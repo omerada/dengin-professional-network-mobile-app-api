@@ -224,7 +224,7 @@
 - Mesaj balonu (kendi mesajları sağda, diğerleri solda)
 - Gönderen ismi ve profil fotoğrafı
 - Mesaj zamanı
-- Mesaj durumu (gönderildi, görüldü - gelecekte)
+- Mesaj durumu (gönderildi, görüldü - gelecekte )
 
 #### FR-007.4: Aktif Kullanıcılar
 
