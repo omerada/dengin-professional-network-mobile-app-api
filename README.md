@@ -198,9 +198,9 @@ AI BELGE DOĞRULAMA
   ↓                             ↓
 BAŞARILI                    BAŞARISIZ
   ↓                             ↓
-MESLEK ONAYI              MANUEL ADMIN (?)
+MESLEK ONAYI              MANUEL ADMIN ONAYINA GÖNDER
   ↓                             ↓
-BELGELERİ SİL            GEN EL KATEGORİ
+BELGELERİ SİL            GENEL KATEGORİ
   ↓                             ↓
 ANA SAYFA                   ANA SAYFA
 ```
@@ -243,7 +243,7 @@ ANA SAYFA                   ANA SAYFA
 4. **Sonuç İşleme**
 
    - ✅ **Başarılı:** Kullanıcı doğrulanır, belgeler anında silinir
-   - ⚠️ **Belirsiz:** Manuel admin incelemesine gönderilir (değerlendirilecek)
+   - ⚠️ **Belirsiz:** Manuel admin incelemesine gönderilir
    - ❌ **Başarısız:** Kullanıcı genel kategoriye yönlendirilir veya yeniden deneme hakkı
 
 5. **Belge İmhası (KVKK Uyum)**
