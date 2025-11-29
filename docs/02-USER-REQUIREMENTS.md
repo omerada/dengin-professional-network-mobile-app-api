@@ -31,7 +31,7 @@
 
 - E-posta formatı kontrol edilmelidir
 - Şifre minimum 8 karakter olmalıdır
-- Şifre en az 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter içermelidir
+- Şifre en az 1 büyük harf, 1 küçük harf, 1 rakam içermelidir
 - Ad ve soyad zorunlu alanlar olmalıdır
 - KVKK aydınlatma metni okunup onaylanmalıdır
 
