@@ -871,7 +871,7 @@ Proje dokümantasyonu aşağıdaki bölümlere ayrılmıştır:
 - JDK 17+
 - Maven 3.8+
 - PostgreSQL 14+
-- IDE (IntelliJ IDEA / Eclipse)
+- IDE (IntelliJ IDEA / VsCode)
 
 ### Kurulum Adımları
 
