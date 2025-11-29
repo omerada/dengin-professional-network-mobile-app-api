@@ -374,8 +374,6 @@ ANA SAYFA                   ANA SAYFA
 **Bildirim Ayarları:**
 
 - Bildirim türleri için ayrı ayrı açma/kapatma
-- Sessiz saatler ayarı
-- Ses ve titreşim tercihleri
 
 ---
 
@@ -411,7 +409,7 @@ ANA SAYFA                   ANA SAYFA
 - 🛡️ Güvenli dosya yükleme ve validasyon
 - 🚫 XSS, CSRF, SQL Injection koruması
 - ⏱️ Rate limiting (DDoS koruması)
-- 🔑 Güçlü parola politikası (min 8 karakter, büyük-küçük-sayı-sembol)
+- 🔑 Güçlü parola politikası (min 8 karakter, büyük-küçük-sayı)
 - 🔐 Password hashing (bcrypt/argon2)
 - 📝 Aktivite loglama ve monitoring
 
@@ -444,8 +442,8 @@ ANA SAYFA                   ANA SAYFA
 
 - ⚛️ **Framework:** React Native (v0.72+)
 - 📦 **Build Tool:** Expo (SDK 49+)
-- 🗄️ **State Management:** Zustand veya Redux Toolkit (karar verilecek)
-  - _Zustand:_ Daha basit, hafif, hızlı (MVP için ideal)
+- 🗄️ **State Management:** Zustand veya Redux Toolkit
+  - _Zustand:_ Daha basit, hafif, hızlı (MVP için ideal) --> ZUSTAND kullanılacak.
   - _Redux Toolkit:_ Daha gelişmiş, ölçeklenebilir (gelecek için)
 - 🧭 **Navigation:** React Navigation v6
 - 🎨 **UI Framework:** React Native Paper / Native Base (değerlendirilecek)
@@ -491,7 +489,7 @@ mobile-app/
 - 💬 **WebSocket:** Spring WebSocket + STOMP
 - 📧 **Email:** Spring Mail
 - 📤 **File Upload:** Multipart file handling
-- 🤖 **AI Integration:** RestTemplate/WebClient (AI servisi için)
+- 🤖 **AI Integration:** RestTemplate/WebClient (AI servisi için, OpenRouter kullanılabilir AI Erişim İçin)
 - 📝 **Validation:** Spring Validation + Hibernate Validator
 - 📊 **Logging:** SLF4J + Logback
 - 🧪 **Testing:** JUnit 5, Mockito, Spring Boot Test
@@ -728,18 +726,16 @@ CREATE INDEX idx_users_profession ON users(profession_id);
 
 **Önerilen AI Servisleri:**
 
-| Servis                       | Özellikler                          | Maliyet         | Karar                  |
-| ---------------------------- | ----------------------------------- | --------------- | ---------------------- |
-| **AWS Rekognition**          | Yüz tanıma, OCR, sahtecilik tespiti | Orta-yüksek     | ✅ Kapsamlı            |
-| **Azure Cognitive Services** | OCR, yüz tanıma, belge analizi      | Orta            | ✅ Güçlü               |
-| **Google Cloud Vision**      | OCR, yüz tanıma, etiketleme         | Orta            | ✅ İyi performans      |
-| **Custom AI Model**          | Tamamen özelleştirilebilir          | Düşük (hosting) | ⚠️ Geliştirme zahmetli |
-| **FaceFirst**                | Sadece yüz tanıma                   | Düşük-orta      | ❌ Kısıtlı             |
+| Servis                       | Özellikler                          | Maliyet     | Karar             |
+| ---------------------------- | ----------------------------------- | ----------- | ----------------- |
+| **AWS Rekognition**          | Yüz tanıma, OCR, sahtecilik tespiti | Orta-yüksek | ✅ Kapsamlı       |
+| **Azure Cognitive Services** | OCR, yüz tanıma, belge analizi      | Orta        | ✅ Güçlü          |
+| **Google Cloud Vision**      | OCR, yüz tanıma, etiketleme         | Orta        | ✅ İyi performans |
 
 **Önerilen Çözüm:**
 
 - **Aşama 1 (MVP):** AWS Rekognition veya Azure Cognitive Services (hızlı entegrasyon)
-- **Aşama 2:** Kendi AI modelimizi eğitme (maliyet optimizasyonu)
+- **Aşama 2:** Kendi AI modelimizi eğitme (maliyet optimizasyonu), Şuan için openrouter veya yukardaki hizmetlerden birini entegre edelim.
 
 **AI Doğrulama API Akışı:**
 
