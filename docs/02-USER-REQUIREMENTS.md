@@ -289,13 +289,13 @@
 
 ### FR-010: Arama ve Filtreleme
 
-#### FR-010.1: Kullanıcı Arama
+#### FR-010.1: Kullanıcı Arama (HERKES KENDİ MESLEK GRUBUNDA ARAMA YAPABİLİR.)
 
 - İsim ve soyisim ile arama
 - Meslek filtreleme
 - Doğrulanmış kullanıcılar filtresi
 
-#### FR-010.2: Gönderi Arama (Gelecekte)
+#### FR-010.2: Gönderi Arama ( (HERKES KENDİ MESLEK GRUBUNDA ARAMA YAPABİLİR.) Gelecekte)
 
 - İçerik arama
 - Tarih filtreleme
