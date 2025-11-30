@@ -159,4 +159,4 @@ Tüm cevaplar dokümanda. Oku. Takip et. Production kalitesinde kod yaz.
 **Güncel sprint:** `docs/sprints/` klasörüne bak  
 **Soru?** Önce dokümanda ara
 
-**Hedef:** Dokümantasyon kalıplarını TAM takip eden temiz, sürdürülebilir, production-ready NestJS backend.
+**Hedef:** Dokümantasyon kalıplarını TAM takip eden temiz, sürdürülebilir, production-ready backend.
