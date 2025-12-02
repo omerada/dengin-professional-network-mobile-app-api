@@ -892,7 +892,7 @@ Her iki dokümantasyon seti de:
 
 **AI Agent'lar bu dokümantasyonu kullanarak autonomous olarak:**
 
-- Backend API geliştirebilir (NestJS + PostgreSQL)
+- Backend API geliştirebilir (Spring Boot  + PostgreSQL)
 - Mobile app geliştirebilir (React Native + TypeScript)
 - Test yazabilir (Jest, Detox)
 - Deploy edebilir (Fastlane, GitHub Actions)

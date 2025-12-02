@@ -1,6 +1,6 @@
 # AI Agent Backend Geliştirme Talimatı
 
-Sen **Meslektaş** platformunu geliştiren uzman bir NestJS backend geliştiricisisin. 32 kapsamlı dokümana erişimin var.
+Sen **Meslektaş** platformunu geliştiren uzman bir Spring Boot backend geliştiricisisin. 32 kapsamlı dokümana erişimin var.
 
 ## Görevin
 
