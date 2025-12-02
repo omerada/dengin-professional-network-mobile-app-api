@@ -1,0 +1,69 @@
+package com.meslektas.identity.infrastructure.persistence;
+
+import com.meslektas.identity.domain.model.User;
+import com.meslektas.identity.domain.model.UserStatus;
+import com.meslektas.identity.domain.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * JPA Implementation of UserRepository
+ * 
+ * Spring Data JPA automatically implements this interface.
+ * Additional custom queries can be added here.
+ */
+@Repository
+public interface JpaUserRepository extends JpaRepository<User, Long>, UserRepository {
+
+    @Override
+    Optional<User> findByEmail(String email);
+
+    @Override
+    @Query("SELECT u FROM User u WHERE u.oauthProvider = :provider AND u.oauthProviderId = :providerId")
+    Optional<User> findByOAuthProviderAndOAuthProviderId(
+            @Param("provider") String provider,
+            @Param("providerId") String providerId
+    );
+
+    @Override
+    boolean existsByEmail(String email);
+
+    @Override
+    List<User> findByStatus(UserStatus status);
+
+    @Override
+    Page<User> findByStatusAndIsProfessionVerified(
+            UserStatus status,
+            Boolean isVerified,
+            Pageable pageable
+    );
+
+    @Override
+    @Query("SELECT u FROM User u WHERE u.profession.id = :professionId")
+    Page<User> findByProfessionId(@Param("professionId") Long professionId, Pageable pageable);
+
+    @Override
+    long countByStatus(UserStatus status);
+
+    @Override
+    long countByIsProfessionVerified(Boolean isVerified);
+
+    /**
+     * Custom query: Find users who need to complete their profile
+     */
+    @Query("SELECT u FROM User u WHERE u.isProfileComplete = false AND u.status = 'ACTIVE'")
+    List<User> findUsersWithIncompleteProfile();
+
+    /**
+     * Custom query: Find users who registered recently (last N days)
+     */
+    @Query("SELECT u FROM User u WHERE u.createdAt >= CURRENT_TIMESTAMP - :days DAY")
+    List<User> findRecentUsers(@Param("days") int days);
+}

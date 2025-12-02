@@ -1,0 +1,256 @@
+# Meslektaş Backend - Spring Boot Configuration
+# Strategic DDD Implementation
+
+spring:
+  application:
+    name: meslektas-backend
+
+  profiles:
+    active: dev
+
+  # JPA & Hibernate
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+
+  # Flyway Migration
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+  # Servlet
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  # Jackson
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: Europe/Istanbul
+    default-property-inclusion: non_null
+
+# Server
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+    include-exception: false
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.meslektas: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# SpringDoc OpenAPI
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    try-it-out-enabled: true
+
+# Application Specific
+app:
+  name: Meslektaş
+  version: 1.0.0
+
+  # JWT Configuration
+  jwt:
+    secret: ${JWT_SECRET:meslektas-super-secret-key-change-in-production-please-use-env-variable-minimum-512-bits}
+    expiration: 3600000 # 1 hour
+    refresh-expiration: 604800000 # 7 days
+
+  # CORS
+  cors:
+    allowed-origins:
+      - http://localhost:3000
+      - http://localhost:19006
+      - meslektas://
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+      - OPTIONS
+    allowed-headers: "*"
+    allow-credentials: true
+    max-age: 3600
+
+---
+# Development Profile
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  # PostgreSQL
+  datasource:
+    url: jdbc:postgresql://localhost:5432/meslektas_dev
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+
+  # Redis
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      timeout: 2000ms
+
+  # OAuth2
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:your-google-client-id}
+            client-secret: ${GOOGLE_CLIENT_SECRET:your-google-client-secret}
+            scope:
+              - email
+              - profile
+          instagram:
+            client-id: ${INSTAGRAM_CLIENT_ID:your-instagram-client-id}
+            client-secret: ${INSTAGRAM_CLIENT_SECRET:your-instagram-client-secret}
+            client-authentication-method: client_secret_post
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/api/auth/oauth2/callback/{registrationId}"
+            scope:
+              - user_profile
+        provider:
+          instagram:
+            authorization-uri: https://api.instagram.com/oauth/authorize
+            token-uri: https://api.instagram.com/oauth/access_token
+            user-info-uri: https://graph.instagram.com/me?fields=id,username
+            user-name-attribute: id
+
+# AWS (Development - LocalStack)
+aws:
+  access-key: ${AWS_ACCESS_KEY_ID:test}
+  secret-key: ${AWS_SECRET_ACCESS_KEY:test}
+  region: eu-central-1
+  endpoint: http://localhost:4566 # LocalStack
+  s3:
+    bucket: meslektas-dev
+
+# File Storage
+storage:
+  type: local # local or s3
+  local:
+    upload-dir: ./uploads
+
+---
+# Production Profile
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  # PostgreSQL
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/meslektas_prod}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD}
+    hikari:
+      minimum-idle: 10
+      maximum-pool-size: 50
+
+  # Redis
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+      ssl: true
+
+  # JPA
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  # OAuth2
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+          instagram:
+            client-id: ${INSTAGRAM_CLIENT_ID}
+            client-secret: ${INSTAGRAM_CLIENT_SECRET}
+
+# AWS (Production)
+aws:
+  access-key: ${AWS_ACCESS_KEY_ID}
+  secret-key: ${AWS_SECRET_ACCESS_KEY}
+  region: ${AWS_REGION:eu-central-1}
+  s3:
+    bucket: ${AWS_S3_BUCKET}
+
+# File Storage
+storage:
+  type: s3
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.meslektas: INFO
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+    org.hibernate.SQL: INFO
+  file:
+    name: /var/log/meslektas/application.log
+    max-size: 10MB
+    max-history: 30
+    total-size-cap: 1GB
+
+# Server
+server:
+  error:
+    include-stacktrace: never
