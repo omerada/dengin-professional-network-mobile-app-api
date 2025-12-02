@@ -2,6 +2,8 @@ package com.meslektas.social.infrastructure.persistence;
 
 import com.meslektas.social.domain.model.Comment;
 import com.meslektas.social.domain.model.CommentId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -61,4 +63,11 @@ public interface JpaCommentRepository extends JpaRepository<Comment, Long> {
      */
     @Query("SELECT COUNT(c) FROM Comment c WHERE c.commenterId = :commenterId AND c.deleted = false")
     long countByCommenterId(@Param("commenterId") Long commenterId);
+    
+    /**
+     * Find paginated comments for a post (excluding deleted)
+     * Ordered chronologically (oldest first)
+     */
+    @Query("SELECT c FROM Comment c WHERE c.postId = :postId AND c.deleted = false ORDER BY c.createdAt ASC")
+    Page<Comment> findByPostIdAndDeletedFalse(@Param("postId") Long postId, Pageable pageable);
 }

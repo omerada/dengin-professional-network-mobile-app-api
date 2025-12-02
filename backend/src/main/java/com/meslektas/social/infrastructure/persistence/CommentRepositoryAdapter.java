@@ -4,6 +4,8 @@ import com.meslektas.social.domain.model.Comment;
 import com.meslektas.social.domain.model.CommentId;
 import com.meslektas.social.domain.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -68,5 +70,10 @@ public class CommentRepositoryAdapter implements CommentRepository {
     @Override
     public void delete(Comment comment) {
         jpaRepository.delete(comment);
+    }
+    
+    @Override
+    public Page<Comment> findByPostIdAndDeletedFalse(Long postId, Pageable pageable) {
+        return jpaRepository.findByPostIdAndDeletedFalse(postId, pageable);
     }
 }

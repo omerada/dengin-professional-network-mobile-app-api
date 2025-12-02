@@ -2,6 +2,8 @@ package com.meslektas.social.domain.repository;
 
 import com.meslektas.social.domain.model.Comment;
 import com.meslektas.social.domain.model.CommentId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -63,4 +65,9 @@ public interface CommentRepository {
      * Delete comment (hard delete - for cleanup)
      */
     void delete(Comment comment);
+    
+    /**
+     * Find paginated visible comments for a post
+     */
+    Page<Comment> findByPostIdAndDeletedFalse(Long postId, Pageable pageable);
 }
