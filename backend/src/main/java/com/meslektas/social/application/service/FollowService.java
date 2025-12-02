@@ -3,6 +3,7 @@ package com.meslektas.social.application.service;
 import com.meslektas.common.infrastructure.DomainEventPublisher;
 import com.meslektas.identity.domain.model.User;
 import com.meslektas.identity.domain.repository.UserRepository;
+import com.meslektas.social.application.dto.FollowResponse;
 import com.meslektas.social.application.dto.UserFollowDto;
 import com.meslektas.social.domain.model.Follow;
 import com.meslektas.social.domain.repository.FollowRepository;
@@ -45,7 +46,7 @@ public class FollowService {
      * Business Rule: Can't follow yourself
      */
     @Transactional
-    public void followUser(Long followerId, Long followingId) {
+    public FollowResponse followUser(Long followerId, Long followingId) {
         log.info("User {} following user {}", followerId, followingId);
         
         // Validate follower is verified
@@ -62,45 +63,57 @@ public class FollowService {
         }
         
         // Check if already following
-        if (followRepository.existsByFollowerIdAndFollowingId(followerId, followingId)) {
+        boolean alreadyFollowing = followRepository.existsByFollowerIdAndFollowingId(followerId, followingId);
+        
+        if (!alreadyFollowing) {
+            // Create follow relationship
+            Follow follow = Follow.create(followerId, followingId);
+            follow = followRepository.save(follow);
+            
+            // Publish event
+            follow.publishCreatedEvent();
+            eventPublisher.publishEvents(follow.getEvents());
+            follow.clearEvents();
+            
+            log.info("User {} now following {}", followerId, followingId);
+        } else {
             log.debug("User {} already following {}", followerId, followingId);
-            return; // Idempotent
         }
         
-        // Create follow relationship
-        Follow follow = Follow.create(followerId, followingId);
-        follow = followRepository.save(follow);
+        // Return follow response with counts
+        long followerCount = followRepository.countByFollowingId(followingId);
+        long followingCount = followRepository.countByFollowerId(followingId);
         
-        // Publish event
-        follow.publishCreatedEvent();
-        eventPublisher.publishEvents(follow.getEvents());
-        follow.clearEvents();
-        
-        log.info("User {} now following {}", followerId, followingId);
+        return new FollowResponse(followingId, true, followerCount, followingCount);
     }
     
     /**
      * Unfollow user
      */
     @Transactional
-    public void unfollowUser(Long followerId, Long followingId) {
+    public FollowResponse unfollowUser(Long followerId, Long followingId) {
         log.info("User {} unfollowing user {}", followerId, followingId);
         
         Follow follow = followRepository.findByFollowerIdAndFollowingId(followerId, followingId)
             .orElse(null);
         
-        if (follow == null) {
+        if (follow != null) {
+            // Publish event before deletion
+            follow.publishDeletedEvent();
+            eventPublisher.publishEvents(follow.getEvents());
+            
+            followRepository.delete(follow);
+            
+            log.info("User {} unfollowed {}", followerId, followingId);
+        } else {
             log.debug("Follow relationship not found, idempotent unfollow");
-            return; // Idempotent
         }
         
-        // Publish event before deletion
-        follow.publishDeletedEvent();
-        eventPublisher.publishEvents(follow.getEvents());
+        // Return follow response with updated counts
+        long followerCount = followRepository.countByFollowingId(followingId);
+        long followingCount = followRepository.countByFollowerId(followingId);
         
-        followRepository.delete(follow);
-        
-        log.info("User {} unfollowed {}", followerId, followingId);
+        return new FollowResponse(followingId, false, followerCount, followingCount);
     }
     
     /**
