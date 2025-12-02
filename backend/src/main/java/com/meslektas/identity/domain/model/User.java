@@ -173,12 +173,34 @@ public class User extends AggregateRoot {
      * Update profile information
      */
     public void updateProfile(String name, String surname, String bio, LocalDate dateOfBirth) {
-        this.name = name;
-        this.surname = surname;
-        this.bio = bio;
-        this.dateOfBirth = dateOfBirth;
+        java.util.List<String> updatedFields = new java.util.ArrayList<>();
+        
+        if (!this.name.equals(name)) {
+            this.name = name;
+            updatedFields.add("name");
+        }
+        if (!this.surname.equals(surname)) {
+            this.surname = surname;
+            updatedFields.add("surname");
+        }
+        if ((this.bio == null && bio != null) || (this.bio != null && !this.bio.equals(bio))) {
+            this.bio = bio;
+            updatedFields.add("bio");
+        }
+        if ((this.dateOfBirth == null && dateOfBirth != null) || 
+            (this.dateOfBirth != null && !this.dateOfBirth.equals(dateOfBirth))) {
+            this.dateOfBirth = dateOfBirth;
+            updatedFields.add("dateOfBirth");
+        }
         
         checkProfileCompleteness();
+        
+        if (!updatedFields.isEmpty()) {
+            registerEvent(new com.meslektas.identity.domain.event.ProfileUpdatedEvent(
+                this.getId(),
+                String.join(",", updatedFields)
+            ));
+        }
     }
 
     /**
@@ -186,6 +208,12 @@ public class User extends AggregateRoot {
      */
     public void updateAvatar(String avatarUrl) {
         this.avatarUrl = avatarUrl;
+        checkProfileCompleteness();
+        
+        registerEvent(new com.meslektas.identity.domain.event.ProfileUpdatedEvent(
+            this.getId(),
+            "avatarUrl"
+        ));
     }
 
     /**
@@ -337,6 +365,19 @@ public class User extends AggregateRoot {
                 UserStatus.DELETED,
                 "User deleted"
         ));
+    }
+    
+    /**
+     * Reset password (for password reset flow)
+     * 
+     * Business Rule: Used by password reset service
+     * PasswordChangedEvent will be published by service layer
+     * 
+     * @param newHashedPassword Hashed password from PasswordEncoder
+     */
+    public void resetPassword(String newHashedPassword) {
+        this.passwordHash = newHashedPassword;
+        // Note: PasswordChangedEvent published by service layer
     }
 
     // =====================================================

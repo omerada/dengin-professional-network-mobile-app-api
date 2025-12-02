@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Repository interface for User Aggregate
@@ -24,9 +25,14 @@ public interface UserRepository {
     User save(User user);
 
     /**
-     * Find user by ID
+     * Find user by ID (Long - database auto-increment)
      */
     Optional<User> findById(Long id);
+    
+    /**
+     * Find user by UUID (id field in entity)
+     */
+    Optional<User> findByIdUUID(UUID id);
 
     /**
      * Find user by email

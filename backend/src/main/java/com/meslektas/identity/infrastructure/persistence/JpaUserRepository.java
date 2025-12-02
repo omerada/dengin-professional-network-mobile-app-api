@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * JPA Implementation of UserRepository
@@ -24,6 +25,15 @@ public interface JpaUserRepository extends JpaRepository<User, Long>, UserReposi
 
     @Override
     Optional<User> findByEmail(String email);
+    
+    /**
+     * Find user by UUID (id field)
+     * 
+     * Note: Spring Data JPA automatically generates this query.
+     * The method name follows naming convention: findBy + PropertyName
+     */
+    @Query("SELECT u FROM User u WHERE u.id = :id")
+    Optional<User> findByIdUUID(@Param("id") UUID id);
 
     @Override
     @Query("SELECT u FROM User u WHERE u.oauthProvider = :provider AND u.oauthProviderId = :providerId")
