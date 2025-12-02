@@ -297,3 +297,5 @@ Tüm cevaplar dokümanda. Oku. Takip et. Production kalitesinde kod yaz.
 **Soru?** Önce dokümanda ara
 
 **Hedef:** Dokümantasyon kalıplarını TAM takip eden temiz, sürdürülebilir, production-ready React Native app.
+
+#codebase
