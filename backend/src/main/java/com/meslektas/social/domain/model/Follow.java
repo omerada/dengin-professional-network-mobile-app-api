@@ -33,18 +33,11 @@ import java.time.LocalDateTime;
 @Getter
 public class Follow extends AggregateRoot {
     
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
     @Column(name = "follower_id", nullable = false)
     private Long followerId;
     
     @Column(name = "following_id", nullable = false)
     private Long followingId;
-    
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
     
     // ============================================
     // FACTORY METHOD
@@ -72,7 +65,6 @@ public class Follow extends AggregateRoot {
         Follow follow = new Follow();
         follow.followerId = followerId;
         follow.followingId = followingId;
-        follow.createdAt = LocalDateTime.now();
         
         // Event will be published after save (when ID is set)
         return follow;
@@ -87,7 +79,7 @@ public class Follow extends AggregateRoot {
      */
     public void publishCreatedEvent() {
         registerEvent(new UserFollowedEvent(
-            this.id,
+            getId(),
             this.followerId,
             this.followingId
         ));
@@ -98,7 +90,7 @@ public class Follow extends AggregateRoot {
      */
     public void publishDeletedEvent() {
         registerEvent(new UserUnfollowedEvent(
-            this.id,
+            getId(),
             this.followerId,
             this.followingId
         ));

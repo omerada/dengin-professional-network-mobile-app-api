@@ -30,9 +30,9 @@ import org.springframework.web.multipart.MultipartFile;
  * - GET /api/users/{userId} - Get user profile
  * - PUT /api/users/{userId} - Update user profile
  * - POST /api/users/{userId}/avatar - Upload profile avatar
- * - GET /api/users/me - Get current user profile (shortcut)
- * - PUT /api/users/me - Update current user profile (shortcut)
- * - POST /api/users/me/avatar - Upload current user avatar (shortcut)
+ * - GET /api/users/profile - Get current user profile (shortcut)
+ * - PUT /api/users/profile - Update current user profile (shortcut)
+ * - POST /api/users/profile/avatar - Upload current user avatar (shortcut)
  * 
  * Security:
  * - All endpoints require authentication (Bearer JWT)
@@ -53,12 +53,12 @@ public class UserProfileController {
     private final ImageProcessor imageProcessor;
 
     /**
-     * GET /api/users/me
+     * GET /api/users/profile
      * Get current authenticated user's profile
      * 
      * @return UserProfileResponse
      */
-    @GetMapping("/me")
+    @GetMapping("/profile")
     @Operation(
         summary = "Get current user profile",
         description = "Returns full profile of the authenticated user",
@@ -77,7 +77,7 @@ public class UserProfileController {
     })
     public ResponseEntity<ApiResponse<UserProfileResponse>> getCurrentUserProfile() {
         Long currentUserId = getCurrentUserId();
-        log.info("GET /api/users/me - userId: {}", currentUserId);
+        log.info("GET /api/users/profile - userId: {}", currentUserId);
         
         UserProfileResponse profile = userService.getUserProfile(currentUserId, currentUserId);
         
@@ -124,13 +124,13 @@ public class UserProfileController {
     }
 
     /**
-     * PUT /api/users/me
+     * PUT /api/users/profile
      * Update current user's profile
      * 
      * @param request Update profile request
      * @return Updated UserProfileResponse
      */
-    @PutMapping("/me")
+    @PutMapping("/profile")
     @Operation(
         summary = "Update current user profile",
         description = "Updates authenticated user's profile information",
@@ -154,7 +154,7 @@ public class UserProfileController {
             @Valid @RequestBody UpdateProfileRequest request
     ) {
         Long currentUserId = getCurrentUserId();
-        log.info("PUT /api/users/me - userId: {}", currentUserId);
+        log.info("PUT /api/users/profile - userId: {}", currentUserId);
         
         UserProfileResponse updatedProfile = userService.updateUserProfile(currentUserId, request);
         
@@ -225,13 +225,13 @@ public class UserProfileController {
     }
     
     /**
-     * POST /api/users/me/avatar
+     * POST /api/users/profile/avatar
      * Upload avatar for current user
      * 
      * @param file Avatar image file (JPEG, PNG, WEBP, max 5MB)
      * @return Updated UserProfileResponse with new avatar URL
      */
-    @PostMapping(value = "/me/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/profile/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(
         summary = "Upload profile avatar",
         description = "Uploads new profile avatar for authenticated user. Max 5MB, formats: JPEG, PNG, WEBP",
@@ -256,7 +256,7 @@ public class UserProfileController {
             @RequestParam("file") MultipartFile file
     ) {
         Long currentUserId = getCurrentUserId();
-        log.info("POST /api/users/me/avatar - userId: {}", currentUserId);
+        log.info("POST /api/users/profile/avatar - userId: {}", currentUserId);
         
         // Validate image
         imageProcessor.validateImage(file);

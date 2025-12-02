@@ -32,10 +32,6 @@ import java.time.temporal.ChronoUnit;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class VerificationRequest extends AggregateRoot {
     
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
     @Embedded
     private VerificationId verificationId;
     
@@ -73,9 +69,6 @@ public class VerificationRequest extends AggregateRoot {
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
     
-    @Version
-    private Long version;
-    
     // Factory method
     private VerificationRequest(
         Long userId,
@@ -100,12 +93,12 @@ public class VerificationRequest extends AggregateRoot {
      * Called by application service after save()
      */
     public void publishSubmittedEvent() {
-        if (this.id == null) {
+        if (getId() == null) {
             throw new IllegalStateException("Cannot publish event before entity is persisted");
         }
         
         registerEvent(new VerificationSubmittedEvent(
-            this.id,
+            getId(),
             this.verificationId.getValue(),
             this.userId,
             this.professionId,
@@ -169,7 +162,7 @@ public class VerificationRequest extends AggregateRoot {
         this.status = VerificationStatus.AI_PROCESSING;
         
         registerEvent(new AIProcessingStartedEvent(
-            this.id,
+            getId(),
             this.verificationId.getValue(),
             this.userId,
             this.documentImage.getS3Key(),
@@ -220,7 +213,7 @@ public class VerificationRequest extends AggregateRoot {
         this.processedAt = Instant.now();
         
         registerEvent(new VerificationAutoApprovedEvent(
-            this.id,
+            getId(),
             this.verificationId.getValue(),
             this.userId,
             this.professionId,
@@ -237,7 +230,7 @@ public class VerificationRequest extends AggregateRoot {
         this.processedAt = Instant.now();
         
         registerEvent(new VerificationAutoRejectedEvent(
-            this.id,
+            getId(),
             this.verificationId.getValue(),
             this.userId,
             this.professionId,
@@ -254,7 +247,7 @@ public class VerificationRequest extends AggregateRoot {
         this.status = VerificationStatus.PENDING_MANUAL_REVIEW;
         
         registerEvent(new VerificationSentToManualReviewEvent(
-            this.id,
+            getId(),
             this.verificationId.getValue(),
             this.userId,
             this.professionId,
@@ -281,7 +274,7 @@ public class VerificationRequest extends AggregateRoot {
         this.processedAt = Instant.now();
         
         registerEvent(new VerificationManuallyApprovedEvent(
-            this.id,
+            getId(),
             this.verificationId.getValue(),
             this.userId,
             this.professionId,
@@ -308,7 +301,7 @@ public class VerificationRequest extends AggregateRoot {
         this.processedAt = Instant.now();
         
         registerEvent(new VerificationManuallyRejectedEvent(
-            this.id,
+            getId(),
             this.verificationId.getValue(),
             this.userId,
             this.professionId,
@@ -337,7 +330,7 @@ public class VerificationRequest extends AggregateRoot {
         this.processedAt = Instant.now();
         
         registerEvent(new VerificationExpiredEvent(
-            this.id,
+            getId(),
             this.verificationId.getValue(),
             this.userId,
             this.professionId

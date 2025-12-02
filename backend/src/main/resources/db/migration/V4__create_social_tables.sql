@@ -34,6 +34,9 @@ CREATE TABLE posts (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP,
     
+    -- Version (for optimistic locking)
+    version BIGINT DEFAULT 0,
+    
     -- Constraints
     CONSTRAINT chk_post_like_count CHECK (like_count >= 0),
     CONSTRAINT chk_post_comment_count CHECK (comment_count >= 0),
@@ -80,8 +83,8 @@ CREATE TABLE post_images (
     height INTEGER NOT NULL,
     file_size BIGINT NOT NULL,
     
-    -- Display Order
-    display_order SMALLINT NOT NULL DEFAULT 0,
+    -- Display Order (managed by JPA @OrderColumn)
+    display_order INTEGER NOT NULL DEFAULT 0,
     
     -- Timestamp
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -155,7 +158,11 @@ CREATE TABLE comments (
     
     -- Timestamps
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP,
+    
+    -- Version (for optimistic locking)
+    version BIGINT DEFAULT 0,
     
     -- Constraints
     CONSTRAINT chk_comment_deleted_at CHECK (
@@ -187,8 +194,12 @@ CREATE TABLE follows (
     -- Following (user being followed)
     following_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     
-    -- Timestamp
+    -- Timestamps
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    
+    -- Version (for optimistic locking)
+    version BIGINT DEFAULT 0,
     
     -- Unique Constraint: One follow relationship per pair
     CONSTRAINT uq_follows_follower_following UNIQUE (follower_id, following_id),
@@ -226,6 +237,18 @@ $$ LANGUAGE plpgsql;
 -- Trigger for posts table
 CREATE TRIGGER trg_posts_updated_at
     BEFORE UPDATE ON posts
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Trigger for comments table
+CREATE TRIGGER trg_comments_updated_at
+    BEFORE UPDATE ON comments
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Trigger for follows table
+CREATE TRIGGER trg_follows_updated_at
+    BEFORE UPDATE ON follows
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 

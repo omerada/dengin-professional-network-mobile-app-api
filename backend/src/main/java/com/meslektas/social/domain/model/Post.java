@@ -36,10 +36,6 @@ import java.util.Set;
 @Getter
 public class Post extends AggregateRoot {
     
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "post_id"))
     private PostId postId;
@@ -77,12 +73,6 @@ public class Post extends AggregateRoot {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private PostStatus status;
-    
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-    
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
     
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
@@ -127,8 +117,8 @@ public class Post extends AggregateRoot {
         post.content = content;
         post.images = new ArrayList<>(images);
         post.status = PostStatus.PUBLISHED;
-        post.createdAt = LocalDateTime.now();
-        post.updatedAt = LocalDateTime.now();
+        
+        // createdAt and updatedAt are handled by BaseEntity @CreatedDate/@LastModifiedDate
         
         // Domain event will be published after ID is set (in service layer)
         return post;
@@ -143,7 +133,7 @@ public class Post extends AggregateRoot {
      */
     public void publishCreatedEvent() {
         registerEvent(new PostCreatedEvent(
-            this.id,
+            getId(),
             this.postId,
             this.authorId,
             this.professionId,
@@ -178,10 +168,9 @@ public class Post extends AggregateRoot {
         
         if (added) {
             this.likeCount++;
-            this.updatedAt = LocalDateTime.now();
             
             registerEvent(new PostLikedEvent(
-                this.id,
+                getId(),
                 this.postId,
                 userId,
                 this.authorId
@@ -203,10 +192,9 @@ public class Post extends AggregateRoot {
         
         if (removed) {
             this.likeCount = Math.max(0, this.likeCount - 1);
-            this.updatedAt = LocalDateTime.now();
             
             registerEvent(new PostUnlikedEvent(
-                this.id,
+                getId(),
                 this.postId,
                 userId
             ));
@@ -218,7 +206,6 @@ public class Post extends AggregateRoot {
      */
     public void incrementCommentCount() {
         this.commentCount++;
-        this.updatedAt = LocalDateTime.now();
     }
     
     /**
@@ -226,7 +213,6 @@ public class Post extends AggregateRoot {
      */
     public void decrementCommentCount() {
         this.commentCount = Math.max(0, this.commentCount - 1);
-        this.updatedAt = LocalDateTime.now();
     }
     
     /**
@@ -249,10 +235,11 @@ public class Post extends AggregateRoot {
         
         this.status = PostStatus.DELETED;
         this.deletedAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        
+        // updatedAt is handled by JPA auditing
         
         registerEvent(new PostDeletedEvent(
-            this.id,
+            getId(),
             this.postId,
             this.authorId
         ));
@@ -270,7 +257,7 @@ public class Post extends AggregateRoot {
      * Get age in hours (for feed algorithm)
      */
     public long getAgeInHours() {
-        return java.time.Duration.between(createdAt, LocalDateTime.now()).toHours();
+        return java.time.Duration.between(getCreatedAt(), LocalDateTime.now()).toHours();
     }
     
     /**

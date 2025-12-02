@@ -136,12 +136,13 @@ public interface JpaVerificationRequestRepository extends
     long countBySubmittedAtAfter(@Param("timestamp") Instant timestamp);
     
     /**
-     * Calculate average processing time in minutes
+     * Calculate average processing time in minutes for processed requests
      * Only for processed requests (submittedAt and processedAt both not null)
      */
-    @Query("SELECT AVG(TIMESTAMPDIFF(MINUTE, v.submittedAt, v.processedAt)) " +
-           "FROM VerificationRequest v " +
-           "WHERE v.processedAt IS NOT NULL " +
-           "AND v.status IN ('AUTO_APPROVED', 'AUTO_REJECTED', 'APPROVED', 'REJECTED')")
+    @Query(value = "SELECT AVG(EXTRACT(EPOCH FROM (processed_at - submitted_at)) / 60.0) " +
+           "FROM verification_requests " +
+           "WHERE processed_at IS NOT NULL " +
+           "AND status IN ('AUTO_APPROVED', 'AUTO_REJECTED', 'APPROVED', 'REJECTED')",
+           nativeQuery = true)
     Double calculateAverageProcessingTimeMinutes();
 }

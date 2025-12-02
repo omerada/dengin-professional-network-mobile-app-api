@@ -97,17 +97,8 @@ app:
 
   # CORS
   cors:
-    allowed-origins:
-      - http://localhost:3000
-      - http://localhost:19006
-      - meslektas://
-    allowed-methods:
-      - GET
-      - POST
-      - PUT
-      - PATCH
-      - DELETE
-      - OPTIONS
+    allowed-origins: http://localhost:3000,http://localhost:19006,meslektas://
+    allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
     allowed-headers: "*"
     allow-credentials: true
     max-age: 3600

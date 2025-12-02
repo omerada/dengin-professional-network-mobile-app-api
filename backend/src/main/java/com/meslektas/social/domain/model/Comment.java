@@ -1,5 +1,6 @@
 package com.meslektas.social.domain.model;
 
+import com.meslektas.common.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -22,11 +23,7 @@ import java.time.LocalDateTime;
 @Table(name = "comments")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Comment {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Comment extends BaseEntity {
     
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "comment_id"))
@@ -43,9 +40,6 @@ public class Comment {
     
     @Column(name = "deleted", nullable = false)
     private boolean deleted = false;
-    
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
     
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
@@ -82,7 +76,8 @@ public class Comment {
         comment.postId = postId;
         comment.commenterId = commenterId;
         comment.content = content;
-        comment.createdAt = LocalDateTime.now();
+        
+        // createdAt is handled by BaseEntity @CreatedDate
         
         return comment;
     }
