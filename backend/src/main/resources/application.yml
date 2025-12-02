@@ -121,7 +121,7 @@ spring:
 
   # PostgreSQL
   datasource:
-    url: jdbc:postgresql://localhost:5432/meslektas_dev
+    url: jdbc:postgresql://localhost:5433/meslektas_dev
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
@@ -136,7 +136,7 @@ spring:
   data:
     redis:
       host: localhost
-      port: 6379
+      port: 6380
       password:
       timeout: 2000ms
 

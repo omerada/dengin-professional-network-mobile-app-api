@@ -82,4 +82,14 @@ public interface UserRepository {
      * Count verified users
      */
     long countByIsProfessionVerified(Boolean isVerified);
+    
+    /**
+     * Check if user exists by ID
+     */
+    boolean existsById(Long id);
+    
+    /**
+     * Find all users by IDs
+     */
+    List<User> findAllById(Iterable<Long> ids);
 }

@@ -461,4 +461,18 @@ public class User extends AggregateRoot {
         }
         return true;
     }
+    
+    /**
+     * Check if user is verified (profession verified)
+     */
+    public boolean isVerified() {
+        return Boolean.TRUE.equals(this.isProfessionVerified);
+    }
+    
+    /**
+     * Get profile image URL (alias for avatarUrl)
+     */
+    public String getProfileImageUrl() {
+        return this.avatarUrl;
+    }
 }
