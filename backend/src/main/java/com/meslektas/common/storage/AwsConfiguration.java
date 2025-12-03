@@ -9,6 +9,7 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.net.URI;
 
@@ -50,6 +51,22 @@ public class AwsConfiguration {
     }
 
     /**
+     * Production S3 Presigner for presigned URLs
+     */
+    @Bean
+    @Profile("prod")
+    public S3Presigner productionS3Presigner() {
+        log.info("Initializing production S3 presigner for region: {}", region);
+
+        return S3Presigner.builder()
+                .region(Region.of(region))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKey, secretKey)
+                ))
+                .build();
+    }
+
+    /**
      * Development S3 Client (LocalStack)
      */
     @Bean
@@ -64,6 +81,23 @@ public class AwsConfiguration {
                 ))
                 .endpointOverride(URI.create(endpoint))
                 .forcePathStyle(true) // Required for LocalStack
+                .build();
+    }
+
+    /**
+     * Development S3 Presigner (LocalStack)
+     */
+    @Bean
+    @Profile("dev")
+    public S3Presigner developmentS3Presigner() {
+        log.info("Initializing LocalStack S3 presigner with endpoint: {}", endpoint);
+
+        return S3Presigner.builder()
+                .region(Region.of(region))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKey, secretKey)
+                ))
+                .endpointOverride(URI.create(endpoint))
                 .build();
     }
 }
