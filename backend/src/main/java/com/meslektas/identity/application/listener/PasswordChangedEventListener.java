@@ -97,7 +97,7 @@ public class PasswordChangedEventListener {
      */
     private void deactivateDeviceTokens(Long userId) {
         try {
-            deviceTokenService.deactivateAllUserTokens(java.util.UUID.fromString(userId.toString()));
+            deviceTokenService.deactivateAllUserTokens(userId);
             log.info("Deactivated all device tokens for user: {}", userId);
         } catch (Exception e) {
             log.warn("Could not deactivate device tokens for user: {}", userId, e);

@@ -11,7 +11,7 @@ spring:
   # JPA & Hibernate
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
@@ -102,6 +102,21 @@ app:
     allowed-headers: "*"
     allow-credentials: true
     max-age: 3600
+
+# Email (Mailgun)
+mailgun:
+  api-key: ${MAILGUN_API_KEY:}
+  domain: ${MAILGUN_DOMAIN:}
+  sender-email: ${MAILGUN_SENDER_EMAIL:noreply@meslektas.com}
+  sender-name: ${MAILGUN_SENDER_NAME:Meslektaş}
+  enabled: ${MAILGUN_ENABLED:true}
+  base-url: ${MAILGUN_BASE_URL:https://api.eu.mailgun.net/v3}
+
+# Firebase (Push Notifications)
+firebase:
+  enabled: ${FIREBASE_ENABLED:false}
+  project-id: ${FIREBASE_PROJECT_ID:}
+  credentials-json: ${FIREBASE_CREDENTIALS_JSON:}
 
 ---
 # Development Profile

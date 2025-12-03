@@ -1,7 +1,12 @@
 package com.meslektas.notification.domain.model;
 
+import jakarta.persistence.Embeddable;
+import lombok.AccessLevel;
 import lombok.Builder;
-import lombok.Value;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.util.Objects;
 
 /**
  * Value Object representing notification content.
@@ -11,17 +16,19 @@ import lombok.Value;
  * - body: Detailed message (max 500 chars)
  * - actionUrl: Optional deep link URL
  */
-@Value
-@Builder
+@Embeddable
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class NotificationContent {
 
     private static final int MAX_TITLE_LENGTH = 100;
     private static final int MAX_BODY_LENGTH = 500;
 
-    String title;
-    String body;
-    String actionUrl;
+    private String title;
+    private String body;
+    private String actionUrl;
 
+    @Builder
     public NotificationContent(String title, String body, String actionUrl) {
         validateTitle(title);
         validateBody(body);
@@ -96,5 +103,20 @@ public class NotificationContent {
             throw new IllegalArgumentException(
                     "Notification body cannot exceed " + MAX_BODY_LENGTH + " characters");
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        NotificationContent that = (NotificationContent) o;
+        return Objects.equals(title, that.title) &&
+               Objects.equals(body, that.body) &&
+               Objects.equals(actionUrl, that.actionUrl);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, body, actionUrl);
     }
 }

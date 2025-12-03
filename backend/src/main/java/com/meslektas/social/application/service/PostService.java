@@ -1,6 +1,7 @@
 package com.meslektas.social.application.service;
 
 import com.meslektas.common.infrastructure.DomainEventPublisher;
+import com.meslektas.identity.application.service.ProfessionService;
 import com.meslektas.identity.domain.model.User;
 import com.meslektas.identity.domain.repository.UserRepository;
 import com.meslektas.social.application.dto.*;
@@ -40,6 +41,7 @@ public class PostService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
+    private final ProfessionService professionService;
     private final DomainEventPublisher eventPublisher;
     
     /**
@@ -323,7 +325,7 @@ public class PostService {
             .authorName(author.getFullName())
             .authorProfileImageUrl(author.getProfileImageUrl())
             .professionId(post.getProfessionId())
-            .professionName(null) // TODO: Get from profession service
+            .professionName(professionService.getProfessionNameById(post.getProfessionId()))
             .authorVerified(author.isVerified())
             .content(post.getContent().getValue())
             .images(imageDtos)

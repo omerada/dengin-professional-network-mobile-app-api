@@ -1,5 +1,6 @@
 package com.meslektas.config;
 
+import com.meslektas.common.config.RateLimitingFilter;
 import com.meslektas.identity.infrastructure.security.JwtAuthenticationFilter;
 import com.meslektas.identity.infrastructure.security.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RateLimitingFilter rateLimitingFilter;
     private final CorsConfigurationSource corsConfigurationSource;
 
     @Bean
@@ -61,6 +63,7 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers("/ws/**", "/ws-raw/**").permitAll()
                         
                         // Public read-only profession endpoints
                         .requestMatchers(HttpMethod.GET, "/api/professions/**").permitAll()
@@ -68,6 +71,9 @@ public class SecurityConfig {
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )
+                
+                // Add Rate Limiting filter before JWT
+                .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
                 
                 // Add JWT filter
                 .authenticationProvider(authenticationProvider())

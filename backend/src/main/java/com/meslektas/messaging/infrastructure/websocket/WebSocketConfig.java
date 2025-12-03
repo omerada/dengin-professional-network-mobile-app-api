@@ -2,9 +2,12 @@ package com.meslektas.messaging.infrastructure.websocket;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
@@ -32,13 +35,23 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final WebSocketAuthenticationInterceptor authenticationInterceptor;
 
+    @Bean
+    public TaskScheduler webSocketHeartbeatTaskScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(1);
+        scheduler.setThreadNamePrefix("ws-heartbeat-");
+        scheduler.initialize();
+        return scheduler;
+    }
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         // Enable simple in-memory broker for /topic (broadcast) and /queue
         // (point-to-point)
         // In production, replace with Redis broker for multi-instance support
         config.enableSimpleBroker("/topic", "/queue")
-                .setHeartbeatValue(new long[] { 10000, 10000 }); // Heartbeat every 10 seconds
+                .setHeartbeatValue(new long[] { 10000, 10000 }) // Heartbeat every 10 seconds
+                .setTaskScheduler(webSocketHeartbeatTaskScheduler());
 
         // Application destination prefix for messages bound for @MessageMapping methods
         config.setApplicationDestinationPrefixes("/app");

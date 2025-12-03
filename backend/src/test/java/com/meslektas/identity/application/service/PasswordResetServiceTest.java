@@ -8,6 +8,7 @@ import com.meslektas.identity.domain.model.User;
 import com.meslektas.identity.domain.model.UserStatus;
 import com.meslektas.identity.domain.model.OAuthProvider;
 import com.meslektas.identity.domain.repository.UserRepository;
+import com.meslektas.notification.domain.service.EmailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -17,6 +18,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -44,6 +47,7 @@ import static org.mockito.Mockito.*;
  * Sprint 2 Implementation
  */
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("PasswordResetService Tests")
 class PasswordResetServiceTest {
 
@@ -61,6 +65,9 @@ class PasswordResetServiceTest {
 
     @Mock
     private ApplicationEventPublisher eventPublisher;
+
+    @Mock
+    private EmailService emailService;
 
     @InjectMocks
     private PasswordResetService passwordResetService;

@@ -1,6 +1,6 @@
 package com.meslektas.notification.api;
 
-import com.meslektas.notification.infrastructure.push.DeviceToken;
+import com.meslektas.notification.domain.model.DeviceToken;
 import com.meslektas.notification.infrastructure.push.DeviceTokenService;
 import com.meslektas.shared.security.CurrentUser;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.UUID;
 
 /**
  * Device Token Registration API
@@ -42,15 +41,13 @@ public class DeviceTokenController {
         @Valid @RequestBody RegisterDeviceRequest request,
         @CurrentUser Principal principal
     ) {
-        UUID userId = UUID.fromString(principal.getName());
+        Long userId = Long.parseLong(principal.getName());
         
         DeviceToken deviceToken = deviceTokenService.registerToken(
             userId,
             request.getToken(),
             request.getPlatform(),
-            request.getDeviceName(),
-            request.getAppVersion(),
-            request.getOsVersion()
+            request.getDeviceName()
         );
         
         return ResponseEntity.ok(DeviceTokenResponse.from(deviceToken));
@@ -77,7 +74,7 @@ public class DeviceTokenController {
     @PostMapping("/unregister-all")
     @Operation(summary = "Unregister all devices for current user")
     public ResponseEntity<Void> unregisterAllDevices(@CurrentUser Principal principal) {
-        UUID userId = UUID.fromString(principal.getName());
+        Long userId = Long.parseLong(principal.getName());
         deviceTokenService.deactivateAllUserTokens(userId);
         return ResponseEntity.ok().build();
     }
@@ -93,8 +90,6 @@ public class DeviceTokenController {
         private DeviceToken.Platform platform;
         
         private String deviceName;
-        private String appVersion;
-        private String osVersion;
     }
     
     @Data
@@ -105,7 +100,7 @@ public class DeviceTokenController {
     
     @Data
     public static class DeviceTokenResponse {
-        private UUID id;
+        private Long id;
         private String platform;
         private String deviceName;
         private boolean active;

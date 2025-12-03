@@ -82,6 +82,6 @@ public interface JpaUserRepository extends JpaRepository<User, Long>, UserReposi
      * Count users who logged in after a specific time
      */
     @Override
-    @Query("SELECT COUNT(u) FROM User u WHERE u.lastLogin >= :dateTime")
+    @Query("SELECT COUNT(u) FROM User u WHERE u.lastLoginAt >= :dateTime")
     long countByLastLoginAfter(@Param("dateTime") LocalDateTime dateTime);
 }

@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
  * - Blocked users can't send messages or see content
  */
 @Entity
-@Table(name = "blocks", uniqueConstraints = {
+@Table(name = "user_blocks", uniqueConstraints = {
         @UniqueConstraint(name = "uk_blocker_blocked", columnNames = { "blocker_id", "blocked_id" })
 })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

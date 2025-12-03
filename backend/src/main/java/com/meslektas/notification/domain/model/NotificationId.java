@@ -1,16 +1,32 @@
 package com.meslektas.notification.domain.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 import java.util.UUID;
 
 /**
  * Value Object representing a unique notification identifier.
  */
-public record NotificationId(UUID value) {
+@Embeddable
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@EqualsAndHashCode
+public class NotificationId implements Serializable {
 
-    public NotificationId {
+    @Column(name = "id", nullable = false)
+    private UUID value;
+
+    private NotificationId(UUID value) {
         if (value == null) {
             throw new IllegalArgumentException("Notification ID cannot be null");
         }
+        this.value = value;
     }
 
     /**
@@ -39,10 +55,6 @@ public record NotificationId(UUID value) {
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid notification ID format: " + value);
         }
-    }
-
-    public UUID getValue() {
-        return value;
     }
 
     @Override

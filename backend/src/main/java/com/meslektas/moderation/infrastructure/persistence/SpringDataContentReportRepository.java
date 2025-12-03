@@ -109,9 +109,10 @@ public interface SpringDataContentReportRepository extends JpaRepository<Content
     java.util.Map<String, Object> getStatisticsMap();
 
     /**
-     * Gets average resolution time in hours.
+     * Gets average resolution time in hours using native query.
      */
-    @Query("SELECT AVG(EXTRACT(EPOCH FROM (r.reviewedAt - r.createdAt)) / 3600) " +
-            "FROM ContentReport r WHERE r.status IN ('RESOLVED_APPROVED', 'RESOLVED_REJECTED') AND r.reviewedAt IS NOT NULL")
+    @Query(value = "SELECT AVG(EXTRACT(EPOCH FROM (reviewed_at - created_at)) / 3600) " +
+            "FROM content_reports WHERE status IN ('RESOLVED_APPROVED', 'RESOLVED_REJECTED') AND reviewed_at IS NOT NULL",
+            nativeQuery = true)
     Optional<Double> getAverageResolutionTimeHours();
 }

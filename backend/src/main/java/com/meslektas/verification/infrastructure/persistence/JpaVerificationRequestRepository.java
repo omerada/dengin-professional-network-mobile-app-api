@@ -98,6 +98,18 @@ public interface JpaVerificationRequestRepository extends
     );
     
     /**
+     * Find last failed attempt timestamp for cooldown calculation
+     */
+    @Query("SELECT MAX(v.submittedAt) FROM VerificationRequest v " +
+           "WHERE v.userId = :userId " +
+           "AND v.professionId = :professionId " +
+           "AND v.status IN ('AUTO_REJECTED', 'REJECTED')")
+    Instant findLastFailedAttemptTime(
+        @Param("userId") Long userId, 
+        @Param("professionId") Long professionId
+    );
+    
+    /**
      * Check if user has pending or approved verification for profession
      * Used to prevent duplicate verification requests
      */

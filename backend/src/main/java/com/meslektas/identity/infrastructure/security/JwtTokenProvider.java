@@ -2,6 +2,7 @@ package com.meslektas.identity.infrastructure.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecurityException;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,11 +56,11 @@ public class JwtTokenProvider {
         Date expiryDate = new Date(now.getTime() + jwtExpiration);
 
         return Jwts.builder()
-                .setSubject(email)
+                .subject(email)
                 .claim("userId", userId)
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(secretKey, SignatureAlgorithm.HS512)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(secretKey, Jwts.SIG.HS512)
                 .compact();
     }
 
@@ -71,12 +72,12 @@ public class JwtTokenProvider {
         Date expiryDate = new Date(now.getTime() + refreshExpiration);
 
         return Jwts.builder()
-                .setSubject(email)
+                .subject(email)
                 .claim("userId", userId)
                 .claim("type", "refresh")
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(secretKey, SignatureAlgorithm.HS512)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(secretKey, Jwts.SIG.HS512)
                 .compact();
     }
 

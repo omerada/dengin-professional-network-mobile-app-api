@@ -1,5 +1,6 @@
 package com.meslektas.messaging.infrastructure.websocket;
 
+import com.meslektas.messaging.infrastructure.websocket.dto.WsDeliveryReceipt;
 import com.meslektas.messaging.infrastructure.websocket.dto.WsMessageResponse;
 import com.meslektas.messaging.infrastructure.websocket.dto.WsReadReceipt;
 import com.meslektas.messaging.infrastructure.websocket.dto.WsTypingNotification;
@@ -81,6 +82,24 @@ public class RedisMessagePublisher {
     }
 
     /**
+     * Publish delivery receipt to Redis
+     * 
+     * @param recipientId     The user ID who should receive the delivery receipt
+     * @param deliveryReceipt The delivery receipt notification
+     */
+    public void publishDeliveryReceipt(Long recipientId, WsDeliveryReceipt deliveryReceipt) {
+        RedisMessage<WsDeliveryReceipt> redisMessage = new RedisMessage<>(
+                recipientId,
+                MessageType.DELIVERY_RECEIPT,
+                deliveryReceipt);
+
+        log.debug("Publishing delivery receipt to Redis - recipientId: {}, messageId: {}",
+                recipientId, deliveryReceipt.getMessageId());
+
+        messagingRedisTemplate.convertAndSend(readReceiptTopic.getTopic(), redisMessage);
+    }
+
+    /**
      * Publish user presence update to Redis
      * 
      * @param userId   The user whose presence changed
@@ -102,6 +121,7 @@ public class RedisMessagePublisher {
         NEW_MESSAGE,
         TYPING,
         READ_RECEIPT,
+        DELIVERY_RECEIPT,
         PRESENCE
     }
 

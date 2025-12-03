@@ -1,6 +1,7 @@
 package com.meslektas.identity.application.service;
 
 import com.meslektas.common.exception.BusinessException;
+import com.meslektas.common.exception.ResourceNotFoundException;
 import com.meslektas.identity.application.dto.request.LoginRequest;
 import com.meslektas.identity.application.dto.request.RegisterRequest;
 import com.meslektas.identity.application.dto.response.LoginResponse;
@@ -9,9 +10,12 @@ import com.meslektas.identity.application.mapper.UserMapper;
 import com.meslektas.identity.domain.model.User;
 import com.meslektas.identity.domain.repository.UserRepository;
 import com.meslektas.identity.infrastructure.security.JwtTokenProvider;
+import com.meslektas.notification.domain.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,6 +23,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Authentication Application Service
@@ -42,6 +48,14 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserMapper userMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final EmailService emailService;
+    private final RedisTemplate<String, String> redisTemplate;
+
+    @Value("${app.frontend-url:https://meslektas.com}")
+    private String frontendUrl;
+
+    private static final String EMAIL_VERIFICATION_PREFIX = "email_verification:";
+    private static final long VERIFICATION_TOKEN_TTL_HOURS = 24;
 
     /**
      * Register a new user
@@ -76,6 +90,9 @@ public class AuthService {
         savedUser.clearEvents();
 
         log.info("User registered successfully: {}", savedUser.getEmail());
+
+        // Send verification email
+        sendVerificationEmail(savedUser);
 
         return userMapper.toResponse(savedUser);
     }
@@ -183,15 +200,75 @@ public class AuthService {
     }
 
     /**
-     * Verify email (placeholder - implement email verification logic)
+     * Verify email with token
      */
     @Transactional
     public void verifyEmail(String token) {
-        // TODO: Implement email verification logic
-        // 1. Validate token
-        // 2. Find user
-        // 3. Call user.verifyEmail()
-        // 4. Save user
-        // 5. Publish event
+        log.info("Verifying email with token: {}", token);
+
+        // Validate token from Redis
+        String redisKey = EMAIL_VERIFICATION_PREFIX + token;
+        String userIdStr = redisTemplate.opsForValue().get(redisKey);
+
+        if (userIdStr == null) {
+            throw new BusinessException("Geçersiz veya süresi dolmuş doğrulama linki", "INVALID_VERIFICATION_TOKEN");
+        }
+
+        // Find user
+        Long userId = Long.parseLong(userIdStr);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        // Verify email (domain behavior)
+        user.verifyEmail();
+        userRepository.save(user);
+
+        // Delete token from Redis
+        redisTemplate.delete(redisKey);
+
+        // Send welcome email
+        emailService.sendWelcomeEmail(user.getEmail(), user.getName());
+
+        log.info("Email verified successfully for user: {}", user.getEmail());
+    }
+
+    /**
+     * Resend verification email
+     */
+    @Transactional
+    public void resendVerificationEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User with email '" + email + "' not found"));
+
+        if (Boolean.TRUE.equals(user.getIsEmailVerified())) {
+            throw new BusinessException("E-posta zaten doğrulanmış", "EMAIL_ALREADY_VERIFIED");
+        }
+
+        sendVerificationEmail(user);
+    }
+
+    /**
+     * Send verification email to user
+     */
+    private void sendVerificationEmail(User user) {
+        // Generate verification token
+        String token = java.util.UUID.randomUUID().toString();
+
+        // Store in Redis
+        String redisKey = EMAIL_VERIFICATION_PREFIX + token;
+        redisTemplate.opsForValue().set(
+                redisKey,
+                user.getId().toString(),
+                VERIFICATION_TOKEN_TTL_HOURS,
+                TimeUnit.HOURS
+        );
+
+        // Build verification link
+        String verificationLink = frontendUrl + "/verify-email?token=" + token;
+
+        // Send email
+        emailService.sendVerificationEmail(user.getEmail(), user.getName(), verificationLink);
+
+        log.info("Verification email sent to: {}", user.getEmail());
     }
 }

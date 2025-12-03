@@ -35,7 +35,7 @@ WHERE deleted_by_sender_at IS NULL AND deleted_by_recipient_at IS NULL;
 
 -- Function to search messages for a user
 CREATE OR REPLACE FUNCTION search_user_messages(
-    user_uuid UUID,
+    user_id_param BIGINT,
     search_query TEXT,
     result_limit INTEGER DEFAULT 50,
     result_offset INTEGER DEFAULT 0
@@ -43,7 +43,7 @@ CREATE OR REPLACE FUNCTION search_user_messages(
 RETURNS TABLE (
     message_id UUID,
     conversation_id UUID,
-    sender_id UUID,
+    sender_id BIGINT,
     content TEXT,
     sent_at TIMESTAMP,
     relevance REAL
@@ -61,12 +61,12 @@ BEGIN
     JOIN conversations c ON m.conversation_id = c.id
     WHERE m.content_search @@ plainto_tsquery('simple', search_query)
         AND (
-            (c.participant1_id = user_uuid AND c.participant1_deleted_at IS NULL) OR
-            (c.participant2_id = user_uuid AND c.participant2_deleted_at IS NULL)
+            (c.participant1_id = user_id_param AND c.participant1_deleted_at IS NULL) OR
+            (c.participant2_id = user_id_param AND c.participant2_deleted_at IS NULL)
         )
         AND (
-            (m.sender_id = user_uuid AND m.deleted_by_sender_at IS NULL) OR
-            (m.recipient_id = user_uuid AND m.deleted_by_recipient_at IS NULL)
+            (m.sender_id = user_id_param AND m.deleted_by_sender_at IS NULL) OR
+            (m.recipient_id = user_id_param AND m.deleted_by_recipient_at IS NULL)
         )
     ORDER BY relevance DESC, m.sent_at DESC
     LIMIT result_limit
@@ -76,7 +76,7 @@ $$ LANGUAGE plpgsql;
 
 -- Function to count search results
 CREATE OR REPLACE FUNCTION count_search_results(
-    user_uuid UUID,
+    user_id_param BIGINT,
     search_query TEXT
 )
 RETURNS INTEGER AS $$
@@ -87,12 +87,12 @@ BEGIN
         JOIN conversations c ON m.conversation_id = c.id
         WHERE m.content_search @@ plainto_tsquery('simple', search_query)
             AND (
-                (c.participant1_id = user_uuid AND c.participant1_deleted_at IS NULL) OR
-                (c.participant2_id = user_uuid AND c.participant2_deleted_at IS NULL)
+                (c.participant1_id = user_id_param AND c.participant1_deleted_at IS NULL) OR
+                (c.participant2_id = user_id_param AND c.participant2_deleted_at IS NULL)
             )
             AND (
-                (m.sender_id = user_uuid AND m.deleted_by_sender_at IS NULL) OR
-                (m.recipient_id = user_uuid AND m.deleted_by_recipient_at IS NULL)
+                (m.sender_id = user_id_param AND m.deleted_by_sender_at IS NULL) OR
+                (m.recipient_id = user_id_param AND m.deleted_by_recipient_at IS NULL)
             )
     );
 END;

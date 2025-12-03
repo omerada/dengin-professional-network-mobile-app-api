@@ -126,6 +126,21 @@ public class ProfessionService {
     }
 
     /**
+     * Get profession name by ID
+     * Returns null if profession not found
+     * Used by other bounded contexts
+     */
+    @Transactional(readOnly = true)
+    public String getProfessionNameById(Long professionId) {
+        if (professionId == null) {
+            return null;
+        }
+        return professionRepository.findById(professionId)
+                .map(Profession::getName)
+                .orElse(null);
+    }
+
+    /**
      * Inner DTO for statistics
      */
     public record ProfessionStatsResponse(

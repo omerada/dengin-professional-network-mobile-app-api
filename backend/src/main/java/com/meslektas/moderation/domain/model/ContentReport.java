@@ -38,9 +38,8 @@ public class ContentReport extends AggregateRoot {
 
     private static final int AUTO_ESCALATE_THRESHOLD = 5;
 
-    @EmbeddedId
-    @AttributeOverride(name = "value", column = @Column(name = "id"))
-    private ContentReportId reportId;
+    @Column(name = "report_uuid", nullable = false, unique = true)
+    private UUID reportUUID;
 
     @Column(name = "reporter_id", nullable = false)
     private Long reporterId;
@@ -109,7 +108,7 @@ public class ContentReport extends AggregateRoot {
         validateReason(reason);
 
         ContentReport report = new ContentReport();
-        report.reportId = ContentReportId.generate();
+        report.reportUUID = UUID.randomUUID();
         report.reporterId = reporterId;
         report.contentType = contentType;
         report.contentId = contentId;
@@ -122,7 +121,7 @@ public class ContentReport extends AggregateRoot {
         report.updatedAt = report.createdAt;
 
         report.registerEvent(new ContentReportedEvent(
-                report.reportId,
+                ContentReportId.of(report.reportUUID),
                 report.reporterId,
                 report.contentType,
                 report.contentId,
@@ -149,7 +148,7 @@ public class ContentReport extends AggregateRoot {
         validateReason(reason);
 
         ContentReport report = new ContentReport();
-        report.reportId = ContentReportId.generate();
+        report.reportUUID = UUID.randomUUID();
         report.reporterId = SYSTEM_REPORTER_ID; // System reporter
         report.contentType = contentType;
         report.contentId = contentId;
@@ -162,7 +161,7 @@ public class ContentReport extends AggregateRoot {
         report.updatedAt = report.createdAt;
 
         report.registerEvent(new ContentReportedEvent(
-                report.reportId,
+                ContentReportId.of(report.reportUUID),
                 report.reporterId,
                 report.contentType,
                 report.contentId,
@@ -231,7 +230,7 @@ public class ContentReport extends AggregateRoot {
 
         // Register reviewed event
         registerEvent(new ContentReviewedEvent(
-                this.reportId,
+                ContentReportId.of(this.reportUUID),
                 moderatorId,
                 this.contentType,
                 this.contentId,
@@ -253,7 +252,7 @@ public class ContentReport extends AggregateRoot {
                     contentOwnerId,
                     decision.getSanctionType(),
                     reason,
-                    reportId.getValue(),
+                    reportUUID,
                     moderatorId));
         }
     }
@@ -311,7 +310,14 @@ public class ContentReport extends AggregateRoot {
      * Get the report UUID.
      */
     public UUID getReportUUID() {
-        return reportId.getValue();
+        return reportUUID;
+    }
+    
+    /**
+     * Get ContentReportId value object
+     */
+    public ContentReportId getReportId() {
+        return ContentReportId.of(reportUUID);
     }
 
     /**

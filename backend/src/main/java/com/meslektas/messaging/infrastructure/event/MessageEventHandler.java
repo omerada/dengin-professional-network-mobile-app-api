@@ -1,11 +1,17 @@
 package com.meslektas.messaging.infrastructure.event;
 
+import com.meslektas.identity.domain.model.User;
+import com.meslektas.identity.domain.repository.UserRepository;
 import com.meslektas.messaging.domain.event.MessageDeliveredEvent;
 import com.meslektas.messaging.domain.event.MessageReadEvent;
 import com.meslektas.messaging.domain.event.MessageSentEvent;
 import com.meslektas.messaging.infrastructure.websocket.RedisMessagePublisher;
 import com.meslektas.messaging.infrastructure.websocket.dto.WsMessageResponse;
 import com.meslektas.messaging.infrastructure.websocket.dto.WsReadReceipt;
+import com.meslektas.messaging.infrastructure.websocket.dto.WsDeliveryReceipt;
+import com.meslektas.notification.application.service.NotificationService;
+import com.meslektas.notification.domain.model.NotificationContent;
+import com.meslektas.notification.domain.model.NotificationType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -13,6 +19,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Event Handler for Message Domain Events
@@ -30,6 +38,8 @@ import java.time.LocalDateTime;
 public class MessageEventHandler {
 
     private final RedisMessagePublisher redisMessagePublisher;
+    private final NotificationService notificationService;
+    private final UserRepository userRepository;
 
     /**
      * Handle MessageSentEvent
@@ -47,8 +57,8 @@ public class MessageEventHandler {
             WsMessageResponse wsMessage = WsMessageResponse.builder()
                     .messageId(event.getMessageId().getValue())
                     .conversationId(event.getConversationId().getValue())
-                    .senderId(null) // TODO: Convert Long to UUID when User entity is updated
-                    .recipientId(null) // TODO: Convert Long to UUID when User entity is updated
+                    .senderId(longToUuid(event.getSenderId()))
+                    .recipientId(longToUuid(event.getRecipientId()))
                     .content(event.getMessagePreview())
                     .status("SENT")
                     .sentAt(event.getOccurredOn().atZone(java.time.ZoneId.systemDefault()).toInstant())
@@ -59,11 +69,8 @@ public class MessageEventHandler {
 
             log.debug("Message notification sent to recipient {} via Redis", event.getRecipientId());
 
-            // TODO: Create in-app notification
-            // notificationService.createMessageNotification(event);
-
-            // TODO: Send push notification if recipient is offline
-            // pushNotificationService.sendMessageNotification(event);
+            // Create in-app notification
+            createMessageNotification(event);
 
         } catch (Exception e) {
             log.error("Error handling MessageSentEvent for messageId: {}",
@@ -89,7 +96,7 @@ public class MessageEventHandler {
             if (senderId != null) {
                 WsReadReceipt readReceipt = WsReadReceipt.builder()
                         .conversationId(event.getConversationId().getValue())
-                        .readByUserId(null) // TODO: Convert Long to UUID when User entity is updated
+                        .readByUserId(longToUuid(event.getReadById()))
                         .lastReadMessageId(event.getMessageId().getValue())
                         .messagesRead(1)
                         .readAt(LocalDateTime.now())
@@ -119,8 +126,15 @@ public class MessageEventHandler {
                 event.getMessageId(), event.getRecipientId());
 
         try {
-            // TODO: Notify sender about delivery status
-            // This could update message status in sender's UI
+            // Notify sender about delivery status via WebSocket
+            WsDeliveryReceipt deliveryReceipt = WsDeliveryReceipt.builder()
+                    .messageId(event.getMessageId().getValue())
+                    .conversationId(event.getConversationId().getValue())
+                    .status("DELIVERED")
+                    .deliveredAt(LocalDateTime.now())
+                    .build();
+
+            redisMessagePublisher.publishDeliveryReceipt(event.getSenderId(), deliveryReceipt);
 
             log.debug("Message {} delivered to recipient {}",
                     event.getMessageId(), event.getRecipientId());
@@ -132,11 +146,52 @@ public class MessageEventHandler {
     }
 
     /**
-     * Get sender name from user service
-     * TODO: Implement actual user lookup
+     * Create in-app notification for new message
+     */
+    private void createMessageNotification(MessageSentEvent event) {
+        try {
+            String senderName = getSenderName(event.getSenderId());
+            String messagePreview = truncateMessage(event.getMessagePreview());
+            String actionUrl = "/chat/" + event.getConversationId().getValue();
+
+            notificationService.createNotification(
+                    event.getRecipientId(),
+                    NotificationType.NEW_MESSAGE,
+                    "Yeni mesaj",
+                    senderName + ": " + messagePreview,
+                    actionUrl,
+                    Map.of(
+                            "conversationId", event.getConversationId().getValue().toString(),
+                            "senderId", event.getSenderId().toString()
+                    )
+            );
+        } catch (Exception e) {
+            log.warn("Failed to create message notification: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Convert Long ID to UUID (deterministic conversion for compatibility)
+     */
+    private UUID longToUuid(Long id) {
+        if (id == null) return null;
+        return new UUID(0L, id);
+    }
+
+    /**
+     * Truncate message preview
+     */
+    private String truncateMessage(String message) {
+        if (message == null) return "";
+        return message.length() > 50 ? message.substring(0, 47) + "..." : message;
+    }
+
+    /**
+     * Get sender name from user repository
      */
     private String getSenderName(Long senderId) {
-        // Placeholder - should fetch from UserRepository
-        return "User " + senderId;
+        return userRepository.findById(senderId)
+                .map(User::getFullName)
+                .orElse("Kullanıcı");
     }
 }

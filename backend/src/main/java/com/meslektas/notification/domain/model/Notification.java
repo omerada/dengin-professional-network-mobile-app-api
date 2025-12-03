@@ -38,9 +38,8 @@ public class Notification extends AggregateRoot {
 
     private static final int EXPIRATION_DAYS = 30;
 
-    @EmbeddedId
-    @AttributeOverride(name = "value", column = @Column(name = "id"))
-    private NotificationId notificationId;
+    @Column(name = "notification_uuid", nullable = false, unique = true)
+    private UUID notificationUUID;
 
     @Column(name = "recipient_id", nullable = false)
     private Long recipientId;
@@ -97,7 +96,7 @@ public class Notification extends AggregateRoot {
         validateContent(content);
 
         Notification notification = new Notification();
-        notification.notificationId = NotificationId.generate();
+        notification.notificationUUID = UUID.randomUUID();
         notification.recipientId = recipientId;
         notification.type = type;
         notification.content = content;
@@ -108,7 +107,7 @@ public class Notification extends AggregateRoot {
         notification.expiresAt = notification.createdAt.plusDays(EXPIRATION_DAYS);
 
         notification.registerEvent(new NotificationCreatedEvent(
-                notification.notificationId,
+                NotificationId.of(notification.notificationUUID),
                 notification.recipientId,
                 notification.type,
                 notification.content.getTitle()));
@@ -132,7 +131,7 @@ public class Notification extends AggregateRoot {
             LocalDateTime createdAt,
             LocalDateTime updatedAt) {
         Notification notification = new Notification();
-        notification.notificationId = notificationId;
+        notification.notificationUUID = notificationId.getValue();
         notification.recipientId = recipientId;
         notification.type = type;
         notification.content = content;
@@ -165,7 +164,7 @@ public class Notification extends AggregateRoot {
         this.readAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
 
-        registerEvent(new NotificationReadEvent(notificationId, recipientId));
+        registerEvent(new NotificationReadEvent(NotificationId.of(notificationUUID), recipientId));
     }
 
     /**
@@ -187,7 +186,7 @@ public class Notification extends AggregateRoot {
 
         this.updatedAt = LocalDateTime.now();
 
-        registerEvent(new NotificationDeliveredEvent(notificationId, recipientId, channel));
+        registerEvent(new NotificationDeliveredEvent(NotificationId.of(notificationUUID), recipientId, channel));
     }
 
     /**
@@ -265,7 +264,14 @@ public class Notification extends AggregateRoot {
     }
 
     public UUID getNotificationUUID() {
-        return notificationId.getValue();
+        return notificationUUID;
+    }
+    
+    /**
+     * Get NotificationId value object
+     */
+    public NotificationId getNotificationId() {
+        return NotificationId.of(notificationUUID);
     }
 
     // ==================== Validation ====================

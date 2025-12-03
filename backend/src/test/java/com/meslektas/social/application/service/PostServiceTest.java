@@ -1,6 +1,7 @@
 package com.meslektas.social.application.service;
 
 import com.meslektas.common.infrastructure.DomainEventPublisher;
+import com.meslektas.identity.application.service.ProfessionService;
 import com.meslektas.identity.domain.model.Profession;
 import com.meslektas.identity.domain.model.User;
 import com.meslektas.identity.domain.repository.UserRepository;
@@ -56,6 +57,9 @@ class PostServiceTest {
     private FollowRepository followRepository;
 
     @Mock
+    private ProfessionService professionService;
+
+    @Mock
     private DomainEventPublisher eventPublisher;
 
     @InjectMocks
@@ -67,6 +71,9 @@ class PostServiceTest {
 
     @BeforeEach
     void setUp() {
+        // Mock profession service
+        when(professionService.getProfessionNameById(anyLong())).thenReturn("Software Engineer");
+
         // Create verified user
         verifiedUser = createMockUser(1L, "John Doe", true);
 

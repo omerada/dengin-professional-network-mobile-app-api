@@ -1,5 +1,6 @@
 package com.meslektas.verification.application.service;
 
+import com.meslektas.identity.application.service.ProfessionService;
 import com.meslektas.verification.application.dto.SubmitVerificationRequest;
 import com.meslektas.verification.application.dto.VerificationResponse;
 import com.meslektas.verification.application.dto.VerificationAttemptResponse;
@@ -41,6 +42,7 @@ public class VerificationService {
     private final VerificationRequestRepository repository;
     private final VerificationAttemptPolicy attemptPolicy;
     private final RekognitionService rekognitionService;
+    private final ProfessionService professionService;
     private final DomainEventPublisher eventPublisher;
     
     /**
@@ -263,10 +265,19 @@ public class VerificationService {
             int recentFailed = repository.countRecentFailedAttempts(userId, professionId, cooldownStart);
             
             if (recentFailed > 0) {
-                // Calculate cooldown end time
-                // TODO: Get last failed attempt timestamp and calculate exact cooldown
-                long cooldownSeconds = 24 * 3600; // 24 hours
-                return VerificationEligibilityResponse.cooldownActive(cooldownSeconds);
+                // Get last failed attempt timestamp and calculate exact cooldown
+                Instant lastFailedAt = repository.findLastFailedAttemptTime(userId, professionId);
+                if (lastFailedAt != null) {
+                    Instant cooldownEnd = lastFailedAt.plus(24, ChronoUnit.HOURS);
+                    long cooldownSeconds = java.time.Duration.between(Instant.now(), cooldownEnd).getSeconds();
+                    if (cooldownSeconds > 0) {
+                        return VerificationEligibilityResponse.cooldownActive(cooldownSeconds);
+                    }
+                } else {
+                    // Fallback to 24 hours if timestamp not found
+                    long cooldownSeconds = 24 * 3600;
+                    return VerificationEligibilityResponse.cooldownActive(cooldownSeconds);
+                }
             }
         }
         
@@ -378,7 +389,7 @@ public class VerificationService {
             .id(verification.getId())
             .verificationId(verification.getVerificationId().getValue())
             .professionId(verification.getProfessionId())
-            .professionName(null) // TODO: Join with profession table
+            .professionName(professionService.getProfessionNameById(verification.getProfessionId()))
             .status(verification.getStatus())
             .attemptNumber(verification.getAttemptNumber())
             .submittedAt(verification.getSubmittedAt())

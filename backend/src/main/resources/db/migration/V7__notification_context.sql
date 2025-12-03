@@ -3,12 +3,15 @@
 -- Sprint 9-10: Comprehensive Notification System
 -- =====================================================
 
+-- Note: update_updated_at_column() function is created in V4__create_social_tables.sql
+
 -- =====================================================
 -- 1. NOTIFICATIONS TABLE
 -- =====================================================
 
 CREATE TABLE notifications (
-    id UUID PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
+    notification_uuid UUID NOT NULL UNIQUE,
     recipient_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     type VARCHAR(50) NOT NULL,
     title VARCHAR(200) NOT NULL,
@@ -19,7 +22,8 @@ CREATE TABLE notifications (
     read_at TIMESTAMP,
     expires_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    version BIGINT NOT NULL DEFAULT 0
 );
 
 -- Indexes for notifications
@@ -42,7 +46,7 @@ COMMENT ON COLUMN notifications.metadata IS 'Additional data like postId, likerI
 
 CREATE TABLE notification_deliveries (
     id BIGSERIAL PRIMARY KEY,
-    notification_id UUID NOT NULL REFERENCES notifications(id) ON DELETE CASCADE,
+    notification_id BIGINT NOT NULL REFERENCES notifications(id) ON DELETE CASCADE,
     channel VARCHAR(20) NOT NULL,
     delivered_at TIMESTAMP NOT NULL DEFAULT NOW(),
     error_message TEXT,
@@ -148,7 +152,7 @@ CREATE TABLE notification_batches (
     reference_id VARCHAR(100),
     count INTEGER NOT NULL DEFAULT 1,
     actor_ids JSONB NOT NULL DEFAULT '[]'::jsonb,
-    first_notification_id UUID NOT NULL REFERENCES notifications(id) ON DELETE CASCADE,
+    first_notification_id BIGINT NOT NULL REFERENCES notifications(id) ON DELETE CASCADE,
     last_updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     sent_at TIMESTAMP,
     UNIQUE(recipient_id, type, reference_id)
@@ -171,19 +175,19 @@ COMMENT ON COLUMN notification_batches.actor_ids IS 'JSON array of user IDs who 
 CREATE TRIGGER set_notifications_updated_at
     BEFORE UPDATE ON notifications
     FOR EACH ROW
-    EXECUTE FUNCTION update_timestamp();
+    EXECUTE FUNCTION update_updated_at_column();
 
 -- Notification preferences updated_at trigger
 CREATE TRIGGER set_notification_preferences_updated_at
     BEFORE UPDATE ON notification_preferences
     FOR EACH ROW
-    EXECUTE FUNCTION update_timestamp();
+    EXECUTE FUNCTION update_updated_at_column();
 
 -- Device tokens updated_at trigger
 CREATE TRIGGER set_device_tokens_updated_at
     BEFORE UPDATE ON device_tokens
     FOR EACH ROW
-    EXECUTE FUNCTION update_timestamp();
+    EXECUTE FUNCTION update_updated_at_column();
 
 -- =====================================================
 -- 7. DEFAULT NOTIFICATION PREFERENCES FUNCTION

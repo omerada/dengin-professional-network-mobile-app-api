@@ -5,10 +5,13 @@ import com.meslektas.common.exception.ResourceNotFoundException;
 import com.meslektas.identity.application.dto.request.PasswordResetConfirmRequest;
 import com.meslektas.identity.application.dto.request.PasswordResetRequest;
 import com.meslektas.identity.domain.event.PasswordChangedEvent;
+import com.meslektas.identity.domain.model.OAuthProvider;
 import com.meslektas.identity.domain.model.User;
 import com.meslektas.identity.domain.repository.UserRepository;
+import com.meslektas.notification.domain.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -43,7 +46,10 @@ public class PasswordResetService {
     private final RedisTemplate<String, String> redisTemplate;
     private final PasswordEncoder passwordEncoder;
     private final ApplicationEventPublisher eventPublisher;
-    // private final EmailService emailService; // TODO: Implement in future sprint
+    private final EmailService emailService;
+
+    @Value("${app.frontend-url:https://meslektas.com}")
+    private String frontendUrl;
 
     private static final String RESET_TOKEN_PREFIX = "password_reset:token:";
     private static final String RESET_RATE_LIMIT_PREFIX = "password_reset:rate_limit:";
@@ -90,6 +96,14 @@ public class PasswordResetService {
         // Check if user is active
         if (!user.isActive()) {
             log.warn("Password reset requested for inactive user: {}", email);
+            incrementRateLimitCounter(email);
+            return;
+        }
+
+        // Check if OAuth user (they can't reset password)
+        if (user.isOAuthUser() && user.getOauthProvider() != OAuthProvider.LOCAL) {
+            log.info("OAuth user requested password reset, sending reminder: {}", email);
+            emailService.sendOAuthLoginReminder(email, user.getOauthProvider().getDisplayName());
             incrementRateLimitCounter(email);
             return;
         }
@@ -220,35 +234,24 @@ public class PasswordResetService {
     /**
      * Send password reset email
      * 
-     * TODO: Implement EmailService in future sprint
-     * 
      * @param user       User
      * @param resetToken Reset token
      */
     private void sendResetEmail(User user, String resetToken) {
-        // Email template
-        String resetLink = "https://meslektas.com/reset-password?token=" + resetToken;
-
-        log.info("Password reset email would be sent to: {}", user.getEmail());
-        log.info("Reset link: {}", resetLink);
-
-        // TODO: Implement actual email sending
-        // emailService.sendPasswordResetEmail(user.getEmail(), user.getName(),
-        // resetLink);
+        String resetLink = frontendUrl + "/reset-password?token=" + resetToken;
+        log.info("Sending password reset email to: {}", user.getEmail());
+        
+        emailService.sendPasswordResetEmail(user.getEmail(), user.getName(), resetLink);
     }
 
     /**
      * Send password reset confirmation email
      * 
-     * TODO: Implement EmailService in future sprint
-     * 
      * @param user User
      */
     private void sendConfirmationEmail(User user) {
-        log.info("Password reset confirmation email would be sent to: {}", user.getEmail());
-
-        // TODO: Implement actual email sending
-        // emailService.sendPasswordResetConfirmationEmail(user.getEmail(),
-        // user.getName());
+        log.info("Sending password reset confirmation email to: {}", user.getEmail());
+        
+        emailService.sendPasswordChangedEmail(user.getEmail(), user.getName());
     }
 }

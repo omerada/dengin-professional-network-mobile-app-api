@@ -28,20 +28,34 @@ import java.time.LocalDateTime;
 public class Message extends BaseEntity {
 
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "message_id"))
+    @AttributeOverride(name = "value", column = @Column(name = "message_uuid"))
     private MessageId messageId;
 
-    @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "conversation_id"))
+    @Column(name = "conversation_id", nullable = false)
+    private Long conversationIdValue;
+
+    @Transient
     private ConversationId conversationId;
 
     @Column(name = "sender_id", nullable = false)
     private Long senderId;
 
-    @Embedded
+    @Column(name = "recipient_id", nullable = false)
+    private Long recipientId;
+
+    @Column(name = "content", nullable = false, length = 2000)
+    private String contentText;
+
+    @Transient
     private MessageContent content;
 
     @Embedded
+    @AttributeOverrides({
+        @AttributeOverride(name = "s3Key", column = @Column(name = "attachment_s3_key")),
+        @AttributeOverride(name = "fileName", column = @Column(name = "attachment_file_name")),
+        @AttributeOverride(name = "contentType", column = @Column(name = "attachment_content_type")),
+        @AttributeOverride(name = "fileSize", column = @Column(name = "attachment_file_size"))
+    })
     private MessageAttachment attachment;
 
     @Enumerated(EnumType.STRING)
@@ -51,24 +65,52 @@ public class Message extends BaseEntity {
     @Column(name = "read_at")
     private LocalDateTime readAt;
 
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
+    @Column(name = "delivered_at")
+    private LocalDateTime deliveredAt;
 
-    @Column(name = "deleted_by")
+    @Column(name = "deleted_by_sender_at")
+    private LocalDateTime deletedBySenderAt;
+
+    @Column(name = "deleted_by_recipient_at")
+    private LocalDateTime deletedByRecipientAt;
+
+    // Transient fields for backward compatibility
+    @Transient
+    private LocalDateTime deletedAt;
+    
+    @Transient
     private Long deletedBy;
 
     // ============================================
-    // FACTORY METHOD
+    // POST-LOAD INITIALIZATION
+    // ============================================
+    
+    @PostLoad
+    private void initTransientFields() {
+        this.content = MessageContent.of(this.contentText);
+        // Set deletedAt based on which party deleted first
+        if (deletedBySenderAt != null || deletedByRecipientAt != null) {
+            this.deletedAt = deletedBySenderAt != null ? deletedBySenderAt : deletedByRecipientAt;
+            this.deletedBy = deletedBySenderAt != null ? senderId : recipientId;
+        }
+    }
+
+    // ============================================
+    // FACTORY METHODS (Backward Compatible)
     // ============================================
 
     /**
-     * Create a new message
-     * 
-     * @param conversationId Conversation this message belongs to
-     * @param senderId       User ID of message sender
-     * @param content        Message text content
-     * @param attachment     Optional attachment
-     * @return New Message entity
+     * Create a new message with ConversationId (backward compatible for tests)
+     */
+    public static Message create(
+            ConversationId conversationId,
+            Long senderId,
+            MessageContent content) {
+        return create(conversationId, senderId, content, null);
+    }
+
+    /**
+     * Create a new message with ConversationId and attachment (backward compatible)
      */
     public static Message create(
             ConversationId conversationId,
@@ -88,8 +130,11 @@ public class Message extends BaseEntity {
         Message message = new Message();
         message.messageId = MessageId.generate();
         message.conversationId = conversationId;
+        message.conversationIdValue = 0L; // Placeholder, will be set by repository
         message.senderId = senderId;
+        message.recipientId = 0L; // Placeholder, will be set by conversation
         message.content = content;
+        message.contentText = content.getValue();
         message.attachment = attachment;
         message.status = MessageStatus.SENT;
 
@@ -97,13 +142,42 @@ public class Message extends BaseEntity {
     }
 
     /**
-     * Create a message for a conversation using ConversationId
-     * 
-     * @param conversationId Conversation ID value object
-     * @param senderId       User ID of message sender
-     * @param content        Message text content
-     * @param attachment     Optional attachment
-     * @return New Message entity
+     * Create a new message with full parameters
+     */
+    public static Message createWithRecipient(
+            Long conversationIdValue,
+            Long senderId,
+            Long recipientId,
+            MessageContent content,
+            MessageAttachment attachment) {
+        if (conversationIdValue == null) {
+            throw new IllegalArgumentException("Conversation ID cannot be null");
+        }
+        if (senderId == null) {
+            throw new IllegalArgumentException("Sender ID cannot be null");
+        }
+        if (recipientId == null) {
+            throw new IllegalArgumentException("Recipient ID cannot be null");
+        }
+        if (content == null) {
+            throw new IllegalArgumentException("Message content cannot be null");
+        }
+
+        Message message = new Message();
+        message.messageId = MessageId.generate();
+        message.conversationIdValue = conversationIdValue;
+        message.senderId = senderId;
+        message.recipientId = recipientId;
+        message.content = content;
+        message.contentText = content.getValue();
+        message.attachment = attachment;
+        message.status = MessageStatus.SENT;
+
+        return message;
+    }
+
+    /**
+     * Create a message for a conversation using ConversationId (alias)
      */
     public static Message createForConversation(
             ConversationId conversationId,
@@ -111,16 +185,6 @@ public class Message extends BaseEntity {
             MessageContent content,
             MessageAttachment attachment) {
         return create(conversationId, senderId, content, attachment);
-    }
-
-    /**
-     * Create a message without attachment
-     */
-    public static Message create(
-            ConversationId conversationId,
-            Long senderId,
-            MessageContent content) {
-        return create(conversationId, senderId, content, null);
     }
 
     // ============================================
@@ -133,13 +197,12 @@ public class Message extends BaseEntity {
     public void markAsDelivered() {
         if (this.status == MessageStatus.SENT) {
             this.status = MessageStatus.DELIVERED;
+            this.deliveredAt = LocalDateTime.now();
         }
     }
 
     /**
      * Mark message as read
-     * 
-     * @param readerId User ID who is reading the message
      */
     public void markAsRead(Long readerId) {
         if (readerId == null) {
@@ -158,60 +221,66 @@ public class Message extends BaseEntity {
     }
 
     /**
-     * Delete message (soft delete)
-     * 
-     * @param deleterId User ID who is deleting the message
+     * Delete message (marks as deleted status)
      */
     public void delete(Long deleterId) {
         if (deleterId == null) {
             throw new IllegalArgumentException("Deleter ID cannot be null");
         }
 
-        if (this.status == MessageStatus.DELETED) {
-            return; // Already deleted
-        }
-
-        this.status = MessageStatus.DELETED;
         this.deletedAt = LocalDateTime.now();
         this.deletedBy = deleterId;
+
+        if (deleterId.equals(senderId)) {
+            this.deletedBySenderAt = this.deletedAt;
+        } else if (deleterId.equals(recipientId)) {
+            this.deletedByRecipientAt = this.deletedAt;
+        }
+
+        // Mark as deleted status if completely deleted
+        if (deletedBySenderAt != null && deletedByRecipientAt != null) {
+            this.status = MessageStatus.DELETED;
+        }
     }
 
     // ============================================
     // QUERY METHODS
     // ============================================
 
-    /**
-     * Check if message has an attachment
-     */
     public boolean hasAttachment() {
-        return this.attachment != null;
+        return this.attachment != null && this.attachment.getS3Key() != null;
     }
 
-    /**
-     * Check if message is from a specific sender
-     */
     public boolean isSentBy(Long userId) {
         return this.senderId.equals(userId);
     }
 
-    /**
-     * Check if message is visible
-     */
     public boolean isVisible() {
-        return this.status.isVisible();
+        return this.status != MessageStatus.DELETED;
     }
 
-    /**
-     * Check if message has been read
-     */
     public boolean isRead() {
         return this.status.isRead();
     }
 
-    /**
-     * Get content preview for notifications
-     */
     public String getContentPreview() {
-        return content.getPreview(50);
+        if (content != null) {
+            return content.getPreview(50);
+        }
+        if (contentText != null) {
+            return contentText.length() > 50 ? contentText.substring(0, 50) + "..." : contentText;
+        }
+        return "";
+    }
+
+    public MessageContent getContent() {
+        if (content == null && contentText != null) {
+            content = MessageContent.of(contentText);
+        }
+        return content;
+    }
+
+    public ConversationId getConversationId() {
+        return conversationId;
     }
 }

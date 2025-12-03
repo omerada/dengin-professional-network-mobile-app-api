@@ -24,10 +24,10 @@ import java.util.UUID;
 public interface SpringDataNotificationRepository extends JpaRepository<Notification, UUID> {
 
     /**
-     * Find notification by its domain ID.
+     * Find notification by its domain ID (UUID).
      */
-    @Query("SELECT n FROM Notification n WHERE n.notificationId.value = :id")
-    Optional<Notification> findByNotificationId(@Param("id") UUID id);
+    @Query("SELECT n FROM Notification n WHERE n.notificationUUID = :id")
+    Optional<Notification> findByNotificationUUID(@Param("id") UUID id);
 
     /**
      * Find all notifications for a recipient with pagination.
@@ -88,7 +88,7 @@ public interface SpringDataNotificationRepository extends JpaRepository<Notifica
      * Mark notifications as read by IDs.
      */
     @Modifying
-    @Query("UPDATE Notification n SET n.status = 'READ', n.readAt = :readAt, n.updatedAt = :readAt WHERE n.notificationId.value IN :ids AND n.recipientId = :recipientId")
+    @Query("UPDATE Notification n SET n.status = 'READ', n.readAt = :readAt, n.updatedAt = :readAt WHERE n.notificationUUID IN :ids AND n.recipientId = :recipientId")
     int markAsReadByIds(@Param("ids") List<UUID> ids, @Param("recipientId") Long recipientId,
             @Param("readAt") LocalDateTime readAt);
 

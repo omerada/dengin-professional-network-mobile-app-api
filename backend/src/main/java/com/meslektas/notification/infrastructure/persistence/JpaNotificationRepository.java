@@ -34,12 +34,12 @@ public class JpaNotificationRepository implements NotificationRepository {
 
     @Override
     public Optional<Notification> findById(NotificationId id) {
-        return springDataRepository.findByNotificationId(id.getValue());
+        return springDataRepository.findByNotificationUUID(id.getValue());
     }
 
     @Override
     public Optional<Notification> findById(UUID id) {
-        return springDataRepository.findByNotificationId(id);
+        return springDataRepository.findByNotificationUUID(id);
     }
 
     @Override
@@ -109,7 +109,7 @@ public class JpaNotificationRepository implements NotificationRepository {
 
     @Override
     public void deleteById(NotificationId id) {
-        springDataRepository.findByNotificationId(id.getValue())
+        springDataRepository.findByNotificationUUID(id.getValue())
                 .ifPresent(springDataRepository::delete);
     }
 }

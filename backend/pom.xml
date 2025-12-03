@@ -138,6 +138,13 @@
             <version>${aws-sdk.version}</version>
         </dependency>
 
+        <!-- Mailgun Email Service (via OkHttp) -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.12.0</version>
+        </dependency>
+
         <!-- Apache Commons -->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -168,6 +175,13 @@
             <groupId>io.sentry</groupId>
             <artifactId>sentry-spring-boot-starter-jakarta</artifactId>
             <version>7.3.0</version>
+        </dependency>
+
+        <!-- Bucket4j Rate Limiting -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j-core</artifactId>
+            <version>8.7.0</version>
         </dependency>
 
         <!-- Testing -->

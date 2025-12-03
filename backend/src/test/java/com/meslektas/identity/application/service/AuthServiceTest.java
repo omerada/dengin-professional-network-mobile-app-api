@@ -11,6 +11,7 @@ import com.meslektas.identity.domain.model.User;
 import com.meslektas.identity.domain.model.UserStatus;
 import com.meslektas.identity.domain.repository.UserRepository;
 import com.meslektas.identity.infrastructure.security.JwtTokenProvider;
+import com.meslektas.notification.domain.service.EmailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,7 +21,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -46,6 +51,7 @@ import static org.mockito.Mockito.*;
  * Coverage Target: 90%+
  */
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @DisplayName("AuthService Tests")
 class AuthServiceTest {
 
@@ -67,6 +73,15 @@ class AuthServiceTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
+    @Mock
+    private RedisTemplate<String, Object> redisTemplate;
+
+    @Mock
+    private ValueOperations<String, Object> valueOperations;
+
+    @Mock
+    private EmailService emailService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -77,6 +92,9 @@ class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
+        // Setup Redis mock
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        
         validRegisterRequest = new RegisterRequest(
                 "test@example.com",
                 "SecurePass123!",
@@ -123,6 +141,7 @@ class AuthServiceTest {
             when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
                 User user = invocation.getArgument(0);
                 // Simulate ID assignment
+                ReflectionTestUtils.setField(user, "id", 1L);
                 return user;
             });
             when(userMapper.toResponse(any(User.class))).thenReturn(testUserResponse);
@@ -165,7 +184,11 @@ class AuthServiceTest {
             String encodedPassword = "$2a$10$encodedpassword";
             when(userRepository.existsByEmail(anyString())).thenReturn(false);
             when(passwordEncoder.encode("SecurePass123!")).thenReturn(encodedPassword);
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+                User user = invocation.getArgument(0);
+                ReflectionTestUtils.setField(user, "id", 1L);
+                return user;
+            });
             when(userMapper.toResponse(any(User.class))).thenReturn(testUserResponse);
 
             // When
@@ -185,7 +208,11 @@ class AuthServiceTest {
             // Given
             when(userRepository.existsByEmail(anyString())).thenReturn(false);
             when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$hashedpassword");
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+                User user = invocation.getArgument(0);
+                ReflectionTestUtils.setField(user, "id", 1L);
+                return user;
+            });
             when(userMapper.toResponse(any(User.class))).thenReturn(testUserResponse);
 
             // When

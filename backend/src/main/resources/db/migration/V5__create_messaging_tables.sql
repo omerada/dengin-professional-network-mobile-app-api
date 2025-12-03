@@ -3,9 +3,10 @@
 
 -- Conversations table
 CREATE TABLE conversations (
-    id UUID PRIMARY KEY,
-    participant1_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    participant2_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    id BIGSERIAL PRIMARY KEY,
+    conversation_uuid UUID NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+    participant1_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    participant2_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     participant1_deleted_at TIMESTAMP,
     participant2_deleted_at TIMESTAMP,
     last_message_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -22,16 +23,18 @@ CREATE TABLE conversations (
 CREATE INDEX idx_conversations_participant1 ON conversations(participant1_id);
 CREATE INDEX idx_conversations_participant2 ON conversations(participant2_id);
 CREATE INDEX idx_conversations_last_message ON conversations(last_message_at DESC);
+CREATE INDEX idx_conversations_uuid ON conversations(conversation_uuid);
 -- Composite index for finding user's conversations
 CREATE INDEX idx_conversations_p1_active ON conversations(participant1_id, last_message_at DESC) WHERE participant1_deleted_at IS NULL;
 CREATE INDEX idx_conversations_p2_active ON conversations(participant2_id, last_message_at DESC) WHERE participant2_deleted_at IS NULL;
 
 -- Messages table
 CREATE TABLE messages (
-    id UUID PRIMARY KEY,
-    conversation_id UUID NOT NULL,
-    sender_id UUID NOT NULL,
-    recipient_id UUID NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    message_uuid UUID NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+    conversation_id BIGINT NOT NULL,
+    sender_id BIGINT NOT NULL,
+    recipient_id BIGINT NOT NULL,
     content TEXT NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'SENT',
     attachment_s3_key VARCHAR(500),
@@ -61,20 +64,21 @@ CREATE INDEX idx_messages_conversation ON messages(conversation_id, sent_at DESC
 CREATE INDEX idx_messages_sender ON messages(sender_id);
 CREATE INDEX idx_messages_recipient ON messages(recipient_id);
 CREATE INDEX idx_messages_sent_at ON messages(sent_at DESC);
+CREATE INDEX idx_messages_uuid ON messages(message_uuid);
 -- Index for unread messages count
 CREATE INDEX idx_messages_unread ON messages(recipient_id, conversation_id) WHERE status != 'READ' AND deleted_by_recipient_at IS NULL;
 -- Index for message search
 CREATE INDEX idx_messages_content_search ON messages USING GIN(to_tsvector('simple', content));
 
 -- Function to count unread messages for a user in a conversation
-CREATE OR REPLACE FUNCTION count_unread_messages(user_uuid UUID, conv_uuid UUID)
+CREATE OR REPLACE FUNCTION count_unread_messages(user_id_param BIGINT, conv_id_param BIGINT)
 RETURNS INTEGER AS $$
 BEGIN
     RETURN (
         SELECT COUNT(*)::INTEGER
         FROM messages
-        WHERE conversation_id = conv_uuid
-            AND recipient_id = user_uuid
+        WHERE conversation_id = conv_id_param
+            AND recipient_id = user_id_param
             AND status != 'READ'
             AND deleted_by_recipient_at IS NULL
     );
@@ -82,19 +86,19 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Function to get total unread message count for a user
-CREATE OR REPLACE FUNCTION count_all_unread_messages(user_uuid UUID)
+CREATE OR REPLACE FUNCTION count_all_unread_messages(user_id_param BIGINT)
 RETURNS INTEGER AS $$
 BEGIN
     RETURN (
         SELECT COUNT(*)::INTEGER
         FROM messages m
         JOIN conversations c ON m.conversation_id = c.id
-        WHERE m.recipient_id = user_uuid
+        WHERE m.recipient_id = user_id_param
             AND m.status != 'READ'
             AND m.deleted_by_recipient_at IS NULL
             AND (
-                (c.participant1_id = user_uuid AND c.participant1_deleted_at IS NULL) OR
-                (c.participant2_id = user_uuid AND c.participant2_deleted_at IS NULL)
+                (c.participant1_id = user_id_param AND c.participant1_deleted_at IS NULL) OR
+                (c.participant2_id = user_id_param AND c.participant2_deleted_at IS NULL)
             )
     );
 END;

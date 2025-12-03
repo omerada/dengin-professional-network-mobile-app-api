@@ -68,6 +68,11 @@ public interface VerificationRequestRepository {
     int countTotalAttempts(Long userId, Long professionId);
     
     /**
+     * Find last failed attempt timestamp for cooldown calculation
+     */
+    Instant findLastFailedAttemptTime(Long userId, Long professionId);
+    
+    /**
      * Check if user has pending or approved verification for profession
      */
     boolean existsByUserIdAndProfessionIdAndStatusIn(

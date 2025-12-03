@@ -1,16 +1,15 @@
 package com.meslektas.notification.infrastructure.push;
 
+import com.meslektas.notification.domain.model.DeviceToken;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Device Token Management Service
@@ -42,18 +41,14 @@ public class DeviceTokenService {
      * @param token FCM token
      * @param platform Device platform
      * @param deviceName Device name/model
-     * @param appVersion App version
-     * @param osVersion OS version
      * @return Registered DeviceToken
      */
     @Transactional
     public DeviceToken registerToken(
-        UUID userId,
+        Long userId,
         String token,
         DeviceToken.Platform platform,
-        String deviceName,
-        String appVersion,
-        String osVersion
+        String deviceName
     ) {
         log.info("Registering device token for user: {}, platform: {}", userId, platform);
         
@@ -63,17 +58,20 @@ public class DeviceTokenService {
         if (existingToken.isPresent()) {
             DeviceToken deviceToken = existingToken.get();
             
-            // Token exists but for different user - reassign
+            // Token exists but for different user - need to create new one
             if (!deviceToken.getUserId().equals(userId)) {
-                log.info("Token reassigned from user {} to {}", deviceToken.getUserId(), userId);
-                deviceToken.setUserId(userId);
+                log.info("Token was assigned to user {}, deactivating and creating new for {}", 
+                    deviceToken.getUserId(), userId);
+                deviceToken.deactivate();
+                deviceTokenRepository.save(deviceToken);
+                
+                // Create new token for new user
+                DeviceToken newToken = DeviceToken.register(userId, token, platform, deviceName);
+                return deviceTokenRepository.save(newToken);
             }
             
-            // Update token info
-            deviceToken.setActive(true);
-            deviceToken.setDeviceName(deviceName);
-            deviceToken.setAppVersion(appVersion);
-            deviceToken.setOsVersion(osVersion);
+            // Update token info - reactivate if needed
+            deviceToken.activate();
             deviceToken.markAsUsed();
             
             return deviceTokenRepository.save(deviceToken);
@@ -82,21 +80,12 @@ public class DeviceTokenService {
         // Check token limit per user
         long tokenCount = deviceTokenRepository.countByUserIdAndActiveTrue(userId);
         if (tokenCount >= MAX_TOKENS_PER_USER) {
-            log.info("User {} has too many tokens, deactivating oldest", userId);
+            log.info("User {} has too many tokens ({}), limit is {}", userId, tokenCount, MAX_TOKENS_PER_USER);
             // In production, would deactivate oldest tokens
         }
         
-        // Create new token
-        DeviceToken newToken = DeviceToken.builder()
-            .userId(userId)
-            .token(token)
-            .platform(platform)
-            .deviceName(deviceName)
-            .appVersion(appVersion)
-            .osVersion(osVersion)
-            .active(true)
-            .build();
-        newToken.markAsUsed();
+        // Create new token using factory method
+        DeviceToken newToken = DeviceToken.register(userId, token, platform, deviceName);
         
         DeviceToken saved = deviceTokenRepository.save(newToken);
         log.info("Device token registered: id={}, user={}, platform={}", 
@@ -109,7 +98,7 @@ public class DeviceTokenService {
      * Get all active tokens for a user
      */
     @Transactional(readOnly = true)
-    public List<String> getActiveTokens(UUID userId) {
+    public List<String> getActiveTokens(Long userId) {
         return deviceTokenRepository.findByUserIdAndActiveTrue(userId)
             .stream()
             .map(DeviceToken::getToken)
@@ -120,7 +109,7 @@ public class DeviceTokenService {
      * Get all active tokens for multiple users
      */
     @Transactional(readOnly = true)
-    public List<String> getActiveTokensForUsers(List<UUID> userIds) {
+    public List<String> getActiveTokensForUsers(List<Long> userIds) {
         return deviceTokenRepository.findActiveByUserIds(userIds)
             .stream()
             .map(DeviceToken::getToken)
@@ -132,7 +121,7 @@ public class DeviceTokenService {
      */
     @Transactional
     public void deactivateToken(String token) {
-        int updated = deviceTokenRepository.deactivateByToken(token, Instant.now());
+        int updated = deviceTokenRepository.deactivateByToken(token, LocalDateTime.now());
         if (updated > 0) {
             log.info("Device token deactivated: {}...", token.substring(0, Math.min(10, token.length())));
         }
@@ -142,8 +131,8 @@ public class DeviceTokenService {
      * Deactivate all tokens for a user (e.g., on password change)
      */
     @Transactional
-    public void deactivateAllUserTokens(UUID userId) {
-        int count = deviceTokenRepository.deactivateAllForUser(userId, Instant.now());
+    public void deactivateAllUserTokens(Long userId) {
+        int count = deviceTokenRepository.deactivateAllForUser(userId, LocalDateTime.now());
         log.info("Deactivated {} tokens for user {}", count, userId);
     }
     
@@ -152,7 +141,7 @@ public class DeviceTokenService {
      */
     @Transactional
     public void markTokensAsInvalid(List<String> tokens) {
-        Instant now = Instant.now();
+        LocalDateTime now = LocalDateTime.now();
         for (String token : tokens) {
             deviceTokenRepository.deactivateByToken(token, now);
         }
@@ -190,12 +179,12 @@ public class DeviceTokenService {
         log.info("Starting device token cleanup");
         
         // Deactivate tokens not used in 60 days
-        Instant inactiveCutoff = Instant.now().minus(INACTIVE_DAYS_THRESHOLD, ChronoUnit.DAYS);
-        int deactivated = deviceTokenRepository.deactivateInactiveTokens(inactiveCutoff, Instant.now());
+        LocalDateTime inactiveCutoff = LocalDateTime.now().minusDays(INACTIVE_DAYS_THRESHOLD);
+        int deactivated = deviceTokenRepository.deactivateInactiveTokens(inactiveCutoff, LocalDateTime.now());
         log.info("Deactivated {} inactive tokens", deactivated);
         
         // Delete old inactive tokens (90 days)
-        Instant deleteCutoff = Instant.now().minus(OLD_TOKEN_DAYS_THRESHOLD, ChronoUnit.DAYS);
+        LocalDateTime deleteCutoff = LocalDateTime.now().minusDays(OLD_TOKEN_DAYS_THRESHOLD);
         int deleted = deviceTokenRepository.deleteOldInactiveTokens(deleteCutoff);
         log.info("Deleted {} old inactive tokens", deleted);
     }
