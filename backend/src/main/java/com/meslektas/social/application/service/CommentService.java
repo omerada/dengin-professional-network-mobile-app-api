@@ -63,26 +63,26 @@ public class CommentService {
 
         // Validate post exists and is not deleted
         Post post = postRepository.findByPostId(command.postId())
-            .orElseThrow(() -> new ResourceNotFoundException("Post not found: " + command.postId().getValue()));
+            .orElseThrow(() -> new ResourceNotFoundException("Gönderi bulunamadı: " + command.postId().getValue()));
 
         if (post.getStatus() == PostStatus.DELETED) {
-            throw new BusinessException("Cannot comment on deleted post", "POST_DELETED");
+            throw new BusinessException("Silinmiş gönderiye yorum yapılamaz", "POST_DELETED");
         }
 
         // Validate commenter exists and is verified
         User commenter = userRepository.findById(command.commenterId())
-            .orElseThrow(() -> new ResourceNotFoundException("User not found: " + command.commenterId()));
+            .orElseThrow(() -> new ResourceNotFoundException("Kullanıcı bulunamadı: " + command.commenterId()));
 
         if (!Boolean.TRUE.equals(commenter.getIsProfessionVerified())) {
-            throw new BusinessException("Only verified users can add comments", "USER_NOT_VERIFIED");
+            throw new BusinessException("Sadece doğrulanmış kullanıcılar yorum yapabilir", "USER_NOT_VERIFIED");
         }
 
         // Validate content length
         if (command.content() == null || command.content().trim().isEmpty()) {
-            throw new BusinessException("Comment content cannot be empty", "INVALID_CONTENT");
+            throw new BusinessException("Yorum içeriği boş olamaz", "INVALID_CONTENT");
         }
         if (command.content().length() < 1 || command.content().length() > 500) {
-            throw new BusinessException("Comment content must be between 1 and 500 characters", "INVALID_CONTENT_LENGTH");
+            throw new BusinessException("Yorum içeriği 1 ile 500 karakter arasında olmalıdır", "INVALID_CONTENT_LENGTH");
         }
 
         // Create comment value object
@@ -132,7 +132,7 @@ public class CommentService {
 
         // Find comment
         Comment comment = commentRepository.findByCommentId(command.commentId())
-            .orElseThrow(() -> new ResourceNotFoundException("Comment not found: " + command.commentId().getValue()));
+            .orElseThrow(() -> new ResourceNotFoundException("Yorum bulunamadı: " + command.commentId().getValue()));
 
         if (comment.isDeleted()) {
             log.info("Comment already deleted: {}", command.commentId().getValue());
@@ -141,14 +141,14 @@ public class CommentService {
 
         // Find post to check post author
         Post post = postRepository.findById(comment.getPostId())
-            .orElseThrow(() -> new ResourceNotFoundException("Post not found for comment"));
+            .orElseThrow(() -> new ResourceNotFoundException("Yorum için gönderi bulunamadı"));
 
         // Validate requester is comment author or post author
         boolean isCommentAuthor = comment.getCommenterId().equals(command.requesterId());
         boolean isPostAuthor = post.getAuthorId().equals(command.requesterId());
 
         if (!isCommentAuthor && !isPostAuthor) {
-            throw new BusinessException("Only comment author or post author can delete this comment", "UNAUTHORIZED_DELETE");
+            throw new BusinessException("Bu yorumu sadece yorum sahibi veya gönderi sahibi silebilir", "UNAUTHORIZED_DELETE");
         }
 
         // Soft delete comment
@@ -175,7 +175,7 @@ public class CommentService {
 
         // Validate post exists
         Post post = postRepository.findByPostId(query.postId())
-            .orElseThrow(() -> new ResourceNotFoundException("Post not found: " + query.postId().getValue()));
+            .orElseThrow(() -> new ResourceNotFoundException("Gönderi bulunamadı: " + query.postId().getValue()));
 
         // Query comments with pagination (oldest first)
         PageRequest pageRequest = PageRequest.of(
@@ -210,7 +210,7 @@ public class CommentService {
     private CommentDto toCommentDto(Comment comment) {
         // Fetch commenter details
         User commenter = userRepository.findById(comment.getCommenterId())
-            .orElseThrow(() -> new ResourceNotFoundException("Commenter not found: " + comment.getCommenterId()));
+            .orElseThrow(() -> new ResourceNotFoundException("Yorum sahibi bulunamadı: " + comment.getCommenterId()));
 
         UserBasicDto commenterDto = new UserBasicDto(
             commenter.getId().toString(),

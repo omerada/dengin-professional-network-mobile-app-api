@@ -59,14 +59,14 @@ public class SecurityConfig {
                 // Authorization rules
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/actuator/health").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/v1/auth/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/ws/**", "/ws-raw/**").permitAll()
                         
                         // Public read-only profession endpoints
-                        .requestMatchers(HttpMethod.GET, "/api/professions/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/professions/**", "/api/v1/professions/**").permitAll()
                         
                         // All other endpoints require authentication
                         .anyRequest().authenticated()

@@ -7,7 +7,7 @@ public class ResourceNotFoundException extends BusinessException {
     
     public ResourceNotFoundException(String resourceName, Object id) {
         super(
-            String.format("%s with id '%s' not found", resourceName, id),
+            String.format("'%s' kaynağı bulunamadı (id: %s)", resourceName, id),
             "RESOURCE_NOT_FOUND"
         );
     }

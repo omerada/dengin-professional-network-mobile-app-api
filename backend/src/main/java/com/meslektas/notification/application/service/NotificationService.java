@@ -182,7 +182,7 @@ public class NotificationService {
 
         // Verify ownership
         if (!notification.getRecipientId().equals(userId)) {
-            throw new BusinessException("Notification does not belong to this user", "NOTIFICATION_ACCESS_DENIED");
+            throw new BusinessException("Bu bildirim size ait değil", "NOTIFICATION_ACCESS_DENIED");
         }
 
         return mapToResponse(notification);
@@ -202,7 +202,7 @@ public class NotificationService {
 
         // Verify ownership
         if (!notification.getRecipientId().equals(userId)) {
-            throw new BusinessException("Notification does not belong to this user", "NOTIFICATION_ACCESS_DENIED");
+            throw new BusinessException("Bu bildirim size ait değil", "NOTIFICATION_ACCESS_DENIED");
         }
 
         notification.markAsRead();
