@@ -1,0 +1,142 @@
+// src/features/feed/components/PostTextInput.tsx
+// Post metin girişi komponenti
+// Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
+
+import React, { memo, useCallback } from 'react';
+import {
+  View,
+  TextInput,
+  Text,
+  StyleSheet,
+  Image,
+} from 'react-native';
+import { useTheme } from '@contexts/ThemeContext';
+import { useAuthStore } from '@features/auth/stores/authStore';
+import { MAX_CONTENT_LENGTH } from '../stores';
+
+interface PostTextInputProps {
+  value: string;
+  onChangeText: (text: string) => void;
+  placeholder?: string;
+  autoFocus?: boolean;
+}
+
+export const PostTextInput: React.FC<PostTextInputProps> = memo(({
+  value,
+  onChangeText,
+  placeholder = 'Ne düşünüyorsunuz?',
+  autoFocus = true,
+}) => {
+  const { theme } = useTheme();
+  const user = useAuthStore((state) => state.user);
+
+  const remainingChars = MAX_CONTENT_LENGTH - value.length;
+  const isNearLimit = remainingChars <= 50;
+  const isOverLimit = remainingChars < 0;
+
+  return (
+    <View style={styles.container}>
+      {/* User avatar */}
+      <View style={styles.avatarContainer}>
+        {user?.avatarUrl ? (
+          <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
+        ) : (
+          <View
+            style={[
+              styles.avatarPlaceholder,
+              { backgroundColor: theme.colors.primary[100] },
+            ]}
+          >
+            <Text style={[styles.avatarText, { color: theme.colors.primary[600] }]}>
+              {user?.firstName?.[0]}{user?.lastName?.[0]}
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* Input area */}
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={[
+            styles.input,
+            { color: theme.colors.text.primary },
+          ]}
+          placeholder={placeholder}
+          placeholderTextColor={theme.colors.text.secondary}
+          value={value}
+          onChangeText={onChangeText}
+          multiline
+          maxLength={MAX_CONTENT_LENGTH + 10} // Allow slight overflow for UX
+          autoFocus={autoFocus}
+          textAlignVertical="top"
+        />
+
+        {/* Character counter */}
+        <View style={styles.counterContainer}>
+          <Text
+            style={[
+              styles.counter,
+              {
+                color: isOverLimit
+                  ? theme.colors.error.main
+                  : isNearLimit
+                  ? theme.colors.warning.main
+                  : theme.colors.text.secondary,
+              },
+            ]}
+          >
+            {remainingChars}
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
+});
+
+PostTextInput.displayName = 'PostTextInput';
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+  },
+  avatarContainer: {
+    marginRight: 12,
+  },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+  },
+  avatarPlaceholder: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  inputContainer: {
+    flex: 1,
+  },
+  input: {
+    fontSize: 16,
+    lineHeight: 24,
+    minHeight: 120,
+    padding: 0,
+  },
+  counterContainer: {
+    alignItems: 'flex-end',
+    marginTop: 8,
+  },
+  counter: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+});
+
+export default PostTextInput;

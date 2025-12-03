@@ -43,9 +43,13 @@ export const API_ENDPOINTS = {
     UPDATE_POST: (id: string) => `/api/v1/posts/${id}`,
     DELETE_POST: (id: string) => `/api/v1/posts/${id}`,
     LIKE_POST: (id: string) => `/api/v1/posts/${id}/like`,
-    UNLIKE_POST: (id: string) => `/api/v1/posts/${id}/unlike`,
+    UNLIKE_POST: (id: string) => `/api/v1/posts/${id}/like`,
     BOOKMARK_POST: (id: string) => `/api/v1/posts/${id}/bookmark`,
+    UNBOOKMARK_POST: (id: string) => `/api/v1/posts/${id}/bookmark`,
     REPORT_POST: (id: string) => `/api/v1/posts/${id}/report`,
+    SHARE_POST: (id: string) => `/api/v1/posts/${id}/share`,
+    BOOKMARKED: '/api/v1/posts/bookmarked',
+    USER_POSTS: (userId: string) => `/api/v1/users/${userId}/posts`,
   },
 
   // Comments
@@ -55,6 +59,8 @@ export const API_ENDPOINTS = {
     UPDATE: (id: string) => `/api/v1/comments/${id}`,
     DELETE: (id: string) => `/api/v1/comments/${id}`,
     LIKE: (id: string) => `/api/v1/comments/${id}/like`,
+    UNLIKE: (id: string) => `/api/v1/comments/${id}/like`,
+    REPLIES: (id: string) => `/api/v1/comments/${id}/replies`,
   },
 
   // Messaging

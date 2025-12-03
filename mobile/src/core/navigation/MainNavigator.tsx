@@ -11,6 +11,7 @@ import { useTheme } from '@contexts/ThemeContext';
 import { FeedScreen } from '@features/feed/screens/FeedScreen';
 import { PostDetailScreen } from '@features/feed/screens/PostDetailScreen';
 import { CreatePostScreen } from '@features/feed/screens/CreatePostScreen';
+import { CommentsScreen } from '@features/feed/screens/CommentsScreen';
 import { ConversationListScreen } from '@features/messaging/screens/ConversationListScreen';
 import { ChatScreen } from '@features/messaging/screens/ChatScreen';
 import { NotificationsScreen } from '@features/notifications/screens/NotificationsScreen';
@@ -29,7 +30,8 @@ const FeedStackNavigator: React.FC = () => (
   <FeedStack.Navigator screenOptions={{ headerShown: false }}>
     <FeedStack.Screen name="Feed" component={FeedScreen} />
     <FeedStack.Screen name="PostDetail" component={PostDetailScreen} />
-    <FeedStack.Screen name="CreatePost" component={CreatePostScreen} />
+    <FeedStack.Screen name="CreatePost" component={CreatePostScreen} options={{ presentation: 'modal' }} />
+    <FeedStack.Screen name="Comments" component={CommentsScreen} />
   </FeedStack.Navigator>
 );
 
