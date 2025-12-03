@@ -11,6 +11,12 @@ export type RootStackParamList = {
   Auth: NavigatorScreenParams<AuthStackParamList>;
   Main: NavigatorScreenParams<MainTabParamList>;
   Verification: NavigatorScreenParams<VerificationStackParamList>;
+  // Deep link screens
+  NotificationSettings: undefined;
+  VerificationStatus: undefined;
+  PostDetail: { postId: string };
+  Profile: { userId?: string };
+  Chat: { conversationId: string };
 };
 
 /**
@@ -40,7 +46,7 @@ export type VerificationStackParamList = {
 export type MainTabParamList = {
   FeedTab: NavigatorScreenParams<FeedStackParamList>;
   MessagingTab: NavigatorScreenParams<MessagingStackParamList>;
-  NotificationsTab: undefined;
+  NotificationsTab: NavigatorScreenParams<NotificationStackParamList>;
   ProfileTab: NavigatorScreenParams<ProfileStackParamList>;
 };
 
@@ -59,6 +65,15 @@ export type FeedStackParamList = {
 export type MessagingStackParamList = {
   ConversationList: undefined;
   Chat: { conversationId: string };
+  NewConversation: undefined;
+};
+
+/**
+ * Notification Stack
+ */
+export type NotificationStackParamList = {
+  Notifications: undefined;
+  NotificationSettings: undefined;
 };
 
 /**

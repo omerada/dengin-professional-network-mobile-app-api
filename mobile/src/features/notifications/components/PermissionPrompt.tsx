@@ -1,0 +1,249 @@
+// src/features/notifications/components/PermissionPrompt.tsx
+// Permission request prompt for push notifications
+// Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
+
+import React, { memo } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Modal,
+  Pressable,
+  Platform,
+  Linking,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
+import Animated, {
+  FadeIn,
+  FadeOut,
+  SlideInDown,
+  SlideOutDown,
+} from 'react-native-reanimated';
+import { useTheme } from '@contexts/ThemeContext';
+
+interface PermissionPromptProps {
+  visible: boolean;
+  onRequestPermission: () => void;
+  onDismiss: () => void;
+  permissionDenied?: boolean;
+}
+
+export const PermissionPrompt: React.FC<PermissionPromptProps> = memo(
+  ({ visible, onRequestPermission, onDismiss, permissionDenied = false }) => {
+    const { theme } = useTheme();
+
+    const handleOpenSettings = () => {
+      Linking.openSettings();
+      onDismiss();
+    };
+
+    return (
+      <Modal
+        visible={visible}
+        transparent
+        animationType="none"
+        statusBarTranslucent
+        onRequestClose={onDismiss}
+      >
+        <Animated.View
+          entering={FadeIn.duration(200)}
+          exiting={FadeOut.duration(150)}
+          style={styles.overlay}
+        >
+          <Pressable style={styles.backdrop} onPress={onDismiss} />
+
+          <Animated.View
+            entering={SlideInDown.springify().damping(15)}
+            exiting={SlideOutDown.duration(200)}
+            style={[styles.content, { backgroundColor: theme.colors.surface }]}
+          >
+            <View
+              style={[
+                styles.iconContainer,
+                { backgroundColor: theme.colors.primary[50] },
+              ]}
+            >
+              <Icon
+                name="notifications"
+                size={40}
+                color={theme.colors.primary[500]}
+              />
+            </View>
+
+            <Text style={[styles.title, { color: theme.colors.text.primary }]}>
+              {permissionDenied
+                ? 'Bildirimler Kapatıldı'
+                : 'Bildirimleri Aç'}
+            </Text>
+
+            <Text
+              style={[
+                styles.description,
+                { color: theme.colors.text.secondary },
+              ]}
+            >
+              {permissionDenied
+                ? 'Bildirim almak için ayarlardan bildirim iznini etkinleştirmeniz gerekiyor.'
+                : 'Mesajlar, beğeniler ve diğer etkileşimlerden anında haberdar olmak için bildirimleri açın.'}
+            </Text>
+
+            <View style={styles.features}>
+              <FeatureItem
+                icon="chatbubble"
+                text="Yeni mesajlar"
+                theme={theme}
+              />
+              <FeatureItem
+                icon="heart"
+                text="Beğeniler ve yorumlar"
+                theme={theme}
+              />
+              <FeatureItem
+                icon="person-add"
+                text="Yeni takipçiler"
+                theme={theme}
+              />
+              <FeatureItem
+                icon="checkmark-circle"
+                text="Doğrulama güncellemeleri"
+                theme={theme}
+              />
+            </View>
+
+            <Pressable
+              onPress={permissionDenied ? handleOpenSettings : onRequestPermission}
+              style={({ pressed }) => [
+                styles.primaryButton,
+                { backgroundColor: theme.colors.primary[500] },
+                pressed && styles.buttonPressed,
+              ]}
+            >
+              <Text style={styles.primaryButtonText}>
+                {permissionDenied ? 'Ayarlara Git' : 'Bildirimleri Aç'}
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={onDismiss}
+              style={({ pressed }) => [
+                styles.secondaryButton,
+                pressed && styles.buttonPressed,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.secondaryButtonText,
+                  { color: theme.colors.text.secondary },
+                ]}
+              >
+                {permissionDenied ? 'Tamam' : 'Şimdi Değil'}
+              </Text>
+            </Pressable>
+          </Animated.View>
+        </Animated.View>
+      </Modal>
+    );
+  }
+);
+
+interface FeatureItemProps {
+  icon: string;
+  text: string;
+  theme: any;
+}
+
+const FeatureItem: React.FC<FeatureItemProps> = memo(({ icon, text, theme }) => (
+  <View style={styles.featureItem}>
+    <Icon
+      name={icon}
+      size={18}
+      color={theme.colors.primary[500]}
+      style={styles.featureIcon}
+    />
+    <Text style={[styles.featureText, { color: theme.colors.text.primary }]}>
+      {text}
+    </Text>
+  </View>
+));
+
+FeatureItem.displayName = 'FeatureItem';
+PermissionPrompt.displayName = 'PermissionPrompt';
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  content: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 24,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 24,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  description: {
+    fontSize: 15,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  features: {
+    width: '100%',
+    marginBottom: 24,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  featureIcon: {
+    marginRight: 12,
+  },
+  featureText: {
+    fontSize: 15,
+  },
+  primaryButton: {
+    width: '100%',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  primaryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  secondaryButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
+  secondaryButtonText: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  buttonPressed: {
+    opacity: 0.8,
+  },
+});
+
+export default PermissionPrompt;

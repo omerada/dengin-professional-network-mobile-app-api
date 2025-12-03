@@ -1,0 +1,109 @@
+# Meslektaş - App Store Metadata (Turkish)
+# Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
+
+---
+# App Name (30 characters max)
+name: Meslektaş
+
+# Subtitle (30 characters max)
+subtitle: Profesyonel Network
+
+# Promotional Text (170 characters max)
+promotional_text: |
+  Türkiye'nin en güvenilir profesyonel ağı! Kimlik doğrulamalı, spam içermeyen ortamda meslektaşlarınızla bağlantı kurun.
+
+# Description (4000 characters max)
+description: |
+  Meslektaş, Türkiye'deki profesyoneller için tasarlanmış yeni nesil sosyal ağ platformudur. Kimlik doğrulama sistemi sayesinde gerçek profesyonellerle güvenli bir ortamda tanışın.
+
+  🔐 KİMLİK DOĞRULAMA
+  Her kullanıcı kimlik belgesi ve yüz tanıma ile doğrulanır. Spam hesaplar ve sahte profiller yok!
+
+  👥 PROFESYONELLERLE BAĞLANTI
+  Aynı sektörden veya farklı alanlardan profesyonellerle tanışın. Kariyerinizi geliştirmek için doğru kişilerle bağlantı kurun.
+
+  💬 GERÇEK ZAMANLI MESAJLAŞMA
+  Meslektaşlarınızla anında mesajlaşın. End-to-end şifreleme ile güvenli iletişim.
+
+  📱 SOSYAL AKIŞ
+  Sektörünüzle ilgili güncellemeleri paylaşın, beğenin ve yorum yapın. Trend olan konuları takip edin.
+
+  🔔 AKILLI BİLDİRİMLER
+  Önemli etkileşimlerden anında haberdar olun. Bildirim tercihlerinizi özelleştirin.
+
+  🛡️ GÜVENLİK VE GİZLİLİK
+  - KVKK uyumlu veri işleme
+  - Biyometrik giriş desteği
+  - Güvenli veri depolama
+
+  ✨ ÖZELLİKLER
+  • Profesyonel profil oluşturma
+  • Kimlik doğrulama rozeti
+  • Sektöre özel topluluklar
+  • Özel mesajlaşma
+  • Gönderi paylaşma ve etkileşim
+  • Takipçi sistemi
+  • Karanlık mod desteği
+
+  📈 KARİYERİNİZİ GELİŞTİRİN
+  Doğru bağlantılar kurun, fırsatları yakalayın ve profesyonel ağınızı genişletin.
+
+  Hemen ücretsiz kaydolun ve Türkiye'nin en güvenilir profesyonel ağına katılın!
+
+  Sorularınız için: destek@meslektas.com
+  Web: https://meslektas.com
+
+# Keywords (100 characters max, comma-separated)
+keywords: networking, profesyonel, kariyer, iş, bağlantı, sosyal, meslek, topluluk, LinkedIn alternatif
+
+# Support URL
+support_url: https://meslektas.com/destek
+
+# Marketing URL
+marketing_url: https://meslektas.com
+
+# Privacy Policy URL
+privacy_url: https://meslektas.com/gizlilik
+
+# Categories
+primary_category: Social Networking
+secondary_category: Business
+
+# Age Rating
+# 0 = None, 1 = Infrequent/Mild, 2 = Frequent/Intense
+age_rating:
+  violence_cartoon: 0
+  violence_fantasy: 0
+  violence_realistic: 0
+  violence_prolonged: 0
+  sexual_content: 0
+  nudity: 0
+  profanity: 0
+  drugs: 0
+  alcohol: 0
+  gambling: 0
+  horror: 0
+  contests: 0
+  age_rating_level: 12+ # Result based on above
+
+# App Review Information
+review_info:
+  demo_user: demo@meslektas.com
+  demo_password: Demo123!
+  notes: |
+    Demo hesabı önceden doğrulanmış olarak ayarlanmıştır.
+    Tüm özellikleri test etmek için kullanabilirsiniz.
+
+# Copyright
+copyright: "2024 Meslektaş Teknoloji A.Ş."
+
+# Version-specific information
+version_release_notes: |
+  Meslektaş'a hoş geldiniz! Bu sürümde:
+  
+  • Yeni: Kimlik doğrulama sistemi
+  • Yeni: Gerçek zamanlı mesajlaşma
+  • Yeni: Sosyal akış ve etkileşimler
+  • Yeni: Push bildirimleri
+  • Performans iyileştirmeleri
+  • Hata düzeltmeleri

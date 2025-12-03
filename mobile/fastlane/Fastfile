@@ -1,0 +1,226 @@
+# Fastlane Lanes for iOS and Android
+# Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
+
+default_platform(:ios)
+
+# ==================== iOS ====================
+platform :ios do
+  desc "Push a new beta build to TestFlight"
+  lane :beta do
+    # Increment build number
+    increment_build_number(xcodeproj: "ios/MeslektasApp.xcodeproj")
+    
+    # Install pods
+    cocoapods(podfile: "./ios/Podfile")
+    
+    # Build app
+    build_app(
+      workspace: "ios/MeslektasApp.xcworkspace",
+      scheme: "MeslektasApp",
+      export_method: "app-store",
+      clean: true
+    )
+    
+    # Upload to TestFlight
+    upload_to_testflight(
+      skip_waiting_for_build_processing: true,
+      notify_external_testers: false
+    )
+    
+    # Notify team
+    slack(
+      message: "🚀 iOS beta başarıyla yüklendi!",
+      success: true
+    ) if ENV['SLACK_URL']
+  end
+
+  desc "Push a new release build to App Store"
+  lane :release do
+    # Increment build number
+    increment_build_number(xcodeproj: "ios/MeslektasApp.xcodeproj")
+    
+    # Install pods
+    cocoapods(podfile: "./ios/Podfile")
+    
+    # Build app
+    build_app(
+      workspace: "ios/MeslektasApp.xcworkspace",
+      scheme: "MeslektasApp",
+      export_method: "app-store",
+      clean: true
+    )
+    
+    # Upload to App Store
+    upload_to_app_store(
+      submit_for_review: true,
+      automatic_release: false,
+      force: true,
+      precheck_include_in_app_purchases: false,
+      submission_information: {
+        add_id_info_uses_idfa: false,
+        export_compliance_platform: 'ios',
+        export_compliance_compliance_required: false,
+        export_compliance_encryption_updated: false,
+        export_compliance_uses_encryption: false,
+        content_rights_contains_third_party_content: false,
+        content_rights_has_rights: true
+      }
+    )
+    
+    # Notify team
+    slack(
+      message: "🎉 iOS sürümü App Store'a gönderildi!",
+      success: true
+    ) if ENV['SLACK_URL']
+  end
+
+  desc "Take screenshots for App Store"
+  lane :screenshots do
+    capture_screenshots(
+      scheme: "MeslektasAppUITests",
+      devices: [
+        "iPhone 15 Pro Max",
+        "iPhone 15",
+        "iPhone SE (3rd generation)",
+        "iPad Pro (12.9-inch) (6th generation)"
+      ],
+      languages: ["tr-TR"]
+    )
+    
+    frame_screenshots(
+      path: "./fastlane/screenshots",
+      white: true,
+      force_device_type: "iPhone 15 Pro Max"
+    )
+  end
+
+  desc "Register new devices"
+  lane :register_devices do
+    register_devices(
+      devices_file: "./fastlane/devices.txt"
+    )
+    match(type: "development", force_for_new_devices: true)
+  end
+end
+
+# ==================== Android ====================
+platform :android do
+  desc "Push a new beta build to Play Store Internal Track"
+  lane :beta do
+    # Increment version code
+    increment_version_code(
+      gradle_file_path: "android/app/build.gradle"
+    )
+    
+    # Build release bundle
+    gradle(
+      task: "bundle",
+      build_type: "Release",
+      project_dir: "android"
+    )
+    
+    # Upload to Play Store internal track
+    upload_to_play_store(
+      track: "internal",
+      aab: "android/app/build/outputs/bundle/release/app-release.aab",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true
+    )
+    
+    # Notify team
+    slack(
+      message: "🚀 Android beta başarıyla yüklendi!",
+      success: true
+    ) if ENV['SLACK_URL']
+  end
+
+  desc "Push a new release build to Play Store Production"
+  lane :release do
+    # Increment version code
+    increment_version_code(
+      gradle_file_path: "android/app/build.gradle"
+    )
+    
+    # Build release bundle
+    gradle(
+      task: "bundle",
+      build_type: "Release",
+      project_dir: "android"
+    )
+    
+    # Upload to Play Store production
+    upload_to_play_store(
+      track: "production",
+      aab: "android/app/build/outputs/bundle/release/app-release.aab",
+      rollout: "0.1" # 10% rollout initially
+    )
+    
+    # Notify team
+    slack(
+      message: "🎉 Android sürümü Play Store'a gönderildi!",
+      success: true
+    ) if ENV['SLACK_URL']
+  end
+
+  desc "Take screenshots for Play Store"
+  lane :screenshots do
+    capture_android_screenshots(
+      app_package_name: "com.meslektas.app",
+      app_apk_path: "android/app/build/outputs/apk/debug/app-debug.apk",
+      tests_apk_path: "android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk",
+      locales: ["tr-TR"],
+      clear_previous_screenshots: true,
+      exit_on_test_failure: false
+    )
+  end
+
+  desc "Build APK for testing"
+  lane :build_debug do
+    gradle(
+      task: "assemble",
+      build_type: "Debug",
+      project_dir: "android"
+    )
+  end
+end
+
+# ==================== Shared ====================
+desc "Run tests"
+lane :test do
+  sh("cd .. && npm run test")
+end
+
+desc "Bump version"
+lane :bump do |options|
+  version = options[:version]
+  
+  if version.nil?
+    UI.user_error!("Version is required. Usage: fastlane bump version:1.2.3")
+  end
+  
+  # Update iOS version
+  increment_version_number(
+    version_number: version,
+    xcodeproj: "ios/MeslektasApp.xcodeproj"
+  )
+  
+  # Update Android version
+  android_set_version_name(
+    version_name: version,
+    gradle_file: "android/app/build.gradle"
+  )
+  
+  # Update package.json
+  sh("cd .. && npm version #{version} --no-git-tag-version")
+  
+  UI.success("Version bumped to #{version}")
+end
+
+# Error handling
+error do |lane, exception|
+  slack(
+    message: "❌ #{lane} başarısız oldu: #{exception.message}",
+    success: false
+  ) if ENV['SLACK_URL']
+end

@@ -1,0 +1,322 @@
+// src/features/messaging/screens/NewConversationScreen.tsx
+// Yeni konuşma başlatma ekranı
+// Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
+
+import React, { useCallback, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  FlatList,
+  Pressable,
+  ActivityIndicator,
+  Image,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTheme } from '@contexts/ThemeContext';
+import { useDebounce } from '@hooks/useDebounce';
+import { useStartConversation } from '../hooks';
+import type { UserSummary } from '../types';
+import type { MessagingStackParamList } from '@navigation/types';
+
+type NavigationProp = NativeStackNavigationProp<MessagingStackParamList, 'NewConversation'>;
+
+// Mock data - in real app, this would come from search API
+const mockUsers: UserSummary[] = [
+  { id: '1', displayName: 'Ahmet Yılmaz', avatarUrl: undefined },
+  { id: '2', displayName: 'Mehmet Demir', avatarUrl: undefined },
+  { id: '3', displayName: 'Ayşe Kaya', avatarUrl: undefined },
+  { id: '4', displayName: 'Fatma Öz', avatarUrl: undefined },
+  { id: '5', displayName: 'Ali Arslan', avatarUrl: undefined },
+];
+
+interface UserItemProps {
+  user: UserSummary;
+  onPress: (user: UserSummary) => void;
+  isLoading?: boolean;
+}
+
+const UserItem: React.FC<UserItemProps> = ({ user, onPress, isLoading }) => {
+  const { theme } = useTheme();
+
+  return (
+    <Pressable
+      onPress={() => onPress(user)}
+      disabled={isLoading}
+      style={({ pressed }) => [
+        styles.userItem,
+        pressed && { backgroundColor: theme.colors.background.secondary },
+      ]}
+    >
+      {/* Avatar */}
+      {user.avatarUrl ? (
+        <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
+      ) : (
+        <View
+          style={[
+            styles.avatarPlaceholder,
+            { backgroundColor: theme.colors.primary[100] },
+          ]}
+        >
+          <Icon name="person" size={20} color={theme.colors.primary[500]} />
+        </View>
+      )}
+
+      {/* Name */}
+      <Text
+        style={[styles.userName, { color: theme.colors.text.primary }]}
+        numberOfLines={1}
+      >
+        {user.displayName}
+      </Text>
+
+      {/* Loading or arrow */}
+      {isLoading ? (
+        <ActivityIndicator size="small" color={theme.colors.primary[500]} />
+      ) : (
+        <Icon name="chevron-forward" size={20} color={theme.colors.text.tertiary} />
+      )}
+    </Pressable>
+  );
+};
+
+export const NewConversationScreen: React.FC = () => {
+  const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
+  const navigation = useNavigation<NavigationProp>();
+
+  // State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<UserSummary[]>(mockUsers);
+  const [isSearching, setIsSearching] = useState(false);
+  const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
+
+  const debouncedSearch = useDebounce(searchQuery, 300);
+
+  // Hooks
+  const { startConversation } = useStartConversation();
+
+  // Search effect
+  React.useEffect(() => {
+    if (debouncedSearch.trim()) {
+      setIsSearching(true);
+      // Simulate search - in real app, this would be an API call
+      const filtered = mockUsers.filter(u =>
+        u.displayName.toLowerCase().includes(debouncedSearch.toLowerCase())
+      );
+      setTimeout(() => {
+        setSearchResults(filtered);
+        setIsSearching(false);
+      }, 300);
+    } else {
+      setSearchResults(mockUsers);
+    }
+  }, [debouncedSearch]);
+
+  // Handlers
+  const handleUserPress = useCallback(async (user: UserSummary) => {
+    try {
+      setLoadingUserId(user.id);
+      const conversationId = await startConversation(user.id);
+      navigation.replace('Chat', { conversationId });
+    } catch (error) {
+      // Error handled in hook
+    } finally {
+      setLoadingUserId(null);
+    }
+  }, [navigation, startConversation]);
+
+  const handleBackPress = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+
+  // Render
+  const renderItem = useCallback(({ item }: { item: UserSummary }) => (
+    <UserItem
+      user={item}
+      onPress={handleUserPress}
+      isLoading={loadingUserId === item.id}
+    />
+  ), [handleUserPress, loadingUserId]);
+
+  const keyExtractor = useCallback((item: UserSummary) => item.id, []);
+
+  const ListEmptyComponent = useCallback(() => (
+    <View style={styles.emptyContainer}>
+      {isSearching ? (
+        <ActivityIndicator size="large" color={theme.colors.primary[500]} />
+      ) : (
+        <>
+          <Icon
+            name="search-outline"
+            size={48}
+            color={theme.colors.text.tertiary}
+          />
+          <Text style={[styles.emptyText, { color: theme.colors.text.secondary }]}>
+            {searchQuery.trim()
+              ? 'Kullanıcı bulunamadı'
+              : 'Konuşma başlatmak için kullanıcı arayın'}
+          </Text>
+        </>
+      )}
+    </View>
+  ), [isSearching, searchQuery, theme.colors]);
+
+  return (
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: theme.colors.background.primary },
+      ]}
+    >
+      {/* Header */}
+      <View
+        style={[
+          styles.header,
+          { paddingTop: insets.top, backgroundColor: theme.colors.background.primary },
+        ]}
+      >
+        <Pressable
+          onPress={handleBackPress}
+          style={styles.backButton}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Icon name="close" size={24} color={theme.colors.text.primary} />
+        </Pressable>
+        <Text style={[styles.title, { color: theme.colors.text.primary }]}>
+          Yeni Konuşma
+        </Text>
+        <View style={styles.headerSpacer} />
+      </View>
+
+      {/* Search bar */}
+      <View style={[styles.searchContainer, { backgroundColor: theme.colors.background.secondary }]}>
+        <View
+          style={[
+            styles.searchInputContainer,
+            { backgroundColor: theme.colors.background.primary },
+          ]}
+        >
+          <Icon name="search" size={18} color={theme.colors.text.tertiary} />
+          <TextInput
+            style={[styles.searchInput, { color: theme.colors.text.primary }]}
+            placeholder="Kullanıcı ara..."
+            placeholderTextColor={theme.colors.text.tertiary}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoFocus
+            returnKeyType="search"
+          />
+          {searchQuery.length > 0 && (
+            <Pressable onPress={() => setSearchQuery('')}>
+              <Icon name="close-circle" size={18} color={theme.colors.text.tertiary} />
+            </Pressable>
+          )}
+        </View>
+      </View>
+
+      {/* User list */}
+      <FlatList
+        data={searchResults}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        ListEmptyComponent={ListEmptyComponent}
+        contentContainerStyle={[
+          styles.listContent,
+          searchResults.length === 0 && styles.emptyListContent,
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
+  },
+  backButton: {
+    padding: 4,
+  },
+  title: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  headerSpacer: {
+    width: 32,
+  },
+  searchContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    paddingVertical: 0,
+  },
+  listContent: {
+    flexGrow: 1,
+  },
+  emptyListContent: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  userItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 12,
+  },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+  },
+  avatarPlaceholder: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  userName: {
+    flex: 1,
+    fontSize: 16,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 48,
+    gap: 16,
+  },
+  emptyText: {
+    fontSize: 14,
+    textAlign: 'center',
+  },
+});
+
+export default NewConversationScreen;

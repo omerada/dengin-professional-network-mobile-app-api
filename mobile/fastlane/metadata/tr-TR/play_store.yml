@@ -1,0 +1,124 @@
+# Meslektaş - Play Store Metadata (Turkish)
+# Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
+
+---
+# Title (50 characters max)
+title: Meslektaş - Profesyonel Network
+
+# Short Description (80 characters max)
+short_description: Kimlik doğrulamalı, güvenilir profesyonel ağ platformu.
+
+# Full Description (4000 characters max)
+full_description: |
+  Meslektaş, Türkiye'deki profesyoneller için tasarlanmış yeni nesil sosyal ağ platformudur. Kimlik doğrulama sistemi sayesinde gerçek profesyonellerle güvenli bir ortamda tanışın.
+
+  🔐 KİMLİK DOĞRULAMA
+  Her kullanıcı kimlik belgesi ve yüz tanıma ile doğrulanır. Spam hesaplar ve sahte profiller yok!
+
+  👥 PROFESYONELLERLE BAĞLANTI
+  Aynı sektörden veya farklı alanlardan profesyonellerle tanışın. Kariyerinizi geliştirmek için doğru kişilerle bağlantı kurun.
+
+  💬 GERÇEK ZAMANLI MESAJLAŞMA
+  Meslektaşlarınızla anında mesajlaşın. End-to-end şifreleme ile güvenli iletişim.
+
+  📱 SOSYAL AKIŞ
+  Sektörünüzle ilgili güncellemeleri paylaşın, beğenin ve yorum yapın. Trend olan konuları takip edin.
+
+  🔔 AKILLI BİLDİRİMLER
+  Önemli etkileşimlerden anında haberdar olun. Bildirim tercihlerinizi özelleştirin.
+
+  🛡️ GÜVENLİK VE GİZLİLİK
+  • KVKK uyumlu veri işleme
+  • Biyometrik giriş desteği
+  • Güvenli veri depolama
+
+  ✨ ÖZELLİKLER
+  • Profesyonel profil oluşturma
+  • Kimlik doğrulama rozeti
+  • Sektöre özel topluluklar
+  • Özel mesajlaşma
+  • Gönderi paylaşma ve etkileşim
+  • Takipçi sistemi
+  • Karanlık mod desteği
+
+  📈 KARİYERİNİZİ GELİŞTİRİN
+  Doğru bağlantılar kurun, fırsatları yakalayın ve profesyonel ağınızı genişletin.
+
+  Hemen ücretsiz kaydolun ve Türkiye'nin en güvenilir profesyonel ağına katılın!
+
+  Sorularınız için: destek@meslektas.com
+  Web: https://meslektas.com
+
+# Category
+category: Social
+
+# Application Type
+application_type: Application
+
+# Content Rating
+content_rating: Everyone 10+
+
+# Privacy Policy URL
+privacy_policy_url: https://meslektas.com/gizlilik
+
+# Developer Info
+developer:
+  name: Meslektaş Teknoloji A.Ş.
+  email: developer@meslektas.com
+  website: https://meslektas.com
+  address: |
+    İstanbul, Türkiye
+
+# Contact Info
+contact:
+  email: destek@meslektas.com
+  phone: +90 212 XXX XX XX
+  website: https://meslektas.com/destek
+
+# Video (YouTube URL)
+video_url: null
+
+# Recent Changes (500 characters max per version)
+changelogs:
+  - version: "1.0.0"
+    text: |
+      Meslektaş'a hoş geldiniz! Bu sürümde:
+      
+      • Yeni: Kimlik doğrulama sistemi
+      • Yeni: Gerçek zamanlı mesajlaşma
+      • Yeni: Sosyal akış ve etkileşimler
+      • Yeni: Push bildirimleri
+      • Performans iyileştirmeleri
+      • Hata düzeltmeleri
+
+# Permissions Declaration
+permissions:
+  - permission: android.permission.INTERNET
+    reason: İnternet bağlantısı için gerekli
+  - permission: android.permission.CAMERA
+    reason: Kimlik doğrulama ve profil fotoğrafı için
+  - permission: android.permission.POST_NOTIFICATIONS
+    reason: Push bildirimler için
+  - permission: android.permission.READ_EXTERNAL_STORAGE
+    reason: Fotoğraf seçimi için
+  - permission: android.permission.VIBRATE
+    reason: Bildirim titreşimi için
+  - permission: android.permission.USE_BIOMETRIC
+    reason: Biyometrik giriş için
+
+# Data Safety
+data_safety:
+  data_collection: true
+  data_sharing: false
+  data_encryption: true
+  data_deletion: true
+  data_types_collected:
+    - Personal info (name, email, phone)
+    - Photos (profile, documents)
+    - Messages
+    - Location (optional)
+  purpose:
+    - App functionality
+    - Account management
+    - Analytics
+    - Security
