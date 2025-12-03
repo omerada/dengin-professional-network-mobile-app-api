@@ -206,7 +206,7 @@ public class UserService {
         // Check if user is active
         if (!user.isActive()) {
             throw new BusinessException(
-                    "User account is not active",
+                    "Bu kullanıcının hesabı aktif değil",
                     "USER_NOT_ACTIVE");
         }
 

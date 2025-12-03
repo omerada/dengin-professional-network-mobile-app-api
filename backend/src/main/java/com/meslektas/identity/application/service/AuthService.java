@@ -69,7 +69,7 @@ public class AuthService {
         // Business validation
         if (userRepository.existsByEmail(request.email())) {
             throw new BusinessException(
-                    "Email already exists: " + request.email(),
+                    "Bu e-posta adresi zaten kullanılıyor: " + request.email(),
                     "EMAIL_ALREADY_EXISTS"
             );
         }
@@ -119,13 +119,13 @@ public class AuthService {
         // Find user
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new BusinessException(
-                        "User not found: " + request.email(),
+                        "Kullanıcı bulunamadı: " + request.email(),
                         "USER_NOT_FOUND"
                 ));
 
         // Check if user is active
         if (!user.isActive()) {
-            String reason = user.isBanned() ? "Account is banned" : "Account is suspended";
+            String reason = user.isBanned() ? "Hesabınız yasaklanmıştır" : "Hesabınız askıya alınmıştır";
             throw new BusinessException(reason, "ACCOUNT_INACTIVE");
         }
 
@@ -157,7 +157,7 @@ public class AuthService {
 
         // Validate refresh token
         if (!jwtTokenProvider.validateToken(refreshToken)) {
-            throw new BusinessException("Invalid refresh token", "INVALID_REFRESH_TOKEN");
+            throw new BusinessException("Geçersiz yenileme tokeni", "INVALID_REFRESH_TOKEN");
         }
 
         // Get user ID from token
@@ -167,13 +167,13 @@ public class AuthService {
         // Find user
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(
-                        "User not found: " + userId,
+                        "Kullanıcı bulunamadı: " + userId,
                         "USER_NOT_FOUND"
                 ));
 
         // Check if user is active
         if (!user.isActive()) {
-            throw new BusinessException("Account is inactive", "ACCOUNT_INACTIVE");
+            throw new BusinessException("Hesabınız aktif değil", "ACCOUNT_INACTIVE");
         }
 
         // Generate new tokens
@@ -238,7 +238,7 @@ public class AuthService {
     @Transactional
     public void resendVerificationEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User with email '" + email + "' not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("'" + email + "' e-posta adresine sahip kullanıcı bulunamadı"));
 
         if (Boolean.TRUE.equals(user.getIsEmailVerified())) {
             throw new BusinessException("E-posta zaten doğrulanmış", "EMAIL_ALREADY_VERIFIED");

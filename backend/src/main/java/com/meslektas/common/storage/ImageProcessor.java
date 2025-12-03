@@ -41,13 +41,13 @@ public class ImageProcessor {
     public void validateImage(MultipartFile file) {
         // Check if file is empty
         if (file.isEmpty()) {
-            throw new BusinessException("File is empty", "EMPTY_FILE");
+            throw new BusinessException("Dosya boş", "EMPTY_FILE");
         }
 
         // Check file size
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new BusinessException(
-                    "File size exceeds maximum allowed size (10MB)",
+                    "Dosya boyutu izin verilen maksimum boyutu aşıyor (10MB)",
                     "FILE_TOO_LARGE"
             );
         }
@@ -56,7 +56,7 @@ public class ImageProcessor {
         String contentType = file.getContentType();
         if (contentType == null || !ALLOWED_TYPES.contains(contentType.toLowerCase())) {
             throw new BusinessException(
-                    "Invalid file type. Allowed types: JPEG, PNG, WebP",
+                    "Geçersiz dosya tipi. İzin verilen tipler: JPEG, PNG, WebP",
                     "INVALID_FILE_TYPE"
             );
         }
@@ -66,13 +66,13 @@ public class ImageProcessor {
             BufferedImage image = ImageIO.read(file.getInputStream());
             if (image == null) {
                 throw new BusinessException(
-                        "File is not a valid image",
+                        "Dosya geçerli bir resim değil",
                         "INVALID_IMAGE"
                 );
             }
         } catch (IOException e) {
             throw new BusinessException(
-                    "Failed to read image file",
+                    "Resim dosyası okunamadı",
                     "IMAGE_READ_FAILED"
             );
         }
