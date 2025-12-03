@@ -10,6 +10,7 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.ses.SesClient;
 
 import java.net.URI;
 
@@ -90,6 +91,37 @@ public class AwsConfiguration {
                 log.info("Initializing LocalStack S3 presigner with endpoint: {}", endpoint);
 
                 return S3Presigner.builder()
+                                .region(Region.of(region))
+                                .credentialsProvider(StaticCredentialsProvider.create(
+                                                AwsBasicCredentials.create(accessKey, secretKey)))
+                                .endpointOverride(URI.create(endpoint))
+                                .build();
+        }
+
+        /**
+         * Production SES Client
+         */
+        @Bean
+        @Profile("prod")
+        public SesClient productionSesClient() {
+                log.info("Initializing production SES client for region: {}", region);
+
+                return SesClient.builder()
+                                .region(Region.of(region))
+                                .credentialsProvider(StaticCredentialsProvider.create(
+                                                AwsBasicCredentials.create(accessKey, secretKey)))
+                                .build();
+        }
+
+        /**
+         * Development SES Client (LocalStack)
+         */
+        @Bean
+        @Profile("dev")
+        public SesClient developmentSesClient() {
+                log.info("Initializing LocalStack SES client with endpoint: {}", endpoint);
+
+                return SesClient.builder()
                                 .region(Region.of(region))
                                 .credentialsProvider(StaticCredentialsProvider.create(
                                                 AwsBasicCredentials.create(accessKey, secretKey)))
