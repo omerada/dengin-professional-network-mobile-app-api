@@ -72,7 +72,7 @@
 
 ---
 
-## 🔧 Core Components (5 docs)
+## 🔧 Core Components (6 docs)
 
 9. **[Navigation](./core/09-NAVIGATION.md)** ⭐⭐⭐
 
@@ -106,12 +106,21 @@
     - Media uploader with progress
     - Permission management
 
-13. **[Real-time Client](./core/13-REAL-TIME.md)** ⭐⭐⭐
-    - Socket.IO client with TypeScript
+13. **[Real-time Client](./core/13-REAL-TIME.md)** ⭐⭐⭐⭐
+
+    - STOMP over WebSocket (SockJS)
     - Auto-reconnection logic
     - Message queue for offline messages
     - Event handlers (message, typing, presence)
     - Connection monitor
+
+14. **[Backend API Reference](./core/14-BACKEND-API-REFERENCE.md)** ⭐⭐⭐⭐⭐ **NEW**
+
+    - Complete REST API documentation
+    - WebSocket STOMP destinations
+    - Request/Response types
+    - Authentication flow
+    - Error codes and handling
 
 ---
 
@@ -280,18 +289,18 @@
 
 ## 📊 Documentation Stats
 
-- **Total Documents:** 32
-- **Total Lines:** ~25,000
-- **Average Document Length:** ~780 lines
+- **Total Documents:** 33
+- **Total Lines:** ~27,000
+- **Average Document Length:** ~800 lines
 - **Coverage:**
   - Architecture & Setup: 2 docs (6%)
-  - Feature Modules: 6 docs (19%)
-  - Core Components: 5 docs (16%)
+  - Feature Modules: 6 docs (18%)
+  - Core Components: 6 docs (18%)
   - State Management: 3 docs (9%)
-  - UI/UX Patterns: 4 docs (13%)
+  - UI/UX Patterns: 4 docs (12%)
   - Testing: 2 docs (6%)
-  - Sprint Implementation: 6 docs (19%)
-  - Best Practices: 4 docs (13%)
+  - Sprint Implementation: 6 docs (18%)
+  - Best Practices: 4 docs (12%)
 
 ---
 
@@ -316,8 +325,9 @@
 
 **Real-time:**
 
-- Socket.IO Client
-- WebSocket auto-reconnection
+- STOMP over WebSocket (@stomp/stompjs)
+- SockJS Client (sockjs-client)
+- Auto-reconnection with backoff
 
 **Media:**
 

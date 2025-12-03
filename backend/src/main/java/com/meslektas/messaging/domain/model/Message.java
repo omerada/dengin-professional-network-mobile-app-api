@@ -222,10 +222,19 @@ public class Message extends BaseEntity {
 
     /**
      * Delete message (marks as deleted status)
+     * 
+     * Business Rule: When either sender or recipient deletes, 
+     * the message is marked as DELETED (soft delete).
+     * Both parties can delete independently.
      */
     public void delete(Long deleterId) {
         if (deleterId == null) {
             throw new IllegalArgumentException("Deleter ID cannot be null");
+        }
+
+        // If already deleted, don't change timestamp
+        if (this.status == MessageStatus.DELETED) {
+            return;
         }
 
         this.deletedAt = LocalDateTime.now();
@@ -237,10 +246,8 @@ public class Message extends BaseEntity {
             this.deletedByRecipientAt = this.deletedAt;
         }
 
-        // Mark as deleted status if completely deleted
-        if (deletedBySenderAt != null && deletedByRecipientAt != null) {
-            this.status = MessageStatus.DELETED;
-        }
+        // Mark as deleted immediately when any party deletes
+        this.status = MessageStatus.DELETED;
     }
 
     // ============================================

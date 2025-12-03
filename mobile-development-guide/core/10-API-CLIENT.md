@@ -281,57 +281,111 @@ export const extractErrorMessage = (error: any): string => {
 export const API_ENDPOINTS = {
   // Auth
   AUTH: {
-    LOGIN: "/auth/login",
-    REGISTER: "/auth/register",
-    LOGOUT: "/auth/logout",
-    REFRESH: "/auth/refresh",
-    ME: "/auth/me",
-    FORGOT_PASSWORD: "/auth/forgot-password",
-    RESET_PASSWORD: "/auth/reset-password",
+    LOGIN: "/api/auth/login",
+    REGISTER: "/api/auth/register",
+    LOGOUT: "/api/auth/logout",
+    REFRESH: "/api/auth/refresh",
+    PASSWORD_RESET_REQUEST: "/api/auth/password-reset/request",
+    PASSWORD_RESET_CONFIRM: "/api/auth/password-reset/confirm",
+    // OAuth2
+    GOOGLE: "/api/v1/auth/oauth/google",
+    APPLE: "/api/v1/auth/oauth/apple",
+  },
+
+  // User
+  USER: {
+    ME: "/api/users/me",
+    PROFILE: "/api/users/profile",
+    BY_ID: (id: number) => `/api/users/${id}`,
+    AVATAR: "/api/users/me/avatar",
+    PROFESSION: "/api/users/me/profession",
+    DELETE: "/api/users/me",
+  },
+
+  // Professions
+  PROFESSION: {
+    LIST: "/api/professions",
+    BY_ID: (id: number) => `/api/professions/${id}`,
+    BY_CATEGORY: (category: string) => `/api/professions/category/${category}`,
+    SEARCH: "/api/professions/search",
+    VERIFICATION_REQUIRED: "/api/professions/verification-required",
   },
 
   // Verification
   VERIFICATION: {
-    STATUS: "/verification/status",
-    START: "/verification/start",
-    UPLOAD: "/verification/upload",
-    SUBMIT: (id: string) => `/verification/${id}/submit`,
+    SUBMIT: "/api/verifications",
+    LIST: "/api/verifications",
+    BY_ID: (id: number) => `/api/verifications/${id}`,
+    HISTORY: "/api/verifications/history",
+    CHECK: (professionId: number) => `/api/verifications/check/${professionId}`,
   },
 
   // Feed
   FEED: {
-    GET: "/feed",
-    POST: (id: string) => `/posts/${id}`,
-    CREATE: "/posts",
-    LIKE: (id: string) => `/posts/${id}/like`,
-    COMMENTS: (id: string) => `/posts/${id}/comments`,
+    GET: "/api/feed",
+    TRENDING: "/api/feed/trending",
+  },
+
+  // Posts
+  POST: {
+    CREATE: "/api/posts",
+    BY_ID: (id: number) => `/api/posts/${id}`,
+    DELETE: (id: number) => `/api/posts/${id}`,
+    LIKE: (id: number) => `/api/posts/${id}/like`,
+    UNLIKE: (id: number) => `/api/posts/${id}/like`,
+    COMMENTS: (id: number) => `/api/posts/${id}/comments`,
+    ADD_COMMENT: (id: number) => `/api/posts/${id}/comments`,
+    DELETE_COMMENT: (postId: number, commentId: string) =>
+      `/api/posts/${postId}/comments/${commentId}`,
+  },
+
+  // Follow
+  FOLLOW: {
+    FOLLOW: (userId: number) => `/api/users/${userId}/follow`,
+    UNFOLLOW: (userId: number) => `/api/users/${userId}/follow`,
+    FOLLOWERS: (userId: number) => `/api/users/${userId}/followers`,
+    FOLLOWING: (userId: number) => `/api/users/${userId}/following`,
   },
 
   // Messaging
   MESSAGING: {
-    CONVERSATIONS: "/conversations",
-    MESSAGES: (id: string) => `/conversations/${id}/messages`,
-    SEND: "/messages",
-    READ: (id: string) => `/conversations/${id}/read`,
+    CONVERSATIONS: "/api/conversations",
+    MESSAGES: (conversationId: string) =>
+      `/api/conversations/${conversationId}/messages`,
+    SEND: "/api/messages",
+    MARK_READ: (conversationId: string) =>
+      `/api/conversations/${conversationId}/read`,
+    DELETE_MESSAGE: (conversationId: string, messageId: string) =>
+      `/api/conversations/${conversationId}/messages/${messageId}`,
+    UNREAD_COUNT: "/api/conversations/unread-count",
+    SEARCH: "/api/messages/search",
+    ATTACHMENT_UPLOAD_URL: "/api/messages/attachments/upload-url",
   },
 
   // Notifications
   NOTIFICATIONS: {
-    GET: "/notifications",
-    READ: (id: string) => `/notifications/${id}/read`,
-    READ_ALL: "/notifications/read-all",
-    REGISTER_TOKEN: "/notifications/register-token",
-    PREFERENCES: "/notifications/preferences",
+    LIST: "/api/notifications",
+    BY_ID: (id: string) => `/api/notifications/${id}`,
+    UNREAD_COUNT: "/api/notifications/unread-count",
+    MARK_READ: (id: string) => `/api/notifications/${id}/read`,
+    MARK_AS_READ: "/api/notifications/mark-as-read",
+    PREFERENCES: "/api/notifications/preferences",
   },
 
-  // Profile
-  PROFILE: {
-    GET: (id?: string) => (id ? `/users/${id}` : "/users/me"),
-    UPDATE: "/users/me",
-    UPLOAD_IMAGE: "/users/me/profile-image",
-    SETTINGS: "/users/me/settings",
-    DELETE: "/users/me",
-    CHANGE_PASSWORD: "/users/me/change-password",
+  // Device Tokens (Push Notifications)
+  DEVICE: {
+    REGISTER: "/api/v1/devices/register",
+    UNREGISTER: "/api/v1/devices/unregister",
+    UNREGISTER_ALL: "/api/v1/devices/unregister-all",
+  },
+
+  // Reports (Content Moderation)
+  REPORT: {
+    CREATE: "/api/reports",
+    MY_REPORTS: "/api/reports/my-reports",
+    BY_ID: (id: string) => `/api/reports/${id}`,
+    CANCEL: (id: string) => `/api/reports/${id}`,
+    CHECK: "/api/reports/check",
   },
 } as const;
 ```

@@ -104,69 +104,117 @@ export interface SocketEvents {
 **src/features/messaging/services/socketService.ts:**
 
 ```typescript
-import io, { Socket } from "socket.io-client";
+import SockJS from "sockjs-client";
+import { Client, IMessage } from "@stomp/stompjs";
 import { ENV } from "@config/env";
 import { tokenService } from "@features/auth/services/tokenService";
 import type { SocketEvents } from "../types/messaging.types";
 
 class SocketService {
-  private socket: Socket | null = null;
+  private client: Client | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
 
   async connect(): Promise<void> {
     const token = await tokenService.getAccessToken();
 
-    this.socket = io(ENV.WS_URL, {
-      auth: { token },
-      transports: ["websocket"],
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
+    this.client = new Client({
+      webSocketFactory: () => new SockJS(`${ENV.API_BASE_URL}/ws`),
+      connectHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
+      heartbeatIncoming: 10000,
+      heartbeatOutgoing: 10000,
+      reconnectDelay: 5000,
+      debug: __DEV__ ? (str) => console.log("[STOMP]", str) : () => {},
     });
 
     this.setupEventHandlers();
+    this.client.activate();
   }
 
   private setupEventHandlers(): void {
-    if (!this.socket) return;
+    if (!this.client) return;
 
-    this.socket.on("connect", () => {
-      console.log("Socket connected");
+    this.client.onConnect = () => {
+      console.log("WebSocket connected");
       this.reconnectAttempts = 0;
-    });
+    };
 
-    this.socket.on("disconnect", () => {
-      console.log("Socket disconnected");
-    });
+    this.client.onDisconnect = () => {
+      console.log("WebSocket disconnected");
+    };
 
-    this.socket.on("error", (error) => {
-      console.error("Socket error:", error);
-    });
+    this.client.onStompError = (frame) => {
+      console.error("STOMP error:", frame.headers["message"]);
+    };
   }
 
   disconnect(): void {
-    this.socket?.disconnect();
-    this.socket = null;
+    this.client?.deactivate();
+    this.client = null;
   }
 
-  emit<K extends keyof SocketEvents>(event: K, data: SocketEvents[K]): void {
-    this.socket?.emit(event, data);
+  // Send message via WebSocket
+  sendMessage(request: WsSendMessageRequest): void {
+    this.client?.publish({
+      destination: "/app/chat.send",
+      body: JSON.stringify(request),
+    });
   }
 
-  on<K extends keyof SocketEvents>(
-    event: K,
-    handler: (data: SocketEvents[K]) => void
+  // Send typing indicator
+  sendTyping(
+    conversationId: string,
+    recipientId: number,
+    isTyping: boolean
   ): void {
-    this.socket?.on(event, handler);
+    this.client?.publish({
+      destination: "/app/chat.typing",
+      body: JSON.stringify({ conversationId, recipientId, isTyping }),
+    });
   }
 
-  off<K extends keyof SocketEvents>(event: K): void {
-    this.socket?.off(event);
+  // Mark messages as read
+  markAsRead(conversationId: string): void {
+    this.client?.publish({
+      destination: "/app/chat.read",
+      body: JSON.stringify({ conversationId }),
+    });
+  }
+
+  // Subscribe to messages
+  subscribeToMessages(callback: (message: WsMessageResponse) => void): void {
+    this.client?.subscribe("/user/queue/messages", (message: IMessage) => {
+      callback(JSON.parse(message.body));
+    });
+  }
+
+  // Subscribe to typing notifications
+  subscribeToTyping(
+    callback: (notification: WsTypingNotification) => void
+  ): void {
+    this.client?.subscribe("/user/queue/typing", (message: IMessage) => {
+      callback(JSON.parse(message.body));
+    });
+  }
+
+  // Subscribe to read receipts
+  subscribeToReadReceipts(callback: (receipt: WsReadReceipt) => void): void {
+    this.client?.subscribe("/user/queue/read", (message: IMessage) => {
+      callback(JSON.parse(message.body));
+    });
+  }
+
+  // Subscribe to errors
+  subscribeToErrors(callback: (error: WsErrorResponse) => void): void {
+    this.client?.subscribe("/user/queue/errors", (message: IMessage) => {
+      callback(JSON.parse(message.body));
+    });
   }
 
   isConnected(): boolean {
-    return this.socket?.connected || false;
+    return this.client?.connected || false;
   }
 }
 
@@ -185,43 +233,100 @@ import type {
 
 export const messagingApi = {
   // Get conversations
-  getConversations: async (): Promise<Conversation[]> => {
-    const response = await apiClient.get("/conversations");
-    return response.data;
+  getConversations: async (
+    page = 0,
+    size = 20
+  ): Promise<{
+    conversations: Conversation[];
+    hasNext: boolean;
+  }> => {
+    const response = await apiClient.get("/api/conversations", {
+      params: { page, size },
+    });
+    return response.data.data;
   },
 
   // Get messages
   getMessages: async (
     conversationId: string,
-    cursor?: string
+    page = 0,
+    size = 30
   ): Promise<{
     messages: Message[];
-    nextCursor?: string;
+    hasNext: boolean;
   }> => {
     const response = await apiClient.get(
-      `/conversations/${conversationId}/messages`,
-      {
-        params: { cursor, limit: 50 },
-      }
+      `/api/conversations/${conversationId}/messages`,
+      { params: { page, size } }
     );
-    return response.data;
+    return response.data.data;
   },
 
-  // Send message (HTTP fallback)
+  // Send message (HTTP fallback when WebSocket unavailable)
   sendMessage: async (data: SendMessageRequest): Promise<Message> => {
-    const response = await apiClient.post("/messages", data);
-    return response.data;
+    const response = await apiClient.post("/api/messages", data);
+    return response.data.data;
   },
 
   // Mark as read
   markAsRead: async (conversationId: string): Promise<void> => {
-    await apiClient.post(`/conversations/${conversationId}/read`);
+    await apiClient.put(`/api/conversations/${conversationId}/read`);
   },
 
-  // Create conversation
-  createConversation: async (userId: string): Promise<Conversation> => {
-    const response = await apiClient.post("/conversations", { userId });
-    return response.data;
+  // Delete message
+  deleteMessage: async (
+    conversationId: string,
+    messageId: string
+  ): Promise<void> => {
+    await apiClient.delete(
+      `/api/conversations/${conversationId}/messages/${messageId}`
+    );
+  },
+
+  // Get unread count
+  getUnreadCount: async (): Promise<number> => {
+    const response = await apiClient.get("/api/conversations/unread-count");
+    return response.data.data;
+  },
+
+  // Search messages
+  searchMessages: async (
+    query: string,
+    conversationId?: string,
+    page = 0,
+    size = 20
+  ): Promise<{
+    messages: Message[];
+    totalResults: number;
+    hasNext: boolean;
+  }> => {
+    const response = await apiClient.get("/api/messages/search", {
+      params: { q: query, conversationId, page, size },
+    });
+    return response.data.data;
+  },
+
+  // Get presigned URL for attachment upload
+  getAttachmentUploadUrl: async (
+    fileName: string,
+    contentType: string,
+    fileSize: number,
+    conversationId?: string
+  ): Promise<{
+    uploadUrl: string;
+    s3Key: string;
+    expiresIn: number;
+  }> => {
+    const response = await apiClient.post(
+      "/api/messages/attachments/upload-url",
+      {
+        fileName,
+        contentType,
+        fileSize,
+        conversationId,
+      }
+    );
+    return response.data.data;
   },
 };
 ```

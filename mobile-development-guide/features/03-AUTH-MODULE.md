@@ -144,51 +144,65 @@ import type {
 export const authApi = {
   // Login
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    const response = await apiClient.post("/auth/login", credentials);
+    const response = await apiClient.post("/api/auth/login", credentials);
     return response.data;
   },
 
   // Register
   register: async (data: RegisterData): Promise<AuthResponse> => {
-    const response = await apiClient.post("/auth/register", data);
+    const response = await apiClient.post("/api/auth/register", data);
     return response.data;
   },
 
   // Logout
   logout: async (): Promise<void> => {
-    await apiClient.post("/auth/logout");
+    await apiClient.post("/api/auth/logout");
   },
 
   // Refresh token
   refreshToken: async (refreshToken: string): Promise<AuthTokens> => {
-    const response = await apiClient.post("/auth/refresh", { refreshToken });
+    const response = await apiClient.post("/api/auth/refresh", null, {
+      headers: { "Refresh-Token": refreshToken },
+    });
     return response.data;
   },
 
   // Get current user
   getCurrentUser: async (): Promise<User> => {
-    const response = await apiClient.get("/auth/me");
-    return response.data;
+    const response = await apiClient.get("/api/users/me");
+    return response.data.data;
   },
 
-  // Forgot password
+  // Forgot password (always returns 204 for security)
   forgotPassword: async (data: ForgotPasswordRequest): Promise<void> => {
-    await apiClient.post("/auth/forgot-password", data);
+    await apiClient.post("/api/auth/password-reset/request", data);
   },
 
   // Reset password
   resetPassword: async (data: ResetPasswordRequest): Promise<void> => {
-    await apiClient.post("/auth/reset-password", data);
+    await apiClient.post("/api/auth/password-reset/confirm", data);
   },
 
-  // Verify email
-  verifyEmail: async (token: string): Promise<void> => {
-    await apiClient.post("/auth/verify-email", { token });
+  // OAuth2 - Google
+  loginWithGoogle: async (idToken: string): Promise<OAuth2AuthResponse> => {
+    const response = await apiClient.post("/api/v1/auth/oauth/google", {
+      idToken,
+    });
+    return response.data;
   },
 
-  // Resend verification email
-  resendVerificationEmail: async (): Promise<void> => {
-    await apiClient.post("/auth/resend-verification");
+  // OAuth2 - Apple
+  loginWithApple: async (
+    idToken: string,
+    authorizationCode?: string,
+    fullName?: { givenName?: string; familyName?: string }
+  ): Promise<OAuth2AuthResponse> => {
+    const response = await apiClient.post("/api/v1/auth/oauth/apple", {
+      idToken,
+      authorizationCode,
+      fullName,
+    });
+    return response.data;
   },
 };
 ```
@@ -1091,7 +1105,7 @@ export const setupAuthInterceptor = (instance: AxiosInstance) => {
 
 ### 10.1 Unit Tests
 
-****tests**/features/auth/hooks/useLogin.test.ts:**
+\***\*tests**/features/auth/hooks/useLogin.test.ts:\*\*
 
 ```typescript
 import { renderHook, waitFor } from "@testing-library/react-native";

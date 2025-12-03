@@ -1,14 +1,19 @@
 # Real-time Communication
 
-**Version:** 1.0
-**Last Updated:** 2024-11-30
-**Complexity:** ⭐⭐⭐ (Medium-High)
+**Version:** 2.0
+**Last Updated:** 2024-12-03
+**Complexity:** ⭐⭐⭐⭐ (High)
 
 ---
 
 ## 1. Overview
 
-Real-time communication modülü Socket.IO kullanarak WebSocket bağlantısı, event handling, reconnection logic ve message queuing sağlar.
+Real-time communication modülü **STOMP over WebSocket** kullanarak backend ile gerçek zamanlı iletişim sağlar. Socket.IO yerine Spring STOMP protokolü kullanılır.
+
+**Backend WebSocket URL:**
+
+- Development: `ws://localhost:8080/ws`
+- Production: `wss://api.meslektas.com/ws`
 
 ---
 
@@ -16,7 +21,7 @@ Real-time communication modülü Socket.IO kullanarak WebSocket bağlantısı, e
 
 ```
 src/core/socket/
-├── socketClient.ts          # Socket.IO client
+├── stompClient.ts           # STOMP WebSocket client
 ├── socketEvents.ts          # Event handlers
 ├── messageQueue.ts          # Offline message queue
 └── types.ts                 # Socket types
@@ -24,25 +29,34 @@ src/core/socket/
 
 ---
 
-## 3. Socket Types
+## 3. Dependencies
+
+```bash
+# Install required packages
+npm install @stomp/stompjs sockjs-client
+npm install -D @types/sockjs-client
+```
+
+---
+
+## 4. Socket Types
 
 **src/core/socket/types.ts:**
 
 ```typescript
 export interface SocketConfig {
   url: string;
-  auth?: {
-    token?: string;
-  };
-  reconnection?: boolean;
-  reconnectionAttempts?: number;
-  reconnectionDelay?: number;
+  token: string;
+  heartbeatIncoming?: number;
+  heartbeatOutgoing?: number;
+  reconnectDelay?: number;
+  debug?: boolean;
 }
 
 export interface SocketMessage {
   id: string;
-  event: string;
-  data: any;
+  destination: string;
+  body: any;
   timestamp: number;
   retry?: number;
 }
@@ -55,270 +69,324 @@ export enum SocketStatus {
   ERROR = "error",
 }
 
-export interface SocketEventMap {
-  // Connection events
-  connect: void;
-  disconnect: string;
-  connect_error: Error;
-  reconnect: number;
-  reconnect_attempt: number;
-  reconnect_error: Error;
-  reconnect_failed: void;
+// ========== WebSocket Message Types ==========
 
-  // Message events
-  "message:new": {
-    id: string;
-    conversationId: string;
-    senderId: string;
-    content: string;
-    createdAt: string;
+// Send Message Request
+export interface WsSendMessageRequest {
+  recipientId: number;
+  content: string;
+  attachment?: {
+    s3Key: string;
+    url: string;
+    contentType: string;
+    fileSize: number;
+    fileName: string;
   };
-  "message:delivered": {
-    messageId: string;
-    deliveredAt: string;
-  };
-  "message:read": {
-    messageId: string;
-    readAt: string;
-  };
+}
 
-  // Typing events
-  "typing:start": {
-    conversationId: string;
-    userId: string;
+// Message Response
+export interface WsMessageResponse {
+  messageId: string;
+  conversationId: string;
+  senderId: number;
+  recipientId: number;
+  content: string;
+  attachment?: {
+    s3Key: string;
+    url: string;
+    contentType: string;
+    fileSize: number;
+    fileName: string;
   };
-  "typing:stop": {
-    conversationId: string;
-    userId: string;
-  };
+  status: "SENT" | "DELIVERED" | "READ";
+  sentAt: string;
+}
 
-  // Presence events
-  "user:online": {
-    userId: string;
-  };
-  "user:offline": {
-    userId: string;
-  };
+// Typing Notification
+export interface WsTypingNotification {
+  conversationId: string;
+  recipientId: number;
+  isTyping: boolean;
+}
 
-  // Notification events
-  "notification:new": {
-    id: string;
-    type: string;
-    title: string;
-    message: string;
-    data?: any;
-  };
+// Read Receipt
+export interface WsReadReceipt {
+  conversationId: string;
+  readByUserId: number;
+  messagesRead: number;
+  readAt: string;
+}
+
+// Error Response
+export interface WsErrorResponse {
+  code: "VALIDATION_ERROR" | "FORBIDDEN" | "INTERNAL_ERROR";
+  message: string;
+  action: string;
+}
+
+// Notification
+export interface WsNotification {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  data?: Record<string, any>;
+  createdAt: string;
 }
 ```
 
 ---
 
-## 4. Socket Client
+## 5. STOMP Client
 
-**src/core/socket/socketClient.ts:**
+**src/core/socket/stompClient.ts:**
 
 ```typescript
-import io, { Socket } from "socket.io-client";
+import SockJS from "sockjs-client";
+import { Client, IMessage, StompSubscription } from "@stomp/stompjs";
 import { ENV } from "@config/env";
 import { tokenService } from "@features/auth/services/tokenService";
 import { messageQueue } from "./messageQueue";
-import type { SocketConfig, SocketStatus, SocketEventMap } from "./types";
+import type {
+  SocketConfig,
+  SocketStatus,
+  WsSendMessageRequest,
+  WsMessageResponse,
+  WsTypingNotification,
+  WsReadReceipt,
+  WsErrorResponse,
+  WsNotification,
+} from "./types";
 
-class SocketClient {
-  private socket: Socket | null = null;
+class StompClient {
+  private client: Client | null = null;
   private status: SocketStatus = SocketStatus.DISCONNECTED;
+  private subscriptions: Map<string, StompSubscription> = new Map();
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
-  private listeners = new Map<string, Set<Function>>();
 
-  // Connect to socket server
+  // ========== Connection ==========
+
   async connect(config?: Partial<SocketConfig>): Promise<void> {
-    if (this.socket?.connected) {
-      console.log("Socket already connected");
+    if (this.client?.connected) {
+      console.log("[STOMP] Already connected");
       return;
     }
 
     this.status = SocketStatus.CONNECTING;
-
     const token = await tokenService.getAccessToken();
 
-    const socketConfig: SocketConfig = {
-      url: ENV.WS_URL,
-      auth: { token },
-      reconnection: true,
-      reconnectionAttempts: this.maxReconnectAttempts,
-      reconnectionDelay: 1000,
-      ...config,
-    };
+    if (!token) {
+      console.error("[STOMP] No access token available");
+      this.status = SocketStatus.ERROR;
+      return;
+    }
 
-    this.socket = io(socketConfig.url, {
-      auth: socketConfig.auth,
-      transports: ["websocket"],
-      reconnection: socketConfig.reconnection,
-      reconnectionAttempts: socketConfig.reconnectionAttempts,
-      reconnectionDelay: socketConfig.reconnectionDelay,
-      reconnectionDelayMax: 5000,
-      timeout: 20000,
+    const wsUrl = config?.url || ENV.WS_URL || `${ENV.API_BASE_URL}/ws`;
+
+    this.client = new Client({
+      // Use SockJS for browser/React Native compatibility
+      webSocketFactory: () => new SockJS(wsUrl),
+
+      // Authentication
+      connectHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
+
+      // Heartbeat settings (match backend: 10 seconds)
+      heartbeatIncoming: config?.heartbeatIncoming ?? 10000,
+      heartbeatOutgoing: config?.heartbeatOutgoing ?? 10000,
+
+      // Reconnection
+      reconnectDelay: config?.reconnectDelay ?? 5000,
+
+      // Debug logging
+      debug:
+        config?.debug && __DEV__
+          ? (str) => console.log("[STOMP]", str)
+          : () => {},
+
+      // Connection callbacks
+      onConnect: () => {
+        console.log("[STOMP] Connected");
+        this.status = SocketStatus.CONNECTED;
+        this.reconnectAttempts = 0;
+        this.subscribeToUserQueues();
+        this.processQueuedMessages();
+      },
+
+      onDisconnect: () => {
+        console.log("[STOMP] Disconnected");
+        this.status = SocketStatus.DISCONNECTED;
+      },
+
+      onStompError: (frame) => {
+        console.error("[STOMP] Error:", frame.headers["message"]);
+        console.error("[STOMP] Details:", frame.body);
+        this.status = SocketStatus.ERROR;
+      },
+
+      onWebSocketClose: () => {
+        console.log("[STOMP] WebSocket closed");
+        if (this.status !== SocketStatus.DISCONNECTED) {
+          this.status = SocketStatus.RECONNECTING;
+          this.reconnectAttempts++;
+        }
+      },
     });
 
-    this.setupEventHandlers();
-    this.processQueuedMessages();
+    this.client.activate();
   }
 
-  // Disconnect from socket server
   disconnect(): void {
-    if (this.socket) {
-      this.socket.disconnect();
-      this.socket = null;
+    if (this.client) {
+      // Unsubscribe all
+      this.subscriptions.forEach((sub) => sub.unsubscribe());
+      this.subscriptions.clear();
+
+      this.client.deactivate();
+      this.client = null;
       this.status = SocketStatus.DISCONNECTED;
     }
   }
 
-  // Setup built-in event handlers
-  private setupEventHandlers(): void {
-    if (!this.socket) return;
+  // ========== Subscriptions ==========
 
-    this.socket.on("connect", () => {
-      console.log("Socket connected");
-      this.status = SocketStatus.CONNECTED;
-      this.reconnectAttempts = 0;
-      this.emit("connect");
-      this.processQueuedMessages();
+  private subscribeToUserQueues(): void {
+    // Messages queue
+    this.subscribe("/user/queue/messages", (message: IMessage) => {
+      const data: WsMessageResponse = JSON.parse(message.body);
+      this.emit("message", data);
     });
 
-    this.socket.on("disconnect", (reason: string) => {
-      console.log("Socket disconnected:", reason);
-      this.status = SocketStatus.DISCONNECTED;
-      this.emit("disconnect", reason);
+    // Typing notifications
+    this.subscribe("/user/queue/typing", (message: IMessage) => {
+      const data: WsTypingNotification = JSON.parse(message.body);
+      this.emit("typing", data);
     });
 
-    this.socket.on("connect_error", (error: Error) => {
-      console.error("Socket connection error:", error);
-      this.status = SocketStatus.ERROR;
-      this.emit("connect_error", error);
+    // Read receipts
+    this.subscribe("/user/queue/read", (message: IMessage) => {
+      const data: WsReadReceipt = JSON.parse(message.body);
+      this.emit("read", data);
     });
 
-    this.socket.on("reconnect", (attemptNumber: number) => {
-      console.log("Socket reconnected after", attemptNumber, "attempts");
-      this.status = SocketStatus.CONNECTED;
-      this.emit("reconnect", attemptNumber);
+    // Errors
+    this.subscribe("/user/queue/errors", (message: IMessage) => {
+      const data: WsErrorResponse = JSON.parse(message.body);
+      this.emit("error", data);
     });
 
-    this.socket.on("reconnect_attempt", (attemptNumber: number) => {
-      console.log("Socket reconnect attempt:", attemptNumber);
-      this.status = SocketStatus.RECONNECTING;
-      this.reconnectAttempts = attemptNumber;
-      this.emit("reconnect_attempt", attemptNumber);
-    });
-
-    this.socket.on("reconnect_error", (error: Error) => {
-      console.error("Socket reconnect error:", error);
-      this.emit("reconnect_error", error);
-    });
-
-    this.socket.on("reconnect_failed", () => {
-      console.error("Socket reconnect failed");
-      this.status = SocketStatus.ERROR;
-      this.emit("reconnect_failed");
+    // Push notifications
+    this.subscribe("/user/queue/notifications", (message: IMessage) => {
+      const data: WsNotification = JSON.parse(message.body);
+      this.emit("notification", data);
     });
   }
 
-  // Emit event to server
-  emit<K extends keyof SocketEventMap>(
-    event: K,
-    data?: SocketEventMap[K]
+  private subscribe(
+    destination: string,
+    callback: (message: IMessage) => void
   ): void {
-    if (this.socket?.connected) {
-      this.socket.emit(event, data);
+    if (!this.client?.connected) {
+      console.warn("[STOMP] Cannot subscribe, not connected");
+      return;
+    }
+
+    const subscription = this.client.subscribe(destination, callback);
+    this.subscriptions.set(destination, subscription);
+  }
+
+  // ========== Publishing ==========
+
+  sendMessage(request: WsSendMessageRequest): void {
+    this.publish("/app/chat.send", request);
+  }
+
+  sendTyping(
+    conversationId: string,
+    recipientId: number,
+    isTyping: boolean
+  ): void {
+    this.publish("/app/chat.typing", { conversationId, recipientId, isTyping });
+  }
+
+  markAsRead(conversationId: string): void {
+    this.publish("/app/chat.read", { conversationId });
+  }
+
+  private publish(destination: string, body: any): void {
+    if (this.client?.connected) {
+      this.client.publish({
+        destination,
+        body: JSON.stringify(body),
+      });
     } else {
-      // Queue message for later
+      // Queue for later
       messageQueue.add({
-        id: `${Date.now()}-${Math.random()}`,
-        event: event as string,
-        data,
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        destination,
+        body,
         timestamp: Date.now(),
       });
     }
   }
 
-  // Listen to events from server
-  on<K extends keyof SocketEventMap>(
-    event: K,
-    handler: (data: SocketEventMap[K]) => void
-  ): () => void {
-    if (!this.listeners.has(event as string)) {
-      this.listeners.set(event as string, new Set());
-    }
+  // ========== Event Handling ==========
 
-    const handlers = this.listeners.get(event as string)!;
-    handlers.add(handler);
+  private eventHandlers: Map<string, Set<Function>> = new Map();
 
-    // Register with socket
-    if (this.socket) {
-      this.socket.on(event as string, handler);
+  on<T>(event: string, handler: (data: T) => void): () => void {
+    if (!this.eventHandlers.has(event)) {
+      this.eventHandlers.set(event, new Set());
     }
+    this.eventHandlers.get(event)!.add(handler);
 
     // Return unsubscribe function
     return () => {
-      handlers.delete(handler);
-      if (this.socket) {
-        this.socket.off(event as string, handler);
-      }
+      this.eventHandlers.get(event)?.delete(handler);
     };
   }
 
-  // Remove event listener
-  off<K extends keyof SocketEventMap>(event: K, handler?: Function): void {
-    if (handler) {
-      const handlers = this.listeners.get(event as string);
-      if (handlers) {
-        handlers.delete(handler);
-      }
-      if (this.socket) {
-        this.socket.off(event as string, handler as any);
-      }
-    } else {
-      // Remove all listeners for event
-      this.listeners.delete(event as string);
-      if (this.socket) {
-        this.socket.off(event as string);
-      }
+  private emit(event: string, data: any): void {
+    const handlers = this.eventHandlers.get(event);
+    if (handlers) {
+      handlers.forEach((handler) => handler(data));
     }
   }
 
-  // Process queued messages
+  // ========== Message Queue ==========
+
   private async processQueuedMessages(): Promise<void> {
-    if (!this.socket?.connected) return;
+    if (!this.client?.connected) return;
 
     const messages = messageQueue.getAll();
-
-    for (const message of messages) {
+    for (const msg of messages) {
       try {
-        this.socket.emit(message.event, message.data);
-        messageQueue.remove(message.id);
+        this.client.publish({
+          destination: msg.destination,
+          body: JSON.stringify(msg.body),
+        });
+        await messageQueue.remove(msg.id);
       } catch (error) {
-        console.error("Failed to send queued message:", error);
+        console.error("[STOMP] Failed to send queued message:", error);
+        await messageQueue.incrementRetry(msg.id);
       }
     }
   }
 
-  // Get connection status
+  // ========== Status ==========
+
   getStatus(): SocketStatus {
     return this.status;
   }
 
-  // Check if connected
   isConnected(): boolean {
-    return this.socket?.connected || false;
-  }
-
-  // Get socket instance (for advanced use)
-  getSocket(): Socket | null {
-    return this.socket;
+    return this.client?.connected || false;
   }
 }
 
-export const socketClient = new SocketClient();
+export const stompClient = new StompClient();
 ```
 
 ---
