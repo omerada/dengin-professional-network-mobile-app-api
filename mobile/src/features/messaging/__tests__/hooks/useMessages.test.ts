@@ -1,5 +1,5 @@
 // src/features/messaging/__tests__/hooks/useMessages.test.ts
-// useMessages hook tests
+// useMessages hook tests - STOMP WebSocket integration
 // Oku: mobile-development-guide/testing/24-UNIT-TESTS.md
 
 import { renderHook, waitFor, act } from '@testing-library/react-native';
@@ -7,13 +7,19 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { useMessages } from '../../hooks/useMessages';
 import { messagingService } from '../../services/messagingService';
-import { socketClient } from '../../services/socketClient';
+import { stompClient } from '@core/socket';
 
 jest.mock('../../services/messagingService');
-jest.mock('../../services/socketClient');
+jest.mock('@core/socket', () => ({
+  stompClient: {
+    on: jest.fn(() => jest.fn()),
+    isConnected: jest.fn(() => true),
+    markAsRead: jest.fn(),
+  },
+}));
 
 const mockMessagingService = messagingService as jest.Mocked<typeof messagingService>;
-const mockSocketClient = socketClient as jest.Mocked<typeof socketClient>;
+const mockStompClient = stompClient as jest.Mocked<typeof stompClient>;
 
 describe('useMessages', () => {
   let queryClient: QueryClient;
@@ -53,8 +59,8 @@ describe('useMessages', () => {
       },
     });
     jest.clearAllMocks();
-    mockSocketClient.on.mockImplementation(() => {});
-    mockSocketClient.off.mockImplementation(() => {});
+    (mockStompClient.on as jest.Mock).mockImplementation(() => jest.fn());
+    (mockStompClient.isConnected as jest.Mock).mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -148,7 +154,7 @@ describe('useMessages', () => {
   });
 
   describe('socket events', () => {
-    it('should register socket listeners on mount', async () => {
+    it('should register STOMP listeners on mount', async () => {
       mockMessagingService.getMessages.mockResolvedValueOnce({
         content: [],
         hasNext: false,
@@ -158,13 +164,15 @@ describe('useMessages', () => {
       renderHook(() => useMessages('conv1'), { wrapper });
 
       await waitFor(() => {
-        expect(mockSocketClient.on).toHaveBeenCalledWith('message:new', expect.any(Function));
-        expect(mockSocketClient.on).toHaveBeenCalledWith('message:status', expect.any(Function));
-        expect(mockSocketClient.on).toHaveBeenCalledWith('message:deleted', expect.any(Function));
+        expect(mockStompClient.on).toHaveBeenCalledWith('message', expect.any(Function));
+        expect(mockStompClient.on).toHaveBeenCalledWith('read', expect.any(Function));
       });
     });
 
-    it('should unregister socket listeners on unmount', async () => {
+    it('should cleanup STOMP listeners on unmount', async () => {
+      const unsubscribeMock = jest.fn();
+      (mockStompClient.on as jest.Mock).mockReturnValue(unsubscribeMock);
+
       mockMessagingService.getMessages.mockResolvedValueOnce({
         content: [],
         hasNext: false,
@@ -174,14 +182,13 @@ describe('useMessages', () => {
       const { unmount } = renderHook(() => useMessages('conv1'), { wrapper });
 
       await waitFor(() => {
-        expect(mockSocketClient.on).toHaveBeenCalled();
+        expect(mockStompClient.on).toHaveBeenCalled();
       });
 
       unmount();
 
-      expect(mockSocketClient.off).toHaveBeenCalledWith('message:new', expect.any(Function));
-      expect(mockSocketClient.off).toHaveBeenCalledWith('message:status', expect.any(Function));
-      expect(mockSocketClient.off).toHaveBeenCalledWith('message:deleted', expect.any(Function));
+      // Unsubscribe functions should be called
+      expect(unsubscribeMock).toHaveBeenCalled();
     });
   });
 

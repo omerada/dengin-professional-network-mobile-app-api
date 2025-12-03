@@ -1,108 +1,107 @@
 // src/features/messaging/hooks/useSocket.ts
-// Socket bağlantı hook'u
+// Socket connection hook for messaging
 // Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
+// Oku: mobile-development-guide/core/13-REAL-TIME.md
 
-import { useEffect, useState, useCallback } from 'react';
-import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
-import { socketClient, messageQueue, SocketConnectionState } from '../services';
+import { useEffect, useCallback, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import {
+  stompClient,
+  connectionMonitor,
+  setupSocketEvents,
+  cleanupSocketEvents,
+  SocketStatus,
+} from '@core/socket';
 import { useAuthStore } from '@features/auth/stores';
 
 /**
- * Socket bağlantı hook'u
+ * Socket connection hook
+ * Manages WebSocket connection lifecycle based on auth state
  */
 export function useSocket() {
-  const [connectionState, setConnectionState] = useState<SocketConnectionState>('disconnected');
-  const [isOnline, setIsOnline] = useState(true);
+  const queryClient = useQueryClient();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const [status, setStatus] = useState<SocketStatus>(SocketStatus.DISCONNECTED);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
 
-  // Network durumunu dinle
+  // Connect/disconnect based on auth state
   useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
-      const online = state.isConnected && state.isInternetReachable !== false;
-      setIsOnline(online ?? false);
+    if (isAuthenticated) {
+      // Connect socket
+      stompClient.connect();
 
-      if (online && isAuthenticated && !socketClient.isConnected()) {
-        // Çevrimiçi oldu ve bağlı değil, bağlan
-        socketClient.connect().catch(() => {
-          // Connection error handled by socket client
-        });
-      }
-    });
+      // Setup event handlers with query client
+      setupSocketEvents(queryClient);
 
-    return () => unsubscribe();
-  }, [isAuthenticated]);
+      // Start connection monitoring
+      connectionMonitor.start();
 
-  // Socket bağlantısını yönet
-  useEffect(() => {
-    if (!isAuthenticated) {
-      socketClient.disconnect();
-      setConnectionState('disconnected');
-      return;
+      // Subscribe to connection status
+      const unsubConnect = stompClient.on('connect', () => {
+        setStatus(SocketStatus.CONNECTED);
+        setIsConnected(true);
+      });
+
+      const unsubDisconnect = stompClient.on('disconnect', () => {
+        setStatus(SocketStatus.DISCONNECTED);
+        setIsConnected(false);
+      });
+
+      // Update online status from connection monitor
+      setIsOnline(connectionMonitor.isNetworkAvailable());
+
+      return () => {
+        unsubConnect();
+        unsubDisconnect();
+        cleanupSocketEvents();
+        connectionMonitor.stop();
+        stompClient.disconnect();
+      };
+    } else {
+      // Disconnect if not authenticated
+      cleanupSocketEvents();
+      connectionMonitor.stop();
+      stompClient.disconnect();
+      setStatus(SocketStatus.DISCONNECTED);
+      setIsConnected(false);
     }
-
-    const handleConnect = () => {
-      setConnectionState('connected');
-      // Bağlantı kurulunca bekleyen mesajları işle
-      messageQueue.processQueue();
-    };
-
-    const handleDisconnect = () => {
-      setConnectionState('disconnected');
-    };
-
-    const handleReconnectAttempt = () => {
-      setConnectionState('reconnecting');
-    };
-
-    socketClient.on('connect', handleConnect);
-    socketClient.on('disconnect', handleDisconnect);
-    socketClient.on('reconnect_attempt', handleReconnectAttempt);
-    socketClient.on('reconnect', handleConnect);
-
-    // İlk bağlantı
-    socketClient.connect().catch(() => {
-      // Connection error
-    });
-
-    // Message queue'yu yükle
-    messageQueue.load();
-
-    return () => {
-      socketClient.off('connect', handleConnect);
-      socketClient.off('disconnect', handleDisconnect);
-      socketClient.off('reconnect_attempt', handleReconnectAttempt);
-      socketClient.off('reconnect', handleConnect);
-    };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, queryClient]);
 
   /**
-   * Manuel bağlanma
+   * Manual connect
    */
   const connect = useCallback(async () => {
-    if (socketClient.isConnected()) return;
-    
-    setConnectionState('connecting');
-    try {
-      await socketClient.connect();
-    } catch {
-      setConnectionState('disconnected');
-    }
+    setStatus(SocketStatus.CONNECTING);
+    await stompClient.connect();
   }, []);
 
   /**
-   * Manuel bağlantı kesme
+   * Manual disconnect
    */
   const disconnect = useCallback(() => {
-    socketClient.disconnect();
-    setConnectionState('disconnected');
+    stompClient.disconnect();
+    setStatus(SocketStatus.DISCONNECTED);
+    setIsConnected(false);
+  }, []);
+
+  /**
+   * Force reconnect
+   */
+  const reconnect = useCallback(async () => {
+    setStatus(SocketStatus.RECONNECTING);
+    await connectionMonitor.forceReconnect();
   }, []);
 
   return {
-    connectionState,
-    isConnected: connectionState === 'connected',
+    status,
+    connectionState: status, // Backward compatibility
+    isConnected,
     isOnline,
+    isReconnecting: status === SocketStatus.RECONNECTING,
     connect,
     disconnect,
+    reconnect,
   };
 }
 

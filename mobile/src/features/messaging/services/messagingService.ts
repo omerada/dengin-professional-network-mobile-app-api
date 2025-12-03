@@ -80,8 +80,8 @@ export const messagingService = {
   /**
    * Mesaj sil
    */
-  async deleteMessage(messageId: string): Promise<void> {
-    await apiClient.delete(`/api/v1/messages/${messageId}`);
+  async deleteMessage(conversationId: string, messageId: string): Promise<void> {
+    await apiClient.delete(`/api/v1/conversations/${conversationId}/messages/${messageId}`);
   },
 
   /**

@@ -56,7 +56,7 @@ export const ChatScreen: React.FC = () => {
 
   // Stores
   const { user } = useAuthStore();
-  const { typingUsers, setActiveConversation, getDraft, setDraft } = useMessagingStore();
+  const { setActiveConversation, getDraft, setDraft } = useMessagingStore();
 
   // Hooks
   const {
@@ -68,17 +68,16 @@ export const ChatScreen: React.FC = () => {
     fetchNextPage,
   } = useMessages(conversationId);
 
-  const { sendMessage, isPending: isSending } = useSendMessage();
-  const { startTyping, stopTyping } = useTyping(conversationId);
+  const { sendMessage, isPending: isSending, retryMessage } = useSendMessage(conversationId);
+  const { startTyping, stopTyping, typingUsers: conversationTypingUserNames } = useTyping(conversationId);
   const { markAsRead } = useMarkAsRead();
 
   // Computed
   const currentUserId = user?.id || '';
   const conversationTypingUsers = useMemo(() => {
-    const users = typingUsers[conversationId] || [];
-    // Exclude current user from typing list
-    return users.filter(name => name !== user?.displayName);
-  }, [typingUsers, conversationId, user?.displayName]);
+    // Use typing users from hook instead of store
+    return conversationTypingUserNames.filter(name => name !== user?.displayName);
+  }, [conversationTypingUserNames, user?.displayName]);
 
   // Load conversation details
   useEffect(() => {
@@ -157,7 +156,6 @@ export const ChatScreen: React.FC = () => {
     if (!trimmedText) return;
 
     sendMessage({
-      conversationId,
       content: trimmedText,
       replyToId: replyingTo?.id,
     });

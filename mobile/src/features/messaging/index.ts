@@ -5,10 +5,16 @@
 // Types
 export * from './types';
 
+// Core Socket (STOMP WebSocket)
+export {
+  stompClient,
+  messageQueue,
+  connectionMonitor,
+  SocketStatus,
+} from '@core/socket';
+
 // Services
-export { socketClient } from './services/socketClient';
 export { messagingService } from './services/messagingService';
-export { messageQueue } from './services/messageQueue';
 
 // Stores
 export { useMessagingStore } from './stores';
@@ -16,12 +22,15 @@ export { useMessagingStore } from './stores';
 // Hooks
 export {
   useConversations,
+  useConversation,
   useMessages,
   useSendMessage,
   useTyping,
   useSocket,
   useMarkAsRead,
   useStartConversation,
+  useTotalUnreadCount,
+  useUnreadCount,
 } from './hooks';
 
 // Components

@@ -4,19 +4,20 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, useEffect } from 'react';
-import { messagingService, socketClient } from '../services';
+import { stompClient } from '@core/socket';
+import { messagingService } from '../services';
 import { CONVERSATIONS_QUERY_KEY } from './useConversations';
 
 /**
  * Konuşmayı okundu olarak işaretleme hook'u
  */
-export function useMarkAsRead(conversationId: string) {
+export function useMarkAsRead(conversationId?: string) {
   const queryClient = useQueryClient();
   const lastMarkedRef = useRef<string | null>(null);
 
   const mutation = useMutation({
-    mutationFn: async () => {
-      await messagingService.markConversationAsRead(conversationId);
+    mutationFn: async (convId: string) => {
+      await messagingService.markConversationAsRead(convId);
     },
     onSuccess: () => {
       // Konuşma listesindeki unread count'u güncelle
@@ -27,22 +28,32 @@ export function useMarkAsRead(conversationId: string) {
   /**
    * Okundu olarak işaretle (debounced)
    */
-  const markAsRead = useCallback(() => {
-    // Aynı conversation için tekrar çağrılmasını engelle
-    if (lastMarkedRef.current === conversationId) return;
+  const markAsRead = useCallback((convId?: string) => {
+    const targetId = convId || conversationId;
+    if (!targetId) return;
     
-    lastMarkedRef.current = conversationId;
-    mutation.mutate();
+    // Aynı conversation için tekrar çağrılmasını engelle
+    if (lastMarkedRef.current === targetId) return;
+    
+    lastMarkedRef.current = targetId;
+    mutation.mutate(targetId);
 
-    // Socket üzerinden de bildir
-    socketClient.emit('conversation:read', { conversationId });
+    // STOMP socket üzerinden de bildir
+    if (stompClient.isConnected()) {
+      stompClient.markAsRead(targetId, []);
+    }
   }, [conversationId, mutation]);
 
   /**
-   * Belirli bir mesajı okundu olarak işaretle
+   * Belirli mesajları okundu olarak işaretle
    */
-  const markMessageAsRead = useCallback((messageId: string) => {
-    socketClient.markAsRead(conversationId, messageId);
+  const markMessagesAsRead = useCallback((messageIds: string[], convId?: string) => {
+    const targetId = convId || conversationId;
+    if (!targetId || messageIds.length === 0) return;
+    
+    if (stompClient.isConnected()) {
+      stompClient.markAsRead(targetId, messageIds);
+    }
   }, [conversationId]);
 
   // Cleanup
@@ -54,7 +65,7 @@ export function useMarkAsRead(conversationId: string) {
 
   return {
     markAsRead,
-    markMessageAsRead,
+    markMessagesAsRead,
     isLoading: mutation.isPending,
   };
 }

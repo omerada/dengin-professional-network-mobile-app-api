@@ -1,56 +1,80 @@
 // src/features/messaging/hooks/useMessages.ts
-// Mesaj listesi hook'u
+// Messages list hook with real-time sync
 // Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
+// Oku: mobile-development-guide/core/13-REAL-TIME.md
 
 import { useInfiniteQuery, useQueryClient, InfiniteData } from '@tanstack/react-query';
-import { useEffect, useCallback } from 'react';
-import { messagingService, socketClient } from '../services';
-import type { MessagesResponse, Message, MessageStatusEvent } from '../types';
+import { useEffect, useCallback, useMemo } from 'react';
+import { stompClient } from '@core/socket';
+import type { WsMessageResponse, WsReadReceipt } from '@core/socket';
+import { messagingService } from '../services';
+import type { MessagesResponse, Message, MessageStatus } from '../types';
 
 export const MESSAGES_QUERY_KEY = 'messages';
 
 /**
- * Mesaj listesi hook'u
+ * Messages list hook with real-time updates
  */
 export function useMessages(conversationId: string) {
   const queryClient = useQueryClient();
 
-  // Socket event listener'ları
+  // Subscribe to real-time message events
   useEffect(() => {
     if (!conversationId) return;
 
-    // Konuşmaya katıl
-    socketClient.joinConversation(conversationId);
+    // Handle new message received
+    const unsubMessage = stompClient.on<WsMessageResponse>('message', (data) => {
+      if (data.conversationId !== conversationId) return;
 
-    const handleNewMessage = (message: Message) => {
-      if (message.conversationId !== conversationId) return;
+      // Convert WebSocket response to Message type
+      const newMessage: Message = {
+        id: data.messageId,
+        conversationId: data.conversationId,
+        senderId: String(data.senderId),
+        content: data.content,
+        type: 'text',
+        status: data.status.toLowerCase() as MessageStatus,
+        attachments: data.attachment ? [{
+          id: data.attachment.s3Key,
+          type: 'file',
+          url: data.attachment.url,
+          fileName: data.attachment.fileName,
+          fileSize: data.attachment.fileSize,
+        }] : [],
+        createdAt: data.sentAt,
+        updatedAt: data.sentAt,
+      };
 
-      // Cache'i güncelle - yeni mesajı en başa ekle
+      // Update cache - add message to beginning of first page
       queryClient.setQueryData<InfiniteData<MessagesResponse>>(
         [MESSAGES_QUERY_KEY, conversationId],
         (old) => {
           if (!old) return old;
 
-          // Mesaj zaten varsa ekleme
-          const existingMessage = old.pages.some((page) =>
-            page.data.some((m) => m.id === message.id)
+          // Check if message already exists
+          const exists = old.pages.some((page) =>
+            page.data.some((m) => m.id === newMessage.id)
           );
-          if (existingMessage) return old;
+          if (exists) return old;
 
           const newPages = [...old.pages];
           if (newPages[0]) {
             newPages[0] = {
               ...newPages[0],
-              data: [message, ...newPages[0].data],
+              data: [newMessage, ...newPages[0].data],
             };
           }
 
           return { ...old, pages: newPages };
         }
       );
-    };
+    });
 
-    const handleMessageStatus = (event: MessageStatusEvent) => {
+    // Handle read receipts
+    const unsubRead = stompClient.on<WsReadReceipt>('read', (data) => {
+      if (data.conversationId !== conversationId) return;
+
+      // Update message statuses to 'read'
       queryClient.setQueryData<InfiniteData<MessagesResponse>>(
         [MESSAGES_QUERY_KEY, conversationId],
         (old) => {
@@ -60,47 +84,24 @@ export function useMessages(conversationId: string) {
             ...old,
             pages: old.pages.map((page) => ({
               ...page,
-              data: page.data.map((msg) =>
-                msg.id === event.messageId
-                  ? { ...msg, status: event.status }
-                  : msg
-              ),
+              data: page.data.map((msg) => ({
+                ...msg,
+                status: 'read' as MessageStatus,
+                readAt: data.readAt,
+              })),
             })),
           };
         }
       );
-    };
-
-    const handleMessageDeleted = (data: { messageId: string }) => {
-      queryClient.setQueryData<InfiniteData<MessagesResponse>>(
-        [MESSAGES_QUERY_KEY, conversationId],
-        (old) => {
-          if (!old) return old;
-
-          return {
-            ...old,
-            pages: old.pages.map((page) => ({
-              ...page,
-              data: page.data.filter((msg) => msg.id !== data.messageId),
-            })),
-          };
-        }
-      );
-    };
-
-    socketClient.on('message:new', handleNewMessage);
-    socketClient.on('message:status', handleMessageStatus);
-    socketClient.on('message:deleted', handleMessageDeleted);
+    });
 
     return () => {
-      socketClient.leaveConversation(conversationId);
-      socketClient.off('message:new', handleNewMessage);
-      socketClient.off('message:status', handleMessageStatus);
-      socketClient.off('message:deleted', handleMessageDeleted);
+      unsubMessage();
+      unsubRead();
     };
   }, [conversationId, queryClient]);
 
-  return useInfiniteQuery<MessagesResponse, Error>({
+  const query = useInfiniteQuery<MessagesResponse, Error>({
     queryKey: [MESSAGES_QUERY_KEY, conversationId],
     queryFn: async ({ pageParam }) => {
       return messagingService.getMessages(conversationId, pageParam as string | undefined);
@@ -108,29 +109,34 @@ export function useMessages(conversationId: string) {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled: !!conversationId,
-    staleTime: 60 * 1000, // 1 dakika
+    staleTime: 60 * 1000, // 1 minute
+    refetchOnWindowFocus: false,
   });
-}
 
-/**
- * Mesaj listesi data helper
- */
-export function useMessagesData(conversationId: string) {
-  const { data, ...rest } = useMessages(conversationId);
+  // Flatten messages from all pages
+  const messages = useMemo(() => {
+    return query.data?.pages.flatMap((page) => page.data) ?? [];
+  }, [query.data]);
 
-  const messages = data?.pages.flatMap((page) => page.data) ?? [];
+  // Mark messages as read when viewing
+  const markAsRead = useCallback(() => {
+    if (conversationId && stompClient.isConnected()) {
+      stompClient.markAsRead(conversationId);
+    }
+  }, [conversationId]);
 
   return {
+    ...query,
     messages,
-    ...rest,
+    markAsRead,
   };
 }
 
 /**
- * Son mesajı al (optimistic update için)
+ * Get last message for a conversation
  */
 export function useLastMessage(conversationId: string) {
-  const { messages } = useMessagesData(conversationId);
+  const { messages } = useMessages(conversationId);
   return messages[0] ?? null;
 }
 

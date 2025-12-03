@@ -59,6 +59,8 @@
     "react-native-permissions": "^4.0.3",
     "react-native-keychain": "^8.1.2",
     "react-native-biometrics": "^3.0.1",
+    "@react-native-community/netinfo": "^11.2.1",
+    "react-native-vector-icons": "^10.0.0",
     "eventemitter3": "^5.0.1"
   },
   "devDependencies": {
@@ -70,6 +72,7 @@
     "@types/react": "^18.2.43",
     "@types/react-native": "^0.72.7",
     "@types/sockjs-client": "^1.5.4",
+    "@types/react-native-vector-icons": "^6.4.18",
     "typescript": "^5.3.2",
     "@testing-library/react-native": "^12.4.1",
     "@testing-library/jest-native": "^5.4.3",

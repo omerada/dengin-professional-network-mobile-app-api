@@ -1,4 +1,12 @@
 // src/features/messaging/services/index.ts
-export { socketClient } from './socketClient';
+// Messaging services - HTTP API layer
+// Socket services are now in @core/socket
+
 export { messagingService } from './messagingService';
-export { messageQueue } from './messageQueue';
+
+// Re-export socket services for backward compatibility
+export { stompClient, messageQueue, connectionMonitor } from '@core/socket';
+
+// Legacy exports - DEPRECATED, use @core/socket instead
+// export { socketClient } from './socketClient';
+// export { messageQueue } from './messageQueue';

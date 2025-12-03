@@ -1,74 +1,93 @@
 // src/features/messaging/hooks/useConversations.ts
-// Konuşma listesi hook'u
+// Conversations list hook with real-time sync
 // Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
+// Oku: mobile-development-guide/core/13-REAL-TIME.md
 
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
-import { messagingService, socketClient } from '../services';
-import type { ConversationsResponse, ConversationSummary, Message } from '../types';
+import { useInfiniteQuery, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useEffect, useMemo } from 'react';
+import { stompClient } from '@core/socket';
+import type { WsMessageResponse } from '@core/socket';
+import { messagingService } from '../services';
+import type { ConversationsResponse, ConversationSummary } from '../types';
 
 export const CONVERSATIONS_QUERY_KEY = 'conversations';
+export const UNREAD_COUNT_QUERY_KEY = 'unreadCount';
 
 /**
- * Konuşma listesi hook'u
+ * Conversations list hook with real-time updates
  */
 export function useConversations() {
   const queryClient = useQueryClient();
 
-  // Socket event listener'ları
+  // Subscribe to real-time events
   useEffect(() => {
-    const handleNewMessage = (message: Message) => {
-      // Konuşma listesini güncelle
+    // Invalidate conversations on new message
+    const unsubMessage = stompClient.on<WsMessageResponse>('message', () => {
       queryClient.invalidateQueries({ queryKey: [CONVERSATIONS_QUERY_KEY] });
-    };
+      queryClient.invalidateQueries({ queryKey: [UNREAD_COUNT_QUERY_KEY] });
+    });
 
-    const handleConversationUpdate = () => {
+    // Connection restored - refetch data
+    const unsubConnect = stompClient.on('connect', () => {
       queryClient.invalidateQueries({ queryKey: [CONVERSATIONS_QUERY_KEY] });
-    };
-
-    socketClient.on('message:new', handleNewMessage);
-    socketClient.on('conversation:update', handleConversationUpdate);
+    });
 
     return () => {
-      socketClient.off('message:new', handleNewMessage);
-      socketClient.off('conversation:update', handleConversationUpdate);
+      unsubMessage();
+      unsubConnect();
     };
   }, [queryClient]);
 
-  return useInfiniteQuery<ConversationsResponse, Error>({
+  const query = useInfiniteQuery<ConversationsResponse, Error>({
     queryKey: [CONVERSATIONS_QUERY_KEY],
     queryFn: async ({ pageParam }) => {
       return messagingService.getConversations(pageParam as string | undefined);
     },
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-    staleTime: 30 * 1000, // 30 saniye
+    staleTime: 30 * 1000, // 30 seconds
   });
-}
 
-/**
- * Konuşma listesi data helper
- */
-export function useConversationsData() {
-  const { data, ...rest } = useConversations();
+  // Flatten conversations from all pages
+  const conversations = useMemo(() => {
+    return query.data?.pages.flatMap((page) => page.data) ?? [];
+  }, [query.data]);
 
-  const conversations = data?.pages.flatMap((page) => page.data) ?? [];
-  const totalCount = data?.pages[0]?.pagination.totalCount ?? 0;
+  // Total count
+  const totalCount = query.data?.pages[0]?.pagination.totalCount ?? 0;
 
   return {
+    ...query,
     conversations,
     totalCount,
-    ...rest,
+    isRefreshing: query.isRefetching && !query.isFetchingNextPage,
   };
 }
 
 /**
- * Okunmamış mesaj sayısı hook'u
+ * Unread message count hook
  */
 export function useUnreadCount() {
-  const { conversations } = useConversationsData();
-  
-  return conversations.reduce((sum: number, conv: ConversationSummary) => sum + conv.unreadCount, 0);
+  return useQuery({
+    queryKey: [UNREAD_COUNT_QUERY_KEY],
+    queryFn: () => messagingService.getUnreadCount(),
+    staleTime: 30 * 1000, // 30 seconds
+    refetchInterval: 60 * 1000, // Refetch every minute
+  });
+}
+
+/**
+ * Calculate total unread count from conversations
+ */
+export function useTotalUnreadCount() {
+  const { conversations } = useConversations();
+
+  return useMemo(() => {
+    return conversations.reduce(
+      (sum: number, conv: ConversationSummary) => sum + conv.unreadCount,
+      0
+    );
+  }, [conversations]);
 }
 
 export default useConversations;
