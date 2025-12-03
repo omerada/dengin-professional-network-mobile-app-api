@@ -20,20 +20,20 @@ import java.util.UUID;
 @Getter
 @EqualsAndHashCode
 public class ConversationId implements Serializable {
-    
+
     private UUID value;
-    
+
     private ConversationId(UUID value) {
         this.value = value;
     }
-    
+
     /**
      * Generate a new unique conversation ID
      */
     public static ConversationId generate() {
         return new ConversationId(UUID.randomUUID());
     }
-    
+
     /**
      * Create from existing UUID
      */
@@ -43,7 +43,7 @@ public class ConversationId implements Serializable {
         }
         return new ConversationId(value);
     }
-    
+
     /**
      * Create from string representation
      */
@@ -53,7 +53,7 @@ public class ConversationId implements Serializable {
         }
         return new ConversationId(UUID.fromString(value));
     }
-    
+
     @Override
     public String toString() {
         return value.toString();

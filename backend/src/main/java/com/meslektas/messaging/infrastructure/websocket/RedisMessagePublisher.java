@@ -19,51 +19,49 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 @Slf4j
 public class RedisMessagePublisher {
-    
+
     private final RedisTemplate<String, Object> messagingRedisTemplate;
     private final ChannelTopic messagingTopic;
     private final ChannelTopic typingTopic;
     private final ChannelTopic readReceiptTopic;
     private final ChannelTopic presenceTopic;
-    
+
     /**
      * Publish a new message notification to Redis
      * 
      * @param recipientId The user ID who should receive the message
-     * @param message The message response to send
+     * @param message     The message response to send
      */
     public void publishMessage(Long recipientId, WsMessageResponse message) {
         RedisMessage<WsMessageResponse> redisMessage = new RedisMessage<>(
-            recipientId, 
-            MessageType.NEW_MESSAGE, 
-            message
-        );
-        
-        log.debug("Publishing message to Redis - recipientId: {}, messageId: {}", 
-            recipientId, message.getMessageId());
-        
+                recipientId,
+                MessageType.NEW_MESSAGE,
+                message);
+
+        log.debug("Publishing message to Redis - recipientId: {}, messageId: {}",
+                recipientId, message.getMessageId());
+
         messagingRedisTemplate.convertAndSend(messagingTopic.getTopic(), redisMessage);
     }
-    
+
     /**
      * Publish typing notification to Redis
      * 
      * @param recipientId The user ID who should receive the typing notification
-     * @param typing The typing notification
+     * @param typing      The typing notification
      */
     public void publishTypingNotification(Long recipientId, WsTypingNotification typing) {
         RedisMessage<WsTypingNotification> redisMessage = new RedisMessage<>(
-            recipientId, 
-            MessageType.TYPING, 
-            typing
-        );
-        
-        log.debug("Publishing typing notification to Redis - recipientId: {}, conversationId: {}", 
-            recipientId, typing.getConversationId());
-        
+                recipientId,
+                MessageType.TYPING,
+                typing);
+
+        log.debug("Publishing typing notification to Redis - recipientId: {}, conversationId: {}",
+                recipientId, typing.getConversationId());
+
         messagingRedisTemplate.convertAndSend(typingTopic.getTopic(), redisMessage);
     }
-    
+
     /**
      * Publish read receipt to Redis
      * 
@@ -72,32 +70,31 @@ public class RedisMessagePublisher {
      */
     public void publishReadReceipt(Long recipientId, WsReadReceipt readReceipt) {
         RedisMessage<WsReadReceipt> redisMessage = new RedisMessage<>(
-            recipientId, 
-            MessageType.READ_RECEIPT, 
-            readReceipt
-        );
-        
-        log.debug("Publishing read receipt to Redis - recipientId: {}, conversationId: {}", 
-            recipientId, readReceipt.getConversationId());
-        
+                recipientId,
+                MessageType.READ_RECEIPT,
+                readReceipt);
+
+        log.debug("Publishing read receipt to Redis - recipientId: {}, conversationId: {}",
+                recipientId, readReceipt.getConversationId());
+
         messagingRedisTemplate.convertAndSend(readReceiptTopic.getTopic(), redisMessage);
     }
-    
+
     /**
      * Publish user presence update to Redis
      * 
-     * @param userId The user whose presence changed
+     * @param userId   The user whose presence changed
      * @param isOnline Whether the user is online
      */
     public void publishPresenceUpdate(Long userId, boolean isOnline) {
         PresenceUpdate presenceUpdate = new PresenceUpdate(userId, isOnline);
-        
-        log.debug("Publishing presence update to Redis - userId: {}, isOnline: {}", 
-            userId, isOnline);
-        
+
+        log.debug("Publishing presence update to Redis - userId: {}, isOnline: {}",
+                userId, isOnline);
+
         messagingRedisTemplate.convertAndSend(presenceTopic.getTopic(), presenceUpdate);
     }
-    
+
     /**
      * Message types for Redis pub/sub
      */
@@ -107,21 +104,21 @@ public class RedisMessagePublisher {
         READ_RECEIPT,
         PRESENCE
     }
-    
+
     /**
      * Wrapper for Redis messages containing recipient and payload
      */
     public record RedisMessage<T>(
-        Long recipientId,
-        MessageType type,
-        T payload
-    ) {}
-    
+            Long recipientId,
+            MessageType type,
+            T payload) {
+    }
+
     /**
      * Presence update notification
      */
     public record PresenceUpdate(
-        Long userId,
-        boolean isOnline
-    ) {}
+            Long userId,
+            boolean isOnline) {
+    }
 }

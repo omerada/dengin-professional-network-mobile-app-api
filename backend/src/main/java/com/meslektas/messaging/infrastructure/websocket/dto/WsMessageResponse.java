@@ -18,31 +18,31 @@ import java.util.UUID;
 @AllArgsConstructor
 @Schema(description = "WebSocket message response")
 public class WsMessageResponse {
-    
+
     @Schema(description = "Message ID")
     private UUID messageId;
-    
+
     @Schema(description = "Conversation ID")
     private UUID conversationId;
-    
+
     @Schema(description = "Sender user ID")
     private UUID senderId;
-    
+
     @Schema(description = "Recipient user ID")
     private UUID recipientId;
-    
+
     @Schema(description = "Message content")
     private String content;
-    
+
     @Schema(description = "Optional attachment")
     private AttachmentData attachment;
-    
+
     @Schema(description = "Message status (SENT, DELIVERED, READ)")
     private String status;
-    
+
     @Schema(description = "When the message was sent")
     private Instant sentAt;
-    
+
     @Data
     @Builder
     @NoArgsConstructor

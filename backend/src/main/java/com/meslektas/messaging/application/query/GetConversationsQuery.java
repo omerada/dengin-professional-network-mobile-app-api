@@ -16,13 +16,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GetConversationsQuery {
-    
+
     @Builder.Default
     private int page = 0;
-    
+
     @Builder.Default
     private int size = 20;
-    
+
     /**
      * Maximum page size to prevent abuse
      */

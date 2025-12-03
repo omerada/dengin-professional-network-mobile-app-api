@@ -21,28 +21,28 @@ import java.util.UUID;
 @Value
 @Builder
 public class SearchMessagesQuery {
-    
+
     @NotBlank(message = "Search query cannot be empty")
     String searchQuery;
-    
+
     /** Optional: Filter by specific conversation */
     UUID conversationId;
-    
+
     /** Optional: Filter messages sent after this date */
     LocalDateTime fromDate;
-    
+
     /** Optional: Filter messages sent before this date */
     LocalDateTime toDate;
-    
+
     @Min(value = 0, message = "Page must be non-negative")
     @Builder.Default
     int page = 0;
-    
+
     @Min(value = 1, message = "Page size must be at least 1")
     @Max(value = 100, message = "Page size cannot exceed 100")
     @Builder.Default
     int size = 20;
-    
+
     /**
      * Calculate offset for pagination
      */

@@ -21,15 +21,15 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SendMessageRequest {
-    
+
     @NotNull(message = "Recipient ID is required")
     private UUID recipientId;
-    
+
     @Size(max = 2000, message = "Message content cannot exceed 2000 characters")
     private String content;
-    
+
     private AttachmentDto attachment;
-    
+
     @Getter
     @Builder
     @NoArgsConstructor

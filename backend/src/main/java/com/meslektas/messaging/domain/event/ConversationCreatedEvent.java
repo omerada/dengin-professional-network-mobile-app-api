@@ -11,12 +11,12 @@ import java.time.LocalDateTime;
  */
 @Getter
 public class ConversationCreatedEvent implements DomainEvent {
-    
+
     private final ConversationId conversationId;
     private final Long participant1Id;
     private final Long participant2Id;
     private final LocalDateTime occurredOn;
-    
+
     public ConversationCreatedEvent(
             ConversationId conversationId,
             Long participant1Id,
@@ -26,12 +26,12 @@ public class ConversationCreatedEvent implements DomainEvent {
         this.participant2Id = participant2Id;
         this.occurredOn = LocalDateTime.now();
     }
-    
+
     @Override
     public LocalDateTime getOccurredOn() {
         return occurredOn;
     }
-    
+
     @Override
     public Long getAggregateId() {
         return null; // Will be set after persistence

@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MessageListResponse {
-    
+
     private List<MessageDto> messages;
     private int pageNumber;
     private int pageSize;

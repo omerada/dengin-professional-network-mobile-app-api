@@ -22,17 +22,17 @@ import lombok.NoArgsConstructor;
 @Getter
 @EqualsAndHashCode
 public class MessageContent {
-    
+
     public static final int MIN_LENGTH = 1;
     public static final int MAX_LENGTH = 2000;
-    
+
     @Column(name = "content", nullable = false, length = MAX_LENGTH)
     private String value;
-    
+
     private MessageContent(String value) {
         this.value = value;
     }
-    
+
     /**
      * Create a new message content with validation
      * 
@@ -44,42 +44,40 @@ public class MessageContent {
         if (content == null) {
             throw new IllegalArgumentException("Message content cannot be null");
         }
-        
+
         String trimmed = content.trim();
-        
+
         if (trimmed.isEmpty()) {
             throw new IllegalArgumentException("Message content cannot be blank");
         }
-        
+
         if (trimmed.length() < MIN_LENGTH) {
             throw new IllegalArgumentException(
-                String.format("Message content must be at least %d character(s)", MIN_LENGTH)
-            );
+                    String.format("Message content must be at least %d character(s)", MIN_LENGTH));
         }
-        
+
         if (trimmed.length() > MAX_LENGTH) {
             throw new IllegalArgumentException(
-                String.format("Message content cannot exceed %d characters", MAX_LENGTH)
-            );
+                    String.format("Message content cannot exceed %d characters", MAX_LENGTH));
         }
-        
+
         return new MessageContent(trimmed);
     }
-    
+
     /**
      * Get the length of the content
      */
     public int length() {
         return value.length();
     }
-    
+
     /**
      * Check if content contains a specific substring
      */
     public boolean contains(String substring) {
         return value.toLowerCase().contains(substring.toLowerCase());
     }
-    
+
     /**
      * Get a preview of the content (for notifications)
      * 
@@ -92,7 +90,7 @@ public class MessageContent {
         }
         return value.substring(0, maxLength - 3) + "...";
     }
-    
+
     @Override
     public String toString() {
         return value;

@@ -17,14 +17,14 @@ import java.time.LocalDateTime;
  */
 @Getter
 public class MessageSentEvent implements DomainEvent {
-    
+
     private final ConversationId conversationId;
     private final MessageId messageId;
     private final Long senderId;
     private final Long recipientId;
     private final String messagePreview;
     private final LocalDateTime occurredOn;
-    
+
     public MessageSentEvent(
             ConversationId conversationId,
             MessageId messageId,
@@ -38,12 +38,12 @@ public class MessageSentEvent implements DomainEvent {
         this.messagePreview = messagePreview;
         this.occurredOn = LocalDateTime.now();
     }
-    
+
     @Override
     public LocalDateTime getOccurredOn() {
         return occurredOn;
     }
-    
+
     @Override
     public Long getAggregateId() {
         return null; // Will be set after persistence

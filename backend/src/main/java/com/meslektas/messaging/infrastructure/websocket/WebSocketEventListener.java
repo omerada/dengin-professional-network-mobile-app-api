@@ -22,13 +22,13 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @RequiredArgsConstructor
 public class WebSocketEventListener {
-    
+
     private final SimpMessageSendingOperations messagingTemplate;
-    
+
     // Track active sessions per user
     // Key: userId, Value: Set of sessionIds
     private final Map<String, String> sessionUserMap = new ConcurrentHashMap<>();
-    
+
     /**
      * Handle new WebSocket connection
      */
@@ -37,18 +37,18 @@ public class WebSocketEventListener {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         Principal user = accessor.getUser();
         String sessionId = accessor.getSessionId();
-        
+
         if (user != null && sessionId != null) {
             String username = user.getName();
             sessionUserMap.put(sessionId, username);
-            
+
             log.info("WebSocket connected - User: {}, SessionId: {}", username, sessionId);
-            
+
             // Could broadcast online status here if needed
             // broadcastOnlineStatus(username, true);
         }
     }
-    
+
     /**
      * Handle WebSocket disconnection
      */
@@ -56,19 +56,19 @@ public class WebSocketEventListener {
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         String sessionId = accessor.getSessionId();
-        
+
         if (sessionId != null) {
             String username = sessionUserMap.remove(sessionId);
-            
+
             if (username != null) {
                 log.info("WebSocket disconnected - User: {}, SessionId: {}", username, sessionId);
-                
+
                 // Could broadcast offline status here if needed
                 // broadcastOnlineStatus(username, false);
             }
         }
     }
-    
+
     /**
      * Handle subscription events (for debugging/monitoring)
      */
@@ -77,26 +77,26 @@ public class WebSocketEventListener {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         String destination = accessor.getDestination();
         Principal user = accessor.getUser();
-        
+
         if (user != null && destination != null) {
             log.debug("User {} subscribed to {}", user.getName(), destination);
         }
     }
-    
+
     /**
      * Check if a user is currently connected
      */
     public boolean isUserOnline(String username) {
         return sessionUserMap.containsValue(username);
     }
-    
+
     /**
      * Get the number of active WebSocket connections
      */
     public int getActiveConnectionCount() {
         return sessionUserMap.size();
     }
-    
+
     /**
      * Get all connected usernames
      */

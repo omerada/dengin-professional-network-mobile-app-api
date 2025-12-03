@@ -19,21 +19,21 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GetMessagesQuery {
-    
+
     @NotNull(message = "Conversation ID is required")
     private UUID conversationId;
-    
+
     @Builder.Default
     private int page = 0;
-    
+
     @Builder.Default
     private int size = 30;
-    
+
     /**
      * If provided, load messages before this message ID (for "load more" pattern)
      */
     private UUID beforeMessageId;
-    
+
     /**
      * Maximum page size to prevent abuse
      */

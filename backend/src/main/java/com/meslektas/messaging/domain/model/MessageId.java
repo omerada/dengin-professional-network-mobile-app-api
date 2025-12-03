@@ -20,20 +20,20 @@ import java.util.UUID;
 @Getter
 @EqualsAndHashCode
 public class MessageId implements Serializable {
-    
+
     private UUID value;
-    
+
     private MessageId(UUID value) {
         this.value = value;
     }
-    
+
     /**
      * Generate a new unique message ID
      */
     public static MessageId generate() {
         return new MessageId(UUID.randomUUID());
     }
-    
+
     /**
      * Create from existing UUID
      */
@@ -43,7 +43,7 @@ public class MessageId implements Serializable {
         }
         return new MessageId(value);
     }
-    
+
     /**
      * Create from string representation
      */
@@ -53,7 +53,7 @@ public class MessageId implements Serializable {
         }
         return new MessageId(UUID.fromString(value));
     }
-    
+
     @Override
     public String toString() {
         return value.toString();

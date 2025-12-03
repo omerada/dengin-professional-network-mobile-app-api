@@ -17,28 +17,28 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Schema(description = "WebSocket error notification")
 public class WsErrorResponse {
-    
+
     @Schema(description = "Error code")
     private String code;
-    
+
     @Schema(description = "Error message")
     private String message;
-    
+
     @Schema(description = "Original action that caused the error")
     private String action;
-    
+
     @Schema(description = "When the error occurred")
     private LocalDateTime timestamp;
-    
+
     public static WsErrorResponse of(String code, String message, String action) {
         return WsErrorResponse.builder()
-            .code(code)
-            .message(message)
-            .action(action)
-            .timestamp(LocalDateTime.now())
-            .build();
+                .code(code)
+                .message(message)
+                .action(action)
+                .timestamp(LocalDateTime.now())
+                .build();
     }
-    
+
     // Common error codes
     public static final String CODE_UNAUTHORIZED = "UNAUTHORIZED";
     public static final String CODE_FORBIDDEN = "FORBIDDEN";

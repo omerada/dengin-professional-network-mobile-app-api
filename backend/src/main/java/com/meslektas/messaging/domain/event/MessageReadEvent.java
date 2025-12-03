@@ -16,13 +16,13 @@ import java.time.LocalDateTime;
  */
 @Getter
 public class MessageReadEvent implements DomainEvent {
-    
+
     private final ConversationId conversationId;
     private final MessageId messageId;
     private final Long senderId;
     private final Long readById;
     private final LocalDateTime occurredOn;
-    
+
     public MessageReadEvent(
             ConversationId conversationId,
             MessageId messageId,
@@ -34,12 +34,12 @@ public class MessageReadEvent implements DomainEvent {
         this.readById = readById;
         this.occurredOn = LocalDateTime.now();
     }
-    
+
     @Override
     public LocalDateTime getOccurredOn() {
         return occurredOn;
     }
-    
+
     @Override
     public Long getAggregateId() {
         return null; // Will be set after persistence

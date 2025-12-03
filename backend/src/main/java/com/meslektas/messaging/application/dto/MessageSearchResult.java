@@ -12,7 +12,7 @@ import java.util.UUID;
 @Value
 @Builder
 public class MessageSearchResult {
-    
+
     UUID messageId;
     UUID conversationId;
     UUID senderId;
@@ -21,10 +21,10 @@ public class MessageSearchResult {
     String contentHighlight; // Content with search terms highlighted
     LocalDateTime sentAt;
     double relevanceScore;
-    
+
     // Participant info for navigation
     ParticipantInfo otherParticipant;
-    
+
     @Value
     @Builder
     public static class ParticipantInfo {

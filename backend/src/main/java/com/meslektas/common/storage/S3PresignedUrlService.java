@@ -33,61 +33,59 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class S3PresignedUrlService {
-    
+
     private final S3Presigner s3Presigner;
-    
+
     @Value("${aws.s3.bucket}")
     private String bucketName;
-    
+
     @Value("${aws.s3.presigned-url-expiration:15}")
     private int presignedUrlExpirationMinutes;
-    
+
     /**
      * Generate presigned URL for uploading a message attachment.
      * 
      * @param conversationId The conversation ID for organizing files
-     * @param fileName Original filename (for extension extraction)
-     * @param contentType MIME type of the file
+     * @param fileName       Original filename (for extension extraction)
+     * @param contentType    MIME type of the file
      * @return PresignedUploadUrl containing URL and S3 key
      */
     public PresignedUploadUrl generateUploadUrl(
             UUID conversationId,
             String fileName,
-            String contentType
-    ) {
+            String contentType) {
         // Generate unique S3 key
         String extension = getExtension(fileName);
         String s3Key = String.format(
-            "message-attachments/%s/%s%s",
-            conversationId,
-            UUID.randomUUID(),
-            extension
-        );
-        
+                "message-attachments/%s/%s%s",
+                conversationId,
+                UUID.randomUUID(),
+                extension);
+
         // Build presigned PUT request
         PutObjectRequest putRequest = PutObjectRequest.builder()
-            .bucket(bucketName)
-            .key(s3Key)
-            .contentType(contentType)
-            .build();
-        
+                .bucket(bucketName)
+                .key(s3Key)
+                .contentType(contentType)
+                .build();
+
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-            .signatureDuration(Duration.ofMinutes(presignedUrlExpirationMinutes))
-            .putObjectRequest(putRequest)
-            .build();
-        
+                .signatureDuration(Duration.ofMinutes(presignedUrlExpirationMinutes))
+                .putObjectRequest(putRequest)
+                .build();
+
         PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
-        
-        log.info("Generated presigned upload URL for conversation {}, key: {}", 
-            conversationId, s3Key);
-        
+
+        log.info("Generated presigned upload URL for conversation {}, key: {}",
+                conversationId, s3Key);
+
         return PresignedUploadUrl.builder()
-            .uploadUrl(presignedRequest.url().toString())
-            .s3Key(s3Key)
-            .expiresIn(presignedUrlExpirationMinutes * 60) // seconds
-            .build();
+                .uploadUrl(presignedRequest.url().toString())
+                .s3Key(s3Key)
+                .expiresIn(presignedUrlExpirationMinutes * 60) // seconds
+                .build();
     }
-    
+
     /**
      * Generate presigned URL for downloading an attachment.
      * 
@@ -96,26 +94,26 @@ public class S3PresignedUrlService {
      */
     public String generateDownloadUrl(String s3Key) {
         GetObjectRequest getRequest = GetObjectRequest.builder()
-            .bucket(bucketName)
-            .key(s3Key)
-            .build();
-        
+                .bucket(bucketName)
+                .key(s3Key)
+                .build();
+
         GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
-            .signatureDuration(Duration.ofMinutes(presignedUrlExpirationMinutes))
-            .getObjectRequest(getRequest)
-            .build();
-        
+                .signatureDuration(Duration.ofMinutes(presignedUrlExpirationMinutes))
+                .getObjectRequest(getRequest)
+                .build();
+
         PresignedGetObjectRequest presignedRequest = s3Presigner.presignGetObject(presignRequest);
-        
+
         log.debug("Generated presigned download URL for key: {}", s3Key);
-        
+
         return presignedRequest.url().toString();
     }
-    
+
     /**
      * Validate that an S3 key is within allowed message attachment path.
      * 
-     * @param s3Key The S3 key to validate
+     * @param s3Key          The S3 key to validate
      * @param conversationId The conversation ID the attachment should belong to
      * @return true if valid
      */
@@ -123,12 +121,12 @@ public class S3PresignedUrlService {
         if (s3Key == null || s3Key.isBlank()) {
             return false;
         }
-        
+
         // Check prefix matches expected path
         String expectedPrefix = "message-attachments/" + conversationId + "/";
         return s3Key.startsWith(expectedPrefix);
     }
-    
+
     /**
      * Get file extension from filename.
      */
@@ -139,7 +137,7 @@ public class S3PresignedUrlService {
         int lastDot = fileName.lastIndexOf(".");
         return fileName.substring(lastDot).toLowerCase();
     }
-    
+
     /**
      * Presigned upload URL response
      */

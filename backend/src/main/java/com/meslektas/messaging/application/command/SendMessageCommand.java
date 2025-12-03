@@ -23,15 +23,15 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SendMessageCommand {
-    
+
     @NotNull(message = "Recipient ID is required")
     private UUID recipientId;
-    
+
     @Size(min = 1, max = 2000, message = "Message content must be between 1 and 2000 characters")
     private String content;
-    
+
     private AttachmentData attachment;
-    
+
     /**
      * Attachment data for message
      */
@@ -46,18 +46,18 @@ public class SendMessageCommand {
         private Long fileSize;
         private String fileName;
     }
-    
+
     /**
      * Validate that at least content or attachment is provided
      */
     public boolean hasContent() {
         return content != null && !content.isBlank();
     }
-    
+
     public boolean hasAttachment() {
         return attachment != null && attachment.getS3Key() != null;
     }
-    
+
     public void validate() {
         if (!hasContent() && !hasAttachment()) {
             throw new IllegalArgumentException("Message must have content or attachment");

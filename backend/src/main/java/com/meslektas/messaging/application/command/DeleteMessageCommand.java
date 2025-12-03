@@ -20,10 +20,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DeleteMessageCommand {
-    
+
     @NotNull(message = "Message ID is required")
     private UUID messageId;
-    
+
     @NotNull(message = "Conversation ID is required")
     private UUID conversationId;
 }

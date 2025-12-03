@@ -19,20 +19,20 @@ import java.util.UUID;
 @AllArgsConstructor
 @Schema(description = "Read receipt notification")
 public class WsReadReceipt {
-    
+
     @NotNull(message = "Conversation ID is required")
     @Schema(description = "Conversation ID")
     private UUID conversationId;
-    
+
     @Schema(description = "User ID who read the messages")
     private UUID readByUserId;
-    
+
     @Schema(description = "Last read message ID")
     private UUID lastReadMessageId;
-    
+
     @Schema(description = "Number of messages marked as read")
     private int messagesRead;
-    
+
     @Schema(description = "When the messages were read")
     private LocalDateTime readAt;
 }

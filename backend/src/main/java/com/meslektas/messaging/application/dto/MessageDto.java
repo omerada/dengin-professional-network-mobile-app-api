@@ -16,7 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MessageDto {
-    
+
     private UUID messageId;
     private UUID conversationId;
     private UUID senderId;

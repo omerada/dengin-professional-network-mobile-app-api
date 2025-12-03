@@ -18,15 +18,15 @@ import java.util.UUID;
 @AllArgsConstructor
 @Schema(description = "Typing indicator notification")
 public class WsTypingNotification {
-    
+
     @NotNull(message = "Conversation ID is required")
     @Schema(description = "Conversation ID")
     private UUID conversationId;
-    
+
     @NotNull(message = "Recipient ID is required")
     @Schema(description = "Recipient user ID")
     private UUID recipientId;
-    
+
     @Schema(description = "Whether user is currently typing")
     private boolean isTyping;
 }

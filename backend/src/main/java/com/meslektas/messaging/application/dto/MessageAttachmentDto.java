@@ -13,12 +13,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MessageAttachmentDto {
-    
+
     private String url;
     private String contentType;
     private Long fileSize;
     private String fileName;
-    
+
     /**
      * File size in KB for display
      */

@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConversationListResponse {
-    
+
     private List<ConversationDto> conversations;
     private int pageNumber;
     private int pageSize;

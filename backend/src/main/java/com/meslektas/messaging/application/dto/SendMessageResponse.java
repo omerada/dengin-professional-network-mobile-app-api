@@ -16,7 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SendMessageResponse {
-    
+
     private UUID messageId;
     private UUID conversationId;
     private String content;

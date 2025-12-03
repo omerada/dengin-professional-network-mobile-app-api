@@ -16,12 +16,12 @@ import java.time.LocalDateTime;
  */
 @Getter
 public class MessageDeletedEvent implements DomainEvent {
-    
+
     private final ConversationId conversationId;
     private final MessageId messageId;
     private final Long deletedById;
     private final LocalDateTime occurredOn;
-    
+
     public MessageDeletedEvent(
             ConversationId conversationId,
             MessageId messageId,
@@ -31,12 +31,12 @@ public class MessageDeletedEvent implements DomainEvent {
         this.deletedById = deletedById;
         this.occurredOn = LocalDateTime.now();
     }
-    
+
     @Override
     public LocalDateTime getOccurredOn() {
         return occurredOn;
     }
-    
+
     @Override
     public Long getAggregateId() {
         return null; // Will be set after persistence

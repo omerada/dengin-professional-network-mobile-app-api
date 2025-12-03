@@ -22,82 +22,78 @@ import java.net.URI;
 @Configuration
 public class AwsConfiguration {
 
-    @Value("${aws.access-key}")
-    private String accessKey;
+        @Value("${aws.access-key}")
+        private String accessKey;
 
-    @Value("${aws.secret-key}")
-    private String secretKey;
+        @Value("${aws.secret-key}")
+        private String secretKey;
 
-    @Value("${aws.region}")
-    private String region;
+        @Value("${aws.region}")
+        private String region;
 
-    @Value("${aws.endpoint:}")
-    private String endpoint;
+        @Value("${aws.endpoint:}")
+        private String endpoint;
 
-    /**
-     * Production S3 Client
-     */
-    @Bean
-    @Profile("prod")
-    public S3Client productionS3Client() {
-        log.info("Initializing production S3 client for region: {}", region);
+        /**
+         * Production S3 Client
+         */
+        @Bean
+        @Profile("prod")
+        public S3Client productionS3Client() {
+                log.info("Initializing production S3 client for region: {}", region);
 
-        return S3Client.builder()
-                .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(accessKey, secretKey)
-                ))
-                .build();
-    }
+                return S3Client.builder()
+                                .region(Region.of(region))
+                                .credentialsProvider(StaticCredentialsProvider.create(
+                                                AwsBasicCredentials.create(accessKey, secretKey)))
+                                .build();
+        }
 
-    /**
-     * Production S3 Presigner for presigned URLs
-     */
-    @Bean
-    @Profile("prod")
-    public S3Presigner productionS3Presigner() {
-        log.info("Initializing production S3 presigner for region: {}", region);
+        /**
+         * Production S3 Presigner for presigned URLs
+         */
+        @Bean
+        @Profile("prod")
+        public S3Presigner productionS3Presigner() {
+                log.info("Initializing production S3 presigner for region: {}", region);
 
-        return S3Presigner.builder()
-                .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(accessKey, secretKey)
-                ))
-                .build();
-    }
+                return S3Presigner.builder()
+                                .region(Region.of(region))
+                                .credentialsProvider(StaticCredentialsProvider.create(
+                                                AwsBasicCredentials.create(accessKey, secretKey)))
+                                .build();
+        }
 
-    /**
-     * Development S3 Client (LocalStack)
-     */
-    @Bean
-    @Profile("dev")
-    public S3Client developmentS3Client() {
-        log.info("Initializing LocalStack S3 client with endpoint: {}", endpoint);
+        /**
+         * Development S3 Client (LocalStack)
+         */
+        @Bean
+        @Profile("dev")
+        public S3Client developmentS3Client() {
+                log.info("Initializing LocalStack S3 client with endpoint: {}", endpoint);
 
-        return S3Client.builder()
-                .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(accessKey, secretKey)
-                ))
-                .endpointOverride(URI.create(endpoint))
-                .forcePathStyle(true) // Required for LocalStack
-                .build();
-    }
+                return S3Client.builder()
+                                .region(Region.of(region))
+                                .credentialsProvider(StaticCredentialsProvider.create(
+                                                AwsBasicCredentials.create(accessKey, secretKey)))
+                                .endpointOverride(URI.create(endpoint))
+                                .forcePathStyle(true) // Required for LocalStack
+                                .build();
+        }
 
-    /**
-     * Development S3 Presigner (LocalStack)
-     */
-    @Bean
-    @Profile("dev")
-    public S3Presigner developmentS3Presigner() {
-        log.info("Initializing LocalStack S3 presigner with endpoint: {}", endpoint);
+        /**
+         * Development S3 Presigner (LocalStack)
+         */
+        @Bean
+        @Profile("dev")
+        public S3Presigner developmentS3Presigner() {
+                log.info("Initializing LocalStack S3 presigner with endpoint: {}", endpoint);
 
-        return S3Presigner.builder()
-                .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(accessKey, secretKey)
-                ))
-                .endpointOverride(URI.create(endpoint))
-                .build();
-    }
+                return S3Presigner.builder()
+                                .region(Region.of(region))
+                                .credentialsProvider(StaticCredentialsProvider.create(
+                                                AwsBasicCredentials.create(accessKey, secretKey)))
+                                .endpointOverride(URI.create(endpoint))
+                                .build();
+        }
 }

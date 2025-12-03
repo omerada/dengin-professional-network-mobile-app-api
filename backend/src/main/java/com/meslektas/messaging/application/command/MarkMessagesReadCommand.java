@@ -20,10 +20,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MarkMessagesReadCommand {
-    
+
     @NotNull(message = "Conversation ID is required")
     private UUID conversationId;
-    
+
     /**
      * If provided, marks all messages up to and including this message as read.
      * If null, marks all unread messages as read.

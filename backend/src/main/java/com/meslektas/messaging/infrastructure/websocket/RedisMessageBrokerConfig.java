@@ -18,17 +18,17 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * 
  * Message Flow:
  * User A (Instance 1) → Send Message → Redis Pub/Sub →
- *   → Instance 1 (User A receives acknowledgment)
- *   → Instance 2 (User B receives message)
+ * → Instance 1 (User A receives acknowledgment)
+ * → Instance 2 (User B receives message)
  */
 @Configuration
 public class RedisMessageBrokerConfig {
-    
+
     public static final String MESSAGING_TOPIC = "meslektas:messaging";
     public static final String TYPING_TOPIC = "meslektas:typing";
     public static final String READ_RECEIPT_TOPIC = "meslektas:read-receipts";
     public static final String PRESENCE_TOPIC = "meslektas:presence";
-    
+
     /**
      * Redis message listener container for handling pub/sub messages
      */
@@ -39,7 +39,7 @@ public class RedisMessageBrokerConfig {
         container.setConnectionFactory(connectionFactory);
         return container;
     }
-    
+
     /**
      * Redis template for publishing messages to topics
      */
@@ -55,7 +55,7 @@ public class RedisMessageBrokerConfig {
         template.afterPropertiesSet();
         return template;
     }
-    
+
     /**
      * Topic for new message notifications
      */
@@ -63,7 +63,7 @@ public class RedisMessageBrokerConfig {
     public ChannelTopic messagingTopic() {
         return new ChannelTopic(MESSAGING_TOPIC);
     }
-    
+
     /**
      * Topic for typing indicator notifications
      */
@@ -71,7 +71,7 @@ public class RedisMessageBrokerConfig {
     public ChannelTopic typingTopic() {
         return new ChannelTopic(TYPING_TOPIC);
     }
-    
+
     /**
      * Topic for read receipt notifications
      */
@@ -79,7 +79,7 @@ public class RedisMessageBrokerConfig {
     public ChannelTopic readReceiptTopic() {
         return new ChannelTopic(READ_RECEIPT_TOPIC);
     }
-    
+
     /**
      * Topic for user presence (online/offline) notifications
      */

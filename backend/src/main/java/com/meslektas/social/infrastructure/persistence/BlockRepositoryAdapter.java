@@ -17,49 +17,49 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class BlockRepositoryAdapter implements BlockRepository {
-    
+
     private final JpaBlockRepository jpaRepository;
-    
+
     @Override
     public Block save(Block block) {
         return jpaRepository.save(block);
     }
-    
+
     @Override
     public Optional<Block> findById(Long id) {
         return jpaRepository.findById(id);
     }
-    
+
     @Override
     public Optional<Block> findByBlockerIdAndBlockedId(Long blockerId, Long blockedId) {
         return jpaRepository.findByBlockerIdAndBlockedId(blockerId, blockedId);
     }
-    
+
     @Override
     public boolean existsByBlockerAndBlocked(Long blockerId, Long blockedId) {
         return jpaRepository.existsByBlockerAndBlocked(blockerId, blockedId);
     }
-    
+
     @Override
     public List<Block> findByBlockerId(Long blockerId) {
         return jpaRepository.findByBlockerId(blockerId);
     }
-    
+
     @Override
     public List<Block> findByBlockedId(Long blockedId) {
         return jpaRepository.findByBlockedId(blockedId);
     }
-    
+
     @Override
     public int countByBlockerId(Long blockerId) {
         return jpaRepository.countByBlockerId(blockerId);
     }
-    
+
     @Override
     public void delete(Block block) {
         jpaRepository.delete(block);
     }
-    
+
     @Override
     public void deleteByBlockerIdAndBlockedId(Long blockerId, Long blockedId) {
         jpaRepository.deleteByBlockerIdAndBlockedId(blockerId, blockedId);
