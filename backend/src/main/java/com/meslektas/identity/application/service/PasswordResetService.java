@@ -2,8 +2,8 @@ package com.meslektas.identity.application.service;
 
 import com.meslektas.common.exception.BusinessException;
 import com.meslektas.common.exception.ResourceNotFoundException;
-import com.meslektas.identity.application.dto.PasswordResetConfirmRequest;
-import com.meslektas.identity.application.dto.PasswordResetRequest;
+import com.meslektas.identity.application.dto.request.PasswordResetConfirmRequest;
+import com.meslektas.identity.application.dto.request.PasswordResetRequest;
 import com.meslektas.identity.domain.event.PasswordChangedEvent;
 import com.meslektas.identity.domain.model.User;
 import com.meslektas.identity.domain.repository.UserRepository;
@@ -100,11 +100,10 @@ public class PasswordResetService {
         // Store token in Redis
         String redisKey = RESET_TOKEN_PREFIX + resetToken;
         redisTemplate.opsForValue().set(
-            redisKey,
-            user.getId().toString(),
-            RESET_TOKEN_TTL_MINUTES,
-            TimeUnit.MINUTES
-        );
+                redisKey,
+                user.getId().toString(),
+                RESET_TOKEN_TTL_MINUTES,
+                TimeUnit.MINUTES);
 
         log.info("Password reset token generated and stored: email={}, token={}", email, resetToken);
 
@@ -139,9 +138,8 @@ public class PasswordResetService {
         // Validate passwords match
         if (!request.passwordsMatch()) {
             throw new BusinessException(
-                "Şifreler eşleşmiyor",
-                "PASSWORDS_DO_NOT_MATCH"
-            );
+                    "Şifreler eşleşmiyor",
+                    "PASSWORDS_DO_NOT_MATCH");
         }
 
         // Validate token
@@ -151,9 +149,8 @@ public class PasswordResetService {
         if (userIdStr == null) {
             log.warn("Invalid or expired reset token: {}", resetToken);
             throw new BusinessException(
-                "Geçersiz veya süresi dolmuş token",
-                "INVALID_RESET_TOKEN"
-            );
+                    "Geçersiz veya süresi dolmuş token",
+                    "INVALID_RESET_TOKEN");
         }
 
         // Find user
@@ -176,9 +173,9 @@ public class PasswordResetService {
 
         // Publish PasswordChangedEvent (to invalidate all sessions)
         eventPublisher.publishEvent(new PasswordChangedEvent(
-            userId,
-            user.getEmail(),
-            true // isPasswordReset = true
+                userId,
+                user.getEmail(),
+                true // isPasswordReset = true
         ));
 
         // Send confirmation email
@@ -225,7 +222,7 @@ public class PasswordResetService {
      * 
      * TODO: Implement EmailService in future sprint
      * 
-     * @param user User
+     * @param user       User
      * @param resetToken Reset token
      */
     private void sendResetEmail(User user, String resetToken) {
@@ -236,7 +233,8 @@ public class PasswordResetService {
         log.info("Reset link: {}", resetLink);
 
         // TODO: Implement actual email sending
-        // emailService.sendPasswordResetEmail(user.getEmail(), user.getName(), resetLink);
+        // emailService.sendPasswordResetEmail(user.getEmail(), user.getName(),
+        // resetLink);
     }
 
     /**
@@ -250,6 +248,7 @@ public class PasswordResetService {
         log.info("Password reset confirmation email would be sent to: {}", user.getEmail());
 
         // TODO: Implement actual email sending
-        // emailService.sendPasswordResetConfirmationEmail(user.getEmail(), user.getName());
+        // emailService.sendPasswordResetConfirmationEmail(user.getEmail(),
+        // user.getName());
     }
 }

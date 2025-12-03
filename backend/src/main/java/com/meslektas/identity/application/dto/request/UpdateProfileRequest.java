@@ -1,4 +1,4 @@
-package com.meslektas.identity.application.dto;
+package com.meslektas.identity.application.dto.request;
 
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -29,25 +29,24 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateProfileRequest {
-    
+
     @NotBlank(message = "Ad boş olamaz")
     @Size(min = 2, max = 100, message = "Ad 2-100 karakter arasında olmalı")
     private String name;
-    
+
     @NotBlank(message = "Soyad boş olamaz")
     @Size(min = 2, max = 100, message = "Soyad 2-100 karakter arasında olmalı")
     private String surname;
-    
+
     @Size(max = 500, message = "Bio maksimum 500 karakter olabilir")
     private String bio;
-    
+
     @Past(message = "Doğum tarihi geçmişte olmalı")
     private LocalDate dateOfBirth;
-    
-    @Pattern(regexp = "MALE|FEMALE|OTHER|PREFER_NOT_TO_SAY", 
-             message = "Geçerli cinsiyet değeri giriniz")
+
+    @Pattern(regexp = "MALE|FEMALE|OTHER|PREFER_NOT_TO_SAY", message = "Geçerli cinsiyet değeri giriniz")
     private String gender;
-    
+
     /**
      * Validate minimum age (13 years)
      */
@@ -55,7 +54,7 @@ public class UpdateProfileRequest {
         if (dateOfBirth == null) {
             return true; // Optional field
         }
-        
+
         LocalDate minDate = LocalDate.now().minusYears(13);
         return dateOfBirth.isBefore(minDate);
     }

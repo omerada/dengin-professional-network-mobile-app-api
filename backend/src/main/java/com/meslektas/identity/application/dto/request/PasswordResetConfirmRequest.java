@@ -1,4 +1,4 @@
-package com.meslektas.identity.application.dto;
+package com.meslektas.identity.application.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -29,21 +29,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PasswordResetConfirmRequest {
-    
+
     @NotBlank(message = "Reset token boş olamaz")
     private String resetToken;
-    
+
     @NotBlank(message = "Şifre boş olamaz")
     @Size(min = 8, max = 100, message = "Şifre 8-100 karakter arasında olmalı")
-    @Pattern(
-        regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
-        message = "Şifre en az 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter içermelidir"
-    )
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$", message = "Şifre en az 1 büyük harf, 1 küçük harf, 1 rakam ve 1 özel karakter içermelidir")
     private String newPassword;
-    
+
     @NotBlank(message = "Şifre tekrarı boş olamaz")
     private String confirmPassword;
-    
+
     /**
      * Validate that passwords match
      */

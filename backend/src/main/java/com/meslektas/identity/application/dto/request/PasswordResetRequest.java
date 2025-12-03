@@ -1,4 +1,4 @@
-package com.meslektas.identity.application.dto;
+package com.meslektas.identity.application.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PasswordResetRequest {
-    
+
     @NotBlank(message = "Email boş olamaz")
     @Email(message = "Geçerli bir email adresi giriniz")
     private String email;

@@ -1,0 +1,59 @@
+# Test Profile Configuration
+# Meslektaş Backend - Sprint 2
+
+spring:
+  # Datasource - Use H2 for testing
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  # JPA Configuration
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # Flyway - Disable for testing
+  flyway:
+    enabled: false
+
+  # Redis - Use embedded Redis or mock
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+# JWT Configuration
+jwt:
+  secret: test-secret-key-for-jwt-token-generation-must-be-at-least-256-bits-long-for-hs256
+  expiration: 900000 # 15 minutes
+  refresh-expiration: 604800000 # 7 days
+
+# AWS Configuration - Mock for testing
+aws:
+  s3:
+    bucket-name: test-bucket
+    region: us-east-1
+    access-key: test-access-key
+    secret-key: test-secret-key
+    endpoint: http://localhost:4566
+
+# Storage Configuration
+storage:
+  type: local
+  local:
+    path: ./test-uploads
+  max-file-size: 5MB
+
+# Logging
+logging:
+  level:
+    com.meslektas: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG

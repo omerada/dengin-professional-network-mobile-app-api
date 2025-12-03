@@ -4,8 +4,8 @@ import com.meslektas.common.exception.BusinessException;
 import com.meslektas.common.exception.ResourceNotFoundException;
 import com.meslektas.common.storage.ImageProcessor;
 import com.meslektas.common.storage.StorageService;
-import com.meslektas.identity.application.dto.UpdateProfileRequest;
-import com.meslektas.identity.application.dto.UserProfileResponse;
+import com.meslektas.identity.application.dto.request.UpdateProfileRequest;
+import com.meslektas.identity.application.dto.response.UserProfileResponse;
 import com.meslektas.identity.application.dto.request.ChangeProfessionRequest;
 import com.meslektas.identity.application.dto.request.UpdateUserRequest;
 import com.meslektas.identity.application.dto.response.UserResponse;
@@ -59,45 +59,45 @@ public class UserService {
 
         return userMapper.toResponse(user);
     }
-    
+
     /**
      * Get user profile by ID (Long)
      * 
      * Returns full profile if requesting user is viewing their own profile,
      * otherwise returns limited profile based on privacy settings.
      * 
-     * @param userId User ID to fetch
-     * @param requestingUserId ID of the user making the request (null for public access)
+     * @param userId           User ID to fetch
+     * @param requestingUserId ID of the user making the request (null for public
+     *                         access)
      * @return UserProfileResponse
      */
     @Transactional(readOnly = true)
     public UserProfileResponse getUserProfile(Long userId, Long requestingUserId) {
         log.info("Fetching user profile: userId={}, requestingUserId={}", userId, requestingUserId);
-        
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
-        
+
         // Check if user is active
         if (!user.isActive()) {
             throw new BusinessException(
                     "Bu kullanıcının hesabı aktif değil",
-                    "USER_NOT_ACTIVE"
-            );
+                    "USER_NOT_ACTIVE");
         }
-        
+
         // Map to full profile response
         UserProfileResponse profile = userMapper.toProfileResponse(user);
-        
+
         // If requesting user is viewing another user's profile, apply privacy rules
         if (requestingUserId != null && !userId.equals(requestingUserId)) {
             // Return limited profile (hide sensitive fields)
             profile = UserProfileResponse.createLimitedProfile(profile);
             log.debug("Returning limited profile for user: {}", userId);
         }
-        
+
         return profile;
     }
-    
+
     /**
      * Update user profile with new DTO
      * 
@@ -106,50 +106,48 @@ public class UserService {
      * - Profile completeness is recalculated
      * - ProfileUpdatedEvent is published
      * 
-     * @param userId User ID
+     * @param userId  User ID
      * @param request Update profile request
      * @return Updated user profile
      */
     @Transactional
     public UserProfileResponse updateUserProfile(Long userId, UpdateProfileRequest request) {
         log.info("Updating user profile: userId={}", userId);
-        
+
         // Validate age if date of birth provided
         if (request.getDateOfBirth() != null && !request.isValidAge()) {
             throw new BusinessException(
                     "Kullanıcı en az 13 yaşında olmalıdır",
-                    "INVALID_AGE"
-            );
+                    "INVALID_AGE");
         }
-        
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
-        
+
         // Update profile using domain behavior
         user.updateProfile(
-            request.getName(),
-            request.getSurname(),
-            request.getBio(),
-            request.getDateOfBirth()
-        );
-        
+                request.getName(),
+                request.getSurname(),
+                request.getBio(),
+                request.getDateOfBirth());
+
         // Update gender if provided
         if (request.getGender() != null) {
             user.setGender(request.getGender());
         }
-        
+
         // Save
         User updatedUser = userRepository.save(user);
-        
+
         // Publish domain events
         updatedUser.getEvents().forEach(eventPublisher::publishEvent);
         updatedUser.clearEvents();
-        
+
         log.info("User profile updated successfully: userId={}", userId);
-        
+
         return userMapper.toProfileResponse(updatedUser);
     }
-    
+
     /**
      * Update user avatar
      * 
@@ -158,17 +156,17 @@ public class UserService {
      * - ProfileUpdatedEvent is published
      * - Profile completeness is recalculated
      * 
-     * @param userId User ID
+     * @param userId    User ID
      * @param avatarUrl New avatar URL from storage
      * @return Updated user profile
      */
     @Transactional
     public UserProfileResponse updateUserAvatar(Long userId, String avatarUrl) {
         log.info("Updating user avatar: userId={}, avatarUrl={}", userId, avatarUrl);
-        
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
-        
+
         // Delete old avatar if exists
         if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
             try {
@@ -179,19 +177,19 @@ public class UserService {
                 // Continue even if deletion fails
             }
         }
-        
+
         // Update avatar using domain behavior
         user.updateAvatar(avatarUrl);
-        
+
         // Save
         User updatedUser = userRepository.save(user);
-        
+
         // Publish domain events
         updatedUser.getEvents().forEach(eventPublisher::publishEvent);
         updatedUser.clearEvents();
-        
+
         log.info("User avatar updated successfully: userId={}", userId);
-        
+
         return userMapper.toProfileResponse(updatedUser);
     }
 
@@ -209,8 +207,7 @@ public class UserService {
         if (!user.isActive()) {
             throw new BusinessException(
                     "User account is not active",
-                    "USER_NOT_ACTIVE"
-            );
+                    "USER_NOT_ACTIVE");
         }
 
         return userMapper.toResponse(user);
@@ -229,14 +226,13 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
 
         // Update basic info
-        if (request.name() != null || request.surname() != null || 
-            request.bio() != null || request.dateOfBirth() != null) {
+        if (request.name() != null || request.surname() != null ||
+                request.bio() != null || request.dateOfBirth() != null) {
             user.updateProfile(
                     request.name() != null ? request.name() : user.getName(),
                     request.surname() != null ? request.surname() : user.getSurname(),
                     request.bio(),
-                    request.dateOfBirth()
-            );
+                    request.dateOfBirth());
         }
 
         // Update gender if provided
@@ -267,7 +263,7 @@ public class UserService {
     /**
      * Change user profession
      * 
-     * Business Rule (BR-003): 
+     * Business Rule (BR-003):
      * - Verified profession cannot be changed (except general category)
      * - Unverified users can change freely
      */
@@ -367,4 +363,3 @@ public class UserService {
         log.info("Account deleted successfully: {}", userId);
     }
 }
-

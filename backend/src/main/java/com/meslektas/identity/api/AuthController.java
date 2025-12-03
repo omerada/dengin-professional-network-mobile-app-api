@@ -1,8 +1,8 @@
 package com.meslektas.identity.api;
 
 import com.meslektas.common.api.ApiResponse;
-import com.meslektas.identity.application.dto.PasswordResetConfirmRequest;
-import com.meslektas.identity.application.dto.PasswordResetRequest;
+import com.meslektas.identity.application.dto.request.PasswordResetConfirmRequest;
+import com.meslektas.identity.application.dto.request.PasswordResetRequest;
 import com.meslektas.identity.application.dto.request.LoginRequest;
 import com.meslektas.identity.application.dto.request.RegisterRequest;
 import com.meslektas.identity.application.dto.response.LoginResponse;
@@ -44,8 +44,7 @@ public class AuthController {
     @PostMapping("/register")
     @Operation(summary = "Register new user", description = "Create a new user account with email and password")
     public ResponseEntity<ApiResponse<UserResponse>> register(
-            @Valid @RequestBody RegisterRequest request
-    ) {
+            @Valid @RequestBody RegisterRequest request) {
         UserResponse user = authService.register(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -55,8 +54,7 @@ public class AuthController {
     @PostMapping("/login")
     @Operation(summary = "Login", description = "Authenticate user and get JWT token")
     public ResponseEntity<ApiResponse<LoginResponse>> login(
-            @Valid @RequestBody LoginRequest request
-    ) {
+            @Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
         return ResponseEntity.ok(ApiResponse.success("Login successful", response));
     }
@@ -64,8 +62,7 @@ public class AuthController {
     @PostMapping("/refresh")
     @Operation(summary = "Refresh token", description = "Get new access token using refresh token")
     public ResponseEntity<ApiResponse<LoginResponse>> refreshToken(
-            @RequestHeader("Refresh-Token") String refreshToken
-    ) {
+            @RequestHeader("Refresh-Token") String refreshToken) {
         LoginResponse response = authService.refreshToken(refreshToken);
         return ResponseEntity.ok(ApiResponse.success("Token refreshed", response));
     }
@@ -76,7 +73,7 @@ public class AuthController {
         authService.logout();
         return ResponseEntity.ok(ApiResponse.success("Logout successful", null));
     }
-    
+
     /**
      * POST /api/auth/password-reset/request
      * Request password reset
@@ -95,21 +92,17 @@ public class AuthController {
      * @return 204 No Content
      */
     @PostMapping("/password-reset/request")
-    @Operation(
-        summary = "Request password reset",
-        description = "Sends password reset email. Always returns success to prevent email enumeration."
-    )
+    @Operation(summary = "Request password reset", description = "Sends password reset email. Always returns success to prevent email enumeration.")
     public ResponseEntity<Void> requestPasswordReset(
-            @Valid @RequestBody PasswordResetRequest request
-    ) {
+            @Valid @RequestBody PasswordResetRequest request) {
         log.info("POST /api/auth/password-reset/request - email: {}", request.getEmail());
-        
+
         passwordResetService.requestPasswordReset(request);
-        
+
         // Always return 204 No Content (security: prevent email enumeration)
         return ResponseEntity.noContent().build();
     }
-    
+
     /**
      * POST /api/auth/password-reset/confirm
      * Confirm password reset
@@ -126,19 +119,14 @@ public class AuthController {
      * @return 200 OK with success message
      */
     @PostMapping("/password-reset/confirm")
-    @Operation(
-        summary = "Confirm password reset",
-        description = "Validates reset token and updates password. Invalidates all user sessions."
-    )
+    @Operation(summary = "Confirm password reset", description = "Validates reset token and updates password. Invalidates all user sessions.")
     public ResponseEntity<ApiResponse<Void>> confirmPasswordReset(
-            @Valid @RequestBody PasswordResetConfirmRequest request
-    ) {
+            @Valid @RequestBody PasswordResetConfirmRequest request) {
         log.info("POST /api/auth/password-reset/confirm - token: {}", request.getResetToken());
-        
+
         passwordResetService.confirmPasswordReset(request);
-        
+
         return ResponseEntity.ok(
-            ApiResponse.success("Şifreniz başarıyla sıfırlandı", null)
-        );
+                ApiResponse.success("Şifreniz başarıyla sıfırlandı", null));
     }
 }

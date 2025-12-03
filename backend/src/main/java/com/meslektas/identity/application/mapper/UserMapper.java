@@ -1,6 +1,6 @@
 package com.meslektas.identity.application.mapper;
 
-import com.meslektas.identity.application.dto.UserProfileResponse;
+import com.meslektas.identity.application.dto.response.UserProfileResponse;
 import com.meslektas.identity.application.dto.response.UserResponse;
 import com.meslektas.identity.domain.model.User;
 import org.mapstruct.*;
@@ -14,16 +14,12 @@ import org.mapstruct.*;
  * - User -> UserResponse (for auth responses)
  * - User -> UserProfileResponse (for profile endpoints)
  */
-@Mapper(
-        componentModel = "spring",
-        uses = {ProfessionMapper.class},
-        unmappedTargetPolicy = ReportingPolicy.IGNORE
-)
+@Mapper(componentModel = "spring", uses = { ProfessionMapper.class }, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
 
     @Mapping(target = "fullName", expression = "java(user.getFullName())")
     UserResponse toResponse(User user);
-    
+
     /**
      * Map User entity to UserProfileResponse
      * 
@@ -49,4 +45,3 @@ public interface UserMapper {
         // Additional custom mapping logic if needed
     }
 }
-
