@@ -472,13 +472,17 @@ export const messageQueue = new MessageQueue();
 **src/core/socket/socketEvents.ts:**
 
 ```typescript
-import { socketClient } from "./socketClient";
+import { stompClient } from "./stompClient";
 import { queryClient } from "@config/queryClient";
+import type { WsMessageResponse, WsReadReceipt, WsNotification } from "./types";
+
+// Unsubscribe functions
+let unsubscribers: (() => void)[] = [];
 
 // Setup socket event listeners
 export const setupSocketEvents = () => {
-  // New message
-  socketClient.on("message:new", (data) => {
+  // New message received
+  const unsubMessage = stompClient.on<WsMessageResponse>("message", (data) => {
     console.log("New message received:", data);
 
     // Invalidate messages query
@@ -491,80 +495,61 @@ export const setupSocketEvents = () => {
       queryKey: ["conversations"],
     });
   });
+  unsubscribers.push(unsubMessage);
 
-  // Message delivered
-  socketClient.on("message:delivered", (data) => {
-    console.log("Message delivered:", data.messageId);
-
-    // Update message status in cache
-    queryClient.setQueriesData({ queryKey: ["messages"] }, (oldData: any) => {
-      if (!oldData) return oldData;
-
-      return {
-        ...oldData,
-        pages: oldData.pages.map((page: any) => ({
-          ...page,
-          messages: page.messages.map((msg: any) =>
-            msg.id === data.messageId ? { ...msg, status: "delivered" } : msg
-          ),
-        })),
-      };
-    });
-  });
-
-  // Message read
-  socketClient.on("message:read", (data) => {
-    console.log("Message read:", data.messageId);
+  // Read receipt received
+  const unsubRead = stompClient.on<WsReadReceipt>("read", (data) => {
+    console.log("Messages read:", data.conversationId);
 
     // Update message status in cache
-    queryClient.setQueriesData({ queryKey: ["messages"] }, (oldData: any) => {
-      if (!oldData) return oldData;
+    queryClient.setQueriesData(
+      { queryKey: ["messages", data.conversationId] },
+      (oldData: any) => {
+        if (!oldData) return oldData;
 
-      return {
-        ...oldData,
-        pages: oldData.pages.map((page: any) => ({
-          ...page,
-          messages: page.messages.map((msg: any) =>
-            msg.id === data.messageId ? { ...msg, status: "read" } : msg
-          ),
-        })),
-      };
-    });
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: any) => ({
+            ...page,
+            messages: page.messages.map((msg: any) => ({
+              ...msg,
+              status: "read",
+            })),
+          })),
+        };
+      }
+    );
   });
+  unsubscribers.push(unsubRead);
 
-  // User online/offline
-  socketClient.on("user:online", (data) => {
-    console.log("User online:", data.userId);
-    // Update user status in cache
+  // New notification received
+  const unsubNotification = stompClient.on<WsNotification>(
+    "notification",
+    (data) => {
+      console.log("New notification:", data);
+
+      // Invalidate notifications query
+      queryClient.invalidateQueries({
+        queryKey: ["notifications"],
+      });
+
+      // Show local notification
+      // notifeeService.displayNotification(data);
+    }
+  );
+  unsubscribers.push(unsubNotification);
+
+  // Error received
+  const unsubError = stompClient.on("error", (data) => {
+    console.error("WebSocket error:", data);
   });
-
-  socketClient.on("user:offline", (data) => {
-    console.log("User offline:", data.userId);
-    // Update user status in cache
-  });
-
-  // New notification
-  socketClient.on("notification:new", (data) => {
-    console.log("New notification:", data);
-
-    // Invalidate notifications query
-    queryClient.invalidateQueries({
-      queryKey: ["notifications"],
-    });
-
-    // Show local notification
-    // notifeeService.displayNotification(data);
-  });
+  unsubscribers.push(unsubError);
 };
 
 // Cleanup socket events
 export const cleanupSocketEvents = () => {
-  socketClient.off("message:new");
-  socketClient.off("message:delivered");
-  socketClient.off("message:read");
-  socketClient.off("user:online");
-  socketClient.off("user:offline");
-  socketClient.off("notification:new");
+  unsubscribers.forEach((unsub) => unsub());
+  unsubscribers = [];
 };
 ```
 
@@ -575,18 +560,22 @@ export const cleanupSocketEvents = () => {
 **Initialize socket:**
 
 ```typescript
-import { socketClient } from "@core/socket/socketClient";
-import { setupSocketEvents } from "@core/socket/socketEvents";
+import { stompClient } from "@core/socket/stompClient";
+import {
+  setupSocketEvents,
+  cleanupSocketEvents,
+} from "@core/socket/socketEvents";
 
 // In App.tsx
 useEffect(() => {
   if (isAuthenticated) {
-    socketClient.connect();
+    stompClient.connect();
     setupSocketEvents();
   }
 
   return () => {
-    socketClient.disconnect();
+    cleanupSocketEvents();
+    stompClient.disconnect();
   };
 }, [isAuthenticated]);
 ```
@@ -594,24 +583,45 @@ useEffect(() => {
 **Send message:**
 
 ```typescript
-import { socketClient } from "@core/socket/socketClient";
+import { stompClient } from "@core/socket/stompClient";
 
-// Send message via socket
-socketClient.emit("message:send", {
-  conversationId: "123",
+// Send message via STOMP WebSocket
+stompClient.sendMessage({
+  recipientId: 123,
   content: "Hello!",
-  type: "text",
 });
+```
+
+**Send typing indicator:**
+
+```typescript
+import { stompClient } from "@core/socket/stompClient";
+
+// Notify typing started
+stompClient.sendTyping("conversation-uuid", 123, true);
+
+// Notify typing stopped
+stompClient.sendTyping("conversation-uuid", 123, false);
+```
+
+**Mark messages as read:**
+
+```typescript
+import { stompClient } from "@core/socket/stompClient";
+
+// Mark conversation messages as read
+stompClient.markAsRead("conversation-uuid");
 ```
 
 **Listen to events:**
 
 ```typescript
-import { socketClient } from "@core/socket/socketClient";
+import { stompClient } from "@core/socket/stompClient";
+import type { WsMessageResponse } from "@core/socket/types";
 
 useEffect(() => {
-  const unsubscribe = socketClient.on("message:new", (message) => {
-    console.log("New message:", message);
+  const unsubscribe = stompClient.on<WsMessageResponse>("message", (data) => {
+    console.log("New message:", data);
   });
 
   return unsubscribe;
@@ -625,8 +635,9 @@ useEffect(() => {
 **src/core/socket/connectionMonitor.ts:**
 
 ```typescript
-import { AppState, NetInfo } from "react-native";
-import { socketClient } from "./socketClient";
+import { AppState } from "react-native";
+import NetInfo from "@react-native-community/netinfo";
+import { stompClient } from "./stompClient";
 
 export class ConnectionMonitor {
   private appStateSubscription: any;
@@ -636,18 +647,18 @@ export class ConnectionMonitor {
     // Monitor app state
     this.appStateSubscription = AppState.addEventListener("change", (state) => {
       if (state === "active") {
-        if (!socketClient.isConnected()) {
-          socketClient.connect();
+        if (!stompClient.isConnected()) {
+          stompClient.connect();
         }
       }
     });
 
     // Monitor network state
     this.netInfoSubscription = NetInfo.addEventListener((state) => {
-      if (state.isConnected && !socketClient.isConnected()) {
-        socketClient.connect();
+      if (state.isConnected && !stompClient.isConnected()) {
+        stompClient.connect();
       } else if (!state.isConnected) {
-        socketClient.disconnect();
+        stompClient.disconnect();
       }
     });
   }
@@ -667,10 +678,10 @@ export const connectionMonitor = new ConnectionMonitor();
 
 ### Features:
 
-- ✅ Socket.IO client with TypeScript
-- ✅ Auto-reconnection logic
+- ✅ STOMP over WebSocket with SockJS fallback
+- ✅ Auto-reconnection with exponential backoff
 - ✅ Offline message queuing
-- ✅ Event subscription/unsubscription
+- ✅ Event subscription/unsubscription pattern
 - ✅ Connection monitoring (app state, network)
 - ✅ Integration with React Query
 - ✅ Message delivery tracking

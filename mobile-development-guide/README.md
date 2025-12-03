@@ -33,7 +33,8 @@ Bu guide, **React Native** ile production-ready mobile app geliştirmek için ge
 - **[10-API-CLIENT.md](./core/10-API-CLIENT.md)** - Axios, interceptors, error handling
 - **[11-STORAGE.md](./core/11-STORAGE.md)** - AsyncStorage, secure storage, caching
 - **[12-MEDIA-HANDLING.md](./core/12-MEDIA-HANDLING.md)** - Camera, image picker, compression
-- **[13-REAL-TIME.md](./core/13-REAL-TIME.md)** - WebSocket, Socket.IO, real-time updates
+- **[13-REAL-TIME.md](./core/13-REAL-TIME.md)** - STOMP WebSocket, SockJS, real-time updates
+- **[14-BACKEND-API-REFERENCE.md](./core/14-BACKEND-API-REFERENCE.md)** - Complete Backend API Reference
 
 ### 4️⃣ State Management
 
@@ -100,7 +101,7 @@ Navigation: React Navigation 6.x
 State Management: Zustand + React Query
 UI Library: React Native Paper / Custom
 HTTP Client: Axios
-Real-time: Socket.IO Client
+Real-time: STOMP/SockJS (Spring WebSocket)
 Storage: AsyncStorage + SecureStore
 Image Handling: react-native-image-picker
 Camera: react-native-vision-camera
@@ -275,8 +276,9 @@ Sprint 11-12: Polish + Release (Performance, Store)
 
 ### 📨 Real-time Requirements
 
-**Socket.IO Client:**
+**STOMP/SockJS WebSocket:**
 
+- Spring Boot compatible
 - Auto-reconnection
 - Message queuing
 - Typing indicators

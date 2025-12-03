@@ -1,7 +1,7 @@
 # Mobile Development Guide - Index
 
 **Meslektaş React Native Mobile Application**
-**Complete Development Documentation - 32 Documents**
+**Complete Development Documentation - 33 Documents**
 
 ---
 
@@ -18,7 +18,7 @@
    - Auth (login, register, biometric)
    - Verification (document, selfie, AI verification)
    - Feed (infinite scroll, like, comment)
-   - Messaging (real-time, Socket.IO)
+   - Messaging (real-time, STOMP/SockJS)
    - Notifications (FCM, deep linking)
    - Profile (edit, settings)
 
@@ -50,7 +50,7 @@
 
 6. **[Real-time Messaging](./features/06-MESSAGING.md)** ⭐⭐⭐⭐
 
-   - Socket.IO integration
+   - STOMP over WebSocket with SockJS
    - Message list with pagination
    - Typing indicators
    - Read receipts
@@ -126,7 +126,7 @@
 
 ## 📊 State Management (3 docs)
 
-14. **[Zustand Store](./state/14-ZUSTAND-STORE.md)** ⭐⭐⭐
+15. **[Zustand Store](./state/14-ZUSTAND-STORE.md)** ⭐⭐⭐
 
     - Local state management
     - Auth store (user, tokens, biometric)
@@ -134,7 +134,7 @@
     - Verification store (multi-step flow)
     - Persistence with AsyncStorage
 
-15. **[React Query](./state/15-REACT-QUERY.md)** ⭐⭐⭐⭐
+16. **[React Query](./state/15-REACT-QUERY.md)** ⭐⭐⭐⭐
 
     - Server state management
     - Query client configuration
@@ -143,7 +143,7 @@
     - Cache management
     - Prefetching
 
-16. **[Context API](./state/16-CONTEXT-API.md)** ⭐⭐
+17. **[Context API](./state/16-CONTEXT-API.md)** ⭐⭐
     - Theme context (light/dark/system)
     - Localization context (tr/en)
     - Config context (app settings)
@@ -232,9 +232,9 @@
 
 26. **[Sprint 7-8: Real-time Messaging](./sprints/26-SPRINT-7-8.md)** ⭐⭐⭐⭐
 
-    - Week 1: Socket setup, chat UI, message status
+    - Week 1: STOMP WebSocket setup, chat UI, message status
     - Week 2: Real-time sync, typing indicators, offline queue
-    - Deliverables: Real-time chat with Socket.IO
+    - Deliverables: Real-time chat with STOMP/SockJS
 
 27. **[Sprint 9-10: Push Notifications](./sprints/27-SPRINT-9-10.md)** ⭐⭐⭐
 

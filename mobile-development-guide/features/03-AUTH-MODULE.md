@@ -115,6 +115,36 @@ export interface BiometricConfig {
   type: "fingerprint" | "face" | "iris" | null;
 }
 
+// OAuth2 Response (Google/Apple)
+export interface OAuth2AuthResponse {
+  success: boolean;
+  error?: string;
+  accessToken: string;
+  refreshToken: string;
+  tokenType: "Bearer";
+  expiresIn: number;
+  isNewUser: boolean;
+  user: {
+    id: number;
+    email: string;
+    name: string;
+    surname: string;
+    fullName: string;
+    avatarUrl?: string;
+    verificationStatus: string;
+  };
+}
+
+// Apple Sign-In specifics
+export interface AppleAuthData {
+  idToken: string;
+  authorizationCode?: string;
+  fullName?: {
+    givenName?: string;
+    familyName?: string;
+  };
+}
+
 // API errors
 export interface AuthError {
   code: string;

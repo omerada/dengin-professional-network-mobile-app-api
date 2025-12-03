@@ -35,7 +35,7 @@ src/features/messaging/
 │   └── messagingStore.ts                # Zustand message cache
 ├── services/
 │   ├── messagingApi.ts                  # Messaging API
-│   └── socketService.ts                 # Socket.IO service
+│   └── socketService.ts                 # STOMP WebSocket service
 ├── types/
 │   └── messaging.types.ts               # Type definitions
 └── index.ts
@@ -50,18 +50,24 @@ src/features/messaging/
 ```typescript
 export interface Conversation {
   id: string;
-  participants: Participant[];
-  lastMessage?: Message;
+  otherParticipant: Participant;
+  lastMessage?: {
+    content: string;
+    senderId: number;
+    sentAt: string;
+    isRead: boolean;
+  };
   unreadCount: number;
   updatedAt: string;
 }
 
 export interface Participant {
-  id: string;
-  firstName: string;
-  lastName: string;
-  profileImageUrl?: string;
+  id: number;
+  name: string;
+  surname: string;
+  avatarUrl?: string;
   isOnline: boolean;
+  lastSeen?: string;
 }
 
 export interface Message {
@@ -71,7 +77,16 @@ export interface Message {
   content: string;
   type: "text" | "image";
   status: "sending" | "sent" | "delivered" | "read";
+  attachment?: MessageAttachment;
   createdAt: string;
+  readAt?: string;
+}
+
+export interface MessageAttachment {
+  url: string;
+  contentType: string;
+  fileName: string;
+  fileSize: number;
 }
 
 export interface SendMessageRequest {
@@ -80,20 +95,54 @@ export interface SendMessageRequest {
   type: "text" | "image";
 }
 
-export interface TypingStatus {
+// ========== WebSocket Types (STOMP) ==========
+
+export interface WsSendMessageRequest {
+  recipientId: number;
+  content: string;
+  attachment?: {
+    s3Key: string;
+    url: string;
+    contentType: string;
+    fileSize: number;
+    fileName: string;
+  };
+}
+
+export interface WsMessageResponse {
+  messageId: string;
   conversationId: string;
-  userId: string;
+  senderId: number;
+  recipientId: number;
+  content: string;
+  attachment?: {
+    s3Key: string;
+    url: string;
+    contentType: string;
+    fileSize: number;
+    fileName: string;
+  };
+  status: "SENT" | "DELIVERED" | "READ";
+  sentAt: string;
+}
+
+export interface WsTypingNotification {
+  conversationId: string;
+  recipientId: number;
   isTyping: boolean;
 }
 
-export interface SocketEvents {
-  "message:new": Message;
-  "message:delivered": { messageId: string };
-  "message:read": { messageId: string };
-  "typing:start": TypingStatus;
-  "typing:stop": TypingStatus;
-  "user:online": { userId: string };
-  "user:offline": { userId: string };
+export interface WsReadReceipt {
+  conversationId: string;
+  readByUserId: number;
+  messagesRead: number;
+  readAt: string;
+}
+
+export interface WsErrorResponse {
+  code: "VALIDATION_ERROR" | "FORBIDDEN" | "INTERNAL_ERROR";
+  message: string;
+  action: string;
 }
 ```
 
@@ -366,7 +415,7 @@ import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { messagingApi } from "../services/messagingApi";
 import { socketService } from "../services/socketService";
-import type { Message } from "../types/messaging.types";
+import type { Message, WsMessageResponse } from "../types/messaging.types";
 
 export const useMessages = (conversationId: string) => {
   const queryClient = useQueryClient();
@@ -380,30 +429,37 @@ export const useMessages = (conversationId: string) => {
   });
 
   useEffect(() => {
-    // Listen for new messages
-    const handleNewMessage = (message: Message) => {
-      if (message.conversationId === conversationId) {
+    // Subscribe to new messages via WebSocket
+    socketService.subscribeToMessages((wsMessage: WsMessageResponse) => {
+      if (wsMessage.conversationId === conversationId) {
         queryClient.setQueryData(["messages", conversationId], (old: any) => {
           if (!old) return old;
+
+          const newMessage: Message = {
+            id: wsMessage.messageId,
+            conversationId: wsMessage.conversationId,
+            senderId: wsMessage.senderId.toString(),
+            content: wsMessage.content,
+            type: "text",
+            status: wsMessage.status.toLowerCase() as Message["status"],
+            createdAt: wsMessage.sentAt,
+          };
 
           const firstPage = old.pages[0];
           return {
             ...old,
             pages: [
-              { ...firstPage, messages: [message, ...firstPage.messages] },
+              { ...firstPage, messages: [newMessage, ...firstPage.messages] },
               ...old.pages.slice(1),
             ],
           };
         });
+
+        // Also invalidate conversations to update last message
+        queryClient.invalidateQueries({ queryKey: ["conversations"] });
       }
-    };
-
-    socketService.on("message:new", handleNewMessage);
-
-    return () => {
-      socketService.off("message:new");
-    };
-  }, [conversationId]);
+    });
+  }, [conversationId, queryClient]);
 
   return query;
 };
@@ -414,58 +470,75 @@ export const useMessages = (conversationId: string) => {
 ```typescript
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { socketService } from "../services/socketService";
-import type { SendMessageRequest } from "../types/messaging.types";
+import { messagingApi } from "../services/messagingApi";
+import { useAuthStore } from "@features/auth/stores/authStore";
+import type { WsSendMessageRequest } from "../types/messaging.types";
 
-export const useSendMessage = () => {
+export const useSendMessage = (conversationId: string) => {
   const queryClient = useQueryClient();
+  const currentUser = useAuthStore((state) => state.user);
 
   return useMutation({
-    mutationFn: async (data: SendMessageRequest) => {
-      // Send via WebSocket (real-time)
-      socketService.emit("message:send", data);
+    mutationFn: async (data: { recipientId: number; content: string }) => {
+      // Try WebSocket first (real-time)
+      if (socketService.isConnected()) {
+        const wsRequest: WsSendMessageRequest = {
+          recipientId: data.recipientId,
+          content: data.content,
+        };
+        socketService.sendMessage(wsRequest);
 
-      // Return optimistic message
-      return {
-        id: `temp-${Date.now()}`,
-        ...data,
-        senderId: "current-user", // Get from auth store
-        status: "sending" as const,
-        createdAt: new Date().toISOString(),
-      };
+        // Return optimistic message
+        return {
+          id: `temp-${Date.now()}`,
+          conversationId,
+          senderId: currentUser?.id || "unknown",
+          content: data.content,
+          type: "text" as const,
+          status: "sending" as const,
+          createdAt: new Date().toISOString(),
+        };
+      } else {
+        // Fallback to HTTP
+        return await messagingApi.sendMessage({
+          conversationId,
+          content: data.content,
+          type: "text",
+        });
+      }
     },
 
     onMutate: async (data) => {
       await queryClient.cancelQueries({
-        queryKey: ["messages", data.conversationId],
+        queryKey: ["messages", conversationId],
       });
 
       // Optimistic update
       const optimisticMessage = {
         id: `temp-${Date.now()}`,
-        ...data,
-        senderId: "current-user",
+        conversationId,
+        senderId: currentUser?.id || "unknown",
+        content: data.content,
+        type: "text" as const,
         status: "sending" as const,
         createdAt: new Date().toISOString(),
       };
 
-      queryClient.setQueryData(
-        ["messages", data.conversationId],
-        (old: any) => {
-          if (!old) return old;
+      queryClient.setQueryData(["messages", conversationId], (old: any) => {
+        if (!old) return old;
 
-          const firstPage = old.pages[0];
-          return {
-            ...old,
-            pages: [
-              {
-                ...firstPage,
-                messages: [optimisticMessage, ...firstPage.messages],
-              },
-              ...old.pages.slice(1),
-            ],
-          };
-        }
-      );
+        const firstPage = old.pages[0];
+        return {
+          ...old,
+          pages: [
+            {
+              ...firstPage,
+              messages: [optimisticMessage, ...firstPage.messages],
+            },
+            ...old.pages.slice(1),
+          ],
+        };
+      });
     },
   });
 };
@@ -623,12 +696,26 @@ const styles = StyleSheet.create({
 
 ### Features:
 
-- ✅ Real-time messaging with Socket.IO
+- ✅ Real-time messaging with STOMP over WebSocket
 - ✅ Optimistic UI updates
-- ✅ Typing indicators
-- ✅ Read receipts
+- ✅ Typing indicators via `/app/chat.typing`
+- ✅ Read receipts via `/app/chat.read`
 - ✅ Message status (sending, sent, delivered, read)
 - ✅ Infinite scroll for message history
-- ✅ Auto-reconnect on disconnect
+- ✅ Auto-reconnect with SockJS fallback
+- ✅ HTTP fallback when WebSocket unavailable
+- ✅ S3 presigned URLs for attachment upload
 
-**Result:** Production-ready real-time messaging with WebSocket.
+### Backend Integration:
+
+| Feature        | REST Endpoint                               | WebSocket Destination  |
+| -------------- | ------------------------------------------- | ---------------------- |
+| Get Convos     | `GET /api/conversations`                    | -                      |
+| Get Messages   | `GET /api/conversations/{id}/messages`      | -                      |
+| Send Message   | `POST /api/messages`                        | `/app/chat.send`       |
+| Mark Read      | `PUT /api/conversations/{id}/read`          | `/app/chat.read`       |
+| Delete Message | `DELETE /api/conversations/{id}/messages/*` | -                      |
+| Typing         | -                                           | `/app/chat.typing`     |
+| Receive Msgs   | -                                           | `/user/queue/messages` |
+
+**Result:** Production-ready real-time messaging with STOMP WebSocket and REST fallback.
