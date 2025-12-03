@@ -1,10 +1,17 @@
 # Test Profile Configuration
-# Meslektaş Backend - Sprint 2
+# Meslektaş Backend - Integration Tests
 
 spring:
-  # Datasource - Use H2 for testing
+  application:
+    name: meslektas-backend-test
+  
+  # Main configuration disabled
+  main:
+    allow-bean-definition-overriding: true
+
+  # Datasource - H2 for unit and integration tests
   datasource:
-    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
     username: sa
     password:
     driver-class-name: org.h2.Driver
@@ -14,35 +21,85 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: create-drop
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
 
-  # Flyway - Disable for testing
+  # Flyway - Disabled for tests
   flyway:
     enabled: false
 
-  # Redis - Use embedded Redis or mock
+  # Redis - Mock configuration (no actual connection needed)
   data:
     redis:
       host: localhost
       port: 6379
+      timeout: 100ms
+  
+  # Disable auto-configuration for Redis
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
+  # Jackson
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: Europe/Istanbul
+    default-property-inclusion: non_null
+
+# Server
+server:
+  port: 0  # Random port for tests
+
+# Actuator - Minimal for tests
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+
+# SpringDoc - Disabled for tests
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
 
 # JWT Configuration
-jwt:
-  secret: test-secret-key-for-jwt-token-generation-must-be-at-least-256-bits-long-for-hs256
-  expiration: 900000 # 15 minutes
-  refresh-expiration: 604800000 # 7 days
+app:
+  jwt:
+    secret: test-secret-key-for-jwt-token-generation-must-be-at-least-256-bits-long-for-hs256
+    expiration: 3600000 # 1 hour
+    refresh-expiration: 86400000 # 1 day
+  
+  # Disable external services
+  aws:
+    enabled: false
+  firebase:
+    enabled: false
+  
+  # Health check
+  health:
+    s3:
+      enabled: false
+    redis:
+      enabled: false
 
 # AWS Configuration - Mock for testing
 aws:
+  access-key: test-access-key
+  secret-key: test-secret-key
+  region: eu-central-1
   s3:
+    bucket: test-bucket
+  rekognition:
     bucket-name: test-bucket
-    region: us-east-1
-    access-key: test-access-key
-    secret-key: test-secret-key
-    endpoint: http://localhost:4566
 
 # Storage Configuration
 storage:
@@ -51,9 +108,17 @@ storage:
     path: ./test-uploads
   max-file-size: 5MB
 
-# Logging
+# Sentry - Disabled
+sentry:
+  dsn: ""
+  enabled: false
+
+# Logging - Minimal for tests
 logging:
   level:
-    com.meslektas: DEBUG
-    org.springframework.security: DEBUG
-    org.hibernate.SQL: DEBUG
+    root: WARN
+    com.meslektas: INFO
+    org.springframework.web: WARN
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    org.testcontainers: WARN

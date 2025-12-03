@@ -441,6 +441,30 @@ public class User extends AggregateRoot {
     public boolean isOAuthUser() {
         return this.oauthProvider != null && this.oauthProvider != OAuthProvider.LOCAL;
     }
+    
+    /**
+     * Link OAuth provider to existing account
+     * 
+     * Used when a user with email/password account 
+     * signs in with OAuth for the first time.
+     */
+    public void linkOAuthProvider(OAuthProvider provider, String providerId) {
+        if (this.oauthProvider != null && this.oauthProvider != OAuthProvider.LOCAL) {
+            throw new BusinessException(
+                "Bu hesap zaten " + this.oauthProvider.getDisplayName() + " ile bağlantılı",
+                "OAUTH_ALREADY_LINKED"
+            );
+        }
+        
+        this.oauthProvider = provider;
+        this.oauthProviderId = providerId;
+        
+        // OAuth emails are considered verified
+        if (!Boolean.TRUE.equals(this.isEmailVerified)) {
+            this.isEmailVerified = true;
+            this.emailVerifiedAt = LocalDateTime.now();
+        }
+    }
 
     /**
      * Get profession name (safe)

@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -76,4 +77,11 @@ public interface JpaUserRepository extends JpaRepository<User, Long>, UserReposi
      */
     @Query("SELECT u FROM User u WHERE u.createdAt >= CURRENT_TIMESTAMP - :days DAY")
     List<User> findRecentUsers(@Param("days") int days);
+    
+    /**
+     * Count users who logged in after a specific time
+     */
+    @Override
+    @Query("SELECT COUNT(u) FROM User u WHERE u.lastLogin >= :dateTime")
+    long countByLastLoginAfter(@Param("dateTime") LocalDateTime dateTime);
 }

@@ -130,6 +130,67 @@ public class EmailTemplateRenderer {
     }
     
     /**
+     * Render OAuth login reminder email.
+     */
+    public String renderOAuthReminderEmail(String oauthProviderName) {
+        String body = String.format("""
+            <p style="margin: 0 0 16px 0; color: #374151; font-size: 16px; line-height: 1.5;">
+                Merhaba,
+            </p>
+            <p style="margin: 0 0 16px 0; color: #374151; font-size: 16px; line-height: 1.5;">
+                Şifre sıfırlama talebinde bulundunuz. Ancak hesabınız <strong>%s</strong> ile oluşturulmuş.
+            </p>
+            <p style="margin: 0 0 16px 0; color: #374151; font-size: 16px; line-height: 1.5;">
+                Giriş yapmak için lütfen <strong>%s ile Giriş Yap</strong> seçeneğini kullanın.
+            </p>
+            <p style="margin: 0 0 16px 0; color: #6B7280; font-size: 14px; line-height: 1.5;">
+                Bu talebi siz yapmadıysanız, bu e-postayı görmezden gelebilirsiniz.
+            </p>
+            """, oauthProviderName, oauthProviderName);
+        
+        return renderBaseTemplate(
+            "Şifre Sıfırlama Hakkında",
+            body,
+            "https://meslektas.com/login",
+            "Giriş Yap",
+            PRIMARY_COLOR
+        );
+    }
+    
+    /**
+     * Render password changed confirmation email.
+     */
+    public String renderPasswordChangedEmail(String recipientName) {
+        String body = String.format("""
+            <p style="margin: 0 0 16px 0; color: #374151; font-size: 16px; line-height: 1.5;">
+                Merhaba %s,
+            </p>
+            <p style="margin: 0 0 16px 0; color: #374151; font-size: 16px; line-height: 1.5;">
+                Şifreniz başarıyla değiştirildi. ✅
+            </p>
+            <p style="margin: 0 0 16px 0; color: #374151; font-size: 16px; line-height: 1.5;">
+                Güvenlik amacıyla tüm cihazlarınızdan çıkış yapıldı. Yeni şifrenizle 
+                tekrar giriş yapabilirsiniz.
+            </p>
+            <div style="background-color: #FEF2F2; border-radius: 8px; padding: 16px; margin: 16px 0;">
+                <p style="margin: 0; color: #991B1B; font-size: 14px; line-height: 1.5;">
+                    <strong>⚠️ Bu işlemi siz yapmadıysanız</strong><br>
+                    Lütfen hemen <a href="mailto:destek@meslektas.com" style="color: #991B1B;">destek@meslektas.com</a> 
+                    adresinden bizimle iletişime geçin.
+                </p>
+            </div>
+            """, recipientName);
+        
+        return renderBaseTemplate(
+            "Şifreniz Değiştirildi",
+            body,
+            null,
+            null,
+            SUCCESS_COLOR
+        );
+    }
+    
+    /**
      * Render base email template.
      */
     private String renderBaseTemplate(

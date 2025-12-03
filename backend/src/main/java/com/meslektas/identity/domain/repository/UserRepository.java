@@ -5,6 +5,7 @@ import com.meslektas.identity.domain.model.UserStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -92,4 +93,14 @@ public interface UserRepository {
      * Find all users by IDs
      */
     List<User> findAllById(Iterable<Long> ids);
+    
+    /**
+     * Count all users
+     */
+    long count();
+    
+    /**
+     * Count users who logged in after a specific time
+     */
+    long countByLastLoginAfter(LocalDateTime dateTime);
 }

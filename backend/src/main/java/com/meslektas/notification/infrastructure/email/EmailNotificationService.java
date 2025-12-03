@@ -2,6 +2,7 @@ package com.meslektas.notification.infrastructure.email;
 
 import com.meslektas.notification.domain.model.NotificationContent;
 import com.meslektas.notification.domain.model.NotificationType;
+import com.meslektas.notification.domain.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +22,7 @@ import java.util.Map;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class EmailNotificationService {
+public class EmailNotificationService implements EmailService {
 
     private final SesClient sesClient;
     private final EmailTemplateRenderer templateRenderer;
@@ -143,6 +144,63 @@ public class EmailNotificationService {
             log.info("Welcome email sent successfully to: {}", recipientEmail);
         } catch (Exception e) {
             log.error("Failed to send welcome email to: {}", recipientEmail, e);
+        }
+    }
+
+    /**
+     * Send OAuth login reminder email.
+     * Sent when user with OAuth account tries to reset password.
+     */
+    @Override
+    @Async
+    public void sendOAuthLoginReminder(String recipientEmail, String oauthProviderName) {
+        if (!emailEnabled) {
+            log.debug("Email notifications disabled, skipping OAuth reminder email to: {}", recipientEmail);
+            return;
+        }
+
+        log.info("Sending OAuth login reminder email to: {}", recipientEmail);
+
+        try {
+            String subject = "Şifre Sıfırlama Hakkında - Meslektaş";
+            String htmlBody = templateRenderer.renderOAuthReminderEmail(oauthProviderName);
+            String textBody = String.format(
+                    "Merhaba,\n\nŞifre sıfırlama talebinde bulundunuz. Ancak hesabınız %s ile oluşturulmuş.\n\nGiriş yapmak için %s ile oturum açın.\n\nMeslektaş Ekibi",
+                    oauthProviderName, oauthProviderName);
+
+            sendEmailWithRetry(recipientEmail, subject, htmlBody, textBody);
+
+            log.info("OAuth login reminder email sent successfully to: {}", recipientEmail);
+        } catch (Exception e) {
+            log.error("Failed to send OAuth login reminder email to: {}", recipientEmail, e);
+        }
+    }
+
+    /**
+     * Send password changed confirmation email.
+     */
+    @Override
+    @Async
+    public void sendPasswordChangedEmail(String recipientEmail, String recipientName) {
+        if (!emailEnabled) {
+            log.debug("Email notifications disabled, skipping password changed email to: {}", recipientEmail);
+            return;
+        }
+
+        log.info("Sending password changed email to: {}", recipientEmail);
+
+        try {
+            String subject = "Şifreniz Değiştirildi - Meslektaş";
+            String htmlBody = templateRenderer.renderPasswordChangedEmail(recipientName);
+            String textBody = String.format(
+                    "Merhaba %s,\n\nŞifreniz başarıyla değiştirildi.\n\nBu işlemi siz yapmadıysanız, lütfen hemen bizimle iletişime geçin.\n\nMeslektaş Ekibi",
+                    recipientName);
+
+            sendEmailWithRetry(recipientEmail, subject, htmlBody, textBody);
+
+            log.info("Password changed email sent successfully to: {}", recipientEmail);
+        } catch (Exception e) {
+            log.error("Failed to send password changed email to: {}", recipientEmail, e);
         }
     }
 
