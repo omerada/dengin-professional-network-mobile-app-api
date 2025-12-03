@@ -131,8 +131,9 @@ public class ModerationService {
         if (report.getModeratorId() == null) {
             report.startReview(moderatorId);
         } else if (!report.getModeratorId().equals(moderatorId)) {
-            throw new BusinessException("NOT_ASSIGNED",
-                    "Bu rapor size atanmamış");
+            throw new BusinessException(
+                    "Bu rapor size atanmamış",
+                    "NOT_ASSIGNED");
         }
 
         // Review the report
