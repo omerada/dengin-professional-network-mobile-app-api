@@ -14,7 +14,7 @@ import com.meslektas.moderation.domain.model.ReportStatus;
 import com.meslektas.moderation.domain.model.SanctionType;
 import com.meslektas.moderation.domain.repository.ContentReportRepository;
 import com.meslektas.moderation.domain.repository.UserSanctionRepository;
-import com.meslektas.shared.exception.BusinessException;
+import com.meslektas.common.exception.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -383,13 +383,11 @@ public class ModerationService {
 
     private ContentReport findReportOrThrow(UUID reportId) {
         return reportRepository.findById(reportId)
-                .orElseThrow(() -> new BusinessException("REPORT_NOT_FOUND",
-                        "Rapor bulunamadı"));
+                .orElseThrow(() -> new BusinessException("Rapor bulunamad\u0131", "REPORT_NOT_FOUND"));
     }
 
     private UserSanction findSanctionOrThrow(UUID sanctionId) {
         return sanctionRepository.findById(sanctionId)
-                .orElseThrow(() -> new BusinessException("SANCTION_NOT_FOUND",
-                        "Yaptırım bulunamadı"));
+                .orElseThrow(() -> new BusinessException("Yapt\u0131r\u0131m bulunamad\u0131", "SANCTION_NOT_FOUND"));
     }
 }

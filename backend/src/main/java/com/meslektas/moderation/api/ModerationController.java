@@ -151,7 +151,7 @@ public class ModerationController {
      */
     @GetMapping("/reports/by-user/{userId}")
     @Operation(summary = "Get reports against user", description = "Get all reports filed against a specific user")
-    public ResponseEntity<List<ReportResponse>> getReportsAgainstUser(@PathVariable UUID userId) {
+    public ResponseEntity<List<ReportResponse>> getReportsAgainstUser(@PathVariable Long userId) {
         List<ReportResponse> reports = moderationService.getReportsAgainstUser(userId);
         return ResponseEntity.ok(reports);
     }
@@ -163,7 +163,7 @@ public class ModerationController {
      */
     @GetMapping("/sanctions/user/{userId}")
     @Operation(summary = "Get user sanctions", description = "Get all sanctions for a specific user")
-    public ResponseEntity<List<SanctionResponse>> getUserSanctions(@PathVariable UUID userId) {
+    public ResponseEntity<List<SanctionResponse>> getUserSanctions(@PathVariable Long userId) {
         List<SanctionResponse> sanctions = moderationService.getUserSanctions(userId);
         return ResponseEntity.ok(sanctions);
     }
@@ -173,7 +173,7 @@ public class ModerationController {
      */
     @GetMapping("/sanctions/user/{userId}/active")
     @Operation(summary = "Get active sanctions", description = "Get currently active sanctions for a user")
-    public ResponseEntity<List<SanctionResponse>> getActiveSanctions(@PathVariable UUID userId) {
+    public ResponseEntity<List<SanctionResponse>> getActiveSanctions(@PathVariable Long userId) {
         List<SanctionResponse> sanctions = moderationService.getActiveSanctions(userId);
         return ResponseEntity.ok(sanctions);
     }
@@ -234,7 +234,7 @@ public class ModerationController {
      */
     @GetMapping("/sanctions/check/{userId}")
     @Operation(summary = "Check user sanction status", description = "Check if a user has any active sanctions")
-    public ResponseEntity<Boolean> isUserSanctioned(@PathVariable UUID userId) {
+    public ResponseEntity<Boolean> isUserSanctioned(@PathVariable Long userId) {
         boolean isSanctioned = moderationService.isUserSanctioned(userId);
         return ResponseEntity.ok(isSanctioned);
     }

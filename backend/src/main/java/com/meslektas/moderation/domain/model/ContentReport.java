@@ -131,6 +131,46 @@ public class ContentReport extends AggregateRoot {
         return report;
     }
 
+    /**
+     * System user ID for automated reports.
+     */
+    private static final Long SYSTEM_REPORTER_ID = 0L;
+
+    /**
+     * Create an automated content report from the moderation system.
+     * Used when automated content analysis detects high-risk content.
+     */
+    public static ContentReport createAutomated(
+            ReportType contentType,
+            UUID contentId,
+            ReportReason reason,
+            String description) {
+        validateContent(contentType, contentId);
+        validateReason(reason);
+
+        ContentReport report = new ContentReport();
+        report.reportId = ContentReportId.generate();
+        report.reporterId = SYSTEM_REPORTER_ID; // System reporter
+        report.contentType = contentType;
+        report.contentId = contentId;
+        report.contentOwnerId = null; // Will be resolved by moderator
+        report.reason = reason;
+        report.description = "[Otomatik Tespit] " + description;
+        report.status = ReportStatus.PENDING;
+        report.riskLevel = RiskLevel.HIGH; // Automated flags are always high priority
+        report.createdAt = LocalDateTime.now();
+        report.updatedAt = report.createdAt;
+
+        report.registerEvent(new ContentReportedEvent(
+                report.reportId,
+                report.reporterId,
+                report.contentType,
+                report.contentId,
+                report.reason));
+
+        return report;
+    }
+
     // ==================== Domain Methods ====================
 
     /**

@@ -149,6 +149,13 @@
             <version>2.15.0</version>
         </dependency>
 
+        <!-- Sentry Error Tracking -->
+        <dependency>
+            <groupId>io.sentry</groupId>
+            <artifactId>sentry-spring-boot-starter-jakarta</artifactId>
+            <version>7.3.0</version>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

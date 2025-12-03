@@ -41,8 +41,8 @@ public class UserSanctionedEvent implements DomainEvent {
     }
 
     @Override
-    public String getAggregateId() {
-        return userId.toString();
+    public Long getAggregateId() {
+        return userId;
     }
 
     /**

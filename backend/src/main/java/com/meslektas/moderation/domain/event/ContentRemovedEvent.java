@@ -41,8 +41,8 @@ public class ContentRemovedEvent implements DomainEvent {
     }
 
     @Override
-    public String getAggregateId() {
-        return contentId.toString();
+    public Long getAggregateId() {
+        return contentOwnerId;
     }
 
     /**

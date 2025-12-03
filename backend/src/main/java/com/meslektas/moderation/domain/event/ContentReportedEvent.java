@@ -42,7 +42,7 @@ public class ContentReportedEvent implements DomainEvent {
     }
 
     @Override
-    public String getAggregateId() {
-        return reportId.getValue().toString();
+    public Long getAggregateId() {
+        return reporterId;
     }
 }

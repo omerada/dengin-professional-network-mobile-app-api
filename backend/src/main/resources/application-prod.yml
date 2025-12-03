@@ -1,0 +1,153 @@
+# Meslektaş Backend - Production Profile
+# Sprint 12: Production-ready configuration
+
+spring:
+  # JPA & Hibernate - Production optimized
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        use_sql_comments: false
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+        generate_statistics: false
+        cache:
+          use_second_level_cache: true
+          use_query_cache: true
+          region:
+            factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
+
+  # Flyway
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
+    validate-on-migrate: true
+
+  # Redis - Production cluster
+  data:
+    redis:
+      cluster:
+        nodes: ${REDIS_CLUSTER_NODES:localhost:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 5000
+      lettuce:
+        pool:
+          max-active: 50
+          max-idle: 20
+          min-idle: 5
+          max-wait: 5000
+
+# Server - Production settings
+server:
+  port: 8080
+  tomcat:
+    max-threads: 200
+    min-spare-threads: 20
+    max-connections: 10000
+    accept-count: 200
+    connection-timeout: 20000
+  compression:
+    enabled: true
+    min-response-size: 1024
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+
+# Actuator - Production exposure
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  metrics:
+    export:
+      cloudwatch:
+        enabled: ${CLOUDWATCH_ENABLED:false}
+        namespace: Meslektas
+        step: 1m
+
+# Logging - Production level
+logging:
+  level:
+    root: WARN
+    com.meslektas: INFO
+    org.springframework.web: WARN
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: /var/log/meslektas/application.log
+    max-size: 100MB
+    max-history: 30
+
+# Security - Production hardening
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+    access-token-validity: 900000 # 15 minutes
+    refresh-token-validity: 604800000 # 7 days
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://meslektas.com}
+    allowed-methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
+    allowed-headers: "*"
+    allow-credentials: true
+    max-age: 3600
+
+# AWS - Production configuration
+aws:
+  region: ${AWS_REGION:eu-west-1}
+  s3:
+    bucket-name: ${S3_BUCKET_NAME:meslektas-production}
+    presigned-url-expiration: 3600
+  rekognition:
+    face-match-threshold: 80.0
+    min-confidence: 70.0
+  ses:
+    from-email: ${SES_FROM_EMAIL:noreply@meslektas.com}
+    reply-to-email: ${SES_REPLY_TO:support@meslektas.com}
+
+# Sentry - Error tracking
+sentry:
+  dsn: ${SENTRY_DSN:}
+  environment: production
+  traces-sample-rate: 0.2
+  send-default-pii: false
+  logging:
+    minimum-event-level: error
+    minimum-breadcrumb-level: info
+
+# Rate Limiting
+rate-limiting:
+  enabled: true
+  requests-per-minute: 60
+  burst-capacity: 100
+
+# Database - Production connection pool
+spring.datasource:
+  url: ${DATABASE_URL}
+  username: ${DATABASE_USERNAME}
+  password: ${DATABASE_PASSWORD}
+  hikari:
+    maximum-pool-size: 30
+    minimum-idle: 10
+    idle-timeout: 300000
+    max-lifetime: 600000
+    connection-timeout: 30000
+    leak-detection-threshold: 60000
+    pool-name: MeslektasHikariPool

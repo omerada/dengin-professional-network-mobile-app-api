@@ -3,11 +3,12 @@ package com.meslektas.moderation.application.service;
 import com.meslektas.moderation.application.dto.request.ReportRequest;
 import com.meslektas.moderation.application.dto.response.ReportResponse;
 import com.meslektas.moderation.domain.model.ContentReport;
+import com.meslektas.moderation.domain.model.ReportReason;
 import com.meslektas.moderation.domain.model.ReportType;
 import com.meslektas.moderation.domain.repository.ContentReportRepository;
 import com.meslektas.moderation.domain.service.AutomatedModerationService;
 import com.meslektas.moderation.domain.model.ModerationScore;
-import com.meslektas.shared.exception.BusinessException;
+import com.meslektas.common.exception.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -58,14 +59,12 @@ public class ReportContentService {
         // Check for duplicate report
         if (reportRepository.existsByReporterAndContent(
                 reporterId, request.contentId(), request.type())) {
-            throw new BusinessException("DUPLICATE_REPORT",
-                    "Bu içeriği zaten bildirdiniz");
+            throw new BusinessException("Bu i\u00e7eri\u011fi zaten bildirdiniz", "DUPLICATE_REPORT");
         }
 
         // Prevent self-reporting
         if (reporterId.equals(contentOwnerId)) {
-            throw new BusinessException("SELF_REPORT",
-                    "Kendi içeriğinizi bildiremezsiniz");
+            throw new BusinessException("Kendi i\u00e7eri\u011finizi bildiremezsiniz", "SELF_REPORT");
         }
 
         // Create the report
@@ -116,13 +115,11 @@ public class ReportContentService {
     @Transactional(readOnly = true)
     public ReportResponse getReport(UUID reportId, Long userId) {
         ContentReport report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new BusinessException("REPORT_NOT_FOUND",
-                        "Bildirim bulunamadı"));
+                .orElseThrow(() -> new BusinessException("Bildirim bulunamad\u0131", "REPORT_NOT_FOUND"));
 
         // Only allow reporter or moderators to view
         if (!report.getReporterId().equals(userId)) {
-            throw new BusinessException("ACCESS_DENIED",
-                    "Bu bildirimi görüntüleme yetkiniz yok");
+            throw new BusinessException("Bu bildirimi g\u00f6r\u00fcnt\u00fcleme yetkiniz yok", "ACCESS_DENIED");
         }
 
         return ReportResponse.from(report);
@@ -136,18 +133,15 @@ public class ReportContentService {
      */
     public void cancelReport(UUID reportId, Long userId) {
         ContentReport report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new BusinessException("REPORT_NOT_FOUND",
-                        "Bildirim bulunamadı"));
+                .orElseThrow(() -> new BusinessException("Bildirim bulunamad\u0131", "REPORT_NOT_FOUND"));
 
         if (!report.getReporterId().equals(userId)) {
-            throw new BusinessException("ACCESS_DENIED",
-                    "Bu bildirimi iptal etme yetkiniz yok");
+            throw new BusinessException("Bu bildirimi iptal etme yetkiniz yok", "ACCESS_DENIED");
         }
 
         // Can only cancel pending reports
         if (report.getStatus() != com.meslektas.moderation.domain.model.ReportStatus.PENDING) {
-            throw new BusinessException("CANNOT_CANCEL",
-                    "Sadece bekleyen raporlar iptal edilebilir");
+            throw new BusinessException("Sadece bekleyen raporlar iptal edilebilir", "CANNOT_CANCEL");
         }
 
         // Delete or mark as cancelled
@@ -178,5 +172,55 @@ public class ReportContentService {
     @Transactional(readOnly = true)
     public boolean hasReported(Long userId, UUID contentId, ReportType type) {
         return reportRepository.existsByReporterAndContent(userId, contentId, type);
+    }
+
+    // ==================== Automated Moderation ====================
+
+    /**
+     * System user ID used for automated reports.
+     * This is a reserved ID that represents the moderation system.
+     */
+    private static final Long SYSTEM_USER_ID = 0L;
+
+    /**
+     * Creates an automated report from the moderation system.
+     * Used when automated content analysis detects high-risk content.
+     *
+     * @param type        the content type
+     * @param contentId   the content ID
+     * @param reason      the detected violation reason
+     * @param description details about the automated detection
+     * @return the created report
+     */
+    public ReportResponse createAutomatedReport(
+            ReportType type,
+            UUID contentId,
+            ReportReason reason,
+            String description) {
+
+        log.info("Creating automated report: contentId={}, type={}, reason={}",
+                contentId, type, reason);
+
+        // Check if already auto-reported
+        if (reportRepository.existsByReporterAndContent(SYSTEM_USER_ID, contentId, type)) {
+            log.debug("Automated report already exists for content: {}", contentId);
+            return null; // Already flagged
+        }
+
+        // Create report from system
+        ContentReport report = ContentReport.createAutomated(
+                type,
+                contentId,
+                reason,
+                description);
+
+        // Auto-escalate automated reports (they need immediate attention)
+        report.escalate();
+
+        ContentReport savedReport = reportRepository.save(report);
+        log.warn("Automated report created: id={}, contentId={}, reason={}",
+                savedReport.getReportId().getValue(), contentId, reason);
+
+        return ReportResponse.from(savedReport);
     }
 }
