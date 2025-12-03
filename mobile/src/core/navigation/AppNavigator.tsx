@@ -1,5 +1,6 @@
 // src/core/navigation/AppNavigator.tsx
 // Oku: mobile-development-guide/core/09-NAVIGATION.md
+// Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import React from 'react';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
@@ -9,6 +10,7 @@ import { useAuthStore } from '@features/auth/stores/authStore';
 import { linking } from './linking';
 import { AuthNavigator } from './AuthNavigator';
 import { MainNavigator } from './MainNavigator';
+import { VerificationNavigator } from './VerificationNavigator';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -26,6 +28,27 @@ export const navigate = <T extends keyof RootStackParamList>(
 ) => {
   if (navigationRef.isReady()) {
     navigationRef.navigate(name, params);
+  }
+};
+
+/**
+ * Go back function for use outside of React components
+ */
+export const goBack = () => {
+  if (navigationRef.isReady() && navigationRef.canGoBack()) {
+    navigationRef.goBack();
+  }
+};
+
+/**
+ * Reset navigation state
+ */
+export const resetNavigation = (
+  index: number,
+  routes: Array<{ name: keyof RootStackParamList; params?: any }>
+) => {
+  if (navigationRef.isReady()) {
+    navigationRef.reset({ index, routes });
   }
 };
 
@@ -50,7 +73,18 @@ export const AppNavigator: React.FC = () => {
           animation: 'fade',
         }}>
         {isAuthenticated ? (
-          <Stack.Screen name="Main" component={MainNavigator} />
+          <>
+            <Stack.Screen name="Main" component={MainNavigator} />
+            <Stack.Screen
+              name="Verification"
+              component={VerificationNavigator}
+              options={{
+                presentation: 'modal',
+                animation: 'slide_from_bottom',
+                gestureEnabled: false,
+              }}
+            />
+          </>
         ) : (
           <Stack.Screen name="Auth" component={AuthNavigator} />
         )}

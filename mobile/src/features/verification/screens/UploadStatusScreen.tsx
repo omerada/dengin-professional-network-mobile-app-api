@@ -1,0 +1,301 @@
+// src/features/verification/screens/UploadStatusScreen.tsx
+// Yükleme durumu ekranı
+// Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
+
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  SafeAreaView,
+  Alert,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import Animated, {
+  useAnimatedStyle,
+  withRepeat,
+  withSequence,
+  withTiming,
+  useSharedValue,
+} from 'react-native-reanimated';
+import { useTheme } from '@contexts';
+import { spacing, typography } from '@theme';
+import { Button } from '@shared/components';
+import { useVerificationStore } from '../stores';
+import { uploadService } from '../services';
+import { UploadProgress } from '../components';
+import type { VerificationStackParamList } from '@shared/types/navigation.types';
+import type { VerificationResponse } from '../types';
+
+type NavigationProp = NativeStackNavigationProp<
+  VerificationStackParamList,
+  'UploadStatus'
+>;
+
+/**
+ * Yükleme durumu ekranı
+ */
+export const UploadStatusScreen: React.FC = memo(() => {
+  const navigation = useNavigation<NavigationProp>();
+  const { colors } = useTheme();
+
+  const {
+    data,
+    uploadProgress,
+    verificationResponse,
+    setUploadProgress,
+    setVerificationResponse,
+    setError,
+    setStep,
+    reset,
+  } = useVerificationStore();
+
+  const [isUploading, setIsUploading] = useState(true);
+  const scale = useSharedValue(1);
+
+  /**
+   * Pulse animasyonu
+   */
+  useEffect(() => {
+    if (isUploading) {
+      scale.value = withRepeat(
+        withSequence(
+          withTiming(1.1, { duration: 800 }),
+          withTiming(1, { duration: 800 })
+        ),
+        -1,
+        true
+      );
+    }
+  }, [isUploading, scale]);
+
+  const animatedIconStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  /**
+   * Yükleme işlemini başlat
+   */
+  useEffect(() => {
+    const startUpload = async () => {
+      try {
+        setUploadProgress({ status: 'uploading' });
+
+        // Belgeleri yükle
+        const response = await uploadService.uploadWithRetry(
+          data,
+          (progress) => {
+            setUploadProgress(progress);
+          }
+        );
+
+        setUploadProgress({ status: 'processing' });
+
+        // Durumu poll et
+        const finalResponse = await uploadService.pollStatus(
+          response.id,
+          (statusResponse: VerificationResponse) => {
+            setVerificationResponse(statusResponse);
+          }
+        );
+
+        setUploadProgress({ status: 'completed', total: 100 });
+        setVerificationResponse(finalResponse);
+        setStep('status');
+        setIsUploading(false);
+      } catch (error) {
+        console.error('Upload error:', error);
+        setUploadProgress({ status: 'failed' });
+        setError({
+          code: 'NETWORK_ERROR',
+          message: 'Yükleme başarısız oldu. Lütfen tekrar deneyin.',
+        });
+        setIsUploading(false);
+      }
+    };
+
+    startUpload();
+  }, [data, setUploadProgress, setVerificationResponse, setStep, setError]);
+
+  /**
+   * Tekrar dene
+   */
+  const handleRetry = useCallback(() => {
+    setUploadProgress({
+      documentFront: 0,
+      documentBack: 0,
+      selfie: 0,
+      total: 0,
+      status: 'idle',
+    });
+    setIsUploading(true);
+  }, [setUploadProgress]);
+
+  /**
+   * Tamamla ve ana ekrana dön
+   */
+  const handleComplete = useCallback(() => {
+    reset();
+    navigation.popToTop();
+  }, [navigation, reset]);
+
+  /**
+   * Sonuç durumunu göster
+   */
+  const renderResult = () => {
+    if (!verificationResponse) return null;
+
+    const { status, message, estimatedTime } = verificationResponse;
+
+    switch (status) {
+      case 'APPROVED':
+        return (
+          <View style={styles.resultContainer}>
+            <Animated.Text style={[styles.resultIcon, animatedIconStyle]}>
+              ✅
+            </Animated.Text>
+            <Text style={[styles.resultTitle, { color: colors.success }]}>
+              Doğrulama Onaylandı!
+            </Text>
+            <Text style={[styles.resultText, { color: colors.textSecondary }]}>
+              Mesleğiniz başarıyla doğrulandı. Profilinizde doğrulanmış rozeti
+              görünecek.
+            </Text>
+          </View>
+        );
+
+      case 'REJECTED':
+        return (
+          <View style={styles.resultContainer}>
+            <Text style={styles.resultIcon}>❌</Text>
+            <Text style={[styles.resultTitle, { color: colors.error }]}>
+              Doğrulama Reddedildi
+            </Text>
+            <Text style={[styles.resultText, { color: colors.textSecondary }]}>
+              {message || 'Belgeleriniz doğrulanamadı. Lütfen tekrar deneyin.'}
+            </Text>
+          </View>
+        );
+
+      case 'MANUAL_REVIEW':
+        return (
+          <View style={styles.resultContainer}>
+            <Text style={styles.resultIcon}>🔍</Text>
+            <Text style={[styles.resultTitle, { color: colors.warning }]}>
+              Manuel İnceleme
+            </Text>
+            <Text style={[styles.resultText, { color: colors.textSecondary }]}>
+              Belgeleriniz manuel olarak incelenecek.{' '}
+              {estimatedTime || 'Tahmini süre: 24-48 saat'}
+            </Text>
+          </View>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={styles.content}>
+        {/* Yükleme ilerleme göstergesi */}
+        {isUploading && (
+          <View style={styles.uploadingContainer}>
+            <Animated.Text style={[styles.uploadingIcon, animatedIconStyle]}>
+              📤
+            </Animated.Text>
+            <Text style={[styles.uploadingTitle, { color: colors.text }]}>
+              Belgeler Yükleniyor
+            </Text>
+            <UploadProgress progress={uploadProgress} />
+          </View>
+        )}
+
+        {/* Sonuç gösterimi */}
+        {!isUploading && uploadProgress.status === 'completed' && renderResult()}
+
+        {/* Hata durumu */}
+        {!isUploading && uploadProgress.status === 'failed' && (
+          <View style={styles.resultContainer}>
+            <Text style={styles.resultIcon}>⚠️</Text>
+            <Text style={[styles.resultTitle, { color: colors.error }]}>
+              Yükleme Başarısız
+            </Text>
+            <Text style={[styles.resultText, { color: colors.textSecondary }]}>
+              Belgeleriniz yüklenirken bir hata oluştu. Lütfen internet
+              bağlantınızı kontrol edip tekrar deneyin.
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* Alt butonlar */}
+      <View style={[styles.footer, { borderTopColor: colors.border }]}>
+        {uploadProgress.status === 'failed' ? (
+          <Button
+            title="Tekrar Dene"
+            onPress={handleRetry}
+            fullWidth
+          />
+        ) : uploadProgress.status === 'completed' ? (
+          <Button
+            title="Tamam"
+            onPress={handleComplete}
+            fullWidth
+          />
+        ) : null}
+      </View>
+    </SafeAreaView>
+  );
+});
+
+UploadStatusScreen.displayName = 'UploadStatusScreen';
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: spacing.lg,
+  },
+  uploadingContainer: {
+    alignItems: 'center',
+  },
+  uploadingIcon: {
+    fontSize: 64,
+    marginBottom: spacing.lg,
+  },
+  uploadingTitle: {
+    ...typography.h2,
+    textAlign: 'center',
+    marginBottom: spacing.xl,
+  },
+  resultContainer: {
+    alignItems: 'center',
+    padding: spacing.xl,
+  },
+  resultIcon: {
+    fontSize: 80,
+    marginBottom: spacing.lg,
+  },
+  resultTitle: {
+    ...typography.h2,
+    textAlign: 'center',
+    marginBottom: spacing.md,
+  },
+  resultText: {
+    ...typography.body,
+    textAlign: 'center',
+    paddingHorizontal: spacing.lg,
+  },
+  footer: {
+    padding: spacing.lg,
+    borderTopWidth: 1,
+  },
+});
+
+export default UploadStatusScreen;
