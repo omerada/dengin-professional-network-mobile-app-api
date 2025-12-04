@@ -83,6 +83,11 @@ export type ProfileStackParamList = {
   Profile: { userId?: string };
   EditProfile: undefined;
   Settings: undefined;
+  ChangePassword: undefined;
+  AccountDeletion: undefined;
+  BiometricSettings: undefined;
+  BlockedUsers: undefined;
+  PrivacySettings: undefined;
 };
 
 /**

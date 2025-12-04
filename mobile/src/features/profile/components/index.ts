@@ -8,3 +8,4 @@ export { ProfileBio } from './ProfileBio';
 export { AvatarPicker } from './AvatarPicker';
 export { SettingsItem } from './SettingsItem';
 export { SettingsSection } from './SettingsSection';
+export { EditProfileForm } from './EditProfileForm';

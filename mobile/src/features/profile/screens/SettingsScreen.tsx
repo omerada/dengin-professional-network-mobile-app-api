@@ -3,13 +3,12 @@
 // Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
 
 import React, { useMemo, useCallback, useState } from 'react';
-import { StyleSheet, ScrollView, Alert } from 'react-native';
+import { StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@contexts/ThemeContext';
 import { spacing } from '@theme';
 import { SettingsSection } from '../components';
-import { useDeleteAccount, useChangePassword } from '../hooks';
 import type { SettingsSectionType } from '../types';
 
 /**
@@ -26,9 +25,6 @@ export const SettingsScreen: React.FC = () => {
   const { theme, toggleTheme, isDarkMode } = useTheme();
   const navigation = useNavigation();
 
-  // Mutations
-  const deleteAccount = useDeleteAccount();
-
   // Loading states
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
 
@@ -38,23 +34,8 @@ export const SettingsScreen: React.FC = () => {
   }, [navigation]);
 
   const handleChangePassword = useCallback(() => {
-    // Navigate to change password screen or show modal
-    Alert.prompt(
-      'Şifre Değiştir',
-      'Yeni şifrenizi girin',
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Değiştir',
-          onPress: (password) => {
-            // TODO: Implement password change flow
-            console.log('Password change requested');
-          },
-        },
-      ],
-      'secure-text',
-    );
-  }, []);
+    navigation.navigate('ChangePassword' as never);
+  }, [navigation]);
 
   const handleBiometric = useCallback(() => {
     navigation.navigate('BiometricSettings' as never);
@@ -83,43 +64,8 @@ export const SettingsScreen: React.FC = () => {
   }, []);
 
   const handleDeleteAccount = useCallback(() => {
-    Alert.alert(
-      'Hesabı Sil',
-      'Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Hesabı Sil',
-          style: 'destructive',
-          onPress: () => {
-            Alert.prompt(
-              'Şifrenizi Girin',
-              'Hesabınızı silmek için şifrenizi girin',
-              [
-                { text: 'İptal', style: 'cancel' },
-                {
-                  text: 'Sil',
-                  style: 'destructive',
-                  onPress: async (password) => {
-                    if (!password) return;
-                    setLoadingStates(prev => ({ ...prev, deleteAccount: true }));
-                    try {
-                      await deleteAccount.mutateAsync({ password });
-                    } catch (error) {
-                      Alert.alert('Hata', 'Hesap silinirken bir hata oluştu.');
-                    } finally {
-                      setLoadingStates(prev => ({ ...prev, deleteAccount: false }));
-                    }
-                  },
-                },
-              ],
-              'secure-text',
-            );
-          },
-        },
-      ],
-    );
-  }, [deleteAccount]);
+    navigation.navigate('AccountDeletion' as never);
+  }, [navigation]);
 
   // Settings sections
   const sections: SettingsSectionType[] = useMemo(
