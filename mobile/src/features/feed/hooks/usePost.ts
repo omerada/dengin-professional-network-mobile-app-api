@@ -1,5 +1,5 @@
 // src/features/feed/hooks/usePost.ts
-// Post detay hook'u
+// Post detay hook'u - Backend API uyumlu
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
 import { useQuery } from '@tanstack/react-query';
@@ -13,13 +13,17 @@ export const POST_QUERY_KEY = 'post';
 
 /**
  * Post detay hook'u
+ * Backend API: GET /api/posts/{postId}
+ * 
+ * @param postId - Post ID (number olarak backend'e gönderilir)
  */
-export function usePost(postId: string) {
+export function usePost(postId: number | undefined) {
   return useQuery<Post, Error>({
     queryKey: [POST_QUERY_KEY, postId],
-    queryFn: () => feedService.getPost(postId),
-    enabled: !!postId,
+    queryFn: () => feedService.getPost(postId!),
+    enabled: postId !== undefined && postId > 0,
     staleTime: 5 * 60 * 1000, // 5 dakika
+    retry: 2,
   });
 }
 

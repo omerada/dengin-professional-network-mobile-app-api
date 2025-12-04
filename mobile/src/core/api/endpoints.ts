@@ -53,8 +53,13 @@ export const API_ENDPOINTS = {
     HISTORY: '/api/verifications/history',
   },
 
-  // Feed - Backend: /api/posts/*
+  // Feed - Backend: /api/feed/* and /api/posts/*
   FEED: {
+    // GET /api/feed - Personalized feed
+    PERSONALIZED: '/api/feed',
+    // GET /api/feed/trending - Trending posts
+    TRENDING: '/api/feed/trending',
+    // GET /api/posts - All posts (for search/filter)
     LIST: '/api/posts',
     POST_BY_ID: (id: string | number) => `/api/posts/${id}`,
     CREATE_POST: '/api/posts',
@@ -62,13 +67,15 @@ export const API_ENDPOINTS = {
     DELETE_POST: (id: string | number) => `/api/posts/${id}`,
     LIKE_POST: (id: string | number) => `/api/posts/${id}/like`,
     UNLIKE_POST: (id: string | number) => `/api/posts/${id}/like`,
-    BOOKMARK_POST: (id: string | number) => `/api/posts/${id}/bookmark`,
-    UNBOOKMARK_POST: (id: string | number) => `/api/posts/${id}/bookmark`,
+    // POST /api/posts/{id}/save - Save post
+    SAVE_POST: (id: string | number) => `/api/posts/${id}/save`,
+    // DELETE /api/posts/{id}/save - Unsave post
+    UNSAVE_POST: (id: string | number) => `/api/posts/${id}/save`,
     REPORT_POST: (id: string | number) => `/api/posts/${id}/report`,
     SHARE_POST: (id: string | number) => `/api/posts/${id}/share`,
-    BOOKMARKED: '/api/posts/bookmarked',
+    // GET /api/posts/saved - Get saved posts
+    SAVED: '/api/posts/saved',
     USER_POSTS: (userId: string | number) => `/api/users/${userId}/posts`,
-    TRENDING: '/api/posts/trending',
     FOLLOWING: '/api/posts/following',
   },
 

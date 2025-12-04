@@ -1,39 +1,70 @@
 // src/features/feed/services/feedService.ts
 // Feed API servisi
-// Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
+// Backend API Reference: mobile-development-guide/core/14-BACKEND-API-REFERENCE.md
 
 import { apiClient } from '@core/api/client';
 import { API_ENDPOINTS } from '@core/api/endpoints';
 import type {
   Post,
   FeedResponse,
-  CommentsResponse,
+  CommentListResponse,
   Comment,
+  CreatePostRequest,
   CreatePostDto,
   CreateCommentDto,
+  AddCommentRequest,
   UpdatePostDto,
   FeedFilter,
+  LikeResponse,
 } from '../types';
+
+/**
+ * API Response wrapper
+ */
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+}
 
 /**
  * Feed API servisi
  */
 export const feedService = {
   /**
-   * Feed getir (cursor pagination)
+   * Personalized feed getir
+   * GET /api/feed?limit=20&professionFilter={professionId}
    */
-  async getFeed(cursor?: string, filter: FeedFilter = 'all', limit = 20): Promise<FeedResponse> {
-    const response = await apiClient.get<{ data: FeedResponse }>(API_ENDPOINTS.FEED.LIST, {
-      params: { cursor, filter, limit },
-    });
+  async getFeed(page = 0, limit = 20, professionFilter?: number): Promise<FeedResponse> {
+    const response = await apiClient.get<ApiResponse<FeedResponse>>(
+      API_ENDPOINTS.FEED.PERSONALIZED,
+      {
+        params: { page, limit, professionFilter },
+      }
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Trending postları getir
+   * GET /api/feed/trending?limit=20
+   */
+  async getTrendingFeed(limit = 20): Promise<FeedResponse> {
+    const response = await apiClient.get<ApiResponse<FeedResponse>>(
+      API_ENDPOINTS.FEED.TRENDING,
+      {
+        params: { limit },
+      }
+    );
     return response.data.data;
   },
 
   /**
    * Post detay getir
+   * GET /api/posts/{postId}
    */
-  async getPost(postId: string): Promise<Post> {
-    const response = await apiClient.get<{ data: Post }>(
+  async getPost(postId: number): Promise<Post> {
+    const response = await apiClient.get<ApiResponse<Post>>(
       API_ENDPOINTS.FEED.POST_BY_ID(postId)
     );
     return response.data.data;
@@ -41,20 +72,21 @@ export const feedService = {
 
   /**
    * Post oluştur
+   * POST /api/posts
    */
-  async createPost(dto: CreatePostDto, imageUrls: string[]): Promise<Post> {
-    const response = await apiClient.post<{ data: Post }>(API_ENDPOINTS.FEED.CREATE_POST, {
-      content: dto.content,
-      imageUrls,
-    });
+  async createPost(data: CreatePostRequest): Promise<Post> {
+    const response = await apiClient.post<ApiResponse<Post>>(
+      API_ENDPOINTS.FEED.CREATE_POST,
+      data
+    );
     return response.data.data;
   },
 
   /**
    * Post güncelle
    */
-  async updatePost(postId: string, dto: UpdatePostDto): Promise<Post> {
-    const response = await apiClient.put<{ data: Post }>(
+  async updatePost(postId: number, dto: UpdatePostDto): Promise<Post> {
+    const response = await apiClient.put<ApiResponse<Post>>(
       API_ENDPOINTS.FEED.UPDATE_POST(postId),
       dto
     );
@@ -63,16 +95,18 @@ export const feedService = {
 
   /**
    * Post sil
+   * DELETE /api/posts/{postId}
    */
-  async deletePost(postId: string): Promise<void> {
+  async deletePost(postId: number): Promise<void> {
     await apiClient.delete(API_ENDPOINTS.FEED.DELETE_POST(postId));
   },
 
   /**
    * Post beğen
+   * POST /api/posts/{postId}/like
    */
-  async likePost(postId: string): Promise<{ likesCount: number }> {
-    const response = await apiClient.post<{ data: { likesCount: number } }>(
+  async likePost(postId: number): Promise<LikeResponse> {
+    const response = await apiClient.post<ApiResponse<LikeResponse>>(
       API_ENDPOINTS.FEED.LIKE_POST(postId)
     );
     return response.data.data;
@@ -80,9 +114,10 @@ export const feedService = {
 
   /**
    * Post beğenmekten vazgeç
+   * DELETE /api/posts/{postId}/like
    */
-  async unlikePost(postId: string): Promise<{ likesCount: number }> {
-    const response = await apiClient.delete<{ data: { likesCount: number } }>(
+  async unlikePost(postId: number): Promise<LikeResponse> {
+    const response = await apiClient.delete<ApiResponse<LikeResponse>>(
       API_ENDPOINTS.FEED.UNLIKE_POST(postId)
     );
     return response.data.data;
@@ -90,64 +125,110 @@ export const feedService = {
 
   /**
    * Post kaydet
+   * POST /api/posts/{postId}/save
    */
-  async bookmarkPost(postId: string): Promise<void> {
-    await apiClient.post(API_ENDPOINTS.FEED.BOOKMARK_POST(postId));
+  async savePost(postId: number): Promise<void> {
+    await apiClient.post(API_ENDPOINTS.FEED.SAVE_POST(postId));
+  },
+
+  /**
+   * Post kaydı kaldır
+   * DELETE /api/posts/{postId}/save
+   */
+  async unsavePost(postId: number): Promise<void> {
+    await apiClient.delete(API_ENDPOINTS.FEED.UNSAVE_POST(postId));
   },
 
   /**
    * Post raporla
    */
-  async reportPost(postId: string, reason: string): Promise<void> {
+  async reportPost(postId: number, reason: string): Promise<void> {
     await apiClient.post(API_ENDPOINTS.FEED.REPORT_POST(postId), { reason });
   },
 
   /**
    * Yorumları getir
+   * GET /api/posts/{postId}/comments?page=0&size=20
    */
-  async getComments(postId: string, cursor?: string, limit = 20): Promise<CommentsResponse> {
-    const response = await apiClient.get<{ data: CommentsResponse }>(
+  async getComments(postId: number, page = 0, size = 20): Promise<CommentListResponse> {
+    const response = await apiClient.get<ApiResponse<CommentListResponse>>(
       API_ENDPOINTS.COMMENTS.BY_POST(postId),
-      { params: { cursor, limit } }
+      { params: { page, size } }
     );
     return response.data.data;
   },
 
   /**
    * Yorum ekle
+   * POST /api/posts/{postId}/comments
    */
-  async addComment(dto: CreateCommentDto): Promise<Comment> {
-    const response = await apiClient.post<{ data: Comment }>(
-      API_ENDPOINTS.COMMENTS.CREATE(dto.postId),
-      { content: dto.content, parentId: dto.parentId }
+  async addComment(postId: number, data: AddCommentRequest): Promise<Comment> {
+    const response = await apiClient.post<ApiResponse<Comment>>(
+      API_ENDPOINTS.COMMENTS.CREATE(postId),
+      data
     );
     return response.data.data;
   },
 
   /**
    * Yorum sil
+   * DELETE /api/posts/{postId}/comments/{commentId}
    */
-  async deleteComment(commentId: string): Promise<void> {
-    await apiClient.delete(API_ENDPOINTS.COMMENTS.DELETE(commentId));
+  async deleteComment(postId: number, commentId: string): Promise<void> {
+    await apiClient.delete(`/api/posts/${postId}/comments/${commentId}`);
   },
 
   /**
    * Yorum beğen
+   * POST /api/posts/{postId}/comments/{commentId}/like
    */
-  async likeComment(commentId: string): Promise<void> {
-    await apiClient.post(API_ENDPOINTS.COMMENTS.LIKE(commentId));
+  async likeComment(postId: number, commentId: string): Promise<void> {
+    await apiClient.post(`/api/posts/${postId}/comments/${commentId}/like`);
   },
 
   /**
    * Yorum beğenmekten vazgeç
+   * DELETE /api/posts/{postId}/comments/{commentId}/like
    */
-  async unlikeComment(commentId: string): Promise<void> {
-    await apiClient.delete(API_ENDPOINTS.COMMENTS.UNLIKE(commentId));
+  async unlikeComment(postId: number, commentId: string): Promise<void> {
+    await apiClient.delete(`/api/posts/${postId}/comments/${commentId}/like`);
   },
 
   /**
    * Kayıtlı postları getir
+   * GET /api/posts/saved
    */
+  async getSavedPosts(page = 0, limit = 20): Promise<FeedResponse> {
+    const response = await apiClient.get<ApiResponse<FeedResponse>>(
+      API_ENDPOINTS.FEED.SAVED,
+      { params: { page, limit } }
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Kullanıcının postlarını getir
+   */
+  async getUserPosts(userId: number, page = 0, limit = 20): Promise<FeedResponse> {
+    const response = await apiClient.get<ApiResponse<FeedResponse>>(
+      API_ENDPOINTS.FEED.USER_POSTS(userId),
+      { params: { page, limit } }
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Post paylaş
+   */
+  async sharePost(postId: number): Promise<{ sharesCount: number }> {
+    const response = await apiClient.post<ApiResponse<{ sharesCount: number }>>(
+      API_ENDPOINTS.FEED.SHARE_POST(postId)
+    );
+    return response.data.data;
+  },
+};
+
+export default feedService;
   async getBookmarkedPosts(cursor?: string, limit = 20): Promise<FeedResponse> {
     const response = await apiClient.get<{ data: FeedResponse }>(
       API_ENDPOINTS.FEED.BOOKMARKED,

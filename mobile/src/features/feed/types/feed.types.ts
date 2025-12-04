@@ -1,16 +1,17 @@
 // src/features/feed/types/feed.types.ts
 // Feed modülü tip tanımlamaları
-// Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
+// Backend API Reference: mobile-development-guide/core/14-BACKEND-API-REFERENCE.md
 
 /**
- * Post yazarı
+ * Post yazarı - Backend API uyumlu
  */
 export interface PostAuthor {
-  id: string;
+  id: number;
   name: string;
-  profession: string;
-  avatarUrl: string | null;
+  surname: string;
+  avatarUrl?: string;
   isVerified: boolean;
+  profession?: string;
 }
 
 /**
@@ -19,104 +20,142 @@ export interface PostAuthor {
 export interface PostImage {
   id: string;
   url: string;
-  thumbnailUrl: string;
+  thumbnailUrl?: string;
   width?: number;
   height?: number;
   blurhash?: string;
 }
 
 /**
- * Post
+ * Post istatistikleri - Backend API uyumlu
+ */
+export interface PostStats {
+  likeCount: number;
+  commentCount: number;
+  viewCount: number;
+}
+
+/**
+ * Kullanıcı etkileşimi - Backend API uyumlu
+ */
+export interface UserInteraction {
+  isLiked: boolean;
+  isSaved: boolean;
+}
+
+/**
+ * Post - Backend FeedPostResponse uyumlu
  */
 export interface Post {
-  id: string;
-  content: string;
-  images: PostImage[];
+  postId: number;
   author: PostAuthor;
-  likesCount: number;
-  commentsCount: number;
-  sharesCount: number;
-  isLiked: boolean;
-  isBookmarked: boolean;
+  content: string;
+  images: string[]; // Backend returns string[] for images
+  stats: PostStats;
+  userInteraction: UserInteraction;
   createdAt: string;
   updatedAt: string;
 }
 
 /**
- * Post özeti (liste için)
+ * Post özeti (liste için) - Backward compatibility
  */
 export interface PostSummary {
-  id: string;
+  postId: number;
   content: string;
-  previewImage: PostImage | null;
+  previewImage: string | null;
   imageCount: number;
   author: PostAuthor;
-  likesCount: number;
-  commentsCount: number;
-  isLiked: boolean;
+  stats: PostStats;
+  userInteraction: UserInteraction;
   createdAt: string;
 }
 
 /**
- * Yorum yazarı
+ * Yorum yazarı - Backend API uyumlu
  */
 export interface CommentAuthor {
-  id: string;
+  id: number;
   name: string;
-  avatarUrl: string | null;
-  profession?: string;
-  isVerified: boolean;
+  surname: string;
+  avatarUrl?: string;
 }
 
 /**
- * Yorum
+ * Yorum - Backend CommentResponse uyumlu
  */
 export interface Comment {
   id: string;
-  postId: string;
-  content: string;
   author: CommentAuthor;
-  likesCount: number;
+  content: string;
+  likeCount: number;
   isLiked: boolean;
-  repliesCount: number;
-  parentId: string | null;
   createdAt: string;
-  updatedAt: string;
 }
 
 /**
- * Feed sayfalama
+ * Yorum listesi yanıtı - Backend API uyumlu
+ */
+export interface CommentListResponse {
+  comments: Comment[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+}
+
+/**
+ * Feed sayfalama - Backend PaginatedResponse uyumlu
  */
 export interface FeedPagination {
-  cursor: string | null;
-  hasMore: boolean;
-  totalCount: number;
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
 }
 
 /**
- * Feed yanıtı
+ * Feed yanıtı - Backend API uyumlu
+ * GET /api/feed response
  */
 export interface FeedResponse {
-  data: Post[];
-  pagination: FeedPagination;
-  nextCursor: string | null;
+  content: Post[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
 }
 
 /**
- * Comments yanıtı
+ * Like yanıtı - Backend API uyumlu
  */
-export interface CommentsResponse {
-  data: Comment[];
-  pagination: FeedPagination;
-  nextCursor: string | null;
+export interface LikeResponse {
+  isLiked: boolean;
+  likeCount: number;
 }
 
 /**
- * Post oluşturma DTO
+ * Post oluşturma isteği - Backend API uyumlu
+ * POST /api/posts
+ */
+export interface CreatePostRequest {
+  content: string; // 1-1000 chars
+  images?: string[]; // Max 5 S3 URLs
+  professionId?: number; // Optional profession tag
+}
+
+/**
+ * Post oluşturma DTO - Lokal kullanım
  */
 export interface CreatePostDto {
   content: string;
   images: LocalImage[];
+  professionId?: number;
 }
 
 /**
@@ -131,12 +170,19 @@ export interface LocalImage {
 }
 
 /**
- * Yorum oluşturma DTO
+ * Yorum ekleme isteği - Backend API uyumlu
+ * POST /api/posts/{postId}/comments
+ */
+export interface AddCommentRequest {
+  content: string; // 1-500 chars
+}
+
+/**
+ * Yorum oluşturma DTO - Lokal kullanım
  */
 export interface CreateCommentDto {
-  postId: string;
+  postId: number;
   content: string;
-  parentId?: string;
 }
 
 /**

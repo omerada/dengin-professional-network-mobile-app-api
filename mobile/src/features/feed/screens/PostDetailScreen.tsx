@@ -1,5 +1,5 @@
 // src/features/feed/screens/PostDetailScreen.tsx
-// Post detay ekranı
+// Post detay ekranı - Backend API uyumlu
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
 import React, { useCallback } from 'react';
@@ -23,7 +23,7 @@ import {
   EmptyFeed,
 } from '../components';
 import type { FeedStackParamList } from '@shared/types';
-import type { Comment } from '../types';
+import type { Comment, AddCommentRequest } from '../types';
 
 type PostDetailRouteProp = RouteProp<FeedStackParamList, 'PostDetail'>;
 
@@ -31,7 +31,7 @@ export const PostDetailScreen: React.FC = () => {
   const { theme } = useTheme();
   const navigation = useNavigation();
   const route = useRoute<PostDetailRouteProp>();
-  const { postId } = route.params;
+  const { postId } = route.params; // postId: number
 
   // Data fetching
   const { data: post, isLoading, refetch, isRefetching } = usePost(postId);
@@ -50,7 +50,8 @@ export const PostDetailScreen: React.FC = () => {
 
   const handleLike = useCallback(() => {
     if (post) {
-      likePost.mutate({ postId: post.id, isLiked: post.isLiked });
+      // Backend API: postId: number, isLiked from userInteraction
+      likePost.mutate({ postId: post.postId, isLiked: post.userInteraction.isLiked });
     }
   }, [likePost, post]);
 
@@ -64,7 +65,8 @@ export const PostDetailScreen: React.FC = () => {
 
   const handleBookmark = useCallback(() => {
     if (post) {
-      bookmarkPost.mutate({ postId: post.id, isBookmarked: post.isBookmarked });
+      // Backend API: postId: number, isSaved from userInteraction
+      bookmarkPost.mutate({ postId: post.postId, isSaved: post.userInteraction.isSaved });
     }
   }, [bookmarkPost, post]);
 
@@ -80,12 +82,15 @@ export const PostDetailScreen: React.FC = () => {
     // TODO: Implement reply
   }, []);
 
-  const handleCommentAuthorPress = useCallback((userId: string) => {
+  const handleCommentAuthorPress = useCallback((userId: number) => {
     navigation.navigate('UserProfile' as never, { userId } as never);
   }, [navigation]);
 
   const handleAddComment = useCallback((content: string) => {
-    addComment.mutate({ postId, content });
+    if (postId) {
+      const request: AddCommentRequest = { content };
+      addComment.mutate({ postId, request });
+    }
   }, [addComment, postId]);
 
   if (isLoading || !post) {
@@ -121,15 +126,15 @@ export const PostDetailScreen: React.FC = () => {
           <PostContent content={post.content} expandable={false} />
 
           {post.images.length > 0 && (
-            <PostImages images={post.images} postId={post.id} />
+            <PostImages images={post.images} postId={post.postId} />
           )}
 
           <PostActions
-            likesCount={post.likesCount}
-            commentsCount={post.commentsCount}
-            sharesCount={post.sharesCount}
-            isLiked={post.isLiked}
-            isBookmarked={post.isBookmarked}
+            likesCount={post.stats.likeCount}
+            commentsCount={post.stats.commentCount}
+            sharesCount={post.stats.viewCount}
+            isLiked={post.userInteraction.isLiked}
+            isBookmarked={post.userInteraction.isSaved}
             onLike={handleLike}
             onComment={handleComment}
             onShare={handleShare}

@@ -38,14 +38,14 @@ export type MainTabParamList = {
 };
 
 /**
- * Feed Stack Parameter List
+ * Feed Stack Parameter List - Backend API uyumlu
  */
 export type FeedStackParamList = {
   Feed: undefined;
-  PostDetail: { postId: string };
+  PostDetail: { postId: number }; // Backend API: postId: number
   CreatePost: undefined;
-  UserProfile: { userId: string };
-  Comments: { postId: string };
+  UserProfile: { userId: number }; // Backend API: userId: number
+  Comments: { postId: number }; // Backend API: postId: number
 };
 
 /**

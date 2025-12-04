@@ -1,11 +1,11 @@
 // src/features/feed/hooks/useComments.ts
-// Comments hook'ları
+// Comments hook'ları - Backend API uyumlu
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
 import { useInfiniteQuery, useMutation, useQueryClient, InfiniteData } from '@tanstack/react-query';
 import { feedService } from '../services';
 import { POST_QUERY_KEY } from './usePost';
-import type { CommentsResponse, Comment, CreateCommentDto, Post } from '../types';
+import type { CommentListResponse, Comment, AddCommentRequest, Post } from '../types';
 
 /**
  * Query keys
@@ -13,17 +13,19 @@ import type { CommentsResponse, Comment, CreateCommentDto, Post } from '../types
 export const COMMENTS_QUERY_KEY = 'comments';
 
 /**
- * Comments hook - infinite scroll
+ * Comments hook - page-based infinite scroll
+ * Backend API: GET /api/posts/{postId}/comments?page=0&size=20
  */
-export function useComments(postId: string) {
-  return useInfiniteQuery<CommentsResponse, Error>({
+export function useComments(postId: number | undefined, pageSize = 20) {
+  return useInfiniteQuery<CommentListResponse, Error>({
     queryKey: [COMMENTS_QUERY_KEY, postId],
-    queryFn: async ({ pageParam }) => {
-      return feedService.getComments(postId, pageParam as string | undefined);
+    queryFn: async ({ pageParam = 0 }) => {
+      return feedService.getComments(postId!, pageParam as number, pageSize);
     },
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-    enabled: !!postId,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => 
+      lastPage.hasNext ? lastPage.page + 1 : undefined,
+    enabled: postId !== undefined && postId > 0,
     staleTime: 1 * 60 * 1000, // 1 dakika
   });
 }
@@ -31,11 +33,11 @@ export function useComments(postId: string) {
 /**
  * Comments data helper
  */
-export function useCommentsData(postId: string) {
+export function useCommentsData(postId: number | undefined) {
   const { data, ...rest } = useComments(postId);
 
-  const comments = data?.pages.flatMap((page) => page.data) ?? [];
-  const totalCount = data?.pages[0]?.pagination.totalCount ?? 0;
+  const comments = data?.pages.flatMap((page) => page.comments) ?? [];
+  const totalCount = data?.pages[0]?.totalElements ?? 0;
 
   return {
     comments,
@@ -46,17 +48,18 @@ export function useCommentsData(postId: string) {
 
 /**
  * Add comment hook
+ * Backend API: POST /api/posts/{postId}/comments
  */
 export function useAddComment() {
   const queryClient = useQueryClient();
 
-  return useMutation<Comment, Error, CreateCommentDto>({
-    mutationFn: (dto) => feedService.addComment(dto),
+  return useMutation<Comment, Error, { postId: number; request: AddCommentRequest }>({
+    mutationFn: ({ postId, request }) => feedService.addComment(postId, request),
 
-    onSuccess: (newComment, variables) => {
-      // Update comments cache
-      queryClient.setQueryData<InfiniteData<CommentsResponse>>(
-        [COMMENTS_QUERY_KEY, variables.postId],
+    onSuccess: (newComment, { postId }) => {
+      // Update comments cache - add to first page
+      queryClient.setQueryData<InfiniteData<CommentListResponse>>(
+        [COMMENTS_QUERY_KEY, postId],
         (old) => {
           if (!old) return old;
 
@@ -64,7 +67,8 @@ export function useAddComment() {
           if (newPages[0]) {
             newPages[0] = {
               ...newPages[0],
-              data: [newComment, ...newPages[0].data],
+              comments: [newComment, ...newPages[0].comments],
+              totalElements: newPages[0].totalElements + 1,
             };
           }
 
@@ -74,31 +78,38 @@ export function useAddComment() {
 
       // Update post comment count
       queryClient.setQueryData<Post>(
-        [POST_QUERY_KEY, variables.postId],
+        [POST_QUERY_KEY, postId],
         (old) => {
           if (!old) return old;
-          return { ...old, commentsCount: old.commentsCount + 1 };
+          return { 
+            ...old, 
+            stats: {
+              ...old.stats,
+              commentCount: old.stats.commentCount + 1,
+            },
+          };
         }
       );
 
       // Invalidate to get fresh data
-      queryClient.invalidateQueries({ queryKey: [COMMENTS_QUERY_KEY, variables.postId] });
+      queryClient.invalidateQueries({ queryKey: [COMMENTS_QUERY_KEY, postId] });
     },
   });
 }
 
 /**
  * Delete comment hook
+ * Backend API: DELETE /api/posts/{postId}/comments/{commentId}
  */
-export function useDeleteComment(postId: string) {
+export function useDeleteComment(postId: number) {
   const queryClient = useQueryClient();
 
   return useMutation<void, Error, string>({
-    mutationFn: (commentId) => feedService.deleteComment(commentId),
+    mutationFn: (commentId) => feedService.deleteComment(postId, commentId),
 
     onSuccess: (_, commentId) => {
       // Remove from cache
-      queryClient.setQueryData<InfiniteData<CommentsResponse>>(
+      queryClient.setQueryData<InfiniteData<CommentListResponse>>(
         [COMMENTS_QUERY_KEY, postId],
         (old) => {
           if (!old) return old;
@@ -107,7 +118,8 @@ export function useDeleteComment(postId: string) {
             ...old,
             pages: old.pages.map((page) => ({
               ...page,
-              data: page.data.filter((comment) => comment.id !== commentId),
+              comments: page.comments.filter((comment) => comment.id !== commentId),
+              totalElements: page.totalElements - 1,
             })),
           };
         }
@@ -118,7 +130,13 @@ export function useDeleteComment(postId: string) {
         [POST_QUERY_KEY, postId],
         (old) => {
           if (!old) return old;
-          return { ...old, commentsCount: Math.max(0, old.commentsCount - 1) };
+          return { 
+            ...old, 
+            stats: {
+              ...old.stats,
+              commentCount: Math.max(0, old.stats.commentCount - 1),
+            },
+          };
         }
       );
     },
@@ -127,22 +145,25 @@ export function useDeleteComment(postId: string) {
 
 /**
  * Like comment hook
+ * Backend API: POST /api/posts/{postId}/comments/{commentId}/like
  */
-export function useLikeComment(postId: string) {
+export function useLikeComment(postId: number) {
   const queryClient = useQueryClient();
 
   return useMutation<void, Error, { commentId: string; isLiked: boolean }>({
     mutationFn: async ({ commentId, isLiked }) => {
-      if (!isLiked) {
-        await feedService.likeComment(commentId);
+      if (isLiked) {
+        // Unlike - not yet implemented in API
+        // await feedService.unlikeComment(postId, commentId);
+      } else {
+        await feedService.likeComment(postId, commentId);
       }
-      // Unlike not implemented in API
     },
 
     onMutate: async ({ commentId, isLiked }) => {
       await queryClient.cancelQueries({ queryKey: [COMMENTS_QUERY_KEY, postId] });
 
-      queryClient.setQueryData<InfiniteData<CommentsResponse>>(
+      queryClient.setQueryData<InfiniteData<CommentListResponse>>(
         [COMMENTS_QUERY_KEY, postId],
         (old) => {
           if (!old) return old;
@@ -151,12 +172,12 @@ export function useLikeComment(postId: string) {
             ...old,
             pages: old.pages.map((page) => ({
               ...page,
-              data: page.data.map((comment) =>
+              comments: page.comments.map((comment) =>
                 comment.id === commentId
                   ? {
                       ...comment,
                       isLiked: !isLiked,
-                      likesCount: isLiked ? comment.likesCount - 1 : comment.likesCount + 1,
+                      likeCount: isLiked ? comment.likeCount - 1 : comment.likeCount + 1,
                     }
                   : comment
               ),

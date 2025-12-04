@@ -1,5 +1,5 @@
 // src/features/feed/screens/FeedScreen.tsx
-// Ana feed ekranı
+// Ana feed ekranı - Backend API uyumlu
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
 import React, { useCallback, useMemo } from 'react';
@@ -37,23 +37,25 @@ export const FeedScreen: React.FC = () => {
     navigation.navigate('CreatePost' as never);
   }, [navigation]);
 
-  const handleLike = useCallback((postId: string, isLiked: boolean) => {
+  // postId: number - backend API uyumlu
+  const handleLike = useCallback((postId: number, isLiked: boolean) => {
     likePost.mutate({ postId, isLiked });
   }, [likePost]);
 
-  const handleComment = useCallback((postId: string) => {
+  const handleComment = useCallback((postId: number) => {
     navigation.navigate('Comments' as never, { postId } as never);
   }, [navigation]);
 
-  const handleShare = useCallback((_postId: string) => {
+  const handleShare = useCallback((_postId: number) => {
     // TODO: Implement share functionality
   }, []);
 
-  const handleBookmark = useCallback((postId: string, isBookmarked: boolean) => {
-    bookmarkPost.mutate({ postId, isBookmarked });
+  // isSaved - backend API uyumlu (isBookmarked yerine)
+  const handleBookmark = useCallback((postId: number, isSaved: boolean) => {
+    bookmarkPost.mutate({ postId, isSaved });
   }, [bookmarkPost]);
 
-  const handleMenuPress = useCallback((_postId: string) => {
+  const handleMenuPress = useCallback((_postId: number) => {
     // TODO: Show action sheet
   }, []);
 
@@ -74,7 +76,8 @@ export const FeedScreen: React.FC = () => {
     />
   ), [handleLike, handleComment, handleShare, handleBookmark, handleMenuPress]);
 
-  const keyExtractor = useCallback((item: Post) => item.id, []);
+  // postId: number kullanılır
+  const keyExtractor = useCallback((item: Post) => String(item.postId), []);
 
   const ListHeaderComponent = useMemo(() => (
     <FeedHeader onCreatePress={handleCreatePress} />

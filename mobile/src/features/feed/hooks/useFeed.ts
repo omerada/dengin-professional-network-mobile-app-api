@@ -1,6 +1,6 @@
 // src/features/feed/hooks/useFeed.ts
 // Feed hook (React Query - Infinite Query)
-// Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
+// Backend API Reference: mobile-development-guide/core/14-BACKEND-API-REFERENCE.md
 
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { feedService } from '../services';
@@ -11,23 +11,44 @@ import type { FeedResponse, FeedFilter } from '../types';
  * Query keys
  */
 export const FEED_QUERY_KEY = 'feed';
+export const TRENDING_FEED_KEY = 'trending-feed';
 
 /**
  * Feed hook - infinite scroll destekli
+ * GET /api/feed with page-based pagination
  */
-export function useFeed(filterOverride?: FeedFilter) {
-  const storeFilter = useFeedStore((state) => state.filter);
-  const filter = filterOverride ?? storeFilter;
-
+export function useFeed(professionFilter?: number) {
   return useInfiniteQuery<FeedResponse, Error>({
-    queryKey: [FEED_QUERY_KEY, filter],
-    queryFn: async ({ pageParam }) => {
-      return feedService.getFeed(pageParam as string | undefined, filter);
+    queryKey: [FEED_QUERY_KEY, professionFilter],
+    queryFn: async ({ pageParam = 0 }) => {
+      return feedService.getFeed(pageParam as number, 20, professionFilter);
     },
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.hasNext) {
+        return lastPage.page + 1;
+      }
+      return undefined;
+    },
     staleTime: 2 * 60 * 1000, // 2 dakika
     gcTime: 10 * 60 * 1000, // 10 dakika
+  });
+}
+
+/**
+ * Trending Feed hook
+ * GET /api/feed/trending
+ */
+export function useTrendingFeed(limit = 20) {
+  return useInfiniteQuery<FeedResponse, Error>({
+    queryKey: [TRENDING_FEED_KEY],
+    queryFn: async () => {
+      return feedService.getTrendingFeed(limit);
+    },
+    initialPageParam: 0,
+    getNextPageParam: () => undefined, // Trending has no pagination
+    staleTime: 5 * 60 * 1000, // 5 dakika
+    gcTime: 15 * 60 * 1000, // 15 dakika
   });
 }
 
@@ -36,21 +57,21 @@ export function useFeed(filterOverride?: FeedFilter) {
  */
 export function useRefreshFeed() {
   const queryClient = useQueryClient();
-  const filter = useFeedStore((state) => state.filter);
 
   return () => {
-    queryClient.invalidateQueries({ queryKey: [FEED_QUERY_KEY, filter] });
+    queryClient.invalidateQueries({ queryKey: [FEED_QUERY_KEY] });
+    queryClient.invalidateQueries({ queryKey: [TRENDING_FEED_KEY] });
   };
 }
 
 /**
  * Feed data helper
  */
-export function useFeedPosts(filterOverride?: FeedFilter) {
-  const { data, ...rest } = useFeed(filterOverride);
+export function useFeedPosts(professionFilter?: number) {
+  const { data, ...rest } = useFeed(professionFilter);
 
-  const posts = data?.pages.flatMap((page) => page.data) ?? [];
-  const totalCount = data?.pages[0]?.pagination.totalCount ?? 0;
+  const posts = data?.pages.flatMap((page) => page.content) ?? [];
+  const totalCount = data?.pages[0]?.totalElements ?? 0;
 
   return {
     posts,

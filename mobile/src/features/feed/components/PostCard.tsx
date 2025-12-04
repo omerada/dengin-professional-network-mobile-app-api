@@ -1,5 +1,5 @@
 // src/features/feed/components/PostCard.tsx
-// Post kartı komponenti
+// Post kartı komponenti - Backend API uyumlu
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
 import React, { memo, useCallback } from 'react';
@@ -22,11 +22,11 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 interface PostCardProps {
   post: Post;
-  onLike?: (postId: string, isLiked: boolean) => void;
-  onComment?: (postId: string) => void;
-  onShare?: (postId: string) => void;
-  onBookmark?: (postId: string, isBookmarked: boolean) => void;
-  onMenuPress?: (postId: string) => void;
+  onLike?: (postId: number, isLiked: boolean) => void;
+  onComment?: (postId: number) => void;
+  onShare?: (postId: number) => void;
+  onBookmark?: (postId: number, isSaved: boolean) => void;
+  onMenuPress?: (postId: number) => void;
 }
 
 export const PostCard: React.FC<PostCardProps> = memo(({
@@ -40,33 +40,34 @@ export const PostCard: React.FC<PostCardProps> = memo(({
   const { theme } = useTheme();
   const navigation = useNavigation();
 
+  // Backend API: postId: number
   const handlePress = useCallback(() => {
-    navigation.navigate('PostDetail' as never, { postId: post.id } as never);
-  }, [navigation, post.id]);
+    navigation.navigate('PostDetail' as never, { postId: post.postId } as never);
+  }, [navigation, post.postId]);
 
   const handleAuthorPress = useCallback(() => {
     navigation.navigate('UserProfile' as never, { userId: post.author.id } as never);
   }, [navigation, post.author.id]);
 
   const handleLike = useCallback(() => {
-    onLike?.(post.id, post.isLiked);
-  }, [onLike, post.id, post.isLiked]);
+    onLike?.(post.postId, post.userInteraction.isLiked);
+  }, [onLike, post.postId, post.userInteraction.isLiked]);
 
   const handleComment = useCallback(() => {
-    onComment?.(post.id);
-  }, [onComment, post.id]);
+    onComment?.(post.postId);
+  }, [onComment, post.postId]);
 
   const handleShare = useCallback(() => {
-    onShare?.(post.id);
-  }, [onShare, post.id]);
+    onShare?.(post.postId);
+  }, [onShare, post.postId]);
 
   const handleBookmark = useCallback(() => {
-    onBookmark?.(post.id, post.isBookmarked);
-  }, [onBookmark, post.id, post.isBookmarked]);
+    onBookmark?.(post.postId, post.userInteraction.isSaved);
+  }, [onBookmark, post.postId, post.userInteraction.isSaved]);
 
   const handleMenu = useCallback(() => {
-    onMenuPress?.(post.id);
-  }, [onMenuPress, post.id]);
+    onMenuPress?.(post.postId);
+  }, [onMenuPress, post.postId]);
 
   return (
     <Pressable
@@ -87,15 +88,15 @@ export const PostCard: React.FC<PostCardProps> = memo(({
       <PostContent content={post.content} />
 
       {post.images.length > 0 && (
-        <PostImages images={post.images} postId={post.id} />
+        <PostImages images={post.images} postId={post.postId} />
       )}
 
       <PostActions
-        likesCount={post.likesCount}
-        commentsCount={post.commentsCount}
-        sharesCount={post.sharesCount}
-        isLiked={post.isLiked}
-        isBookmarked={post.isBookmarked}
+        likesCount={post.stats.likeCount}
+        commentsCount={post.stats.commentCount}
+        sharesCount={post.stats.viewCount}
+        isLiked={post.userInteraction.isLiked}
+        isBookmarked={post.userInteraction.isSaved}
         onLike={handleLike}
         onComment={handleComment}
         onShare={handleShare}

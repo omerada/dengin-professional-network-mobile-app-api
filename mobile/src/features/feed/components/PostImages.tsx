@@ -1,5 +1,5 @@
 // src/features/feed/components/PostImages.tsx
-// Post görselleri komponenti
+// Post görselleri komponenti - Backend API uyumlu
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
 import React, { memo, useCallback, useState } from 'react';
@@ -16,14 +16,13 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@contexts/ThemeContext';
-import type { PostImage } from '../types';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const IMAGE_GAP = 2;
 
 interface PostImagesProps {
-  images: PostImage[];
-  postId: string;
+  images: string[]; // Backend API: string[] (S3 URLs)
+  postId: number; // Backend API: postId: number
 }
 
 export const PostImages: React.FC<PostImagesProps> = memo(({ images, postId }) => {
@@ -42,16 +41,14 @@ export const PostImages: React.FC<PostImagesProps> = memo(({ images, postId }) =
 
   // Tek görsel
   if (images.length === 1) {
-    const image = images[0];
-    const aspectRatio = image.width / image.height;
-    const height = Math.min(SCREEN_WIDTH / aspectRatio, 400);
+    const imageUrl = images[0];
 
     return (
       <>
         <Pressable onPress={() => openImage(0)}>
           <Image
-            source={{ uri: image.url }}
-            style={[styles.singleImage, { height }]}
+            source={{ uri: imageUrl }}
+            style={[styles.singleImage, { height: 300 }]}
             resizeMode="cover"
           />
         </Pressable>
@@ -70,14 +67,14 @@ export const PostImages: React.FC<PostImagesProps> = memo(({ images, postId }) =
     return (
       <>
         <View style={styles.twoImages}>
-          {images.map((image, index) => (
+          {images.map((imageUrl, index) => (
             <Pressable
-              key={image.id}
+              key={`${postId}-image-${index}`}
               style={styles.twoImageItem}
               onPress={() => openImage(index)}
             >
               <Image
-                source={{ uri: image.url }}
+                source={{ uri: imageUrl }}
                 style={styles.twoImageContent}
                 resizeMode="cover"
               />
@@ -101,20 +98,20 @@ export const PostImages: React.FC<PostImagesProps> = memo(({ images, postId }) =
         <View style={styles.threeImages}>
           <Pressable style={styles.threeImageMain} onPress={() => openImage(0)}>
             <Image
-              source={{ uri: images[0].url }}
+              source={{ uri: images[0] }}
               style={styles.threeImageMainContent}
               resizeMode="cover"
             />
           </Pressable>
           <View style={styles.threeImageSide}>
-            {images.slice(1).map((image, index) => (
+            {images.slice(1).map((imageUrl, index) => (
               <Pressable
-                key={image.id}
+                key={`${postId}-image-${index + 1}`}
                 style={styles.threeImageSideItem}
                 onPress={() => openImage(index + 1)}
               >
                 <Image
-                  source={{ uri: image.url }}
+                  source={{ uri: imageUrl }}
                   style={styles.threeImageSideContent}
                   resizeMode="cover"
                 />
@@ -136,14 +133,14 @@ export const PostImages: React.FC<PostImagesProps> = memo(({ images, postId }) =
   return (
     <>
       <View style={styles.fourImages}>
-        {images.slice(0, 4).map((image, index) => (
+        {images.slice(0, 4).map((imageUrl, index) => (
           <Pressable
-            key={image.id}
+            key={`${postId}-image-${index}`}
             style={styles.fourImageItem}
             onPress={() => openImage(index)}
           >
             <Image
-              source={{ uri: image.url }}
+              source={{ uri: imageUrl }}
               style={styles.fourImageContent}
               resizeMode="cover"
             />
@@ -170,7 +167,7 @@ PostImages.displayName = 'PostImages';
 // Full screen image modal
 interface ImageModalProps {
   visible: boolean;
-  images: PostImage[];
+  images: string[]; // Backend API: string[] (S3 URLs)
   initialIndex: number;
   onClose: () => void;
 }
@@ -215,16 +212,16 @@ const ImageModal: React.FC<ImageModalProps> = ({
           })}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
-          renderItem={({ item }) => (
+          renderItem={({ item: imageUrl, index }) => (
             <View style={styles.modalImageContainer}>
               <Image
-                source={{ uri: item.url }}
+                source={{ uri: imageUrl }}
                 style={styles.modalImage}
                 resizeMode="contain"
               />
             </View>
           )}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item, index) => `modal-image-${index}`}
         />
 
         {images.length > 1 && (

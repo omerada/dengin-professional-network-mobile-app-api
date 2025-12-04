@@ -1,5 +1,5 @@
 // src/features/feed/hooks/useDeletePost.ts
-// Post silme hook'u
+// Post silme hook'u - Backend API uyumlu
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
 import { useMutation, useQueryClient, InfiniteData } from '@tanstack/react-query';
@@ -7,34 +7,38 @@ import { useNavigation } from '@react-navigation/native';
 import { Alert } from 'react-native';
 import { feedService } from '../services';
 import { FEED_QUERY_KEY } from './useFeed';
-import type { FeedResponse } from '../types';
+import { POST_QUERY_KEY } from './usePost';
+import type { Post } from '../types';
 
 /**
  * Delete post hook
+ * Backend API: DELETE /api/posts/{postId}
  */
 export function useDeletePost() {
   const queryClient = useQueryClient();
   const navigation = useNavigation();
 
-  return useMutation({
-    mutationFn: (postId: string) => feedService.deletePost(postId),
+  return useMutation<void, Error, number>({
+    mutationFn: (postId: number) => feedService.deletePost(postId),
 
     onSuccess: (_, postId) => {
       // Remove from feed cache
-      queryClient.setQueriesData<InfiniteData<FeedResponse>>(
+      queryClient.setQueriesData<InfiniteData<Post[]>>(
         { queryKey: [FEED_QUERY_KEY] },
         (old) => {
           if (!old) return old;
 
           return {
             ...old,
-            pages: old.pages.map((page) => ({
-              ...page,
-              data: page.data.filter((post) => post.id !== postId),
-            })),
+            pages: old.pages.map((page) =>
+              page.filter((post) => post.postId !== postId)
+            ),
           };
         }
       );
+
+      // Remove single post from cache
+      queryClient.removeQueries({ queryKey: [POST_QUERY_KEY, postId] });
 
       // Navigate back if on post detail
       if (navigation.canGoBack()) {
@@ -54,7 +58,7 @@ export function useDeletePost() {
 export function useDeletePostWithConfirmation() {
   const deletePost = useDeletePost();
 
-  const confirmAndDelete = (postId: string) => {
+  const confirmAndDelete = (postId: number) => {
     Alert.alert(
       'Gönderiyi Sil',
       'Bu gönderiyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',

@@ -1,5 +1,5 @@
 // src/features/feed/components/PostHeader.tsx
-// Post header komponenti
+// Post header komponenti - Backend API uyumlu
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
 import React, { memo } from 'react';
@@ -30,7 +30,9 @@ export const PostHeader: React.FC<PostHeaderProps> = memo(({
 }) => {
   const { theme } = useTheme();
 
-  const fullName = `${author.firstName} ${author.lastName}`;
+  // Backend API: name, surname
+  const fullName = `${author.name} ${author.surname}`;
+  const initials = `${author.name[0] || ''}${author.surname[0] || ''}`;
 
   return (
     <View style={styles.container}>
@@ -45,7 +47,7 @@ export const PostHeader: React.FC<PostHeaderProps> = memo(({
             ]}
           >
             <Text style={[styles.avatarText, { color: theme.colors.primary[600] }]}>
-              {author.firstName[0]}{author.lastName[0]}
+              {initials}
             </Text>
           </View>
         )}

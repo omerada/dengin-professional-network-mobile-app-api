@@ -1,5 +1,5 @@
 // src/features/feed/screens/CommentsScreen.tsx
-// Yorumlar ekranı
+// Yorumlar ekranı - Backend API uyumlu
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
 import React, { useCallback, useMemo } from 'react';
@@ -14,7 +14,7 @@ import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { useTheme } from '@contexts/ThemeContext';
 import { useCommentsData, useAddComment, useLikeComment, useDeleteComment } from '../hooks';
 import { CommentCard, AddCommentForm, EmptyFeed } from '../components';
-import type { Comment } from '../types';
+import type { Comment, AddCommentRequest } from '../types';
 import type { FeedStackParamList } from '@shared/types';
 
 type CommentsRouteProp = RouteProp<FeedStackParamList, 'Comments'>;
@@ -23,7 +23,7 @@ export const CommentsScreen: React.FC = () => {
   const { theme } = useTheme();
   const navigation = useNavigation();
   const route = useRoute<CommentsRouteProp>();
-  const { postId } = route.params;
+  const { postId } = route.params; // postId: number
 
   // Data
   const {
@@ -42,7 +42,10 @@ export const CommentsScreen: React.FC = () => {
   const deleteComment = useDeleteComment(postId);
 
   const handleAddComment = useCallback((content: string) => {
-    addComment.mutate({ postId, content });
+    if (postId) {
+      const request: AddCommentRequest = { content };
+      addComment.mutate({ postId, request });
+    }
   }, [addComment, postId]);
 
   const handleLike = useCallback((commentId: string, isLiked: boolean) => {
@@ -54,7 +57,7 @@ export const CommentsScreen: React.FC = () => {
     console.log('Reply to:', commentId);
   }, []);
 
-  const handleAuthorPress = useCallback((userId: string) => {
+  const handleAuthorPress = useCallback((userId: number) => {
     navigation.navigate('UserProfile' as never, { userId } as never);
   }, [navigation]);
 
