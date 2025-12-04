@@ -1,7 +1,10 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "lib": ["ES2021", "DOM"],
+    "lib": [
+      "ES2021",
+      "DOM"
+    ],
     "jsx": "react-native",
     "module": "ESNext",
     "moduleResolution": "node",
@@ -24,16 +27,40 @@
     "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
-      "@features/*": ["src/features/*"],
-      "@core/*": ["src/core/*"],
-      "@shared/*": ["src/shared/*"],
-      "@theme": ["src/theme"],
-      "@theme/*": ["src/theme/*"],
-      "@contexts/*": ["src/contexts/*"],
-      "@config/*": ["src/config/*"],
-      "@assets/*": ["assets/*"]
+      "@features/*": [
+        "src/features/*"
+      ],
+      "@core/*": [
+        "src/core/*"
+      ],
+      "@shared/*": [
+        "src/shared/*"
+      ],
+      "@theme": [
+        "src/theme"
+      ],
+      "@theme/*": [
+        "src/theme/*"
+      ],
+      "@contexts/*": [
+        "src/contexts/*"
+      ],
+      "@config/*": [
+        "src/config/*"
+      ],
+      "@assets/*": [
+        "assets/*"
+      ]
     }
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "babel.config.js", "metro.config.js", "__tests__"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "__tests__"
+  ],
+  "extends": "expo/tsconfig.base"
 }
