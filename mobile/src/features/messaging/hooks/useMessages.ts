@@ -1,19 +1,25 @@
 // src/features/messaging/hooks/useMessages.ts
 // Messages list hook with real-time sync
-// Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
-// Oku: mobile-development-guide/core/13-REAL-TIME.md
+// Backend: ConversationController - GET /api/conversations/{id}/messages
+// Oku: backend-development-guide/sprint-planning/26-SPRINT-7-8.md
 
 import { useInfiniteQuery, useQueryClient, InfiniteData } from '@tanstack/react-query';
 import { useEffect, useCallback, useMemo } from 'react';
-import { stompClient } from '@core/socket';
-import type { WsMessageResponse, WsReadReceipt } from '@core/socket';
+import { stompClient } from '../services/socketClient';
+import type { 
+  WsMessageResponse, 
+  WsReadReceipt,
+  MessageListResponse, 
+  Message,
+  ClientMessage,
+} from '../types';
 import { messagingService } from '../services';
-import type { MessagesResponse, Message, MessageStatus } from '../types';
 
 export const MESSAGES_QUERY_KEY = 'messages';
 
 /**
  * Messages list hook with real-time updates
+ * Backend MessageListResponse ile uyumlu
  */
 export function useMessages(conversationId: string) {
   const queryClient = useQueryClient();
@@ -23,37 +29,33 @@ export function useMessages(conversationId: string) {
     if (!conversationId) return;
 
     // Handle new message received
-    const unsubMessage = stompClient.on<WsMessageResponse>('message', (data) => {
+    const handleNewMessage = (data: WsMessageResponse) => {
       if (data.conversationId !== conversationId) return;
 
       // Convert WebSocket response to Message type
       const newMessage: Message = {
-        id: data.messageId,
+        messageId: data.messageId,
         conversationId: data.conversationId,
-        senderId: String(data.senderId),
+        senderId: data.senderId,
+        senderName: '', // Will be populated from conversation participant
         content: data.content,
-        type: 'text',
-        status: data.status.toLowerCase() as MessageStatus,
-        attachments: data.attachment ? [{
-          id: data.attachment.s3Key,
-          type: 'file',
-          url: data.attachment.url,
-          fileName: data.attachment.fileName,
-          fileSize: data.attachment.fileSize,
-        }] : [],
-        createdAt: data.sentAt,
-        updatedAt: data.sentAt,
+        attachment: data.attachment,
+        status: data.status,
+        read: false,
+        sentByMe: false, // Backend will determine this
+        sentAt: data.sentAt,
+        readAt: null,
       };
 
       // Update cache - add message to beginning of first page
-      queryClient.setQueryData<InfiniteData<MessagesResponse>>(
+      queryClient.setQueryData<InfiniteData<MessageListResponse>>(
         [MESSAGES_QUERY_KEY, conversationId],
         (old) => {
           if (!old) return old;
 
           // Check if message already exists
           const exists = old.pages.some((page) =>
-            page.data.some((m) => m.id === newMessage.id)
+            page.messages.some((m) => m.messageId === newMessage.messageId)
           );
           if (exists) return old;
 
@@ -61,21 +63,22 @@ export function useMessages(conversationId: string) {
           if (newPages[0]) {
             newPages[0] = {
               ...newPages[0],
-              data: [newMessage, ...newPages[0].data],
+              messages: [newMessage, ...newPages[0].messages],
+              totalMessages: newPages[0].totalMessages + 1,
             };
           }
 
           return { ...old, pages: newPages };
         }
       );
-    });
+    };
 
     // Handle read receipts
-    const unsubRead = stompClient.on<WsReadReceipt>('read', (data) => {
+    const handleReadReceipt = (data: WsReadReceipt) => {
       if (data.conversationId !== conversationId) return;
 
-      // Update message statuses to 'read'
-      queryClient.setQueryData<InfiniteData<MessagesResponse>>(
+      // Update message statuses to 'READ'
+      queryClient.setQueryData<InfiniteData<MessageListResponse>>(
         [MESSAGES_QUERY_KEY, conversationId],
         (old) => {
           if (!old) return old;
@@ -84,30 +87,42 @@ export function useMessages(conversationId: string) {
             ...old,
             pages: old.pages.map((page) => ({
               ...page,
-              data: page.data.map((msg) => ({
+              messages: page.messages.map((msg) => ({
                 ...msg,
-                status: 'read' as MessageStatus,
+                status: 'READ' as const,
+                read: true,
                 readAt: data.readAt,
               })),
             })),
           };
         }
       );
-    });
+    };
+
+    stompClient.on<WsMessageResponse>('message:new', handleNewMessage);
+    stompClient.on<WsReadReceipt>('read', handleReadReceipt);
 
     return () => {
-      unsubMessage();
-      unsubRead();
+      stompClient.off<WsMessageResponse>('message:new', handleNewMessage);
+      stompClient.off<WsReadReceipt>('read', handleReadReceipt);
     };
   }, [conversationId, queryClient]);
 
-  const query = useInfiniteQuery<MessagesResponse, Error>({
+  const query = useInfiniteQuery<MessageListResponse, Error>({
     queryKey: [MESSAGES_QUERY_KEY, conversationId],
-    queryFn: async ({ pageParam }) => {
-      return messagingService.getMessages(conversationId, pageParam as string | undefined);
+    queryFn: async ({ pageParam = 0 }) => {
+      return messagingService.getMessages(conversationId, { 
+        page: pageParam as number, 
+        size: 30 
+      });
     },
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => {
+      if (lastPage.hasMore) {
+        return lastPage.pageNumber + 1;
+      }
+      return undefined;
+    },
     enabled: !!conversationId,
     staleTime: 60 * 1000, // 1 minute
     refetchOnWindowFocus: false,
@@ -115,19 +130,30 @@ export function useMessages(conversationId: string) {
 
   // Flatten messages from all pages
   const messages = useMemo(() => {
-    return query.data?.pages.flatMap((page) => page.data) ?? [];
+    return query.data?.pages.flatMap((page) => page.messages) ?? [];
   }, [query.data]);
+
+  // Total messages count
+  const totalMessages = query.data?.pages[0]?.totalMessages ?? 0;
 
   // Mark messages as read when viewing
   const markAsRead = useCallback(() => {
-    if (conversationId && stompClient.isConnected()) {
-      stompClient.markAsRead(conversationId);
+    if (!conversationId) return;
+    
+    // Use HTTP endpoint
+    messagingService.markAsRead(conversationId).catch(console.error);
+    
+    // Also send via WebSocket if connected
+    if (stompClient.isConnected() && messages.length > 0) {
+      const lastMessage = messages[0];
+      stompClient.sendReadReceipt(conversationId, lastMessage.messageId);
     }
-  }, [conversationId]);
+  }, [conversationId, messages]);
 
   return {
     ...query,
     messages,
+    totalMessages,
     markAsRead,
   };
 }

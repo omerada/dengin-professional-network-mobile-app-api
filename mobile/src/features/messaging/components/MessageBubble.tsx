@@ -1,6 +1,7 @@
 // src/features/messaging/components/MessageBubble.tsx
-// Mesaj baloncuğu komponenti
-// Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
+// Mesaj baloncuğu komponenti - Backend MessageDto ile uyumlu
+// Backend: com.meslektas.messaging.application.dto.MessageDto
+// Oku: backend-development-guide/sprint-planning/26-SPRINT-7-8.md
 
 import React, { memo, useCallback } from 'react';
 import {
@@ -9,35 +10,37 @@ import {
   StyleSheet,
   Pressable,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@contexts/ThemeContext';
-import type { Message, MessageStatus } from '../types';
+import type { Message, ClientMessage, ClientMessageStatus } from '../types';
 
 interface MessageBubbleProps {
-  message: Message;
-  isOwn: boolean;
+  message: Message | ClientMessage;
+  isOwn?: boolean;
   showAvatar?: boolean;
-  onLongPress?: (message: Message) => void;
-  onReplyPress?: (message: Message) => void;
+  onLongPress?: (message: Message | ClientMessage) => void;
+  onImagePress?: (url: string) => void;
 }
 
 /**
- * Mesaj durumu ikonu
+ * Mesaj durumu ikonu - Backend MessageStatus ile uyumlu
+ * SENT, DELIVERED, READ + client-side SENDING, FAILED
  */
-const MessageStatusIcon: React.FC<{ status: MessageStatus }> = memo(({ status }) => {
+const MessageStatusIcon: React.FC<{ status: ClientMessageStatus }> = memo(({ status }) => {
   const { theme } = useTheme();
 
   switch (status) {
-    case 'sending':
+    case 'SENDING':
       return <ActivityIndicator size={12} color={theme.colors.text.tertiary} />;
-    case 'sent':
+    case 'SENT':
       return <Icon name="checkmark" size={14} color={theme.colors.text.tertiary} />;
-    case 'delivered':
+    case 'DELIVERED':
       return <Icon name="checkmark-done" size={14} color={theme.colors.text.tertiary} />;
-    case 'read':
+    case 'READ':
       return <Icon name="checkmark-done" size={14} color={theme.colors.primary[500]} />;
-    case 'failed':
+    case 'FAILED':
       return <Icon name="alert-circle" size={14} color={theme.colors.status.error} />;
     default:
       return null;
@@ -47,7 +50,7 @@ const MessageStatusIcon: React.FC<{ status: MessageStatus }> = memo(({ status })
 MessageStatusIcon.displayName = 'MessageStatusIcon';
 
 /**
- * Zaman formatlama
+ * Zaman formatlama - sentAt alanını kullanır
  */
 const formatTime = (dateString: string): string => {
   const date = new Date(dateString);
@@ -57,14 +60,26 @@ const formatTime = (dateString: string): string => {
   });
 };
 
+/**
+ * Dosya boyutu formatlama
+ */
+const formatFileSize = (bytes: number): string => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
 export const MessageBubble: React.FC<MessageBubbleProps> = memo(({
   message,
   isOwn,
   showAvatar = false,
   onLongPress,
-  onReplyPress,
+  onImagePress,
 }) => {
   const { theme } = useTheme();
+  
+  // sentByMe alanını kullan, yoksa isOwn prop'unu
+  const isSentByMe = message.sentByMe ?? isOwn ?? false;
 
   const handleLongPress = useCallback(() => {
     onLongPress?.(message);
@@ -72,16 +87,47 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(({
 
   const bubbleStyle = [
     styles.bubble,
-    isOwn
+    isSentByMe
       ? [styles.ownBubble, { backgroundColor: theme.colors.primary[500] }]
       : [styles.otherBubble, { backgroundColor: theme.colors.background.secondary }],
   ];
 
-  const textColor = isOwn ? '#FFFFFF' : theme.colors.text.primary;
-  const metaColor = isOwn ? 'rgba(255,255,255,0.7)' : theme.colors.text.tertiary;
+  const textColor = isSentByMe ? '#FFFFFF' : theme.colors.text.primary;
+  const metaColor = isSentByMe ? 'rgba(255,255,255,0.7)' : theme.colors.text.tertiary;
+
+  // Attachment render
+  const renderAttachment = () => {
+    if (!message.attachment) return null;
+
+    const { url, contentType, fileName, fileSize } = message.attachment;
+    const isImage = contentType?.startsWith('image/');
+
+    if (isImage) {
+      return (
+        <Pressable onPress={() => onImagePress?.(url)} style={styles.imageContainer}>
+          <Image source={{ uri: url }} style={styles.image} resizeMode="cover" />
+        </Pressable>
+      );
+    }
+
+    // File attachment
+    return (
+      <View style={[styles.fileContainer, { backgroundColor: isSentByMe ? 'rgba(255,255,255,0.1)' : theme.colors.background.tertiary }]}>
+        <Icon name="document-outline" size={24} color={isSentByMe ? '#FFFFFF' : theme.colors.text.secondary} />
+        <View style={styles.fileInfo}>
+          <Text style={[styles.fileName, { color: textColor }]} numberOfLines={1}>
+            {fileName}
+          </Text>
+          <Text style={[styles.fileSize, { color: metaColor }]}>
+            {formatFileSize(fileSize)}
+          </Text>
+        </View>
+      </View>
+    );
+  };
 
   return (
-    <View style={[styles.container, isOwn ? styles.ownContainer : styles.otherContainer]}>
+    <View style={[styles.container, isSentByMe ? styles.ownContainer : styles.otherContainer]}>
       <Pressable
         onLongPress={handleLongPress}
         style={({ pressed }) => [
@@ -89,43 +135,24 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(({
           pressed && styles.pressed,
         ]}
       >
-        {/* Reply indicator */}
-        {message.replyTo && (
-          <Pressable
-            style={[
-              styles.replyContainer,
-              { borderLeftColor: isOwn ? 'rgba(255,255,255,0.5)' : theme.colors.primary[500] },
-            ]}
-            onPress={() => onReplyPress?.(message)}
-          >
-            <Text
-              style={[styles.replyName, { color: isOwn ? 'rgba(255,255,255,0.9)' : theme.colors.primary[500] }]}
-              numberOfLines={1}
-            >
-              {message.replyTo.senderName}
-            </Text>
-            <Text
-              style={[styles.replyText, { color: metaColor }]}
-              numberOfLines={1}
-            >
-              {message.replyTo.content}
-            </Text>
-          </Pressable>
-        )}
+        {/* Attachment */}
+        {renderAttachment()}
 
         {/* Message content */}
-        <Text style={[styles.content, { color: textColor }]}>
-          {message.content}
-        </Text>
+        {message.content && (
+          <Text style={[styles.content, { color: textColor }]}>
+            {message.content}
+          </Text>
+        )}
 
         {/* Meta info */}
         <View style={styles.meta}>
           <Text style={[styles.time, { color: metaColor }]}>
-            {formatTime(message.createdAt)}
+            {formatTime(message.sentAt)}
           </Text>
-          {isOwn && (
+          {isSentByMe && (
             <View style={styles.statusContainer}>
-              <MessageStatusIcon status={message.status} />
+              <MessageStatusIcon status={message.status as ClientMessageStatus} />
             </View>
           )}
         </View>
@@ -164,17 +191,34 @@ const styles = StyleSheet.create({
   pressed: {
     opacity: 0.9,
   },
-  replyContainer: {
-    borderLeftWidth: 2,
-    paddingLeft: 8,
+  imageContainer: {
+    marginBottom: 6,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  image: {
+    width: 200,
+    height: 150,
+    borderRadius: 8,
+  },
+  fileContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    borderRadius: 8,
     marginBottom: 6,
   },
-  replyName: {
-    fontSize: 12,
-    fontWeight: '600',
+  fileInfo: {
+    marginLeft: 8,
+    flex: 1,
   },
-  replyText: {
-    fontSize: 12,
+  fileName: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  fileSize: {
+    fontSize: 11,
+    marginTop: 2,
   },
   content: {
     fontSize: 15,

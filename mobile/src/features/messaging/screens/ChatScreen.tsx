@@ -1,6 +1,7 @@
 // src/features/messaging/screens/ChatScreen.tsx
-// Sohbet ekranı
-// Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
+// Sohbet ekranı - Backend API ile uyumlu
+// Backend: ConversationController, MessageWebSocketController
+// Oku: backend-development-guide/sprint-planning/26-SPRINT-7-8.md
 
 import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import {
@@ -27,11 +28,10 @@ import {
   useMessages,
   useSendMessage,
   useTyping,
-  useMarkAsRead,
 } from '../hooks';
 import { useMessagingStore } from '../stores';
 import { messagingService } from '../services';
-import type { Message, Conversation } from '../types';
+import type { Message, Conversation, Participant } from '../types';
 import type { MessagingStackParamList } from '@navigation/types';
 
 type NavigationProp = NativeStackNavigationProp<MessagingStackParamList, 'Chat'>;
@@ -43,20 +43,22 @@ export const ChatScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ChatRouteProp>();
 
-  const { conversationId } = route.params;
+  // Route params - Backend Conversation yapısıyla uyumlu
+  const { conversationId, participant } = route.params as {
+    conversationId: string;
+    participant?: Participant;
+  };
 
   // State
   const [messageText, setMessageText] = useState('');
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
-  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
-  const [conversation, setConversation] = useState<Conversation | null>(null);
 
   // Refs
   const messageOptionsRef = useRef<MessageOptionsSheetRef>(null);
 
   // Stores
   const { user } = useAuthStore();
-  const { setActiveConversation, getDraft, setDraft } = useMessagingStore();
+  const { setActiveConversation, drafts, setDraft, clearDraft } = useMessagingStore();
 
   // Hooks
   const {
@@ -66,54 +68,29 @@ export const ChatScreen: React.FC = () => {
     hasNextPage,
     refetch,
     fetchNextPage,
+    markAsRead,
   } = useMessages(conversationId);
 
   const { sendMessage, isPending: isSending, retryMessage } = useSendMessage(conversationId);
-  const { startTyping, stopTyping, typingUsers: conversationTypingUserNames } = useTyping(conversationId);
-  const { markAsRead } = useMarkAsRead();
+  const { startTyping, stopTyping, setRecipientId, isTyping: otherUserTyping } = useTyping(conversationId);
 
   // Computed
-  const currentUserId = user?.id || '';
-  const conversationTypingUsers = useMemo(() => {
-    // Use typing users from hook instead of store
-    return conversationTypingUserNames.filter(name => name !== user?.displayName);
-  }, [conversationTypingUserNames, user?.displayName]);
+  const currentUserId = user?.id?.toString() || '';
+  const recipientId = participant?.userId || '';
 
-  // Load conversation details
+  // Set recipient for typing
   useEffect(() => {
-    const loadConversation = async () => {
-      try {
-        // For now, create a mock conversation from the first message's data
-        // In a real app, you'd fetch this from the API
-        if (messages.length > 0) {
-          const firstMessage = messages[0];
-          const mockConversation: Conversation = {
-            id: conversationId,
-            name: firstMessage.sender?.displayName || 'Konuşma',
-            avatarUrl: firstMessage.sender?.avatarUrl,
-            participants: [],
-            createdAt: firstMessage.createdAt,
-            updatedAt: firstMessage.createdAt,
-            isPinned: false,
-            isMuted: false,
-            unreadCount: 0,
-          };
-          setConversation(mockConversation);
-        }
-      } catch (error) {
-        // Handle error
-      }
-    };
-
-    loadConversation();
-  }, [conversationId, messages]);
+    if (recipientId) {
+      setRecipientId(recipientId);
+    }
+  }, [recipientId, setRecipientId]);
 
   // Set active conversation on mount
   useEffect(() => {
     setActiveConversation(conversationId);
 
     // Load draft
-    const draft = getDraft(conversationId);
+    const draft = drafts[conversationId];
     if (draft) {
       setMessageText(draft);
     }
@@ -122,17 +99,19 @@ export const ChatScreen: React.FC = () => {
       // Save draft on unmount
       if (messageText.trim()) {
         setDraft(conversationId, messageText);
+      } else {
+        clearDraft(conversationId);
       }
       setActiveConversation(null);
     };
-  }, [conversationId, setActiveConversation, getDraft, setDraft]);
+  }, [conversationId]);
 
-  // Mark messages as read
+  // Mark messages as read when viewing
   useEffect(() => {
     if (messages.length > 0) {
-      markAsRead(conversationId);
+      markAsRead();
     }
-  }, [conversationId, messages.length, markAsRead]);
+  }, [messages.length, markAsRead]);
 
   // Handlers
   const handleBackPress = useCallback(() => {
@@ -140,51 +119,40 @@ export const ChatScreen: React.FC = () => {
   }, [navigation]);
 
   const handleProfilePress = useCallback(() => {
-    // Navigate to user profile
-    if (conversation?.participants[0]) {
-      // TODO: Navigate to profile
+    if (participant) {
+      navigation.navigate('Profile' as never, { userId: participant.userId } as never);
     }
-  }, [conversation]);
+  }, [navigation, participant]);
 
   const handleOptionsPress = useCallback(() => {
-    // TODO: Show conversation options
     Alert.alert('Konuşma Seçenekleri', 'Bu özellik yakında eklenecek');
   }, []);
 
   const handleSend = useCallback(() => {
     const trimmedText = messageText.trim();
-    if (!trimmedText) return;
+    if (!trimmedText || !recipientId) return;
 
     sendMessage({
       content: trimmedText,
-      replyToId: replyingTo?.id,
+      recipientId,
     });
 
     setMessageText('');
-    setReplyingTo(null);
-    setDraft(conversationId, '');
-  }, [conversationId, messageText, replyingTo, sendMessage, setDraft]);
+    clearDraft(conversationId);
+  }, [conversationId, messageText, recipientId, sendMessage, clearDraft]);
 
-  const handleTypingStart = useCallback(() => {
-    startTyping();
-  }, [startTyping]);
-
-  const handleTypingStop = useCallback(() => {
-    stopTyping();
-  }, [stopTyping]);
+  const handleTextChange = useCallback((text: string) => {
+    setMessageText(text);
+    if (text.length > 0) {
+      startTyping();
+    } else {
+      stopTyping();
+    }
+  }, [startTyping, stopTyping]);
 
   const handleMessageLongPress = useCallback((message: Message) => {
     setSelectedMessage(message);
     messageOptionsRef.current?.open();
-  }, []);
-
-  const handleReplyPress = useCallback((message: Message) => {
-    setReplyingTo(message);
-    // Focus input would go here with ref
-  }, []);
-
-  const handleCopyMessage = useCallback(() => {
-    // Toast or feedback would go here
   }, []);
 
   const handleDeleteMessage = useCallback(async (message: Message) => {
@@ -198,7 +166,7 @@ export const ChatScreen: React.FC = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              await messagingService.deleteMessage(conversationId, message.id);
+              await messagingService.deleteMessage(conversationId, message.messageId);
               refetch();
             } catch (error) {
               Alert.alert('Hata', 'Mesaj silinemedi');
@@ -218,7 +186,6 @@ export const ChatScreen: React.FC = () => {
         {
           text: 'Bildir',
           onPress: () => {
-            // TODO: Implement report
             Alert.alert('Bilgi', 'Mesaj bildirildi');
           },
         },
@@ -232,16 +199,15 @@ export const ChatScreen: React.FC = () => {
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Default conversation object if not loaded
-  const displayConversation: Conversation = conversation || {
-    id: conversationId,
-    name: 'Konuşma',
-    participants: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    isPinned: false,
-    isMuted: false,
-    unreadCount: 0,
+  // Display data
+  const displayParticipant: Participant = participant || {
+    userId: '',
+    fullName: 'Konuşma',
+    profession: '',
+    profileImageUrl: null,
+    verified: false,
+    online: false,
+    lastSeenAt: null,
   };
 
   return (
@@ -254,7 +220,8 @@ export const ChatScreen: React.FC = () => {
       {/* Header */}
       <View style={{ paddingTop: insets.top }}>
         <ChatHeader
-          conversation={displayConversation}
+          participant={displayParticipant}
+          isTyping={otherUserTyping}
           onBackPress={handleBackPress}
           onProfilePress={handleProfilePress}
           onOptionsPress={handleOptionsPress}
@@ -270,53 +237,21 @@ export const ChatScreen: React.FC = () => {
         <MessageList
           messages={messages}
           currentUserId={currentUserId}
-          conversationId={conversationId}
-          typingUsers={conversationTypingUsers}
-          userName={conversation?.name}
           isLoading={isLoading}
           isFetchingMore={isFetchingNextPage}
-          hasMore={hasNextPage}
+          hasMore={!!hasNextPage}
           onLoadMore={handleLoadMore}
           onRefresh={refetch}
           onMessageLongPress={handleMessageLongPress}
-          onReplyPress={handleReplyPress}
         />
-
-        {/* Reply indicator */}
-        {replyingTo && (
-          <View
-            style={[
-              styles.replyBar,
-              { backgroundColor: theme.colors.background.secondary },
-            ]}
-          >
-            <View style={styles.replyContent}>
-              <View
-                style={[
-                  styles.replyIndicator,
-                  { backgroundColor: theme.colors.primary[500] },
-                ]}
-              />
-              <View style={styles.replyTextContainer}>
-                <View style={styles.replyText}>
-                  <View>
-                    {/* Reply text would go here */}
-                  </View>
-                </View>
-              </View>
-            </View>
-          </View>
-        )}
 
         {/* Input */}
         <View style={{ paddingBottom: insets.bottom }}>
           <MessageInput
             value={messageText}
-            onChangeText={setMessageText}
+            onChangeText={handleTextChange}
             onSend={handleSend}
-            onTypingStart={handleTypingStart}
-            onTypingStop={handleTypingStop}
-            disabled={isSending}
+            disabled={isSending || !recipientId}
           />
         </View>
       </KeyboardAvoidingView>
@@ -326,8 +261,6 @@ export const ChatScreen: React.FC = () => {
         ref={messageOptionsRef}
         message={selectedMessage}
         isOwn={selectedMessage?.senderId === currentUserId}
-        onReply={handleReplyPress}
-        onCopy={handleCopyMessage}
         onDelete={handleDeleteMessage}
         onReport={handleReportMessage}
       />

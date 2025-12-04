@@ -1,70 +1,60 @@
 // src/features/messaging/hooks/useSocket.ts
-// Socket connection hook for messaging
-// Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
-// Oku: mobile-development-guide/core/13-REAL-TIME.md
+// STOMP WebSocket connection hook for messaging
+// Backend: Spring WebSocket + STOMP over SockJS
+// Oku: backend-development-guide/sprint-planning/26-SPRINT-7-8.md
 
 import { useEffect, useCallback, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import {
-  stompClient,
-  connectionMonitor,
-  setupSocketEvents,
-  cleanupSocketEvents,
-  SocketStatus,
-} from '@core/socket';
+import { stompClient } from '../services/socketClient';
 import { useAuthStore } from '@features/auth/stores';
+import { useMessagingStore } from '../stores';
+import type { StompConnectionState } from '../types';
 
 /**
- * Socket connection hook
+ * STOMP WebSocket connection hook
  * Manages WebSocket connection lifecycle based on auth state
+ * Backend STOMP/SockJS ile uyumlu
  */
 export function useSocket() {
   const queryClient = useQueryClient();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const [status, setStatus] = useState<SocketStatus>(SocketStatus.DISCONNECTED);
-  const [isConnected, setIsConnected] = useState(false);
+  const { connectionState, setConnectionState } = useMessagingStore();
   const [isOnline, setIsOnline] = useState(true);
 
   // Connect/disconnect based on auth state
   useEffect(() => {
     if (isAuthenticated) {
-      // Connect socket
-      stompClient.connect();
-
-      // Setup event handlers with query client
-      setupSocketEvents(queryClient);
-
-      // Start connection monitoring
-      connectionMonitor.start();
-
-      // Subscribe to connection status
-      const unsubConnect = stompClient.on('connect', () => {
-        setStatus(SocketStatus.CONNECTED);
-        setIsConnected(true);
+      // Connect STOMP client
+      stompClient.connect().catch((error) => {
+        console.error('[useSocket] Connection failed:', error);
       });
 
-      const unsubDisconnect = stompClient.on('disconnect', () => {
-        setStatus(SocketStatus.DISCONNECTED);
-        setIsConnected(false);
-      });
+      // Subscribe to connection events
+      const handleConnect = () => {
+        setIsOnline(true);
+      };
 
-      // Update online status from connection monitor
-      setIsOnline(connectionMonitor.isNetworkAvailable());
+      const handleDisconnect = () => {
+        setIsOnline(false);
+      };
+
+      const handleReconnecting = () => {
+        // Connection is being restored
+      };
+
+      stompClient.on('connect', handleConnect);
+      stompClient.on('disconnect', handleDisconnect);
+      stompClient.on('reconnecting', handleReconnecting);
 
       return () => {
-        unsubConnect();
-        unsubDisconnect();
-        cleanupSocketEvents();
-        connectionMonitor.stop();
+        stompClient.off('connect', handleConnect);
+        stompClient.off('disconnect', handleDisconnect);
+        stompClient.off('reconnecting', handleReconnecting);
         stompClient.disconnect();
       };
     } else {
       // Disconnect if not authenticated
-      cleanupSocketEvents();
-      connectionMonitor.stop();
       stompClient.disconnect();
-      setStatus(SocketStatus.DISCONNECTED);
-      setIsConnected(false);
     }
   }, [isAuthenticated, queryClient]);
 
@@ -72,7 +62,6 @@ export function useSocket() {
    * Manual connect
    */
   const connect = useCallback(async () => {
-    setStatus(SocketStatus.CONNECTING);
     await stompClient.connect();
   }, []);
 
@@ -81,24 +70,22 @@ export function useSocket() {
    */
   const disconnect = useCallback(() => {
     stompClient.disconnect();
-    setStatus(SocketStatus.DISCONNECTED);
-    setIsConnected(false);
   }, []);
 
   /**
    * Force reconnect
    */
   const reconnect = useCallback(async () => {
-    setStatus(SocketStatus.RECONNECTING);
-    await connectionMonitor.forceReconnect();
+    stompClient.disconnect();
+    await stompClient.connect();
   }, []);
 
   return {
-    status,
-    connectionState: status, // Backward compatibility
-    isConnected,
+    status: connectionState,
+    connectionState,
+    isConnected: connectionState === 'CONNECTED',
     isOnline,
-    isReconnecting: status === SocketStatus.RECONNECTING,
+    isReconnecting: connectionState === 'RECONNECTING',
     connect,
     disconnect,
     reconnect,

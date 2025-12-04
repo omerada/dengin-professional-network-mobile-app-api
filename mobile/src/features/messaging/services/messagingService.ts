@@ -1,153 +1,231 @@
 // src/features/messaging/services/messagingService.ts
-// Messaging API servisi
-// Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
+// Messaging HTTP API servisi - Backend ConversationController ile %100 uyumlu
+// Backend: com.meslektas.messaging.api.ConversationController
+// Oku: backend-development-guide/sprint-planning/26-SPRINT-7-8.md
 
 import { apiClient } from '@core/api/client';
-import { API_ENDPOINTS } from '@core/api/endpoints';
 import type {
   Conversation,
-  ConversationSummary,
-  ConversationsResponse,
+  ConversationListResponse,
   Message,
-  MessagesResponse,
-  SendMessageDto,
-  StartConversationDto,
+  MessageListResponse,
+  SendMessageRequest,
+  ConversationListParams,
+  MessageListParams,
+  MessageSearchParams,
+  PresignedUrlRequest,
+  PresignedUrlResponse,
 } from '../types';
 
 /**
+ * API Response wrapper (backend ApiResponse<T> ile uyumlu)
+ */
+interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+  timestamp: string;
+}
+
+/**
+ * Mesaj arama yanıtı
+ */
+interface MessageSearchResponse {
+  messages: Message[];
+  totalResults: number;
+  pageNumber: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
+/**
+ * Ek yükleme URL yanıtı
+ */
+interface AttachmentUploadResponse {
+  uploadUrl: string;
+  s3Key: string;
+  expiresIn: number;
+  instructions: {
+    method: string;
+    contentType: string;
+    maxFileSize: number;
+  };
+}
+
+/**
+ * Mesaj gönderme yanıtı
+ */
+interface SendMessageResponse {
+  messageId: string;
+  conversationId: string;
+  content: string;
+  status: string;
+  sentAt: string;
+}
+
+/**
  * Messaging API Servisi
+ * 
+ * Endpoints:
+ * - GET /api/conversations - Konuşmaları getir
+ * - GET /api/conversations/{conversationId}/messages - Mesajları getir
+ * - POST /api/messages - Mesaj gönder
+ * - PUT /api/conversations/{conversationId}/read - Okundu işaretle
+ * - DELETE /api/conversations/{conversationId}/messages/{messageId} - Mesaj sil
+ * - GET /api/conversations/unread-count - Okunmamış sayısı
+ * - GET /api/messages/search - Mesaj ara
+ * - POST /api/messages/attachments/upload-url - Ek yükleme URL'i
  */
 export const messagingService = {
+  // =========================================================================
+  // CONVERSATION ENDPOINTS
+  // =========================================================================
+
   /**
-   * Konuşmaları getir
+   * GET /api/conversations
+   * Kullanıcının konuşmalarını sayfalanmış olarak getir
    */
-  async getConversations(cursor?: string, limit = 20): Promise<ConversationsResponse> {
-    const response = await apiClient.get<{ data: ConversationsResponse }>(
-      API_ENDPOINTS.MESSAGING.CONVERSATIONS,
-      { params: { cursor, limit } }
+  async getConversations(params: ConversationListParams = {}): Promise<ConversationListResponse> {
+    const { page = 0, size = 20 } = params;
+    
+    const response = await apiClient.get<ApiResponse<ConversationListResponse>>(
+      '/api/conversations',
+      { params: { page, size } }
     );
+    
     return response.data.data;
   },
 
   /**
-   * Konuşma detayını getir
+   * GET /api/conversations/{conversationId}/messages
+   * Konuşmadaki mesajları sayfalanmış olarak getir
    */
-  async getConversation(conversationId: string): Promise<Conversation> {
-    const response = await apiClient.get<{ data: Conversation }>(
-      API_ENDPOINTS.MESSAGING.CONVERSATION_BY_ID(conversationId)
+  async getMessages(
+    conversationId: string, 
+    params: MessageListParams = {}
+  ): Promise<MessageListResponse> {
+    const { page = 0, size = 30 } = params;
+    
+    const response = await apiClient.get<ApiResponse<MessageListResponse>>(
+      `/api/conversations/${conversationId}/messages`,
+      { params: { page, size } }
     );
+    
     return response.data.data;
   },
 
   /**
-   * Yeni konuşma başlat
-   */
-  async startConversation(dto: StartConversationDto): Promise<Conversation> {
-    const response = await apiClient.post<{ data: Conversation }>(
-      API_ENDPOINTS.MESSAGING.START_CONVERSATION,
-      dto
-    );
-    return response.data.data;
-  },
-
-  /**
-   * Konuşmadaki mesajları getir
-   */
-  async getMessages(conversationId: string, cursor?: string, limit = 50): Promise<MessagesResponse> {
-    const response = await apiClient.get<{ data: MessagesResponse }>(
-      API_ENDPOINTS.MESSAGING.MESSAGES(conversationId),
-      { params: { cursor, limit } }
-    );
-    return response.data.data;
-  },
-
-  /**
-   * Mesaj gönder
-   */
-  async sendMessage(dto: SendMessageDto): Promise<Message> {
-    const response = await apiClient.post<{ data: Message }>(
-      API_ENDPOINTS.MESSAGING.SEND_MESSAGE(dto.conversationId),
-      {
-        content: dto.content,
-        type: dto.type || 'text',
-        attachmentIds: dto.attachmentIds,
-        replyToId: dto.replyToId,
-      }
-    );
-    return response.data.data;
-  },
-
-  /**
-   * Mesaj sil
-   */
-  async deleteMessage(conversationId: string, messageId: string): Promise<void> {
-    await apiClient.delete(`/api/v1/conversations/${conversationId}/messages/${messageId}`);
-  },
-
-  /**
-   * Konuşmayı okundu olarak işaretle
-   */
-  async markConversationAsRead(conversationId: string): Promise<void> {
-    await apiClient.post(API_ENDPOINTS.MESSAGING.MARK_READ(conversationId));
-  },
-
-  /**
-   * Konuşmayı sabitle
-   */
-  async pinConversation(conversationId: string): Promise<void> {
-    await apiClient.post(`/api/v1/conversations/${conversationId}/pin`);
-  },
-
-  /**
-   * Konuşma sabitlemesini kaldır
-   */
-  async unpinConversation(conversationId: string): Promise<void> {
-    await apiClient.delete(`/api/v1/conversations/${conversationId}/pin`);
-  },
-
-  /**
-   * Konuşmayı sessize al
-   */
-  async muteConversation(conversationId: string): Promise<void> {
-    await apiClient.post(`/api/v1/conversations/${conversationId}/mute`);
-  },
-
-  /**
-   * Konuşma sessizini kaldır
-   */
-  async unmuteConversation(conversationId: string): Promise<void> {
-    await apiClient.delete(`/api/v1/conversations/${conversationId}/mute`);
-  },
-
-  /**
-   * Konuşmayı sil (gizle)
-   */
-  async deleteConversation(conversationId: string): Promise<void> {
-    await apiClient.delete(API_ENDPOINTS.MESSAGING.CONVERSATION_BY_ID(conversationId));
-  },
-
-  /**
-   * Kullanıcıyla mevcut konuşmayı bul
-   */
-  async findConversationWithUser(userId: string): Promise<Conversation | null> {
-    try {
-      const response = await apiClient.get<{ data: Conversation }>(
-        `/api/v1/conversations/with/${userId}`
-      );
-      return response.data.data;
-    } catch {
-      return null;
-    }
-  },
-
-  /**
-   * Okunmamış mesaj sayısını getir
+   * GET /api/conversations/unread-count
+   * Toplam okunmamış mesaj sayısını getir
    */
   async getUnreadCount(): Promise<number> {
-    const response = await apiClient.get<{ data: { count: number } }>(
-      '/api/v1/conversations/unread-count'
+    const response = await apiClient.get<ApiResponse<number>>(
+      '/api/conversations/unread-count'
     );
-    return response.data.data.count;
+    
+    return response.data.data;
+  },
+
+  // =========================================================================
+  // MESSAGE ENDPOINTS
+  // =========================================================================
+
+  /**
+   * POST /api/messages
+   * Yeni mesaj gönder (HTTP fallback - WebSocket tercih edilir)
+   */
+  async sendMessage(request: SendMessageRequest): Promise<SendMessageResponse> {
+    const response = await apiClient.post<ApiResponse<SendMessageResponse>>(
+      '/api/messages',
+      request
+    );
+    
+    return response.data.data;
+  },
+
+  /**
+   * PUT /api/conversations/{conversationId}/read
+   * Konuşmadaki tüm mesajları okundu olarak işaretle
+   */
+  async markAsRead(conversationId: string): Promise<void> {
+    await apiClient.put<ApiResponse<void>>(
+      `/api/conversations/${conversationId}/read`
+    );
+  },
+
+  /**
+   * DELETE /api/conversations/{conversationId}/messages/{messageId}
+   * Mesajı sil (soft delete)
+   */
+  async deleteMessage(conversationId: string, messageId: string): Promise<void> {
+    await apiClient.delete<ApiResponse<void>>(
+      `/api/conversations/${conversationId}/messages/${messageId}`
+    );
+  },
+
+  // =========================================================================
+  // SEARCH ENDPOINTS
+  // =========================================================================
+
+  /**
+   * GET /api/messages/search
+   * Mesajlarda tam metin araması yap
+   */
+  async searchMessages(params: MessageSearchParams): Promise<MessageSearchResponse> {
+    const { query, conversationId, page = 0, size = 20 } = params;
+    
+    const response = await apiClient.get<ApiResponse<MessageSearchResponse>>(
+      '/api/messages/search',
+      { 
+        params: { 
+          q: query, 
+          conversationId, 
+          page, 
+          size 
+        } 
+      }
+    );
+    
+    return response.data.data;
+  },
+
+  // =========================================================================
+  // ATTACHMENT ENDPOINTS
+  // =========================================================================
+
+  /**
+   * POST /api/messages/attachments/upload-url
+   * Ek dosya yüklemek için presigned URL al
+   * 
+   * Desteklenen formatlar: JPEG, PNG, GIF, WebP
+   * Max boyut: 10MB
+   */
+  async getAttachmentUploadUrl(
+    conversationId: string,
+    request: PresignedUrlRequest
+  ): Promise<AttachmentUploadResponse> {
+    const response = await apiClient.post<ApiResponse<AttachmentUploadResponse>>(
+      '/api/messages/attachments/upload-url',
+      {
+        conversationId,
+        ...request,
+      }
+    );
+    
+    return response.data.data;
+  },
+
+  /**
+   * S3'e dosya yükle (presigned URL ile)
+   */
+  async uploadAttachment(uploadUrl: string, file: Blob, contentType: string): Promise<void> {
+    await fetch(uploadUrl, {
+      method: 'PUT',
+      body: file,
+      headers: {
+        'Content-Type': contentType,
+      },
+    });
   },
 };
 

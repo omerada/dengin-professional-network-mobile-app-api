@@ -1,6 +1,7 @@
 // src/features/messaging/screens/ConversationListScreen.tsx
-// Konuşma listesi ekranı
-// Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
+// Konuşma listesi ekranı - Backend API ile uyumlu
+// Backend: ConversationController - GET /api/conversations
+// Oku: backend-development-guide/sprint-planning/26-SPRINT-7-8.md
 
 import React, { useCallback, useRef, useState } from 'react';
 import {
@@ -21,12 +22,9 @@ import { useTheme } from '@contexts/ThemeContext';
 import {
   ConversationItem,
   EmptyConversations,
-  ConversationOptionsSheet,
-  type ConversationOptionsSheetRef,
 } from '../components';
 import { useConversations, useSocket } from '../hooks';
-import { messagingService } from '../services';
-import type { ConversationSummary } from '../types';
+import type { Conversation } from '../types';
 import type { MessagingStackParamList } from '@navigation/types';
 
 type NavigationProp = NativeStackNavigationProp<MessagingStackParamList>;
@@ -38,10 +36,6 @@ export const ConversationListScreen: React.FC = () => {
 
   // State
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedConversation, setSelectedConversation] = useState<ConversationSummary | null>(null);
-
-  // Refs
-  const optionsSheetRef = useRef<ConversationOptionsSheetRef>(null);
 
   // Hooks
   const { isConnected } = useSocket();
@@ -55,92 +49,41 @@ export const ConversationListScreen: React.FC = () => {
     fetchNextPage,
   } = useConversations();
 
-  // Filtered conversations
+  // Filtered conversations - participant.fullName ile arama
   const filteredConversations = searchQuery.trim()
     ? conversations.filter(c =>
-        c.name.toLowerCase().includes(searchQuery.toLowerCase())
+        c.participant.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.participant.profession.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : conversations;
 
   // Handlers
-  const handleConversationPress = useCallback((conversation: ConversationSummary) => {
-    navigation.navigate('Chat', { conversationId: conversation.id });
+  const handleConversationPress = useCallback((conversation: Conversation) => {
+    navigation.navigate('Chat', { 
+      conversationId: conversation.conversationId,
+      participant: conversation.participant,
+    });
   }, [navigation]);
 
-  const handleConversationLongPress = useCallback((conversation: ConversationSummary) => {
-    setSelectedConversation(conversation);
-    optionsSheetRef.current?.open();
-  }, []);
+  const handleConversationLongPress = useCallback((conversation: Conversation) => {
+    Alert.alert(
+      conversation.participant.fullName,
+      'Konuşma seçenekleri',
+      [
+        { text: 'İptal', style: 'cancel' },
+        { 
+          text: 'Profili Görüntüle', 
+          onPress: () => {
+            navigation.navigate('Profile' as never, { userId: conversation.participant.userId } as never);
+          }
+        },
+      ]
+    );
+  }, [navigation]);
 
   const handleNewConversation = useCallback(() => {
     navigation.navigate('NewConversation');
   }, [navigation]);
-
-  const handlePin = useCallback(async (conversation: ConversationSummary) => {
-    try {
-      if (conversation.isPinned) {
-        await messagingService.unpinConversation(conversation.id);
-      } else {
-        await messagingService.pinConversation(conversation.id);
-      }
-      refetch();
-    } catch (error) {
-      Alert.alert('Hata', 'İşlem gerçekleştirilemedi');
-    }
-  }, [refetch]);
-
-  const handleMute = useCallback(async (conversation: ConversationSummary) => {
-    try {
-      if (conversation.isMuted) {
-        await messagingService.unmuteConversation(conversation.id);
-      } else {
-        await messagingService.muteConversation(conversation.id);
-      }
-      refetch();
-    } catch (error) {
-      Alert.alert('Hata', 'İşlem gerçekleştirilemedi');
-    }
-  }, [refetch]);
-
-  const handleDelete = useCallback(async (conversation: ConversationSummary) => {
-    Alert.alert(
-      'Konuşmayı Sil',
-      'Bu konuşmayı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Sil',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await messagingService.deleteConversation(conversation.id);
-              refetch();
-            } catch (error) {
-              Alert.alert('Hata', 'Konuşma silinemedi');
-            }
-          },
-        },
-      ]
-    );
-  }, [refetch]);
-
-  const handleBlock = useCallback((conversation: ConversationSummary) => {
-    Alert.alert(
-      'Kullanıcıyı Engelle',
-      `${conversation.name} kullanıcısını engellemek istediğinize emin misiniz?`,
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Engelle',
-          style: 'destructive',
-          onPress: () => {
-            // TODO: Implement block user
-            Alert.alert('Bilgi', 'Kullanıcı engellendi');
-          },
-        },
-      ]
-    );
-  }, []);
 
   const handleLoadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -149,7 +92,7 @@ export const ConversationListScreen: React.FC = () => {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // Render functions
-  const renderItem = useCallback(({ item }: { item: ConversationSummary }) => (
+  const renderItem = useCallback(({ item }: { item: Conversation }) => (
     <ConversationItem
       conversation={item}
       onPress={handleConversationPress}
@@ -157,7 +100,7 @@ export const ConversationListScreen: React.FC = () => {
     />
   ), [handleConversationPress, handleConversationLongPress]);
 
-  const keyExtractor = useCallback((item: ConversationSummary) => item.id, []);
+  const keyExtractor = useCallback((item: Conversation) => item.conversationId, []);
 
   const ListFooterComponent = useCallback(() => {
     if (!isFetchingNextPage) return null;
@@ -254,16 +197,6 @@ export const ConversationListScreen: React.FC = () => {
       >
         <Icon name="create-outline" size={24} color="#FFFFFF" />
       </Pressable>
-
-      {/* Options bottom sheet */}
-      <ConversationOptionsSheet
-        ref={optionsSheetRef}
-        conversation={selectedConversation}
-        onPin={handlePin}
-        onMute={handleMute}
-        onDelete={handleDelete}
-        onBlock={handleBlock}
-      />
     </View>
   );
 };

@@ -1,50 +1,59 @@
-// src/features/messaging/services/socketClient.ts
-// Socket.IO client servisi
-// Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
+// src/features/messaging/services/stompClient.ts
+// STOMP over SockJS WebSocket client servisi
+// Backend: Spring WebSocket + STOMP protokolü
+// Oku: backend-development-guide/infrastructure/18-WEBSOCKET-SETUP.md
 
-import { io, Socket } from 'socket.io-client';
+import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 import { ENV } from '@core/config/env';
 import { tokenService } from '@features/auth/services';
 import { useMessagingStore } from '../stores';
 import type {
-  Message,
-  TypingEvent,
-  PresenceEvent,
-  MessageStatusEvent,
-  SocketEvent,
+  StompConnectionState,
+  WsMessageResponse,
+  WsTypingNotification,
+  WsReadReceipt,
+  WsSendMessageRequest,
+  STOMP_ENDPOINTS,
 } from '../types';
 
 /**
- * Socket bağlantı durumu
+ * STOMP event handler tipi
  */
-export type SocketConnectionState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
+type StompEventHandler<T = unknown> = (data: T) => void;
 
 /**
- * Socket event handler tipi
+ * Subscription bilgisi
  */
-type SocketEventHandler<T = unknown> = (data: T) => void;
+interface SubscriptionInfo {
+  destination: string;
+  subscription: StompSubscription | null;
+  handler: (message: IMessage) => void;
+}
 
 /**
- * Socket Client Class
+ * STOMP Client Class
+ * Spring WebSocket + STOMP protokolüne uyumlu
  */
-class SocketClient {
-  private socket: Socket | null = null;
-  private connectionState: SocketConnectionState = 'disconnected';
-  private eventHandlers: Map<string, Set<SocketEventHandler>> = new Map();
+class StompClient {
+  private client: Client | null = null;
+  private connectionState: StompConnectionState = 'DISCONNECTED';
+  private subscriptions: Map<string, SubscriptionInfo> = new Map();
+  private eventHandlers: Map<string, Set<StompEventHandler>> = new Map();
   private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
-  private reconnectDelay = 1000;
-  private messageQueue: Array<{ event: string; data: unknown }> = [];
+  private maxReconnectAttempts = 10;
+  private messageQueue: Array<{ destination: string; body: unknown }> = [];
+  private heartbeatInterval: ReturnType<typeof setInterval> | null = null;
 
   /**
-   * Socket'e bağlan
+   * STOMP bağlantısını başlat
    */
   async connect(): Promise<void> {
-    if (this.socket?.connected) {
+    if (this.client?.connected) {
       return;
     }
 
-    this.connectionState = 'connecting';
+    this.setConnectionState('CONNECTING');
 
     try {
       const token = await tokenService.getAccessToken();
@@ -53,99 +62,155 @@ class SocketClient {
         throw new Error('No access token available');
       }
 
-      this.socket = io(ENV.WS_URL, {
-        auth: { token },
-        transports: ['websocket'],
-        reconnection: true,
-        reconnectionAttempts: this.maxReconnectAttempts,
-        reconnectionDelay: this.reconnectDelay,
-        reconnectionDelayMax: 5000,
-        timeout: 10000,
-        forceNew: true,
+      const wsUrl = `${ENV.API_URL}/ws`;
+
+      this.client = new Client({
+        // SockJS kullanarak WebSocket bağlantısı
+        webSocketFactory: () => new SockJS(wsUrl),
+        
+        // Bağlantı header'ları - JWT token
+        connectHeaders: {
+          Authorization: `Bearer ${token}`,
+        },
+        
+        // Debug logging (production'da kapatılmalı)
+        debug: __DEV__ ? (str) => console.log('[STOMP]', str) : () => {},
+        
+        // Heartbeat ayarları
+        heartbeatIncoming: 10000,
+        heartbeatOutgoing: 10000,
+        
+        // Reconnect ayarları
+        reconnectDelay: 5000,
+        
+        // Bağlantı kurulduğunda
+        onConnect: () => {
+          this.setConnectionState('CONNECTED');
+          this.reconnectAttempts = 0;
+          this.setupSubscriptions();
+          this.processMessageQueue();
+          this.notifyHandlers('connect', {});
+        },
+        
+        // Bağlantı kesildiğinde
+        onDisconnect: () => {
+          this.setConnectionState('DISCONNECTED');
+          this.notifyHandlers('disconnect', {});
+        },
+        
+        // STOMP hatası
+        onStompError: (frame) => {
+          console.error('[STOMP] Error:', frame.headers.message);
+          this.setConnectionState('ERROR');
+          this.notifyHandlers('error', { message: frame.headers.message });
+        },
+        
+        // WebSocket kapatıldığında
+        onWebSocketClose: () => {
+          if (this.connectionState === 'CONNECTED') {
+            this.setConnectionState('RECONNECTING');
+            this.reconnectAttempts++;
+            
+            if (this.reconnectAttempts <= this.maxReconnectAttempts) {
+              this.notifyHandlers('reconnecting', { attempt: this.reconnectAttempts });
+            } else {
+              this.setConnectionState('ERROR');
+              this.notifyHandlers('reconnect_failed', {});
+            }
+          }
+        },
       });
 
-      this.setupEventListeners();
+      // Bağlantıyı başlat
+      this.client.activate();
     } catch (error) {
-      this.connectionState = 'disconnected';
+      this.setConnectionState('ERROR');
       throw error;
     }
   }
 
   /**
-   * Socket event listener'ları kur
+   * Bağlantı durumunu ayarla ve store'u güncelle
    */
-  private setupEventListeners(): void {
-    if (!this.socket) return;
+  private setConnectionState(state: StompConnectionState): void {
+    this.connectionState = state;
+    const { setConnectionState } = useMessagingStore.getState();
+    setConnectionState(state);
+  }
 
-    this.socket.on('connect', () => {
-      this.connectionState = 'connected';
-      this.reconnectAttempts = 0;
-      this.processMessageQueue();
-      this.notifyHandlers('connect', {});
-    });
+  /**
+   * Default subscription'ları kur
+   */
+  private setupSubscriptions(): void {
+    // Yeni mesaj subscription
+    this.subscribe(
+      '/user/queue/messages',
+      (message: IMessage) => {
+        const data: WsMessageResponse = JSON.parse(message.body);
+        this.notifyHandlers('message:new', data);
+      }
+    );
 
-    this.socket.on('disconnect', (reason: string) => {
-      this.connectionState = 'disconnected';
-      this.notifyHandlers('disconnect', { reason });
-    });
+    // Yazıyor bildirimi subscription
+    this.subscribe(
+      '/user/queue/typing',
+      (message: IMessage) => {
+        const data: WsTypingNotification = JSON.parse(message.body);
+        const { addTypingUser, removeTypingUser } = useMessagingStore.getState();
+        
+        if (data.isTyping) {
+          // senderId'yi bulmak için conversationId kullanıyoruz
+          // Typing notification gönderen kişi recipientId değil, karşı taraf
+          addTypingUser(data.conversationId, data.recipientId);
+        } else {
+          removeTypingUser(data.conversationId, data.recipientId);
+        }
+        
+        this.notifyHandlers('typing', data);
+      }
+    );
 
-    this.socket.on('connect_error', (error: Error) => {
-      this.connectionState = 'disconnected';
-      this.notifyHandlers('connect_error', { error: error.message });
-    });
+    // Okundu bildirimi subscription
+    this.subscribe(
+      '/user/queue/read',
+      (message: IMessage) => {
+        const data: WsReadReceipt = JSON.parse(message.body);
+        this.notifyHandlers('read', data);
+      }
+    );
+  }
 
-    this.socket.on('reconnect_attempt', (attempt: number) => {
-      this.connectionState = 'reconnecting';
-      this.reconnectAttempts = attempt;
-      this.notifyHandlers('reconnect_attempt', { attempt });
-    });
+  /**
+   * Bir destination'a subscribe ol
+   */
+  subscribe(destination: string, handler: (message: IMessage) => void): void {
+    if (!this.client?.connected) {
+      // Bağlantı yoksa bekleyen subscriptions'a ekle
+      this.subscriptions.set(destination, {
+        destination,
+        subscription: null,
+        handler,
+      });
+      return;
+    }
 
-    this.socket.on('reconnect', () => {
-      this.connectionState = 'connected';
-      this.reconnectAttempts = 0;
-      this.processMessageQueue();
-      this.notifyHandlers('reconnect', {});
+    const subscription = this.client.subscribe(destination, handler);
+    this.subscriptions.set(destination, {
+      destination,
+      subscription,
+      handler,
     });
+  }
 
-    this.socket.on('reconnect_failed', () => {
-      this.connectionState = 'disconnected';
-      this.notifyHandlers('reconnect_failed', {});
-    });
-
-    // Business events
-    this.socket.on('message:new', (data: Message) => {
-      this.notifyHandlers('message:new', data);
-    });
-
-    this.socket.on('message:status', (data: MessageStatusEvent) => {
-      this.notifyHandlers('message:status', data);
-    });
-
-    this.socket.on('message:deleted', (data: { messageId: string }) => {
-      this.notifyHandlers('message:deleted', data);
-    });
-
-    this.socket.on('typing:start', (data: TypingEvent) => {
-      const { addTypingUser } = useMessagingStore.getState();
-      addTypingUser(data.conversationId, data.userId);
-      this.notifyHandlers('typing:start', data);
-    });
-
-    this.socket.on('typing:stop', (data: TypingEvent) => {
-      const { removeTypingUser } = useMessagingStore.getState();
-      removeTypingUser(data.conversationId, data.userId);
-      this.notifyHandlers('typing:stop', data);
-    });
-
-    this.socket.on('presence:update', (data: PresenceEvent) => {
-      const { setUserOnline } = useMessagingStore.getState();
-      setUserOnline(data.userId, data.isOnline);
-      this.notifyHandlers('presence:update', data);
-    });
-
-    this.socket.on('conversation:update', (data: unknown) => {
-      this.notifyHandlers('conversation:update', data);
-    });
+  /**
+   * Subscription'ı iptal et
+   */
+  unsubscribe(destination: string): void {
+    const info = this.subscriptions.get(destination);
+    if (info?.subscription) {
+      info.subscription.unsubscribe();
+    }
+    this.subscriptions.delete(destination);
   }
 
   /**
@@ -163,40 +228,43 @@ class SocketClient {
    */
   private processMessageQueue(): void {
     while (this.messageQueue.length > 0) {
-      const { event, data } = this.messageQueue.shift()!;
-      this.emit(event, data);
+      const { destination, body } = this.messageQueue.shift()!;
+      this.send(destination, body);
     }
   }
 
   /**
-   * Event emit et
+   * STOMP destination'a mesaj gönder
    */
-  emit(event: string, data: unknown): void {
-    if (this.socket?.connected) {
-      this.socket.emit(event, data);
+  send(destination: string, body: unknown): void {
+    if (this.client?.connected) {
+      this.client.publish({
+        destination,
+        body: JSON.stringify(body),
+      });
     } else {
       // Bağlantı yoksa kuyruğa ekle
-      this.messageQueue.push({ event, data });
+      this.messageQueue.push({ destination, body });
     }
   }
 
   /**
    * Event dinle
    */
-  on<T = unknown>(event: SocketEvent | string, handler: SocketEventHandler<T>): void {
+  on<T = unknown>(event: string, handler: StompEventHandler<T>): void {
     if (!this.eventHandlers.has(event)) {
       this.eventHandlers.set(event, new Set());
     }
-    this.eventHandlers.get(event)!.add(handler as SocketEventHandler);
+    this.eventHandlers.get(event)!.add(handler as StompEventHandler);
   }
 
   /**
    * Event dinlemeyi bırak
    */
-  off<T = unknown>(event: SocketEvent | string, handler: SocketEventHandler<T>): void {
+  off<T = unknown>(event: string, handler: StompEventHandler<T>): void {
     const handlers = this.eventHandlers.get(event);
     if (handlers) {
-      handlers.delete(handler as SocketEventHandler);
+      handlers.delete(handler as StompEventHandler);
     }
   }
 
@@ -204,11 +272,25 @@ class SocketClient {
    * Bağlantıyı kes
    */
   disconnect(): void {
-    if (this.socket) {
-      this.socket.disconnect();
-      this.socket = null;
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
     }
-    this.connectionState = 'disconnected';
+
+    // Tüm subscription'ları iptal et
+    this.subscriptions.forEach((info) => {
+      if (info.subscription) {
+        info.subscription.unsubscribe();
+      }
+    });
+    this.subscriptions.clear();
+
+    if (this.client) {
+      this.client.deactivate();
+      this.client = null;
+    }
+
+    this.setConnectionState('DISCONNECTED');
     this.eventHandlers.clear();
     this.messageQueue = [];
   }
@@ -216,7 +298,7 @@ class SocketClient {
   /**
    * Bağlantı durumunu al
    */
-  getConnectionState(): SocketConnectionState {
+  getConnectionState(): StompConnectionState {
     return this.connectionState;
   }
 
@@ -224,51 +306,65 @@ class SocketClient {
    * Bağlı mı kontrol et
    */
   isConnected(): boolean {
-    return this.socket?.connected ?? false;
+    return this.client?.connected ?? false;
+  }
+
+  // =========================================================================
+  // MESSAGING HELPERS - Backend STOMP destinations ile uyumlu
+  // =========================================================================
+
+  /**
+   * Mesaj gönder
+   * Destination: /app/chat.send
+   */
+  sendMessage(request: WsSendMessageRequest): void {
+    this.send('/app/chat.send', request);
   }
 
   /**
-   * Socket ID'yi al
+   * Yazıyor bildirimi gönder
+   * Destination: /app/chat.typing
    */
-  getSocketId(): string | null {
-    return this.socket?.id ?? null;
+  sendTyping(conversationId: string, recipientId: string, isTyping: boolean): void {
+    const notification: WsTypingNotification = {
+      conversationId,
+      recipientId,
+      isTyping,
+    };
+    this.send('/app/chat.typing', notification);
   }
 
   /**
-   * Konuşmaya katıl (room join)
+   * Okundu bildirimi gönder
+   * Destination: /app/chat.read
    */
-  joinConversation(conversationId: string): void {
-    this.emit('conversation:join', { conversationId });
+  sendReadReceipt(conversationId: string, lastReadMessageId: string): void {
+    const receipt: Partial<WsReadReceipt> = {
+      conversationId,
+      lastReadMessageId,
+    };
+    this.send('/app/chat.read', receipt);
   }
 
   /**
-   * Konuşmadan ayrıl (room leave)
+   * Yazıyor eventini başlat
    */
-  leaveConversation(conversationId: string): void {
-    this.emit('conversation:leave', { conversationId });
+  startTyping(conversationId: string, recipientId: string): void {
+    this.sendTyping(conversationId, recipientId, true);
   }
 
   /**
-   * Yazıyor eventini gönder
+   * Yazıyor eventini durdur
    */
-  sendTypingStart(conversationId: string): void {
-    this.emit('typing:start', { conversationId });
-  }
-
-  /**
-   * Yazmayı bıraktı eventini gönder
-   */
-  sendTypingStop(conversationId: string): void {
-    this.emit('typing:stop', { conversationId });
-  }
-
-  /**
-   * Mesaj okundu olarak işaretle
-   */
-  markAsRead(conversationId: string, messageId: string): void {
-    this.emit('message:read', { conversationId, messageId });
+  stopTyping(conversationId: string, recipientId: string): void {
+    this.sendTyping(conversationId, recipientId, false);
   }
 }
 
-export const socketClient = new SocketClient();
-export default socketClient;
+// Singleton instance
+export const stompClient = new StompClient();
+
+// Legacy alias for backward compatibility
+export const socketClient = stompClient;
+
+export default stompClient;

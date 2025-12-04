@@ -1,6 +1,7 @@
 // src/features/messaging/components/ConversationItem.tsx
-// Konuşma listesi öğesi komponenti
-// Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
+// Konuşma listesi öğesi komponenti - Backend ConversationDto ile uyumlu
+// Backend: com.meslektas.messaging.application.dto.ConversationDto
+// Oku: backend-development-guide/sprint-planning/26-SPRINT-7-8.md
 
 import React, { memo, useCallback } from 'react';
 import {
@@ -13,16 +14,16 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@contexts/ThemeContext';
 import { useMessagingStore } from '../stores';
-import type { ConversationSummary } from '../types';
+import type { Conversation } from '../types';
 
 interface ConversationItemProps {
-  conversation: ConversationSummary;
-  onPress: (conversation: ConversationSummary) => void;
-  onLongPress?: (conversation: ConversationSummary) => void;
+  conversation: Conversation;
+  onPress: (conversation: Conversation) => void;
+  onLongPress?: (conversation: Conversation) => void;
 }
 
 /**
- * Zaman formatlama (göreli)
+ * Zaman formatlama (göreli) - updatedAt alanını kullanır
  */
 const formatRelativeTime = (dateString: string): string => {
   const date = new Date(dateString);
@@ -44,15 +45,24 @@ const formatRelativeTime = (dateString: string): string => {
 };
 
 /**
- * Son mesaj önizlemesi
+ * Son mesaj önizlemesi - Backend LastMessageDto ile uyumlu
  */
 const getLastMessagePreview = (
-  lastMessage: string | undefined,
+  conversation: Conversation,
   isTyping: boolean
 ): string => {
   if (isTyping) return 'yazıyor...';
+  
+  const lastMessage = conversation.lastMessage;
   if (!lastMessage) return 'Henüz mesaj yok';
-  return lastMessage.length > 40 ? `${lastMessage.slice(0, 40)}...` : lastMessage;
+  
+  // Attachment varsa
+  if (lastMessage.hasAttachment) {
+    return lastMessage.sentByMe ? 'Fotoğraf gönderdiniz' : 'Fotoğraf';
+  }
+  
+  const content = lastMessage.content;
+  return content.length > 40 ? `${content.slice(0, 40)}...` : content;
 };
 
 export const ConversationItem: React.FC<ConversationItemProps> = memo(({
@@ -71,15 +81,17 @@ export const ConversationItem: React.FC<ConversationItemProps> = memo(({
     onLongPress?.(conversation);
   }, [conversation, onLongPress]);
 
-  // Typing status
-  const conversationTypingUsers = typingUsers[conversation.id] || [];
+  // Typing status - conversationId kullanarak
+  const conversationTypingUsers = typingUsers[conversation.conversationId] || [];
   const isTyping = conversationTypingUsers.length > 0;
 
-  // Online status (for 1:1 conversations)
-  const otherUserId = conversation.participants.find(p => p.id !== conversation.id)?.id;
-  const isOnline = otherUserId ? onlineUsers.has(otherUserId) : false;
+  // Online status - participant.online veya onlineUsers set'i
+  const isOnline = conversation.participant.online || onlineUsers.has(conversation.participant.userId);
 
   const hasUnread = conversation.unreadCount > 0;
+
+  // Participant bilgileri
+  const { participant } = conversation;
 
   return (
     <Pressable
@@ -92,9 +104,9 @@ export const ConversationItem: React.FC<ConversationItemProps> = memo(({
     >
       {/* Avatar */}
       <View style={styles.avatarContainer}>
-        {conversation.avatarUrl ? (
+        {participant.profileImageUrl ? (
           <Image
-            source={{ uri: conversation.avatarUrl }}
+            source={{ uri: participant.profileImageUrl }}
             style={styles.avatar}
           />
         ) : (
@@ -104,11 +116,9 @@ export const ConversationItem: React.FC<ConversationItemProps> = memo(({
               { backgroundColor: theme.colors.primary[100] },
             ]}
           >
-            <Icon
-              name="person"
-              size={24}
-              color={theme.colors.primary[500]}
-            />
+            <Text style={[styles.avatarText, { color: theme.colors.primary[500] }]}>
+              {participant.fullName.charAt(0).toUpperCase()}
+            </Text>
           </View>
         )}
 
@@ -121,28 +131,46 @@ export const ConversationItem: React.FC<ConversationItemProps> = memo(({
             ]}
           />
         )}
+        
+        {/* Verified badge */}
+        {participant.verified && (
+          <View style={[styles.verifiedBadge, { backgroundColor: theme.colors.primary[500] }]}>
+            <Icon name="checkmark" size={8} color="#FFFFFF" />
+          </View>
+        )}
       </View>
 
       {/* Content */}
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text
-            style={[
-              styles.name,
-              { color: theme.colors.text.primary },
-              hasUnread && styles.nameBold,
-            ]}
-            numberOfLines={1}
-          >
-            {conversation.name}
-          </Text>
+          <View style={styles.nameContainer}>
+            <Text
+              style={[
+                styles.name,
+                { color: theme.colors.text.primary },
+                hasUnread && styles.nameBold,
+              ]}
+              numberOfLines={1}
+            >
+              {participant.fullName}
+            </Text>
+          </View>
           <Text
             style={[
               styles.time,
               { color: hasUnread ? theme.colors.primary[500] : theme.colors.text.tertiary },
             ]}
           >
-            {formatRelativeTime(conversation.lastMessageAt || conversation.updatedAt)}
+            {formatRelativeTime(conversation.lastMessage?.sentAt || conversation.updatedAt)}
+          </Text>
+        </View>
+
+        <View style={styles.subHeader}>
+          <Text
+            style={[styles.profession, { color: theme.colors.text.tertiary }]}
+            numberOfLines={1}
+          >
+            {participant.profession}
           </Text>
         </View>
 
@@ -152,10 +180,12 @@ export const ConversationItem: React.FC<ConversationItemProps> = memo(({
               styles.preview,
               { color: isTyping ? theme.colors.primary[500] : theme.colors.text.secondary },
               isTyping && styles.previewTyping,
+              hasUnread && styles.previewBold,
             ]}
             numberOfLines={1}
           >
-            {getLastMessagePreview(conversation.lastMessage, isTyping)}
+            {conversation.lastMessage?.sentByMe && !isTyping && 'Sen: '}
+            {getLastMessagePreview(conversation, isTyping)}
           </Text>
 
           {hasUnread && (
@@ -169,24 +199,6 @@ export const ConversationItem: React.FC<ConversationItemProps> = memo(({
                 {conversation.unreadCount > 99 ? '99+' : conversation.unreadCount}
               </Text>
             </View>
-          )}
-
-          {conversation.isPinned && (
-            <Icon
-              name="pin"
-              size={14}
-              color={theme.colors.text.tertiary}
-              style={styles.pinIcon}
-            />
-          )}
-
-          {conversation.isMuted && (
-            <Icon
-              name="volume-mute"
-              size={14}
-              color={theme.colors.text.tertiary}
-              style={styles.muteIcon}
-            />
           )}
         </View>
       </View>
@@ -219,6 +231,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  avatarText: {
+    fontSize: 20,
+    fontWeight: '600',
+  },
   onlineIndicator: {
     position: 'absolute',
     right: 0,
@@ -226,6 +242,18 @@ const styles = StyleSheet.create({
     width: 14,
     height: 14,
     borderRadius: 7,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  verifiedBadge: {
+    position: 'absolute',
+    right: -2,
+    top: -2,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
     borderWidth: 2,
     borderColor: '#FFFFFF',
   },
@@ -237,12 +265,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
+  },
+  nameContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 8,
   },
   name: {
     fontSize: 16,
-    flex: 1,
-    marginRight: 8,
   },
   nameBold: {
     fontWeight: '600',
@@ -250,9 +281,16 @@ const styles = StyleSheet.create({
   time: {
     fontSize: 12,
   },
+  subHeader: {
+    marginTop: 2,
+  },
+  profession: {
+    fontSize: 12,
+  },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 4,
   },
   preview: {
     fontSize: 14,
@@ -260,6 +298,9 @@ const styles = StyleSheet.create({
   },
   previewTyping: {
     fontStyle: 'italic',
+  },
+  previewBold: {
+    fontWeight: '500',
   },
   badge: {
     minWidth: 20,
@@ -274,12 +315,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 11,
     fontWeight: '600',
-  },
-  pinIcon: {
-    marginLeft: 6,
-  },
-  muteIcon: {
-    marginLeft: 4,
   },
 });
 

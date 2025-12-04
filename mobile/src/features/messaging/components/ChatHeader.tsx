@@ -35,11 +35,9 @@ export const ChatHeader: React.FC<ChatHeaderProps> = memo(({
   const conversationTypingUsers = typingUsers[conversation.id] || [];
   const isTyping = conversationTypingUsers.length > 0;
 
-  // Online status
-  const otherParticipant = conversation.participants.find(
-    p => p.id !== conversation.id
-  );
-  const isOnline = otherParticipant ? onlineUsers.has(otherParticipant.id) : false;
+  // Online status - participant tek obje olarak gelir (1:1 chat)
+  const participant = conversation.participant;
+  const isOnline = participant?.online || onlineUsers.has(participant?.id || '');
 
   const getStatusText = useCallback((): string => {
     if (isTyping) {
@@ -82,9 +80,9 @@ export const ChatHeader: React.FC<ChatHeaderProps> = memo(({
       >
         {/* Avatar */}
         <View style={styles.avatarContainer}>
-          {conversation.avatarUrl ? (
+          {participant?.profileImageUrl ? (
             <Image
-              source={{ uri: conversation.avatarUrl }}
+              source={{ uri: participant.profileImageUrl }}
               style={styles.avatar}
             />
           ) : (
@@ -114,7 +112,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = memo(({
             style={[styles.name, { color: theme.colors.text.primary }]}
             numberOfLines={1}
           >
-            {conversation.name}
+            {participant?.fullName || 'Kullanıcı'}
           </Text>
           {statusText && (
             <Text
