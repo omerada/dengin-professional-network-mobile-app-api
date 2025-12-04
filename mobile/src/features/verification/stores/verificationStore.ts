@@ -1,6 +1,6 @@
 // src/features/verification/stores/verificationStore.ts
 // Zustand store for verification state management
-// Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
+// Backend API Reference: mobile-development-guide/core/14-BACKEND-API-REFERENCE.md
 
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
@@ -77,6 +77,15 @@ export const useVerificationStore = create<VerificationStore>()(
     setDocumentType: (type: DocumentType) => {
       set((state) => {
         state.data.documentType = type;
+      });
+    },
+
+    /**
+     * Meslek ID'sini ayarla
+     */
+    setProfessionId: (professionId: number) => {
+      set((state) => {
+        state.data.professionId = professionId;
       });
     },
 

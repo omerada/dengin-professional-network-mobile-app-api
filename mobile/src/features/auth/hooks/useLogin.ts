@@ -7,12 +7,15 @@ import { useNavigation } from '@react-navigation/native';
 import { useCallback } from 'react';
 import { authApi, tokenService } from '../services';
 import { useAuthStore } from '../stores';
-import { LoginFormData } from '../types';
-import { RootStackNavigationProp } from '@shared/types';
+import type { LoginFormData } from '../types';
+import type { RootStackNavigationProp } from '@shared/types';
 
 /**
  * Login hook with React Query mutation
  * Handles login flow including token storage and navigation
+ * 
+ * Backend API: POST /api/auth/login
+ * Response format: { user, accessToken, refreshToken, tokenType, expiresIn }
  */
 export const useLogin = () => {
   const navigation = useNavigation<RootStackNavigationProp>();
@@ -26,13 +29,18 @@ export const useLogin = () => {
       });
       return response;
     },
-    onSuccess: async (data, variables) => {
-      // Save tokens securely
-      await tokenService.saveTokens(data.tokens);
 
-      // Update auth store
+    onSuccess: async (data, variables) => {
+      // Save tokens securely (backend format: accessToken, refreshToken, expiresIn)
+      await tokenService.saveTokens(data);
+
+      // Update auth store with user data
       setUser(data.user);
-      setLastLoginEmail(variables.email);
+
+      // Remember last login email
+      if (variables.rememberMe) {
+        setLastLoginEmail(variables.email);
+      }
 
       // Navigate to main app
       navigation.reset({
@@ -40,8 +48,9 @@ export const useLogin = () => {
         routes: [{ name: 'Main' }],
       });
     },
-    onError: error => {
-      console.error('[useLogin] Error:', error);
+
+    onError: (error: Error) => {
+      console.error('[useLogin] Error:', error.message);
     },
   });
 
@@ -54,9 +63,11 @@ export const useLogin = () => {
 
   return {
     login,
+    loginAsync: mutation.mutateAsync,
     isLoading: mutation.isPending,
     error: mutation.error,
     isError: mutation.isError,
+    isSuccess: mutation.isSuccess,
     reset: mutation.reset,
   };
 };

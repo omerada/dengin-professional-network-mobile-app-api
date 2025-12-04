@@ -5,13 +5,16 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AuthStore } from '../types';
+import type { AuthStore } from '../types';
 import { secureStorage, SECURE_KEYS } from '@core/storage';
-import { User } from '@shared/types';
+import type { User } from '@shared/types';
 
 /**
  * Auth store with persistence
  * Manages user authentication state
+ * 
+ * State is persisted to AsyncStorage (non-sensitive data)
+ * Tokens are stored in SecureStorage (sensitive data)
  */
 export const useAuthStore = create<AuthStore>()(
   persist(
@@ -30,6 +33,15 @@ export const useAuthStore = create<AuthStore>()(
           isAuthenticated: true,
           isLoading: false,
         });
+      },
+
+      updateUser: (updates: Partial<User>) => {
+        const currentUser = get().user;
+        if (currentUser) {
+          set({
+            user: { ...currentUser, ...updates },
+          });
+        }
       },
 
       clearUser: () => {
@@ -108,3 +120,9 @@ export const useAuthStore = create<AuthStore>()(
     },
   ),
 );
+
+// Selectors for optimized re-renders
+export const selectUser = (state: AuthStore) => state.user;
+export const selectIsAuthenticated = (state: AuthStore) => state.isAuthenticated;
+export const selectIsLoading = (state: AuthStore) => state.isLoading;
+export const selectBiometricEnabled = (state: AuthStore) => state.biometricEnabled;

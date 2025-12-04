@@ -5,35 +5,50 @@
 import { useMutation } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import { useCallback } from 'react';
+import { Alert } from 'react-native';
 import { authApi } from '../services';
-import { RegisterFormData } from '../types';
-import { AuthStackNavigationProp } from '@shared/types';
+import type { RegisterFormData } from '../types';
+import type { AuthStackNavigationProp } from '@shared/types';
 
 /**
  * Register hook with React Query mutation
  * Handles registration flow
+ * 
+ * Backend API: POST /api/auth/register
+ * Request: { email, password, name, surname }
+ * Response: { id, email, name, surname, createdAt }
  */
 export const useRegister = () => {
   const navigation = useNavigation<AuthStackNavigationProp>();
 
   const mutation = useMutation({
     mutationFn: async (data: RegisterFormData) => {
+      // Backend expects 'name' and 'surname' instead of firstName/lastName
       const response = await authApi.register({
         email: data.email,
         password: data.password,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phoneNumber: data.phoneNumber,
-        profession: data.profession,
+        name: data.firstName,
+        surname: data.lastName,
       });
       return response;
     },
-    onSuccess: (data, variables) => {
-      // Navigate to email verification screen
-      navigation.navigate('VerifyEmail', { email: variables.email });
+
+    onSuccess: (_data, variables) => {
+      // Show success message
+      Alert.alert(
+        'Kayıt Başarılı',
+        'Hesabınız oluşturuldu. E-posta adresinize gönderilen doğrulama linkine tıklayarak hesabınızı aktifleştirin.',
+        [
+          {
+            text: 'Tamam',
+            onPress: () => navigation.navigate('Login'),
+          },
+        ],
+      );
     },
-    onError: error => {
-      console.error('[useRegister] Error:', error);
+
+    onError: (error: Error) => {
+      console.error('[useRegister] Error:', error.message);
     },
   });
 
@@ -46,9 +61,11 @@ export const useRegister = () => {
 
   return {
     register,
+    registerAsync: mutation.mutateAsync,
     isLoading: mutation.isPending,
     error: mutation.error,
     isError: mutation.isError,
+    isSuccess: mutation.isSuccess,
     reset: mutation.reset,
   };
 };

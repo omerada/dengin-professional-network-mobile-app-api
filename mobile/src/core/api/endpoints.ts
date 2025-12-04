@@ -3,89 +3,126 @@
 
 /**
  * API endpoint definitions
+ * Backend API Reference ile %100 uyumlu
  */
 export const API_ENDPOINTS = {
-  // Authentication
+  // Authentication - Backend: /api/auth/*
   AUTH: {
-    LOGIN: '/api/v1/auth/login',
-    REGISTER: '/api/v1/auth/register',
-    REFRESH_TOKEN: '/api/v1/auth/refresh',
-    LOGOUT: '/api/v1/auth/logout',
-    FORGOT_PASSWORD: '/api/v1/auth/forgot-password',
-    RESET_PASSWORD: '/api/v1/auth/reset-password',
-    VERIFY_EMAIL: '/api/v1/auth/verify-email',
-    CHANGE_PASSWORD: '/api/v1/auth/change-password',
+    LOGIN: '/api/auth/login',
+    REGISTER: '/api/auth/register',
+    REFRESH_TOKEN: '/api/auth/refresh',
+    LOGOUT: '/api/auth/logout',
+    FORGOT_PASSWORD: '/api/auth/password-reset/request',
+    RESET_PASSWORD: '/api/auth/password-reset/confirm',
+    VERIFY_EMAIL: '/api/auth/verify-email',
+    CHANGE_PASSWORD: '/api/auth/change-password',
+    // OAuth2 endpoints
+    OAUTH_GOOGLE: '/api/v1/auth/oauth/google',
+    OAUTH_APPLE: '/api/v1/auth/oauth/apple',
   },
 
-  // User
+  // User - Backend: /api/users/*
   USER: {
-    ME: '/api/v1/users/me',
-    BY_ID: (id: string) => `/api/v1/users/${id}`,
-    UPDATE_PROFILE: '/api/v1/users/me',
-    UPDATE_AVATAR: '/api/v1/users/me/avatar',
-    DELETE_ACCOUNT: '/api/v1/users/me',
-    SEARCH: '/api/v1/users/search',
+    ME: '/api/users/me',
+    PROFILE: '/api/users/profile',
+    BY_ID: (id: string | number) => `/api/users/${id}`,
+    UPDATE_PROFILE: '/api/users/me',
+    UPDATE_AVATAR: '/api/users/me/avatar',
+    CHANGE_PROFESSION: '/api/users/me/profession',
+    DELETE_ACCOUNT: '/api/users/me',
+    SEARCH: '/api/users/search',
   },
 
-  // Verification
+  // Professions - Backend: /api/professions/*
+  PROFESSIONS: {
+    LIST: '/api/professions',
+    SEARCH: '/api/professions/search',
+    BY_CATEGORY: (category: string) => `/api/professions/category/${category}`,
+    BY_ID: (id: string | number) => `/api/professions/${id}`,
+  },
+
+  // Verification - Backend: /api/verifications/*
   VERIFICATION: {
-    STATUS: '/api/v1/verification/status',
-    SUBMIT: '/api/v1/verification/submit',
-    UPLOAD_DOCUMENT: '/api/v1/verification/document',
-    UPLOAD_SELFIE: '/api/v1/verification/selfie',
+    // POST /api/verifications - Submit verification
+    SUBMIT: '/api/verifications',
+    // GET /api/verifications - Get user's verification list
+    LIST: '/api/verifications',
+    // GET /api/verifications/check/{professionId} - Check eligibility
+    CHECK_ELIGIBILITY: (professionId: number) => `/api/verifications/check/${professionId}`,
+    // GET /api/verifications/history - Get verification history
+    HISTORY: '/api/verifications/history',
   },
 
-  // Feed
+  // Feed - Backend: /api/posts/*
   FEED: {
-    LIST: '/api/v1/feed',
-    POST_BY_ID: (id: string) => `/api/v1/posts/${id}`,
-    CREATE_POST: '/api/v1/posts',
-    UPDATE_POST: (id: string) => `/api/v1/posts/${id}`,
-    DELETE_POST: (id: string) => `/api/v1/posts/${id}`,
-    LIKE_POST: (id: string) => `/api/v1/posts/${id}/like`,
-    UNLIKE_POST: (id: string) => `/api/v1/posts/${id}/like`,
-    BOOKMARK_POST: (id: string) => `/api/v1/posts/${id}/bookmark`,
-    UNBOOKMARK_POST: (id: string) => `/api/v1/posts/${id}/bookmark`,
-    REPORT_POST: (id: string) => `/api/v1/posts/${id}/report`,
-    SHARE_POST: (id: string) => `/api/v1/posts/${id}/share`,
-    BOOKMARKED: '/api/v1/posts/bookmarked',
-    USER_POSTS: (userId: string) => `/api/v1/users/${userId}/posts`,
+    LIST: '/api/posts',
+    POST_BY_ID: (id: string | number) => `/api/posts/${id}`,
+    CREATE_POST: '/api/posts',
+    UPDATE_POST: (id: string | number) => `/api/posts/${id}`,
+    DELETE_POST: (id: string | number) => `/api/posts/${id}`,
+    LIKE_POST: (id: string | number) => `/api/posts/${id}/like`,
+    UNLIKE_POST: (id: string | number) => `/api/posts/${id}/like`,
+    BOOKMARK_POST: (id: string | number) => `/api/posts/${id}/bookmark`,
+    UNBOOKMARK_POST: (id: string | number) => `/api/posts/${id}/bookmark`,
+    REPORT_POST: (id: string | number) => `/api/posts/${id}/report`,
+    SHARE_POST: (id: string | number) => `/api/posts/${id}/share`,
+    BOOKMARKED: '/api/posts/bookmarked',
+    USER_POSTS: (userId: string | number) => `/api/users/${userId}/posts`,
+    TRENDING: '/api/posts/trending',
+    FOLLOWING: '/api/posts/following',
   },
 
-  // Comments
+  // Comments - Backend: /api/posts/{postId}/comments/*
   COMMENTS: {
-    BY_POST: (postId: string) => `/api/v1/posts/${postId}/comments`,
-    CREATE: (postId: string) => `/api/v1/posts/${postId}/comments`,
-    UPDATE: (id: string) => `/api/v1/comments/${id}`,
-    DELETE: (id: string) => `/api/v1/comments/${id}`,
-    LIKE: (id: string) => `/api/v1/comments/${id}/like`,
-    UNLIKE: (id: string) => `/api/v1/comments/${id}/like`,
-    REPLIES: (id: string) => `/api/v1/comments/${id}/replies`,
+    BY_POST: (postId: string | number) => `/api/posts/${postId}/comments`,
+    CREATE: (postId: string | number) => `/api/posts/${postId}/comments`,
+    UPDATE: (id: string | number) => `/api/comments/${id}`,
+    DELETE: (id: string | number) => `/api/comments/${id}`,
+    LIKE: (id: string | number) => `/api/comments/${id}/like`,
+    UNLIKE: (id: string | number) => `/api/comments/${id}/like`,
+    REPLIES: (id: string | number) => `/api/comments/${id}/replies`,
   },
 
-  // Messaging
+  // Messaging - Backend: /api/conversations/*
   MESSAGING: {
-    CONVERSATIONS: '/api/v1/conversations',
-    CONVERSATION_BY_ID: (id: string) => `/api/v1/conversations/${id}`,
-    MESSAGES: (conversationId: string) => `/api/v1/conversations/${conversationId}/messages`,
-    SEND_MESSAGE: (conversationId: string) => `/api/v1/conversations/${conversationId}/messages`,
-    START_CONVERSATION: '/api/v1/conversations',
-    MARK_READ: (conversationId: string) => `/api/v1/conversations/${conversationId}/read`,
+    CONVERSATIONS: '/api/conversations',
+    CONVERSATION_BY_ID: (id: string | number) => `/api/conversations/${id}`,
+    MESSAGES: (conversationId: string | number) => `/api/conversations/${conversationId}/messages`,
+    SEND_MESSAGE: (conversationId: string | number) => `/api/conversations/${conversationId}/messages`,
+    START_CONVERSATION: '/api/conversations',
+    MARK_READ: (conversationId: string | number) => `/api/conversations/${conversationId}/read`,
+    ARCHIVE: (conversationId: string | number) => `/api/conversations/${conversationId}/archive`,
+    UNARCHIVE: (conversationId: string | number) => `/api/conversations/${conversationId}/unarchive`,
   },
 
-  // Notifications
+  // Notifications - Backend: /api/notifications/*
   NOTIFICATIONS: {
-    LIST: '/api/v1/notifications',
-    MARK_READ: (id: string) => `/api/v1/notifications/${id}/read`,
-    MARK_ALL_READ: '/api/v1/notifications/read-all',
-    SETTINGS: '/api/v1/notifications/settings',
-    REGISTER_DEVICE: '/api/v1/notifications/devices',
+    LIST: '/api/notifications',
+    MARK_READ: (id: string | number) => `/api/notifications/${id}/read`,
+    MARK_ALL_READ: '/api/notifications/read-all',
+    SETTINGS: '/api/notifications/settings',
+    UPDATE_SETTINGS: '/api/notifications/settings',
+    REGISTER_DEVICE: '/api/notifications/devices',
+    UNREGISTER_DEVICE: (deviceId: string) => `/api/notifications/devices/${deviceId}`,
   },
 
-  // Media
+  // Media - Backend: /api/media/*
   MEDIA: {
-    UPLOAD: '/api/v1/media/upload',
-    UPLOAD_MULTIPLE: '/api/v1/media/upload-multiple',
+    UPLOAD: '/api/media/upload',
+    UPLOAD_MULTIPLE: '/api/media/upload-multiple',
+    PRESIGNED_URL: '/api/media/presigned-url',
+    DELETE: (id: string) => `/api/media/${id}`,
+  },
+
+  // Social - Backend: /api/users/{userId}/*
+  SOCIAL: {
+    FOLLOW: (userId: string | number) => `/api/users/${userId}/follow`,
+    UNFOLLOW: (userId: string | number) => `/api/users/${userId}/follow`,
+    FOLLOWERS: (userId: string | number) => `/api/users/${userId}/followers`,
+    FOLLOWING: (userId: string | number) => `/api/users/${userId}/following`,
+    BLOCK: (userId: string | number) => `/api/users/${userId}/block`,
+    UNBLOCK: (userId: string | number) => `/api/users/${userId}/block`,
+    REPORT: (userId: string | number) => `/api/users/${userId}/report`,
   },
 } as const;
 

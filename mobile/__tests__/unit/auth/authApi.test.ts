@@ -1,8 +1,10 @@
 // __tests__/unit/auth/authApi.test.ts
 // Oku: mobile-development-guide/testing/21-TESTING-STRATEGY.md
+// Oku: mobile-development-guide/core/14-BACKEND-API-REFERENCE.md
 
 import { authApi } from '../../../src/features/auth/services/authApi';
 import { apiClient } from '../../../src/core/api/client';
+import { API_ENDPOINTS } from '../../../src/core/api/endpoints';
 
 // Mock api client
 jest.mock('../../../src/core/api/client', () => ({
@@ -21,42 +23,46 @@ describe('AuthApi', () => {
   describe('login', () => {
     const loginData = {
       email: 'test@example.com',
-      password: 'password123',
+      password: 'Password123!',
     };
 
+    // Backend response format: { user, accessToken, refreshToken, tokenType, expiresIn }
     const mockResponse = {
       data: {
-        success: true,
-        data: {
-          user: {
-            id: '1',
-            email: 'test@example.com',
-            firstName: 'John',
-            lastName: 'Doe',
-          },
-          accessToken: 'access-token',
-          refreshToken: 'refresh-token',
+        user: {
+          id: 1,
+          email: 'test@example.com',
+          name: 'John',
+          surname: 'Doe',
+          verificationStatus: 'PENDING',
         },
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token',
+        tokenType: 'Bearer',
+        expiresIn: 86400,
       },
     };
 
-    it('doğru endpoint ile istek yapmalı', async () => {
+    it('should call correct endpoint POST /api/auth/login', async () => {
       (apiClient.post as jest.Mock).mockResolvedValue(mockResponse);
 
       await authApi.login(loginData);
 
-      expect(apiClient.post).toHaveBeenCalledWith('/auth/login', loginData);
+      expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.AUTH.LOGIN, loginData);
     });
 
-    it('başarılı yanıt döndürmeli', async () => {
+    it('should return AuthResponse with user and tokens', async () => {
       (apiClient.post as jest.Mock).mockResolvedValue(mockResponse);
 
       const result = await authApi.login(loginData);
 
       expect(result).toEqual(mockResponse.data);
+      expect(result.user.id).toBe(1);
+      expect(result.accessToken).toBe('access-token');
+      expect(result.expiresIn).toBe(86400);
     });
 
-    it('hata durumunda exception fırlatmalı', async () => {
+    it('should throw error on invalid credentials', async () => {
       const error = new Error('Invalid credentials');
       (apiClient.post as jest.Mock).mockRejectedValue(error);
 
@@ -65,168 +71,243 @@ describe('AuthApi', () => {
   });
 
   describe('register', () => {
+    // Backend request format: { email, password, name, surname }
     const registerData = {
       email: 'new@example.com',
-      password: 'Password123',
-      confirmPassword: 'Password123',
-      firstName: 'Jane',
-      lastName: 'Doe',
-      acceptTerms: true,
+      password: 'Password123!',
+      name: 'Jane',
+      surname: 'Doe',
     };
 
+    // Backend response format: { id, email, name, surname, createdAt }
     const mockResponse = {
       data: {
-        success: true,
-        data: {
-          user: {
-            id: '2',
-            email: 'new@example.com',
-            firstName: 'Jane',
-            lastName: 'Doe',
-          },
-          accessToken: 'access-token',
-          refreshToken: 'refresh-token',
-        },
+        id: 2,
+        email: 'new@example.com',
+        name: 'Jane',
+        surname: 'Doe',
+        createdAt: '2024-12-04T12:00:00Z',
       },
     };
 
-    it('doğru endpoint ile istek yapmalı', async () => {
+    it('should call correct endpoint POST /api/auth/register', async () => {
       (apiClient.post as jest.Mock).mockResolvedValue(mockResponse);
 
       await authApi.register(registerData);
 
-      expect(apiClient.post).toHaveBeenCalledWith('/auth/register', registerData);
+      expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.AUTH.REGISTER, registerData);
     });
 
-    it('başarılı yanıt döndürmeli', async () => {
+    it('should return RegisterResponse', async () => {
       (apiClient.post as jest.Mock).mockResolvedValue(mockResponse);
 
       const result = await authApi.register(registerData);
 
       expect(result).toEqual(mockResponse.data);
+      expect(result.id).toBe(2);
+      expect(result.email).toBe('new@example.com');
     });
   });
 
   describe('refreshToken', () => {
     const refreshToken = 'refresh-token-123';
 
+    // Backend response format: { accessToken, refreshToken, expiresIn }
     const mockResponse = {
       data: {
-        success: true,
-        data: {
-          accessToken: 'new-access-token',
-          refreshToken: 'new-refresh-token',
-        },
+        accessToken: 'new-access-token',
+        refreshToken: 'new-refresh-token',
+        expiresIn: 86400,
       },
     };
 
-    it('doğru endpoint ile istek yapmalı', async () => {
+    it('should call correct endpoint with Refresh-Token header', async () => {
       (apiClient.post as jest.Mock).mockResolvedValue(mockResponse);
 
       await authApi.refreshToken(refreshToken);
 
-      expect(apiClient.post).toHaveBeenCalledWith('/auth/refresh', {
-        refreshToken,
-      });
+      expect(apiClient.post).toHaveBeenCalledWith(
+        API_ENDPOINTS.AUTH.REFRESH_TOKEN,
+        null,
+        {
+          headers: {
+            'Refresh-Token': refreshToken,
+          },
+        },
+      );
     });
 
-    it('yeni tokenlar döndürmeli', async () => {
+    it('should return new tokens', async () => {
       (apiClient.post as jest.Mock).mockResolvedValue(mockResponse);
 
       const result = await authApi.refreshToken(refreshToken);
 
-      expect(result.data.accessToken).toBe('new-access-token');
-      expect(result.data.refreshToken).toBe('new-refresh-token');
+      expect(result.accessToken).toBe('new-access-token');
+      expect(result.refreshToken).toBe('new-refresh-token');
+      expect(result.expiresIn).toBe(86400);
     });
   });
 
   describe('forgotPassword', () => {
     const email = 'test@example.com';
 
-    const mockResponse = {
-      data: {
-        success: true,
-        message: 'Password reset email sent',
-      },
-    };
-
-    it('doğru endpoint ile istek yapmalı', async () => {
-      (apiClient.post as jest.Mock).mockResolvedValue(mockResponse);
+    it('should call correct endpoint POST /api/auth/password-reset/request', async () => {
+      (apiClient.post as jest.Mock).mockResolvedValue({ data: null });
 
       await authApi.forgotPassword(email);
 
-      expect(apiClient.post).toHaveBeenCalledWith('/auth/forgot-password', {
-        email,
-      });
+      expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, { email });
+    });
+
+    it('should not throw error (always returns 204 for security)', async () => {
+      (apiClient.post as jest.Mock).mockResolvedValue({ data: null });
+
+      await expect(authApi.forgotPassword(email)).resolves.not.toThrow();
     });
   });
 
   describe('resetPassword', () => {
-    const resetData = {
-      token: 'reset-token',
-      password: 'NewPassword123',
-      confirmPassword: 'NewPassword123',
-    };
+    const resetToken = 'reset-token-123';
+    const newPassword = 'NewPassword123!';
 
-    const mockResponse = {
-      data: {
-        success: true,
-        message: 'Password reset successful',
-      },
-    };
+    it('should call correct endpoint POST /api/auth/password-reset/confirm', async () => {
+      (apiClient.post as jest.Mock).mockResolvedValue({ data: null });
 
-    it('doğru endpoint ile istek yapmalı', async () => {
-      (apiClient.post as jest.Mock).mockResolvedValue(mockResponse);
+      await authApi.resetPassword(resetToken, newPassword);
 
-      await authApi.resetPassword(resetData);
-
-      expect(apiClient.post).toHaveBeenCalledWith('/auth/reset-password', resetData);
+      expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.AUTH.RESET_PASSWORD, {
+        resetToken,
+        newPassword,
+      });
     });
   });
 
   describe('logout', () => {
-    const mockResponse = {
-      data: {
-        success: true,
-      },
-    };
-
-    it('doğru endpoint ile istek yapmalı', async () => {
-      (apiClient.post as jest.Mock).mockResolvedValue(mockResponse);
+    it('should call correct endpoint POST /api/auth/logout', async () => {
+      (apiClient.post as jest.Mock).mockResolvedValue({ data: null });
 
       await authApi.logout();
 
-      expect(apiClient.post).toHaveBeenCalledWith('/auth/logout');
+      expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.AUTH.LOGOUT);
     });
   });
 
-  describe('getProfile', () => {
+  describe('getCurrentUser', () => {
+    // Backend response format: User object
+    const mockResponse = {
+      data: {
+        id: 1,
+        email: 'test@example.com',
+        name: 'John',
+        surname: 'Doe',
+        verificationStatus: 'PENDING',
+        createdAt: '2024-12-04T12:00:00Z',
+        updatedAt: '2024-12-04T12:00:00Z',
+      },
+    };
+
+    it('should call correct endpoint GET /api/users/me', async () => {
+      (apiClient.get as jest.Mock).mockResolvedValue(mockResponse);
+
+      await authApi.getCurrentUser();
+
+      expect(apiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.USER.ME);
+    });
+
+    it('should return User data', async () => {
+      (apiClient.get as jest.Mock).mockResolvedValue(mockResponse);
+
+      const result = await authApi.getCurrentUser();
+
+      expect(result.email).toBe('test@example.com');
+      expect(result.id).toBe(1);
+    });
+  });
+
+  describe('loginWithGoogle', () => {
+    const idToken = 'google-id-token';
+
+    // Backend OAuth2 response format
     const mockResponse = {
       data: {
         success: true,
-        data: {
-          id: '1',
-          email: 'test@example.com',
-          firstName: 'John',
-          lastName: 'Doe',
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token',
+        tokenType: 'Bearer',
+        expiresIn: 86400,
+        isNewUser: false,
+        user: {
+          id: 1,
+          email: 'test@gmail.com',
+          name: 'John',
+          surname: 'Doe',
+          fullName: 'John Doe',
+          verificationStatus: 'PENDING',
         },
       },
     };
 
-    it('doğru endpoint ile istek yapmalı', async () => {
-      (apiClient.get as jest.Mock).mockResolvedValue(mockResponse);
+    it('should call correct endpoint POST /api/v1/auth/oauth/google', async () => {
+      (apiClient.post as jest.Mock).mockResolvedValue(mockResponse);
 
-      await authApi.getProfile();
+      await authApi.loginWithGoogle(idToken);
 
-      expect(apiClient.get).toHaveBeenCalledWith('/auth/profile');
+      expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.AUTH.OAUTH_GOOGLE, { idToken });
     });
 
-    it('kullanıcı bilgilerini döndürmeli', async () => {
-      (apiClient.get as jest.Mock).mockResolvedValue(mockResponse);
+    it('should return OAuth2AuthResponse', async () => {
+      (apiClient.post as jest.Mock).mockResolvedValue(mockResponse);
 
-      const result = await authApi.getProfile();
+      const result = await authApi.loginWithGoogle(idToken);
 
-      expect(result.data.email).toBe('test@example.com');
+      expect(result.success).toBe(true);
+      expect(result.isNewUser).toBe(false);
+      expect(result.user.email).toBe('test@gmail.com');
+    });
+  });
+
+  describe('loginWithApple', () => {
+    const idToken = 'apple-id-token';
+    const authorizationCode = 'auth-code';
+    const fullName = { givenName: 'John', familyName: 'Doe' };
+
+    const mockResponse = {
+      data: {
+        success: true,
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token',
+        tokenType: 'Bearer',
+        expiresIn: 86400,
+        isNewUser: true,
+        user: {
+          id: 1,
+          email: 'test@privaterelay.appleid.com',
+          name: 'John',
+          surname: 'Doe',
+          verificationStatus: 'PENDING',
+        },
+      },
+    };
+
+    it('should call correct endpoint POST /api/v1/auth/oauth/apple', async () => {
+      (apiClient.post as jest.Mock).mockResolvedValue(mockResponse);
+
+      await authApi.loginWithApple(idToken, authorizationCode, fullName);
+
+      expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.AUTH.OAUTH_APPLE, {
+        idToken,
+        authorizationCode,
+        fullName,
+      });
+    });
+
+    it('should handle first-time login with user name', async () => {
+      (apiClient.post as jest.Mock).mockResolvedValue(mockResponse);
+
+      const result = await authApi.loginWithApple(idToken, authorizationCode, fullName);
+
+      expect(result.isNewUser).toBe(true);
+      expect(result.user.name).toBe('John');
     });
   });
 });

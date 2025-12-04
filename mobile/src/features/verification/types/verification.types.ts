@@ -1,14 +1,15 @@
 // src/features/verification/types/verification.types.ts
 // Doğrulama tipi tanımlamaları
+// Backend API Reference: mobile-development-guide/core/14-BACKEND-API-REFERENCE.md
 // Oku: docs/09-AI-VERIFICATION-DESIGN.md
 
 /**
- * Doğrulama durumları
+ * Doğrulama durumları - Backend ile uyumlu
+ * Backend: "PENDING" | "PROCESSING" | "APPROVED" | "REJECTED" | "MANUAL_REVIEW"
  */
 export type VerificationStatus =
-  | 'NOT_STARTED'
-  | 'IN_PROGRESS'
-  | 'PENDING_REVIEW'
+  | 'PENDING'
+  | 'PROCESSING'
   | 'APPROVED'
   | 'REJECTED'
   | 'MANUAL_REVIEW';
@@ -73,7 +74,7 @@ export interface CapturedImage {
 }
 
 /**
- * Doğrulama verisi
+ * Doğrulama verisi - Lokal state için
  */
 export interface VerificationData {
   documentType: DocumentType;
@@ -81,11 +82,21 @@ export interface VerificationData {
   documentBack: CapturedImage | null;
   selfie: CapturedImage | null;
   profession?: string;
-  professionId?: string;
+  professionId?: number;
 }
 
 /**
- * Doğrulama isteği
+ * Doğrulama isteği - Backend API uyumlu
+ * POST /api/verifications
+ */
+export interface SubmitVerificationRequest {
+  professionId: number;
+  documentUrl: string; // S3 URL of uploaded document
+  selfieUrl: string;   // S3 URL of selfie with document
+}
+
+/**
+ * @deprecated Use SubmitVerificationRequest
  */
 export interface VerificationRequest {
   documentType: DocumentType;
@@ -96,21 +107,37 @@ export interface VerificationRequest {
 }
 
 /**
- * Doğrulama yanıtı
+ * Doğrulama yanıtı - Backend API uyumlu
+ * Response from POST /api/verifications and GET /api/verifications
  */
 export interface VerificationResponse {
-  id: string;
+  id: number;
   status: VerificationStatus;
-  confidenceScore?: number;
-  message?: string;
+  profession: {
+    id: number;
+    name: string;
+  };
+  aiConfidenceScore?: number;
+  rejectionReason?: string;
+  attemptCount: number;
+  maxAttempts: number; // Usually 3
   createdAt: string;
   updatedAt: string;
-  estimatedTime?: string;
-  result?: VerificationResult;
 }
 
 /**
- * AI Doğrulama sonucu
+ * Doğrulama uygunluk kontrolü yanıtı
+ * GET /api/verifications/check/{professionId}
+ */
+export interface VerificationEligibilityResponse {
+  eligible: boolean;
+  reason?: string;
+  remainingAttempts: number;
+  cooldownEndsAt?: string; // If rejected recently
+}
+
+/**
+ * AI Doğrulama sonucu - Internal
  */
 export interface VerificationResult {
   ocrConfidence: number;
@@ -198,6 +225,7 @@ export interface VerificationState {
 export interface VerificationActions {
   setStep: (step: VerificationStep) => void;
   setDocumentType: (type: DocumentType) => void;
+  setProfessionId: (professionId: number) => void;
   setDocumentFront: (image: CapturedImage) => void;
   setDocumentBack: (image: CapturedImage) => void;
   setSelfie: (image: CapturedImage) => void;

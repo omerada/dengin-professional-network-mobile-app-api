@@ -1,7 +1,8 @@
 // src/features/auth/types/auth.types.ts
 // Oku: mobile-development-guide/features/03-AUTH-MODULE.md
+// Oku: mobile-development-guide/core/14-BACKEND-API-REFERENCE.md
 
-import { User, AuthTokens } from '@shared/types';
+import type { User, AuthTokens } from '@shared/types';
 
 /**
  * Login form data
@@ -14,13 +15,14 @@ export interface LoginFormData {
 
 /**
  * Register form data
+ * Note: Backend expects 'name' and 'surname'
  */
 export interface RegisterFormData {
   email: string;
   password: string;
   confirmPassword: string;
-  firstName: string;
-  lastName: string;
+  firstName: string; // Mapped to 'name' in API call
+  lastName: string;  // Mapped to 'surname' in API call
   phoneNumber?: string;
   profession?: string;
   acceptTerms: boolean;
@@ -67,6 +69,7 @@ export interface AuthState {
  */
 export interface AuthActions {
   setUser: (user: User) => void;
+  updateUser: (updates: Partial<User>) => void;
   clearUser: () => void;
   setLoading: (loading: boolean) => void;
   setBiometricEnabled: (enabled: boolean) => void;
@@ -81,25 +84,17 @@ export interface AuthActions {
 export type AuthStore = AuthState & AuthActions;
 
 /**
- * Login response from API
- */
-export interface LoginResponse {
-  user: User;
-  tokens: AuthTokens;
-}
-
-/**
- * Register response from API
- */
-export interface RegisterResponse {
-  user: User;
-  message: string;
-}
-
-/**
  * Biometric auth result
  */
 export interface BiometricResult {
   success: boolean;
   error?: string;
+}
+
+/**
+ * Biometric config
+ */
+export interface BiometricConfig {
+  enabled: boolean;
+  type: 'fingerprint' | 'face' | 'iris' | null;
 }

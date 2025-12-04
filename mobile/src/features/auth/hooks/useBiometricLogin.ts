@@ -6,11 +6,18 @@ import { useNavigation } from '@react-navigation/native';
 import { useCallback, useEffect, useState } from 'react';
 import { biometricService, authApi, tokenService } from '../services';
 import { useAuthStore } from '../stores';
-import { RootStackNavigationProp } from '@shared/types';
+import type { RootStackNavigationProp } from '@shared/types';
 
 /**
  * Biometric login hook
  * Handles biometric authentication flow
+ * 
+ * Flow:
+ * 1. User triggers biometric auth
+ * 2. Biometric service verifies identity
+ * 3. Get stored refresh token
+ * 4. Refresh to get new access token
+ * 5. Navigate to main app
  */
 export const useBiometricLogin = () => {
   const navigation = useNavigation<RootStackNavigationProp>();
@@ -44,15 +51,21 @@ export const useBiometricLogin = () => {
       }
 
       // Refresh token to get new access token
+      // Backend: POST /api/auth/refresh with Refresh-Token header
       const response = await authApi.refreshToken(credentials.refreshToken);
-      return response;
+
+      // Get current user data
+      const user = await authApi.getCurrentUser();
+
+      return { tokens: response, user };
     },
-    onSuccess: async data => {
+
+    onSuccess: async ({ tokens, user }) => {
       // Save new tokens
-      await tokenService.saveTokens(data.tokens);
+      await tokenService.saveTokens(tokens);
 
       // Update auth store
-      setUser(data.user);
+      setUser(user);
 
       // Navigate to main app
       navigation.reset({
@@ -60,8 +73,9 @@ export const useBiometricLogin = () => {
         routes: [{ name: 'Main' }],
       });
     },
-    onError: error => {
-      console.error('[useBiometricLogin] Error:', error);
+
+    onError: (error: Error) => {
+      console.error('[useBiometricLogin] Error:', error.message);
     },
   });
 
@@ -73,6 +87,7 @@ export const useBiometricLogin = () => {
 
   return {
     loginWithBiometric,
+    loginWithBiometricAsync: mutation.mutateAsync,
     isLoading: mutation.isPending,
     error: mutation.error,
     isError: mutation.isError,

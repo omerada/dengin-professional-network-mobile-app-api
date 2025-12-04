@@ -1,6 +1,6 @@
 // src/features/verification/screens/UploadStatusScreen.tsx
 // Yükleme durumu ekranı
-// Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
+// Backend API Reference: mobile-development-guide/core/14-BACKEND-API-REFERENCE.md
 
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import {
@@ -82,7 +82,7 @@ export const UploadStatusScreen: React.FC = memo(() => {
       try {
         setUploadProgress({ status: 'uploading' });
 
-        // Belgeleri yükle
+        // Belgeleri yükle ve doğrulama isteği gönder
         const response = await uploadService.uploadWithRetry(
           data,
           (progress) => {
@@ -91,17 +91,20 @@ export const UploadStatusScreen: React.FC = memo(() => {
         );
 
         setUploadProgress({ status: 'processing' });
+        setVerificationResponse(response);
 
-        // Durumu poll et
+        // Durumu poll et (backend'den güncel durumu al)
         const finalResponse = await uploadService.pollStatus(
-          response.id,
           (statusResponse: VerificationResponse) => {
             setVerificationResponse(statusResponse);
           }
         );
 
-        setUploadProgress({ status: 'completed', total: 100 });
-        setVerificationResponse(finalResponse);
+        if (finalResponse) {
+          setUploadProgress({ status: 'completed', total: 100 });
+          setVerificationResponse(finalResponse);
+        }
+
         setStep('status');
         setIsUploading(false);
       } catch (error) {

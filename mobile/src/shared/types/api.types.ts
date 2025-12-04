@@ -5,108 +5,270 @@ import { VerificationStatus, UserRole, BaseEntity } from './common.types';
 
 /**
  * User entity from API
+ * Backend: LoginResponse.user format
  */
-export interface User extends BaseEntity {
+export interface User {
+  id: number;
   email: string;
+  name: string;
+  surname: string;
+  fullName?: string;
   phoneNumber?: string;
-  firstName: string;
-  lastName: string;
-  displayName: string;
-  avatarUrl?: string;
-  profession?: string;
-  workplace?: string;
   bio?: string;
-  verificationStatus: VerificationStatus;
-  role: UserRole;
-  isActive: boolean;
-  lastSeenAt?: string;
+  avatarUrl?: string;
+  verificationStatus: BackendVerificationStatus;
+  professionId?: number;
+  professionName?: string;
+  profession?: Profession;
+  stats?: UserStats;
+  createdAt: string;
+  updatedAt: string;
 }
 
 /**
+ * Backend verification status enum
+ */
+export type BackendVerificationStatus = 'PENDING' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
+
+/**
+ * User stats
+ */
+export interface UserStats {
+  postCount: number;
+  followerCount: number;
+  followingCount: number;
+}
+
+/**
+ * Profession entity
+ */
+export interface Profession {
+  id: number;
+  name: string;
+  category: ProfessionCategory;
+  description?: string;
+  requiresVerification: boolean;
+  verificationDocuments?: string[];
+}
+
+/**
+ * Profession category enum
+ */
+export type ProfessionCategory =
+  | 'MEDICAL'
+  | 'LEGAL'
+  | 'ENGINEERING'
+  | 'EDUCATION'
+  | 'FINANCE'
+  | 'OTHER';
+
+/**
  * Authentication tokens
+ * Backend: LoginResponse format
  */
 export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
-  expiresIn: number;
+  expiresIn: number; // seconds (86400 = 24 hours)
   tokenType: 'Bearer';
 }
 
 /**
  * Login credentials
+ * Backend: POST /api/auth/login request
  */
 export interface LoginCredentials {
   email: string;
   password: string;
-  deviceToken?: string;
 }
 
 /**
  * Registration data
+ * Backend: POST /api/auth/register request
  */
 export interface RegisterData {
   email: string;
   password: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber?: string;
-  profession?: string;
+  name: string;
+  surname: string;
 }
 
 /**
  * Auth response from API
+ * Backend: POST /api/auth/login response
  */
 export interface AuthResponse {
   user: User;
-  tokens: AuthTokens;
+  accessToken: string;
+  refreshToken: string;
+  tokenType: 'Bearer';
+  expiresIn: number;
+}
+
+/**
+ * Register response from API
+ * Backend: POST /api/auth/register response
+ */
+export interface RegisterResponse {
+  id: number;
+  email: string;
+  name: string;
+  surname: string;
+  createdAt: string;
+}
+
+/**
+ * Refresh token response
+ * Backend: POST /api/auth/refresh response
+ */
+export interface RefreshTokenResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+}
+
+/**
+ * OAuth2 response (Google/Apple)
+ * Backend: POST /api/v1/auth/oauth/* response
+ */
+export interface OAuth2AuthResponse {
+  success: boolean;
+  error?: string;
+  accessToken: string;
+  refreshToken: string;
+  tokenType: 'Bearer';
+  expiresIn: number;
+  isNewUser: boolean;
+  user: User;
+}
+
+/**
+ * Password reset request
+ */
+export interface PasswordResetRequest {
+  email: string;
+}
+
+/**
+ * Password reset confirm request
+ */
+export interface PasswordResetConfirmRequest {
+  resetToken: string;
+  newPassword: string;
+}
+
+/**
+ * Verification entity
+ * Backend: POST /api/verifications response
+ */
+export interface Verification {
+  id: number;
+  status: VerificationStatusType;
+  profession: {
+    id: number;
+    name: string;
+  };
+  aiConfidenceScore?: number;
+  rejectionReason?: string;
+  attemptCount: number;
+  maxAttempts: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Verification status type
+ */
+export type VerificationStatusType =
+  | 'PENDING'
+  | 'PROCESSING'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'MANUAL_REVIEW';
+
+/**
+ * Submit verification request
+ */
+export interface SubmitVerificationRequest {
+  professionId: number;
+  documentUrl: string;
+  selfieUrl: string;
 }
 
 /**
  * Post entity
  */
-export interface Post extends BaseEntity {
+export interface Post {
+  id: number;
   content: string;
   imageUrls: string[];
   author: User;
   likeCount: number;
   commentCount: number;
+  shareCount: number;
   isLiked: boolean;
   isBookmarked: boolean;
+  visibility: PostVisibility;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Post visibility enum
+ */
+export type PostVisibility = 'PUBLIC' | 'VERIFIED_ONLY' | 'FOLLOWERS_ONLY';
+
+/**
+ * Create post request
+ */
+export interface CreatePostRequest {
+  content: string;
+  imageUrls?: string[];
+  visibility?: PostVisibility;
 }
 
 /**
  * Comment entity
  */
-export interface Comment extends BaseEntity {
+export interface Comment {
+  id: number;
   content: string;
   author: User;
-  postId: string;
-  parentId?: string;
+  postId: number;
+  parentId?: number;
   likeCount: number;
+  replyCount: number;
   isLiked: boolean;
-  replies?: Comment[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 /**
  * Conversation entity
  */
-export interface Conversation extends BaseEntity {
+export interface Conversation {
+  id: number;
   participants: User[];
   lastMessage?: Message;
   unreadCount: number;
   isArchived: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 /**
  * Message entity
  */
-export interface Message extends BaseEntity {
-  conversationId: string;
-  senderId: string;
+export interface Message {
+  id: number;
+  conversationId: number;
+  senderId: number;
   content: string;
   type: MessageType;
   status: MessageStatus;
   attachments?: Attachment[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 /**
@@ -134,9 +296,16 @@ export interface Attachment {
 /**
  * Notification entity
  */
-export interface Notification extends BaseEntity {
+export interface Notification {
+  id: number;
   type: NotificationType;
   title: string;
+  body: string;
+  data?: Record<string, string>;
+  isRead: boolean;
+  actionUrl?: string;
+  createdAt: string;
+}
   body: string;
   data?: Record<string, string>;
   isRead: boolean;
@@ -163,7 +332,7 @@ export interface VerificationDocument {
   frontImageUrl?: string;
   backImageUrl?: string;
   selfieImageUrl?: string;
-  status: VerificationStatus;
+  status: BackendVerificationStatus;
   rejectionReason?: string;
   submittedAt: string;
   reviewedAt?: string;
@@ -181,4 +350,40 @@ export interface UploadProgress {
   loaded: number;
   total: number;
   percentage: number;
+}
+
+/**
+ * Paginated response from backend
+ */
+export interface PaginatedApiResponse<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
+
+/**
+ * API Error response
+ */
+export interface ApiErrorResponse {
+  success: false;
+  error: {
+    code: string;
+    message: string;
+    details?: Record<string, string>;
+  };
+  timestamp: string;
+}
+
+/**
+ * API Success response
+ */
+export interface ApiSuccessResponse<T> {
+  success: true;
+  data: T;
+  message?: string;
+  timestamp?: string;
 }

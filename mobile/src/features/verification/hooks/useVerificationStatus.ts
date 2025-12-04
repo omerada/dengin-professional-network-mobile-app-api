@@ -1,41 +1,56 @@
 // src/features/verification/hooks/useVerificationStatus.ts
 // Doğrulama durumu hook'u
-// Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
+// Backend API Reference: mobile-development-guide/core/14-BACKEND-API-REFERENCE.md
 
 import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@core/api/client';
-import { API_ENDPOINTS } from '@core/api/endpoints';
-import type { VerificationResponse, VerificationStatus } from '../types';
+import { verificationApi } from '../services';
+import type { VerificationResponse, VerificationStatus, VerificationEligibilityResponse } from '../types';
 
 /**
- * Query key
+ * Query keys
  */
 export const VERIFICATION_STATUS_KEY = ['verification', 'status'] as const;
-
-/**
- * Doğrulama durumunu getir
- */
-async function fetchVerificationStatus(): Promise<VerificationResponse | null> {
-  try {
-    const response = await apiClient.get<{ data: VerificationResponse }>(
-      API_ENDPOINTS.VERIFICATION.STATUS
-    );
-    return response.data.data;
-  } catch (error) {
-    // Doğrulama yoksa null döndür
-    return null;
-  }
-}
+export const VERIFICATION_LIST_KEY = ['verification', 'list'] as const;
+export const VERIFICATION_ELIGIBILITY_KEY = ['verification', 'eligibility'] as const;
 
 /**
  * Doğrulama durumu hook'u
+ * GET /api/verifications -> returns latest verification
  */
 export function useVerificationStatus() {
   return useQuery({
     queryKey: VERIFICATION_STATUS_KEY,
-    queryFn: fetchVerificationStatus,
+    queryFn: () => verificationApi.getLatestVerification(),
     staleTime: 5 * 60 * 1000, // 5 dakika
     gcTime: 30 * 60 * 1000, // 30 dakika
+    retry: 1,
+  });
+}
+
+/**
+ * Tüm doğrulama listesi hook'u
+ * GET /api/verifications
+ */
+export function useVerificationList() {
+  return useQuery({
+    queryKey: VERIFICATION_LIST_KEY,
+    queryFn: () => verificationApi.getVerifications(),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: 1,
+  });
+}
+
+/**
+ * Meslek için doğrulama uygunluğu hook'u
+ * GET /api/verifications/check/{professionId}
+ */
+export function useVerificationEligibility(professionId: number | undefined) {
+  return useQuery({
+    queryKey: [...VERIFICATION_ELIGIBILITY_KEY, professionId] as const,
+    queryFn: () => verificationApi.checkEligibility(professionId!),
+    enabled: !!professionId,
+    staleTime: 60 * 1000, // 1 dakika
     retry: 1,
   });
 }
@@ -48,8 +63,11 @@ export function useIsVerified() {
 
   return {
     isVerified: status?.status === 'APPROVED',
-    isPending: status?.status === 'PENDING_REVIEW' || status?.status === 'MANUAL_REVIEW',
+    isPending: status?.status === 'PENDING' || status?.status === 'PROCESSING' || status?.status === 'MANUAL_REVIEW',
+    isRejected: status?.status === 'REJECTED',
     status: status?.status as VerificationStatus | undefined,
+    attemptCount: status?.attemptCount,
+    maxAttempts: status?.maxAttempts,
     isLoading,
   };
 }

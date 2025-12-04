@@ -1,7 +1,8 @@
 // src/features/verification/services/uploadService.ts
 // Doğrulama yükleme servisi - FormData, progress tracking, retry
-// Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
+// Backend API Reference: mobile-development-guide/core/14-BACKEND-API-REFERENCE.md
 
+/* eslint-disable no-console */
 import { apiClient } from '@core/api/client';
 import { API_ENDPOINTS } from '@core/api/endpoints';
 import type {
@@ -9,7 +10,9 @@ import type {
   VerificationResponse,
   UploadProgress,
   CapturedImage,
+  SubmitVerificationRequest,
 } from '../types';
+import { verificationApi } from './verificationApi';
 
 /**
  * Yükleme ayarları
@@ -17,7 +20,6 @@ import type {
 const UPLOAD_CONFIG = {
   maxRetries: 3,
   retryDelay: 2000, // ms
-  chunkSize: 1024 * 1024, // 1MB chunks (gelecekte chunked upload için)
   timeout: 60000, // 60 saniye
 };
 
@@ -27,78 +29,13 @@ const UPLOAD_CONFIG = {
 export const uploadService = {
   /**
    * Doğrulama belgelerini yükle
+   * @deprecated Use uploadAndSubmitVerification instead for proper S3 + API flow
    */
   async uploadVerification(
     data: VerificationData,
     onProgress?: (progress: UploadProgress) => void
   ): Promise<VerificationResponse> {
-    const formData = new FormData();
-
-    // Belge ön yüzünü ekle
-    if (data.documentFront) {
-      formData.append('documentFront', {
-        uri: data.documentFront.uri,
-        type: 'image/jpeg',
-        name: 'document_front.jpg',
-      } as unknown as Blob);
-    }
-
-    // Belge arka yüzünü ekle
-    if (data.documentBack) {
-      formData.append('documentBack', {
-        uri: data.documentBack.uri,
-        type: 'image/jpeg',
-        name: 'document_back.jpg',
-      } as unknown as Blob);
-    }
-
-    // Selfie'yi ekle
-    if (data.selfie) {
-      formData.append('selfie', {
-        uri: data.selfie.uri,
-        type: 'image/jpeg',
-        name: 'selfie.jpg',
-      } as unknown as Blob);
-    }
-
-    // Meta verileri ekle
-    formData.append('documentType', data.documentType);
-    if (data.professionId) {
-      formData.append('professionId', data.professionId);
-    }
-
-    try {
-      const response = await apiClient.post<{ data: VerificationResponse }>(
-        API_ENDPOINTS.VERIFICATION.UPLOAD,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-          timeout: UPLOAD_CONFIG.timeout,
-          onUploadProgress: (progressEvent) => {
-            if (progressEvent.total && onProgress) {
-              const percentage = Math.round(
-                (progressEvent.loaded * 100) / progressEvent.total
-              );
-
-              onProgress({
-                documentFront: percentage,
-                documentBack: percentage,
-                selfie: percentage,
-                total: percentage,
-                status: percentage < 100 ? 'uploading' : 'processing',
-              });
-            }
-          },
-        }
-      );
-
-      return response.data.data;
-    } catch (error) {
-      console.error('Upload verification error:', error);
-      throw error;
-    }
+    return this.uploadAndSubmitVerification(data, onProgress);
   },
 
   /**
@@ -110,7 +47,7 @@ export const uploadService = {
     retryCount = 0
   ): Promise<VerificationResponse> {
     try {
-      return await this.uploadVerification(data, onProgress);
+      return await this.uploadAndSubmitVerification(data, onProgress);
     } catch (error) {
       if (retryCount < UPLOAD_CONFIG.maxRetries) {
         console.log(`Upload retry attempt ${retryCount + 1}`);
@@ -128,17 +65,18 @@ export const uploadService = {
 
   /**
    * Tek görüntüyü yükle (presigned URL ile)
+   * Backend: POST /api/media/presigned-url -> PUT to S3
    */
   async uploadImage(
     image: CapturedImage,
-    type: 'document_front' | 'document_back' | 'selfie',
+    type: 'document' | 'selfie',
     onProgress?: (progress: number) => void
   ): Promise<string> {
-    // Presigned URL al
+    // Presigned URL al from media endpoint
     const { data: presignedData } = await apiClient.post<{
       data: { url: string; key: string };
-    }>(API_ENDPOINTS.VERIFICATION.PRESIGNED_URL, {
-      type,
+    }>(API_ENDPOINTS.MEDIA.PRESIGNED_URL, {
+      type: `verification_${type}`,
       contentType: 'image/jpeg',
     });
 
@@ -146,7 +84,7 @@ export const uploadService = {
     const response = await fetch(image.uri);
     const blob = await response.blob();
 
-    await fetch(presignedData.url, {
+    await fetch(presignedData.data.url, {
       method: 'PUT',
       body: blob,
       headers: {
@@ -158,43 +96,130 @@ export const uploadService = {
       onProgress(100);
     }
 
-    return presignedData.key;
+    // Return the S3 key/URL for verification submission
+    return presignedData.data.key;
   },
 
   /**
-   * Doğrulama durumunu sorgula
+   * Upload all verification images and submit verification
+   * 1. Upload document image to S3
+   * 2. Upload selfie image to S3
+   * 3. Submit verification with S3 URLs
    */
-  async checkStatus(verificationId: string): Promise<VerificationResponse> {
-    const response = await apiClient.get<{ data: VerificationResponse }>(
-      `${API_ENDPOINTS.VERIFICATION.STATUS}/${verificationId}`
+  async uploadAndSubmitVerification(
+    data: VerificationData,
+    onProgress?: (progress: UploadProgress) => void
+  ): Promise<VerificationResponse> {
+    if (!data.professionId) {
+      throw new Error('Profession ID is required');
+    }
+    if (!data.documentFront) {
+      throw new Error('Document image is required');
+    }
+    if (!data.selfie) {
+      throw new Error('Selfie image is required');
+    }
+
+    // Step 1: Upload document image
+    if (onProgress) {
+      onProgress({
+        documentFront: 0,
+        documentBack: 0,
+        selfie: 0,
+        total: 0,
+        status: 'uploading',
+      });
+    }
+
+    const documentUrl = await this.uploadImage(
+      data.documentFront,
+      'document',
+      (progress) => {
+        if (onProgress) {
+          onProgress({
+            documentFront: progress,
+            documentBack: 0,
+            selfie: 0,
+            total: Math.round(progress / 2),
+            status: 'uploading',
+          });
+        }
+      }
     );
 
-    return response.data.data;
+    // Step 2: Upload selfie image
+    const selfieUrl = await this.uploadImage(
+      data.selfie,
+      'selfie',
+      (progress) => {
+        if (onProgress) {
+          onProgress({
+            documentFront: 100,
+            documentBack: data.documentBack ? 0 : 100,
+            selfie: progress,
+            total: Math.round(50 + progress / 2),
+            status: 'uploading',
+          });
+        }
+      }
+    );
+
+    // Step 3: Submit verification
+    if (onProgress) {
+      onProgress({
+        documentFront: 100,
+        documentBack: 100,
+        selfie: 100,
+        total: 100,
+        status: 'processing',
+      });
+    }
+
+    const submitRequest: SubmitVerificationRequest = {
+      professionId: data.professionId,
+      documentUrl,
+      selfieUrl,
+    };
+
+    const response = await verificationApi.submit(submitRequest);
+
+    if (onProgress) {
+      onProgress({
+        documentFront: 100,
+        documentBack: 100,
+        selfie: 100,
+        total: 100,
+        status: 'completed',
+      });
+    }
+
+    return response;
   },
 
   /**
    * Doğrulama durumunu poll et
    */
   async pollStatus(
-    verificationId: string,
     onStatusChange: (response: VerificationResponse) => void,
     maxAttempts = 30,
     intervalMs = 2000
-  ): Promise<VerificationResponse> {
+  ): Promise<VerificationResponse | null> {
     let attempts = 0;
 
     while (attempts < maxAttempts) {
-      const response = await this.checkStatus(verificationId);
+      const response = await verificationApi.getLatestVerification();
 
-      onStatusChange(response);
+      if (response) {
+        onStatusChange(response);
 
-      // Eğer işlem tamamlandıysa döndür
-      if (
-        response.status === 'APPROVED' ||
-        response.status === 'REJECTED' ||
-        response.status === 'MANUAL_REVIEW'
-      ) {
-        return response;
+        // Eğer işlem tamamlandıysa döndür
+        if (
+          response.status === 'APPROVED' ||
+          response.status === 'REJECTED' ||
+          response.status === 'MANUAL_REVIEW'
+        ) {
+          return response;
+        }
       }
 
       attempts++;
@@ -202,15 +227,6 @@ export const uploadService = {
     }
 
     throw new Error('Doğrulama zaman aşımına uğradı');
-  },
-
-  /**
-   * Yüklemeyi iptal et
-   */
-  async cancelUpload(verificationId: string): Promise<void> {
-    await apiClient.delete(
-      `${API_ENDPOINTS.VERIFICATION.CANCEL}/${verificationId}`
-    );
   },
 
   /**

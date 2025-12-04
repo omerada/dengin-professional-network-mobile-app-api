@@ -1,15 +1,27 @@
 // __tests__/unit/auth/tokenService.test.ts
 // Oku: mobile-development-guide/testing/21-TESTING-STRATEGY.md
+// Oku: mobile-development-guide/features/03-AUTH-MODULE.md
 
 import { tokenService } from '../../../src/features/auth/services/tokenService';
-import { secureStorage } from '../../../src/core/storage/secureStorage';
+import { secureStorage, SECURE_KEYS } from '../../../src/core/storage';
 
 // Mock secure storage
-jest.mock('../../../src/core/storage/secureStorage', () => ({
+jest.mock('../../../src/core/storage', () => ({
   secureStorage: {
     get: jest.fn(),
     set: jest.fn().mockResolvedValue(true),
     remove: jest.fn().mockResolvedValue(true),
+  },
+  SECURE_KEYS: {
+    ACCESS_TOKEN: 'access_token',
+    REFRESH_TOKEN: 'refresh_token',
+  },
+}));
+
+// Mock authApi
+jest.mock('../../../src/features/auth/services/authApi', () => ({
+  authApi: {
+    refreshToken: jest.fn(),
   },
 }));
 
@@ -18,8 +30,30 @@ describe('TokenService', () => {
     jest.clearAllMocks();
   });
 
+  describe('saveTokens', () => {
+    it('should save tokens from AuthResponse format', async () => {
+      const authResponse = {
+        accessToken: 'access-123',
+        refreshToken: 'refresh-456',
+        expiresIn: 86400,
+        tokenType: 'Bearer' as const,
+        user: { id: 1, email: 'test@test.com' },
+      };
+
+      const result = await tokenService.saveTokens(authResponse);
+
+      expect(result).toBe(true);
+      expect(secureStorage.set).toHaveBeenCalledWith('access_token', 'access-123');
+      expect(secureStorage.set).toHaveBeenCalledWith('refresh_token', 'refresh-456');
+      expect(secureStorage.set).toHaveBeenCalledWith(
+        'token_expires_at',
+        expect.any(String),
+      );
+    });
+  });
+
   describe('getAccessToken', () => {
-    it('access token döndürmeli', async () => {
+    it('should return access token', async () => {
       const mockToken = 'access-token-123';
       (secureStorage.get as jest.Mock).mockResolvedValue(mockToken);
 
@@ -29,7 +63,7 @@ describe('TokenService', () => {
       expect(secureStorage.get).toHaveBeenCalledWith('access_token');
     });
 
-    it('token yoksa null döndürmeli', async () => {
+    it('should return null when token not found', async () => {
       (secureStorage.get as jest.Mock).mockResolvedValue(null);
 
       const token = await tokenService.getAccessToken();
@@ -39,7 +73,7 @@ describe('TokenService', () => {
   });
 
   describe('getRefreshToken', () => {
-    it('refresh token döndürmeli', async () => {
+    it('should return refresh token', async () => {
       const mockToken = 'refresh-token-123';
       (secureStorage.get as jest.Mock).mockResolvedValue(mockToken);
 
@@ -50,51 +84,71 @@ describe('TokenService', () => {
     });
   });
 
-  describe('setTokens', () => {
-    it('her iki token\'ı da kaydetmeli', async () => {
-      const accessToken = 'access-123';
-      const refreshToken = 'refresh-456';
+  describe('isTokenExpired', () => {
+    it('should return true when expiresAt not found', async () => {
+      (secureStorage.get as jest.Mock).mockResolvedValue(null);
 
-      await tokenService.setTokens(accessToken, refreshToken);
+      const isExpired = await tokenService.isTokenExpired();
 
-      expect(secureStorage.set).toHaveBeenCalledWith('access_token', accessToken);
-      expect(secureStorage.set).toHaveBeenCalledWith('refresh_token', refreshToken);
+      expect(isExpired).toBe(true);
+    });
+
+    it('should return true when token is expired', async () => {
+      // Set expiry to past
+      const pastTime = (Date.now() - 60000).toString();
+      (secureStorage.get as jest.Mock).mockResolvedValue(pastTime);
+
+      const isExpired = await tokenService.isTokenExpired();
+
+      expect(isExpired).toBe(true);
+    });
+
+    it('should return false when token is valid', async () => {
+      // Set expiry to future (2 minutes from now)
+      const futureTime = (Date.now() + 120000).toString();
+      (secureStorage.get as jest.Mock).mockResolvedValue(futureTime);
+
+      const isExpired = await tokenService.isTokenExpired();
+
+      expect(isExpired).toBe(false);
     });
   });
 
   describe('clearTokens', () => {
-    it('her iki token\'ı da silmeli', async () => {
-      await tokenService.clearTokens();
+    it('should remove all tokens', async () => {
+      const result = await tokenService.clearTokens();
 
+      expect(result).toBe(true);
       expect(secureStorage.remove).toHaveBeenCalledWith('access_token');
       expect(secureStorage.remove).toHaveBeenCalledWith('refresh_token');
+      expect(secureStorage.remove).toHaveBeenCalledWith('token_expires_at');
     });
   });
 
-  describe('hasValidToken', () => {
-    it('token varsa true döndürmeli', async () => {
+  describe('hasTokens', () => {
+    it('should return true when access token exists', async () => {
       (secureStorage.get as jest.Mock).mockResolvedValue('valid-token');
 
-      const hasToken = await tokenService.hasValidToken();
+      const hasTokens = await tokenService.hasTokens();
 
-      expect(hasToken).toBe(true);
+      expect(hasTokens).toBe(true);
     });
 
-    it('token yoksa false döndürmeli', async () => {
+    it('should return false when access token not found', async () => {
       (secureStorage.get as jest.Mock).mockResolvedValue(null);
 
-      const hasToken = await tokenService.hasValidToken();
+      const hasTokens = await tokenService.hasTokens();
 
-      expect(hasToken).toBe(false);
+      expect(hasTokens).toBe(false);
     });
   });
 
   describe('decodeToken', () => {
-    it('JWT token decode etmeli', () => {
-      // JWT structure: header.payload.signature
-      // This is a mock JWT with payload: { sub: "user123", exp: 9999999999 }
+    it('should decode JWT token payload', () => {
+      // Mock JWT: header.payload.signature
+      // Payload: { sub: "user123", exp: 9999999999, iat: 1234567890 }
       const mockJWT =
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwiZXhwIjo5OTk5OTk5OTk5fQ.signature';
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwiZXhwIjo5OTk5OTk5OTk5LCJpYXQiOjEyMzQ1Njc4OTB9.signature';
 
       const decoded = tokenService.decodeToken(mockJWT);
 
@@ -103,44 +157,46 @@ describe('TokenService', () => {
       expect(decoded?.exp).toBe(9999999999);
     });
 
-    it('geçersiz token için null döndürmeli', () => {
+    it('should return null for invalid token', () => {
       const decoded = tokenService.decodeToken('invalid-token');
 
       expect(decoded).toBeNull();
     });
 
-    it('null token için null döndürmeli', () => {
-      const decoded = tokenService.decodeToken(null as any);
+    it('should return null for empty token', () => {
+      const decoded = tokenService.decodeToken('');
 
       expect(decoded).toBeNull();
     });
   });
 
-  describe('isTokenExpired', () => {
-    it('expired token için true döndürmeli', () => {
-      // Token with exp in the past
-      const expiredJWT =
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwiZXhwIjoxfQ.signature';
+  describe('isTokenExpiringSoon', () => {
+    it('should return true when no expiry stored', async () => {
+      (secureStorage.get as jest.Mock).mockResolvedValue(null);
 
-      const isExpired = tokenService.isTokenExpired(expiredJWT);
+      const isExpiringSoon = await tokenService.isTokenExpiringSoon();
 
-      expect(isExpired).toBe(true);
+      expect(isExpiringSoon).toBe(true);
     });
 
-    it('geçerli token için false döndürmeli', () => {
-      // Token with exp far in the future
-      const validJWT =
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwiZXhwIjo5OTk5OTk5OTk5fQ.signature';
+    it('should return true when token expires within threshold', async () => {
+      // Expires in 1 minute (threshold is 5 minutes)
+      const soonTime = (Date.now() + 60000).toString();
+      (secureStorage.get as jest.Mock).mockResolvedValue(soonTime);
 
-      const isExpired = tokenService.isTokenExpired(validJWT);
+      const isExpiringSoon = await tokenService.isTokenExpiringSoon();
 
-      expect(isExpired).toBe(false);
+      expect(isExpiringSoon).toBe(true);
     });
 
-    it('null token için true döndürmeli', () => {
-      const isExpired = tokenService.isTokenExpired(null as any);
+    it('should return false when token has plenty of time', async () => {
+      // Expires in 1 hour
+      const laterTime = (Date.now() + 3600000).toString();
+      (secureStorage.get as jest.Mock).mockResolvedValue(laterTime);
 
-      expect(isExpired).toBe(true);
+      const isExpiringSoon = await tokenService.isTokenExpiringSoon();
+
+      expect(isExpiringSoon).toBe(false);
     });
   });
 });
