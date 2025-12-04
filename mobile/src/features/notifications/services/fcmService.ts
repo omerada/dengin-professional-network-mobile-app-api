@@ -1,9 +1,7 @@
 // src/features/notifications/services/fcmService.ts
-// Firebase Cloud Messaging service - Backend DeviceTokenController ile uyumlu
-// Backend: com.meslektas.notification.api.DeviceTokenController
-// Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
+// Firebase Cloud Messaging service - Stub implementation for Expo
+// Firebase'in managed Expo workflow ile uyumlu olmaması nedeniyle stub
 
-import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { Platform } from 'react-native';
 import { apiClient } from '@core/api/client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -18,55 +16,47 @@ const FCM_TOKEN_KEY = '@meslektas/fcm_token';
 const DEVICE_ID_KEY = '@meslektas/device_id';
 
 /**
- * FCM Servis sınıfı - Backend DeviceTokenController ile uyumlu
- * @see DeviceTokenController.java
+ * Remote Message tipi - Expo push notification formatına uygun
+ */
+export interface RemoteMessage {
+  messageId?: string;
+  notification?: {
+    title?: string;
+    body?: string;
+    imageUrl?: string;
+  };
+  data?: Record<string, string>;
+  sentTime?: number;
+}
+
+/**
+ * FCM Servis sınıfı - Stub implementation
+ * Expo'da gerçek Firebase yerine expo-notifications kullanılacak
  */
 class FCMService {
   private readonly DEVICE_API_PATH = '/api/v1/devices';
   private token: string | null = null;
+  private listeners: Map<string, (() => void)[]> = new Map();
 
   /**
-   * Bildirim izni iste
+   * Bildirim izni iste - stub
    */
   async requestPermission(): Promise<boolean> {
-    try {
-      const authStatus = await messaging().requestPermission();
-
-      const enabled =
-        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-      if (enabled) {
-        console.log('[FCM] Permission granted:', authStatus);
-      } else {
-        console.log('[FCM] Permission denied');
-      }
-
-      return enabled;
-    } catch (error) {
-      console.error('[FCM] Error requesting permission:', error);
-      return false;
-    }
+    console.log('[FCM Stub] requestPermission called');
+    // Gerçek implementasyonda expo-notifications kullanılacak
+    return true;
   }
 
   /**
-   * İzin durumunu kontrol et
+   * İzin durumunu kontrol et - stub
    */
   async checkPermission(): Promise<boolean> {
-    try {
-      const authStatus = await messaging().hasPermission();
-      return (
-        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-        authStatus === messaging.AuthorizationStatus.PROVISIONAL
-      );
-    } catch (error) {
-      console.error('[FCM] Error checking permission:', error);
-      return false;
-    }
+    console.log('[FCM Stub] checkPermission called');
+    return true;
   }
 
   /**
-   * FCM token al
+   * FCM token al - stub
    */
   async getToken(): Promise<string | null> {
     try {
@@ -82,17 +72,16 @@ class FCMService {
         return storedToken;
       }
 
-      // Request new token
-      const token = await messaging().getToken();
-      if (token) {
-        this.token = token;
-        await AsyncStorage.setItem(FCM_TOKEN_KEY, token);
-        console.log('[FCM] Token received:', token.substring(0, 20) + '...');
-      }
+      // Generate a placeholder token for development
+      const deviceId = await this.getDeviceId();
+      const token = `expo-push-token-${deviceId}`;
+      this.token = token;
+      await AsyncStorage.setItem(FCM_TOKEN_KEY, token);
+      console.log('[FCM Stub] Token generated:', token.substring(0, 20) + '...');
 
       return token;
     } catch (error) {
-      console.error('[FCM] Error getting token:', error);
+      console.error('[FCM Stub] Error getting token:', error);
       return null;
     }
   }
@@ -127,7 +116,7 @@ class FCMService {
       request,
     );
 
-    console.log('[FCM] Device registered successfully');
+    console.log('[FCM Stub] Device registered successfully');
     return response.data;
   }
 
@@ -139,7 +128,7 @@ class FCMService {
     const request: UnregisterDeviceRequest = { token };
 
     await apiClient.post(`${this.DEVICE_API_PATH}/unregister`, request);
-    console.log('[FCM] Device unregistered successfully');
+    console.log('[FCM Stub] Device unregistered successfully');
   }
 
   /**
@@ -148,18 +137,17 @@ class FCMService {
    */
   async unregisterAllDevices(): Promise<void> {
     await apiClient.post(`${this.DEVICE_API_PATH}/unregister-all`);
-    console.log('[FCM] All devices unregistered');
+    console.log('[FCM Stub] All devices unregistered');
   }
 
   /**
-   * Token'ı sunucuya gönder (eski API uyumluluğu için)
-   * @deprecated registerDevice kullanın
+   * Token'ı sunucuya gönder
    */
   async sendTokenToServer(token: string): Promise<void> {
     try {
       await this.registerDevice(token);
     } catch (error) {
-      console.error('[FCM] Error sending token to server:', error);
+      console.error('[FCM Stub] Error sending token to server:', error);
       throw error;
     }
   }
@@ -174,7 +162,7 @@ class FCMService {
         await this.unregisterDevice(token);
       }
     } catch (error) {
-      console.error('[FCM] Error removing token from server:', error);
+      console.error('[FCM Stub] Error removing token from server:', error);
     }
   }
 
@@ -185,86 +173,67 @@ class FCMService {
     try {
       await this.unregisterAllDevices();
     } catch (error) {
-      console.error('[FCM] Error removing all tokens from server:', error);
+      console.error('[FCM Stub] Error removing all tokens from server:', error);
     }
   }
 
   /**
-   * Token yenilenme dinleyicisi kur
+   * Token yenilenme dinleyicisi kur - stub
    */
   setupTokenRefreshListener(onRefresh: (token: string) => void): () => void {
-    const unsubscribe = messaging().onTokenRefresh(async newToken => {
-      console.log('[FCM] Token refreshed');
-      this.token = newToken;
-      await AsyncStorage.setItem(FCM_TOKEN_KEY, newToken);
-
-      try {
-        await this.sendTokenToServer(newToken);
-        onRefresh(newToken);
-      } catch (error) {
-        console.error('[FCM] Error handling token refresh:', error);
-      }
-    });
-
-    return unsubscribe;
+    console.log('[FCM Stub] setupTokenRefreshListener called');
+    return () => {
+      console.log('[FCM Stub] Token refresh listener removed');
+    };
   }
 
   /**
-   * Ön plan bildirimi dinleyicisi
+   * Ön plan bildirimi dinleyicisi - stub
    */
-  onForegroundMessage(
-    handler: (message: FirebaseMessagingTypes.RemoteMessage) => void,
-  ): () => void {
-    return messaging().onMessage(handler);
+  onForegroundMessage(handler: (message: RemoteMessage) => void): () => void {
+    console.log('[FCM Stub] onForegroundMessage listener added');
+    return () => {
+      console.log('[FCM Stub] Foreground message listener removed');
+    };
   }
 
   /**
-   * Arka plan bildirimi tıklama dinleyicisi
+   * Arka plan bildirimi tıklama dinleyicisi - stub
    */
-  onNotificationOpenedApp(
-    handler: (message: FirebaseMessagingTypes.RemoteMessage) => void,
-  ): () => void {
-    return messaging().onNotificationOpenedApp(handler);
+  onNotificationOpenedApp(handler: (message: RemoteMessage) => void): () => void {
+    console.log('[FCM Stub] onNotificationOpenedApp listener added');
+    return () => {
+      console.log('[FCM Stub] Notification opened listener removed');
+    };
   }
 
   /**
-   * Uygulama kapalıyken açılan bildirim
+   * Uygulama kapalıyken açılan bildirim - stub
    */
-  async getInitialNotification(): Promise<FirebaseMessagingTypes.RemoteMessage | null> {
-    return messaging().getInitialNotification();
+  async getInitialNotification(): Promise<RemoteMessage | null> {
+    console.log('[FCM Stub] getInitialNotification called');
+    return null;
   }
 
   /**
-   * Arka plan mesaj işleyicisi ayarla
+   * Arka plan mesaj işleyicisi ayarla - stub
    */
-  setBackgroundMessageHandler(
-    handler: (message: FirebaseMessagingTypes.RemoteMessage) => Promise<void>,
-  ): void {
-    messaging().setBackgroundMessageHandler(handler);
+  setBackgroundMessageHandler(handler: (message: RemoteMessage) => Promise<void>): void {
+    console.log('[FCM Stub] setBackgroundMessageHandler called');
   }
 
   /**
-   * Belirli bir konuya abone ol
+   * Belirli bir konuya abone ol - stub
    */
   async subscribeToTopic(topic: string): Promise<void> {
-    try {
-      await messaging().subscribeToTopic(topic);
-      console.log(`[FCM] Subscribed to topic: ${topic}`);
-    } catch (error) {
-      console.error(`[FCM] Error subscribing to topic ${topic}:`, error);
-    }
+    console.log(`[FCM Stub] subscribeToTopic: ${topic}`);
   }
 
   /**
-   * Belirli bir konudan aboneliği kaldır
+   * Belirli bir konudan aboneliği kaldır - stub
    */
   async unsubscribeFromTopic(topic: string): Promise<void> {
-    try {
-      await messaging().unsubscribeFromTopic(topic);
-      console.log(`[FCM] Unsubscribed from topic: ${topic}`);
-    } catch (error) {
-      console.error(`[FCM] Error unsubscribing from topic ${topic}:`, error);
-    }
+    console.log(`[FCM Stub] unsubscribeFromTopic: ${topic}`);
   }
 
   /**
@@ -272,23 +241,22 @@ class FCMService {
    */
   async clearToken(): Promise<void> {
     try {
-      await messaging().deleteToken();
       await AsyncStorage.removeItem(FCM_TOKEN_KEY);
       this.token = null;
-      console.log('[FCM] Token cleared');
+      console.log('[FCM Stub] Token cleared');
     } catch (error) {
-      console.error('[FCM] Error clearing token:', error);
+      console.error('[FCM Stub] Error clearing token:', error);
     }
   }
 
   /**
-   * Cihaz ID'si al (basit implementasyon)
+   * Cihaz ID'si al
    */
   private async getDeviceId(): Promise<string> {
-    let deviceId = await AsyncStorage.getItem('@meslektas/device_id');
+    let deviceId = await AsyncStorage.getItem(DEVICE_ID_KEY);
     if (!deviceId) {
       deviceId = `${Platform.OS}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      await AsyncStorage.setItem('@meslektas/device_id', deviceId);
+      await AsyncStorage.setItem(DEVICE_ID_KEY, deviceId);
     }
     return deviceId;
   }

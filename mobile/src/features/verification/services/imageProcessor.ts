@@ -2,14 +2,10 @@
 // Görüntü işleme servisi - sıkıştırma, doğrulama, kırpma
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
-import ImageResizer from 'react-native-image-resizer';
+import * as FileSystem from 'expo-file-system';
+import * as ImageManipulator from 'expo-image-manipulator';
 import { Image as RNImage } from 'react-native';
-import RNFS from 'react-native-fs';
-import type {
-  CapturedImage,
-  ImageValidationResult,
-  ImageValidationError,
-} from '../types';
+import type { CapturedImage, ImageValidationResult, ImageValidationError } from '../types';
 
 /**
  * Görüntü işleme ayarları
@@ -37,26 +33,22 @@ export const imageProcessor = {
    */
   async compress(uri: string): Promise<CapturedImage> {
     try {
-      const result = await ImageResizer.createResizedImage(
+      const result = await ImageManipulator.manipulateAsync(
         uri,
-        IMAGE_CONFIG.maxWidth,
-        IMAGE_CONFIG.maxHeight,
-        IMAGE_CONFIG.format,
-        IMAGE_CONFIG.quality,
-        IMAGE_CONFIG.rotation,
-        undefined,
-        false,
-        { mode: 'contain' }
+        [{ resize: { width: IMAGE_CONFIG.maxWidth, height: IMAGE_CONFIG.maxHeight } }],
+        { compress: IMAGE_CONFIG.quality / 100, format: ImageManipulator.SaveFormat.JPEG },
       );
+
+      const fileInfo = await FileSystem.getInfoAsync(result.uri);
 
       return {
         uri: result.uri,
-        path: result.path,
+        path: result.uri.replace('file://', ''),
         width: result.width,
         height: result.height,
         type: 'front',
         capturedAt: new Date().toISOString(),
-        fileSize: result.size,
+        fileSize: fileInfo.exists && 'size' in fileInfo ? fileInfo.size : 0,
       };
     } catch (error) {
       console.error('Image compression error:', error);
@@ -79,10 +71,7 @@ export const imageProcessor = {
 
       // Çözünürlüğü kontrol et
       const resolution = await this.getResolution(uri);
-      if (
-        resolution.width < IMAGE_CONFIG.minWidth ||
-        resolution.height < IMAGE_CONFIG.minHeight
-      ) {
+      if (resolution.width < IMAGE_CONFIG.minWidth || resolution.height < IMAGE_CONFIG.minHeight) {
         errors.push('TOO_SMALL');
       }
 
@@ -127,9 +116,8 @@ export const imageProcessor = {
    */
   async getFileSize(uri: string): Promise<number> {
     try {
-      const path = uri.replace('file://', '');
-      const stat = await RNFS.stat(path);
-      return stat.size;
+      const fileInfo = await FileSystem.getInfoAsync(uri);
+      return fileInfo.exists && 'size' in fileInfo ? fileInfo.size : 0;
     } catch {
       return 0;
     }
@@ -139,11 +127,11 @@ export const imageProcessor = {
    * Görüntü çözünürlüğünü getir
    */
   getResolution(uri: string): Promise<{ width: number; height: number }> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       RNImage.getSize(
         uri,
         (width, height) => resolve({ width, height }),
-        () => resolve({ width: 0, height: 0 })
+        () => resolve({ width: 0, height: 0 }),
       );
     });
   },
@@ -176,32 +164,25 @@ export const imageProcessor = {
     x: number,
     y: number,
     width: number,
-    height: number
+    height: number,
   ): Promise<CapturedImage> {
     try {
-      const result = await ImageResizer.createResizedImage(
+      const result = await ImageManipulator.manipulateAsync(
         uri,
-        width,
-        height,
-        IMAGE_CONFIG.format,
-        IMAGE_CONFIG.quality,
-        0,
-        undefined,
-        false,
-        {
-          mode: 'cover',
-          onlyScaleDown: false,
-        }
+        [{ crop: { originX: x, originY: y, width, height } }],
+        { compress: IMAGE_CONFIG.quality / 100, format: ImageManipulator.SaveFormat.JPEG },
       );
+
+      const fileInfo = await FileSystem.getInfoAsync(result.uri);
 
       return {
         uri: result.uri,
-        path: result.path,
+        path: result.uri.replace('file://', ''),
         width: result.width,
         height: result.height,
         type: 'front',
         capturedAt: new Date().toISOString(),
-        fileSize: result.size,
+        fileSize: fileInfo.exists && 'size' in fileInfo ? fileInfo.size : 0,
       };
     } catch (error) {
       console.error('Image crop error:', error);
@@ -214,26 +195,21 @@ export const imageProcessor = {
    */
   async rotate(uri: string, degrees: number): Promise<CapturedImage> {
     try {
-      const resolution = await this.getResolution(uri);
-      const result = await ImageResizer.createResizedImage(
-        uri,
-        resolution.width,
-        resolution.height,
-        IMAGE_CONFIG.format,
-        IMAGE_CONFIG.quality,
-        degrees,
-        undefined,
-        false
-      );
+      const result = await ImageManipulator.manipulateAsync(uri, [{ rotate: degrees }], {
+        compress: IMAGE_CONFIG.quality / 100,
+        format: ImageManipulator.SaveFormat.JPEG,
+      });
+
+      const fileInfo = await FileSystem.getInfoAsync(result.uri);
 
       return {
         uri: result.uri,
-        path: result.path,
+        path: result.uri.replace('file://', ''),
         width: result.width,
         height: result.height,
         type: 'front',
         capturedAt: new Date().toISOString(),
-        fileSize: result.size,
+        fileSize: fileInfo.exists && 'size' in fileInfo ? fileInfo.size : 0,
       };
     } catch (error) {
       console.error('Image rotation error:', error);
@@ -246,8 +222,9 @@ export const imageProcessor = {
    */
   async toBase64(uri: string): Promise<string> {
     try {
-      const path = uri.replace('file://', '');
-      return await RNFS.readFile(path, 'base64');
+      return await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
     } catch (error) {
       console.error('Base64 conversion error:', error);
       throw new Error('Görüntü dönüştürülemedi');
@@ -259,10 +236,9 @@ export const imageProcessor = {
    */
   async deleteTemp(uri: string): Promise<void> {
     try {
-      const path = uri.replace('file://', '');
-      const exists = await RNFS.exists(path);
-      if (exists) {
-        await RNFS.unlink(path);
+      const fileInfo = await FileSystem.getInfoAsync(uri);
+      if (fileInfo.exists) {
+        await FileSystem.deleteAsync(uri);
       }
     } catch (error) {
       console.error('Delete temp file error:', error);

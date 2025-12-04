@@ -1,9 +1,8 @@
 // src/shared/services/analytics.ts
-// Firebase Analytics integration
+// Analytics stub for Expo managed workflow
+// TODO: Implement with expo-firebase-analytics or similar when needed
 // Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
 
-import analytics from '@react-native-firebase/analytics';
-import crashlytics from '@react-native-firebase/crashlytics';
 import { Platform } from 'react-native';
 
 /**
@@ -106,7 +105,8 @@ export interface UserProperties {
 }
 
 /**
- * Analytics service class
+ * Analytics service - Stub implementation for Expo
+ * Replace with real implementation when using EAS Build
  */
 class AnalyticsService {
   private isEnabled: boolean = true;
@@ -117,8 +117,9 @@ class AnalyticsService {
    */
   async setEnabled(enabled: boolean): Promise<void> {
     this.isEnabled = enabled;
-    await analytics().setAnalyticsCollectionEnabled(enabled);
-    await crashlytics().setCrashlyticsCollectionEnabled(enabled);
+    if (__DEV__) {
+      console.log(`[Analytics] Collection ${enabled ? 'enabled' : 'disabled'}`);
+    }
   }
 
   /**
@@ -126,12 +127,8 @@ class AnalyticsService {
    */
   async setUserId(userId: string | null): Promise<void> {
     this.userId = userId;
-
-    if (userId) {
-      await analytics().setUserId(userId);
-      await crashlytics().setUserId(userId);
-    } else {
-      await analytics().setUserId(null);
+    if (__DEV__) {
+      console.log(`[Analytics] User ID set: ${userId}`);
     }
   }
 
@@ -140,109 +137,88 @@ class AnalyticsService {
    */
   async setUserProperties(properties: UserProperties): Promise<void> {
     if (!this.isEnabled) return;
-
-    const analyticsProperties: Record<string, string | null> = {};
-
-    if (properties.userId) {
-      analyticsProperties.user_id = properties.userId;
-    }
-    if (properties.isVerified !== undefined) {
-      analyticsProperties.is_verified = properties.isVerified ? 'true' : 'false';
-    }
-    if (properties.profession) {
-      analyticsProperties.profession = properties.profession;
-    }
-    if (properties.accountAge !== undefined) {
-      analyticsProperties.account_age_days = properties.accountAge.toString();
-    }
-    if (properties.platform) {
-      analyticsProperties.platform = properties.platform;
-    }
-
-    await analytics().setUserProperties(analyticsProperties);
-
-    // Also set in Crashlytics
-    if (properties.isVerified !== undefined) {
-      await crashlytics().setAttribute(
-        'is_verified',
-        properties.isVerified ? 'true' : 'false'
-      );
-    }
-    if (properties.profession) {
-      await crashlytics().setAttribute('profession', properties.profession);
+    if (__DEV__) {
+      console.log('[Analytics] User properties:', properties);
     }
   }
 
   /**
    * Log screen view
    */
-  async logScreenView(
-    screenName: AnalyticsScreen | string,
-    screenClass?: string
-  ): Promise<void> {
+  async logScreenView(screenName: AnalyticsScreen | string, screenClass?: string): Promise<void> {
     if (!this.isEnabled) return;
-
-    try {
-      await analytics().logScreenView({
-        screen_name: screenName,
-        screen_class: screenClass ?? screenName,
-      });
-
-      if (__DEV__) {
-        console.log(`[Analytics] Screen: ${screenName}`);
-      }
-    } catch (error) {
-      this.logError(error as Error, { context: 'logScreenView', screenName });
+    if (__DEV__) {
+      console.log(`[Analytics] Screen: ${screenName}`);
     }
   }
 
   /**
    * Log custom event
    */
-  async logEvent(
-    eventName: AnalyticsEvent | string,
-    params?: Record<string, any>
-  ): Promise<void> {
+  async logEvent(eventName: AnalyticsEvent | string, params?: Record<string, any>): Promise<void> {
     if (!this.isEnabled) return;
+    if (__DEV__) {
+      console.log(`[Analytics] Event: ${eventName}`, params);
+    }
+  }
 
-    try {
-      const sanitizedParams = this.sanitizeParams(params);
-      await analytics().logEvent(eventName, sanitizedParams);
+  /**
+   * Log error to crashlytics
+   */
+  logError(error: Error, context?: Record<string, any>): void {
+    if (__DEV__) {
+      console.error('[Analytics] Error:', error.message, context);
+    }
+  }
 
-      if (__DEV__) {
-        console.log(`[Analytics] Event: ${eventName}`, sanitizedParams);
-      }
-    } catch (error) {
-      this.logError(error as Error, { context: 'logEvent', eventName });
+  /**
+   * Log message to crashlytics
+   */
+  log(message: string): void {
+    if (__DEV__) {
+      console.log(`[Analytics] Log: ${message}`);
+    }
+  }
+
+  /**
+   * Record a non-fatal error
+   */
+  recordError(error: Error, jsErrorName?: string): void {
+    if (__DEV__) {
+      console.error('[Analytics] Recorded error:', error.message);
+    }
+  }
+
+  /**
+   * Set custom key for crashlytics
+   */
+  async setAttribute(key: string, value: string): Promise<void> {
+    if (__DEV__) {
+      console.log(`[Analytics] Attribute: ${key} = ${value}`);
     }
   }
 
   /**
    * Log login event
    */
-  async logLogin(method: 'email' | 'biometric' | 'social'): Promise<void> {
-    await analytics().logLogin({ method });
+  async logLogin(method: string): Promise<void> {
+    await this.logEvent(AnalyticsEvent.LOGIN, { method });
   }
 
   /**
-   * Log sign up event
+   * Log signup event
    */
-  async logSignUp(method: 'email' | 'social'): Promise<void> {
-    await analytics().logSignUp({ method });
+  async logSignUp(method: string): Promise<void> {
+    await this.logEvent(AnalyticsEvent.SIGN_UP, { method });
   }
 
   /**
    * Log share event
    */
-  async logShare(
-    contentType: string,
-    itemId: string,
-    method?: string
-  ): Promise<void> {
-    await analytics().logShare({
+  async logShare(contentType: string, itemId: string): Promise<void> {
+    await this.logEvent(AnalyticsEvent.POST_SHARED, {
       content_type: contentType,
       item_id: itemId,
-      method: method ?? Platform.OS,
     });
   }
 
@@ -250,116 +226,30 @@ class AnalyticsService {
    * Log search event
    */
   async logSearch(searchTerm: string): Promise<void> {
-    await analytics().logSearch({ search_term: searchTerm });
-  }
-
-  /**
-   * Log error to Crashlytics
-   */
-  logError(
-    error: Error,
-    context?: Record<string, any>,
-    isFatal: boolean = false
-  ): void {
-    try {
-      // Set context attributes
-      if (context) {
-        Object.entries(context).forEach(([key, value]) => {
-          crashlytics().setAttribute(key, String(value));
-        });
-      }
-
-      // Record error
-      crashlytics().recordError(error);
-
-      // Also log to analytics
-      this.logEvent(AnalyticsEvent.ERROR_OCCURRED, {
-        error_message: error.message,
-        error_name: error.name,
-        is_fatal: isFatal,
-        ...context,
-      });
-
-      if (__DEV__) {
-        console.error('[Analytics] Error:', error.message, context);
-      }
-    } catch (e) {
-      console.error('[Analytics] Failed to log error:', e);
-    }
-  }
-
-  /**
-   * Log a custom key-value pair to Crashlytics
-   */
-  async setCustomKey(key: string, value: string | number | boolean): Promise<void> {
-    await crashlytics().setAttribute(key, String(value));
-  }
-
-  /**
-   * Log a message to Crashlytics
-   */
-  log(message: string): void {
-    crashlytics().log(message);
-  }
-
-  /**
-   * Sanitize params for analytics
-   * Firebase has limits on param names and values
-   */
-  private sanitizeParams(
-    params?: Record<string, any>
-  ): Record<string, any> | undefined {
-    if (!params) return undefined;
-
-    const sanitized: Record<string, any> = {};
-
-    Object.entries(params).forEach(([key, value]) => {
-      // Limit key length to 40 characters
-      const sanitizedKey = key.substring(0, 40);
-
-      // Handle different value types
-      if (value === null || value === undefined) {
-        sanitized[sanitizedKey] = 'null';
-      } else if (typeof value === 'string') {
-        // Limit string values to 100 characters
-        sanitized[sanitizedKey] = value.substring(0, 100);
-      } else if (typeof value === 'number' || typeof value === 'boolean') {
-        sanitized[sanitizedKey] = value;
-      } else if (typeof value === 'object') {
-        // Convert objects to JSON string (limited)
-        sanitized[sanitizedKey] = JSON.stringify(value).substring(0, 100);
-      } else {
-        sanitized[sanitizedKey] = String(value).substring(0, 100);
-      }
+    await this.logEvent(AnalyticsEvent.SEARCH_PERFORMED, {
+      search_term: searchTerm,
     });
-
-    return sanitized;
-  }
-
-  /**
-   * Reset analytics data (for logout)
-   */
-  async reset(): Promise<void> {
-    this.userId = null;
-    await analytics().resetAnalyticsData();
   }
 }
 
 // Export singleton instance
-export const Analytics = new AnalyticsService();
+export const analyticsService = new AnalyticsService();
 
 /**
- * Hook for screen tracking
+ * React hook for screen tracking
  */
-export function useScreenTracking(screenName: AnalyticsScreen | string) {
-  const { useEffect } = require('react');
-  const { useIsFocused } = require('@react-navigation/native');
+export const useScreenTracking = (screenName: AnalyticsScreen | string) => {
+  // Lazy require to avoid import issues
+  const React = require('react');
+  const Navigation = require('@react-navigation/native');
 
-  const isFocused = useIsFocused();
+  const isFocused = Navigation.useIsFocused();
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (isFocused) {
-      Analytics.logScreenView(screenName);
+      analyticsService.logScreenView(screenName);
     }
   }, [isFocused, screenName]);
-}
+};
+
+export default analyticsService;

@@ -1,4 +1,21 @@
 {
-  "name": "MeslektasApp",
-  "displayName": "Meslektaş"
+  "expo": {
+    "name": "Meslektaş",
+    "slug": "meslektas",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.meslektas.app"
+    },
+    "android": {
+      "package": "com.meslektas.app"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": ["expo-secure-store"]
+  }
 }

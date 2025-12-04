@@ -3,8 +3,26 @@
 // Backend: Spring WebSocket + STOMP protokolü
 // Oku: backend-development-guide/infrastructure/18-WEBSOCKET-SETUP.md
 
-import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
+import { Platform } from 'react-native';
 import SockJS from 'sockjs-client';
+
+// Dynamic import for web compatibility
+let Client: any;
+let IMessage: any;
+let StompSubscription: any;
+
+if (Platform.OS !== 'web') {
+  const stomp = require('@stomp/stompjs');
+  Client = stomp.Client;
+  IMessage = stomp.IMessage;
+  StompSubscription = stomp.StompSubscription;
+} else {
+  // For web, use UMD bundle
+  const stomp = require('@stomp/stompjs/bundles/stomp.umd.js');
+  Client = stomp.Client;
+  IMessage = stomp.IMessage;
+  StompSubscription = stomp.StompSubscription;
+}
 import { ENV } from '@config/env';
 import { tokenService } from '@features/auth/services';
 import { useMessagingStore } from '../stores';

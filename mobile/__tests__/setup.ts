@@ -22,9 +22,6 @@ jest.mock('zustand/middleware/immer', () => ({
   },
 }));
 
-// Mock React Native modules
-jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper');
-
 // Mock ThemeContext to avoid async loading issues
 jest.mock('../src/contexts/ThemeContext', () => {
   const React = require('react');
@@ -57,11 +54,51 @@ jest.mock('react-native-config', () => ({
 }));
 
 // Mock react-native-reanimated
-jest.mock('react-native-reanimated', () => {
-  const Reanimated = require('react-native-reanimated/mock');
-  Reanimated.default.call = () => {};
-  return Reanimated;
-});
+jest.mock('react-native-reanimated', () => ({
+  useAnimatedRef: jest.fn(),
+  useAnimatedStyle: jest.fn(() => ({})),
+  useDerivedValue: jest.fn((fn: () => any) => ({ value: fn() })),
+  useAnimatedScrollHandler: jest.fn(),
+  useSharedValue: jest.fn((val: any) => ({ value: val })),
+  useAnimatedGestureHandler: jest.fn(),
+  withTiming: jest.fn((val: any) => val),
+  withSpring: jest.fn((val: any) => val),
+  withDelay: jest.fn((delay: number, val: any) => val),
+  withSequence: jest.fn((...vals: any[]) => vals[0]),
+  withRepeat: jest.fn((val: any) => val),
+  cancelAnimation: jest.fn(),
+  runOnJS: jest.fn((fn: Function) => fn),
+  runOnUI: jest.fn((fn: Function) => fn),
+  interpolate: jest.fn(),
+  interpolateColor: jest.fn(),
+  Extrapolate: { CLAMP: 'clamp', EXTEND: 'extend', IDENTITY: 'identity' },
+  createAnimatedComponent: (component: any) => component,
+  View: require('react-native').View,
+  Text: require('react-native').Text,
+  Image: require('react-native').Image,
+  ScrollView: require('react-native').ScrollView,
+  FlatList: require('react-native').FlatList,
+  Layout: {},
+  FadeIn: {},
+  FadeOut: {},
+  SlideInRight: {},
+  SlideOutRight: {},
+  default: {
+    call: jest.fn(),
+    createAnimatedComponent: (component: any) => component,
+    useAnimatedStyle: jest.fn(() => ({})),
+    useSharedValue: jest.fn((val: any) => ({ value: val })),
+  },
+}));
+
+jest.mock('react-native-worklets', () => ({
+  __esModule: true,
+  default: {},
+  useWorklet: jest.fn(),
+  createWorklet: jest.fn(),
+  runOnJS: jest.fn((fn: Function) => fn),
+  runOnUI: jest.fn((fn: Function) => fn),
+}));
 
 // Mock react-native-gesture-handler
 jest.mock('react-native-gesture-handler', () => {

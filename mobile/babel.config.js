@@ -1,6 +1,7 @@
-module.exports = {
-  presets: ['module:@react-native/babel-preset'],
-  plugins: [
+module.exports = function (api) {
+  api.cache(true);
+
+  const plugins = [
     [
       'module-resolver',
       {
@@ -17,6 +18,15 @@ module.exports = {
         },
       },
     ],
-    'react-native-reanimated/plugin',
-  ],
+  ];
+
+  // Only add reanimated plugin in non-test environment
+  if (process.env.NODE_ENV !== 'test') {
+    plugins.push('react-native-reanimated/plugin');
+  }
+
+  return {
+    presets: ['babel-preset-expo'],
+    plugins,
+  };
 };

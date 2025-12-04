@@ -3,8 +3,26 @@
 // Oku: mobile-development-guide/core/13-REAL-TIME.md
 // Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
 
+import { Platform } from 'react-native';
 import SockJS from 'sockjs-client';
-import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
+
+// Dynamic import for web compatibility
+let Client: any;
+let IMessage: any;
+let StompSubscription: any;
+
+if (Platform.OS !== 'web') {
+  const stomp = require('@stomp/stompjs');
+  Client = stomp.Client;
+  IMessage = stomp.IMessage;
+  StompSubscription = stomp.StompSubscription;
+} else {
+  // For web, use UMD bundle
+  const stomp = require('@stomp/stompjs/bundles/stomp.umd.js');
+  Client = stomp.Client;
+  IMessage = stomp.IMessage;
+  StompSubscription = stomp.StompSubscription;
+}
 import { ENV } from '@config/env';
 import { tokenService } from '@features/auth/services';
 import { messageQueue } from './messageQueue';
@@ -87,9 +105,10 @@ class StompClient {
       reconnectDelay: config?.reconnectDelay ?? 5000,
 
       // Debug logging (only in development)
-      debug: config?.debug !== false && __DEV__
-        ? (str: string) => console.log('[STOMP]', str)
-        : () => {},
+      debug:
+        config?.debug !== false && __DEV__
+          ? (str: string) => console.log('[STOMP]', str)
+          : () => {},
 
       // Connection lifecycle callbacks
       onConnect: this.handleConnect.bind(this),
@@ -107,7 +126,7 @@ class StompClient {
   disconnect(): void {
     if (this.client) {
       // Unsubscribe all
-      this.subscriptions.forEach((sub) => sub.unsubscribe());
+      this.subscriptions.forEach(sub => sub.unsubscribe());
       this.subscriptions.clear();
 
       this.client.deactivate();
@@ -194,10 +213,7 @@ class StompClient {
     });
   }
 
-  private subscribe(
-    destination: string,
-    callback: (message: IMessage) => void,
-  ): void {
+  private subscribe(destination: string, callback: (message: IMessage) => void): void {
     if (!this.client?.connected) {
       console.warn('[STOMP] Cannot subscribe, not connected');
       return;
@@ -213,7 +229,9 @@ class StompClient {
    * Send a chat message
    * @returns true if sent via WebSocket, false if queued
    */
-  sendMessage(request: WsSendMessageRequest & { conversationId: string; clientMessageId: string }): boolean {
+  sendMessage(
+    request: WsSendMessageRequest & { conversationId: string; clientMessageId: string },
+  ): boolean {
     if (this.client?.connected) {
       this.publish(DESTINATIONS.SEND_MESSAGE, request);
       return true;
@@ -314,7 +332,7 @@ class StompClient {
   private emit(event: SocketEventType, data: unknown): void {
     const handlers = this.eventHandlers.get(event);
     if (handlers) {
-      handlers.forEach((handler) => {
+      handlers.forEach(handler => {
         try {
           handler(data);
         } catch (error) {

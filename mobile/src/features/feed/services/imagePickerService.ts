@@ -1,10 +1,23 @@
 // src/features/feed/services/imagePickerService.ts
-// Image picker servisi
+// Image picker servisi - Web compatible
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
-import { launchImageLibrary, launchCamera, ImagePickerResponse, Asset } from 'react-native-image-picker';
 import { Platform, PermissionsAndroid, Alert, Linking } from 'react-native';
 import type { LocalImage, ImagePickerOptions } from '../types';
+
+// Native modülü dinamik olarak yükle
+let launchImageLibrary: any = null;
+let launchCamera: any = null;
+
+if (Platform.OS !== 'web') {
+  try {
+    const imagePicker = require('react-native-image-picker');
+    launchImageLibrary = imagePicker.launchImageLibrary;
+    launchCamera = imagePicker.launchCamera;
+  } catch (e) {
+    console.log('[ImagePickerService] Native module not available');
+  }
+}
 
 /**
  * Galeri izni iste (Android)
@@ -24,7 +37,7 @@ async function requestGalleryPermission(): Promise<boolean> {
           message: 'Görsellere erişmek için galeri izni gereklidir.',
           buttonPositive: 'İzin Ver',
           buttonNegative: 'İptal',
-        }
+        },
       );
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     }
@@ -37,7 +50,7 @@ async function requestGalleryPermission(): Promise<boolean> {
         message: 'Görsellere erişmek için galeri izni gereklidir.',
         buttonPositive: 'İzin Ver',
         buttonNegative: 'İptal',
-      }
+      },
     );
     return granted === PermissionsAndroid.RESULTS.GRANTED;
   } catch {
@@ -55,15 +68,12 @@ async function requestCameraPermission(): Promise<boolean> {
   }
 
   try {
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.CAMERA,
-      {
-        title: 'Kamera İzni',
-        message: 'Fotoğraf çekmek için kamera izni gereklidir.',
-        buttonPositive: 'İzin Ver',
-        buttonNegative: 'İptal',
-      }
-    );
+    const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA, {
+      title: 'Kamera İzni',
+      message: 'Fotoğraf çekmek için kamera izni gereklidir.',
+      buttonPositive: 'İzin Ver',
+      buttonNegative: 'İptal',
+    });
     return granted === PermissionsAndroid.RESULTS.GRANTED;
   } catch {
     // Camera permission error
@@ -74,7 +84,7 @@ async function requestCameraPermission(): Promise<boolean> {
 /**
  * Asset'i LocalImage'a çevir
  */
-function assetToLocalImage(asset: Asset): LocalImage | null {
+function assetToLocalImage(asset: any): LocalImage | null {
   if (!asset.uri) {
     return null;
   }
@@ -92,37 +102,91 @@ function assetToLocalImage(asset: Asset): LocalImage | null {
  * İzin reddedildi uyarısı
  */
 function showPermissionDeniedAlert(type: 'gallery' | 'camera'): void {
-  const title = type === 'gallery' ? 'Galeri İzni Gerekli' : 'Kamera İzni Gerekli';
-  const message = type === 'gallery'
-    ? 'Galeri erişimi için izin vermeniz gerekmektedir.'
-    : 'Fotoğraf çekmek için kamera iznine ihtiyacımız var.';
+  if (Platform.OS === 'web') return;
 
-  Alert.alert(
-    title,
-    message,
-    [
-      { text: 'İptal', style: 'cancel' },
-      { text: 'Ayarları Aç', onPress: () => Linking.openSettings() },
-    ]
-  );
+  const title = type === 'gallery' ? 'Galeri İzni Gerekli' : 'Kamera İzni Gerekli';
+  const message =
+    type === 'gallery'
+      ? 'Galeri erişimi için izin vermeniz gerekmektedir.'
+      : 'Fotoğraf çekmek için kamera iznine ihtiyacımız var.';
+
+  Alert.alert(title, message, [
+    { text: 'İptal', style: 'cancel' },
+    { text: 'Ayarları Aç', onPress: () => Linking.openSettings() },
+  ]);
 }
 
 /**
- * Image Picker Service
+ * Web için file input kullanarak görsel seç
+ */
+async function pickFromGalleryWeb(options: ImagePickerOptions): Promise<LocalImage[]> {
+  return new Promise(resolve => {
+    if (typeof document === 'undefined') {
+      resolve([]);
+      return;
+    }
+
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.multiple = (options.selectionLimit || 1) > 1;
+
+    input.onchange = (event: any) => {
+      const files = event.target.files;
+      if (!files || files.length === 0) {
+        resolve([]);
+        return;
+      }
+
+      const images: LocalImage[] = [];
+      const limit = Math.min(files.length, options.selectionLimit || 5);
+
+      for (let i = 0; i < limit; i++) {
+        const file = files[i];
+        const url = URL.createObjectURL(file);
+        images.push({
+          uri: url,
+          width: 0,
+          height: 0,
+          fileSize: file.size,
+          type: file.type,
+        });
+      }
+
+      resolve(images);
+    };
+
+    input.click();
+  });
+}
+
+/**
+ * Image Picker Service - Web compatible
  */
 export const imagePickerService = {
   /**
    * Galeriden görsel seç
    */
   async pickFromGallery(options: ImagePickerOptions): Promise<LocalImage[]> {
+    // Web için file input kullan
+    if (Platform.OS === 'web') {
+      return pickFromGalleryWeb(options);
+    }
+
+    // Native modül yoksa boş dön
+    if (!launchImageLibrary) {
+      console.log('[ImagePickerService] launchImageLibrary not available');
+      return [];
+    }
+
     const hasPermission = await requestGalleryPermission();
-    
+
     if (!hasPermission) {
       showPermissionDeniedAlert('gallery');
       return [];
     }
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       launchImageLibrary(
         {
           mediaType: options.mediaType,
@@ -131,7 +195,7 @@ export const imagePickerService = {
           includeBase64: false,
           includeExtra: true,
         },
-        (response: ImagePickerResponse) => {
+        (response: any) => {
           if (response.didCancel) {
             resolve([]);
             return;
@@ -144,9 +208,9 @@ export const imagePickerService = {
           }
 
           const images: LocalImage[] = [];
-          
+
           if (response.assets) {
-            response.assets.forEach((asset: Asset) => {
+            response.assets.forEach((asset: any) => {
               const localImage = assetToLocalImage(asset);
               if (localImage) {
                 images.push(localImage);
@@ -155,7 +219,7 @@ export const imagePickerService = {
           }
 
           resolve(images);
-        }
+        },
       );
     });
   },
@@ -164,14 +228,26 @@ export const imagePickerService = {
    * Kameradan fotoğraf çek
    */
   async captureFromCamera(): Promise<LocalImage | null> {
+    // Web'de kamera desteklenmez (şimdilik)
+    if (Platform.OS === 'web') {
+      console.log('[ImagePickerService] Camera not supported on web');
+      return null;
+    }
+
+    // Native modül yoksa null dön
+    if (!launchCamera) {
+      console.log('[ImagePickerService] launchCamera not available');
+      return null;
+    }
+
     const hasPermission = await requestCameraPermission();
-    
+
     if (!hasPermission) {
       showPermissionDeniedAlert('camera');
       return null;
     }
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       launchCamera(
         {
           mediaType: 'photo',
@@ -179,7 +255,7 @@ export const imagePickerService = {
           saveToPhotos: false,
           cameraType: 'back',
         },
-        (response: ImagePickerResponse) => {
+        (response: any) => {
           if (response.didCancel) {
             resolve(null);
             return;
@@ -196,7 +272,7 @@ export const imagePickerService = {
           } else {
             resolve(null);
           }
-        }
+        },
       );
     });
   },
@@ -206,10 +282,9 @@ export const imagePickerService = {
    */
   validateImageCount(currentCount: number, maxCount: number = 5): boolean {
     if (currentCount >= maxCount) {
-      Alert.alert(
-        'Limit Aşıldı',
-        `En fazla ${maxCount} görsel ekleyebilirsiniz.`
-      );
+      if (Platform.OS !== 'web') {
+        Alert.alert('Limit Aşıldı', `En fazla ${maxCount} görsel ekleyebilirsiniz.`);
+      }
       return false;
     }
     return true;
@@ -220,12 +295,11 @@ export const imagePickerService = {
    */
   validateFileSize(fileSize: number, maxSizeMB: number = 10): boolean {
     const maxSizeBytes = maxSizeMB * 1024 * 1024;
-    
+
     if (fileSize > maxSizeBytes) {
-      Alert.alert(
-        'Dosya Çok Büyük',
-        `Görsel boyutu ${maxSizeMB}MB\'dan küçük olmalıdır.`
-      );
+      if (Platform.OS !== 'web') {
+        Alert.alert('Dosya Çok Büyük', `Görsel boyutu ${maxSizeMB}MB\'dan küçük olmalıdır.`);
+      }
       return false;
     }
     return true;

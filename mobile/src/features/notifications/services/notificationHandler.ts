@@ -1,12 +1,10 @@
 // src/features/notifications/services/notificationHandler.ts
-// Notification handler for FCM and Notifee events
+// Notification handler - Web compatible implementation
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
-import { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
-import { EventType } from '@notifee/react-native';
 import { navigationRef } from '@core/navigation/navigationRef';
-import { fcmService } from './fcmService';
-import { notifeeService } from './notifeeService';
+import { fcmService, RemoteMessage } from './fcmService';
+import { notifeeService, EventType } from './notifeeService';
 import { useNotificationStore } from '../stores';
 import type { NotificationData, NotificationType } from '../types';
 
@@ -49,7 +47,7 @@ class NotificationHandler {
    * Ön plan mesaj işleyicisi
    */
   private setupForegroundMessageHandler(): void {
-    fcmService.onForegroundMessage(async (remoteMessage) => {
+    fcmService.onForegroundMessage(async (remoteMessage: RemoteMessage) => {
       console.log('[NotificationHandler] Foreground message:', remoteMessage);
 
       // Yerel bildirim göster
@@ -64,9 +62,9 @@ class NotificationHandler {
    * Bildirim açma işleyicisi
    */
   private setupNotificationOpenedHandler(): void {
-    fcmService.onNotificationOpenedApp((remoteMessage) => {
+    fcmService.onNotificationOpenedApp((remoteMessage: RemoteMessage) => {
       console.log('[NotificationHandler] Notification opened app:', remoteMessage);
-      this.handleNotificationNavigation(remoteMessage.data);
+      this.handleNotificationNavigation(remoteMessage.data as NotificationData);
     });
   }
 
@@ -88,7 +86,10 @@ class NotificationHandler {
 
         case EventType.ACTION_PRESS:
           console.log('[NotificationHandler] Action pressed:', detail.pressAction?.id);
-          this.handleActionPress(detail.pressAction?.id, detail.notification?.data as NotificationData);
+          this.handleActionPress(
+            detail.pressAction?.id,
+            detail.notification?.data as NotificationData,
+          );
           break;
       }
     });
@@ -101,7 +102,10 @@ class NotificationHandler {
           break;
 
         case EventType.ACTION_PRESS:
-          this.handleActionPress(detail.pressAction?.id, detail.notification?.data as NotificationData);
+          this.handleActionPress(
+            detail.pressAction?.id,
+            detail.notification?.data as NotificationData,
+          );
           break;
       }
     });
@@ -118,7 +122,7 @@ class NotificationHandler {
         console.log('[NotificationHandler] FCM initial notification:', fcmInitial);
         // Delay navigation until app is ready
         setTimeout(() => {
-          this.handleNotificationNavigation(fcmInitial.data);
+          this.handleNotificationNavigation(fcmInitial.data as NotificationData);
         }, 1000);
         return;
       }
@@ -139,9 +143,7 @@ class NotificationHandler {
   /**
    * FCM mesajından yerel bildirim göster
    */
-  private async displayLocalNotification(
-    remoteMessage: FirebaseMessagingTypes.RemoteMessage
-  ): Promise<void> {
+  private async displayLocalNotification(remoteMessage: RemoteMessage): Promise<void> {
     const { notification, data, messageId } = remoteMessage;
 
     if (!notification?.title || !notification?.body) {
@@ -165,9 +167,7 @@ class NotificationHandler {
   /**
    * Store'a bildirim ekle
    */
-  private addNotificationToStore(
-    remoteMessage: FirebaseMessagingTypes.RemoteMessage
-  ): void {
+  private addNotificationToStore(remoteMessage: RemoteMessage): void {
     const { notification, data, messageId, sentTime } = remoteMessage;
 
     if (!notification?.title || !notification?.body) return;
@@ -283,7 +283,7 @@ class NotificationHandler {
    * FCM arka plan mesaj işleyicisi
    */
   setupBackgroundHandler(): void {
-    fcmService.setBackgroundMessageHandler(async (remoteMessage) => {
+    fcmService.setBackgroundMessageHandler(async (remoteMessage: RemoteMessage) => {
       console.log('[NotificationHandler] Background message:', remoteMessage);
       // Arka planda yerel bildirim göster
       await this.displayLocalNotification(remoteMessage);

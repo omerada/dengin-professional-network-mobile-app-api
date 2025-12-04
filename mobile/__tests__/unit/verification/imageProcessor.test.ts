@@ -3,15 +3,32 @@
 
 import { imageProcessor } from '../../../src/features/verification/services/imageProcessor';
 
-// react-native-image-resizer mock
-jest.mock('react-native-image-resizer', () => ({
-  createResizedImage: jest.fn().mockResolvedValue({
+// expo-image-manipulator mock
+jest.mock('expo-image-manipulator', () => ({
+  manipulateAsync: jest.fn().mockResolvedValue({
     uri: 'file:///resized/image.jpg',
     width: 1920,
     height: 1080,
-    path: '/resized/image.jpg',
-    size: 500000,
   }),
+  SaveFormat: {
+    JPEG: 'jpeg',
+    PNG: 'png',
+  },
+}));
+
+// expo-file-system mock
+jest.mock('expo-file-system', () => ({
+  getInfoAsync: jest.fn().mockResolvedValue({
+    exists: true,
+    size: 1024000,
+    isDirectory: false,
+  }),
+  readAsStringAsync: jest.fn().mockResolvedValue('base64-encoded-data'),
+  deleteAsync: jest.fn().mockResolvedValue(undefined),
+  EncodingType: {
+    Base64: 'base64',
+    UTF8: 'utf8',
+  },
 }));
 
 // react-native mock
@@ -20,18 +37,6 @@ jest.mock('react-native', () => ({
   Image: {
     getSize: jest.fn((uri, success) => success(1920, 1080)),
   },
-}));
-
-// RNFS mock
-jest.mock('react-native-fs', () => ({
-  stat: jest.fn().mockResolvedValue({
-    size: 1024000,
-    isFile: () => true,
-    mtime: new Date(),
-  }),
-  readFile: jest.fn().mockResolvedValue('base64-encoded-data'),
-  exists: jest.fn().mockResolvedValue(true),
-  unlink: jest.fn().mockResolvedValue(undefined),
 }));
 
 describe('Image Processor', () => {
@@ -44,10 +49,11 @@ describe('Image Processor', () => {
     });
 
     it('should detect file too large', async () => {
-      const RNFS = require('react-native-fs');
-      RNFS.stat.mockResolvedValueOnce({
+      const FileSystem = require('expo-file-system');
+      FileSystem.getInfoAsync.mockResolvedValueOnce({
+        exists: true,
         size: 20 * 1024 * 1024, // 20MB
-        isFile: () => true,
+        isDirectory: false,
       });
 
       const result = await imageProcessor.validate('file:///test/large.jpg');

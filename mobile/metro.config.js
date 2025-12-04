@@ -1,24 +1,43 @@
 // metro.config.js
-const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+// Learn more https://docs.expo.dev/guides/customizing-metro
+const { getDefaultConfig } = require('expo/metro-config');
+const path = require('path');
 
-/**
- * Metro configuration
- * https://facebook.github.io/metro/docs/configuration
- *
- * @type {import('metro-config').MetroConfig}
- */
-const config = {
-  transformer: {
-    getTransformOptions: async () => ({
-      transform: {
-        experimentalImportSupport: false,
-        inlineRequires: true,
-      },
-    }),
-  },
-  resolver: {
-    sourceExts: ['jsx', 'js', 'ts', 'tsx', 'json'],
-  },
+/** @type {import('expo/metro-config').MetroConfig} */
+const config = getDefaultConfig(__dirname);
+
+// Add support for additional extensions
+config.resolver.sourceExts = ['jsx', 'js', 'ts', 'tsx', 'json', 'mjs'];
+
+// Resolver config to handle problematic packages
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  // Force @stomp/stompjs to use UMD bundle instead of ESM
+  if (moduleName === '@stomp/stompjs') {
+    const stompPath = path.join(
+      __dirname,
+      'node_modules',
+      '@stomp',
+      'stompjs',
+      'bundles',
+      'stomp.umd.js',
+    );
+
+    return {
+      filePath: stompPath,
+      type: 'sourceFile',
+    };
+  }
+
+  // Default resolver
+  return context.resolveRequest(context, moduleName, platform);
 };
 
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+// Enable inline requires for better performance
+config.transformer.getTransformOptions = async () => ({
+  transform: {
+    experimentalImportSupport: false,
+    inlineRequires: true,
+  },
+});
+
+module.exports = config;

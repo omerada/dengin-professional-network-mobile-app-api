@@ -1,11 +1,30 @@
 // src/core/socket/connectionMonitor.ts
-// Connection monitor for WebSocket
+// Connection monitor for WebSocket - Web compatible
 // Oku: mobile-development-guide/core/13-REAL-TIME.md
 
-import { AppState, AppStateStatus, NativeEventSubscription } from 'react-native';
-import NetInfo, { NetInfoSubscription, NetInfoState } from '@react-native-community/netinfo';
+import { AppState, AppStateStatus, NativeEventSubscription, Platform } from 'react-native';
 import { stompClient } from './stompClient';
 import { SocketStatus } from './types';
+
+// NetInfo tiplerini tanımla
+interface NetInfoState {
+  isConnected: boolean | null;
+  isInternetReachable: boolean | null;
+  type: string;
+}
+
+type NetInfoSubscription = (() => void) | null;
+
+// NetInfo'yu dinamik olarak yükle
+let NetInfo: any = null;
+
+if (Platform.OS !== 'web') {
+  try {
+    NetInfo = require('@react-native-community/netinfo').default;
+  } catch (e) {
+    console.log('[ConnectionMonitor] NetInfo not available');
+  }
+}
 
 /**
  * Connection Monitor
@@ -35,10 +54,29 @@ class ConnectionMonitor {
       this.handleAppStateChange.bind(this),
     );
 
-    // Monitor network state changes
-    this.netInfoSubscription = NetInfo.addEventListener(
-      this.handleNetInfoChange.bind(this),
-    );
+    // Monitor network state changes (native only)
+    if (NetInfo) {
+      this.netInfoSubscription = NetInfo.addEventListener(this.handleNetInfoChange.bind(this));
+    } else {
+      // Web: use navigator.onLine
+      if (typeof window !== 'undefined') {
+        this.isNetworkConnected = navigator.onLine;
+        window.addEventListener('online', () =>
+          this.handleNetInfoChange({
+            isConnected: true,
+            isInternetReachable: true,
+            type: 'unknown',
+          }),
+        );
+        window.addEventListener('offline', () =>
+          this.handleNetInfoChange({
+            isConnected: false,
+            isInternetReachable: false,
+            type: 'none',
+          }),
+        );
+      }
+    }
 
     console.log('[ConnectionMonitor] Started');
   }
@@ -52,7 +90,9 @@ class ConnectionMonitor {
     this.appStateSubscription?.remove();
     this.appStateSubscription = null;
 
-    this.netInfoSubscription?.();
+    if (this.netInfoSubscription) {
+      this.netInfoSubscription();
+    }
     this.netInfoSubscription = null;
 
     this.isMonitoring = false;

@@ -1,12 +1,29 @@
 // src/features/auth/services/biometricService.ts
+// Web compatible biometric authentication service
 // Oku: mobile-development-guide/features/03-AUTH-MODULE.md
 // Oku: mobile-development-guide/best-practices/31-SECURITY.md
 
-import ReactNativeBiometrics, { BiometryTypes } from 'react-native-biometrics';
 import { Platform } from 'react-native';
 import { secureStorage, SECURE_KEYS, asyncStorage, STORAGE_KEYS } from '@core/storage';
 
-const rnBiometrics = new ReactNativeBiometrics({ allowDeviceCredentials: true });
+// Biometric types for compatibility
+const BiometryTypes = {
+  FaceID: 'FaceID',
+  TouchID: 'TouchID',
+  Biometrics: 'Biometrics',
+};
+
+// Native module'ü sadece native platformlarda yükle
+let rnBiometrics: any = null;
+
+if (Platform.OS !== 'web') {
+  try {
+    const ReactNativeBiometrics = require('react-native-biometrics').default;
+    rnBiometrics = new ReactNativeBiometrics({ allowDeviceCredentials: true });
+  } catch (e) {
+    console.log('[BiometricService] Native module not available');
+  }
+}
 
 /**
  * Biometric type names for UI display
@@ -18,13 +35,18 @@ const BIOMETRIC_NAMES: Record<string, string> = {
 };
 
 /**
- * Biometric authentication service
+ * Biometric authentication service - Web compatible
  */
 export const biometricService = {
   /**
    * Check if biometric authentication is available
    */
   isAvailable: async (): Promise<{ available: boolean; biometryType: string | null }> => {
+    // Web'de biometrik desteklenmez
+    if (Platform.OS === 'web' || !rnBiometrics) {
+      return { available: false, biometryType: null };
+    }
+
     try {
       const { available, biometryType } = await rnBiometrics.isSensorAvailable();
       return {
@@ -52,6 +74,11 @@ export const biometricService = {
    * Prompt user for biometric authentication
    */
   authenticate: async (promptMessage?: string): Promise<{ success: boolean; error?: string }> => {
+    // Web'de biometrik desteklenmez
+    if (Platform.OS === 'web' || !rnBiometrics) {
+      return { success: false, error: 'Biyometrik doğrulama bu platformda desteklenmiyor' };
+    }
+
     try {
       const { available } = await biometricService.isAvailable();
 
@@ -80,6 +107,11 @@ export const biometricService = {
    * Stores encrypted credentials for biometric login
    */
   enable: async (email: string, refreshToken: string): Promise<boolean> => {
+    // Web'de biometrik desteklenmez
+    if (Platform.OS === 'web' || !rnBiometrics) {
+      return false;
+    }
+
     try {
       const { available } = await biometricService.isAvailable();
 
@@ -117,6 +149,11 @@ export const biometricService = {
    * Check if biometric is enabled for current user
    */
   isEnabled: async (): Promise<boolean> => {
+    // Web'de biometrik desteklenmez
+    if (Platform.OS === 'web') {
+      return false;
+    }
+
     const enabled = await asyncStorage.get<boolean>(STORAGE_KEYS.BIOMETRIC_ENABLED);
     return enabled === true;
   },
@@ -129,6 +166,11 @@ export const biometricService = {
     email: string;
     refreshToken: string;
   } | null> => {
+    // Web'de biometrik desteklenmez
+    if (Platform.OS === 'web' || !rnBiometrics) {
+      return null;
+    }
+
     try {
       // First verify biometric
       const { success } = await biometricService.authenticate('Giriş yapmak için doğrulayın');

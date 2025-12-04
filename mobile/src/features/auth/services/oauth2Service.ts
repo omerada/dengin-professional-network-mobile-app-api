@@ -3,14 +3,11 @@
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART6.md
 
 import { apiClient, API_ENDPOINTS } from '@core/api';
-import {
-  GoogleSignin,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
-import appleAuth from '@invertase/react-native-apple-authentication';
 import { Platform } from 'react-native';
 import { storage, STORAGE_KEYS } from '@core/storage';
 import type { AuthResponse } from '../types';
+import { googleAuth } from './googleAuth';
+import { appleAuth } from './appleAuth';
 
 interface ApiResponse<T> {
   success: boolean;
@@ -32,11 +29,7 @@ interface OAuth2TokenRequest {
  * App.tsx veya App entry point'te çağrılmalı
  */
 export const configureGoogleSignIn = (): void => {
-  GoogleSignin.configure({
-    webClientId: process.env.GOOGLE_WEB_CLIENT_ID || 'YOUR_GOOGLE_WEB_CLIENT_ID',
-    offlineAccess: true,
-    forceCodeForRefreshToken: true,
-  });
+  googleAuth.configure(process.env.GOOGLE_WEB_CLIENT_ID || 'YOUR_GOOGLE_WEB_CLIENT_ID');
 };
 
 /**
@@ -48,13 +41,12 @@ export const oauth2Service = {
    * Google ile giriş yap
    */
   signInWithGoogle: async (): Promise<AuthResponse> => {
-    try {
-      await GoogleSignin.hasPlayServices({
-        showPlayServicesUpdateDialog: true,
-      });
+    if (!googleAuth.isAvailable()) {
+      throw new Error('Google Sign-In bu platformda desteklenmiyor');
+    }
 
-      const userInfo = await GoogleSignin.signIn();
-      const tokens = await GoogleSignin.getTokens();
+    try {
+      const { userInfo, tokens } = await googleAuth.signIn();
 
       const request: OAuth2TokenRequest = {
         provider: 'GOOGLE',
@@ -64,13 +56,13 @@ export const oauth2Service = {
 
       return await oauth2Service.authenticateWithBackend(request);
     } catch (error: any) {
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+      if (googleAuth.isSignInError(error, 'cancelled')) {
         throw new Error('Giriş iptal edildi');
       }
-      if (error.code === statusCodes.IN_PROGRESS) {
+      if (googleAuth.isSignInError(error, 'inProgress')) {
         throw new Error('Giriş işlemi devam ediyor');
       }
-      if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+      if (googleAuth.isSignInError(error, 'playServices')) {
         throw new Error('Google Play Servisleri kullanılamıyor');
       }
       throw error;
@@ -81,43 +73,29 @@ export const oauth2Service = {
    * Apple ile giriş yap (iOS only)
    */
   signInWithApple: async (): Promise<AuthResponse> => {
-    if (Platform.OS !== 'ios') {
+    if (!appleAuth.isAvailable()) {
       throw new Error('Apple Sign-In sadece iOS destekler');
     }
 
     try {
-      const appleAuthRequestResponse = await appleAuth.performRequest({
-        requestedOperation: appleAuth.Operation.LOGIN,
-        requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
-      });
-
-      const credentialState = await appleAuth.getCredentialStateForUser(
-        appleAuthRequestResponse.user,
-      );
-
-      if (credentialState !== appleAuth.State.AUTHORIZED) {
-        throw new Error('Apple Sign-In yetkilendirme başarısız');
-      }
-
-      const { identityToken, authorizationCode, fullName, email } =
-        appleAuthRequestResponse;
+      const credential = await appleAuth.signIn();
 
       // Apple ilk girişte fullName ve email verir, sonraki girişlerde vermez
-      const displayName = fullName
-        ? `${fullName.givenName || ''} ${fullName.familyName || ''}`.trim()
+      const displayName = credential.fullName
+        ? `${credential.fullName.givenName || ''} ${credential.fullName.familyName || ''}`.trim()
         : undefined;
 
       const request: OAuth2TokenRequest = {
         provider: 'APPLE',
-        idToken: identityToken || '',
-        authorizationCode: authorizationCode || undefined,
+        idToken: credential.identityToken || '',
+        authorizationCode: credential.authorizationCode || undefined,
         fullName: displayName,
-        email: email || undefined,
+        email: credential.email || undefined,
       };
 
       return await oauth2Service.authenticateWithBackend(request);
     } catch (error: any) {
-      if (error.code === appleAuth.Error.CANCELED) {
+      if (error.message?.includes('iptal')) {
         throw new Error('Giriş iptal edildi');
       }
       throw error;
@@ -148,21 +126,14 @@ export const oauth2Service = {
    * Google Sign-Out
    */
   signOutGoogle: async (): Promise<void> => {
-    try {
-      await GoogleSignin.revokeAccess();
-      await GoogleSignin.signOut();
-    } catch (error) {
-      // Ignore errors on sign out
-      console.warn('Google sign out warning:', error);
-    }
+    await googleAuth.signOut();
   },
 
   /**
    * Apple Sign-Out (no-op, just clears local data)
    */
   signOutApple: async (): Promise<void> => {
-    // Apple doesn't have a sign-out method
-    // Just clear local tokens
+    await appleAuth.signOut();
   },
 };
 

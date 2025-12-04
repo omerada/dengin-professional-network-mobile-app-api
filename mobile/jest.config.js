@@ -1,6 +1,6 @@
 // jest.config.js
 module.exports = {
-  preset: 'react-native',
+  preset: 'jest-expo',
   setupFilesAfterEnv: [
     '@testing-library/jest-native/extend-expect',
     '<rootDir>/__tests__/setup.ts',
@@ -26,9 +26,11 @@ module.exports = {
     '^@react-native-firebase/crashlytics$':
       '<rootDir>/__mocks__/@react-native-firebase/crashlytics.js',
     '^@react-native-firebase/analytics$': '<rootDir>/__mocks__/@react-native-firebase/analytics.js',
+    '^react-native-reanimated$': '<rootDir>/__mocks__/react-native-reanimated.js',
+    '^react-native-worklets(.*)$': '<rootDir>/__mocks__/react-native-worklets.js',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|@react-native-firebase|@react-navigation|react-native-reanimated|react-native-gesture-handler|react-native-safe-area-context|react-native-screens|@react-native-async-storage|expo-secure-store|react-native-biometrics|@notifee|sockjs-client|@stomp|react-native-vector-icons|immer)/)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@stomp/stompjs|sockjs-client|@notifee|immer)',
   ],
   testPathIgnorePatterns: [
     '/node_modules/',

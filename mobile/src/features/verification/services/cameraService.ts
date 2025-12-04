@@ -1,28 +1,51 @@
 // src/features/verification/services/cameraService.ts
-// Kamera servisi - Vision Camera wrapper
+// Kamera servisi - Vision Camera wrapper - Web compatible
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
-import { Camera, CameraDevice, PhotoFile } from 'react-native-vision-camera';
 import { Platform, PermissionsAndroid } from 'react-native';
 import type { CameraSettings, CapturedImage } from '../types';
+
+// Tip tanımlamaları
+export interface CameraDevice {
+  id: string;
+  position: 'front' | 'back';
+  hasFlash: boolean;
+  supportsPhotoHdr: boolean;
+}
+
+export interface PhotoFile {
+  path: string;
+  width: number;
+  height: number;
+}
 
 /**
  * Kamera izin durumları
  */
-export type CameraPermissionStatus =
-  | 'granted'
-  | 'denied'
-  | 'not-determined'
-  | 'restricted';
+export type CameraPermissionStatus = 'granted' | 'denied' | 'not-determined' | 'restricted';
+
+// Native modülü dinamik olarak yükle
+let Camera: any = null;
+
+if (Platform.OS !== 'web') {
+  try {
+    Camera = require('react-native-vision-camera').Camera;
+  } catch (e) {
+    console.log('[CameraService] Native module not available');
+  }
+}
 
 /**
- * Kamera servisi
+ * Kamera servisi - Web compatible
  */
 export const cameraService = {
   /**
    * Kamera iznini kontrol et
    */
   async checkPermission(): Promise<CameraPermissionStatus> {
+    if (Platform.OS === 'web' || !Camera) {
+      return 'not-determined';
+    }
     const status = await Camera.getCameraPermissionStatus();
     return status as CameraPermissionStatus;
   },
@@ -31,6 +54,9 @@ export const cameraService = {
    * Kamera izni iste
    */
   async requestPermission(): Promise<CameraPermissionStatus> {
+    if (Platform.OS === 'web' || !Camera) {
+      return 'denied';
+    }
     const status = await Camera.requestCameraPermission();
     return status as CameraPermissionStatus;
   },
@@ -39,6 +65,9 @@ export const cameraService = {
    * Mikrofon izni iste (video için)
    */
   async requestMicrophonePermission(): Promise<CameraPermissionStatus> {
+    if (Platform.OS === 'web' || !Camera) {
+      return 'denied';
+    }
     const status = await Camera.requestMicrophonePermission();
     return status as CameraPermissionStatus;
   },
@@ -48,19 +77,16 @@ export const cameraService = {
    */
   async checkAndroidPermissions(): Promise<boolean> {
     if (Platform.OS !== 'android') return true;
+    if (Platform.OS === 'web') return false;
 
     try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.CAMERA,
-        {
-          title: 'Kamera İzni',
-          message:
-            'Kimlik doğrulama için kamera erişimine ihtiyacımız var.',
-          buttonNeutral: 'Daha Sonra Sor',
-          buttonNegative: 'İptal',
-          buttonPositive: 'Tamam',
-        }
-      );
+      const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA, {
+        title: 'Kamera İzni',
+        message: 'Kimlik doğrulama için kamera erişimine ihtiyacımız var.',
+        buttonNeutral: 'Daha Sonra Sor',
+        buttonNegative: 'İptal',
+        buttonPositive: 'Tamam',
+      });
 
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     } catch (err) {
@@ -73,6 +99,9 @@ export const cameraService = {
    * Kullanılabilir kameraları getir
    */
   getAvailableDevices(): CameraDevice[] {
+    if (Platform.OS === 'web' || !Camera) {
+      return [];
+    }
     return Camera.getAvailableCameraDevices();
   },
 
@@ -81,12 +110,11 @@ export const cameraService = {
    */
   getBestBackCamera(): CameraDevice | undefined {
     const devices = this.getAvailableDevices();
-    return devices.find(
-      (device) =>
-        device.position === 'back' &&
-        device.hasFlash &&
-        device.supportsPhotoHdr
-    ) || devices.find((device) => device.position === 'back');
+    return (
+      devices.find(
+        device => device.position === 'back' && device.hasFlash && device.supportsPhotoHdr,
+      ) || devices.find(device => device.position === 'back')
+    );
   },
 
   /**
@@ -94,16 +122,13 @@ export const cameraService = {
    */
   getBestFrontCamera(): CameraDevice | undefined {
     const devices = this.getAvailableDevices();
-    return devices.find((device) => device.position === 'front');
+    return devices.find(device => device.position === 'front');
   },
 
   /**
    * Fotoğraf dosyasını CapturedImage'e dönüştür
    */
-  photoToImage(
-    photo: PhotoFile,
-    type: 'front' | 'back' | 'selfie'
-  ): CapturedImage {
+  photoToImage(photo: PhotoFile, type: 'front' | 'back' | 'selfie'): CapturedImage {
     return {
       uri: `file://${photo.path}`,
       path: photo.path,
@@ -138,9 +163,7 @@ export const cameraService = {
   /**
    * Kamera pozisyonunu değiştir
    */
-  togglePosition(
-    current: CameraSettings['position']
-  ): CameraSettings['position'] {
+  togglePosition(current: CameraSettings['position']): CameraSettings['position'] {
     return current === 'back' ? 'front' : 'back';
   },
 };
