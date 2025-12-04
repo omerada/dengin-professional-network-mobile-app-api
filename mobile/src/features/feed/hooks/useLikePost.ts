@@ -44,9 +44,9 @@ export function useLikePost() {
 
         return {
           ...old,
-          pages: old.pages.map((page) => ({
+          pages: old.pages.map(page => ({
             ...page,
-            content: page.content.map((post) =>
+            content: page.content.map(post =>
               post.postId === postId
                 ? {
                     ...post,
@@ -59,7 +59,7 @@ export function useLikePost() {
                       likeCount: isLiked ? post.stats.likeCount - 1 : post.stats.likeCount + 1,
                     },
                   }
-                : post
+                : post,
             ),
           })),
         };
@@ -68,13 +68,13 @@ export function useLikePost() {
       // Optimistic update for main feed
       queryClient.setQueriesData<InfiniteData<FeedResponse>>(
         { queryKey: [FEED_QUERY_KEY] },
-        updateFeedPosts
+        updateFeedPosts,
       );
 
       // Optimistic update for trending feed
       queryClient.setQueriesData<InfiniteData<FeedResponse>>(
         { queryKey: [TRENDING_FEED_KEY] },
-        updateFeedPosts
+        updateFeedPosts,
       );
 
       // Optimistic update for single post
@@ -87,7 +87,9 @@ export function useLikePost() {
           },
           stats: {
             ...previousPost.stats,
-            likeCount: isLiked ? previousPost.stats.likeCount - 1 : previousPost.stats.likeCount + 1,
+            likeCount: isLiked
+              ? previousPost.stats.likeCount - 1
+              : previousPost.stats.likeCount + 1,
           },
         });
       }
@@ -116,19 +118,6 @@ export function useLikePost() {
 
     onSettled: (_data, _error, { postId }) => {
       // Refetch to ensure consistency
-      queryClient.invalidateQueries({ queryKey: [POST_QUERY_KEY, postId] });
-    },
-  });
-}
-
-export default useLikePost;
-        queryClient.setQueryData([POST_QUERY_KEY, postId], context.previousPost);
-      }
-    },
-
-    onSettled: (_data, _error, { postId }) => {
-      // Refetch to ensure data is correct
-      queryClient.invalidateQueries({ queryKey: [FEED_QUERY_KEY] });
       queryClient.invalidateQueries({ queryKey: [POST_QUERY_KEY, postId] });
     },
   });

@@ -5,17 +5,13 @@
 import { renderHook, waitFor } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFeed, useFeedPosts } from '../../../src/features/feed/hooks';
+import { useTrendingFeed } from '../../../src/features/feed/hooks/useFeed';
 import { feedService } from '../../../src/features/feed/services';
-import type { Post } from '../../../src/features/feed/types';
+import type { Post, FeedResponse } from '../../../src/features/feed/types';
 import React from 'react';
 
-// Mock feedService
-jest.mock('../../../src/features/feed/services', () => ({
-  feedService: {
-    getPersonalizedFeed: jest.fn(),
-    getTrendingFeed: jest.fn(),
-  },
-}));
+// Mock feedService - use jest.mock with auto-mocking
+jest.mock('../../../src/features/feed/services');
 
 const mockFeedService = feedService as jest.Mocked<typeof feedService>;
 
@@ -78,31 +74,33 @@ describe('useFeed Hook', () => {
     },
   ];
 
-  describe('useFeed', () => {
-    it('should fetch personalized feed on initial render', async () => {
-      mockFeedService.getPersonalizedFeed.mockResolvedValue(mockPosts);
+  const mockFeedResponse: FeedResponse = {
+    content: mockPosts,
+    page: 0,
+    size: 20,
+    totalElements: 2,
+    totalPages: 1,
+    hasNext: false,
+    hasPrevious: false,
+  };
 
-      const { result } = renderHook(() => useFeed('all'), { wrapper });
+  describe('useFeed', () => {
+    it('should fetch feed on initial render', async () => {
+      mockFeedService.getFeed.mockResolvedValue(mockFeedResponse);
+
+      const { result } = renderHook(() => useFeed(), { wrapper });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockFeedService.getPersonalizedFeed).toHaveBeenCalledWith(0, 20, undefined);
+      expect(mockFeedService.getFeed).toHaveBeenCalledWith(0, 20, undefined);
     });
 
-    it('should fetch trending feed when filter is trending', async () => {
-      mockFeedService.getTrendingFeed.mockResolvedValue({
-        content: mockPosts,
-        page: 0,
-        size: 20,
-        totalElements: 2,
-        totalPages: 1,
-        hasNext: false,
-        hasPrevious: false,
-      });
+    it('should fetch trending feed', async () => {
+      mockFeedService.getTrendingFeed.mockResolvedValue(mockFeedResponse);
 
-      const { result } = renderHook(() => useFeed('trending'), { wrapper });
+      const { result } = renderHook(() => useTrendingFeed(20), { wrapper });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
@@ -112,23 +110,23 @@ describe('useFeed Hook', () => {
     });
 
     it('should apply profession filter when provided', async () => {
-      mockFeedService.getPersonalizedFeed.mockResolvedValue(mockPosts);
+      mockFeedService.getFeed.mockResolvedValue(mockFeedResponse);
 
-      const { result } = renderHook(() => useFeed('all', 1), { wrapper });
+      const { result } = renderHook(() => useFeed(1), { wrapper });
 
       await waitFor(() => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockFeedService.getPersonalizedFeed).toHaveBeenCalledWith(0, 20, 1);
+      expect(mockFeedService.getFeed).toHaveBeenCalledWith(0, 20, 1);
     });
   });
 
   describe('useFeedPosts', () => {
     it('should return flattened posts array', async () => {
-      mockFeedService.getPersonalizedFeed.mockResolvedValue(mockPosts);
+      mockFeedService.getFeed.mockResolvedValue(mockFeedResponse);
 
-      const { result } = renderHook(() => useFeedPosts('all'), { wrapper });
+      const { result } = renderHook(() => useFeedPosts(), { wrapper });
 
       await waitFor(() => {
         expect(result.current.posts.length).toBe(2);
@@ -139,11 +137,11 @@ describe('useFeed Hook', () => {
     });
 
     it('should handle loading state correctly', async () => {
-      mockFeedService.getPersonalizedFeed.mockImplementation(
-        () => new Promise((resolve) => setTimeout(() => resolve(mockPosts), 100))
+      mockFeedService.getFeed.mockImplementation(
+        () => new Promise(resolve => setTimeout(() => resolve(mockFeedResponse), 100)),
       );
 
-      const { result } = renderHook(() => useFeedPosts('all'), { wrapper });
+      const { result } = renderHook(() => useFeedPosts(), { wrapper });
 
       expect(result.current.isLoading).toBe(true);
 
@@ -153,11 +151,12 @@ describe('useFeed Hook', () => {
     });
 
     it('should indicate when more pages are available', async () => {
-      mockFeedService.getPersonalizedFeed.mockResolvedValue(
-        Array(20).fill(mockPosts[0])
-      );
+      mockFeedService.getFeed.mockResolvedValue({
+        ...mockFeedResponse,
+        hasNext: true,
+      });
 
-      const { result } = renderHook(() => useFeedPosts('all'), { wrapper });
+      const { result } = renderHook(() => useFeedPosts(), { wrapper });
 
       await waitFor(() => {
         expect(result.current.hasNextPage).toBe(true);
@@ -165,9 +164,12 @@ describe('useFeed Hook', () => {
     });
 
     it('should indicate when no more pages available', async () => {
-      mockFeedService.getPersonalizedFeed.mockResolvedValue([mockPosts[0]]);
+      mockFeedService.getFeed.mockResolvedValue({
+        ...mockFeedResponse,
+        hasNext: false,
+      });
 
-      const { result } = renderHook(() => useFeedPosts('all'), { wrapper });
+      const { result } = renderHook(() => useFeedPosts(), { wrapper });
 
       await waitFor(() => {
         expect(result.current.hasNextPage).toBe(false);

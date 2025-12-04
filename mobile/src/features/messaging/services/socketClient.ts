@@ -5,7 +5,7 @@
 
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { ENV } from '@core/config/env';
+import { ENV } from '@config/env';
 import { tokenService } from '@features/auth/services';
 import { useMessagingStore } from '../stores';
 import type {
@@ -67,22 +67,22 @@ class StompClient {
       this.client = new Client({
         // SockJS kullanarak WebSocket bağlantısı
         webSocketFactory: () => new SockJS(wsUrl),
-        
+
         // Bağlantı header'ları - JWT token
         connectHeaders: {
           Authorization: `Bearer ${token}`,
         },
-        
+
         // Debug logging (production'da kapatılmalı)
-        debug: __DEV__ ? (str) => console.log('[STOMP]', str) : () => {},
-        
+        debug: __DEV__ ? str => console.log('[STOMP]', str) : () => {},
+
         // Heartbeat ayarları
         heartbeatIncoming: 10000,
         heartbeatOutgoing: 10000,
-        
+
         // Reconnect ayarları
         reconnectDelay: 5000,
-        
+
         // Bağlantı kurulduğunda
         onConnect: () => {
           this.setConnectionState('CONNECTED');
@@ -91,26 +91,26 @@ class StompClient {
           this.processMessageQueue();
           this.notifyHandlers('connect', {});
         },
-        
+
         // Bağlantı kesildiğinde
         onDisconnect: () => {
           this.setConnectionState('DISCONNECTED');
           this.notifyHandlers('disconnect', {});
         },
-        
+
         // STOMP hatası
-        onStompError: (frame) => {
+        onStompError: frame => {
           console.error('[STOMP] Error:', frame.headers.message);
           this.setConnectionState('ERROR');
           this.notifyHandlers('error', { message: frame.headers.message });
         },
-        
+
         // WebSocket kapatıldığında
         onWebSocketClose: () => {
           if (this.connectionState === 'CONNECTED') {
             this.setConnectionState('RECONNECTING');
             this.reconnectAttempts++;
-            
+
             if (this.reconnectAttempts <= this.maxReconnectAttempts) {
               this.notifyHandlers('reconnecting', { attempt: this.reconnectAttempts });
             } else {
@@ -143,41 +143,32 @@ class StompClient {
    */
   private setupSubscriptions(): void {
     // Yeni mesaj subscription
-    this.subscribe(
-      '/user/queue/messages',
-      (message: IMessage) => {
-        const data: WsMessageResponse = JSON.parse(message.body);
-        this.notifyHandlers('message:new', data);
-      }
-    );
+    this.subscribe('/user/queue/messages', (message: IMessage) => {
+      const data: WsMessageResponse = JSON.parse(message.body);
+      this.notifyHandlers('message:new', data);
+    });
 
     // Yazıyor bildirimi subscription
-    this.subscribe(
-      '/user/queue/typing',
-      (message: IMessage) => {
-        const data: WsTypingNotification = JSON.parse(message.body);
-        const { addTypingUser, removeTypingUser } = useMessagingStore.getState();
-        
-        if (data.isTyping) {
-          // senderId'yi bulmak için conversationId kullanıyoruz
-          // Typing notification gönderen kişi recipientId değil, karşı taraf
-          addTypingUser(data.conversationId, data.recipientId);
-        } else {
-          removeTypingUser(data.conversationId, data.recipientId);
-        }
-        
-        this.notifyHandlers('typing', data);
+    this.subscribe('/user/queue/typing', (message: IMessage) => {
+      const data: WsTypingNotification = JSON.parse(message.body);
+      const { addTypingUser, removeTypingUser } = useMessagingStore.getState();
+
+      if (data.isTyping) {
+        // senderId'yi bulmak için conversationId kullanıyoruz
+        // Typing notification gönderen kişi recipientId değil, karşı taraf
+        addTypingUser(data.conversationId, data.recipientId);
+      } else {
+        removeTypingUser(data.conversationId, data.recipientId);
       }
-    );
+
+      this.notifyHandlers('typing', data);
+    });
 
     // Okundu bildirimi subscription
-    this.subscribe(
-      '/user/queue/read',
-      (message: IMessage) => {
-        const data: WsReadReceipt = JSON.parse(message.body);
-        this.notifyHandlers('read', data);
-      }
-    );
+    this.subscribe('/user/queue/read', (message: IMessage) => {
+      const data: WsReadReceipt = JSON.parse(message.body);
+      this.notifyHandlers('read', data);
+    });
   }
 
   /**
@@ -219,7 +210,7 @@ class StompClient {
   private notifyHandlers(event: string, data: unknown): void {
     const handlers = this.eventHandlers.get(event);
     if (handlers) {
-      handlers.forEach((handler) => handler(data));
+      handlers.forEach(handler => handler(data));
     }
   }
 
@@ -278,7 +269,7 @@ class StompClient {
     }
 
     // Tüm subscription'ları iptal et
-    this.subscriptions.forEach((info) => {
+    this.subscriptions.forEach(info => {
       if (info.subscription) {
         info.subscription.unsubscribe();
       }

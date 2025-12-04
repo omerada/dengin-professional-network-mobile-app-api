@@ -1,7 +1,11 @@
 // __tests__/unit/notifications/index.ts
-// Notification tests barrel export
+// Notification tests barrel - This file documents the test structure
+// Note: This is NOT a test file. Jest runs *.test.ts files directly.
 
-export * from './notificationService.test';
-export * from './fcmService.test';
-export * from './useNotifications.test';
-export * from './notificationStore.test';
+/**
+ * Notification module tests:
+ * - notificationService.test.ts - NotificationService API tests
+ * - fcmService.test.ts - FCM service tests
+ * - useNotifications.test.ts - Notification hooks tests
+ * - notificationStore.test.ts - Zustand store tests
+ */

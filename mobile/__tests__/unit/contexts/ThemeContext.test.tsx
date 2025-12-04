@@ -1,10 +1,18 @@
 // __tests__/unit/contexts/ThemeContext.test.tsx
 // Oku: mobile-development-guide/testing/21-TESTING-STRATEGY.md
 
+// Unmock ThemeContext to test real implementation
+jest.unmock('../../../src/contexts/ThemeContext');
+
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
-import { Text, Button } from 'react-native';
+import { Text, TouchableOpacity } from 'react-native';
 import { ThemeProvider, useTheme } from '../../../src/contexts/ThemeContext';
+
+// Mock useColorScheme
+jest.mock('react-native/Libraries/Utilities/useColorScheme', () => ({
+  default: jest.fn(() => 'light'),
+}));
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -13,67 +21,104 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   removeItem: jest.fn().mockResolvedValue(undefined),
 }));
 
+// Mock the storage module
+jest.mock('../../../src/core/storage', () => ({
+  asyncStorage: {
+    get: jest.fn().mockResolvedValue(null),
+    set: jest.fn().mockResolvedValue(undefined),
+    remove: jest.fn().mockResolvedValue(undefined),
+  },
+  STORAGE_KEYS: {
+    THEME: 'theme',
+  },
+}));
+
 // Test component that uses the theme context
 const TestComponent = () => {
-  const { theme, themeMode, setThemeMode, isDark, colors } = useTheme();
+  const { theme, themeMode, setThemeMode, isDark } = useTheme();
 
   return (
     <>
       <Text testID="theme-mode">{themeMode}</Text>
       <Text testID="is-dark">{isDark ? 'dark' : 'light'}</Text>
-      <Text testID="primary-color">{colors.primary}</Text>
-      <Button testID="set-light" title="Light" onPress={() => setThemeMode('light')} />
-      <Button testID="set-dark" title="Dark" onPress={() => setThemeMode('dark')} />
-      <Button testID="set-system" title="System" onPress={() => setThemeMode('system')} />
+      <Text testID="primary-color">{theme?.colors?.primary?.[500] || 'color-loaded'}</Text>
+      <TouchableOpacity testID="set-light" onPress={() => setThemeMode('light')}>
+        <Text>Light</Text>
+      </TouchableOpacity>
+      <TouchableOpacity testID="set-dark" onPress={() => setThemeMode('dark')}>
+        <Text>Dark</Text>
+      </TouchableOpacity>
+      <TouchableOpacity testID="set-system" onPress={() => setThemeMode('system')}>
+        <Text>System</Text>
+      </TouchableOpacity>
     </>
   );
 };
 
 describe('ThemeContext', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Reset storage mock to return null (default behavior - system theme)
+    const { asyncStorage } = require('../../../src/core/storage');
+    asyncStorage.get.mockResolvedValue(null);
+  });
+
   describe('ThemeProvider', () => {
-    it('children\'ı render etmeli', () => {
+    it("children'ı render etmeli", async () => {
       const { getByText } = render(
         <ThemeProvider>
           <Text>Test Child</Text>
-        </ThemeProvider>
-      );
-
-      expect(getByText('Test Child')).toBeTruthy();
-    });
-
-    it('varsayılan tema modu "system" olmalı', async () => {
-      const { getByTestId } = render(
-        <ThemeProvider>
-          <TestComponent />
-        </ThemeProvider>
+        </ThemeProvider>,
       );
 
       await waitFor(() => {
-        expect(getByTestId('theme-mode').props.children).toBe('system');
+        expect(getByText('Test Child')).toBeTruthy();
       });
+    });
+
+    it('varsayılan tema modu "system" olmalı (storage boş olduğunda)', async () => {
+      const { getByTestId } = render(
+        <ThemeProvider>
+          <TestComponent />
+        </ThemeProvider>,
+      );
+
+      // Wait for async loading to complete
+      await waitFor(
+        () => {
+          expect(getByTestId('theme-mode').props.children).toBe('system');
+        },
+        { timeout: 3000 },
+      );
     });
   });
 
   describe('useTheme hook', () => {
-    it('tema değerlerini döndürmeli', () => {
+    it('tema değerlerini döndürmeli', async () => {
       const { getByTestId } = render(
         <ThemeProvider>
           <TestComponent />
-        </ThemeProvider>
+        </ThemeProvider>,
       );
 
-      expect(getByTestId('primary-color')).toBeTruthy();
+      await waitFor(() => {
+        expect(getByTestId('primary-color')).toBeTruthy();
+      });
     });
 
     it('tema modunu light olarak değiştirebilmeli', async () => {
-      const { getByTestId, getByText } = render(
+      const { getByTestId } = render(
         <ThemeProvider>
           <TestComponent />
-        </ThemeProvider>
+        </ThemeProvider>,
       );
 
+      await waitFor(() => {
+        expect(getByTestId('theme-mode')).toBeTruthy();
+      });
+
       await act(async () => {
-        fireEvent.press(getByText('Light'));
+        fireEvent.press(getByTestId('set-light'));
       });
 
       await waitFor(() => {
@@ -83,14 +128,18 @@ describe('ThemeContext', () => {
     });
 
     it('tema modunu dark olarak değiştirebilmeli', async () => {
-      const { getByTestId, getByText } = render(
+      const { getByTestId } = render(
         <ThemeProvider>
           <TestComponent />
-        </ThemeProvider>
+        </ThemeProvider>,
       );
 
+      await waitFor(() => {
+        expect(getByTestId('theme-mode')).toBeTruthy();
+      });
+
       await act(async () => {
-        fireEvent.press(getByText('Dark'));
+        fireEvent.press(getByTestId('set-dark'));
       });
 
       await waitFor(() => {
@@ -100,18 +149,22 @@ describe('ThemeContext', () => {
     });
 
     it('tema modunu system olarak değiştirebilmeli', async () => {
-      const { getByTestId, getByText } = render(
+      const { getByTestId } = render(
         <ThemeProvider>
           <TestComponent />
-        </ThemeProvider>
+        </ThemeProvider>,
       );
 
-      await act(async () => {
-        fireEvent.press(getByText('Dark'));
+      await waitFor(() => {
+        expect(getByTestId('theme-mode')).toBeTruthy();
       });
 
       await act(async () => {
-        fireEvent.press(getByText('System'));
+        fireEvent.press(getByTestId('set-dark'));
+      });
+
+      await act(async () => {
+        fireEvent.press(getByTestId('set-system'));
       });
 
       await waitFor(() => {
@@ -122,14 +175,18 @@ describe('ThemeContext', () => {
 
   describe('Theme Colors', () => {
     it('light tema renkleri doğru olmalı', async () => {
-      const { getByTestId, getByText } = render(
+      const { getByTestId } = render(
         <ThemeProvider>
           <TestComponent />
-        </ThemeProvider>
+        </ThemeProvider>,
       );
 
+      await waitFor(() => {
+        expect(getByTestId('theme-mode')).toBeTruthy();
+      });
+
       await act(async () => {
-        fireEvent.press(getByText('Light'));
+        fireEvent.press(getByTestId('set-light'));
       });
 
       await waitFor(() => {
@@ -139,14 +196,18 @@ describe('ThemeContext', () => {
     });
 
     it('dark tema renkleri doğru olmalı', async () => {
-      const { getByTestId, getByText } = render(
+      const { getByTestId } = render(
         <ThemeProvider>
           <TestComponent />
-        </ThemeProvider>
+        </ThemeProvider>,
       );
 
+      await waitFor(() => {
+        expect(getByTestId('theme-mode')).toBeTruthy();
+      });
+
       await act(async () => {
-        fireEvent.press(getByText('Dark'));
+        fireEvent.press(getByTestId('set-dark'));
       });
 
       await waitFor(() => {
@@ -158,13 +219,24 @@ describe('ThemeContext', () => {
 
   describe('Error Handling', () => {
     it('provider olmadan hook kullanılamaz', () => {
-      // This should throw an error
       const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-      expect(() => {
-        render(<TestComponent />);
-      }).toThrow();
+      // Component that will throw
+      const ThrowingComponent = () => {
+        useTheme();
+        return null;
+      };
 
+      // Wrap in try-catch as render will throw
+      let errorThrown = false;
+      try {
+        render(<ThrowingComponent />);
+      } catch (error) {
+        errorThrown = true;
+        expect((error as Error).message).toContain('useTheme must be used within a ThemeProvider');
+      }
+
+      expect(errorThrown).toBe(true);
       consoleError.mockRestore();
     });
   });

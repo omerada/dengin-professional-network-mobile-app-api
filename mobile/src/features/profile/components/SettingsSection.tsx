@@ -5,7 +5,7 @@
 import React, { memo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, fontSize } from '@theme';
 import { SettingsItem } from './SettingsItem';
 import type { SettingsSectionType } from '../types';
 
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   title: {
-    fontSize: typography.fontSize.sm,
+    fontSize: fontSize.sm,
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -84,3 +84,4 @@ const styles = StyleSheet.create({
     marginLeft: 66, // icon width + padding
   },
 });
+

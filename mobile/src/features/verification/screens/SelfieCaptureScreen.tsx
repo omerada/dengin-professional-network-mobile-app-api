@@ -3,14 +3,7 @@
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import React, { memo, useCallback, useRef, useState, useEffect } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  Alert,
-  SafeAreaView,
-  StatusBar,
-} from 'react-native';
+import { StyleSheet, View, Text, Alert, SafeAreaView, StatusBar } from 'react-native';
 import {
   Camera,
   useCameraDevice,
@@ -24,25 +17,19 @@ import { spacing, typography } from '@theme';
 import { Button, Loading } from '@shared/components';
 import { useVerificationStore } from '../stores';
 import { cameraService, imageProcessor } from '../services';
-import {
-  SelfieGuide,
-  CaptureButton,
-  CameraControls,
-} from '../components';
+import { SelfieGuide, CaptureButton, CameraControls } from '../components';
 import type { CameraSettings, CapturedImage } from '../types';
 import type { VerificationStackParamList } from '@shared/types/navigation.types';
 
-type NavigationProp = NativeStackNavigationProp<
-  VerificationStackParamList,
-  'SelfieCapture'
->;
+type NavigationProp = NativeStackNavigationProp<VerificationStackParamList, 'SelfieCapture'>;
 
 /**
  * Selfie yakalama ekranı
  */
 export const SelfieCaptureScreen: React.FC = memo(() => {
   const navigation = useNavigation<NavigationProp>();
-  const { colors } = useTheme();
+  const { theme } = useTheme();
+  const { colors } = theme;
 
   const { hasPermission, requestPermission } = useCameraPermission();
   const device = useCameraDevice('front');
@@ -83,12 +70,9 @@ export const SelfieCaptureScreen: React.FC = memo(() => {
   /**
    * Ayar değişikliği
    */
-  const handleSettingsChange = useCallback(
-    (newSettings: Partial<CameraSettings>) => {
-      setSettings((prev) => ({ ...prev, ...newSettings }));
-    },
-    []
-  );
+  const handleSettingsChange = useCallback((newSettings: Partial<CameraSettings>) => {
+    setSettings(prev => ({ ...prev, ...newSettings }));
+  }, []);
 
   /**
    * Fotoğraf çek
@@ -100,7 +84,7 @@ export const SelfieCaptureScreen: React.FC = memo(() => {
       Alert.alert(
         'Yüz Tespit Edilemedi',
         'Lütfen yüzünüzü çerçeve içine yerleştirin ve tekrar deneyin.',
-        [{ text: 'Tamam' }]
+        [{ text: 'Tamam' }],
       );
       return;
     }
@@ -122,14 +106,12 @@ export const SelfieCaptureScreen: React.FC = memo(() => {
 
       if (!validation.isValid) {
         const errorMessages = validation.errors
-          .map((err) => imageProcessor.getErrorMessage(err))
+          .map(err => imageProcessor.getErrorMessage(err))
           .join('\n');
 
-        Alert.alert(
-          'Görüntü Kalitesi Düşük',
-          errorMessages + '\n\nLütfen tekrar deneyin.',
-          [{ text: 'Tamam' }]
-        );
+        Alert.alert('Görüntü Kalitesi Düşük', errorMessages + '\n\nLütfen tekrar deneyin.', [
+          { text: 'Tamam' },
+        ]);
         setIsCapturing(false);
         return;
       }
@@ -145,11 +127,9 @@ export const SelfieCaptureScreen: React.FC = memo(() => {
       navigation.navigate('VerificationReview');
     } catch (error) {
       console.error('Selfie capture error:', error);
-      Alert.alert(
-        'Hata',
-        'Selfie çekilirken bir hata oluştu. Lütfen tekrar deneyin.',
-        [{ text: 'Tamam' }]
-      );
+      Alert.alert('Hata', 'Selfie çekilirken bir hata oluştu. Lütfen tekrar deneyin.', [
+        { text: 'Tamam' },
+      ]);
     } finally {
       setIsCapturing(false);
     }
@@ -163,17 +143,11 @@ export const SelfieCaptureScreen: React.FC = memo(() => {
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.permissionContainer}>
           <Text style={styles.permissionIcon}>📷</Text>
-          <Text style={[styles.permissionTitle, { color: colors.text }]}>
-            Kamera İzni Gerekli
-          </Text>
+          <Text style={[styles.permissionTitle, { color: colors.text }]}>Kamera İzni Gerekli</Text>
           <Text style={[styles.permissionText, { color: colors.textSecondary }]}>
             Selfie çekmek için kamera erişimine ihtiyacımız var.
           </Text>
-          <Button
-            title="İzin Ver"
-            onPress={requestPermission}
-            style={styles.permissionButton}
-          />
+          <Button title="İzin Ver" onPress={requestPermission} style={styles.permissionButton} />
         </View>
       </SafeAreaView>
     );
@@ -187,9 +161,7 @@ export const SelfieCaptureScreen: React.FC = memo(() => {
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.permissionContainer}>
           <Text style={styles.permissionIcon}>⚠️</Text>
-          <Text style={[styles.permissionTitle, { color: colors.text }]}>
-            Ön Kamera Bulunamadı
-          </Text>
+          <Text style={[styles.permissionTitle, { color: colors.text }]}>Ön Kamera Bulunamadı</Text>
           <Text style={[styles.permissionText, { color: colors.textSecondary }]}>
             Bu cihazda kullanılabilir ön kamera bulunamadı.
           </Text>
@@ -212,10 +184,7 @@ export const SelfieCaptureScreen: React.FC = memo(() => {
       />
 
       {/* Selfie rehberi overlay */}
-      <SelfieGuide
-        isCapturing={isCapturing}
-        faceDetected={faceDetected}
-      />
+      <SelfieGuide isCapturing={isCapturing} faceDetected={faceDetected} />
 
       {/* Üst bilgi çubuğu */}
       <SafeAreaView style={styles.topBar}>
@@ -245,8 +214,8 @@ export const SelfieCaptureScreen: React.FC = memo(() => {
           {isCapturing
             ? 'Fotoğraf çekiliyor...'
             : faceDetected
-            ? 'Çekmek için dokunun'
-            : 'Yüzünüzü çerçeveye yerleştirin'}
+              ? 'Çekmek için dokunun'
+              : 'Yüzünüzü çerçeveye yerleştirin'}
         </Text>
       </SafeAreaView>
 

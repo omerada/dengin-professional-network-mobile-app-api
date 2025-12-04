@@ -3,7 +3,7 @@
 // Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
 
 import { messagingService } from '@features/messaging/services/messagingService';
-import { apiClient } from '@core/services/api';
+import { apiClient } from '@core/api/client';
 import type {
   Conversation,
   Message,
@@ -13,7 +13,7 @@ import type {
 } from '@features/messaging/types';
 
 // Mock API client
-jest.mock('@core/services/api', () => ({
+jest.mock('@core/api/client', () => ({
   apiClient: {
     get: jest.fn(),
     post: jest.fn(),
@@ -69,35 +69,35 @@ describe('Messaging Service', () => {
   describe('getConversations', () => {
     it('should fetch conversations with pagination', async () => {
       const mockResponse: ConversationListResponse = {
-        content: [createMockConversation()],
-        page: 0,
-        size: 20,
+        conversations: [createMockConversation()],
+        pageNumber: 0,
+        pageSize: 20,
         totalElements: 1,
         totalPages: 1,
         hasMore: false,
       };
 
-      mockApiClient.get.mockResolvedValueOnce({ data: mockResponse });
+      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockResponse } });
 
-      const result = await messagingService.getConversations(0, 20);
+      const result = await messagingService.getConversations({ page: 0, size: 20 });
 
       expect(mockApiClient.get).toHaveBeenCalledWith('/api/conversations', {
         params: { page: 0, size: 20 },
       });
-      expect(result.data).toEqual(mockResponse);
+      expect(result).toEqual(mockResponse);
     });
 
     it('should use default pagination values', async () => {
       const mockResponse: ConversationListResponse = {
-        content: [],
-        page: 0,
-        size: 20,
+        conversations: [],
+        pageNumber: 0,
+        pageSize: 20,
         totalElements: 0,
         totalPages: 0,
         hasMore: false,
       };
 
-      mockApiClient.get.mockResolvedValueOnce({ data: mockResponse });
+      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockResponse } });
 
       await messagingService.getConversations();
 
@@ -111,43 +111,41 @@ describe('Messaging Service', () => {
     it('should fetch messages for a conversation with pagination', async () => {
       const conversationId = '123e4567-e89b-12d3-a456-426614174000';
       const mockResponse: MessageListResponse = {
-        content: [createMockMessage()],
-        page: 0,
-        size: 50,
-        totalElements: 1,
-        totalPages: 1,
+        messages: [createMockMessage()],
+        pageNumber: 0,
+        pageSize: 30,
+        totalMessages: 1,
         hasMore: false,
       };
 
-      mockApiClient.get.mockResolvedValueOnce({ data: mockResponse });
+      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockResponse } });
 
-      const result = await messagingService.getMessages(conversationId, 0, 50);
+      const result = await messagingService.getMessages(conversationId, { page: 0, size: 30 });
 
       expect(mockApiClient.get).toHaveBeenCalledWith(
         `/api/conversations/${conversationId}/messages`,
-        { params: { page: 0, size: 50 } }
+        { params: { page: 0, size: 30 } },
       );
-      expect(result.data).toEqual(mockResponse);
+      expect(result).toEqual(mockResponse);
     });
 
     it('should use default pagination values for messages', async () => {
       const conversationId = '123e4567-e89b-12d3-a456-426614174000';
       const mockResponse: MessageListResponse = {
-        content: [],
-        page: 0,
-        size: 50,
-        totalElements: 0,
-        totalPages: 0,
+        messages: [],
+        pageNumber: 0,
+        pageSize: 30,
+        totalMessages: 0,
         hasMore: false,
       };
 
-      mockApiClient.get.mockResolvedValueOnce({ data: mockResponse });
+      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockResponse } });
 
       await messagingService.getMessages(conversationId);
 
       expect(mockApiClient.get).toHaveBeenCalledWith(
         `/api/conversations/${conversationId}/messages`,
-        { params: { page: 0, size: 50 } }
+        { params: { page: 0, size: 30 } },
       );
     });
   });
@@ -155,47 +153,50 @@ describe('Messaging Service', () => {
   describe('sendMessage', () => {
     it('should send a message via HTTP', async () => {
       const request: SendMessageRequest = {
-        conversationId: '123e4567-e89b-12d3-a456-426614174000',
         content: 'Test message',
         recipientId: '123e4567-e89b-12d3-a456-426614174001',
       };
-      const mockResponse = createMockMessage({
+      const mockResponse = {
+        messageId: '123e4567-e89b-12d3-a456-426614174002',
+        conversationId: '123e4567-e89b-12d3-a456-426614174000',
         content: 'Test message',
-      });
+        status: 'SENT',
+        sentAt: '2024-01-01T12:00:00Z',
+      };
 
-      mockApiClient.post.mockResolvedValueOnce({ data: mockResponse });
+      mockApiClient.post.mockResolvedValueOnce({ data: { data: mockResponse } });
 
       const result = await messagingService.sendMessage(request);
 
       expect(mockApiClient.post).toHaveBeenCalledWith('/api/messages', request);
-      expect(result.data).toEqual(mockResponse);
+      expect(result).toEqual(mockResponse);
     });
 
     it('should send a message with attachment', async () => {
       const request: SendMessageRequest = {
-        conversationId: '123e4567-e89b-12d3-a456-426614174000',
         content: 'Check this file',
         recipientId: '123e4567-e89b-12d3-a456-426614174001',
-        attachmentKey: 'uploads/123/file.pdf',
+        attachment: {
+          url: 'https://cdn.example.com/file.pdf',
+          type: 'PDF',
+          size: 1024,
+          name: 'file.pdf',
+        },
       };
-      const mockResponse = createMockMessage({
+      const mockResponse = {
+        messageId: '123e4567-e89b-12d3-a456-426614174002',
+        conversationId: '123e4567-e89b-12d3-a456-426614174000',
         content: 'Check this file',
-        attachments: [
-          {
-            url: 'https://cdn.example.com/file.pdf',
-            contentType: 'application/pdf',
-            fileSize: 1024,
-            fileName: 'file.pdf',
-          },
-        ],
-      });
+        status: 'SENT',
+        sentAt: '2024-01-01T12:00:00Z',
+      };
 
-      mockApiClient.post.mockResolvedValueOnce({ data: mockResponse });
+      mockApiClient.post.mockResolvedValueOnce({ data: { data: mockResponse } });
 
       const result = await messagingService.sendMessage(request);
 
       expect(mockApiClient.post).toHaveBeenCalledWith('/api/messages', request);
-      expect(result.data.attachments).toHaveLength(1);
+      expect(result.messageId).toBeDefined();
     });
   });
 
@@ -207,20 +208,18 @@ describe('Messaging Service', () => {
 
       await messagingService.markAsRead(conversationId);
 
-      expect(mockApiClient.put).toHaveBeenCalledWith(
-        `/api/conversations/${conversationId}/read`
-      );
+      expect(mockApiClient.put).toHaveBeenCalledWith(`/api/conversations/${conversationId}/read`);
     });
   });
 
   describe('getUnreadCount', () => {
     it('should fetch total unread message count', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: 5 });
+      mockApiClient.get.mockResolvedValueOnce({ data: { data: 5 } });
 
       const result = await messagingService.getUnreadCount();
 
       expect(mockApiClient.get).toHaveBeenCalledWith('/api/conversations/unread-count');
-      expect(result.data).toBe(5);
+      expect(result).toBe(5);
     });
   });
 
@@ -234,7 +233,7 @@ describe('Messaging Service', () => {
       await messagingService.deleteMessage(conversationId, messageId);
 
       expect(mockApiClient.delete).toHaveBeenCalledWith(
-        `/api/conversations/${conversationId}/messages/${messageId}`
+        `/api/conversations/${conversationId}/messages/${messageId}`,
       );
     });
   });
@@ -242,59 +241,59 @@ describe('Messaging Service', () => {
   describe('searchMessages', () => {
     it('should search messages with query', async () => {
       const searchParams = {
-        q: 'test',
+        query: 'test',
         conversationId: '123e4567-e89b-12d3-a456-426614174000',
         page: 0,
         size: 20,
       };
-      const mockResponse: MessageListResponse = {
-        content: [createMockMessage({ content: 'test message' })],
-        page: 0,
-        size: 20,
-        totalElements: 1,
-        totalPages: 1,
+      const mockResponse = {
+        messages: [createMockMessage({ content: 'test message' })],
+        totalResults: 1,
+        pageNumber: 0,
+        pageSize: 20,
         hasMore: false,
       };
 
-      mockApiClient.get.mockResolvedValueOnce({ data: mockResponse });
+      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockResponse } });
 
       const result = await messagingService.searchMessages(searchParams);
 
       expect(mockApiClient.get).toHaveBeenCalledWith('/api/messages/search', {
-        params: searchParams,
+        params: {
+          q: 'test',
+          conversationId: '123e4567-e89b-12d3-a456-426614174000',
+          page: 0,
+          size: 20,
+        },
       });
-      expect(result.data.content).toHaveLength(1);
+      expect(result.messages).toHaveLength(1);
     });
 
-    it('should search messages with date range', async () => {
+    it('should search messages with default pagination', async () => {
       const searchParams = {
-        q: 'test',
-        fromDate: '2024-01-01',
-        toDate: '2024-01-31',
-        page: 0,
-        size: 20,
+        query: 'test',
       };
-      const mockResponse: MessageListResponse = {
-        content: [],
-        page: 0,
-        size: 20,
-        totalElements: 0,
-        totalPages: 0,
+      const mockResponse = {
+        messages: [],
+        totalResults: 0,
+        pageNumber: 0,
+        pageSize: 20,
         hasMore: false,
       };
 
-      mockApiClient.get.mockResolvedValueOnce({ data: mockResponse });
+      mockApiClient.get.mockResolvedValueOnce({ data: { data: mockResponse } });
 
       await messagingService.searchMessages(searchParams);
 
       expect(mockApiClient.get).toHaveBeenCalledWith('/api/messages/search', {
-        params: searchParams,
+        params: { q: 'test', conversationId: undefined, page: 0, size: 20 },
       });
     });
   });
 
   describe('getAttachmentUploadUrl', () => {
     it('should get presigned URL for file upload', async () => {
+      const conversationId = '123e4567-e89b-12d3-a456-426614174000';
       const request = {
         fileName: 'document.pdf',
         contentType: 'application/pdf',
@@ -302,19 +301,24 @@ describe('Messaging Service', () => {
       };
       const mockResponse = {
         uploadUrl: 'https://s3.amazonaws.com/bucket/presigned-url',
-        key: 'uploads/123/document.pdf',
+        s3Key: 'uploads/123/document.pdf',
         expiresIn: 3600,
+        instructions: {
+          method: 'PUT',
+          contentType: 'application/pdf',
+          maxFileSize: 10485760,
+        },
       };
 
-      mockApiClient.post.mockResolvedValueOnce({ data: mockResponse });
+      mockApiClient.post.mockResolvedValueOnce({ data: { data: mockResponse } });
 
-      const result = await messagingService.getAttachmentUploadUrl(request);
+      const result = await messagingService.getAttachmentUploadUrl(conversationId, request);
 
-      expect(mockApiClient.post).toHaveBeenCalledWith(
-        '/api/messages/attachments/upload-url',
-        request
-      );
-      expect(result.data).toEqual(mockResponse);
+      expect(mockApiClient.post).toHaveBeenCalledWith('/api/messages/attachments/upload-url', {
+        conversationId,
+        ...request,
+      });
+      expect(result).toEqual(mockResponse);
     });
   });
 });

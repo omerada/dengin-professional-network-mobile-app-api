@@ -1,7 +1,7 @@
 // __tests__/unit/verification/imageProcessor.test.ts
 // Image processor testleri
 
-import { imageProcessor, ImageValidationError } from '../../../src/features/verification/services/imageProcessor';
+import { imageProcessor } from '../../../src/features/verification/services/imageProcessor';
 
 // react-native-image-resizer mock
 jest.mock('react-native-image-resizer', () => ({
@@ -29,6 +29,9 @@ jest.mock('react-native-fs', () => ({
     isFile: () => true,
     mtime: new Date(),
   }),
+  readFile: jest.fn().mockResolvedValue('base64-encoded-data'),
+  exists: jest.fn().mockResolvedValue(true),
+  unlink: jest.fn().mockResolvedValue(undefined),
 }));
 
 describe('Image Processor', () => {
@@ -50,14 +53,17 @@ describe('Image Processor', () => {
       const result = await imageProcessor.validate('file:///test/large.jpg');
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain(ImageValidationError.FILE_TOO_LARGE);
+      expect(result.errors).toContain('TOO_LARGE');
     });
 
-    it('should detect invalid format', async () => {
-      const result = await imageProcessor.validate('file:///test/image.gif');
+    it('should detect resolution too small', async () => {
+      const { Image } = require('react-native');
+      Image.getSize.mockImplementationOnce((uri: string, success: Function) => success(320, 240));
+
+      const result = await imageProcessor.validate('file:///test/small.jpg');
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain(ImageValidationError.INVALID_FORMAT);
+      expect(result.errors).toContain('TOO_SMALL');
     });
   });
 
@@ -69,74 +75,55 @@ describe('Image Processor', () => {
       expect(result.uri).toContain('resized');
     });
 
-    it('should compress image with custom options', async () => {
-      const ImageResizer = require('react-native-image-resizer');
+    it('should return CapturedImage format', async () => {
+      const result = await imageProcessor.compress('file:///test/image.jpg');
 
-      await imageProcessor.compress('file:///test/image.jpg', {
-        maxWidth: 1280,
-        maxHeight: 720,
-        quality: 70,
-      });
-
-      expect(ImageResizer.createResizedImage).toHaveBeenCalledWith(
-        'file:///test/image.jpg',
-        1280,
-        720,
-        'JPEG',
-        70,
-        0,
-        undefined,
-        false,
-        { mode: 'contain', onlyScaleDown: true }
-      );
-    });
-  });
-
-  describe('getMetadata', () => {
-    it('should get image metadata', async () => {
-      const metadata = await imageProcessor.getMetadata('file:///test/image.jpg');
-
-      expect(metadata).toBeDefined();
-      expect(metadata.width).toBe(1920);
-      expect(metadata.height).toBe(1080);
-      expect(metadata.fileSize).toBe(1024000);
-    });
-  });
-
-  describe('processForUpload', () => {
-    it('should validate, compress and return processed image', async () => {
-      const result = await imageProcessor.processForUpload('file:///test/image.jpg');
-
-      expect(result.uri).toContain('resized');
+      expect(result.uri).toBeDefined();
+      expect(result.path).toBeDefined();
       expect(result.width).toBeDefined();
       expect(result.height).toBeDefined();
+      expect(result.type).toBe('front');
+      expect(result.capturedAt).toBeDefined();
     });
+  });
 
-    it('should throw on invalid image', async () => {
-      const RNFS = require('react-native-fs');
-      RNFS.stat.mockResolvedValueOnce({
-        size: 20 * 1024 * 1024, // 20MB
-        isFile: () => true,
-      });
+  describe('getResolution', () => {
+    it('should get image resolution', async () => {
+      const resolution = await imageProcessor.getResolution('file:///test/image.jpg');
 
-      await expect(imageProcessor.processForUpload('file:///test/large.jpg'))
-        .rejects.toThrow('Dosya boyutu çok büyük');
+      expect(resolution).toBeDefined();
+      expect(resolution.width).toBe(1920);
+      expect(resolution.height).toBe(1080);
+    });
+  });
+
+  describe('getFileSize', () => {
+    it('should get file size', async () => {
+      const size = await imageProcessor.getFileSize('file:///test/image.jpg');
+
+      expect(size).toBe(1024000);
+    });
+  });
+
+  describe('toBase64', () => {
+    it('should convert image to base64', async () => {
+      const result = await imageProcessor.toBase64('file:///test/image.jpg');
+
+      expect(result).toBe('base64-encoded-data');
     });
   });
 
   describe('getErrorMessage', () => {
     it('should return correct error messages', () => {
-      expect(imageProcessor.getErrorMessage(ImageValidationError.FILE_TOO_LARGE))
-        .toBe('Dosya boyutu çok büyük (max 10MB)');
+      expect(imageProcessor.getErrorMessage('TOO_LARGE')).toBe('Dosya boyutu çok büyük.');
 
-      expect(imageProcessor.getErrorMessage(ImageValidationError.INVALID_FORMAT))
-        .toBe('Geçersiz dosya formatı (JPG, PNG kabul edilir)');
+      expect(imageProcessor.getErrorMessage('WRONG_FORMAT')).toBe('Desteklenmeyen dosya formatı.');
 
-      expect(imageProcessor.getErrorMessage(ImageValidationError.DIMENSIONS_TOO_SMALL))
-        .toBe('Görüntü çözünürlüğü çok düşük (min 640x480)');
+      expect(imageProcessor.getErrorMessage('TOO_SMALL')).toBe('Görüntü çözünürlüğü çok düşük.');
 
-      expect(imageProcessor.getErrorMessage(ImageValidationError.CORRUPTED))
-        .toBe('Görüntü dosyası bozuk veya okunamıyor');
+      expect(imageProcessor.getErrorMessage('BLURRY')).toBe(
+        'Görüntü bulanık. Kamerayı sabit tutun ve odaklanmasını bekleyin.',
+      );
     });
   });
 });

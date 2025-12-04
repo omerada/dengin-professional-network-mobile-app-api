@@ -40,7 +40,7 @@ export const feedService = {
       API_ENDPOINTS.FEED.PERSONALIZED,
       {
         params: { page, limit, professionFilter },
-      }
+      },
     );
     return response.data.data;
   },
@@ -50,12 +50,9 @@ export const feedService = {
    * GET /api/feed/trending?limit=20
    */
   async getTrendingFeed(limit = 20): Promise<FeedResponse> {
-    const response = await apiClient.get<ApiResponse<FeedResponse>>(
-      API_ENDPOINTS.FEED.TRENDING,
-      {
-        params: { limit },
-      }
-    );
+    const response = await apiClient.get<ApiResponse<FeedResponse>>(API_ENDPOINTS.FEED.TRENDING, {
+      params: { limit },
+    });
     return response.data.data;
   },
 
@@ -64,9 +61,7 @@ export const feedService = {
    * GET /api/posts/{postId}
    */
   async getPost(postId: number): Promise<Post> {
-    const response = await apiClient.get<ApiResponse<Post>>(
-      API_ENDPOINTS.FEED.POST_BY_ID(postId)
-    );
+    const response = await apiClient.get<ApiResponse<Post>>(API_ENDPOINTS.FEED.POST_BY_ID(postId));
     return response.data.data;
   },
 
@@ -75,10 +70,7 @@ export const feedService = {
    * POST /api/posts
    */
   async createPost(data: CreatePostRequest): Promise<Post> {
-    const response = await apiClient.post<ApiResponse<Post>>(
-      API_ENDPOINTS.FEED.CREATE_POST,
-      data
-    );
+    const response = await apiClient.post<ApiResponse<Post>>(API_ENDPOINTS.FEED.CREATE_POST, data);
     return response.data.data;
   },
 
@@ -88,7 +80,7 @@ export const feedService = {
   async updatePost(postId: number, dto: UpdatePostDto): Promise<Post> {
     const response = await apiClient.put<ApiResponse<Post>>(
       API_ENDPOINTS.FEED.UPDATE_POST(postId),
-      dto
+      dto,
     );
     return response.data.data;
   },
@@ -107,7 +99,7 @@ export const feedService = {
    */
   async likePost(postId: number): Promise<LikeResponse> {
     const response = await apiClient.post<ApiResponse<LikeResponse>>(
-      API_ENDPOINTS.FEED.LIKE_POST(postId)
+      API_ENDPOINTS.FEED.LIKE_POST(postId),
     );
     return response.data.data;
   },
@@ -118,7 +110,7 @@ export const feedService = {
    */
   async unlikePost(postId: number): Promise<LikeResponse> {
     const response = await apiClient.delete<ApiResponse<LikeResponse>>(
-      API_ENDPOINTS.FEED.UNLIKE_POST(postId)
+      API_ENDPOINTS.FEED.UNLIKE_POST(postId),
     );
     return response.data.data;
   },
@@ -153,7 +145,7 @@ export const feedService = {
   async getComments(postId: number, page = 0, size = 20): Promise<CommentListResponse> {
     const response = await apiClient.get<ApiResponse<CommentListResponse>>(
       API_ENDPOINTS.COMMENTS.BY_POST(postId),
-      { params: { page, size } }
+      { params: { page, size } },
     );
     return response.data.data;
   },
@@ -165,7 +157,7 @@ export const feedService = {
   async addComment(postId: number, data: AddCommentRequest): Promise<Comment> {
     const response = await apiClient.post<ApiResponse<Comment>>(
       API_ENDPOINTS.COMMENTS.CREATE(postId),
-      data
+      data,
     );
     return response.data.data;
   },
@@ -199,10 +191,9 @@ export const feedService = {
    * GET /api/posts/saved
    */
   async getSavedPosts(page = 0, limit = 20): Promise<FeedResponse> {
-    const response = await apiClient.get<ApiResponse<FeedResponse>>(
-      API_ENDPOINTS.FEED.SAVED,
-      { params: { page, limit } }
-    );
+    const response = await apiClient.get<ApiResponse<FeedResponse>>(API_ENDPOINTS.FEED.SAVED, {
+      params: { page, limit },
+    });
     return response.data.data;
   },
 
@@ -212,7 +203,7 @@ export const feedService = {
   async getUserPosts(userId: number, page = 0, limit = 20): Promise<FeedResponse> {
     const response = await apiClient.get<ApiResponse<FeedResponse>>(
       API_ENDPOINTS.FEED.USER_POSTS(userId),
-      { params: { page, limit } }
+      { params: { page, limit } },
     );
     return response.data.data;
   },
@@ -222,38 +213,7 @@ export const feedService = {
    */
   async sharePost(postId: number): Promise<{ sharesCount: number }> {
     const response = await apiClient.post<ApiResponse<{ sharesCount: number }>>(
-      API_ENDPOINTS.FEED.SHARE_POST(postId)
-    );
-    return response.data.data;
-  },
-};
-
-export default feedService;
-  async getBookmarkedPosts(cursor?: string, limit = 20): Promise<FeedResponse> {
-    const response = await apiClient.get<{ data: FeedResponse }>(
-      API_ENDPOINTS.FEED.BOOKMARKED,
-      { params: { cursor, limit } }
-    );
-    return response.data.data;
-  },
-
-  /**
-   * Kullanıcının postlarını getir
-   */
-  async getUserPosts(userId: string, cursor?: string, limit = 20): Promise<FeedResponse> {
-    const response = await apiClient.get<{ data: FeedResponse }>(
-      API_ENDPOINTS.FEED.USER_POSTS(userId),
-      { params: { cursor, limit } }
-    );
-    return response.data.data;
-  },
-
-  /**
-   * Post paylaş
-   */
-  async sharePost(postId: string): Promise<{ sharesCount: number }> {
-    const response = await apiClient.post<{ data: { sharesCount: number } }>(
-      API_ENDPOINTS.FEED.SHARE_POST(postId)
+      API_ENDPOINTS.FEED.SHARE_POST(postId),
     );
     return response.data.data;
   },

@@ -3,13 +3,7 @@
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import React, { memo, useCallback } from 'react';
-import {
-  StyleSheet,
-  TouchableOpacity,
-  View,
-  ActivityIndicator,
-  ViewStyle,
-} from 'react-native';
+import { StyleSheet, TouchableOpacity, View, ActivityIndicator, ViewStyle } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -71,7 +65,8 @@ export const CaptureButton: React.FC<CaptureButtonProps> = memo(
     style,
     accessibilityLabel = 'Fotoğraf çek',
   }) => {
-    const { colors } = useTheme();
+    const { theme } = useTheme();
+    const { colors } = theme;
     const scale = useSharedValue(1);
 
     const sizeValues = SIZES[size];
@@ -105,7 +100,7 @@ export const CaptureButton: React.FC<CaptureButtonProps> = memo(
       // Pulse animation
       scale.value = withSequence(
         withTiming(0.85, { duration: 100 }),
-        withSpring(1, { damping: 10, stiffness: 300 })
+        withSpring(1, { damping: 10, stiffness: 300 }),
       );
 
       onCapture();
@@ -128,8 +123,7 @@ export const CaptureButton: React.FC<CaptureButtonProps> = memo(
           activeOpacity={1}
           accessibilityRole="button"
           accessibilityLabel={accessibilityLabel}
-          accessibilityState={{ disabled: disabled || loading }}
-        >
+          accessibilityState={{ disabled: disabled || loading }}>
           <View
             style={[
               styles.outerRing,
@@ -138,12 +132,9 @@ export const CaptureButton: React.FC<CaptureButtonProps> = memo(
                 height: sizeValues.outer,
                 borderRadius: sizeValues.outer / 2,
                 borderWidth: sizeValues.border,
-                borderColor: disabled
-                  ? colors.textDisabled
-                  : colors.background,
+                borderColor: disabled ? colors.textDisabled : colors.background,
               },
-            ]}
-          >
+            ]}>
             <View
               style={[
                 styles.innerCircle,
@@ -151,24 +142,16 @@ export const CaptureButton: React.FC<CaptureButtonProps> = memo(
                   width: sizeValues.inner,
                   height: sizeValues.inner,
                   borderRadius: sizeValues.inner / 2,
-                  backgroundColor: disabled
-                    ? colors.textDisabled
-                    : colors.background,
+                  backgroundColor: disabled ? colors.textDisabled : colors.background,
                 },
-              ]}
-            >
-              {loading && (
-                <ActivityIndicator
-                  size="small"
-                  color={colors.primary}
-                />
-              )}
+              ]}>
+              {loading && <ActivityIndicator size="small" color={colors.primary} />}
             </View>
           </View>
         </TouchableOpacity>
       </Animated.View>
     );
-  }
+  },
 );
 
 CaptureButton.displayName = 'CaptureButton';

@@ -3,13 +3,7 @@
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import React, { memo, useCallback } from 'react';
-import {
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  Text,
-  ViewStyle,
-} from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Text, ViewStyle } from 'react-native';
 import { useTheme } from '@contexts';
 import { spacing, typography } from '@theme';
 import type { CameraSettings } from '../types';
@@ -66,7 +60,8 @@ export const CameraControls: React.FC<CameraControlsProps> = memo(
     showGallery = false,
     style,
   }) => {
-    const { colors } = useTheme();
+    const { theme } = useTheme();
+    const { colors } = theme;
 
     /**
      * Flaş modunu değiştir
@@ -87,8 +82,7 @@ export const CameraControls: React.FC<CameraControlsProps> = memo(
               style={[styles.controlButton, { backgroundColor: colors.surface }]}
               onPress={onSelectFromGallery}
               accessibilityRole="button"
-              accessibilityLabel="Galeriden seç"
-            >
+              accessibilityLabel="Galeriden seç">
               <Text style={styles.controlIcon}>🖼️</Text>
             </TouchableOpacity>
           )}
@@ -104,22 +98,13 @@ export const CameraControls: React.FC<CameraControlsProps> = memo(
             style={[
               styles.controlButton,
               {
-                backgroundColor:
-                  settings.flash === 'on'
-                    ? colors.primary
-                    : colors.surface,
+                backgroundColor: settings.flash === 'on' ? colors.primary : colors.surface,
               },
             ]}
             onPress={handleFlashToggle}
             accessibilityRole="button"
-            accessibilityLabel={`Flaş: ${FLASH_LABELS[settings.flash]}`}
-          >
-            <Text
-              style={[
-                styles.controlIcon,
-                settings.flash === 'off' && styles.flashOff,
-              ]}
-            >
+            accessibilityLabel={`Flaş: ${FLASH_LABELS[settings.flash]}`}>
+            <Text style={[styles.controlIcon, settings.flash === 'off' && styles.flashOff]}>
               {FLASH_ICONS[settings.flash]}
             </Text>
           </TouchableOpacity>
@@ -130,15 +115,14 @@ export const CameraControls: React.FC<CameraControlsProps> = memo(
               style={[styles.controlButton, { backgroundColor: colors.surface }]}
               onPress={onFlipCamera}
               accessibilityRole="button"
-              accessibilityLabel="Kamerayı çevir"
-            >
+              accessibilityLabel="Kamerayı çevir">
               <Text style={styles.controlIcon}>🔄</Text>
             </TouchableOpacity>
           )}
         </View>
       </View>
     );
-  }
+  },
 );
 
 CameraControls.displayName = 'CameraControls';

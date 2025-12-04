@@ -2,39 +2,20 @@
 // Unit tests for analytics service
 // Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
 
+// Firebase mocks are in setup.ts
+
 import { Analytics, AnalyticsEvent, AnalyticsScreen } from '@shared/services/analytics';
 import analytics from '@react-native-firebase/analytics';
 import crashlytics from '@react-native-firebase/crashlytics';
-
-// Mock Firebase Analytics
-jest.mock('@react-native-firebase/analytics', () => () => ({
-  logScreenView: jest.fn(),
-  logEvent: jest.fn(),
-  logLogin: jest.fn(),
-  logSignUp: jest.fn(),
-  logShare: jest.fn(),
-  logSearch: jest.fn(),
-  setUserId: jest.fn(),
-  setUserProperties: jest.fn(),
-  setAnalyticsCollectionEnabled: jest.fn(),
-  resetAnalyticsData: jest.fn(),
-}));
-
-// Mock Firebase Crashlytics
-jest.mock('@react-native-firebase/crashlytics', () => () => ({
-  recordError: jest.fn(),
-  log: jest.fn(),
-  setUserId: jest.fn(),
-  setAttribute: jest.fn(),
-  setCrashlyticsCollectionEnabled: jest.fn(),
-}));
 
 const mockAnalytics = analytics() as jest.Mocked<ReturnType<typeof analytics>>;
 const mockCrashlytics = crashlytics() as jest.Mocked<ReturnType<typeof crashlytics>>;
 
 describe('Analytics Service', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks();
+    // Ensure analytics is enabled for tests
+    await Analytics.setEnabled(true);
   });
 
   describe('setEnabled', () => {
@@ -109,20 +90,18 @@ describe('Analytics Service', () => {
     it('should log custom event', async () => {
       await Analytics.logEvent(AnalyticsEvent.POST_LIKED, { postId: 'post-123' });
 
-      expect(mockAnalytics.logEvent).toHaveBeenCalledWith(
-        AnalyticsEvent.POST_LIKED,
-        { postId: 'post-123' }
-      );
+      expect(mockAnalytics.logEvent).toHaveBeenCalledWith(AnalyticsEvent.POST_LIKED, {
+        postId: 'post-123',
+      });
     });
 
     it('should sanitize long string params', async () => {
       const longString = 'a'.repeat(200);
       await Analytics.logEvent(AnalyticsEvent.SEARCH_PERFORMED, { query: longString });
 
-      expect(mockAnalytics.logEvent).toHaveBeenCalledWith(
-        AnalyticsEvent.SEARCH_PERFORMED,
-        { query: 'a'.repeat(100) }
-      );
+      expect(mockAnalytics.logEvent).toHaveBeenCalledWith(AnalyticsEvent.SEARCH_PERFORMED, {
+        query: 'a'.repeat(100),
+      });
     });
 
     it('should sanitize null values', async () => {
@@ -196,7 +175,7 @@ describe('Analytics Service', () => {
           error_message: 'Test error',
           error_name: 'Error',
           is_fatal: false,
-        })
+        }),
       );
     });
   });
@@ -205,10 +184,7 @@ describe('Analytics Service', () => {
     it('should set custom key on crashlytics', async () => {
       await Analytics.setCustomKey('custom_key', 'custom_value');
 
-      expect(mockCrashlytics.setAttribute).toHaveBeenCalledWith(
-        'custom_key',
-        'custom_value'
-      );
+      expect(mockCrashlytics.setAttribute).toHaveBeenCalledWith('custom_key', 'custom_value');
     });
   });
 

@@ -1,10 +1,10 @@
-// src/features/feed/__tests__/useFeed.test.ts
-// Feed hook unit testleri
+// src/features/feed/__tests__/useFeed.test.tsx
+// Feed hook unit testleri - Backend API uyumlu
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
+import React from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React from 'react';
 import { useFeed, useFeedPosts } from '../hooks/useFeed';
 import { feedService } from '../services/feedService';
 import type { FeedResponse, Post } from '../types';
@@ -14,53 +14,59 @@ jest.mock('../services/feedService');
 
 const mockFeedService = feedService as jest.Mocked<typeof feedService>;
 
-// Mock data
+// Mock data - Backend API uyumlu
 const mockPost1: Post = {
-  id: 'post-1',
+  postId: 1,
   content: 'First post',
   author: {
-    id: 'user-1',
-    name: 'User 1',
-    avatarUrl: null,
+    id: 1,
+    name: 'User',
+    surname: '1',
+    avatarUrl: undefined,
     profession: 'Engineer',
     isVerified: true,
   },
   images: [],
-  likesCount: 10,
-  commentsCount: 5,
-  sharesCount: 2,
-  isLiked: false,
-  isBookmarked: false,
+  stats: {
+    likeCount: 10,
+    commentCount: 5,
+    viewCount: 2,
+  },
+  userInteraction: {
+    isLiked: false,
+    isSaved: false,
+  },
   createdAt: '2024-01-01T10:00:00Z',
   updatedAt: '2024-01-01T10:00:00Z',
 };
 
 const mockPost2: Post = {
   ...mockPost1,
-  id: 'post-2',
+  postId: 2,
   content: 'Second post',
 };
 
 const mockFirstPage: FeedResponse = {
-  data: [mockPost1, mockPost2],
-  pagination: {
-    cursor: 'cursor-page-1',
-    hasMore: true,
-    totalCount: 100,
-  },
-  nextCursor: 'cursor-page-1',
-  hasMore: true,
+  content: [mockPost1, mockPost2],
+  page: 0,
+  size: 20,
+  totalElements: 100,
+  totalPages: 5,
+  hasNext: true,
+  hasPrevious: false,
 };
 
 const mockSecondPage: FeedResponse = {
-  data: [{ ...mockPost1, id: 'post-3' }, { ...mockPost1, id: 'post-4' }],
-  pagination: {
-    cursor: 'cursor-page-2',
-    hasMore: false,
-    totalCount: 100,
-  },
-  nextCursor: null,
-  hasMore: false,
+  content: [
+    { ...mockPost1, postId: 3 },
+    { ...mockPost1, postId: 4 },
+  ],
+  page: 1,
+  size: 20,
+  totalElements: 100,
+  totalPages: 5,
+  hasNext: false,
+  hasPrevious: true,
 };
 
 // Test wrapper
@@ -98,14 +104,14 @@ describe('useFeed', () => {
     });
 
     expect(result.current.data?.pages).toHaveLength(1);
-    expect(result.current.data?.pages[0].data).toHaveLength(2);
-    expect(mockFeedService.getFeed).toHaveBeenCalledWith(undefined, 'all', 20);
+    expect(result.current.data?.pages[0].content).toHaveLength(2);
+    expect(mockFeedService.getFeed).toHaveBeenCalledWith(0, 20, undefined);
   });
 
-  it('should handle filter parameter', async () => {
+  it('should handle professionFilter parameter', async () => {
     mockFeedService.getFeed.mockResolvedValue(mockFirstPage);
 
-    const { result } = renderHook(() => useFeed('following'), {
+    const { result } = renderHook(() => useFeed(5), {
       wrapper: createWrapper(),
     });
 
@@ -113,7 +119,7 @@ describe('useFeed', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(mockFeedService.getFeed).toHaveBeenCalledWith(undefined, 'following', 20);
+    expect(mockFeedService.getFeed).toHaveBeenCalledWith(0, 20, 5);
   });
 
   it('should fetch next page when hasNextPage is true', async () => {
@@ -141,13 +147,21 @@ describe('useFeed', () => {
     });
 
     expect(mockFeedService.getFeed).toHaveBeenCalledTimes(2);
-    expect(mockFeedService.getFeed).toHaveBeenLastCalledWith('cursor-page-1', 'all', 20);
+    expect(mockFeedService.getFeed).toHaveBeenLastCalledWith(1, 20, undefined);
   });
 
   it('should set hasNextPage to false when no more pages', async () => {
-    mockFeedService.getFeed
-      .mockResolvedValueOnce(mockFirstPage)
-      .mockResolvedValueOnce(mockSecondPage);
+    const noMorePagesResponse: FeedResponse = {
+      content: [mockPost1],
+      page: 0,
+      size: 20,
+      totalElements: 1,
+      totalPages: 1,
+      hasNext: false,
+      hasPrevious: false,
+    };
+
+    mockFeedService.getFeed.mockResolvedValue(noMorePagesResponse);
 
     const { result } = renderHook(() => useFeed(), {
       wrapper: createWrapper(),
@@ -157,13 +171,7 @@ describe('useFeed', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    await act(async () => {
-      await result.current.fetchNextPage();
-    });
-
-    await waitFor(() => {
-      expect(result.current.hasNextPage).toBe(false);
-    });
+    expect(result.current.hasNextPage).toBe(false);
   });
 
   it('should handle API error', async () => {
@@ -214,10 +222,13 @@ describe('useFeedPosts', () => {
 
   it('should return empty array when no data', async () => {
     mockFeedService.getFeed.mockResolvedValue({
-      data: [],
-      pagination: { cursor: null, hasMore: false, totalCount: 0 },
-      nextCursor: null,
-      hasMore: false,
+      content: [],
+      page: 0,
+      size: 20,
+      totalElements: 0,
+      totalPages: 0,
+      hasNext: false,
+      hasPrevious: false,
     });
 
     const { result } = renderHook(() => useFeedPosts(), {

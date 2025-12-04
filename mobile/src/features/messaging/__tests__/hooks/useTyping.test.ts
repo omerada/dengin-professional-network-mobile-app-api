@@ -3,38 +3,49 @@
 // Oku: mobile-development-guide/testing/21-TESTING-STRATEGY.md
 
 import { renderHook, act } from '@testing-library/react-native';
-import { useTyping } from '../../hooks/useTyping';
 
-// Mock STOMP client
+// Track mock calls
 const mockSendTyping = jest.fn();
-const mockOn = jest.fn(() => jest.fn());
+const mockOn = jest.fn();
+const mockOff = jest.fn();
+const mockAddTypingUser = jest.fn();
+const mockRemoveTypingUser = jest.fn();
 
-jest.mock('@core/socket', () => ({
+jest.mock('../../services/socketClient', () => ({
   stompClient: {
-    on: mockOn,
-    sendTyping: mockSendTyping,
-    isConnected: jest.fn(() => true),
+    on: (event: string, handler: Function) => mockOn(event, handler),
+    off: (event: string, handler: Function) => mockOff(event, handler),
+    sendTyping: (convId: string, recipientId: string, isTyping: boolean) =>
+      mockSendTyping(convId, recipientId, isTyping),
+    isConnected: () => true,
   },
 }));
 
 // Mock stores
 jest.mock('../../stores', () => ({
-  useMessagingStore: jest.fn(() => ({
-    addTypingUser: jest.fn(),
-    removeTypingUser: jest.fn(),
+  useMessagingStore: () => ({
+    addTypingUser: mockAddTypingUser,
+    removeTypingUser: mockRemoveTypingUser,
     typingUsers: {},
-  })),
+  }),
 }));
 
 jest.mock('@features/auth/stores', () => ({
-  useAuthStore: jest.fn(() => ({
+  useAuthStore: () => ({
     user: { id: '123' },
-  })),
+  }),
 }));
+
+import { useTyping } from '../../hooks/useTyping';
 
 describe('useTyping', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSendTyping.mockClear();
+    mockOn.mockClear();
+    mockOff.mockClear();
+    mockAddTypingUser.mockClear();
+    mockRemoveTypingUser.mockClear();
     jest.useFakeTimers();
   });
 
@@ -58,7 +69,7 @@ describe('useTyping', () => {
     const { result } = renderHook(() => useTyping('conv-1'));
 
     act(() => {
-      result.current.setRecipientId(456);
+      result.current.setRecipientId('456');
     });
 
     // Recipient ID is stored internally
@@ -70,7 +81,7 @@ describe('useTyping', () => {
 
     // Set recipient first
     act(() => {
-      result.current.setRecipientId(456);
+      result.current.setRecipientId('456');
     });
 
     // Start typing
@@ -86,14 +97,14 @@ describe('useTyping', () => {
       jest.advanceTimersByTime(500);
     });
 
-    expect(mockSendTyping).toHaveBeenCalledWith('conv-1', 456, true);
+    expect(mockSendTyping).toHaveBeenCalledWith('conv-1', '456', true);
   });
 
   it('should stop typing after timeout', () => {
     const { result } = renderHook(() => useTyping('conv-1'));
 
     act(() => {
-      result.current.setRecipientId(456);
+      result.current.setRecipientId('456');
     });
 
     act(() => {
@@ -111,14 +122,14 @@ describe('useTyping', () => {
     });
 
     // Should have sent stop typing
-    expect(mockSendTyping).toHaveBeenCalledWith('conv-1', 456, false);
+    expect(mockSendTyping).toHaveBeenCalledWith('conv-1', '456', false);
   });
 
   it('should stop typing immediately when called', () => {
     const { result } = renderHook(() => useTyping('conv-1'));
 
     act(() => {
-      result.current.setRecipientId(456);
+      result.current.setRecipientId('456');
     });
 
     act(() => {
@@ -134,7 +145,7 @@ describe('useTyping', () => {
       result.current.stopTyping();
     });
 
-    expect(mockSendTyping).toHaveBeenCalledWith('conv-1', 456, false);
+    expect(mockSendTyping).toHaveBeenCalledWith('conv-1', '456', false);
   });
 
   it('should return correct typing text', () => {

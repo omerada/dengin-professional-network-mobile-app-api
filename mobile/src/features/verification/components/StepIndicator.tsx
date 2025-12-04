@@ -4,10 +4,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { StyleSheet, View, Text, ViewStyle } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  withSpring,
-} from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useTheme } from '@contexts';
 import { spacing, typography } from '@theme';
 import type { VerificationStep } from '../types';
@@ -53,65 +50,61 @@ interface StepDotProps {
   isCurrent: boolean;
 }
 
-const StepDot: React.FC<StepDotProps> = memo(
-  ({ step, isCompleted, isCurrent }) => {
-    const { colors } = useTheme();
+const StepDot: React.FC<StepDotProps> = memo(({ step, isCompleted, isCurrent }) => {
+  const { theme } = useTheme();
+  const { colors } = theme;
 
-    const animatedStyle = useAnimatedStyle(() => ({
-      transform: [
-        {
-          scale: withSpring(isCurrent ? 1.2 : 1, {
-            damping: 15,
-            stiffness: 300,
-          }),
-        },
-      ],
-    }));
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        scale: withSpring(isCurrent ? 1.2 : 1, {
+          damping: 15,
+          stiffness: 300,
+        }),
+      },
+    ],
+  }));
 
-    const getBackgroundColor = () => {
-      if (isCompleted) return colors.success;
-      if (isCurrent) return colors.primary;
-      return colors.border;
-    };
+  const getBackgroundColor = () => {
+    if (isCompleted) return colors.success;
+    if (isCurrent) return colors.primary;
+    return colors.border;
+  };
 
-    return (
-      <View style={styles.stepContainer}>
-        <Animated.View
-          style={[
-            styles.stepDot,
-            {
-              backgroundColor: getBackgroundColor(),
-            },
-            animatedStyle,
-          ]}
-        >
-          <Text
-            style={[
-              styles.stepNumber,
-              {
-                color: isCompleted || isCurrent ? colors.textInverse : colors.textSecondary,
-              },
-            ]}
-          >
-            {isCompleted ? '✓' : step.shortLabel}
-          </Text>
-        </Animated.View>
+  return (
+    <View style={styles.stepContainer}>
+      <Animated.View
+        style={[
+          styles.stepDot,
+          {
+            backgroundColor: getBackgroundColor(),
+          },
+          animatedStyle,
+        ]}>
         <Text
           style={[
-            styles.stepLabel,
+            styles.stepNumber,
             {
-              color: isCurrent ? colors.text : colors.textSecondary,
-              fontWeight: isCurrent ? '600' : '400',
+              color: isCompleted || isCurrent ? colors.textInverse : colors.textSecondary,
             },
-          ]}
-          numberOfLines={1}
-        >
-          {step.label}
+          ]}>
+          {isCompleted ? '✓' : step.shortLabel}
         </Text>
-      </View>
-    );
-  }
-);
+      </Animated.View>
+      <Text
+        style={[
+          styles.stepLabel,
+          {
+            color: isCurrent ? colors.text : colors.textSecondary,
+            fontWeight: isCurrent ? '600' : '400',
+          },
+        ]}
+        numberOfLines={1}>
+        {step.label}
+      </Text>
+    </View>
+  );
+});
 
 StepDot.displayName = 'StepDot';
 
@@ -123,13 +116,14 @@ interface StepLineProps {
 }
 
 const StepLine: React.FC<StepLineProps> = memo(({ isCompleted }) => {
-  const { colors } = useTheme();
+  const { theme } = useTheme();
+  const { colors } = theme;
 
   const animatedStyle = useAnimatedStyle(() => ({
-    backgroundColor: withSpring(
-      isCompleted ? colors.success : colors.border,
-      { damping: 20, stiffness: 200 }
-    ),
+    backgroundColor: withSpring(isCompleted ? colors.success : colors.border, {
+      damping: 20,
+      stiffness: 200,
+    }),
   }));
 
   return <Animated.View style={[styles.stepLine, animatedStyle]} />;
@@ -141,38 +135,31 @@ StepLine.displayName = 'StepLine';
  * Adım göstergesi
  * Doğrulama sürecindeki ilerlemeyi görsel olarak gösterir
  */
-export const StepIndicator: React.FC<StepIndicatorProps> = memo(
-  ({ currentStep, style }) => {
-    const currentIndex = useMemo(
-      () => STEPS.findIndex((s) => s.key === currentStep),
-      [currentStep]
-    );
+export const StepIndicator: React.FC<StepIndicatorProps> = memo(({ currentStep, style }) => {
+  const currentIndex = useMemo(() => STEPS.findIndex(s => s.key === currentStep), [currentStep]);
 
-    // Yükleme ve durum adımlarını gösterme
-    if (currentStep === 'uploading' || currentStep === 'status') {
-      return null;
-    }
-
-    return (
-      <View style={[styles.container, style]} accessibilityRole="progressbar">
-        {STEPS.map((step, index) => (
-          <React.Fragment key={step.key}>
-            <StepDot
-              step={step}
-              index={index}
-              currentIndex={currentIndex}
-              isCompleted={index < currentIndex}
-              isCurrent={index === currentIndex}
-            />
-            {index < STEPS.length - 1 && (
-              <StepLine isCompleted={index < currentIndex} />
-            )}
-          </React.Fragment>
-        ))}
-      </View>
-    );
+  // Yükleme ve durum adımlarını gösterme
+  if (currentStep === 'uploading' || currentStep === 'status') {
+    return null;
   }
-);
+
+  return (
+    <View style={[styles.container, style]} accessibilityRole="progressbar">
+      {STEPS.map((step, index) => (
+        <React.Fragment key={step.key}>
+          <StepDot
+            step={step}
+            index={index}
+            currentIndex={currentIndex}
+            isCompleted={index < currentIndex}
+            isCurrent={index === currentIndex}
+          />
+          {index < STEPS.length - 1 && <StepLine isCompleted={index < currentIndex} />}
+        </React.Fragment>
+      ))}
+    </View>
+  );
+});
 
 StepIndicator.displayName = 'StepIndicator';
 

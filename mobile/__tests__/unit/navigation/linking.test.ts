@@ -1,7 +1,7 @@
 // __tests__/unit/navigation/linking.test.ts
 // Oku: mobile-development-guide/testing/21-TESTING-STRATEGY.md
 
-import { linkingConfig } from '../../../src/core/navigation/linking';
+import { linking as linkingConfig } from '../../../src/core/navigation/linking';
 
 describe('Navigation Linking', () => {
   describe('Linking Config', () => {
@@ -41,8 +41,8 @@ describe('Navigation Linking', () => {
     });
 
     it('https deep link desteklenmeli', () => {
-      const hasHttps = linkingConfig.prefixes.some(
-        (prefix: string) => prefix.startsWith('https://')
+      const hasHttps = linkingConfig.prefixes.some((prefix: string) =>
+        prefix.startsWith('https://'),
       );
       expect(hasHttps).toBe(true);
     });

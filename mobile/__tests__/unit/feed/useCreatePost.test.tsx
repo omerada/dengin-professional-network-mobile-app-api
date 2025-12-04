@@ -10,16 +10,6 @@ import { useFeedStore } from '../../../src/features/feed/stores';
 import type { Post, LocalImage } from '../../../src/features/feed/types';
 import React from 'react';
 
-// Mock services
-jest.mock('../../../src/features/feed/services', () => ({
-  feedService: {
-    createPost: jest.fn(),
-  },
-  mediaUploader: {
-    uploadImages: jest.fn(),
-  },
-}));
-
 // Mock store
 jest.mock('../../../src/features/feed/stores', () => ({
   useFeedStore: jest.fn(),
@@ -32,6 +22,9 @@ jest.mock('@react-navigation/native', () => ({
     goBack: jest.fn(),
   }),
 }));
+
+// Mock services - must be after imports but jest hoists it
+jest.mock('../../../src/features/feed/services');
 
 const mockFeedService = feedService as jest.Mocked<typeof feedService>;
 const mockMediaUploader = mediaUploader as jest.Mocked<typeof mediaUploader>;
@@ -59,7 +52,7 @@ describe('useCreatePost Hook', () => {
     jest.clearAllMocks();
 
     // Setup store mock
-    mockUseFeedStore.mockImplementation((selector) =>
+    mockUseFeedStore.mockImplementation(selector =>
       selector({
         draftContent: '',
         draftImages: [],
@@ -67,7 +60,7 @@ describe('useCreatePost Hook', () => {
         addDraftImage: jest.fn(),
         removeDraftImage: jest.fn(),
         clearDraft: mockClearDraft,
-      })
+      }),
     );
   });
 
@@ -92,10 +85,7 @@ describe('useCreatePost Hook', () => {
     },
   ];
 
-  const mockS3Urls = [
-    'https://s3.example.com/image1.jpg',
-    'https://s3.example.com/image2.jpg',
-  ];
+  const mockS3Urls = ['https://s3.example.com/image1.jpg', 'https://s3.example.com/image2.jpg'];
 
   const mockCreatedPost: Post = {
     postId: 1,
@@ -136,10 +126,7 @@ describe('useCreatePost Hook', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(mockMediaUploader.uploadImages).toHaveBeenCalledWith(
-        mockLocalImages,
-        undefined
-      );
+      expect(mockMediaUploader.uploadImages).toHaveBeenCalledWith(mockLocalImages, undefined);
       expect(mockFeedService.createPost).toHaveBeenCalledWith({
         content: 'Test post content',
         images: mockS3Urls,
@@ -199,15 +186,22 @@ describe('useCreatePost Hook', () => {
 
     it('should report upload progress', async () => {
       const progressCallback = jest.fn();
-      
+
       mockMediaUploader.uploadImages.mockImplementation(
-        async (_, onProgress) => {
+        async (
+          _: unknown,
+          onProgress?: (progress: {
+            imageIndex: number;
+            totalImages: number;
+            progress: number;
+          }) => void,
+        ) => {
           if (onProgress) {
             onProgress({ imageIndex: 0, totalImages: 2, progress: 50 });
             onProgress({ imageIndex: 1, totalImages: 2, progress: 100 });
           }
           return mockS3Urls;
-        }
+        },
       );
       mockFeedService.createPost.mockResolvedValue(mockCreatedPost);
 
@@ -227,15 +221,11 @@ describe('useCreatePost Hook', () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      expect(progressCallback).toHaveBeenCalledWith(
-        expect.objectContaining({ progress: 50 })
-      );
+      expect(progressCallback).toHaveBeenCalledWith(expect.objectContaining({ progress: 50 }));
     });
 
     it('should handle upload error', async () => {
-      mockMediaUploader.uploadImages.mockRejectedValue(
-        new Error('Upload failed')
-      );
+      mockMediaUploader.uploadImages.mockRejectedValue(new Error('Upload failed'));
 
       const { result } = renderHook(() => useCreatePost(), { wrapper });
 

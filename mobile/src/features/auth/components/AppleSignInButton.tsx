@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, fontSize } from '@theme';
 import { useAppleSignIn } from '../hooks';
 
 interface AppleSignInButtonProps {
@@ -93,9 +93,10 @@ const styles = StyleSheet.create({
     marginRight: spacing.sm,
   },
   text: {
-    fontSize: typography.fontSize.md,
+    fontSize: fontSize.md,
     fontWeight: '600',
   },
 });
 
 AppleSignInButton.displayName = 'AppleSignInButton';
+

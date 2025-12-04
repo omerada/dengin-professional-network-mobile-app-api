@@ -3,14 +3,7 @@
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import React, { memo, useCallback, useRef, useState, useEffect } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  Alert,
-  SafeAreaView,
-  StatusBar,
-} from 'react-native';
+import { StyleSheet, View, Text, Alert, SafeAreaView, StatusBar } from 'react-native';
 import {
   Camera,
   useCameraDevice,
@@ -24,18 +17,11 @@ import { spacing, typography } from '@theme';
 import { Button, Loading } from '@shared/components';
 import { useVerificationStore } from '../stores';
 import { cameraService, imageProcessor } from '../services';
-import {
-  DocumentGuide,
-  CaptureButton,
-  CameraControls,
-} from '../components';
+import { DocumentGuide, CaptureButton, CameraControls } from '../components';
 import type { CameraSettings, CapturedImage } from '../types';
 import type { VerificationStackParamList } from '@shared/types/navigation.types';
 
-type NavigationProp = NativeStackNavigationProp<
-  VerificationStackParamList,
-  'DocumentCapture'
->;
+type NavigationProp = NativeStackNavigationProp<VerificationStackParamList, 'DocumentCapture'>;
 
 type RouteProps = RouteProp<VerificationStackParamList, 'DocumentCapture'>;
 
@@ -45,8 +31,9 @@ type RouteProps = RouteProp<VerificationStackParamList, 'DocumentCapture'>;
 export const DocumentCaptureScreen: React.FC = memo(() => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RouteProps>();
-  const { colors } = useTheme();
-  
+  const { theme } = useTheme();
+  const { colors } = theme;
+
   const { side } = route.params;
   const isBackSide = side === 'back';
 
@@ -55,16 +42,9 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
   const cameraRef = useRef<Camera>(null);
 
   const [isCapturing, setIsCapturing] = useState(false);
-  const [settings, setSettings] = useState<CameraSettings>(
-    cameraService.getDefaultSettings()
-  );
+  const [settings, setSettings] = useState<CameraSettings>(cameraService.getDefaultSettings());
 
-  const {
-    setDocumentFront,
-    setDocumentBack,
-    setStep,
-    goToNextStep,
-  } = useVerificationStore();
+  const { setDocumentFront, setDocumentBack, setStep, goToNextStep } = useVerificationStore();
 
   /**
    * İzin kontrolü
@@ -78,12 +58,9 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
   /**
    * Ayar değişikliği
    */
-  const handleSettingsChange = useCallback(
-    (newSettings: Partial<CameraSettings>) => {
-      setSettings((prev) => ({ ...prev, ...newSettings }));
-    },
-    []
-  );
+  const handleSettingsChange = useCallback((newSettings: Partial<CameraSettings>) => {
+    setSettings(prev => ({ ...prev, ...newSettings }));
+  }, []);
 
   /**
    * Fotoğraf çek
@@ -102,20 +79,18 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
 
       // Görüntüyü işle
       const compressedImage = await imageProcessor.compress(`file://${photo.path}`);
-      
+
       // Görüntüyü doğrula
       const validation = await imageProcessor.validate(compressedImage.uri);
 
       if (!validation.isValid) {
         const errorMessages = validation.errors
-          .map((err) => imageProcessor.getErrorMessage(err))
+          .map(err => imageProcessor.getErrorMessage(err))
           .join('\n');
 
-        Alert.alert(
-          'Görüntü Kalitesi Düşük',
-          errorMessages + '\n\nLütfen tekrar deneyin.',
-          [{ text: 'Tamam' }]
-        );
+        Alert.alert('Görüntü Kalitesi Düşük', errorMessages + '\n\nLütfen tekrar deneyin.', [
+          { text: 'Tamam' },
+        ]);
         setIsCapturing(false);
         return;
       }
@@ -137,11 +112,9 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
       }
     } catch (error) {
       console.error('Capture error:', error);
-      Alert.alert(
-        'Hata',
-        'Fotoğraf çekilirken bir hata oluştu. Lütfen tekrar deneyin.',
-        [{ text: 'Tamam' }]
-      );
+      Alert.alert('Hata', 'Fotoğraf çekilirken bir hata oluştu. Lütfen tekrar deneyin.', [
+        { text: 'Tamam' },
+      ]);
     } finally {
       setIsCapturing(false);
     }
@@ -163,17 +136,11 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.permissionContainer}>
           <Text style={styles.permissionIcon}>📷</Text>
-          <Text style={[styles.permissionTitle, { color: colors.text }]}>
-            Kamera İzni Gerekli
-          </Text>
+          <Text style={[styles.permissionTitle, { color: colors.text }]}>Kamera İzni Gerekli</Text>
           <Text style={[styles.permissionText, { color: colors.textSecondary }]}>
             Belge fotoğrafı çekmek için kamera erişimine ihtiyacımız var.
           </Text>
-          <Button
-            title="İzin Ver"
-            onPress={requestPermission}
-            style={styles.permissionButton}
-          />
+          <Button title="İzin Ver" onPress={requestPermission} style={styles.permissionButton} />
         </View>
       </SafeAreaView>
     );
@@ -187,9 +154,7 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
         <View style={styles.permissionContainer}>
           <Text style={styles.permissionIcon}>⚠️</Text>
-          <Text style={[styles.permissionTitle, { color: colors.text }]}>
-            Kamera Bulunamadı
-          </Text>
+          <Text style={[styles.permissionTitle, { color: colors.text }]}>Kamera Bulunamadı</Text>
           <Text style={[styles.permissionText, { color: colors.textSecondary }]}>
             Bu cihazda kullanılabilir kamera bulunamadı.
           </Text>
@@ -214,17 +179,12 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
       />
 
       {/* Belge rehberi overlay */}
-      <DocumentGuide
-        type={isBackSide ? 'back' : 'front'}
-        isCapturing={isCapturing}
-      />
+      <DocumentGuide type={isBackSide ? 'back' : 'front'} isCapturing={isCapturing} />
 
       {/* Üst bilgi çubuğu */}
       <SafeAreaView style={styles.topBar}>
         <View style={styles.topBarContent}>
-          <Text style={styles.stepText}>
-            {isBackSide ? 'Adım 2/3' : 'Adım 1/3'}
-          </Text>
+          <Text style={styles.stepText}>{isBackSide ? 'Adım 2/3' : 'Adım 1/3'}</Text>
         </View>
       </SafeAreaView>
 
@@ -241,11 +201,7 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
             onCapture={handleCapture}
             loading={isCapturing}
             disabled={isCapturing}
-            accessibilityLabel={
-              isBackSide
-                ? 'Belge arka yüzünü çek'
-                : 'Belge ön yüzünü çek'
-            }
+            accessibilityLabel={isBackSide ? 'Belge arka yüzünü çek' : 'Belge ön yüzünü çek'}
           />
         </View>
 

@@ -6,7 +6,7 @@ import React, { memo } from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, fontSize } from '@theme';
 import { Button } from '../Button';
 
 interface EmptyStateProps {
@@ -43,20 +43,20 @@ interface EmptyStateProps {
 
 /**
  * EmptyState Component
- * 
+ *
  * Displays a friendly message when there's no content to show.
  * Commonly used for empty lists, search results, or initial states.
- * 
+ *
  * @example
  * ```tsx
  * // Basic empty state
- * <EmptyState 
+ * <EmptyState
  *   title="Henüz gönderi yok"
  *   message="İlk gönderinizi paylaşın!"
  * />
- * 
+ *
  * // With action button
- * <EmptyState 
+ * <EmptyState
  *   icon="people-outline"
  *   title="Henüz takipçi yok"
  *   message="Paylaşımlarınız ile topluluğunuzu oluşturun."
@@ -66,36 +66,20 @@ interface EmptyStateProps {
  * ```
  */
 export const EmptyState: React.FC<EmptyStateProps> = memo(
-  ({
-    icon = 'file-tray-outline',
-    title,
-    message,
-    actionLabel,
-    onAction,
-    style,
-    testID,
-  }) => {
+  ({ icon = 'file-tray-outline', title, message, actionLabel, onAction, style, testID }) => {
     const { theme } = useTheme();
 
     return (
       <View style={[styles.container, style]} testID={testID}>
         <View
-          style={[
-            styles.iconContainer,
-            { backgroundColor: theme.colors.background.secondary },
-          ]}
-        >
+          style={[styles.iconContainer, { backgroundColor: theme.colors.background.secondary }]}>
           <Icon name={icon} size={48} color={theme.colors.text.tertiary} />
         </View>
 
-        <Text style={[styles.title, { color: theme.colors.text.primary }]}>
-          {title}
-        </Text>
+        <Text style={[styles.title, { color: theme.colors.text.primary }]}>{title}</Text>
 
         {message && (
-          <Text style={[styles.message, { color: theme.colors.text.secondary }]}>
-            {message}
-          </Text>
+          <Text style={[styles.message, { color: theme.colors.text.secondary }]}>{message}</Text>
         )}
 
         {actionLabel && onAction && (
@@ -128,13 +112,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   title: {
-    fontSize: typography.fontSize.lg,
+    fontSize: fontSize.lg,
     fontWeight: '600',
     textAlign: 'center',
     marginBottom: spacing.sm,
   },
   message: {
-    fontSize: typography.fontSize.base,
+    fontSize: fontSize.base,
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: spacing.lg,

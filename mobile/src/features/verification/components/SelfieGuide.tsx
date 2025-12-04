@@ -4,14 +4,7 @@
 
 import React, { memo } from 'react';
 import { StyleSheet, View, Text, Dimensions } from 'react-native';
-import Svg, {
-  Circle,
-  Rect,
-  Defs,
-  Mask,
-  G,
-  Path,
-} from 'react-native-svg';
+import Svg, { Circle, Rect, Defs, Mask, G, Path } from 'react-native-svg';
 import { useTheme } from '@contexts';
 import { spacing, typography } from '@theme';
 
@@ -35,7 +28,8 @@ interface SelfieGuideProps {
  */
 export const SelfieGuide: React.FC<SelfieGuideProps> = memo(
   ({ hint, isCapturing = false, faceDetected = false }) => {
-    const { colors } = useTheme();
+    const { theme } = useTheme();
+    const { colors } = theme;
 
     // Yüz alanı boyutları (oval)
     const GUIDE_WIDTH = SCREEN_WIDTH * 0.65;
@@ -67,11 +61,7 @@ export const SelfieGuide: React.FC<SelfieGuideProps> = memo(
           <Defs>
             {/* Mask for darkening outside the guide */}
             <Mask id="selfie-mask">
-              <Rect
-                width={SCREEN_WIDTH}
-                height={SCREEN_HEIGHT}
-                fill="white"
-              />
+              <Rect width={SCREEN_WIDTH} height={SCREEN_HEIGHT} fill="white" />
               <Path d={ovalPath} fill="black" />
             </Mask>
           </Defs>
@@ -94,12 +84,7 @@ export const SelfieGuide: React.FC<SelfieGuideProps> = memo(
           />
 
           {/* Face position markers */}
-          <G
-            stroke={colors.textInverse}
-            strokeWidth={2}
-            strokeLinecap="round"
-            opacity={0.5}
-          >
+          <G stroke={colors.textInverse} strokeWidth={2} strokeLinecap="round" opacity={0.5}>
             {/* Eye level line */}
             <Path
               d={`M ${CENTER_X - 40} ${CENTER_Y - RY * 0.25} 
@@ -108,12 +93,7 @@ export const SelfieGuide: React.FC<SelfieGuideProps> = memo(
             />
 
             {/* Center cross */}
-            <Circle
-              cx={CENTER_X}
-              cy={CENTER_Y}
-              r={4}
-              fill={colors.textInverse}
-            />
+            <Circle cx={CENTER_X} cy={CENTER_Y} r={4} fill={colors.textInverse} />
           </G>
         </Svg>
 
@@ -122,8 +102,7 @@ export const SelfieGuide: React.FC<SelfieGuideProps> = memo(
           <Text
             style={[styles.hintText, { color: colors.textInverse }]}
             accessibilityRole="text"
-            accessibilityLabel={hint || defaultHint}
-          >
+            accessibilityLabel={hint || defaultHint}>
             {hint || defaultHint}
           </Text>
         </View>
@@ -134,15 +113,11 @@ export const SelfieGuide: React.FC<SelfieGuideProps> = memo(
             style={[
               styles.statusIndicator,
               {
-                backgroundColor: faceDetected
-                  ? colors.success
-                  : colors.warning,
+                backgroundColor: faceDetected ? colors.success : colors.warning,
               },
             ]}
           />
-          <Text
-            style={[styles.statusText, { color: colors.textInverse }]}
-          >
+          <Text style={[styles.statusText, { color: colors.textInverse }]}>
             {faceDetected ? 'Yüz algılandı' : 'Yüzünüzü çerçeveye yerleştirin'}
           </Text>
         </View>
@@ -161,7 +136,7 @@ export const SelfieGuide: React.FC<SelfieGuideProps> = memo(
         </View>
       </View>
     );
-  }
+  },
 );
 
 SelfieGuide.displayName = 'SelfieGuide';

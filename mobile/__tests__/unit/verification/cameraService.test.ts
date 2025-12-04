@@ -72,57 +72,103 @@ describe('Camera Service', () => {
     });
   });
 
-  describe('getDevices', () => {
-    it('should return available camera devices', async () => {
+  describe('getAvailableDevices', () => {
+    it('should return available camera devices', () => {
       const mockDevices = [
         { id: 'back', position: 'back', hasFlash: true },
         { id: 'front', position: 'front', hasFlash: false },
       ];
 
-      (Camera.getAvailableCameraDevices as jest.Mock).mockResolvedValueOnce(mockDevices);
+      (Camera.getAvailableCameraDevices as jest.Mock).mockReturnValue(mockDevices);
 
-      const result = await cameraService.getDevices();
+      const result = cameraService.getAvailableDevices();
 
       expect(result).toEqual(mockDevices);
       expect(result).toHaveLength(2);
     });
 
-    it('should handle error when getting devices', async () => {
-      (Camera.getAvailableCameraDevices as jest.Mock).mockRejectedValueOnce(
-        new Error('Camera not available')
-      );
+    it('should return empty array when no devices', () => {
+      (Camera.getAvailableCameraDevices as jest.Mock).mockReturnValue([]);
 
-      await expect(cameraService.getDevices()).rejects.toThrow('Camera not available');
+      const result = cameraService.getAvailableDevices();
+
+      expect(result).toEqual([]);
     });
   });
 
-  describe('getBackCamera', () => {
-    it('should return back camera device', async () => {
+  describe('getBestBackCamera', () => {
+    it('should return back camera device', () => {
       const mockDevices = [
-        { id: 'back', position: 'back', hasFlash: true },
+        { id: 'back', position: 'back', hasFlash: true, supportsPhotoHdr: true },
         { id: 'front', position: 'front', hasFlash: false },
       ];
 
-      (Camera.getAvailableCameraDevices as jest.Mock).mockResolvedValueOnce(mockDevices);
+      (Camera.getAvailableCameraDevices as jest.Mock).mockReturnValue(mockDevices);
 
-      const result = await cameraService.getBackCamera();
+      const result = cameraService.getBestBackCamera();
 
       expect(result?.position).toBe('back');
     });
+
+    it('should return undefined when no back camera', () => {
+      const mockDevices = [{ id: 'front', position: 'front', hasFlash: false }];
+
+      (Camera.getAvailableCameraDevices as jest.Mock).mockReturnValue(mockDevices);
+
+      const result = cameraService.getBestBackCamera();
+
+      expect(result).toBeUndefined();
+    });
   });
 
-  describe('getFrontCamera', () => {
-    it('should return front camera device', async () => {
+  describe('getBestFrontCamera', () => {
+    it('should return front camera device', () => {
       const mockDevices = [
         { id: 'back', position: 'back', hasFlash: true },
         { id: 'front', position: 'front', hasFlash: false },
       ];
 
-      (Camera.getAvailableCameraDevices as jest.Mock).mockResolvedValueOnce(mockDevices);
+      (Camera.getAvailableCameraDevices as jest.Mock).mockReturnValue(mockDevices);
 
-      const result = await cameraService.getFrontCamera();
+      const result = cameraService.getBestFrontCamera();
 
       expect(result?.position).toBe('front');
+    });
+
+    it('should return undefined when no front camera', () => {
+      const mockDevices = [{ id: 'back', position: 'back', hasFlash: true }];
+
+      (Camera.getAvailableCameraDevices as jest.Mock).mockReturnValue(mockDevices);
+
+      const result = cameraService.getBestFrontCamera();
+
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('getDefaultSettings', () => {
+    it('should return default camera settings', () => {
+      const settings = cameraService.getDefaultSettings();
+
+      expect(settings.flash).toBe('auto');
+      expect(settings.focus).toBe('auto');
+      expect(settings.zoom).toBe(1);
+      expect(settings.position).toBe('back');
+    });
+  });
+
+  describe('toggleFlash', () => {
+    it('should cycle through flash modes', () => {
+      expect(cameraService.toggleFlash('off')).toBe('on');
+      expect(cameraService.toggleFlash('on')).toBe('auto');
+      expect(cameraService.toggleFlash('auto')).toBe('off');
+    });
+  });
+
+  describe('togglePosition', () => {
+    it('should toggle between back and front', () => {
+      expect(cameraService.togglePosition('back')).toBe('front');
+      expect(cameraService.togglePosition('front')).toBe('back');
     });
   });
 });

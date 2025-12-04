@@ -16,6 +16,15 @@ jest.mock('@features/messaging/services/messagingService', () => ({
   },
 }));
 
+// Mock STOMP client
+jest.mock('@features/messaging/services/socketClient', () => ({
+  stompClient: {
+    on: jest.fn(),
+    off: jest.fn(),
+    isConnected: jest.fn(() => true),
+  },
+}));
+
 // Mock messaging store
 jest.mock('@features/messaging/stores', () => ({
   useMessagingStore: jest.fn(() => ({
@@ -51,11 +60,7 @@ const createWrapper = () => {
   });
 
   return function Wrapper({ children }: { children: React.ReactNode }) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
-    );
+    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
   };
 };
 
@@ -66,21 +71,19 @@ describe('useMessages Hook', () => {
 
   it('should fetch messages for a conversation', async () => {
     const conversationId = '123e4567-e89b-12d3-a456-426614174000';
-    const mockResponse: MessageListResponse = {
-      content: [createMockMessage()],
-      page: 0,
-      size: 50,
-      totalElements: 1,
+    // Response format matching the actual API
+    const mockResponse = {
+      messages: [createMockMessage()],
+      totalMessages: 1,
       totalPages: 1,
+      pageNumber: 0,
+      pageSize: 50,
       hasMore: false,
     };
 
-    mockMessagingService.getMessages.mockResolvedValueOnce({ data: mockResponse } as any);
+    mockMessagingService.getMessages.mockResolvedValueOnce(mockResponse);
 
-    const { result } = renderHook(
-      () => useMessages(conversationId),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useMessages(conversationId), { wrapper: createWrapper() });
 
     expect(result.current.isLoading).toBe(true);
 
@@ -89,27 +92,23 @@ describe('useMessages Hook', () => {
     });
 
     expect(result.current.messages).toHaveLength(1);
-    expect(result.current.hasMore).toBe(false);
-    expect(mockMessagingService.getMessages).toHaveBeenCalledWith(conversationId, 0, 50);
+    expect(result.current.hasNextPage).toBe(false);
   });
 
   it('should handle empty message list', async () => {
     const conversationId = '123e4567-e89b-12d3-a456-426614174000';
-    const mockResponse: MessageListResponse = {
-      content: [],
-      page: 0,
-      size: 50,
-      totalElements: 0,
+    const mockResponse = {
+      messages: [],
+      totalMessages: 0,
       totalPages: 0,
+      pageNumber: 0,
+      pageSize: 50,
       hasMore: false,
     };
 
-    mockMessagingService.getMessages.mockResolvedValueOnce({ data: mockResponse } as any);
+    mockMessagingService.getMessages.mockResolvedValueOnce(mockResponse);
 
-    const { result } = renderHook(
-      () => useMessages(conversationId),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useMessages(conversationId), { wrapper: createWrapper() });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -120,30 +119,27 @@ describe('useMessages Hook', () => {
 
   it('should handle pagination with hasMore', async () => {
     const conversationId = '123e4567-e89b-12d3-a456-426614174000';
-    const mockResponse: MessageListResponse = {
-      content: Array(50).fill(null).map((_, i) => 
-        createMockMessage({ messageId: `msg-${i}` })
-      ),
-      page: 0,
-      size: 50,
-      totalElements: 100,
+    const mockResponse = {
+      messages: Array(50)
+        .fill(null)
+        .map((_, i) => createMockMessage({ messageId: `msg-${i}` })),
+      totalMessages: 100,
       totalPages: 2,
+      pageNumber: 0,
+      pageSize: 50,
       hasMore: true,
     };
 
-    mockMessagingService.getMessages.mockResolvedValueOnce({ data: mockResponse } as any);
+    mockMessagingService.getMessages.mockResolvedValueOnce(mockResponse);
 
-    const { result } = renderHook(
-      () => useMessages(conversationId),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useMessages(conversationId), { wrapper: createWrapper() });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
     expect(result.current.messages).toHaveLength(50);
-    expect(result.current.hasMore).toBe(true);
+    expect(result.current.hasNextPage).toBe(true);
   });
 
   it('should handle fetch error', async () => {
@@ -152,10 +148,7 @@ describe('useMessages Hook', () => {
 
     mockMessagingService.getMessages.mockRejectedValueOnce(error);
 
-    const { result } = renderHook(
-      () => useMessages(conversationId),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useMessages(conversationId), { wrapper: createWrapper() });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -165,10 +158,7 @@ describe('useMessages Hook', () => {
   });
 
   it('should not fetch when conversationId is undefined', async () => {
-    const { result } = renderHook(
-      () => useMessages(undefined),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useMessages(undefined), { wrapper: createWrapper() });
 
     // Should not call API without conversationId
     expect(mockMessagingService.getMessages).not.toHaveBeenCalled();

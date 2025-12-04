@@ -2,26 +2,41 @@
 // Verification hooks testleri
 // Backend API Reference: mobile-development-guide/core/14-BACKEND-API-REFERENCE.md
 
-import { renderHook, waitFor } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
+
+// Mock react-native-vision-camera before any imports that use it
+jest.mock('react-native-vision-camera', () => ({
+  Camera: jest.fn(),
+  useCameraDevice: jest.fn(() => null),
+  useCameraPermission: jest.fn(() => ({ hasPermission: true, requestPermission: jest.fn() })),
+  useCameraFormat: jest.fn(() => null),
+}));
+
+// Mock verification services that use camera
+jest.mock('@features/verification/services', () => ({
+  verificationApi: {
+    getLatestVerification: jest.fn(),
+    getVerifications: jest.fn(),
+    checkEligibility: jest.fn(),
+  },
+  cameraService: {
+    capturePhoto: jest.fn(),
+  },
+}));
+
 import {
   useVerificationStatus,
   useVerificationList,
   useVerificationEligibility,
   useIsVerified,
 } from '@features/verification/hooks';
-import { verificationApi } from '@features/verification/services/verificationApi';
-import type { VerificationResponse, VerificationEligibilityResponse } from '@features/verification/types';
-
-// Mock verification API
-jest.mock('@features/verification/services/verificationApi', () => ({
-  verificationApi: {
-    getLatestVerification: jest.fn(),
-    getVerifications: jest.fn(),
-    checkEligibility: jest.fn(),
-  },
-}));
+import { verificationApi } from '@features/verification/services';
+import type {
+  VerificationResponse,
+  VerificationEligibilityResponse,
+} from '@features/verification/types';
 
 const mockVerificationApi = verificationApi as jest.Mocked<typeof verificationApi>;
 
@@ -59,11 +74,13 @@ describe('Verification Hooks', () => {
     it('should fetch latest verification status', async () => {
       mockVerificationApi.getLatestVerification.mockResolvedValueOnce(mockVerificationResponse);
 
-      const { result, waitFor } = renderHook(() => useVerificationStatus(), {
+      const { result } = renderHook(() => useVerificationStatus(), {
         wrapper: createWrapper(),
       });
 
-      await waitFor(() => !result.current.isLoading);
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data).toEqual(mockVerificationResponse);
     });
@@ -71,11 +88,13 @@ describe('Verification Hooks', () => {
     it('should return null when no verification exists', async () => {
       mockVerificationApi.getLatestVerification.mockResolvedValueOnce(null);
 
-      const { result, waitFor } = renderHook(() => useVerificationStatus(), {
+      const { result } = renderHook(() => useVerificationStatus(), {
         wrapper: createWrapper(),
       });
 
-      await waitFor(() => !result.current.isLoading);
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data).toBeNull();
     });
@@ -90,11 +109,13 @@ describe('Verification Hooks', () => {
 
       mockVerificationApi.getVerifications.mockResolvedValueOnce(mockVerifications);
 
-      const { result, waitFor } = renderHook(() => useVerificationList(), {
+      const { result } = renderHook(() => useVerificationList(), {
         wrapper: createWrapper(),
       });
 
-      await waitFor(() => !result.current.isLoading);
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data).toEqual(mockVerifications);
       expect(result.current.data?.length).toBe(2);
@@ -110,22 +131,22 @@ describe('Verification Hooks', () => {
     it('should check eligibility for profession', async () => {
       mockVerificationApi.checkEligibility.mockResolvedValueOnce(mockEligibility);
 
-      const { result, waitFor } = renderHook(
-        () => useVerificationEligibility(1),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useVerificationEligibility(1), {
+        wrapper: createWrapper(),
+      });
 
-      await waitFor(() => !result.current.isLoading);
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data).toEqual(mockEligibility);
       expect(mockVerificationApi.checkEligibility).toHaveBeenCalledWith(1);
     });
 
     it('should not fetch when professionId is undefined', async () => {
-      const { result } = renderHook(
-        () => useVerificationEligibility(undefined),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useVerificationEligibility(undefined), {
+        wrapper: createWrapper(),
+      });
 
       expect(result.current.isLoading).toBe(false);
       expect(mockVerificationApi.checkEligibility).not.toHaveBeenCalled();
@@ -141,12 +162,13 @@ describe('Verification Hooks', () => {
 
       mockVerificationApi.checkEligibility.mockResolvedValueOnce(ineligibleResponse);
 
-      const { result, waitFor } = renderHook(
-        () => useVerificationEligibility(1),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useVerificationEligibility(1), {
+        wrapper: createWrapper(),
+      });
 
-      await waitFor(() => !result.current.isLoading);
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.data?.eligible).toBe(false);
       expect(result.current.data?.remainingAttempts).toBe(0);
@@ -160,11 +182,13 @@ describe('Verification Hooks', () => {
         status: 'APPROVED',
       });
 
-      const { result, waitFor } = renderHook(() => useIsVerified(), {
+      const { result } = renderHook(() => useIsVerified(), {
         wrapper: createWrapper(),
       });
 
-      await waitFor(() => !result.current.isLoading);
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.isVerified).toBe(true);
       expect(result.current.isPending).toBe(false);
@@ -177,11 +201,13 @@ describe('Verification Hooks', () => {
         status: 'PENDING',
       });
 
-      const { result, waitFor } = renderHook(() => useIsVerified(), {
+      const { result } = renderHook(() => useIsVerified(), {
         wrapper: createWrapper(),
       });
 
-      await waitFor(() => !result.current.isLoading);
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.isVerified).toBe(false);
       expect(result.current.isPending).toBe(true);
@@ -193,11 +219,13 @@ describe('Verification Hooks', () => {
         status: 'PROCESSING',
       });
 
-      const { result, waitFor } = renderHook(() => useIsVerified(), {
+      const { result } = renderHook(() => useIsVerified(), {
         wrapper: createWrapper(),
       });
 
-      await waitFor(() => !result.current.isLoading);
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.isVerified).toBe(false);
       expect(result.current.isPending).toBe(true);
@@ -209,11 +237,13 @@ describe('Verification Hooks', () => {
         status: 'MANUAL_REVIEW',
       });
 
-      const { result, waitFor } = renderHook(() => useIsVerified(), {
+      const { result } = renderHook(() => useIsVerified(), {
         wrapper: createWrapper(),
       });
 
-      await waitFor(() => !result.current.isLoading);
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.isVerified).toBe(false);
       expect(result.current.isPending).toBe(true);
@@ -226,11 +256,13 @@ describe('Verification Hooks', () => {
         rejectionReason: 'Document unclear',
       });
 
-      const { result, waitFor } = renderHook(() => useIsVerified(), {
+      const { result } = renderHook(() => useIsVerified(), {
         wrapper: createWrapper(),
       });
 
-      await waitFor(() => !result.current.isLoading);
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.isVerified).toBe(false);
       expect(result.current.isPending).toBe(false);
@@ -244,11 +276,13 @@ describe('Verification Hooks', () => {
         maxAttempts: 3,
       });
 
-      const { result, waitFor } = renderHook(() => useIsVerified(), {
+      const { result } = renderHook(() => useIsVerified(), {
         wrapper: createWrapper(),
       });
 
-      await waitFor(() => !result.current.isLoading);
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
 
       expect(result.current.attemptCount).toBe(2);
       expect(result.current.maxAttempts).toBe(3);

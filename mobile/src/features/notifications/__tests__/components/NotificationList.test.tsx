@@ -6,8 +6,7 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NotificationList } from '../../components/NotificationList';
-import { notificationService } from '../../services/notificationService';
-import { NotificationType } from '../../types';
+import type { NotificationResponse } from '../../types';
 
 // Mock dependencies
 jest.mock('@contexts/ThemeContext', () => ({
@@ -28,12 +27,16 @@ jest.mock('@contexts/ThemeContext', () => ({
 
 jest.mock('react-native-vector-icons/Ionicons', () => 'Icon');
 
-jest.mock('../../services/notificationService', () => ({
-  notificationService: {
-    getNotifications: jest.fn(),
-    markAsRead: jest.fn(),
-    deleteNotification: jest.fn(),
-  },
+// Mock the hooks used by NotificationList
+const mockMarkAsRead = jest.fn();
+const mockDeleteNotification = jest.fn();
+const mockFetchNextPage = jest.fn();
+const mockRefetch = jest.fn();
+
+jest.mock('../../hooks', () => ({
+  useNotifications: jest.fn(),
+  useMarkAsRead: () => ({ markAsRead: mockMarkAsRead }),
+  useDeleteNotification: () => ({ deleteNotification: mockDeleteNotification }),
 }));
 
 jest.mock('react-native-reanimated', () => {
@@ -47,30 +50,38 @@ jest.mock('react-native-reanimated', () => {
   };
 });
 
-const mockNotificationService = notificationService as jest.Mocked<typeof notificationService>;
+import { useNotifications } from '../../hooks';
+const mockUseNotifications = useNotifications as jest.Mock;
 
-const mockNotifications = [
+// Mock notifications matching backend NotificationResponse type
+const mockNotifications: NotificationResponse[] = [
   {
-    id: '1',
-    type: NotificationType.MESSAGE,
+    notificationId: 'notif-1',
+    type: 'NEW_MESSAGE',
     title: 'Yeni Mesaj',
     body: 'Ahmet size mesaj gönderdi',
-    isRead: false,
+    actionUrl: '/messages/conv-1',
+    metadata: { senderId: 'user-1' },
+    status: 'DELIVERED',
+    deliveredChannels: ['PUSH', 'IN_APP'],
+    read: false,
+    readAt: null,
+    relativeTime: '5 dk önce',
     createdAt: new Date().toISOString(),
-    senderId: 'user-1',
-    senderName: 'Ahmet',
-    referenceId: 'conv-1',
   },
   {
-    id: '2',
-    type: NotificationType.POST_LIKE,
+    notificationId: 'notif-2',
+    type: 'POST_LIKED',
     title: 'Yeni Beğeni',
     body: 'Mehmet gönderinizi beğendi',
-    isRead: true,
+    actionUrl: '/posts/post-1',
+    metadata: { postId: 'post-1' },
+    status: 'READ',
+    deliveredChannels: ['IN_APP'],
+    read: true,
+    readAt: new Date().toISOString(),
+    relativeTime: '1 saat önce',
     createdAt: new Date().toISOString(),
-    senderId: 'user-2',
-    senderName: 'Mehmet',
-    referenceId: 'post-1',
   },
 ];
 
@@ -85,9 +96,7 @@ const createQueryClient = () =>
 
 const renderWithProviders = (component: React.ReactElement) => {
   const queryClient = createQueryClient();
-  return render(
-    <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>
-  );
+  return render(<QueryClientProvider client={queryClient}>{component}</QueryClientProvider>);
 };
 
 describe('NotificationList', () => {
@@ -96,25 +105,33 @@ describe('NotificationList', () => {
   });
 
   it('should render loading state initially', async () => {
-    mockNotificationService.getNotifications.mockReturnValue(
-      new Promise(() => {}) // Never resolves
-    );
+    mockUseNotifications.mockReturnValue({
+      notifications: [],
+      isLoading: true,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: mockFetchNextPage,
+      refetch: mockRefetch,
+      isRefreshing: false,
+    });
 
-    const { getByTestId } = renderWithProviders(
-      <NotificationList testID="notification-list" />
-    );
+    const { UNSAFE_root } = renderWithProviders(<NotificationList />);
 
     // Should show loading indicator
     await waitFor(() => {
-      expect(getByTestId).toBeTruthy();
+      expect(UNSAFE_root).toBeTruthy();
     });
   });
 
   it('should render notifications after loading', async () => {
-    mockNotificationService.getNotifications.mockResolvedValueOnce({
-      items: mockNotifications,
-      hasMore: false,
-      nextCursor: undefined,
+    mockUseNotifications.mockReturnValue({
+      notifications: mockNotifications,
+      isLoading: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: mockFetchNextPage,
+      refetch: mockRefetch,
+      isRefreshing: false,
     });
 
     const { findByText } = renderWithProviders(<NotificationList />);
@@ -126,10 +143,14 @@ describe('NotificationList', () => {
   });
 
   it('should render empty state when no notifications', async () => {
-    mockNotificationService.getNotifications.mockResolvedValueOnce({
-      items: [],
-      hasMore: false,
-      nextCursor: undefined,
+    mockUseNotifications.mockReturnValue({
+      notifications: [],
+      isLoading: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: mockFetchNextPage,
+      refetch: mockRefetch,
+      isRefreshing: false,
     });
 
     const { findByText } = renderWithProviders(<NotificationList />);
@@ -141,15 +162,18 @@ describe('NotificationList', () => {
 
   it('should call onNotificationPress when notification is pressed', async () => {
     const mockOnPress = jest.fn();
-    mockNotificationService.getNotifications.mockResolvedValueOnce({
-      items: mockNotifications,
-      hasMore: false,
-      nextCursor: undefined,
+    mockUseNotifications.mockReturnValue({
+      notifications: mockNotifications,
+      isLoading: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: mockFetchNextPage,
+      refetch: mockRefetch,
+      isRefreshing: false,
     });
-    mockNotificationService.markAsRead.mockResolvedValueOnce(undefined);
 
     const { findByText } = renderWithProviders(
-      <NotificationList onNotificationPress={mockOnPress} />
+      <NotificationList onNotificationPress={mockOnPress} />,
     );
 
     const notification = await findByText('Yeni Mesaj');
@@ -157,18 +181,21 @@ describe('NotificationList', () => {
 
     await waitFor(() => {
       expect(mockOnPress).toHaveBeenCalledWith(
-        expect.objectContaining({ id: '1' })
+        expect.objectContaining({ notificationId: 'notif-1' }),
       );
     });
   });
 
   it('should mark unread notification as read when pressed', async () => {
-    mockNotificationService.getNotifications.mockResolvedValueOnce({
-      items: mockNotifications,
-      hasMore: false,
-      nextCursor: undefined,
+    mockUseNotifications.mockReturnValue({
+      notifications: mockNotifications,
+      isLoading: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: mockFetchNextPage,
+      refetch: mockRefetch,
+      isRefreshing: false,
     });
-    mockNotificationService.markAsRead.mockResolvedValueOnce(undefined);
 
     const { findByText } = renderWithProviders(<NotificationList />);
 
@@ -176,22 +203,26 @@ describe('NotificationList', () => {
     fireEvent.press(unreadNotification);
 
     await waitFor(() => {
-      expect(mockNotificationService.markAsRead).toHaveBeenCalledWith('1');
+      expect(mockMarkAsRead).toHaveBeenCalledWith('notif-1');
     });
   });
 
   it('should not mark already read notification as read', async () => {
-    const readNotifications = [
+    const readNotifications: NotificationResponse[] = [
       {
         ...mockNotifications[0],
-        isRead: true,
+        read: true,
       },
     ];
 
-    mockNotificationService.getNotifications.mockResolvedValueOnce({
-      items: readNotifications,
-      hasMore: false,
-      nextCursor: undefined,
+    mockUseNotifications.mockReturnValue({
+      notifications: readNotifications,
+      isLoading: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: mockFetchNextPage,
+      refetch: mockRefetch,
+      isRefreshing: false,
     });
 
     const { findByText } = renderWithProviders(<NotificationList />);
@@ -200,77 +231,65 @@ describe('NotificationList', () => {
     fireEvent.press(notification);
 
     await waitFor(() => {
-      expect(mockNotificationService.markAsRead).not.toHaveBeenCalled();
+      expect(mockMarkAsRead).not.toHaveBeenCalled();
     });
   });
 
   describe('Infinite scroll', () => {
     it('should load more when scrolled to end', async () => {
-      const firstPage = {
-        items: mockNotifications,
-        hasMore: true,
-        nextCursor: 'cursor-1',
-      };
+      mockUseNotifications.mockReturnValue({
+        notifications: mockNotifications,
+        isLoading: false,
+        isFetchingNextPage: false,
+        hasNextPage: true,
+        fetchNextPage: mockFetchNextPage,
+        refetch: mockRefetch,
+        isRefreshing: false,
+      });
 
-      const secondPage = {
-        items: [
-          {
-            id: '3',
-            type: NotificationType.FOLLOW,
-            title: 'Yeni Takipçi',
-            body: 'Ali sizi takip etti',
-            isRead: false,
-            createdAt: new Date().toISOString(),
-            senderId: 'user-3',
-            senderName: 'Ali',
-          },
-        ],
-        hasMore: false,
-        nextCursor: undefined,
-      };
-
-      mockNotificationService.getNotifications
-        .mockResolvedValueOnce(firstPage)
-        .mockResolvedValueOnce(secondPage);
-
-      const { getByTestId, findByText } = renderWithProviders(
-        <NotificationList testID="notification-list" />
-      );
+      const { findByText, UNSAFE_root } = renderWithProviders(<NotificationList />);
 
       // Wait for first page to load
       await findByText('Yeni Mesaj');
 
-      // Simulate scroll to end
-      const list = getByTestId('notification-list');
-      fireEvent(list, 'onEndReached');
+      // Find the FlatList component and trigger onEndReached
+      const flatList = UNSAFE_root.findByType(require('react-native').FlatList);
+      if (flatList && flatList.props.onEndReached) {
+        flatList.props.onEndReached();
+      }
 
-      // Wait for second page
+      // Wait for fetchNextPage to be called
       await waitFor(() => {
-        expect(mockNotificationService.getNotifications).toHaveBeenCalledTimes(2);
+        expect(mockFetchNextPage).toHaveBeenCalled();
       });
     });
   });
 
   describe('Pull to refresh', () => {
     it('should refresh when pulled down', async () => {
-      mockNotificationService.getNotifications.mockResolvedValue({
-        items: mockNotifications,
-        hasMore: false,
-        nextCursor: undefined,
+      mockUseNotifications.mockReturnValue({
+        notifications: mockNotifications,
+        isLoading: false,
+        isFetchingNextPage: false,
+        hasNextPage: false,
+        fetchNextPage: mockFetchNextPage,
+        refetch: mockRefetch,
+        isRefreshing: false,
       });
 
-      const { getByTestId, findByText } = renderWithProviders(
-        <NotificationList testID="notification-list" />
-      );
+      const { findByText, UNSAFE_root } = renderWithProviders(<NotificationList />);
 
       await findByText('Yeni Mesaj');
 
-      // Simulate pull to refresh
-      const list = getByTestId('notification-list');
-      fireEvent(list, 'onRefresh');
+      // Find the RefreshControl via the FlatList
+      const flatList = UNSAFE_root.findByType(require('react-native').FlatList);
+      if (flatList && flatList.props.refreshControl) {
+        // Simulate refresh
+        flatList.props.refreshControl.props.onRefresh();
+      }
 
       await waitFor(() => {
-        expect(mockNotificationService.getNotifications).toHaveBeenCalledTimes(2);
+        expect(mockRefetch).toHaveBeenCalled();
       });
     });
   });

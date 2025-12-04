@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useTheme } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, fontSize } from '@theme';
 import { useFollow, useUnfollow } from '../hooks';
 
 interface FollowButtonProps {
@@ -131,11 +131,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   textSm: {
-    fontSize: typography.fontSize.sm,
+    fontSize: fontSize.sm,
   },
   textMd: {
-    fontSize: typography.fontSize.base,
+    fontSize: fontSize.base,
   },
 });
 
 FollowButton.displayName = 'FollowButton';
+

@@ -3,14 +3,7 @@
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import React, { memo, useCallback } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  SafeAreaView,
-  Alert,
-} from 'react-native';
+import { StyleSheet, View, Text, ScrollView, SafeAreaView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme } from '@contexts';
@@ -20,26 +13,18 @@ import { useVerificationStore } from '../stores';
 import { StepIndicator, ImagePreview } from '../components';
 import type { VerificationStackParamList } from '@shared/types/navigation.types';
 
-type NavigationProp = NativeStackNavigationProp<
-  VerificationStackParamList,
-  'VerificationReview'
->;
+type NavigationProp = NativeStackNavigationProp<VerificationStackParamList, 'VerificationReview'>;
 
 /**
  * Doğrulama önizleme ekranı
  */
 export const VerificationReviewScreen: React.FC = memo(() => {
   const navigation = useNavigation<NavigationProp>();
-  const { colors } = useTheme();
+  const { theme } = useTheme();
+  const { colors } = theme;
 
-  const {
-    data,
-    currentStep,
-    setStep,
-    setDocumentFront,
-    setDocumentBack,
-    setSelfie,
-  } = useVerificationStore();
+  const { data, currentStep, setStep, setDocumentFront, setDocumentBack, setSelfie } =
+    useVerificationStore();
 
   /**
    * Belge ön yüzünü tekrar çek
@@ -74,11 +59,7 @@ export const VerificationReviewScreen: React.FC = memo(() => {
   const handleSubmit = useCallback(() => {
     // Tüm görüntülerin mevcut olduğunu kontrol et
     if (!data.documentFront || !data.documentBack || !data.selfie) {
-      Alert.alert(
-        'Eksik Belge',
-        'Lütfen tüm belgeleri çekin.',
-        [{ text: 'Tamam' }]
-      );
+      Alert.alert('Eksik Belge', 'Lütfen tüm belgeleri çekin.', [{ text: 'Tamam' }]);
       return;
     }
 
@@ -102,28 +83,24 @@ export const VerificationReviewScreen: React.FC = memo(() => {
             navigation.popToTop();
           },
         },
-      ]
+      ],
     );
   }, [navigation]);
 
-  const isComplete =
-    data.documentFront && data.documentBack && data.selfie;
+  const isComplete = data.documentFront && data.documentBack && data.selfie;
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
         {/* Adım göstergesi */}
         <StepIndicator currentStep={currentStep} style={styles.stepIndicator} />
 
         {/* Başlık */}
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>
-            Belgeleri Kontrol Edin
-          </Text>
+          <Text style={[styles.title, { color: colors.text }]}>Belgeleri Kontrol Edin</Text>
           <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
             Yüklemeden önce tüm belgelerin net ve okunaklı olduğundan emin olun.
           </Text>
@@ -163,38 +140,25 @@ export const VerificationReviewScreen: React.FC = memo(() => {
         </View>
 
         {/* Kontrol listesi */}
-        <View
-          style={[
-            styles.checklistContainer,
-            { backgroundColor: colors.surfaceVariant },
-          ]}
-        >
-          <Text style={[styles.checklistTitle, { color: colors.text }]}>
-            Kontrol Listesi
-          </Text>
+        <View style={[styles.checklistContainer, { backgroundColor: colors.surfaceVariant }]}>
+          <Text style={[styles.checklistTitle, { color: colors.text }]}>Kontrol Listesi</Text>
 
           <View style={styles.checklistItem}>
-            <Text style={styles.checkIcon}>
-              {data.documentFront ? '✅' : '⬜️'}
-            </Text>
+            <Text style={styles.checkIcon}>{data.documentFront ? '✅' : '⬜️'}</Text>
             <Text style={[styles.checkText, { color: colors.textSecondary }]}>
               Belge ön yüzü net ve okunaklı
             </Text>
           </View>
 
           <View style={styles.checklistItem}>
-            <Text style={styles.checkIcon}>
-              {data.documentBack ? '✅' : '⬜️'}
-            </Text>
+            <Text style={styles.checkIcon}>{data.documentBack ? '✅' : '⬜️'}</Text>
             <Text style={[styles.checkText, { color: colors.textSecondary }]}>
               Belge arka yüzü net ve okunaklı
             </Text>
           </View>
 
           <View style={styles.checklistItem}>
-            <Text style={styles.checkIcon}>
-              {data.selfie ? '✅' : '⬜️'}
-            </Text>
+            <Text style={styles.checkIcon}>{data.selfie ? '✅' : '⬜️'}</Text>
             <Text style={[styles.checkText, { color: colors.textSecondary }]}>
               Selfie'de yüzünüz net görünüyor
             </Text>
@@ -202,13 +166,10 @@ export const VerificationReviewScreen: React.FC = memo(() => {
         </View>
 
         {/* Uyarı */}
-        <View
-          style={[styles.warningContainer, { backgroundColor: colors.warningLight }]}
-        >
+        <View style={[styles.warningContainer, { backgroundColor: colors.warningLight }]}>
           <Text style={styles.warningIcon}>⚠️</Text>
           <Text style={[styles.warningText, { color: colors.warning }]}>
-            Belgeleriniz AI tarafından analiz edilecek ve sonuç 2-5 dakika içinde
-            bildirilecektir.
+            Belgeleriniz AI tarafından analiz edilecek ve sonuç 2-5 dakika içinde bildirilecektir.
           </Text>
         </View>
       </ScrollView>

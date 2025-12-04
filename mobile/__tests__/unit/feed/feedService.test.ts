@@ -3,11 +3,11 @@
 // Sprint 5-6: Social Feed & Posts
 
 import { feedService } from '../../../src/features/feed/services';
-import { apiClient } from '../../../src/core/api';
+import { apiClient } from '../../../src/core/api/client';
 import type { CreatePostRequest, AddCommentRequest } from '../../../src/features/feed/types';
 
-// Mock apiClient
-jest.mock('../../../src/core/api', () => ({
+// Mock apiClient - use module path that feedService imports from
+jest.mock('../../../src/core/api/client', () => ({
   apiClient: {
     get: jest.fn(),
     post: jest.fn(),
@@ -23,8 +23,8 @@ describe('FeedService', () => {
     jest.clearAllMocks();
   });
 
-  describe('getPersonalizedFeed', () => {
-    it('should fetch personalized feed with pagination', async () => {
+  describe('getFeed', () => {
+    it('should fetch feed with pagination', async () => {
       const mockResponse = {
         data: {
           data: {
@@ -48,7 +48,7 @@ describe('FeedService', () => {
 
       mockApiClient.get.mockResolvedValue(mockResponse);
 
-      const result = await feedService.getPersonalizedFeed(0, 20);
+      const result = await feedService.getFeed(0, 20);
 
       expect(mockApiClient.get).toHaveBeenCalledWith('/api/feed', {
         params: { page: 0, limit: 20, professionFilter: undefined },
@@ -56,7 +56,7 @@ describe('FeedService', () => {
       expect(result).toEqual(mockResponse.data.data);
     });
 
-    it('should fetch personalized feed with profession filter', async () => {
+    it('should fetch feed with profession filter', async () => {
       const mockResponse = {
         data: {
           data: {
@@ -72,7 +72,7 @@ describe('FeedService', () => {
 
       mockApiClient.get.mockResolvedValue(mockResponse);
 
-      await feedService.getPersonalizedFeed(0, 20, 1);
+      await feedService.getFeed(0, 20, 1);
 
       expect(mockApiClient.get).toHaveBeenCalledWith('/api/feed', {
         params: { page: 0, limit: 20, professionFilter: 1 },

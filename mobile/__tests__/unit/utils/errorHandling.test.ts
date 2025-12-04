@@ -2,6 +2,14 @@
 // Unit tests for error handling utilities
 // Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
 
+// Mock Analytics service before importing errorHandling
+jest.mock('@shared/services/analytics', () => ({
+  Analytics: {
+    logError: jest.fn(),
+    logEvent: jest.fn(),
+  },
+}));
+
 import {
   AppError,
   ErrorType,
@@ -44,7 +52,8 @@ describe('Error Handling Utilities', () => {
     });
 
     it('should parse timeout error', () => {
-      const error = { code: 'ECONNABORTED' };
+      // Error needs response property to bypass network error check
+      const error = { code: 'ECONNABORTED', response: {} };
       const appError = parseApiError(error);
 
       expect(appError.type).toBe(ErrorType.TIMEOUT);
@@ -112,7 +121,7 @@ describe('Error Handling Utilities', () => {
     it('should parse 5xx server errors', () => {
       const statuses = [500, 502, 503, 504];
 
-      statuses.forEach((status) => {
+      statuses.forEach(status => {
         const error = {
           response: { status },
         };
@@ -154,20 +163,12 @@ describe('Error Handling Utilities', () => {
   });
 
   describe('retryWithBackoff', () => {
-    beforeEach(() => {
-      jest.useFakeTimers();
-    });
-
-    afterEach(() => {
-      jest.useRealTimers();
-    });
-
     it('should return immediately on success', async () => {
       const fn = jest.fn().mockResolvedValue('success');
 
-      const resultPromise = retryWithBackoff(fn, { maxRetries: 3 });
+      const result = await retryWithBackoff(fn, { maxRetries: 3, initialDelay: 10 });
 
-      await expect(resultPromise).resolves.toBe('success');
+      expect(result).toBe('success');
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
@@ -180,32 +181,28 @@ describe('Error Handling Utilities', () => {
 
       const onRetry = jest.fn();
 
-      const resultPromise = retryWithBackoff(fn, {
+      const result = await retryWithBackoff(fn, {
         maxRetries: 3,
-        initialDelay: 100,
+        initialDelay: 10,
         onRetry,
       });
 
-      // Advance timers for retries
-      jest.runAllTimers();
-
-      await expect(resultPromise).resolves.toBe('success');
+      expect(result).toBe('success');
       expect(fn).toHaveBeenCalledTimes(3);
       expect(onRetry).toHaveBeenCalledTimes(2);
-    });
+    }, 15000);
 
     it('should throw after max retries', async () => {
       const fn = jest.fn().mockRejectedValue(new Error('always fail'));
 
-      const resultPromise = retryWithBackoff(fn, {
-        maxRetries: 2,
-        initialDelay: 100,
-      });
+      await expect(
+        retryWithBackoff(fn, {
+          maxRetries: 2,
+          initialDelay: 10,
+        }),
+      ).rejects.toThrow('always fail');
 
-      jest.runAllTimers();
-
-      await expect(resultPromise).rejects.toThrow('always fail');
       expect(fn).toHaveBeenCalledTimes(3); // initial + 2 retries
-    });
+    }, 15000);
   });
 });

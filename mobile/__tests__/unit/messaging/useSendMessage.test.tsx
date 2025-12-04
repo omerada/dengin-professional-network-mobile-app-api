@@ -6,7 +6,7 @@ import { renderHook, act, waitFor } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useSendMessage } from '@features/messaging/hooks/useSendMessage';
 import { messagingService } from '@features/messaging/services/messagingService';
-import { stompClient } from '@features/messaging/services/stompClient';
+import { stompClient } from '@features/messaging/services/socketClient';
 import type { Message } from '@features/messaging/types';
 import React from 'react';
 
@@ -18,7 +18,7 @@ jest.mock('@features/messaging/services/messagingService', () => ({
 }));
 
 // Mock STOMP client
-jest.mock('@features/messaging/services/stompClient', () => ({
+jest.mock('@features/messaging/services/socketClient', () => ({
   stompClient: {
     sendMessage: jest.fn(),
     isConnected: jest.fn(() => true),
@@ -65,15 +65,13 @@ const createWrapper = () => {
   });
 
   return function Wrapper({ children }: { children: React.ReactNode }) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
-    );
+    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
   };
 };
 
 describe('useSendMessage Hook', () => {
+  const conversationId = '123e4567-e89b-12d3-a456-426614174000';
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockStompClient.isConnected.mockReturnValue(true);
@@ -82,45 +80,49 @@ describe('useSendMessage Hook', () => {
   it('should send message via WebSocket when connected', async () => {
     mockStompClient.isConnected.mockReturnValue(true);
 
-    const { result } = renderHook(
-      () => useSendMessage(),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useSendMessage(conversationId), {
+      wrapper: createWrapper(),
+    });
 
-    const messageRequest = {
-      conversationId: '123e4567-e89b-12d3-a456-426614174000',
+    const messageParams = {
       content: 'Hello World',
       recipientId: '123e4567-e89b-12d3-a456-426614174001',
     };
 
     await act(async () => {
-      await result.current.sendMessage(messageRequest);
+      await result.current.sendMessage(messageParams);
     });
 
-    expect(mockStompClient.sendMessage).toHaveBeenCalledWith(messageRequest);
+    expect(mockStompClient.sendMessage).toHaveBeenCalledWith({
+      content: 'Hello World',
+      recipientId: '123e4567-e89b-12d3-a456-426614174001',
+      attachment: undefined,
+    });
   });
 
   it('should fallback to HTTP when WebSocket is not connected', async () => {
     mockStompClient.isConnected.mockReturnValue(false);
     const mockResponse = createMockMessage({ content: 'Hello World' });
-    mockMessagingService.sendMessage.mockResolvedValueOnce({ data: mockResponse } as any);
+    mockMessagingService.sendMessage.mockResolvedValueOnce(mockResponse);
 
-    const { result } = renderHook(
-      () => useSendMessage(),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useSendMessage(conversationId), {
+      wrapper: createWrapper(),
+    });
 
-    const messageRequest = {
-      conversationId: '123e4567-e89b-12d3-a456-426614174000',
+    const messageParams = {
       content: 'Hello World',
       recipientId: '123e4567-e89b-12d3-a456-426614174001',
     };
 
     await act(async () => {
-      await result.current.sendMessage(messageRequest);
+      await result.current.sendMessage(messageParams);
     });
 
-    expect(mockMessagingService.sendMessage).toHaveBeenCalledWith(messageRequest);
+    expect(mockMessagingService.sendMessage).toHaveBeenCalledWith({
+      content: 'Hello World',
+      recipientId: '123e4567-e89b-12d3-a456-426614174001',
+      attachment: undefined,
+    });
     expect(mockStompClient.sendMessage).not.toHaveBeenCalled();
   });
 
@@ -130,20 +132,18 @@ describe('useSendMessage Hook', () => {
       throw error;
     });
 
-    const { result } = renderHook(
-      () => useSendMessage(),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useSendMessage(conversationId), {
+      wrapper: createWrapper(),
+    });
 
-    const messageRequest = {
-      conversationId: '123e4567-e89b-12d3-a456-426614174000',
+    const messageParams = {
       content: 'Hello World',
       recipientId: '123e4567-e89b-12d3-a456-426614174001',
     };
 
     await act(async () => {
       try {
-        await result.current.sendMessage(messageRequest);
+        await result.current.sendMessage(messageParams);
       } catch (e) {
         expect(e).toBeDefined();
       }
@@ -151,19 +151,21 @@ describe('useSendMessage Hook', () => {
   });
 
   it('should not send empty messages', async () => {
-    const { result } = renderHook(
-      () => useSendMessage(),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useSendMessage(conversationId), {
+      wrapper: createWrapper(),
+    });
 
-    const messageRequest = {
-      conversationId: '123e4567-e89b-12d3-a456-426614174000',
+    const messageParams = {
       content: '   ', // Empty/whitespace only
       recipientId: '123e4567-e89b-12d3-a456-426614174001',
     };
 
     await act(async () => {
-      await result.current.sendMessage(messageRequest);
+      try {
+        await result.current.sendMessage(messageParams);
+      } catch (e) {
+        // Expected to throw for empty content
+      }
     });
 
     // Should not send whitespace-only messages
@@ -174,7 +176,7 @@ describe('useSendMessage Hook', () => {
   it('should indicate loading state while sending', async () => {
     // Create a delayed mock response
     let resolvePromise: () => void;
-    const delayedPromise = new Promise<void>((resolve) => {
+    const delayedPromise = new Promise<void>(resolve => {
       resolvePromise = resolve;
     });
 
@@ -182,27 +184,23 @@ describe('useSendMessage Hook', () => {
       return delayedPromise as any;
     });
 
-    const { result } = renderHook(
-      () => useSendMessage(),
-      { wrapper: createWrapper() }
-    );
+    const { result } = renderHook(() => useSendMessage(conversationId), {
+      wrapper: createWrapper(),
+    });
 
-    expect(result.current.isSending).toBe(false);
+    // Hook uses isPending from mutation
+    expect(result.current.isPending).toBe(false);
 
     const sendPromise = act(async () => {
       result.current.sendMessage({
-        conversationId: '123e4567-e89b-12d3-a456-426614174000',
         content: 'Hello',
         recipientId: '123e4567-e89b-12d3-a456-426614174001',
       });
     });
 
-    // Note: Due to async nature, isSending state may not be captured mid-execution
-    // This is a limitation of the test setup
-
     resolvePromise!();
     await sendPromise;
 
-    expect(result.current.isSending).toBe(false);
+    expect(result.current.isPending).toBe(false);
   });
 });

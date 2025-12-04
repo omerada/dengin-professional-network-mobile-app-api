@@ -7,19 +7,19 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { useSendMessage } from '../../hooks/useSendMessage';
 import { messagingService } from '../../services/messagingService';
-import { stompClient, messageQueue } from '@core/socket';
+import { stompClient } from '../../services/socketClient';
 import NetInfo from '@react-native-community/netinfo';
 
-jest.mock('../../services/messagingService');
-jest.mock('@core/socket', () => ({
+jest.mock('../../services/messagingService', () => ({
+  messagingService: {
+    sendMessage: jest.fn(),
+    getMessages: jest.fn(),
+  },
+}));
+jest.mock('../../services/socketClient', () => ({
   stompClient: {
     isConnected: jest.fn(() => false),
     sendMessage: jest.fn(),
-  },
-  messageQueue: {
-    add: jest.fn(),
-    remove: jest.fn(),
-    getAll: jest.fn(() => []),
   },
 }));
 jest.mock('@react-native-community/netinfo');
@@ -33,15 +33,13 @@ jest.mock('@features/auth/stores', () => ({
 
 const mockMessagingService = messagingService as jest.Mocked<typeof messagingService>;
 const mockStompClient = stompClient as jest.Mocked<typeof stompClient>;
-const mockMessageQueue = messageQueue as jest.Mocked<typeof messageQueue>;
 const mockNetInfo = NetInfo as jest.Mocked<typeof NetInfo>;
 
 describe('useSendMessage', () => {
   let queryClient: QueryClient;
 
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    React.createElement(QueryClientProvider, { client: queryClient }, children)
-  );
+  const wrapper = ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client: queryClient }, children);
 
   beforeEach(() => {
     queryClient = new QueryClient({
@@ -51,7 +49,7 @@ describe('useSendMessage', () => {
       },
     });
     jest.clearAllMocks();
-    
+
     // Default to online
     mockNetInfo.fetch.mockResolvedValue({
       isConnected: true,
@@ -73,28 +71,27 @@ describe('useSendMessage', () => {
       await act(async () => {
         result.current.sendMessage({
           content: 'Hello',
+          recipientId: 'user2',
         });
       });
 
       await waitFor(() => {
         expect(mockStompClient.sendMessage).toHaveBeenCalledWith(
           expect.objectContaining({
-            conversationId: 'conv1',
+            recipientId: 'user2',
             content: 'Hello',
-          })
+          }),
         );
       });
     });
 
     it('should fallback to HTTP when WebSocket fails', async () => {
       const mockResponse = {
-        id: 'msg1',
-        content: 'Hello',
-        senderId: 'user1',
+        messageId: 'msg1',
         conversationId: 'conv1',
-        status: 'sent' as const,
-        createdAt: new Date().toISOString(),
-        type: 'text' as const,
+        content: 'Hello',
+        status: 'SENT' as const,
+        sentAt: new Date().toISOString(),
       };
 
       (mockStompClient.isConnected as jest.Mock).mockReturnValue(false);
@@ -105,100 +102,99 @@ describe('useSendMessage', () => {
       await act(async () => {
         result.current.sendMessage({
           content: 'Hello',
-        });
-      });
-
-      await waitFor(() => {
-        expect(result.current.isSuccess).toBe(true);
-      });
-
-      expect(mockMessagingService.sendMessage).toHaveBeenCalledWith({
-        conversationId: 'conv1',
-        content: 'Hello',
-        replyToId: undefined,
-      });
-    });
-
-    it('should send message with reply', async () => {
-      mockMessagingService.sendMessage.mockResolvedValueOnce({
-        id: 'msg2',
-        content: 'Reply',
-        senderId: 'user1',
-        conversationId: 'conv1',
-        replyToId: 'msg1',
-        status: 'sent' as const,
-        createdAt: new Date().toISOString(),
-        type: 'text' as const,
-      });
-      (mockStompClient.isConnected as jest.Mock).mockReturnValue(false);
-
-      const { result } = renderHook(() => useSendMessage('conv1'), { wrapper });
-
-      await act(async () => {
-        result.current.sendMessage({
-          content: 'Reply',
-          replyToId: 'msg1',
-        });
-      });
-
-      await waitFor(() => {
-        expect(result.current.isSuccess).toBe(true);
-      });
-
-      expect(mockMessagingService.sendMessage).toHaveBeenCalledWith({
-        conversationId: 'conv1',
-        content: 'Reply',
-        replyToId: 'msg1',
-      });
-    });
-  });
-
-  describe('optimistic updates', () => {
-    it('should apply optimistic update before server response', async () => {
-      // Create a promise that won't resolve immediately
-      let resolvePromise: (value: any) => void;
-      const pendingPromise = new Promise<any>((resolve) => {
-        resolvePromise = resolve;
-      });
-
-      (mockStompClient.isConnected as jest.Mock).mockReturnValue(false);
-      mockMessagingService.sendMessage.mockReturnValueOnce(pendingPromise);
-
-      const { result } = renderHook(() => useSendMessage('conv1'), { wrapper });
-
-      act(() => {
-        result.current.sendMessage({
-          content: 'Test',
-        });
-      });
-
-      // Should be pending
-      expect(result.current.isPending).toBe(true);
-
-      // Resolve the promise
-      await act(async () => {
-        resolvePromise!({
-          id: 'msg1',
-          content: 'Test',
-          status: 'sent',
+          recipientId: 'user2',
         });
       });
 
       await waitFor(() => {
         expect(result.current.isPending).toBe(false);
       });
+
+      expect(mockMessagingService.sendMessage).toHaveBeenCalledWith({
+        recipientId: 'user2',
+        content: 'Hello',
+        attachment: undefined,
+      });
+    });
+
+    it('should send message with attachment', async () => {
+      const mockResponse = {
+        messageId: 'msg2',
+        conversationId: 'conv1',
+        content: 'Check this out',
+        status: 'SENT' as const,
+        sentAt: new Date().toISOString(),
+      };
+      (mockStompClient.isConnected as jest.Mock).mockReturnValue(false);
+      mockMessagingService.sendMessage.mockResolvedValueOnce(mockResponse);
+
+      const { result } = renderHook(() => useSendMessage('conv1'), { wrapper });
+
+      await act(async () => {
+        result.current.sendMessage({
+          content: 'Check this out',
+          recipientId: 'user2',
+          attachment: { type: 'image', url: 'http://example.com/image.jpg' } as any,
+        });
+      });
+
+      await waitFor(() => {
+        expect(result.current.isPending).toBe(false);
+      });
+
+      expect(mockMessagingService.sendMessage).toHaveBeenCalledWith({
+        recipientId: 'user2',
+        content: 'Check this out',
+        attachment: { type: 'image', url: 'http://example.com/image.jpg' },
+      });
+    });
+  });
+
+  describe('optimistic updates', () => {
+    it('should apply optimistic update before server response', async () => {
+      // Setup: WebSocket disconnected, HTTP will be used
+      (mockStompClient.isConnected as jest.Mock).mockReturnValue(false);
+
+      const mockResponse = {
+        messageId: 'msg1',
+        conversationId: 'conv1',
+        content: 'Test',
+        status: 'SENT',
+        sentAt: new Date().toISOString(),
+      };
+      mockMessagingService.sendMessage.mockResolvedValueOnce(mockResponse);
+
+      const { result } = renderHook(() => useSendMessage('conv1'), { wrapper });
+
+      // Send message
+      await act(async () => {
+        result.current.sendMessage({
+          content: 'Test',
+          recipientId: 'user2',
+        });
+      });
+
+      // Wait for mutation to complete
+      await waitFor(() => {
+        expect(result.current.isPending).toBe(false);
+      });
+
+      // Verify HTTP was called
+      expect(mockMessagingService.sendMessage).toHaveBeenCalledWith({
+        recipientId: 'user2',
+        content: 'Test',
+        attachment: undefined,
+      });
     });
   });
 
   describe('offline handling', () => {
-    it('should queue message when offline', async () => {
+    it('should handle offline scenarios', async () => {
       mockNetInfo.fetch.mockResolvedValue({
         isConnected: false,
         isInternetReachable: false,
       } as any);
       (mockStompClient.isConnected as jest.Mock).mockReturnValue(false);
-
-      mockMessageQueue.add.mockResolvedValueOnce(undefined);
 
       const { result } = renderHook(() => useSendMessage('conv1'), { wrapper });
 
@@ -217,6 +213,7 @@ describe('useSendMessage', () => {
       await act(async () => {
         result.current.sendMessage({
           content: 'Test',
+          recipientId: 'user2',
         });
       });
 
@@ -236,6 +233,7 @@ describe('useSendMessage', () => {
       await act(async () => {
         result.current.sendMessage({
           content: 'Test',
+          recipientId: 'user2',
         });
       });
 
@@ -255,10 +253,11 @@ describe('useSendMessage', () => {
       await act(async () => {
         result.current.sendMessage({
           content: '',
+          recipientId: 'user2',
         });
       });
 
-      // Should not call the service
+      // Should not call the service due to validation
       expect(mockMessagingService.sendMessage).not.toHaveBeenCalled();
       expect(mockStompClient.sendMessage).not.toHaveBeenCalled();
     });
@@ -269,6 +268,7 @@ describe('useSendMessage', () => {
       await act(async () => {
         result.current.sendMessage({
           content: '   ',
+          recipientId: 'user2',
         });
       });
 

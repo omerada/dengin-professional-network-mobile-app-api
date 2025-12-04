@@ -5,7 +5,7 @@
 import React, { memo, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, fontSize } from '@theme';
 
 interface ProfileBioProps {
   /**
@@ -85,12 +85,13 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
   },
   bio: {
-    fontSize: typography.fontSize.base,
+    fontSize: fontSize.base,
     lineHeight: 22,
   },
   showMore: {
-    fontSize: typography.fontSize.sm,
+    fontSize: fontSize.sm,
     fontWeight: '600',
     marginTop: spacing.xs,
   },
 });
+

@@ -7,7 +7,7 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@contexts/ThemeContext';
 import { Avatar, EmptyState, Loading, Button } from '@shared/components';
-import { spacing, typography } from '@theme';
+import { spacing, fontSize } from '@theme';
 import { useBlockedUsers } from '../hooks';
 import { useUnblock } from '@features/social';
 import type { BlockedUser } from '../types';
@@ -133,11 +133,11 @@ const styles = StyleSheet.create({
     marginRight: spacing.sm,
   },
   name: {
-    fontSize: typography.fontSize.md,
+    fontSize: fontSize.md,
     fontWeight: '600',
   },
   date: {
-    fontSize: typography.fontSize.xs,
+    fontSize: fontSize.xs,
     marginTop: 2,
   },
   separator: {
@@ -148,3 +148,4 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+

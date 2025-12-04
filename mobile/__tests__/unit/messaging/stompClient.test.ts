@@ -2,7 +2,7 @@
 // Unit tests for STOMP WebSocket client
 // Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
 
-import { stompClient } from '@features/messaging/services/stompClient';
+import { stompClient } from '@features/messaging/services/socketClient';
 import SockJS from 'sockjs-client';
 import { Client as StompClient } from '@stomp/stompjs';
 
@@ -34,16 +34,27 @@ jest.mock('sockjs-client', () => {
 });
 
 // Mock token service
-jest.mock('@core/services/token', () => ({
+jest.mock('@features/auth/services', () => ({
   tokenService: {
     getAccessToken: jest.fn().mockResolvedValue('mock-jwt-token'),
   },
 }));
 
 // Mock environment config
-jest.mock('@core/config/environment', () => ({
+jest.mock('@config/env', () => ({
   ENV: {
-    WS_URL: 'ws://localhost:8080/ws',
+    API_URL: 'http://localhost:8080',
+  },
+}));
+
+// Mock messaging store
+jest.mock('@features/messaging/stores', () => ({
+  useMessagingStore: {
+    getState: jest.fn().mockReturnValue({
+      setConnectionState: jest.fn(),
+      addTypingUser: jest.fn(),
+      removeTypingUser: jest.fn(),
+    }),
   },
 }));
 
@@ -64,7 +75,7 @@ describe('STOMP Client', () => {
 
     it('should handle connection errors gracefully', async () => {
       const mockOnError = jest.fn();
-      
+
       // TODO: Implement error handling test
       expect(typeof stompClient.disconnect).toBe('function');
     });
@@ -100,38 +111,38 @@ describe('STOMP Client', () => {
     });
   });
 
-  describe('markAsRead', () => {
+  describe('sendReadReceipt', () => {
     it('should send read receipt', () => {
       const conversationId = '123e4567-e89b-12d3-a456-426614174000';
       const messageId = '123e4567-e89b-12d3-a456-426614174002';
 
-      // TODO: Implement mark as read test
-      expect(typeof stompClient.markAsRead).toBe('function');
+      // TODO: Implement send read receipt test
+      expect(typeof stompClient.sendReadReceipt).toBe('function');
     });
   });
 
   describe('event subscriptions', () => {
     it('should subscribe to message events', () => {
       const mockHandler = jest.fn();
-      
+
       stompClient.on('message', mockHandler);
-      
+
       expect(typeof stompClient.on).toBe('function');
     });
 
     it('should subscribe to typing events', () => {
       const mockHandler = jest.fn();
-      
+
       stompClient.on('typing', mockHandler);
-      
+
       expect(typeof stompClient.on).toBe('function');
     });
 
     it('should subscribe to read events', () => {
       const mockHandler = jest.fn();
-      
+
       stompClient.on('read', mockHandler);
-      
+
       expect(typeof stompClient.on).toBe('function');
     });
   });

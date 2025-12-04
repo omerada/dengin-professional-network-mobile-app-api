@@ -38,6 +38,7 @@ interface ButtonProps extends Omit<TouchableOpacityProps, 'style'> {
   rightIcon?: React.ReactNode;
   style?: ViewStyle;
   textStyle?: TextStyle;
+  testID?: string;
 }
 
 /**
@@ -56,6 +57,7 @@ export const Button = React.memo<ButtonProps>(
     rightIcon,
     style,
     textStyle,
+    testID,
     onPress,
     ...props
   }) => {
@@ -168,6 +170,7 @@ export const Button = React.memo<ButtonProps>(
 
     return (
       <TouchableOpacity
+        testID={testID}
         style={buttonStyles}
         onPress={handlePress}
         disabled={disabled || loading}

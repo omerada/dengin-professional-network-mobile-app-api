@@ -1,221 +1,249 @@
 // __tests__/unit/verification/verificationStore.test.ts
 // Verification store testleri
+// Zustand store'larını test etmek için doğrudan store erişimi kullanıyoruz
 
-import { renderHook, act } from '@testing-library/react-hooks';
-import { useVerificationStore } from '../../../src/features/verification/stores';
-import { VerificationStep } from '../../../src/features/verification/types';
+// Disable auto-mock for this file - we want to test the real store
+jest.unmock('zustand/middleware/immer');
 
-// Store'u sıfırla
-beforeEach(() => {
-  useVerificationStore.getState().reset();
-});
+import { act } from '@testing-library/react-native';
 
 describe('Verification Store', () => {
+  // Use dynamic import inside tests to get fresh module
+  const getStore = () => {
+    // Clear require cache for a fresh store
+    jest.resetModules();
+    return require('../../../src/features/verification/stores').useVerificationStore;
+  };
+
   describe('Initial State', () => {
     it('should have correct initial state', () => {
-      const { result } = renderHook(() => useVerificationStore());
+      const store = getStore();
+      const state = store.getState();
 
-      expect(result.current.currentStep).toBe(VerificationStep.INTRO);
-      expect(result.current.documentFront).toBeNull();
-      expect(result.current.documentBack).toBeNull();
-      expect(result.current.selfie).toBeNull();
-      expect(result.current.isUploading).toBe(false);
-      expect(result.current.uploadProgress).toBe(0);
-      expect(result.current.verificationId).toBeNull();
-      expect(result.current.status).toBeNull();
-      expect(result.current.error).toBeNull();
+      expect(state.currentStep).toBe('intro');
+      expect(state.data.documentFront).toBeNull();
+      expect(state.data.documentBack).toBeNull();
+      expect(state.data.selfie).toBeNull();
+      expect(state.isProcessing).toBe(false);
+      expect(state.uploadProgress.total).toBe(0);
+      expect(state.verificationResponse).toBeNull();
+      expect(state.error).toBeNull();
     });
   });
 
   describe('Step Navigation', () => {
     it('should set current step', () => {
-      const { result } = renderHook(() => useVerificationStore());
+      const store = getStore();
 
       act(() => {
-        result.current.setStep(VerificationStep.DOCUMENT_FRONT);
+        store.getState().setStep('document_front');
       });
 
-      expect(result.current.currentStep).toBe(VerificationStep.DOCUMENT_FRONT);
+      expect(store.getState().currentStep).toBe('document_front');
     });
 
     it('should go to next step', () => {
-      const { result } = renderHook(() => useVerificationStore());
+      const store = getStore();
 
       act(() => {
-        result.current.goToNextStep();
+        store.getState().goToNextStep();
       });
 
-      expect(result.current.currentStep).toBe(VerificationStep.DOCUMENT_FRONT);
+      expect(store.getState().currentStep).toBe('document_front');
 
       act(() => {
-        result.current.goToNextStep();
+        store.getState().goToNextStep();
       });
 
-      expect(result.current.currentStep).toBe(VerificationStep.DOCUMENT_BACK);
+      expect(store.getState().currentStep).toBe('document_back');
     });
 
     it('should go to previous step', () => {
-      const { result } = renderHook(() => useVerificationStore());
+      const store = getStore();
 
       act(() => {
-        result.current.setStep(VerificationStep.SELFIE);
+        store.getState().setStep('selfie');
       });
 
       act(() => {
-        result.current.goToPreviousStep();
+        store.getState().goToPreviousStep();
       });
 
-      expect(result.current.currentStep).toBe(VerificationStep.DOCUMENT_BACK);
+      expect(store.getState().currentStep).toBe('document_back');
     });
 
-    it('should not go below INTRO step', () => {
-      const { result } = renderHook(() => useVerificationStore());
+    it('should not go below intro step', () => {
+      const store = getStore();
 
       act(() => {
-        result.current.goToPreviousStep();
+        store.getState().goToPreviousStep();
       });
 
-      expect(result.current.currentStep).toBe(VerificationStep.INTRO);
+      expect(store.getState().currentStep).toBe('intro');
     });
   });
 
   describe('Image Capture', () => {
     const mockImage = {
       uri: 'file:///mock/image.jpg',
+      path: '/mock/image.jpg',
       width: 1920,
       height: 1080,
+      type: 'front' as const,
+      capturedAt: new Date().toISOString(),
       fileSize: 1024000,
     };
 
     it('should set document front image', () => {
-      const { result } = renderHook(() => useVerificationStore());
+      const store = getStore();
 
       act(() => {
-        result.current.setDocumentFront(mockImage);
+        store.getState().setDocumentFront(mockImage);
       });
 
-      expect(result.current.documentFront).toEqual(mockImage);
+      expect(store.getState().data.documentFront).toEqual(mockImage);
     });
 
     it('should set document back image', () => {
-      const { result } = renderHook(() => useVerificationStore());
+      const store = getStore();
+      const backImage = { ...mockImage, type: 'back' as const };
 
       act(() => {
-        result.current.setDocumentBack(mockImage);
+        store.getState().setDocumentBack(backImage);
       });
 
-      expect(result.current.documentBack).toEqual(mockImage);
+      expect(store.getState().data.documentBack).toEqual(backImage);
     });
 
     it('should set selfie image', () => {
-      const { result } = renderHook(() => useVerificationStore());
+      const store = getStore();
+      const selfieImage = { ...mockImage, type: 'selfie' as const };
 
       act(() => {
-        result.current.setSelfie(mockImage);
+        store.getState().setSelfie(selfieImage);
       });
 
-      expect(result.current.selfie).toEqual(mockImage);
+      expect(store.getState().data.selfie).toEqual(selfieImage);
     });
 
     it('should check if all images are captured', () => {
-      const { result } = renderHook(() => useVerificationStore());
+      const store = getStore();
+      const backImage = { ...mockImage, type: 'back' as const };
+      const selfieImage = { ...mockImage, type: 'selfie' as const };
 
-      expect(result.current.hasAllImages()).toBe(false);
+      const stateBefore = store.getState();
+      expect(
+        stateBefore.data.documentFront === null ||
+          stateBefore.data.documentBack === null ||
+          stateBefore.data.selfie === null,
+      ).toBe(true);
 
       act(() => {
-        result.current.setDocumentFront(mockImage);
-        result.current.setDocumentBack(mockImage);
-        result.current.setSelfie(mockImage);
+        store.getState().setDocumentFront(mockImage);
+        store.getState().setDocumentBack(backImage);
+        store.getState().setSelfie(selfieImage);
       });
 
-      expect(result.current.hasAllImages()).toBe(true);
+      const stateAfter = store.getState();
+      expect(stateAfter.data.documentFront).not.toBeNull();
+      expect(stateAfter.data.documentBack).not.toBeNull();
+      expect(stateAfter.data.selfie).not.toBeNull();
     });
   });
 
   describe('Upload State', () => {
-    it('should set uploading state', () => {
-      const { result } = renderHook(() => useVerificationStore());
+    it('should set processing state', () => {
+      const store = getStore();
 
       act(() => {
-        result.current.setIsUploading(true);
+        store.getState().setProcessing(true);
       });
 
-      expect(result.current.isUploading).toBe(true);
+      expect(store.getState().isProcessing).toBe(true);
     });
 
     it('should set upload progress', () => {
-      const { result } = renderHook(() => useVerificationStore());
+      const store = getStore();
+      const progress = {
+        documentFront: 50,
+        documentBack: 30,
+        selfie: 0,
+        status: 'uploading' as const,
+      };
 
       act(() => {
-        result.current.setUploadProgress(50);
+        store.getState().setUploadProgress(progress);
       });
 
-      expect(result.current.uploadProgress).toBe(50);
+      const uploadProgress = store.getState().uploadProgress;
+      expect(uploadProgress.documentFront).toBe(50);
+      expect(uploadProgress.documentBack).toBe(30);
+      expect(uploadProgress.selfie).toBe(0);
+      expect(uploadProgress.status).toBe('uploading');
+      // Total is auto-calculated: (50 + 30 + 0) / 3 = 26.67 -> 27
+      expect(uploadProgress.total).toBe(27);
     });
 
-    it('should set verification ID', () => {
-      const { result } = renderHook(() => useVerificationStore());
+    it('should set verification response', () => {
+      const store = getStore();
+      const response = {
+        id: '123',
+        status: 'APPROVED' as const,
+        message: 'Verification successful',
+        confidenceScore: 0.95,
+      };
 
       act(() => {
-        result.current.setVerificationId('ver_123456');
+        store.getState().setVerificationResponse(response);
       });
 
-      expect(result.current.verificationId).toBe('ver_123456');
-    });
-
-    it('should set verification status', () => {
-      const { result } = renderHook(() => useVerificationStore());
-
-      act(() => {
-        result.current.setStatus('PENDING_REVIEW');
-      });
-
-      expect(result.current.status).toBe('PENDING_REVIEW');
+      expect(store.getState().verificationResponse).toEqual(response);
     });
 
     it('should set error', () => {
-      const { result } = renderHook(() => useVerificationStore());
+      const store = getStore();
+      const error = {
+        code: 'INVALID_DOCUMENT',
+        message: 'Document is not valid',
+      };
 
       act(() => {
-        result.current.setError('Upload failed');
+        store.getState().setError(error);
       });
 
-      expect(result.current.error).toBe('Upload failed');
+      expect(store.getState().error).toEqual(error);
     });
   });
 
   describe('Reset', () => {
     it('should reset all state', () => {
-      const { result } = renderHook(() => useVerificationStore());
-
+      const store = getStore();
       const mockImage = {
         uri: 'file:///mock/image.jpg',
+        path: '/mock/image.jpg',
         width: 1920,
         height: 1080,
+        type: 'front' as const,
+        capturedAt: new Date().toISOString(),
         fileSize: 1024000,
       };
 
+      // Modify state first
       act(() => {
-        result.current.setStep(VerificationStep.SELFIE);
-        result.current.setDocumentFront(mockImage);
-        result.current.setDocumentBack(mockImage);
-        result.current.setSelfie(mockImage);
-        result.current.setIsUploading(true);
-        result.current.setUploadProgress(75);
-        result.current.setError('Some error');
+        store.getState().setStep('selfie');
+        store.getState().setDocumentFront(mockImage);
+        store.getState().setProcessing(true);
       });
 
+      // Reset
       act(() => {
-        result.current.reset();
+        store.getState().reset();
       });
 
-      expect(result.current.currentStep).toBe(VerificationStep.INTRO);
-      expect(result.current.documentFront).toBeNull();
-      expect(result.current.documentBack).toBeNull();
-      expect(result.current.selfie).toBeNull();
-      expect(result.current.isUploading).toBe(false);
-      expect(result.current.uploadProgress).toBe(0);
-      expect(result.current.error).toBeNull();
+      const state = store.getState();
+      expect(state.currentStep).toBe('intro');
+      expect(state.data.documentFront).toBeNull();
+      expect(state.isProcessing).toBe(false);
     });
   });
 });

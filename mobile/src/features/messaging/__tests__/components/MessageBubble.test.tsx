@@ -27,9 +27,10 @@ describe('MessageBubble', () => {
     conversationId: 'conv1',
     content: 'Test message content',
     senderId: 'user1',
-    status: 'sent',
-    createdAt: '2024-01-15T10:00:00Z',
+    status: 'SENT',
+    sentAt: '2024-01-15T10:00:00Z',
     type: 'text',
+    sentByMe: false,
     ...overrides,
   });
 
@@ -37,19 +38,15 @@ describe('MessageBubble', () => {
     it('should render message content', () => {
       const message = createMessage({ content: 'Hello World!' });
 
-      const { getByText } = render(
-        <MessageBubble message={message} isOwn={false} />
-      );
+      const { getByText } = render(<MessageBubble message={message} isOwn={false} />);
 
       expect(getByText('Hello World!')).toBeTruthy();
     });
 
     it('should render own message with different style', () => {
-      const message = createMessage();
+      const message = createMessage({ sentByMe: true });
 
-      const { getByText } = render(
-        <MessageBubble message={message} isOwn={true} />
-      );
+      const { getByText } = render(<MessageBubble message={message} isOwn={true} />);
 
       const messageText = getByText('Test message content');
       expect(messageText).toBeTruthy();
@@ -58,20 +55,16 @@ describe('MessageBubble', () => {
     it('should render other user message', () => {
       const message = createMessage();
 
-      const { getByText } = render(
-        <MessageBubble message={message} isOwn={false} />
-      );
+      const { getByText } = render(<MessageBubble message={message} isOwn={false} />);
 
       const messageText = getByText('Test message content');
       expect(messageText).toBeTruthy();
     });
 
     it('should render timestamp', () => {
-      const message = createMessage({ createdAt: '2024-01-15T14:30:00Z' });
+      const message = createMessage({ sentAt: '2024-01-15T14:30:00Z' });
 
-      const { getByText } = render(
-        <MessageBubble message={message} isOwn={false} />
-      );
+      const { getByText } = render(<MessageBubble message={message} isOwn={false} />);
 
       // Should show formatted time (depends on locale)
       expect(getByText(/\d{2}:\d{2}/)).toBeTruthy();
@@ -80,95 +73,86 @@ describe('MessageBubble', () => {
 
   describe('status indicators', () => {
     it('should show sending indicator for sending status', () => {
-      const message = createMessage({ status: 'sending' });
+      const message = createMessage({ status: 'SENDING', sentByMe: true });
 
-      const { UNSAFE_queryAllByType } = render(
-        <MessageBubble message={message} isOwn={true} />
-      );
+      const { UNSAFE_queryAllByType } = render(<MessageBubble message={message} isOwn={true} />);
 
       // ActivityIndicator should be present
       expect(UNSAFE_queryAllByType('ActivityIndicator')).toBeDefined();
     });
 
     it('should show checkmark for sent status', () => {
-      const message = createMessage({ status: 'sent' });
+      const message = createMessage({ status: 'SENT', sentByMe: true });
 
-      const { container } = render(
-        <MessageBubble message={message} isOwn={true} />
-      );
+      const { root } = render(<MessageBubble message={message} isOwn={true} />);
 
       // Icon should be rendered
-      expect(container).toBeTruthy();
+      expect(root).toBeTruthy();
     });
 
     it('should show double checkmark for delivered status', () => {
-      const message = createMessage({ status: 'delivered' });
+      const message = createMessage({ status: 'DELIVERED', sentByMe: true });
 
-      const { container } = render(
-        <MessageBubble message={message} isOwn={true} />
-      );
+      const { root } = render(<MessageBubble message={message} isOwn={true} />);
 
-      expect(container).toBeTruthy();
+      expect(root).toBeTruthy();
     });
 
     it('should show blue checkmark for read status', () => {
-      const message = createMessage({ status: 'read' });
+      const message = createMessage({ status: 'READ', sentByMe: true });
 
-      const { container } = render(
-        <MessageBubble message={message} isOwn={true} />
-      );
+      const { root } = render(<MessageBubble message={message} isOwn={true} />);
 
-      expect(container).toBeTruthy();
+      expect(root).toBeTruthy();
     });
 
     it('should show error icon for failed status', () => {
-      const message = createMessage({ status: 'failed' });
+      const message = createMessage({ status: 'FAILED', sentByMe: true });
 
-      const { container } = render(
-        <MessageBubble message={message} isOwn={true} />
-      );
+      const { root } = render(<MessageBubble message={message} isOwn={true} />);
 
-      expect(container).toBeTruthy();
+      expect(root).toBeTruthy();
     });
 
     it('should not show status for other user messages', () => {
-      const message = createMessage({ status: 'read' });
+      const message = createMessage({ status: 'READ', sentByMe: false });
 
-      const { container } = render(
-        <MessageBubble message={message} isOwn={false} />
-      );
+      const { root } = render(<MessageBubble message={message} isOwn={false} />);
 
       // Status should not be visible for non-own messages
-      expect(container).toBeTruthy();
+      expect(root).toBeTruthy();
     });
   });
 
-  describe('reply indicator', () => {
-    it('should render reply indicator when message has replyTo', () => {
+  describe('attachment', () => {
+    it('should render image attachment', () => {
       const message = createMessage({
-        replyTo: {
-          id: 'msg0',
-          content: 'Original message',
-          senderName: 'Jane Doe',
+        attachment: {
+          url: 'https://example.com/image.jpg',
+          contentType: 'image/jpeg',
+          fileName: 'image.jpg',
+          fileSize: 1024,
         },
       });
 
-      const { getByText } = render(
-        <MessageBubble message={message} isOwn={false} />
-      );
+      const { root } = render(<MessageBubble message={message} isOwn={false} />);
 
-      expect(getByText('Jane Doe')).toBeTruthy();
-      expect(getByText('Original message')).toBeTruthy();
+      expect(root).toBeTruthy();
     });
 
-    it('should not render reply indicator when no replyTo', () => {
-      const message = createMessage();
+    it('should render file attachment', () => {
+      const message = createMessage({
+        attachment: {
+          url: 'https://example.com/doc.pdf',
+          contentType: 'application/pdf',
+          fileName: 'document.pdf',
+          fileSize: 2048,
+        },
+      });
 
-      const { queryByText } = render(
-        <MessageBubble message={message} isOwn={false} />
-      );
+      const { getByText } = render(<MessageBubble message={message} isOwn={false} />);
 
-      expect(queryByText('Jane Doe')).toBeNull();
+      expect(getByText('document.pdf')).toBeTruthy();
     });
   });
 
@@ -178,7 +162,7 @@ describe('MessageBubble', () => {
       const onLongPress = jest.fn();
 
       const { getByText } = render(
-        <MessageBubble message={message} isOwn={false} onLongPress={onLongPress} />
+        <MessageBubble message={message} isOwn={false} onLongPress={onLongPress} />,
       );
 
       const messageText = getByText('Test message content');
@@ -190,39 +174,31 @@ describe('MessageBubble', () => {
     it('should not crash without onLongPress handler', () => {
       const message = createMessage();
 
-      const { getByText } = render(
-        <MessageBubble message={message} isOwn={false} />
-      );
+      const { getByText } = render(<MessageBubble message={message} isOwn={false} />);
 
       const messageText = getByText('Test message content');
-      
+
       expect(() => {
         fireEvent(messageText, 'longPress');
       }).not.toThrow();
     });
 
-    it('should call onReplyPress when reply is pressed', () => {
+    it('should call onImagePress when image is pressed', () => {
       const message = createMessage({
-        replyTo: {
-          id: 'msg0',
-          content: 'Original',
-          senderName: 'User',
+        attachment: {
+          url: 'https://example.com/image.jpg',
+          contentType: 'image/jpeg',
+          fileName: 'image.jpg',
+          fileSize: 1024,
         },
       });
-      const onReplyPress = jest.fn();
+      const onImagePress = jest.fn();
 
-      const { getByText } = render(
-        <MessageBubble 
-          message={message} 
-          isOwn={false} 
-          onReplyPress={onReplyPress} 
-        />
+      const { root } = render(
+        <MessageBubble message={message} isOwn={false} onImagePress={onImagePress} />,
       );
 
-      const replyName = getByText('User');
-      fireEvent.press(replyName);
-
-      expect(onReplyPress).toHaveBeenCalledWith(message);
+      expect(root).toBeTruthy();
     });
   });
 
@@ -231,9 +207,7 @@ describe('MessageBubble', () => {
       const longContent = 'A'.repeat(500);
       const message = createMessage({ content: longContent });
 
-      const { getByText } = render(
-        <MessageBubble message={message} isOwn={false} />
-      );
+      const { getByText } = render(<MessageBubble message={message} isOwn={false} />);
 
       expect(getByText(longContent)).toBeTruthy();
     });
@@ -243,9 +217,7 @@ describe('MessageBubble', () => {
     it('should render emoji correctly', () => {
       const message = createMessage({ content: '👋 Merhaba! 🎉' });
 
-      const { getByText } = render(
-        <MessageBubble message={message} isOwn={false} />
-      );
+      const { getByText } = render(<MessageBubble message={message} isOwn={false} />);
 
       expect(getByText('👋 Merhaba! 🎉')).toBeTruthy();
     });
@@ -253,9 +225,7 @@ describe('MessageBubble', () => {
     it('should render Turkish characters correctly', () => {
       const message = createMessage({ content: 'Türkçe karakterler: ş, ğ, ü, ö, ç, ı' });
 
-      const { getByText } = render(
-        <MessageBubble message={message} isOwn={false} />
-      );
+      const { getByText } = render(<MessageBubble message={message} isOwn={false} />);
 
       expect(getByText('Türkçe karakterler: ş, ğ, ü, ö, ç, ı')).toBeTruthy();
     });

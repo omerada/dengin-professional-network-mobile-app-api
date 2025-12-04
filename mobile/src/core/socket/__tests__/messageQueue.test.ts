@@ -38,7 +38,7 @@ describe('messageQueue', () => {
 
       expect(mockAsyncStorage.setItem).toHaveBeenCalledWith(
         expect.stringContaining('message_queue'),
-        expect.any(String)
+        expect.any(String),
       );
     });
 
@@ -65,7 +65,7 @@ describe('messageQueue', () => {
             destination: '/app/chat.send',
             timestamp: expect.any(Number),
           }),
-        ])
+        ]),
       );
     });
   });
@@ -93,7 +93,7 @@ describe('messageQueue', () => {
 
       expect(mockAsyncStorage.setItem).toHaveBeenCalledWith(
         expect.stringContaining('message_queue'),
-        expect.any(String)
+        expect.any(String),
       );
 
       const setItemCall = mockAsyncStorage.setItem.mock.calls[0];
@@ -114,24 +114,27 @@ describe('messageQueue', () => {
 
   describe('incrementRetry', () => {
     it('should increment retry count for a message', async () => {
-      const existingQueue = [
-        {
-          id: 'client-123',
-          destination: '/app/chat.send',
-          body: { conversationId: 'conv1', content: 'Hello' },
-          timestamp: Date.now(),
-          retry: 0,
-        },
-      ];
+      const message = {
+        id: 'client-123',
+        destination: '/app/chat.send',
+        body: { conversationId: 'conv1', content: 'Hello' },
+        timestamp: Date.now(),
+        retry: 0,
+      };
 
-      mockAsyncStorage.getItem.mockResolvedValueOnce(JSON.stringify(existingQueue));
+      // Add message first so it exists in memory
+      await messageQueue.add(message);
+      jest.clearAllMocks();
 
       await messageQueue.incrementRetry('client-123');
 
-      const setItemCall = mockAsyncStorage.setItem.mock.calls[0];
-      const storedData = JSON.parse(setItemCall[1]);
+      // Check that save was called
+      expect(mockAsyncStorage.setItem).toHaveBeenCalled();
 
-      expect(storedData[0].retry).toBe(1);
+      // Verify the message in queue has incremented retry
+      const allMessages = messageQueue.getAll();
+      const updatedMessage = allMessages.find(m => m.id === 'client-123');
+      expect(updatedMessage?.retry).toBe(1);
     });
 
     it('should handle non-existent message gracefully', async () => {
@@ -163,7 +166,7 @@ describe('messageQueue', () => {
 
       expect(mockAsyncStorage.setItem).toHaveBeenCalledWith(
         '@socket:message_queue',
-        expect.any(String)
+        expect.any(String),
       );
     });
 

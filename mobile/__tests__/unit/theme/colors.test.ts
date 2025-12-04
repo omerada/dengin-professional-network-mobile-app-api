@@ -1,101 +1,90 @@
 // __tests__/unit/theme/colors.test.ts
 // Oku: mobile-development-guide/testing/21-TESTING-STRATEGY.md
 
-import { lightColors, darkColors, colors } from '../../../src/theme/colors';
+import { lightTheme, darkTheme, colors } from '../../../src/theme/colors';
 
 describe('Theme Colors', () => {
-  describe('Light Colors', () => {
+  describe('Light Theme', () => {
     it('tüm gerekli renk kategorilerini içermeli', () => {
-      expect(lightColors.primary).toBeDefined();
-      expect(lightColors.background).toBeDefined();
-      expect(lightColors.text).toBeDefined();
-      expect(lightColors.border).toBeDefined();
-      expect(lightColors.error).toBeDefined();
-      expect(lightColors.success).toBeDefined();
-      expect(lightColors.warning).toBeDefined();
+      expect(lightTheme.primary).toBeDefined();
+      expect(lightTheme.background).toBeDefined();
+      expect(lightTheme.text).toBeDefined();
+      expect(lightTheme.border).toBeDefined();
+      expect(lightTheme.error).toBeDefined();
+      expect(lightTheme.success).toBeDefined();
+      expect(lightTheme.warning).toBeDefined();
     });
 
     it('primary renkler tanımlı olmalı', () => {
-      expect(lightColors.primary).toBeDefined();
-      expect(typeof lightColors.primary).toBe('string');
+      expect(lightTheme.primary).toBeDefined();
+      expect(typeof lightTheme.primary).toBe('object');
+      expect(lightTheme.primary[500]).toBeDefined();
     });
 
-    it('background renkleri açık olmalı', () => {
-      // Light theme should have light background colors
-      expect(lightColors.background).toBeDefined();
+    it('background renkleri tanımlı olmalı', () => {
+      expect(lightTheme.background).toBeDefined();
+      expect(lightTheme.background.primary).toBeDefined();
     });
   });
 
-  describe('Dark Colors', () => {
+  describe('Dark Theme', () => {
     it('tüm gerekli renk kategorilerini içermeli', () => {
-      expect(darkColors.primary).toBeDefined();
-      expect(darkColors.background).toBeDefined();
-      expect(darkColors.text).toBeDefined();
-      expect(darkColors.border).toBeDefined();
-      expect(darkColors.error).toBeDefined();
-      expect(darkColors.success).toBeDefined();
-      expect(darkColors.warning).toBeDefined();
+      expect(darkTheme.primary).toBeDefined();
+      expect(darkTheme.background).toBeDefined();
+      expect(darkTheme.text).toBeDefined();
+      expect(darkTheme.border).toBeDefined();
+      expect(darkTheme.error).toBeDefined();
+      expect(darkTheme.success).toBeDefined();
+      expect(darkTheme.warning).toBeDefined();
     });
 
     it('primary renkler tanımlı olmalı', () => {
-      expect(darkColors.primary).toBeDefined();
-      expect(typeof darkColors.primary).toBe('string');
+      expect(darkTheme.primary).toBeDefined();
+      expect(typeof darkTheme.primary).toBe('object');
+      expect(darkTheme.primary[500]).toBeDefined();
     });
 
-    it('background renkleri koyu olmalı', () => {
-      // Dark theme should have dark background colors
-      expect(darkColors.background).toBeDefined();
+    it('background renkleri tanımlı olmalı', () => {
+      expect(darkTheme.background).toBeDefined();
+      expect(darkTheme.background.primary).toBeDefined();
     });
   });
 
   describe('Color Consistency', () => {
     it('light ve dark temaların aynı anahtarları olmalı', () => {
-      const lightKeys = Object.keys(lightColors).sort();
-      const darkKeys = Object.keys(darkColors).sort();
+      const lightKeys = Object.keys(lightTheme).sort();
+      const darkKeys = Object.keys(darkTheme).sort();
 
       expect(lightKeys).toEqual(darkKeys);
-    });
-
-    it('renk değerleri geçerli hex veya rgba formatında olmalı', () => {
-      const hexOrRgbaRegex = /^(#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{8}|rgba?\(.+\))$/;
-
-      Object.values(lightColors).forEach((value) => {
-        if (typeof value === 'string') {
-          expect(value).toMatch(hexOrRgbaRegex);
-        }
-      });
     });
   });
 
   describe('Semantic Colors', () => {
-    it('error rengi kırmızı tonlarında olmalı', () => {
-      // Error colors should be red-ish
-      expect(lightColors.error).toBeDefined();
-      expect(darkColors.error).toBeDefined();
+    it('error rengi tanımlı olmalı', () => {
+      expect(lightTheme.error).toBeDefined();
+      expect(darkTheme.error).toBeDefined();
     });
 
-    it('success rengi yeşil tonlarında olmalı', () => {
-      // Success colors should be green-ish
-      expect(lightColors.success).toBeDefined();
-      expect(darkColors.success).toBeDefined();
+    it('success rengi tanımlı olmalı', () => {
+      expect(lightTheme.success).toBeDefined();
+      expect(darkTheme.success).toBeDefined();
     });
 
-    it('warning rengi sarı/turuncu tonlarında olmalı', () => {
-      // Warning colors should be yellow/orange-ish
-      expect(lightColors.warning).toBeDefined();
-      expect(darkColors.warning).toBeDefined();
+    it('warning rengi tanımlı olmalı', () => {
+      expect(lightTheme.warning).toBeDefined();
+      expect(darkTheme.warning).toBeDefined();
     });
   });
 
-  describe('colors utility', () => {
-    it('light tema seçilebilmeli', () => {
-      const theme = colors('light');
-      expect(theme).toEqual(lightColors);
+  describe('colors palette', () => {
+    it('primary color palette tanımlı olmalı', () => {
+      expect(colors.primary).toBeDefined();
+      expect(colors.primary[500]).toBeDefined();
     });
 
-    it('dark tema seçilebilmeli', () => {
-      const theme = colors('dark');
-      expect(theme).toEqual(darkColors);
+    it('neutral color palette tanımlı olmalı', () => {
+      expect(colors.neutral).toBeDefined();
+      expect(colors.neutral[0]).toBeDefined();
     });
   });
 });

@@ -1,7 +1,30 @@
 // __tests__/unit/theme/typography.test.ts
 // Oku: mobile-development-guide/testing/21-TESTING-STRATEGY.md
 
-import { typography, fontSizes, fontWeights, lineHeights } from '../../../src/theme/typography';
+import { typography, fontSize, fontWeight, lineHeight } from '../../../src/theme/typography';
+
+// Create aliases to match expected test interface
+const fontSizes = {
+  xs: fontSize.xs,
+  sm: fontSize.sm,
+  md: fontSize.md,
+  lg: fontSize.lg,
+  xl: fontSize.xl,
+  xxl: fontSize['2xl'],
+};
+
+const fontWeights = {
+  regular: fontWeight.regular,
+  medium: fontWeight.medium,
+  semibold: fontWeight.semibold,
+  bold: fontWeight.bold,
+};
+
+const lineHeights = {
+  tight: lineHeight.tight,
+  normal: lineHeight.normal,
+  relaxed: lineHeight.relaxed,
+};
 
 describe('Typography', () => {
   describe('Font Sizes', () => {
@@ -23,7 +46,7 @@ describe('Typography', () => {
     });
 
     it('boyutlar pozitif sayı olmalı', () => {
-      Object.values(fontSizes).forEach((size) => {
+      Object.values(fontSizes).forEach(size => {
         expect(size).toBeGreaterThan(0);
         expect(typeof size).toBe('number');
       });
@@ -39,9 +62,21 @@ describe('Typography', () => {
     });
 
     it('ağırlıklar geçerli değerlerde olmalı', () => {
-      const validWeights = ['100', '200', '300', '400', '500', '600', '700', '800', '900', 'normal', 'bold'];
-      
-      Object.values(fontWeights).forEach((weight) => {
+      const validWeights = [
+        '100',
+        '200',
+        '300',
+        '400',
+        '500',
+        '600',
+        '700',
+        '800',
+        '900',
+        'normal',
+        'bold',
+      ];
+
+      Object.values(fontWeights).forEach(weight => {
         expect(validWeights).toContain(weight);
       });
     });
@@ -55,7 +90,7 @@ describe('Typography', () => {
     });
 
     it('satır yükseklikleri pozitif olmalı', () => {
-      Object.values(lineHeights).forEach((height) => {
+      Object.values(lineHeights).forEach(height => {
         expect(height).toBeGreaterThan(0);
       });
     });
@@ -85,8 +120,8 @@ describe('Typography', () => {
     it('presetler gerekli özellikleri içermeli', () => {
       const requiredProps = ['fontSize', 'fontWeight', 'lineHeight'];
 
-      Object.values(typography).forEach((preset) => {
-        requiredProps.forEach((prop) => {
+      Object.values(typography).forEach(preset => {
+        requiredProps.forEach(prop => {
           expect(preset).toHaveProperty(prop);
         });
       });

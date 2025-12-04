@@ -5,28 +5,39 @@ import { renderHook, waitFor, act } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { useLogin } from '../../../src/features/auth/hooks/useLogin';
-import { authApi } from '../../../src/features/auth/services/authApi';
-import { tokenService } from '../../../src/features/auth/services/tokenService';
-import { useAuthStore } from '../../../src/features/auth/stores/authStore';
 
-// Mock dependencies
-jest.mock('../../../src/features/auth/services/authApi', () => ({
+// Mock navigation
+const mockNavigate = jest.fn();
+const mockReset = jest.fn();
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: () => ({
+    navigate: mockNavigate,
+    reset: mockReset,
+  }),
+}));
+
+// Mock auth services
+const mockLogin = jest.fn();
+const mockSaveTokens = jest.fn();
+
+jest.mock('../../../src/features/auth/services', () => ({
   authApi: {
-    login: jest.fn(),
+    login: (...args: unknown[]) => mockLogin(...args),
   },
-}));
-
-jest.mock('../../../src/features/auth/services/tokenService', () => ({
   tokenService: {
-    setTokens: jest.fn(),
+    saveTokens: (...args: unknown[]) => mockSaveTokens(...args),
   },
 }));
 
-jest.mock('../../../src/features/auth/stores/authStore', () => ({
-  useAuthStore: jest.fn(() => ({
-    setUser: jest.fn(),
-    setLastLoginEmail: jest.fn(),
-  })),
+// Mock auth store
+const mockSetUser = jest.fn();
+const mockSetLastLoginEmail = jest.fn();
+
+jest.mock('../../../src/features/auth/stores', () => ({
+  useAuthStore: () => ({
+    setUser: mockSetUser,
+    setLastLoginEmail: mockSetLastLoginEmail,
+  }),
 }));
 
 const createWrapper = () => {
@@ -57,12 +68,9 @@ describe('useLogin Hook', () => {
   };
 
   const mockLoginResponse = {
-    success: true,
-    data: {
-      user: mockUser,
-      accessToken: 'access-token',
-      refreshToken: 'refresh-token',
-    },
+    user: mockUser,
+    accessToken: 'access-token',
+    refreshToken: 'refresh-token',
   };
 
   beforeEach(() => {
@@ -70,22 +78,17 @@ describe('useLogin Hook', () => {
   });
 
   it('başarılı giriş yapmalı', async () => {
-    (authApi.login as jest.Mock).mockResolvedValue(mockLoginResponse);
-    const setUser = jest.fn();
-    const setLastLoginEmail = jest.fn();
-    (useAuthStore as unknown as jest.Mock).mockReturnValue({
-      setUser,
-      setLastLoginEmail,
-    });
+    mockLogin.mockResolvedValue(mockLoginResponse);
 
     const { result } = renderHook(() => useLogin(), {
       wrapper: createWrapper(),
     });
 
     await act(async () => {
-      result.current.mutate({
+      result.current.login({
         email: 'test@example.com',
         password: 'password123',
+        rememberMe: true,
       });
     });
 
@@ -93,31 +96,25 @@ describe('useLogin Hook', () => {
       expect(result.current.isSuccess).toBe(true);
     });
 
-    expect(authApi.login).toHaveBeenCalledWith({
+    expect(mockLogin).toHaveBeenCalledWith({
       email: 'test@example.com',
       password: 'password123',
     });
-    expect(tokenService.setTokens).toHaveBeenCalledWith('access-token', 'refresh-token');
-    expect(setUser).toHaveBeenCalledWith(mockUser);
-    expect(setLastLoginEmail).toHaveBeenCalledWith('test@example.com');
+    expect(mockSaveTokens).toHaveBeenCalledWith(mockLoginResponse);
+    expect(mockSetUser).toHaveBeenCalledWith(mockUser);
+    expect(mockSetLastLoginEmail).toHaveBeenCalledWith('test@example.com');
   });
 
   it('başarısız giriş hatası döndürmeli', async () => {
-    const errorResponse = {
-      success: false,
-      error: {
-        code: 'INVALID_CREDENTIALS',
-        message: 'Invalid email or password',
-      },
-    };
-    (authApi.login as jest.Mock).mockRejectedValue(errorResponse);
+    const errorResponse = new Error('Invalid email or password');
+    mockLogin.mockRejectedValue(errorResponse);
 
     const { result } = renderHook(() => useLogin(), {
       wrapper: createWrapper(),
     });
 
     await act(async () => {
-      result.current.mutate({
+      result.current.login({
         email: 'wrong@example.com',
         password: 'wrongpassword',
       });
@@ -127,31 +124,31 @@ describe('useLogin Hook', () => {
       expect(result.current.isError).toBe(true);
     });
 
-    expect(tokenService.setTokens).not.toHaveBeenCalled();
+    expect(mockSaveTokens).not.toHaveBeenCalled();
   });
 
   it('loading durumu doğru çalışmalı', async () => {
     let resolveLogin: (value: typeof mockLoginResponse) => void;
-    const loginPromise = new Promise<typeof mockLoginResponse>((resolve) => {
+    const loginPromise = new Promise<typeof mockLoginResponse>(resolve => {
       resolveLogin = resolve;
     });
-    (authApi.login as jest.Mock).mockReturnValue(loginPromise);
+    mockLogin.mockReturnValue(loginPromise);
 
     const { result } = renderHook(() => useLogin(), {
       wrapper: createWrapper(),
     });
 
-    expect(result.current.isPending).toBe(false);
+    expect(result.current.isLoading).toBe(false);
 
     act(() => {
-      result.current.mutate({
+      result.current.login({
         email: 'test@example.com',
         password: 'password123',
       });
     });
 
     await waitFor(() => {
-      expect(result.current.isPending).toBe(true);
+      expect(result.current.isLoading).toBe(true);
     });
 
     await act(async () => {
@@ -159,7 +156,7 @@ describe('useLogin Hook', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.isPending).toBe(false);
+      expect(result.current.isLoading).toBe(false);
     });
   });
 });

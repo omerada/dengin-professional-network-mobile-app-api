@@ -3,13 +3,7 @@
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import React, { memo, useCallback } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  SafeAreaView,
-} from 'react-native';
+import { StyleSheet, View, Text, ScrollView, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTheme } from '@contexts';
@@ -19,10 +13,7 @@ import { useVerificationStore } from '../stores';
 import { StepIndicator } from '../components';
 import type { VerificationStackParamList } from '@shared/types/navigation.types';
 
-type NavigationProp = NativeStackNavigationProp<
-  VerificationStackParamList,
-  'VerificationIntro'
->;
+type NavigationProp = NativeStackNavigationProp<VerificationStackParamList, 'VerificationIntro'>;
 
 /**
  * Bilgi kartı bileşeni
@@ -34,19 +25,17 @@ interface InfoCardProps {
 }
 
 const InfoCard: React.FC<InfoCardProps> = memo(({ icon, title, description }) => {
-  const { colors } = useTheme();
+  const { theme } = useTheme();
+  const { colors } = theme;
 
   return (
     <View
       style={[styles.infoCard, { backgroundColor: colors.surfaceVariant }]}
-      accessibilityRole="text"
-    >
+      accessibilityRole="text">
       <Text style={styles.infoIcon}>{icon}</Text>
       <View style={styles.infoContent}>
         <Text style={[styles.infoTitle, { color: colors.text }]}>{title}</Text>
-        <Text style={[styles.infoDescription, { color: colors.textSecondary }]}>
-          {description}
-        </Text>
+        <Text style={[styles.infoDescription, { color: colors.textSecondary }]}>{description}</Text>
       </View>
     </View>
   );
@@ -59,7 +48,8 @@ InfoCard.displayName = 'InfoCard';
  */
 export const VerificationIntroScreen: React.FC = memo(() => {
   const navigation = useNavigation<NavigationProp>();
-  const { colors } = useTheme();
+  const { theme } = useTheme();
+  const { colors } = theme;
   const { setStep, currentStep, reset } = useVerificationStore();
 
   /**
@@ -76,17 +66,14 @@ export const VerificationIntroScreen: React.FC = memo(() => {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
         {/* Adım göstergesi */}
         <StepIndicator currentStep={currentStep} style={styles.stepIndicator} />
 
         {/* Başlık */}
         <View style={styles.header}>
           <Text style={styles.headerIcon}>🔐</Text>
-          <Text style={[styles.title, { color: colors.text }]}>
-            Meslek Doğrulama
-          </Text>
+          <Text style={[styles.title, { color: colors.text }]}>Meslek Doğrulama</Text>
           <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
             Meslektaşlarınızla güvenle bağlantı kurmak için mesleğinizi doğrulayın
           </Text>
@@ -94,9 +81,7 @@ export const VerificationIntroScreen: React.FC = memo(() => {
 
         {/* Adımlar */}
         <View style={styles.stepsSection}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Nasıl Çalışır?
-          </Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Nasıl Çalışır?</Text>
 
           <InfoCard
             icon="📄"
@@ -125,13 +110,9 @@ export const VerificationIntroScreen: React.FC = memo(() => {
 
         {/* Gereksinimler */}
         <View style={styles.requirementsSection}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Gereksinimler
-          </Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Gereksinimler</Text>
 
-          <View
-            style={[styles.requirementsList, { backgroundColor: colors.surfaceVariant }]}
-          >
+          <View style={[styles.requirementsList, { backgroundColor: colors.surfaceVariant }]}>
             <Text style={[styles.requirementItem, { color: colors.textSecondary }]}>
               • Geçerli bir diploma veya sertifika
             </Text>
@@ -148,13 +129,11 @@ export const VerificationIntroScreen: React.FC = memo(() => {
         </View>
 
         {/* Güvenlik notu */}
-        <View
-          style={[styles.securityNote, { backgroundColor: colors.primaryLight }]}
-        >
+        <View style={[styles.securityNote, { backgroundColor: colors.primaryLight }]}>
           <Text style={styles.securityIcon}>🔒</Text>
           <Text style={[styles.securityText, { color: colors.primary }]}>
-            Belgeleriniz güvenli şekilde işlenir ve doğrulama sonrası silinir.
-            KVKK uyumlu veri işleme politikamız gereği kişisel verileriniz korunur.
+            Belgeleriniz güvenli şekilde işlenir ve doğrulama sonrası silinir. KVKK uyumlu veri
+            işleme politikamız gereği kişisel verileriniz korunur.
           </Text>
         </View>
       </ScrollView>

@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, fontSize } from '@theme';
 import type { SettingsItemType } from '../types';
 
 interface SettingsItemProps extends SettingsItemType {
@@ -164,11 +164,11 @@ const styles = StyleSheet.create({
     marginRight: spacing.sm,
   },
   title: {
-    fontSize: typography.fontSize.base,
+    fontSize: fontSize.base,
     fontWeight: '500',
   },
   subtitle: {
-    fontSize: typography.fontSize.sm,
+    fontSize: fontSize.sm,
     marginTop: 2,
   },
   rightContainer: {
@@ -176,3 +176,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+

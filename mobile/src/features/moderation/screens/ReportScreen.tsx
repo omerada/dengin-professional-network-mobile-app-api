@@ -16,7 +16,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@contexts/ThemeContext';
 import { Button, Input } from '@shared/components';
-import { spacing, typography } from '@theme';
+import { spacing, fontSize } from '@theme';
 import { useCreateReport } from '../hooks';
 import { REPORT_REASONS } from '../types';
 import type { ReportReason, ReportType } from '../types';
@@ -169,12 +169,12 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   title: {
-    fontSize: typography.fontSize.xl,
+    fontSize: fontSize.xl,
     fontWeight: '700',
     marginBottom: spacing.xs,
   },
   subtitle: {
-    fontSize: typography.fontSize.base,
+    fontSize: fontSize.base,
     marginBottom: spacing.xl,
   },
   reasons: {
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
   },
   reasonText: {
     flex: 1,
-    fontSize: typography.fontSize.md,
+    fontSize: fontSize.md,
     fontWeight: '500',
     marginLeft: spacing.md,
   },
@@ -204,3 +204,4 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
 });
+

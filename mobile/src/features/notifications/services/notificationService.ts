@@ -3,7 +3,7 @@
 // Backend: com.meslektas.notification.api.NotificationController
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
-import { apiClient } from '@services/apiClient';
+import { apiClient } from '@core/api/client';
 import type {
   NotificationResponse,
   NotificationListResponse,
@@ -22,7 +22,7 @@ class NotificationService {
   /**
    * Bildirimleri getir (sayfalama destekli)
    * GET /api/notifications
-   * 
+   *
    * @param page Sayfa numarası (0-indexed)
    * @param size Sayfa boyutu
    * @param unreadOnly Sadece okunmamışları getir
@@ -30,14 +30,11 @@ class NotificationService {
   async getNotifications(
     page: number = 0,
     size: number = 20,
-    unreadOnly: boolean = false
+    unreadOnly: boolean = false,
   ): Promise<NotificationListResponse> {
-    const response = await apiClient.get<NotificationListResponse>(
-      this.BASE_PATH,
-      {
-        params: { page, size, unreadOnly },
-      }
-    );
+    const response = await apiClient.get<NotificationListResponse>(this.BASE_PATH, {
+      params: { page, size, unreadOnly },
+    });
     return response.data;
   }
 
@@ -47,7 +44,7 @@ class NotificationService {
    */
   async getNotification(notificationId: string): Promise<NotificationResponse> {
     const response = await apiClient.get<NotificationResponse>(
-      `${this.BASE_PATH}/${notificationId}`
+      `${this.BASE_PATH}/${notificationId}`,
     );
     return response.data;
   }
@@ -57,9 +54,7 @@ class NotificationService {
    * GET /api/notifications/unread-count
    */
   async getUnreadCount(): Promise<number> {
-    const response = await apiClient.get<{ unreadCount: number }>(
-      `${this.BASE_PATH}/unread-count`
-    );
+    const response = await apiClient.get<{ unreadCount: number }>(`${this.BASE_PATH}/unread-count`);
     return response.data.unreadCount;
   }
 
@@ -69,7 +64,7 @@ class NotificationService {
    */
   async markAsRead(notificationId: string): Promise<NotificationResponse> {
     const response = await apiClient.post<NotificationResponse>(
-      `${this.BASE_PATH}/${notificationId}/read`
+      `${this.BASE_PATH}/${notificationId}/read`,
     );
     return response.data;
   }
@@ -77,13 +72,13 @@ class NotificationService {
   /**
    * Birden fazla bildirimi okundu olarak işaretle
    * POST /api/notifications/mark-as-read
-   * 
+   *
    * @param request markAll: true veya notificationIds listesi
    */
   async markMultipleAsRead(request: MarkAsReadRequest): Promise<{ markedAsRead: number }> {
     const response = await apiClient.post<{ markedAsRead: number }>(
       `${this.BASE_PATH}/mark-as-read`,
-      request
+      request,
     );
     return response.data;
   }
@@ -103,7 +98,7 @@ class NotificationService {
    */
   async getPreferences(): Promise<NotificationPreferencesResponse> {
     const response = await apiClient.get<NotificationPreferencesResponse>(
-      `${this.BASE_PATH}/preferences`
+      `${this.BASE_PATH}/preferences`,
     );
     return response.data;
   }
@@ -113,11 +108,11 @@ class NotificationService {
    * PUT /api/notifications/preferences
    */
   async updatePreferences(
-    request: NotificationPreferencesRequest
+    request: NotificationPreferencesRequest,
   ): Promise<NotificationPreferencesResponse> {
     const response = await apiClient.put<NotificationPreferencesResponse>(
       `${this.BASE_PATH}/preferences`,
-      request
+      request,
     );
     return response.data;
   }
@@ -127,7 +122,7 @@ class NotificationService {
    */
   async updateTypePreference(
     type: string,
-    channels: string[]
+    channels: string[],
   ): Promise<NotificationPreferencesResponse> {
     return this.updatePreferences({
       typeSettings: { [type]: channels as any },
@@ -153,7 +148,7 @@ class NotificationService {
    */
   async setQuietHours(
     start: number | null,
-    end: number | null
+    end: number | null,
   ): Promise<NotificationPreferencesResponse> {
     return this.updatePreferences({
       quietHoursStart: start,

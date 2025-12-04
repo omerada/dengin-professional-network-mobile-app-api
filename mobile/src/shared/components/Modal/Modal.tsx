@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, fontSize } from '@theme';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -55,10 +55,10 @@ interface ModalProps {
 
 /**
  * Modal Component
- * 
+ *
  * Centered modal dialog with optional title and close button.
  * Supports keyboard avoidance on iOS.
- * 
+ *
  * @example
  * ```tsx
  * <Modal
@@ -89,34 +89,17 @@ export const Modal: React.FC<ModalProps> = memo(
         transparent
         animationType="fade"
         onRequestClose={onClose}
-        testID={testID}
-      >
+        testID={testID}>
         <TouchableWithoutFeedback onPress={closeOnBackdrop ? onClose : undefined}>
           <View style={styles.overlay}>
             <TouchableWithoutFeedback>
-              <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              >
+              <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
                 <View
-                  style={[
-                    styles.content,
-                    { backgroundColor: theme.colors.background.primary },
-                  ]}
-                >
+                  style={[styles.content, { backgroundColor: theme.colors.background.primary }]}>
                   {(title || showCloseButton) && (
-                    <View
-                      style={[
-                        styles.header,
-                        { borderBottomColor: theme.colors.border.light },
-                      ]}
-                    >
+                    <View style={[styles.header, { borderBottomColor: theme.colors.border.light }]}>
                       {title && (
-                        <Text
-                          style={[
-                            styles.title,
-                            { color: theme.colors.text.primary },
-                          ]}
-                        >
+                        <Text style={[styles.title, { color: theme.colors.text.primary }]}>
                           {title}
                         </Text>
                       )}
@@ -124,13 +107,8 @@ export const Modal: React.FC<ModalProps> = memo(
                         <TouchableOpacity
                           onPress={onClose}
                           style={styles.closeButton}
-                          hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
-                        >
-                          <Icon
-                            name="close"
-                            size={24}
-                            color={theme.colors.text.secondary}
-                          />
+                          hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+                          <Icon name="close" size={24} color={theme.colors.text.secondary} />
                         </TouchableOpacity>
                       )}
                     </View>
@@ -176,9 +154,9 @@ interface BottomSheetProps {
 
 /**
  * BottomSheet Component
- * 
+ *
  * Bottom-sliding sheet modal for actions, menus, or content.
- * 
+ *
  * @example
  * ```tsx
  * <BottomSheet
@@ -205,8 +183,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = memo(
         transparent
         animationType="slide"
         onRequestClose={onClose}
-        testID={testID}
-      >
+        testID={testID}>
         <TouchableWithoutFeedback onPress={onClose}>
           <View style={styles.overlay}>
             <TouchableWithoutFeedback>
@@ -217,25 +194,16 @@ export const BottomSheet: React.FC<BottomSheetProps> = memo(
                     backgroundColor: theme.colors.background.primary,
                     maxHeight: height === 'auto' ? SCREEN_HEIGHT * 0.9 : height,
                   },
-                ]}
-              >
-                <View
-                  style={[
-                    styles.handle,
-                    { backgroundColor: theme.colors.border.medium },
-                  ]}
-                />
+                ]}>
+                <View style={[styles.handle, { backgroundColor: theme.colors.border.medium }]} />
 
                 {title && (
                   <View
                     style={[
                       styles.bottomSheetHeader,
                       { borderBottomColor: theme.colors.border.light },
-                    ]}
-                  >
-                    <Text
-                      style={[styles.title, { color: theme.colors.text.primary }]}
-                    >
+                    ]}>
+                    <Text style={[styles.title, { color: theme.colors.text.primary }]}>
                       {title}
                     </Text>
                   </View>
@@ -273,7 +241,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   title: {
-    fontSize: typography.fontSize.lg,
+    fontSize: fontSize.lg,
     fontWeight: '600',
     flex: 1,
   },

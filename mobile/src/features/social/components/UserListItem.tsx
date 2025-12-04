@@ -7,7 +7,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@contexts/ThemeContext';
 import { Avatar, Badge } from '@shared/components';
-import { spacing, typography } from '@theme';
+import { spacing, fontSize } from '@theme';
 import { FollowButton } from './FollowButton';
 import type { FollowUser } from '../types';
 
@@ -126,20 +126,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   name: {
-    fontSize: typography.fontSize.md,
+    fontSize: fontSize.md,
     fontWeight: '600',
   },
   verifiedBadge: {
     marginLeft: spacing.xs,
   },
   profession: {
-    fontSize: typography.fontSize.sm,
+    fontSize: fontSize.sm,
     marginTop: 2,
   },
   followsYou: {
-    fontSize: typography.fontSize.xs,
+    fontSize: fontSize.xs,
     marginTop: 2,
   },
 });
 
 UserListItem.displayName = 'UserListItem';
+

@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, fontSize } from '@theme';
 import { useGoogleSignIn } from '../hooks';
 
 interface GoogleSignInButtonProps {
@@ -107,9 +107,10 @@ const styles = StyleSheet.create({
     color: '#4285F4', // Google blue
   },
   text: {
-    fontSize: typography.fontSize.md,
+    fontSize: fontSize.md,
     fontWeight: '600',
   },
 });
 
 GoogleSignInButton.displayName = 'GoogleSignInButton';
+

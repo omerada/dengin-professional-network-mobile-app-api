@@ -17,7 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@contexts/ThemeContext';
 import { Button, Input } from '@shared/components';
-import { spacing, typography } from '@theme';
+import { spacing, fontSize } from '@theme';
 import { AvatarPicker } from '../components';
 import {
   useMyProfile,
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   label: {
-    fontSize: typography.fontSize.sm,
+    fontSize: fontSize.sm,
     fontWeight: '500',
     marginBottom: spacing.sm,
   },
@@ -304,3 +304,4 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
 });
+

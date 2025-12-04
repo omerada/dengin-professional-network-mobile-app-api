@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, fontSize } from '@theme';
 import type { ProfileResponse, MyProfileResponse } from '../types';
 
 interface ProfileHeaderProps {
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   name: {
-    fontSize: typography.fontSize.xl,
+    fontSize: fontSize.xl,
     fontWeight: '700',
   },
   editButton: {
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     marginRight: spacing.xs,
   },
   profession: {
-    fontSize: typography.fontSize.sm,
+    fontSize: fontSize.sm,
   },
   verifiedText: {
     flexDirection: 'row',
@@ -278,7 +278,8 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   verifiedLabel: {
-    fontSize: typography.fontSize.xs,
+    fontSize: fontSize.xs,
     fontWeight: '600',
   },
 });
+

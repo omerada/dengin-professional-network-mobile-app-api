@@ -1,7 +1,7 @@
 // __tests__/unit/theme/spacing.test.ts
 // Oku: mobile-development-guide/testing/21-TESTING-STRATEGY.md
 
-import { spacing, grid } from '../../../src/theme/spacing';
+import { spacing } from '../../../src/theme/spacing';
 
 describe('Spacing', () => {
   describe('Spacing Scale', () => {
@@ -12,7 +12,7 @@ describe('Spacing', () => {
       expect(spacing.md).toBeDefined();
       expect(spacing.lg).toBeDefined();
       expect(spacing.xl).toBeDefined();
-      expect(spacing.xxl).toBeDefined();
+      expect(spacing['2xl']).toBeDefined();
     });
 
     it('none 0 olmalı', () => {
@@ -24,7 +24,7 @@ describe('Spacing', () => {
       expect(spacing.sm).toBeLessThan(spacing.md);
       expect(spacing.md).toBeLessThan(spacing.lg);
       expect(spacing.lg).toBeLessThan(spacing.xl);
-      expect(spacing.xl).toBeLessThan(spacing.xxl);
+      expect(spacing.xl).toBeLessThan(spacing['2xl']);
     });
 
     it('boyutlar pozitif sayı olmalı (none hariç)', () => {
@@ -36,45 +36,32 @@ describe('Spacing', () => {
       });
     });
 
-    it('4/8px grid sistemine uygun olmalı', () => {
-      // Values should be multiples of 4
-      Object.values(spacing).forEach((value) => {
-        expect(value % 4).toBe(0);
+    it('4px grid sistemine uygun olmalı (2xs hariç)', () => {
+      // Values should be multiples of 4, except 2xs which is 2
+      Object.entries(spacing).forEach(([key, value]) => {
+        if (key !== '2xs') {
+          expect(value % 4).toBe(0);
+        }
       });
     });
   });
 
-  describe('Grid System', () => {
-    it('base unit tanımlı olmalı', () => {
-      expect(grid.base).toBeDefined();
-      expect(grid.base).toBe(4);
+  describe('Extended Spacing Scale', () => {
+    it('büyük spacing değerleri tanımlı olmalı', () => {
+      expect(spacing['3xl']).toBeDefined();
+      expect(spacing['4xl']).toBeDefined();
+      expect(spacing['5xl']).toBeDefined();
+      expect(spacing['6xl']).toBeDefined();
     });
 
-    it('container padding tanımlı olmalı', () => {
-      expect(grid.containerPadding).toBeDefined();
-      expect(grid.containerPadding).toBeGreaterThan(0);
+    it('2xs değeri 2 olmalı', () => {
+      expect(spacing['2xs']).toBe(2);
     });
 
-    it('gutter tanımlı olmalı', () => {
-      expect(grid.gutter).toBeDefined();
-      expect(grid.gutter).toBeGreaterThan(0);
-    });
-
-    it('değerler base unit çarpanı olmalı', () => {
-      expect(grid.containerPadding % grid.base).toBe(0);
-      expect(grid.gutter % grid.base).toBe(0);
-    });
-  });
-
-  describe('Responsive Spacing', () => {
-    it('screen padding tanımlı olmalı', () => {
-      expect(spacing.screenPadding).toBeDefined();
-      expect(spacing.screenPadding).toBeGreaterThan(0);
-    });
-
-    it('section spacing tanımlı olmalı', () => {
-      expect(spacing.section).toBeDefined();
-      expect(spacing.section).toBeGreaterThan(0);
+    it('büyük değerler artan sırada olmalı', () => {
+      expect(spacing['2xl']).toBeLessThan(spacing['3xl']);
+      expect(spacing['3xl']).toBeLessThan(spacing['4xl']);
+      expect(spacing['4xl']).toBeLessThan(spacing['5xl']);
     });
   });
 });

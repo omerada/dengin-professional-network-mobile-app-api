@@ -6,7 +6,7 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { ConversationItem } from '../../components/ConversationItem';
 import { useMessagingStore } from '../../stores';
-import type { ConversationSummary } from '../../types';
+import type { Conversation } from '../../types';
 
 // Mock theme context
 jest.mock('@contexts/ThemeContext', () => ({
@@ -15,7 +15,7 @@ jest.mock('@contexts/ThemeContext', () => ({
       colors: {
         primary: { 500: '#007AFF', 100: '#E5F0FF' },
         text: { primary: '#000', secondary: '#666', tertiary: '#999' },
-        background: { primary: '#FFF', secondary: '#F5F5F5' },
+        background: { primary: '#FFF', secondary: '#F5F5F5', tertiary: '#EBEBEB' },
         status: { success: '#34C759' },
       },
     },
@@ -33,19 +33,23 @@ jest.mock('../../stores', () => ({
 const mockUseMessagingStore = useMessagingStore as jest.MockedFunction<typeof useMessagingStore>;
 
 describe('ConversationItem', () => {
-  const createConversation = (overrides?: Partial<ConversationSummary>): ConversationSummary => ({
-    id: 'conv1',
-    name: 'Test User',
-    avatarUrl: undefined,
-    participants: [
-      { id: 'user1', displayName: 'Test User', avatarUrl: undefined },
-    ],
-    lastMessage: 'Last message content',
-    lastMessageAt: '2024-01-15T10:00:00Z',
+  const createConversation = (overrides?: Partial<Conversation>): Conversation => ({
+    conversationId: 'conv1',
+    participant: {
+      userId: 'user1',
+      fullName: 'Test User',
+      profession: 'Developer',
+      profileImageUrl: undefined,
+      online: false,
+      verified: false,
+    },
+    lastMessage: {
+      content: 'Last message content',
+      sentAt: '2024-01-15T10:00:00Z',
+      sentByMe: false,
+      hasAttachment: false,
+    },
     unreadCount: 0,
-    isPinned: false,
-    isMuted: false,
-    createdAt: '2024-01-01T00:00:00Z',
     updatedAt: '2024-01-15T10:00:00Z',
     ...overrides,
   });
@@ -64,21 +68,37 @@ describe('ConversationItem', () => {
   });
 
   describe('rendering', () => {
-    it('should render conversation name', () => {
-      const conversation = createConversation({ name: 'John Doe' });
+    it('should render participant name', () => {
+      const conversation = createConversation({
+        participant: {
+          userId: 'user1',
+          fullName: 'John Doe',
+          profession: 'Developer',
+          profileImageUrl: undefined,
+          online: false,
+          verified: false,
+        },
+      });
 
       const { getByText } = render(
-        <ConversationItem {...defaultProps} conversation={conversation} />
+        <ConversationItem {...defaultProps} conversation={conversation} />,
       );
 
       expect(getByText('John Doe')).toBeTruthy();
     });
 
     it('should render last message preview', () => {
-      const conversation = createConversation({ lastMessage: 'Hello there!' });
+      const conversation = createConversation({
+        lastMessage: {
+          content: 'Hello there!',
+          sentAt: '2024-01-15T10:00:00Z',
+          sentByMe: false,
+          hasAttachment: false,
+        },
+      });
 
       const { getByText } = render(
-        <ConversationItem {...defaultProps} conversation={conversation} />
+        <ConversationItem {...defaultProps} conversation={conversation} />,
       );
 
       expect(getByText('Hello there!')).toBeTruthy();
@@ -86,10 +106,17 @@ describe('ConversationItem', () => {
 
     it('should truncate long last message', () => {
       const longMessage = 'A'.repeat(60);
-      const conversation = createConversation({ lastMessage: longMessage });
+      const conversation = createConversation({
+        lastMessage: {
+          content: longMessage,
+          sentAt: '2024-01-15T10:00:00Z',
+          sentByMe: false,
+          hasAttachment: false,
+        },
+      });
 
       const { getByText } = render(
-        <ConversationItem {...defaultProps} conversation={conversation} />
+        <ConversationItem {...defaultProps} conversation={conversation} />,
       );
 
       expect(getByText(/A{40}\.\.\./)).toBeTruthy();
@@ -99,30 +126,35 @@ describe('ConversationItem', () => {
       const conversation = createConversation({ lastMessage: undefined });
 
       const { getByText } = render(
-        <ConversationItem {...defaultProps} conversation={conversation} />
+        <ConversationItem {...defaultProps} conversation={conversation} />,
       );
 
       expect(getByText('Henüz mesaj yok')).toBeTruthy();
     });
 
-    it('should render avatar placeholder when no avatarUrl', () => {
-      const conversation = createConversation({ avatarUrl: undefined });
+    it('should render avatar placeholder when no profileImageUrl', () => {
+      const conversation = createConversation();
 
-      const { container } = render(
-        <ConversationItem {...defaultProps} conversation={conversation} />
-      );
+      const { root } = render(<ConversationItem {...defaultProps} conversation={conversation} />);
 
       // Should render without crashing
-      expect(container).toBeTruthy();
+      expect(root).toBeTruthy();
     });
 
-    it('should render avatar when avatarUrl provided', () => {
+    it('should render avatar when profileImageUrl provided', () => {
       const conversation = createConversation({
-        avatarUrl: 'https://example.com/avatar.jpg',
+        participant: {
+          userId: 'user1',
+          fullName: 'Test User',
+          profession: 'Developer',
+          profileImageUrl: 'https://example.com/avatar.jpg',
+          online: false,
+          verified: false,
+        },
       });
 
       const { UNSAFE_queryAllByType } = render(
-        <ConversationItem {...defaultProps} conversation={conversation} />
+        <ConversationItem {...defaultProps} conversation={conversation} />,
       );
 
       // Image component should be present
@@ -135,7 +167,7 @@ describe('ConversationItem', () => {
       const conversation = createConversation({ unreadCount: 5 });
 
       const { getByText } = render(
-        <ConversationItem {...defaultProps} conversation={conversation} />
+        <ConversationItem {...defaultProps} conversation={conversation} />,
       );
 
       expect(getByText('5')).toBeTruthy();
@@ -145,7 +177,7 @@ describe('ConversationItem', () => {
       const conversation = createConversation({ unreadCount: 150 });
 
       const { getByText } = render(
-        <ConversationItem {...defaultProps} conversation={conversation} />
+        <ConversationItem {...defaultProps} conversation={conversation} />,
       );
 
       expect(getByText('99+')).toBeTruthy();
@@ -155,7 +187,7 @@ describe('ConversationItem', () => {
       const conversation = createConversation({ unreadCount: 0 });
 
       const { queryByText } = render(
-        <ConversationItem {...defaultProps} conversation={conversation} />
+        <ConversationItem {...defaultProps} conversation={conversation} />,
       );
 
       expect(queryByText('0')).toBeNull();
@@ -163,28 +195,42 @@ describe('ConversationItem', () => {
   });
 
   describe('status indicators', () => {
-    it('should show pin icon when isPinned', () => {
-      const conversation = createConversation({ isPinned: true });
+    it('should show verified badge when participant is verified', () => {
+      const conversation = createConversation({
+        participant: {
+          userId: 'user1',
+          fullName: 'Test User',
+          profession: 'Developer',
+          profileImageUrl: undefined,
+          online: false,
+          verified: true,
+        },
+      });
 
-      const { container } = render(
-        <ConversationItem {...defaultProps} conversation={conversation} />
-      );
+      const { root } = render(<ConversationItem {...defaultProps} conversation={conversation} />);
 
       // Icon should be present
-      expect(container).toBeTruthy();
+      expect(root).toBeTruthy();
     });
 
-    it('should show mute icon when isMuted', () => {
-      const conversation = createConversation({ isMuted: true });
+    it('should show online indicator when participant is online', () => {
+      const conversation = createConversation({
+        participant: {
+          userId: 'user1',
+          fullName: 'Test User',
+          profession: 'Developer',
+          profileImageUrl: undefined,
+          online: true,
+          verified: false,
+        },
+      });
 
-      const { container } = render(
-        <ConversationItem {...defaultProps} conversation={conversation} />
-      );
+      const { root } = render(<ConversationItem {...defaultProps} conversation={conversation} />);
 
-      expect(container).toBeTruthy();
+      expect(root).toBeTruthy();
     });
 
-    it('should show online indicator when user is online', () => {
+    it('should show online indicator from store when user is online', () => {
       mockUseMessagingStore.mockReturnValue({
         typingUsers: {},
         onlineUsers: new Set(['user1']),
@@ -192,11 +238,9 @@ describe('ConversationItem', () => {
 
       const conversation = createConversation();
 
-      const { container } = render(
-        <ConversationItem {...defaultProps} conversation={conversation} />
-      );
+      const { root } = render(<ConversationItem {...defaultProps} conversation={conversation} />);
 
-      expect(container).toBeTruthy();
+      expect(root).toBeTruthy();
     });
   });
 
@@ -210,7 +254,7 @@ describe('ConversationItem', () => {
       const conversation = createConversation();
 
       const { getByText } = render(
-        <ConversationItem {...defaultProps} conversation={conversation} />
+        <ConversationItem {...defaultProps} conversation={conversation} />,
       );
 
       expect(getByText('yazıyor...')).toBeTruthy();
@@ -222,10 +266,17 @@ describe('ConversationItem', () => {
         onlineUsers: new Set(),
       } as any);
 
-      const conversation = createConversation({ lastMessage: 'Hello' });
+      const conversation = createConversation({
+        lastMessage: {
+          content: 'Hello',
+          sentAt: '2024-01-15T10:00:00Z',
+          sentByMe: false,
+          hasAttachment: false,
+        },
+      });
 
       const { queryByText, getByText } = render(
-        <ConversationItem {...defaultProps} conversation={conversation} />
+        <ConversationItem {...defaultProps} conversation={conversation} />,
       );
 
       expect(queryByText('yazıyor...')).toBeNull();
@@ -238,11 +289,16 @@ describe('ConversationItem', () => {
       const now = new Date();
       const fiveMinutesAgo = new Date(now.getTime() - 5 * 60 * 1000);
       const conversation = createConversation({
-        lastMessageAt: fiveMinutesAgo.toISOString(),
+        lastMessage: {
+          content: 'Test',
+          sentAt: fiveMinutesAgo.toISOString(),
+          sentByMe: false,
+          hasAttachment: false,
+        },
       });
 
       const { getByText } = render(
-        <ConversationItem {...defaultProps} conversation={conversation} />
+        <ConversationItem {...defaultProps} conversation={conversation} />,
       );
 
       expect(getByText(/\d+dk/)).toBeTruthy();
@@ -252,11 +308,16 @@ describe('ConversationItem', () => {
       const now = new Date();
       const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
       const conversation = createConversation({
-        lastMessageAt: twoHoursAgo.toISOString(),
+        lastMessage: {
+          content: 'Test',
+          sentAt: twoHoursAgo.toISOString(),
+          sentByMe: false,
+          hasAttachment: false,
+        },
       });
 
       const { getByText } = render(
-        <ConversationItem {...defaultProps} conversation={conversation} />
+        <ConversationItem {...defaultProps} conversation={conversation} />,
       );
 
       expect(getByText(/\d+sa/)).toBeTruthy();
@@ -269,7 +330,7 @@ describe('ConversationItem', () => {
       const conversation = createConversation();
 
       const { getByText } = render(
-        <ConversationItem {...defaultProps} conversation={conversation} onPress={onPress} />
+        <ConversationItem {...defaultProps} conversation={conversation} onPress={onPress} />,
       );
 
       fireEvent.press(getByText('Test User'));
@@ -282,7 +343,11 @@ describe('ConversationItem', () => {
       const conversation = createConversation();
 
       const { getByText } = render(
-        <ConversationItem {...defaultProps} conversation={conversation} onLongPress={onLongPress} />
+        <ConversationItem
+          {...defaultProps}
+          conversation={conversation}
+          onLongPress={onLongPress}
+        />,
       );
 
       fireEvent(getByText('Test User'), 'longPress');

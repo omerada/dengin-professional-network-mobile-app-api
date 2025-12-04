@@ -83,6 +83,13 @@ describe('Upload Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockFetch.mockReset();
+    // Mock sleep function to avoid real delays in tests
+    jest.spyOn(uploadService, 'sleep').mockImplementation(() => Promise.resolve());
+  });
+
+  afterEach(() => {
+    // Restore original sleep function
+    jest.restoreAllMocks();
   });
 
   describe('uploadImage', () => {
@@ -97,13 +104,10 @@ describe('Upload Service', () => {
 
       const result = await uploadService.uploadImage(mockDocumentImage, 'document');
 
-      expect(mockApiClient.post).toHaveBeenCalledWith(
-        API_ENDPOINTS.MEDIA.PRESIGNED_URL,
-        {
-          type: 'verification_document',
-          contentType: 'image/jpeg',
-        }
-      );
+      expect(mockApiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.MEDIA.PRESIGNED_URL, {
+        type: 'verification_document',
+        contentType: 'image/jpeg',
+      });
       expect(result).toBe(mockPresignedResponse.data.data.key);
     });
   });
@@ -114,7 +118,12 @@ describe('Upload Service', () => {
       mockApiClient.post
         .mockResolvedValueOnce(mockPresignedResponse) // document
         .mockResolvedValueOnce({
-          data: { data: { url: 'https://s3.amazonaws.com/bucket/selfie', key: 'verification/selfie-123.jpg' } },
+          data: {
+            data: {
+              url: 'https://s3.amazonaws.com/bucket/selfie',
+              key: 'verification/selfie-123.jpg',
+            },
+          },
         }); // selfie
 
       // Mock fetch calls
@@ -128,7 +137,10 @@ describe('Upload Service', () => {
       mockVerificationApi.submit.mockResolvedValueOnce(mockVerificationResponse);
 
       const onProgress = jest.fn();
-      const result = await uploadService.uploadAndSubmitVerification(mockVerificationData, onProgress);
+      const result = await uploadService.uploadAndSubmitVerification(
+        mockVerificationData,
+        onProgress,
+      );
 
       expect(result).toEqual(mockVerificationResponse);
       expect(onProgress).toHaveBeenCalled();
@@ -142,22 +154,25 @@ describe('Upload Service', () => {
     it('should throw error if professionId is missing', async () => {
       const dataWithoutProfession = { ...mockVerificationData, professionId: undefined };
 
-      await expect(uploadService.uploadAndSubmitVerification(dataWithoutProfession as VerificationData))
-        .rejects.toThrow('Profession ID is required');
+      await expect(
+        uploadService.uploadAndSubmitVerification(dataWithoutProfession as VerificationData),
+      ).rejects.toThrow('Profession ID is required');
     });
 
     it('should throw error if document image is missing', async () => {
       const dataWithoutDocument = { ...mockVerificationData, documentFront: null };
 
-      await expect(uploadService.uploadAndSubmitVerification(dataWithoutDocument))
-        .rejects.toThrow('Document image is required');
+      await expect(uploadService.uploadAndSubmitVerification(dataWithoutDocument)).rejects.toThrow(
+        'Document image is required',
+      );
     });
 
     it('should throw error if selfie is missing', async () => {
       const dataWithoutSelfie = { ...mockVerificationData, selfie: null };
 
-      await expect(uploadService.uploadAndSubmitVerification(dataWithoutSelfie))
-        .rejects.toThrow('Selfie image is required');
+      await expect(uploadService.uploadAndSubmitVerification(dataWithoutSelfie)).rejects.toThrow(
+        'Selfie image is required',
+      );
     });
   });
 
@@ -171,7 +186,12 @@ describe('Upload Service', () => {
         .mockRejectedValueOnce(error)
         .mockResolvedValueOnce(mockPresignedResponse)
         .mockResolvedValueOnce({
-          data: { data: { url: 'https://s3.amazonaws.com/bucket/selfie', key: 'verification/selfie-123.jpg' } },
+          data: {
+            data: {
+              url: 'https://s3.amazonaws.com/bucket/selfie',
+              key: 'verification/selfie-123.jpg',
+            },
+          },
         });
 
       mockFetch
@@ -192,8 +212,7 @@ describe('Upload Service', () => {
       const error = new Error('Network error');
       mockApiClient.post.mockRejectedValue(error);
 
-      await expect(uploadService.uploadWithRetry(mockVerificationData))
-        .rejects.toThrow();
+      await expect(uploadService.uploadWithRetry(mockVerificationData)).rejects.toThrow();
     });
   });
 
@@ -244,13 +263,17 @@ describe('Upload Service', () => {
 
       const onStatusChange = jest.fn();
 
-      await expect(uploadService.pollStatus(onStatusChange, 3, 10))
-        .rejects.toThrow('Doğrulama zaman aşımına uğradı');
+      await expect(uploadService.pollStatus(onStatusChange, 3, 10)).rejects.toThrow(
+        'Doğrulama zaman aşımına uğradı',
+      );
     });
   });
 
   describe('sleep', () => {
     it('should wait for specified milliseconds', async () => {
+      // Restore real sleep function for this test
+      jest.restoreAllMocks();
+
       const start = Date.now();
       await uploadService.sleep(50);
       const elapsed = Date.now() - start;

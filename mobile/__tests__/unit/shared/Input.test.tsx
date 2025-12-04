@@ -2,6 +2,7 @@
 // Oku: mobile-development-guide/testing/21-TESTING-STRATEGY.md
 
 import React from 'react';
+import { Text } from 'react-native';
 import { render, fireEvent } from '@testing-library/react-native';
 import { Input } from '../../../src/shared/components/Input';
 import { ThemeProvider } from '../../../src/contexts/ThemeContext';
@@ -14,7 +15,7 @@ describe('Input Component', () => {
   describe('Rendering', () => {
     it('placeholder ile render edilmeli', () => {
       const { getByPlaceholderText } = renderWithTheme(
-        <Input placeholder="Enter text" onChangeText={() => {}} />
+        <Input placeholder="Enter text" onChangeText={() => {}} />,
       );
 
       expect(getByPlaceholderText('Enter text')).toBeTruthy();
@@ -22,7 +23,7 @@ describe('Input Component', () => {
 
     it('label ile render edilmeli', () => {
       const { getByText } = renderWithTheme(
-        <Input label="Email" placeholder="Enter email" onChangeText={() => {}} />
+        <Input label="Email" placeholder="Enter email" onChangeText={() => {}} />,
       );
 
       expect(getByText('Email')).toBeTruthy();
@@ -30,7 +31,7 @@ describe('Input Component', () => {
 
     it('value ile render edilmeli', () => {
       const { getByDisplayValue } = renderWithTheme(
-        <Input value="test value" onChangeText={() => {}} />
+        <Input value="test value" onChangeText={() => {}} />,
       );
 
       expect(getByDisplayValue('test value')).toBeTruthy();
@@ -40,11 +41,7 @@ describe('Input Component', () => {
   describe('Error State', () => {
     it('hata mesajı göstermeli', () => {
       const { getByText } = renderWithTheme(
-        <Input
-          placeholder="Enter text"
-          onChangeText={() => {}}
-          error="This field is required"
-        />
+        <Input placeholder="Enter text" onChangeText={() => {}} error="This field is required" />,
       );
 
       expect(getByText('This field is required')).toBeTruthy();
@@ -57,7 +54,7 @@ describe('Input Component', () => {
           onChangeText={() => {}}
           error="Error message"
           testID="input"
-        />
+        />,
       );
 
       const input = getByTestId('input');
@@ -73,7 +70,7 @@ describe('Input Component', () => {
           onChangeText={() => {}}
           secureTextEntry
           testID="password-input"
-        />
+        />,
       );
 
       const input = getByTestId('password-input');
@@ -81,14 +78,13 @@ describe('Input Component', () => {
     });
 
     it('toggle butonu ile şifre gösterilebilmeli', () => {
-      const { getByTestId, getByLabelText } = renderWithTheme(
+      const { getByTestId, getByRole } = renderWithTheme(
         <Input
           placeholder="Password"
           onChangeText={() => {}}
           secureTextEntry
-          showPasswordToggle
           testID="password-input"
-        />
+        />,
       );
 
       // Initially password is hidden
@@ -96,7 +92,7 @@ describe('Input Component', () => {
       expect(input.props.secureTextEntry).toBe(true);
 
       // Find and press toggle button
-      const toggleButton = getByLabelText(/göster|gizle/i);
+      const toggleButton = getByRole('button');
       fireEvent.press(toggleButton);
 
       // Password should be visible now
@@ -109,7 +105,7 @@ describe('Input Component', () => {
     it('onChangeText yazıldığında çağrılmalı', () => {
       const onChangeText = jest.fn();
       const { getByTestId } = renderWithTheme(
-        <Input placeholder="Enter text" onChangeText={onChangeText} testID="input" />
+        <Input placeholder="Enter text" onChangeText={onChangeText} testID="input" />,
       );
 
       fireEvent.changeText(getByTestId('input'), 'new text');
@@ -120,7 +116,7 @@ describe('Input Component', () => {
     it('onFocus odaklandığında çağrılmalı', () => {
       const onFocus = jest.fn();
       const { getByTestId } = renderWithTheme(
-        <Input placeholder="Enter text" onChangeText={() => {}} onFocus={onFocus} testID="input" />
+        <Input placeholder="Enter text" onChangeText={() => {}} onFocus={onFocus} testID="input" />,
       );
 
       fireEvent(getByTestId('input'), 'focus');
@@ -131,7 +127,7 @@ describe('Input Component', () => {
     it('onBlur odak kaybedildiğinde çağrılmalı', () => {
       const onBlur = jest.fn();
       const { getByTestId } = renderWithTheme(
-        <Input placeholder="Enter text" onChangeText={() => {}} onBlur={onBlur} testID="input" />
+        <Input placeholder="Enter text" onChangeText={() => {}} onBlur={onBlur} testID="input" />,
       );
 
       fireEvent(getByTestId('input'), 'blur');
@@ -143,7 +139,7 @@ describe('Input Component', () => {
   describe('Disabled State', () => {
     it('disabled durumda düzenlenemez olmalı', () => {
       const { getByTestId } = renderWithTheme(
-        <Input placeholder="Enter text" onChangeText={() => {}} disabled testID="input" />
+        <Input placeholder="Enter text" onChangeText={() => {}} disabled testID="input" />,
       );
 
       const input = getByTestId('input');
@@ -159,7 +155,7 @@ describe('Input Component', () => {
           onChangeText={() => {}}
           keyboardType="email-address"
           testID="input"
-        />
+        />,
       );
 
       const input = getByTestId('input');
@@ -168,12 +164,7 @@ describe('Input Component', () => {
 
     it('numeric keyboard type ayarlanmalı', () => {
       const { getByTestId } = renderWithTheme(
-        <Input
-          placeholder="Phone"
-          onChangeText={() => {}}
-          keyboardType="numeric"
-          testID="input"
-        />
+        <Input placeholder="Phone" onChangeText={() => {}} keyboardType="numeric" testID="input" />,
       );
 
       const input = getByTestId('input');
@@ -187,12 +178,13 @@ describe('Input Component', () => {
         <Input
           placeholder="Enter text"
           onChangeText={() => {}}
-          accessibilityLabel="Text input"
+          label="Text input"
           testID="input"
-        />
+        />,
       );
 
       const input = getByTestId('input');
+      // accessibilityLabel defaults to label or placeholder
       expect(input.props.accessibilityLabel).toBe('Text input');
     });
 
@@ -201,9 +193,9 @@ describe('Input Component', () => {
         <Input
           placeholder="Enter text"
           onChangeText={() => {}}
-          accessibilityHint="Enter your text here"
+          hint="Enter your text here"
           testID="input"
-        />
+        />,
       );
 
       const input = getByTestId('input');
@@ -217,9 +209,9 @@ describe('Input Component', () => {
         <Input
           placeholder="Search"
           onChangeText={() => {}}
-          leftIcon="search"
+          leftIcon={<Text>🔍</Text>}
           testID="input"
-        />
+        />,
       );
 
       const input = getByTestId('input');
@@ -231,9 +223,9 @@ describe('Input Component', () => {
         <Input
           placeholder="Date"
           onChangeText={() => {}}
-          rightIcon="calendar"
+          rightIcon={<Text>📅</Text>}
           testID="input"
-        />
+        />,
       );
 
       const input = getByTestId('input');
@@ -250,7 +242,7 @@ describe('Input Component', () => {
           multiline
           numberOfLines={4}
           testID="input"
-        />
+        />,
       );
 
       const input = getByTestId('input');
@@ -262,12 +254,7 @@ describe('Input Component', () => {
   describe('Max Length', () => {
     it('maxLength ayarlanmalı', () => {
       const { getByTestId } = renderWithTheme(
-        <Input
-          placeholder="Enter text"
-          onChangeText={() => {}}
-          maxLength={100}
-          testID="input"
-        />
+        <Input placeholder="Enter text" onChangeText={() => {}} maxLength={100} testID="input" />,
       );
 
       const input = getByTestId('input');

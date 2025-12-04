@@ -3,16 +3,16 @@
 // Sprint 9-10: Push & In-app Notifications
 
 import { notificationService } from '../../../src/features/notifications/services/notificationService';
-import { apiClient } from '@services/apiClient';
-import type { 
-  NotificationListResponse, 
+import { apiClient } from '@core/api/client';
+import type {
+  NotificationListResponse,
   NotificationResponse,
   NotificationPreferencesResponse,
   MarkAsReadRequest,
 } from '../../../src/features/notifications/types';
 
 // Mock apiClient
-jest.mock('@services/apiClient', () => ({
+jest.mock('@core/api/client', () => ({
   apiClient: {
     get: jest.fn(),
     post: jest.fn(),
@@ -120,7 +120,7 @@ describe('NotificationService', () => {
       const result = await notificationService.getUnreadCount();
 
       expect(apiClient.get).toHaveBeenCalledWith('/api/notifications/unread-count');
-      expect(result).toEqual(mockResponse);
+      expect(result).toEqual(7); // Service returns just the number, not the object
     });
   });
 
@@ -165,13 +165,14 @@ describe('NotificationService', () => {
 
   describe('markAllAsRead', () => {
     it('should mark all notifications as read', async () => {
-      (apiClient.post as jest.Mock).mockResolvedValue({ data: undefined });
+      (apiClient.post as jest.Mock).mockResolvedValue({ data: { markedAsRead: 5 } });
 
-      await notificationService.markAllAsRead();
+      const result = await notificationService.markAllAsRead();
 
       expect(apiClient.post).toHaveBeenCalledWith('/api/notifications/mark-as-read', {
         markAll: true,
       });
+      expect(result).toBe(5);
     });
   });
 

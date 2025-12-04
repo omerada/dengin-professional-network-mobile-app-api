@@ -5,13 +5,13 @@
 
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { Platform } from 'react-native';
-import { apiClient } from '@services/apiClient';
+import { apiClient } from '@core/api/client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { 
-  RegisterDeviceRequest, 
+import type {
+  RegisterDeviceRequest,
   UnregisterDeviceRequest,
   DeviceTokenResponse,
-  DevicePlatform 
+  DevicePlatform,
 } from '../types';
 
 const FCM_TOKEN_KEY = '@meslektas/fcm_token';
@@ -124,7 +124,7 @@ class FCMService {
 
     const response = await apiClient.post<DeviceTokenResponse>(
       `${this.DEVICE_API_PATH}/register`,
-      request
+      request,
     );
 
     console.log('[FCM] Device registered successfully');
@@ -192,14 +192,12 @@ class FCMService {
   /**
    * Token yenilenme dinleyicisi kur
    */
-  setupTokenRefreshListener(
-    onRefresh: (token: string) => void
-  ): () => void {
-    const unsubscribe = messaging().onTokenRefresh(async (newToken) => {
+  setupTokenRefreshListener(onRefresh: (token: string) => void): () => void {
+    const unsubscribe = messaging().onTokenRefresh(async newToken => {
       console.log('[FCM] Token refreshed');
       this.token = newToken;
       await AsyncStorage.setItem(FCM_TOKEN_KEY, newToken);
-      
+
       try {
         await this.sendTokenToServer(newToken);
         onRefresh(newToken);
@@ -215,7 +213,7 @@ class FCMService {
    * Ön plan bildirimi dinleyicisi
    */
   onForegroundMessage(
-    handler: (message: FirebaseMessagingTypes.RemoteMessage) => void
+    handler: (message: FirebaseMessagingTypes.RemoteMessage) => void,
   ): () => void {
     return messaging().onMessage(handler);
   }
@@ -224,7 +222,7 @@ class FCMService {
    * Arka plan bildirimi tıklama dinleyicisi
    */
   onNotificationOpenedApp(
-    handler: (message: FirebaseMessagingTypes.RemoteMessage) => void
+    handler: (message: FirebaseMessagingTypes.RemoteMessage) => void,
   ): () => void {
     return messaging().onNotificationOpenedApp(handler);
   }
@@ -240,7 +238,7 @@ class FCMService {
    * Arka plan mesaj işleyicisi ayarla
    */
   setBackgroundMessageHandler(
-    handler: (message: FirebaseMessagingTypes.RemoteMessage) => Promise<void>
+    handler: (message: FirebaseMessagingTypes.RemoteMessage) => Promise<void>,
   ): void {
     messaging().setBackgroundMessageHandler(handler);
   }

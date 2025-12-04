@@ -42,15 +42,9 @@ interface ImagePreviewProps {
  * Yakalanan fotoğrafı önizleme ve tekrar çekme seçeneği sunar
  */
 export const ImagePreview: React.FC<ImagePreviewProps> = memo(
-  ({
-    image,
-    label,
-    onRetake,
-    loading = false,
-    fullWidth = false,
-    style,
-  }) => {
-    const { colors } = useTheme();
+  ({ image, label, onRetake, loading = false, fullWidth = false, style }) => {
+    const { theme } = useTheme();
+    const { colors } = theme;
 
     const imageWidth = fullWidth ? SCREEN_WIDTH - spacing.lg * 2 : 150;
     const imageHeight = imageWidth * 0.63; // ID kart oranı
@@ -67,12 +61,9 @@ export const ImagePreview: React.FC<ImagePreviewProps> = memo(
               borderColor: colors.border,
             },
             style,
-          ]}
-        >
+          ]}>
           <Text style={[styles.placeholderIcon]}>📷</Text>
-          <Text style={[styles.placeholderText, { color: colors.textSecondary }]}>
-            {label}
-          </Text>
+          <Text style={[styles.placeholderText, { color: colors.textSecondary }]}>{label}</Text>
         </View>
       );
     }
@@ -81,8 +72,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = memo(
       <Animated.View
         entering={FadeIn.duration(300)}
         exiting={FadeOut.duration(200)}
-        style={[styles.container, style]}
-      >
+        style={[styles.container, style]}>
         <View
           style={[
             styles.imageContainer,
@@ -91,8 +81,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = memo(
               height: imageHeight,
               borderColor: colors.border,
             },
-          ]}
-        >
+          ]}>
           <Image
             source={{ uri: image.uri }}
             style={styles.image}
@@ -102,48 +91,30 @@ export const ImagePreview: React.FC<ImagePreviewProps> = memo(
 
           {/* Yükleniyor overlay */}
           {loading && (
-            <View
-              style={[
-                styles.loadingOverlay,
-                { backgroundColor: 'rgba(0,0,0,0.5)' },
-              ]}
-            >
+            <View style={[styles.loadingOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
               <Text style={styles.loadingText}>Yükleniyor...</Text>
             </View>
           )}
 
           {/* Etiket */}
-          <View
-            style={[
-              styles.labelContainer,
-              { backgroundColor: colors.surface },
-            ]}
-          >
-            <Text style={[styles.label, { color: colors.text }]}>
-              {label}
-            </Text>
+          <View style={[styles.labelContainer, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
           </View>
         </View>
 
         {/* Tekrar çek butonu */}
         {onRetake && !loading && (
           <TouchableOpacity
-            style={[
-              styles.retakeButton,
-              { backgroundColor: colors.surfaceVariant },
-            ]}
+            style={[styles.retakeButton, { backgroundColor: colors.surfaceVariant }]}
             onPress={onRetake}
             accessibilityRole="button"
-            accessibilityLabel={`${label} tekrar çek`}
-          >
-            <Text style={[styles.retakeText, { color: colors.primary }]}>
-              Tekrar Çek
-            </Text>
+            accessibilityLabel={`${label} tekrar çek`}>
+            <Text style={[styles.retakeText, { color: colors.primary }]}>Tekrar Çek</Text>
           </TouchableOpacity>
         )}
       </Animated.View>
     );
-  }
+  },
 );
 
 ImagePreview.displayName = 'ImagePreview';

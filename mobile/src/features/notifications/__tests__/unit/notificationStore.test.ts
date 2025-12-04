@@ -2,9 +2,19 @@
 // Unit tests for notification store
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act } from '@testing-library/react-native';
+import { renderHook } from '@testing-library/react-native';
 import { useNotificationStore } from '../../stores/notificationStore';
-import type { NotificationSettings, PermissionStatus } from '../../types';
+import type {
+  NotificationResponse,
+  NotificationPreferencesResponse,
+  NotificationType,
+} from '../../types';
+
+// Mock AsyncStorage
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
+);
 
 describe('NotificationStore', () => {
   beforeEach(() => {
@@ -20,10 +30,10 @@ describe('NotificationStore', () => {
       const { result } = renderHook(() => useNotificationStore());
 
       expect(result.current.unreadCount).toBe(0);
-      expect(result.current.settings).toBeNull();
-      expect(result.current.permissionStatus).toBe('not-determined');
+      expect(result.current.notifications).toEqual([]);
+      expect(result.current.isPermissionGranted).toBe(false);
       expect(result.current.fcmToken).toBeNull();
-      expect(result.current.isInitialized).toBe(false);
+      expect(result.current.hasMore).toBe(true);
     });
   });
 
@@ -36,16 +46,6 @@ describe('NotificationStore', () => {
       });
 
       expect(result.current.unreadCount).toBe(5);
-    });
-
-    it('should not set negative count', () => {
-      const { result } = renderHook(() => useNotificationStore());
-
-      act(() => {
-        result.current.setUnreadCount(-1);
-      });
-
-      expect(result.current.unreadCount).toBe(0);
     });
   });
 
@@ -95,7 +95,7 @@ describe('NotificationStore', () => {
     });
   });
 
-  describe('clearUnreadCount', () => {
+  describe('resetUnreadCount', () => {
     it('should reset unread count to zero', () => {
       const { result } = renderHook(() => useNotificationStore());
 
@@ -104,97 +104,215 @@ describe('NotificationStore', () => {
       });
 
       act(() => {
-        result.current.clearUnreadCount();
+        result.current.resetUnreadCount();
       });
 
       expect(result.current.unreadCount).toBe(0);
     });
   });
 
-  describe('setSettings', () => {
-    it('should set settings', () => {
+  describe('setNotifications', () => {
+    it('should set notifications and calculate unread count', () => {
       const { result } = renderHook(() => useNotificationStore());
-      const settings: NotificationSettings = {
-        enabled: true,
-        messages: true,
-        likes: true,
-        comments: true,
-        follows: true,
-        verification: true,
-        system: true,
-      };
-
-      act(() => {
-        result.current.setSettings(settings);
-      });
-
-      expect(result.current.settings).toEqual(settings);
-    });
-  });
-
-  describe('updateSettings', () => {
-    it('should update partial settings', () => {
-      const { result } = renderHook(() => useNotificationStore());
-      const initialSettings: NotificationSettings = {
-        enabled: true,
-        messages: true,
-        likes: true,
-        comments: true,
-        follows: true,
-        verification: true,
-        system: true,
-      };
-
-      act(() => {
-        result.current.setSettings(initialSettings);
-      });
-
-      act(() => {
-        result.current.updateSettings({ messages: false, likes: false });
-      });
-
-      expect(result.current.settings?.messages).toBe(false);
-      expect(result.current.settings?.likes).toBe(false);
-      expect(result.current.settings?.comments).toBe(true); // Unchanged
-    });
-
-    it('should not update if settings is null', () => {
-      const { result } = renderHook(() => useNotificationStore());
-
-      act(() => {
-        result.current.updateSettings({ messages: false });
-      });
-
-      expect(result.current.settings).toBeNull();
-    });
-  });
-
-  describe('setPermissionStatus', () => {
-    it('should set permission status', () => {
-      const { result } = renderHook(() => useNotificationStore());
-
-      act(() => {
-        result.current.setPermissionStatus('granted');
-      });
-
-      expect(result.current.permissionStatus).toBe('granted');
-    });
-
-    it('should handle all status values', () => {
-      const { result } = renderHook(() => useNotificationStore());
-      const statuses: PermissionStatus[] = [
-        'granted',
-        'denied',
-        'not-determined',
-        'blocked',
+      const notifications: NotificationResponse[] = [
+        {
+          notificationId: '1',
+          type: 'NEW_MESSAGE',
+          title: 'Test',
+          body: 'Test body',
+          actionUrl: null,
+          metadata: {},
+          status: 'DELIVERED',
+          deliveredChannels: [],
+          read: false,
+          readAt: null,
+          relativeTime: 'şimdi',
+          createdAt: new Date().toISOString(),
+        },
+        {
+          notificationId: '2',
+          type: 'POST_LIKED',
+          title: 'Test 2',
+          body: 'Test body 2',
+          actionUrl: null,
+          metadata: {},
+          status: 'READ',
+          deliveredChannels: [],
+          read: true,
+          readAt: new Date().toISOString(),
+          relativeTime: '1sa önce',
+          createdAt: new Date().toISOString(),
+        },
       ];
 
-      statuses.forEach((status) => {
-        act(() => {
-          result.current.setPermissionStatus(status);
-        });
-        expect(result.current.permissionStatus).toBe(status);
+      act(() => {
+        result.current.setNotifications(notifications);
       });
+
+      expect(result.current.notifications).toHaveLength(2);
+      expect(result.current.unreadCount).toBe(1);
+    });
+  });
+
+  describe('addNotification', () => {
+    it('should add notification to the beginning', () => {
+      const { result } = renderHook(() => useNotificationStore());
+      const notification: NotificationResponse = {
+        notificationId: '1',
+        type: 'NEW_MESSAGE',
+        title: 'Test',
+        body: 'Test body',
+        actionUrl: null,
+        metadata: {},
+        status: 'DELIVERED',
+        deliveredChannels: [],
+        read: false,
+        readAt: null,
+        relativeTime: 'şimdi',
+        createdAt: new Date().toISOString(),
+      };
+
+      act(() => {
+        result.current.addNotification(notification);
+      });
+
+      expect(result.current.notifications).toHaveLength(1);
+      expect(result.current.notifications[0].notificationId).toBe('1');
+      expect(result.current.unreadCount).toBe(1);
+    });
+
+    it('should not add duplicate notification', () => {
+      const { result } = renderHook(() => useNotificationStore());
+      const notification: NotificationResponse = {
+        notificationId: '1',
+        type: 'NEW_MESSAGE',
+        title: 'Test',
+        body: 'Test body',
+        actionUrl: null,
+        metadata: {},
+        status: 'DELIVERED',
+        deliveredChannels: [],
+        read: false,
+        readAt: null,
+        relativeTime: 'şimdi',
+        createdAt: new Date().toISOString(),
+      };
+
+      act(() => {
+        result.current.addNotification(notification);
+        result.current.addNotification(notification);
+      });
+
+      expect(result.current.notifications).toHaveLength(1);
+    });
+  });
+
+  describe('markAsRead', () => {
+    it('should mark notification as read', () => {
+      const { result } = renderHook(() => useNotificationStore());
+      const notification: NotificationResponse = {
+        notificationId: '1',
+        type: 'NEW_MESSAGE',
+        title: 'Test',
+        body: 'Test body',
+        actionUrl: null,
+        metadata: {},
+        status: 'DELIVERED',
+        deliveredChannels: [],
+        read: false,
+        readAt: null,
+        relativeTime: 'şimdi',
+        createdAt: new Date().toISOString(),
+      };
+
+      act(() => {
+        result.current.addNotification(notification);
+      });
+
+      act(() => {
+        result.current.markAsRead('1');
+      });
+
+      expect(result.current.notifications[0].read).toBe(true);
+      expect(result.current.unreadCount).toBe(0);
+    });
+  });
+
+  describe('markAllAsRead', () => {
+    it('should mark all notifications as read', () => {
+      const { result } = renderHook(() => useNotificationStore());
+      const notifications: NotificationResponse[] = [
+        {
+          notificationId: '1',
+          type: 'NEW_MESSAGE',
+          title: 'Test',
+          body: 'Test body',
+          actionUrl: null,
+          metadata: {},
+          status: 'DELIVERED',
+          deliveredChannels: [],
+          read: false,
+          readAt: null,
+          relativeTime: 'şimdi',
+          createdAt: new Date().toISOString(),
+        },
+        {
+          notificationId: '2',
+          type: 'POST_LIKED',
+          title: 'Test 2',
+          body: 'Test body 2',
+          actionUrl: null,
+          metadata: {},
+          status: 'DELIVERED',
+          deliveredChannels: [],
+          read: false,
+          readAt: null,
+          relativeTime: 'şimdi',
+          createdAt: new Date().toISOString(),
+        },
+      ];
+
+      act(() => {
+        result.current.setNotifications(notifications);
+      });
+
+      act(() => {
+        result.current.markAllAsRead();
+      });
+
+      expect(result.current.notifications.every(n => n.read)).toBe(true);
+      expect(result.current.unreadCount).toBe(0);
+    });
+  });
+
+  describe('removeNotification', () => {
+    it('should remove notification', () => {
+      const { result } = renderHook(() => useNotificationStore());
+      const notification: NotificationResponse = {
+        notificationId: '1',
+        type: 'NEW_MESSAGE',
+        title: 'Test',
+        body: 'Test body',
+        actionUrl: null,
+        metadata: {},
+        status: 'DELIVERED',
+        deliveredChannels: [],
+        read: false,
+        readAt: null,
+        relativeTime: 'şimdi',
+        createdAt: new Date().toISOString(),
+      };
+
+      act(() => {
+        result.current.addNotification(notification);
+      });
+
+      act(() => {
+        result.current.removeNotification('1');
+      });
+
+      expect(result.current.notifications).toHaveLength(0);
+      expect(result.current.unreadCount).toBe(0);
     });
   });
 
@@ -224,37 +342,54 @@ describe('NotificationStore', () => {
     });
   });
 
-  describe('setInitialized', () => {
-    it('should set initialized state', () => {
+  describe('setPermissionGranted', () => {
+    it('should set permission granted state', () => {
       const { result } = renderHook(() => useNotificationStore());
 
       act(() => {
-        result.current.setInitialized(true);
+        result.current.setPermissionGranted(true);
       });
 
-      expect(result.current.isInitialized).toBe(true);
+      expect(result.current.isPermissionGranted).toBe(true);
+    });
+  });
+
+  describe('setPagination', () => {
+    it('should set pagination state', () => {
+      const { result } = renderHook(() => useNotificationStore());
+
+      act(() => {
+        result.current.setPagination(1, 5, true);
+      });
+
+      expect(result.current.currentPage).toBe(1);
+      expect(result.current.totalPages).toBe(5);
+      expect(result.current.hasMore).toBe(true);
     });
   });
 
   describe('reset', () => {
     it('should reset all state to initial values', () => {
       const { result } = renderHook(() => useNotificationStore());
-      const settings: NotificationSettings = {
-        enabled: true,
-        messages: true,
-        likes: true,
-        comments: true,
-        follows: true,
-        verification: true,
-        system: true,
+      const notification: NotificationResponse = {
+        notificationId: '1',
+        type: 'NEW_MESSAGE',
+        title: 'Test',
+        body: 'Test body',
+        actionUrl: null,
+        metadata: {},
+        status: 'DELIVERED',
+        deliveredChannels: [],
+        read: false,
+        readAt: null,
+        relativeTime: 'şimdi',
+        createdAt: new Date().toISOString(),
       };
 
       act(() => {
-        result.current.setUnreadCount(10);
-        result.current.setSettings(settings);
-        result.current.setPermissionStatus('granted');
+        result.current.addNotification(notification);
+        result.current.setPermissionGranted(true);
         result.current.setFcmToken('token');
-        result.current.setInitialized(true);
       });
 
       act(() => {
@@ -262,23 +397,9 @@ describe('NotificationStore', () => {
       });
 
       expect(result.current.unreadCount).toBe(0);
-      expect(result.current.settings).toBeNull();
-      expect(result.current.permissionStatus).toBe('not-determined');
+      expect(result.current.notifications).toEqual([]);
+      expect(result.current.isPermissionGranted).toBe(false);
       expect(result.current.fcmToken).toBeNull();
-      expect(result.current.isInitialized).toBe(false);
-    });
-  });
-
-  describe('Persistence', () => {
-    it('should persist specific fields', () => {
-      // The store uses zustand/persist, so settings should be persisted
-      // This test verifies the persisted fields are correct
-      const { result } = renderHook(() => useNotificationStore());
-
-      // Store uses persist middleware with specific partialize function
-      // settings, permissionStatus should be persisted
-      expect(result.current.settings).toBeDefined();
-      expect(result.current.permissionStatus).toBeDefined();
     });
   });
 });

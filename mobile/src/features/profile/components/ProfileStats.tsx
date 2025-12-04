@@ -6,7 +6,7 @@ import React, { memo, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, fontSize } from '@theme';
 import type { ProfileStats as ProfileStatsType } from '../types';
 
 interface ProfileStatsProps {
@@ -130,11 +130,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
   },
   statValue: {
-    fontSize: typography.fontSize.lg,
+    fontSize: fontSize.lg,
     fontWeight: '700',
   },
   statLabel: {
-    fontSize: typography.fontSize.sm,
+    fontSize: fontSize.sm,
     marginTop: 2,
   },
   divider: {
@@ -142,3 +142,4 @@ const styles = StyleSheet.create({
     height: 32,
   },
 });
+

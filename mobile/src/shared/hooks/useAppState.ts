@@ -4,7 +4,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
-import { Analytics, AnalyticsEvent } from '@services/analytics';
+import { Analytics, AnalyticsEvent } from '@shared/services/analytics';
 
 type AppStateCallback = (state: AppStateStatus) => void;
 
@@ -12,12 +12,10 @@ type AppStateCallback = (state: AppStateStatus) => void;
  * Hook for tracking app state (active, background, inactive)
  */
 export function useAppState(): AppStateStatus {
-  const [appState, setAppState] = useState<AppStateStatus>(
-    AppState.currentState
-  );
+  const [appState, setAppState] = useState<AppStateStatus>(AppState.currentState);
 
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', (nextAppState) => {
+    const subscription = AppState.addEventListener('change', nextAppState => {
       setAppState(nextAppState);
     });
 
@@ -35,10 +33,7 @@ export function useOnAppForeground(callback: () => void, deps: any[] = []): void
   const prevAppState = useRef(appState);
 
   useEffect(() => {
-    if (
-      prevAppState.current.match(/inactive|background/) &&
-      appState === 'active'
-    ) {
+    if (prevAppState.current.match(/inactive|background/) && appState === 'active') {
       callback();
     }
     prevAppState.current = appState;
@@ -53,10 +48,7 @@ export function useOnAppBackground(callback: () => void, deps: any[] = []): void
   const prevAppState = useRef(appState);
 
   useEffect(() => {
-    if (
-      prevAppState.current === 'active' &&
-      appState.match(/inactive|background/)
-    ) {
+    if (prevAppState.current === 'active' && appState.match(/inactive|background/)) {
       callback();
     }
     prevAppState.current = appState;
@@ -81,7 +73,7 @@ export function useAppUsageTime(): {
   useOnAppForeground(() => {
     if (backgroundStartRef.current) {
       const bgDuration = Date.now() - backgroundStartRef.current;
-      setBackgroundTime((prev) => prev + bgDuration);
+      setBackgroundTime(prev => prev + bgDuration);
       backgroundStartRef.current = null;
     }
   });
@@ -126,7 +118,7 @@ export function useRefreshOnForeground<T>(
   options?: {
     enabled?: boolean;
     minBackgroundTime?: number; // Minimum time in background before refresh (ms)
-  }
+  },
 ): void {
   const { enabled = true, minBackgroundTime = 60000 } = options || {}; // Default: 1 minute
   const backgroundStartRef = useRef<number | null>(null);

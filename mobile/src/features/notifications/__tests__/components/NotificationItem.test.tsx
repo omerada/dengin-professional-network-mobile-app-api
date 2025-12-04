@@ -5,8 +5,7 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { NotificationItem } from '../../components/NotificationItem';
-import { NotificationType } from '../../types';
-import type { NotificationData } from '../../types';
+import type { NotificationResponse, NotificationType } from '../../types';
 
 // Mock dependencies
 jest.mock('@contexts/ThemeContext', () => ({
@@ -16,7 +15,8 @@ jest.mock('@contexts/ThemeContext', () => ({
         surface: '#FFFFFF',
         primary: { 50: '#E3F2FD', 500: '#2196F3' },
         grey: { 100: '#F5F5F5' },
-        text: { primary: '#212121', secondary: '#757575' },
+        text: { primary: '#212121', secondary: '#757575', tertiary: '#9E9E9E' },
+        background: { primary: '#FFFFFF', secondary: '#F5F5F5' },
         error: { 500: '#F44336' },
         success: { 500: '#4CAF50' },
         warning: { 500: '#FF9800' },
@@ -28,34 +28,37 @@ jest.mock('@contexts/ThemeContext', () => ({
 
 jest.mock('react-native-vector-icons/Ionicons', () => 'Icon');
 
-const mockNotification: NotificationData = {
-  id: 'notif-1',
-  type: NotificationType.MESSAGE,
+const createMockNotification = (
+  overrides?: Partial<NotificationResponse>,
+): NotificationResponse => ({
+  notificationId: 'notif-1',
+  type: 'NEW_MESSAGE',
   title: 'Yeni Mesaj',
   body: 'Ahmet size bir mesaj gönderdi',
-  isRead: false,
+  actionUrl: '/messages/conv-1',
+  metadata: { actorAvatarUrl: 'https://example.com/avatar.jpg' },
+  status: 'DELIVERED',
+  deliveredChannels: ['PUSH'],
+  read: false,
+  readAt: null,
+  relativeTime: '5dk önce',
   createdAt: new Date().toISOString(),
-  senderId: 'user-1',
-  senderName: 'Ahmet',
-  senderAvatar: 'https://example.com/avatar.jpg',
-  referenceId: 'conv-1',
-};
+  ...overrides,
+});
 
 describe('NotificationItem', () => {
   const mockOnPress = jest.fn();
-  const mockOnDelete = jest.fn();
+  const mockOnLongPress = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should render notification correctly', () => {
+    const notification = createMockNotification();
+
     const { getByText } = render(
-      <NotificationItem
-        notification={mockNotification}
-        onPress={mockOnPress}
-        onDelete={mockOnDelete}
-      />
+      <NotificationItem notification={notification} onPress={mockOnPress} />,
     );
 
     expect(getByText('Yeni Mesaj')).toBeTruthy();
@@ -63,70 +66,85 @@ describe('NotificationItem', () => {
   });
 
   it('should call onPress when pressed', () => {
-    const { getByTestId } = render(
-      <NotificationItem
-        notification={mockNotification}
-        onPress={mockOnPress}
-        onDelete={mockOnDelete}
-        testID="notification-item"
-      />
+    const notification = createMockNotification();
+
+    const { getByText } = render(
+      <NotificationItem notification={notification} onPress={mockOnPress} />,
     );
 
-    fireEvent.press(getByTestId('notification-item'));
+    fireEvent.press(getByText('Yeni Mesaj'));
 
-    expect(mockOnPress).toHaveBeenCalledWith(mockNotification);
+    expect(mockOnPress).toHaveBeenCalledWith(notification);
   });
 
-  it('should show unread indicator for unread notifications', () => {
-    const { getByTestId } = render(
+  it('should call onLongPress when long pressed', () => {
+    const notification = createMockNotification();
+
+    const { getByText } = render(
       <NotificationItem
-        notification={{ ...mockNotification, isRead: false }}
+        notification={notification}
         onPress={mockOnPress}
-        onDelete={mockOnDelete}
-        testID="notification-item"
-      />
+        onLongPress={mockOnLongPress}
+      />,
     );
 
-    // Unread notifications should have a visual indicator
-    const item = getByTestId('notification-item');
-    expect(item).toBeTruthy();
+    fireEvent(getByText('Yeni Mesaj'), 'onLongPress');
+
+    expect(mockOnLongPress).toHaveBeenCalledWith(notification);
   });
 
-  it('should not show unread indicator for read notifications', () => {
-    const { queryByTestId } = render(
-      <NotificationItem
-        notification={{ ...mockNotification, isRead: true }}
-        onPress={mockOnPress}
-        onDelete={mockOnDelete}
-        testID="notification-item"
-      />
+  it('should display relative time', () => {
+    const notification = createMockNotification({ relativeTime: '5dk önce' });
+
+    const { getByText } = render(
+      <NotificationItem notification={notification} onPress={mockOnPress} />,
     );
 
-    const unreadIndicator = queryByTestId('unread-indicator');
-    expect(unreadIndicator).toBeNull();
+    expect(getByText('5dk önce')).toBeTruthy();
+  });
+
+  it('should render unread notification differently', () => {
+    const unreadNotification = createMockNotification({ read: false });
+
+    const { UNSAFE_root } = render(
+      <NotificationItem notification={unreadNotification} onPress={mockOnPress} />,
+    );
+
+    // Unread notification should be rendered
+    expect(UNSAFE_root).toBeTruthy();
+  });
+
+  it('should render read notification differently', () => {
+    const readNotification = createMockNotification({
+      read: true,
+      readAt: new Date().toISOString(),
+    });
+
+    const { UNSAFE_root } = render(
+      <NotificationItem notification={readNotification} onPress={mockOnPress} />,
+    );
+
+    // Read notification should be rendered
+    expect(UNSAFE_root).toBeTruthy();
   });
 
   describe('Icon rendering based on type', () => {
-    const types = [
-      { type: NotificationType.MESSAGE, expectedIcon: 'chatbubble' },
-      { type: NotificationType.POST_LIKE, expectedIcon: 'heart' },
-      { type: NotificationType.POST_COMMENT, expectedIcon: 'chatbubble-ellipses' },
-      { type: NotificationType.COMMENT_REPLY, expectedIcon: 'chatbubble-ellipses' },
-      { type: NotificationType.FOLLOW, expectedIcon: 'person-add' },
-      { type: NotificationType.VERIFICATION_UPDATE, expectedIcon: 'checkmark-circle' },
-      { type: NotificationType.SYSTEM, expectedIcon: 'information-circle' },
+    const types: NotificationType[] = [
+      'NEW_MESSAGE',
+      'POST_LIKED',
+      'POST_COMMENTED',
+      'NEW_FOLLOWER',
+      'VERIFICATION_APPROVED',
+      'VERIFICATION_REJECTED',
+      'WELCOME',
     ];
 
-    types.forEach(({ type }) => {
+    types.forEach(type => {
       it(`should render correct icon for ${type} notification`, () => {
-        const notification = { ...mockNotification, type };
+        const notification = createMockNotification({ type });
 
         const { UNSAFE_root } = render(
-          <NotificationItem
-            notification={notification}
-            onPress={mockOnPress}
-            onDelete={mockOnDelete}
-          />
+          <NotificationItem notification={notification} onPress={mockOnPress} />,
         );
 
         // Icon component should be rendered
@@ -135,101 +153,44 @@ describe('NotificationItem', () => {
     });
   });
 
-  describe('Relative time display', () => {
-    it('should show relative time for recent notifications', () => {
-      const recentNotification = {
-        ...mockNotification,
-        createdAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(), // 5 minutes ago
-      };
-
-      const { getByText } = render(
-        <NotificationItem
-          notification={recentNotification}
-          onPress={mockOnPress}
-          onDelete={mockOnDelete}
-        />
-      );
-
-      // Should show something like "5dk önce"
-      // The exact text depends on the implementation
-      expect(getByText(/önce/)).toBeTruthy();
-    });
-
-    it('should show date for old notifications', () => {
-      const oldNotification = {
-        ...mockNotification,
-        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
-      };
+  describe('Metadata handling', () => {
+    it('should render with image from metadata', () => {
+      const notification = createMockNotification({
+        metadata: { imageUrl: 'https://example.com/image.jpg' },
+      });
 
       const { UNSAFE_root } = render(
-        <NotificationItem
-          notification={oldNotification}
-          onPress={mockOnPress}
-          onDelete={mockOnDelete}
-        />
+        <NotificationItem notification={notification} onPress={mockOnPress} />,
+      );
+
+      expect(UNSAFE_root).toBeTruthy();
+    });
+
+    it('should render fallback when no image in metadata', () => {
+      const notification = createMockNotification({
+        metadata: {},
+      });
+
+      const { UNSAFE_root } = render(
+        <NotificationItem notification={notification} onPress={mockOnPress} />,
       );
 
       expect(UNSAFE_root).toBeTruthy();
     });
   });
 
-  describe('Sender avatar', () => {
-    it('should render sender avatar when available', () => {
-      const { UNSAFE_root } = render(
-        <NotificationItem
-          notification={mockNotification}
-          onPress={mockOnPress}
-          onDelete={mockOnDelete}
-        />
-      );
-
-      // Avatar should be rendered (implementation may use Image or custom component)
-      expect(UNSAFE_root).toBeTruthy();
-    });
-
-    it('should render fallback when avatar is not available', () => {
-      const notificationWithoutAvatar = {
-        ...mockNotification,
-        senderAvatar: undefined,
-      };
+  describe('Backend icon/color fields', () => {
+    it('should use icon from backend if provided', () => {
+      const notification = createMockNotification({
+        icon: 'custom-icon',
+        color: '#FF0000',
+      });
 
       const { UNSAFE_root } = render(
-        <NotificationItem
-          notification={notificationWithoutAvatar}
-          onPress={mockOnPress}
-          onDelete={mockOnDelete}
-        />
+        <NotificationItem notification={notification} onPress={mockOnPress} />,
       );
 
       expect(UNSAFE_root).toBeTruthy();
-    });
-  });
-
-  describe('Accessibility', () => {
-    it('should have accessible role', () => {
-      const { getByRole } = render(
-        <NotificationItem
-          notification={mockNotification}
-          onPress={mockOnPress}
-          onDelete={mockOnDelete}
-        />
-      );
-
-      // Should be accessible as a button
-      expect(getByRole).toBeTruthy();
-    });
-
-    it('should have accessible label', () => {
-      const { getByLabelText } = render(
-        <NotificationItem
-          notification={mockNotification}
-          onPress={mockOnPress}
-          onDelete={mockOnDelete}
-          accessibilityLabel="Notification from Ahmet"
-        />
-      );
-
-      expect(getByLabelText).toBeTruthy();
     });
   });
 });

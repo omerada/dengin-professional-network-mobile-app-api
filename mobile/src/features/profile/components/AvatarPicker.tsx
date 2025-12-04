@@ -20,7 +20,7 @@ import {
   MediaType,
 } from 'react-native-image-picker';
 import { useTheme } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, fontSize } from '@theme';
 
 interface AvatarPickerProps {
   /**
@@ -277,12 +277,13 @@ const styles = StyleSheet.create({
   },
   overlayText: {
     color: '#FFFFFF',
-    fontSize: typography.fontSize.xs,
+    fontSize: fontSize.xs,
     fontWeight: '600',
     marginTop: 2,
   },
   hint: {
-    fontSize: typography.fontSize.sm,
+    fontSize: fontSize.sm,
     marginTop: spacing.sm,
   },
 });
+

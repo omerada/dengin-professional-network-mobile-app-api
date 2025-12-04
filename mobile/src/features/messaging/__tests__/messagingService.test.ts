@@ -3,9 +3,9 @@
 // Oku: mobile-development-guide/testing/24-UNIT-TESTS.md
 
 import { messagingService } from '../services/messagingService';
-import { apiClient } from '@services/apiClient';
+import { apiClient } from '@core/api/client';
 
-jest.mock('@services/apiClient');
+jest.mock('@core/api/client');
 
 const mockApiClient = apiClient as jest.Mocked<typeof apiClient>;
 
@@ -16,19 +16,24 @@ describe('messagingService', () => {
 
   describe('getConversations', () => {
     it('should fetch conversations with pagination', async () => {
+      const mockData = {
+        content: [
+          {
+            conversationId: '1',
+            participant: { userId: 'user1', fullName: 'Test User' },
+            lastMessage: { content: 'Hello', sentAt: '2024-01-15T10:00:00Z' },
+            unreadCount: 2,
+          },
+        ],
+        totalPages: 1,
+        totalElements: 1,
+      };
       const mockResponse = {
         data: {
-          content: [
-            {
-              id: '1',
-              name: 'Test User',
-              lastMessage: 'Hello',
-              lastMessageAt: '2024-01-15T10:00:00Z',
-              unreadCount: 2,
-            },
-          ],
-          hasNext: true,
-          nextCursor: 'cursor123',
+          success: true,
+          message: 'OK',
+          data: mockData,
+          timestamp: new Date().toISOString(),
         },
       };
 
@@ -36,18 +41,24 @@ describe('messagingService', () => {
 
       const result = await messagingService.getConversations();
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/messaging/conversations', {
-        params: { limit: 20, cursor: undefined },
+      expect(mockApiClient.get).toHaveBeenCalledWith('/api/conversations', {
+        params: { page: 0, size: 20 },
       });
-      expect(result).toEqual(mockResponse.data);
+      expect(result).toEqual(mockData);
     });
 
     it('should handle empty conversations', async () => {
+      const mockData = {
+        content: [],
+        totalPages: 0,
+        totalElements: 0,
+      };
       const mockResponse = {
         data: {
-          content: [],
-          hasNext: false,
-          nextCursor: null,
+          success: true,
+          message: 'OK',
+          data: mockData,
+          timestamp: new Date().toISOString(),
         },
       };
 
@@ -56,26 +67,31 @@ describe('messagingService', () => {
       const result = await messagingService.getConversations();
 
       expect(result.content).toHaveLength(0);
-      expect(result.hasNext).toBe(false);
     });
   });
 
   describe('getMessages', () => {
     it('should fetch messages for a conversation', async () => {
       const conversationId = 'conv123';
+      const mockData = {
+        content: [
+          {
+            messageId: 'msg1',
+            content: 'Hello',
+            senderId: 'user1',
+            status: 'READ',
+            sentAt: '2024-01-15T10:00:00Z',
+          },
+        ],
+        totalPages: 1,
+        totalElements: 1,
+      };
       const mockResponse = {
         data: {
-          content: [
-            {
-              id: 'msg1',
-              content: 'Hello',
-              senderId: 'user1',
-              status: 'read',
-              createdAt: '2024-01-15T10:00:00Z',
-            },
-          ],
-          hasNext: false,
-          nextCursor: null,
+          success: true,
+          message: 'OK',
+          data: mockData,
+          timestamp: new Date().toISOString(),
         },
       };
 
@@ -84,69 +100,82 @@ describe('messagingService', () => {
       const result = await messagingService.getMessages(conversationId);
 
       expect(mockApiClient.get).toHaveBeenCalledWith(
-        `/messaging/conversations/${conversationId}/messages`,
-        { params: { limit: 50, cursor: undefined } }
+        `/api/conversations/${conversationId}/messages`,
+        { params: { page: 0, size: 30 } },
       );
-      expect(result).toEqual(mockResponse.data);
+      expect(result).toEqual(mockData);
     });
 
-    it('should pass cursor for pagination', async () => {
+    it('should pass page for pagination', async () => {
       const conversationId = 'conv123';
-      const cursor = 'cursor456';
+      const mockData = { content: [], totalPages: 0, totalElements: 0 };
 
       mockApiClient.get.mockResolvedValueOnce({
-        data: { content: [], hasNext: false, nextCursor: null },
+        data: { success: true, message: 'OK', data: mockData, timestamp: new Date().toISOString() },
       });
 
-      await messagingService.getMessages(conversationId, 50, cursor);
+      await messagingService.getMessages(conversationId, { page: 2, size: 30 });
 
       expect(mockApiClient.get).toHaveBeenCalledWith(
-        `/messaging/conversations/${conversationId}/messages`,
-        { params: { limit: 50, cursor } }
+        `/api/conversations/${conversationId}/messages`,
+        { params: { page: 2, size: 30 } },
       );
     });
   });
 
   describe('sendMessage', () => {
     it('should send a message', async () => {
-      const conversationId = 'conv123';
-      const content = 'Test message';
+      const request = {
+        conversationId: 'conv123',
+        content: 'Test message',
+        type: 'text' as const,
+      };
+      const mockData = {
+        messageId: 'msg1',
+        conversationId: 'conv123',
+        content: 'Test message',
+        status: 'SENT',
+        sentAt: '2024-01-15T10:00:00Z',
+      };
       const mockResponse = {
         data: {
-          id: 'msg1',
-          content,
-          senderId: 'user1',
-          status: 'sent',
-          createdAt: '2024-01-15T10:00:00Z',
+          success: true,
+          message: 'OK',
+          data: mockData,
+          timestamp: new Date().toISOString(),
         },
       };
 
       mockApiClient.post.mockResolvedValueOnce(mockResponse);
 
-      const result = await messagingService.sendMessage(conversationId, content);
+      const result = await messagingService.sendMessage(request);
 
-      expect(mockApiClient.post).toHaveBeenCalledWith(
-        `/messaging/conversations/${conversationId}/messages`,
-        { content, replyToId: undefined }
-      );
-      expect(result).toEqual(mockResponse.data);
+      expect(mockApiClient.post).toHaveBeenCalledWith('/api/messages', request);
+      expect(result).toEqual(mockData);
     });
 
     it('should send a reply message', async () => {
-      const conversationId = 'conv123';
-      const content = 'Reply message';
-      const replyToId = 'msg0';
+      const request = {
+        conversationId: 'conv123',
+        content: 'Reply message',
+        type: 'text' as const,
+        replyToId: 'msg0',
+      };
+      const mockData = {
+        messageId: 'msg1',
+        conversationId: 'conv123',
+        content: 'Reply message',
+        status: 'SENT',
+        sentAt: '2024-01-15T10:00:00Z',
+      };
 
       mockApiClient.post.mockResolvedValueOnce({
-        data: { id: 'msg1', content, replyToId },
+        data: { success: true, message: 'OK', data: mockData, timestamp: new Date().toISOString() },
       });
 
-      await messagingService.sendMessage(conversationId, content, replyToId);
+      await messagingService.sendMessage(request);
 
-      expect(mockApiClient.post).toHaveBeenCalledWith(
-        `/messaging/conversations/${conversationId}/messages`,
-        { content, replyToId }
-      );
+      expect(mockApiClient.post).toHaveBeenCalledWith('/api/messages', request);
     });
   });
 
@@ -160,117 +189,69 @@ describe('messagingService', () => {
       await messagingService.deleteMessage(conversationId, messageId);
 
       expect(mockApiClient.delete).toHaveBeenCalledWith(
-        `/messaging/conversations/${conversationId}/messages/${messageId}`
+        `/api/conversations/${conversationId}/messages/${messageId}`,
       );
     });
   });
 
-  describe('markConversationAsRead', () => {
+  describe('markAsRead', () => {
     it('should mark conversation as read', async () => {
       const conversationId = 'conv123';
 
       mockApiClient.put.mockResolvedValueOnce({});
 
-      await messagingService.markConversationAsRead(conversationId);
+      await messagingService.markAsRead(conversationId);
 
-      expect(mockApiClient.put).toHaveBeenCalledWith(
-        `/messaging/conversations/${conversationId}/read`
-      );
+      expect(mockApiClient.put).toHaveBeenCalledWith(`/api/conversations/${conversationId}/read`);
     });
   });
 
-  describe('startConversation', () => {
-    it('should start a new conversation', async () => {
-      const userId = 'user123';
-      const mockResponse = {
-        data: {
-          id: 'conv1',
-          name: 'Test User',
-          participants: [{ id: userId, displayName: 'Test User' }],
-        },
+  describe('searchMessages', () => {
+    it('should search messages', async () => {
+      const mockData = {
+        messages: [{ messageId: 'msg1', content: 'test search' }],
+        totalResults: 1,
+        pageNumber: 0,
+        pageSize: 20,
+        hasMore: false,
       };
-
-      mockApiClient.post.mockResolvedValueOnce(mockResponse);
-
-      const result = await messagingService.startConversation(userId);
-
-      expect(mockApiClient.post).toHaveBeenCalledWith('/messaging/conversations', {
-        participantId: userId,
-      });
-      expect(result).toEqual(mockResponse.data);
-    });
-  });
-
-  describe('findConversationWithUser', () => {
-    it('should find existing conversation with user', async () => {
-      const userId = 'user123';
       const mockResponse = {
         data: {
-          id: 'conv1',
-          name: 'Test User',
+          success: true,
+          message: 'OK',
+          data: mockData,
+          timestamp: new Date().toISOString(),
         },
       };
 
       mockApiClient.get.mockResolvedValueOnce(mockResponse);
 
-      const result = await messagingService.findConversationWithUser(userId);
+      const result = await messagingService.searchMessages({ query: 'test' });
 
-      expect(mockApiClient.get).toHaveBeenCalledWith(
-        `/messaging/conversations/with/${userId}`
-      );
-      expect(result).toEqual(mockResponse.data);
-    });
-
-    it('should return null if no conversation exists', async () => {
-      const userId = 'user123';
-
-      mockApiClient.get.mockRejectedValueOnce({ response: { status: 404 } });
-
-      const result = await messagingService.findConversationWithUser(userId);
-
-      expect(result).toBeNull();
+      expect(mockApiClient.get).toHaveBeenCalledWith('/api/messages/search', {
+        params: { q: 'test', conversationId: undefined, page: 0, size: 20 },
+      });
+      expect(result).toEqual(mockData);
     });
   });
 
-  describe('pinConversation', () => {
-    it('should pin a conversation', async () => {
-      const conversationId = 'conv123';
+  describe('getUnreadCount', () => {
+    it('should get unread count', async () => {
+      const mockResponse = {
+        data: {
+          success: true,
+          message: 'OK',
+          data: 5,
+          timestamp: new Date().toISOString(),
+        },
+      };
 
-      mockApiClient.put.mockResolvedValueOnce({});
+      mockApiClient.get.mockResolvedValueOnce(mockResponse);
 
-      await messagingService.pinConversation(conversationId);
+      const result = await messagingService.getUnreadCount();
 
-      expect(mockApiClient.put).toHaveBeenCalledWith(
-        `/messaging/conversations/${conversationId}/pin`
-      );
-    });
-  });
-
-  describe('muteConversation', () => {
-    it('should mute a conversation', async () => {
-      const conversationId = 'conv123';
-
-      mockApiClient.put.mockResolvedValueOnce({});
-
-      await messagingService.muteConversation(conversationId);
-
-      expect(mockApiClient.put).toHaveBeenCalledWith(
-        `/messaging/conversations/${conversationId}/mute`
-      );
-    });
-  });
-
-  describe('deleteConversation', () => {
-    it('should delete a conversation', async () => {
-      const conversationId = 'conv123';
-
-      mockApiClient.delete.mockResolvedValueOnce({});
-
-      await messagingService.deleteConversation(conversationId);
-
-      expect(mockApiClient.delete).toHaveBeenCalledWith(
-        `/messaging/conversations/${conversationId}`
-      );
+      expect(mockApiClient.get).toHaveBeenCalledWith('/api/conversations/unread-count');
+      expect(result).toBe(5);
     });
   });
 });

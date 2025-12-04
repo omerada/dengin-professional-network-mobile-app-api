@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
-import { Text, Button } from 'react-native';
+import { Text, TouchableOpacity } from 'react-native';
 import { LocaleProvider, useLocale } from '../../../src/contexts/LocaleContext';
 
 // Mock AsyncStorage
@@ -11,6 +11,18 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn().mockResolvedValue(undefined),
   getItem: jest.fn().mockResolvedValue(null),
   removeItem: jest.fn().mockResolvedValue(undefined),
+}));
+
+// Mock the storage module
+jest.mock('../../../src/core/storage', () => ({
+  asyncStorage: {
+    get: jest.fn().mockResolvedValue(null),
+    set: jest.fn().mockResolvedValue(undefined),
+    remove: jest.fn().mockResolvedValue(undefined),
+  },
+  STORAGE_KEYS: {
+    LOCALE: 'locale',
+  },
 }));
 
 // Test component that uses the locale context
@@ -21,30 +33,40 @@ const TestComponent = () => {
     <>
       <Text testID="current-locale">{locale}</Text>
       <Text testID="is-rtl">{isRTL ? 'rtl' : 'ltr'}</Text>
-      <Text testID="translation">{t('common.loading')}</Text>
-      <Button testID="set-tr" title="TR" onPress={() => setLocale('tr')} />
-      <Button testID="set-en" title="EN" onPress={() => setLocale('en')} />
+      <Text testID="translation">{t ? t('common.loading') : 'no-t'}</Text>
+      <TouchableOpacity testID="set-tr" onPress={() => setLocale('tr')}>
+        <Text>TR</Text>
+      </TouchableOpacity>
+      <TouchableOpacity testID="set-en" onPress={() => setLocale('en')}>
+        <Text>EN</Text>
+      </TouchableOpacity>
     </>
   );
 };
 
 describe('LocaleContext', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('LocaleProvider', () => {
-    it('children\'ı render etmeli', () => {
+    it("children'ı render etmeli", async () => {
       const { getByText } = render(
         <LocaleProvider>
           <Text>Test Child</Text>
-        </LocaleProvider>
+        </LocaleProvider>,
       );
 
-      expect(getByText('Test Child')).toBeTruthy();
+      await waitFor(() => {
+        expect(getByText('Test Child')).toBeTruthy();
+      });
     });
 
     it('varsayılan locale "tr" olmalı', async () => {
       const { getByTestId } = render(
         <LocaleProvider>
           <TestComponent />
-        </LocaleProvider>
+        </LocaleProvider>,
       );
 
       await waitFor(() => {
@@ -54,25 +76,31 @@ describe('LocaleContext', () => {
   });
 
   describe('useLocale hook', () => {
-    it('locale değerini döndürmeli', () => {
+    it('locale değerini döndürmeli', async () => {
       const { getByTestId } = render(
         <LocaleProvider>
           <TestComponent />
-        </LocaleProvider>
+        </LocaleProvider>,
       );
 
-      expect(getByTestId('current-locale')).toBeTruthy();
+      await waitFor(() => {
+        expect(getByTestId('current-locale')).toBeTruthy();
+      });
     });
 
-    it('locale\'i TR olarak değiştirebilmeli', async () => {
-      const { getByTestId, getByText } = render(
+    it("locale'i TR olarak değiştirebilmeli", async () => {
+      const { getByTestId } = render(
         <LocaleProvider>
           <TestComponent />
-        </LocaleProvider>
+        </LocaleProvider>,
       );
 
+      await waitFor(() => {
+        expect(getByTestId('current-locale')).toBeTruthy();
+      });
+
       await act(async () => {
-        fireEvent.press(getByText('TR'));
+        fireEvent.press(getByTestId('set-tr'));
       });
 
       await waitFor(() => {
@@ -80,15 +108,19 @@ describe('LocaleContext', () => {
       });
     });
 
-    it('locale\'i EN olarak değiştirebilmeli', async () => {
-      const { getByTestId, getByText } = render(
+    it("locale'i EN olarak değiştirebilmeli", async () => {
+      const { getByTestId } = render(
         <LocaleProvider>
           <TestComponent />
-        </LocaleProvider>
+        </LocaleProvider>,
       );
 
+      await waitFor(() => {
+        expect(getByTestId('current-locale')).toBeTruthy();
+      });
+
       await act(async () => {
-        fireEvent.press(getByText('EN'));
+        fireEvent.press(getByTestId('set-en'));
       });
 
       await waitFor(() => {
@@ -102,7 +134,7 @@ describe('LocaleContext', () => {
       const { getByTestId } = render(
         <LocaleProvider>
           <TestComponent />
-        </LocaleProvider>
+        </LocaleProvider>,
       );
 
       await waitFor(() => {
@@ -112,16 +144,18 @@ describe('LocaleContext', () => {
     });
 
     it('locale değiştiğinde çeviri güncellemeli', async () => {
-      const { getByTestId, getByText } = render(
+      const { getByTestId } = render(
         <LocaleProvider>
           <TestComponent />
-        </LocaleProvider>
+        </LocaleProvider>,
       );
 
-      const initialTranslation = getByTestId('translation').props.children;
+      await waitFor(() => {
+        expect(getByTestId('translation')).toBeTruthy();
+      });
 
       await act(async () => {
-        fireEvent.press(getByText('EN'));
+        fireEvent.press(getByTestId('set-en'));
       });
 
       await waitFor(() => {
@@ -134,14 +168,18 @@ describe('LocaleContext', () => {
 
   describe('RTL Support', () => {
     it('Türkçe için LTR olmalı', async () => {
-      const { getByTestId, getByText } = render(
+      const { getByTestId } = render(
         <LocaleProvider>
           <TestComponent />
-        </LocaleProvider>
+        </LocaleProvider>,
       );
 
+      await waitFor(() => {
+        expect(getByTestId('is-rtl')).toBeTruthy();
+      });
+
       await act(async () => {
-        fireEvent.press(getByText('TR'));
+        fireEvent.press(getByTestId('set-tr'));
       });
 
       await waitFor(() => {
@@ -150,14 +188,18 @@ describe('LocaleContext', () => {
     });
 
     it('İngilizce için LTR olmalı', async () => {
-      const { getByTestId, getByText } = render(
+      const { getByTestId } = render(
         <LocaleProvider>
           <TestComponent />
-        </LocaleProvider>
+        </LocaleProvider>,
       );
 
+      await waitFor(() => {
+        expect(getByTestId('is-rtl')).toBeTruthy();
+      });
+
       await act(async () => {
-        fireEvent.press(getByText('EN'));
+        fireEvent.press(getByTestId('set-en'));
       });
 
       await waitFor(() => {
@@ -172,7 +214,7 @@ describe('LocaleContext', () => {
 
       expect(() => {
         render(<TestComponent />);
-      }).toThrow();
+      }).toThrow('useLocale must be used within a LocaleProvider');
 
       consoleError.mockRestore();
     });

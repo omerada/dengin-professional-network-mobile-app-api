@@ -3,7 +3,7 @@
 // Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
 
 import { Alert, Platform } from 'react-native';
-import { Analytics } from '@services/analytics';
+import { Analytics } from '@shared/services/analytics';
 
 /**
  * Error types
@@ -34,7 +34,7 @@ export class AppError extends Error {
       code?: string;
       context?: Record<string, any>;
       isRecoverable?: boolean;
-    }
+    },
   ) {
     super(message);
     this.name = 'AppError';
@@ -51,11 +51,9 @@ export class AppError extends Error {
 export function parseApiError(error: any): AppError {
   // Network errors
   if (error.message === 'Network Error' || !error.response) {
-    return new AppError(
-      'İnternet bağlantınızı kontrol edin',
-      ErrorType.NETWORK,
-      { isRecoverable: true }
-    );
+    return new AppError('İnternet bağlantınızı kontrol edin', ErrorType.NETWORK, {
+      isRecoverable: true,
+    });
   }
 
   // Timeout errors
@@ -63,7 +61,7 @@ export function parseApiError(error: any): AppError {
     return new AppError(
       'Bağlantı zaman aşımına uğradı. Lütfen tekrar deneyin.',
       ErrorType.TIMEOUT,
-      { isRecoverable: true }
+      { isRecoverable: true },
     );
   }
 
@@ -73,46 +71,37 @@ export function parseApiError(error: any): AppError {
 
   switch (status) {
     case 400:
-      return new AppError(
-        data?.message || 'Geçersiz istek',
-        ErrorType.VALIDATION,
-        { code: data?.code, context: data?.errors }
-      );
+      return new AppError(data?.message || 'Geçersiz istek', ErrorType.VALIDATION, {
+        code: data?.code,
+        context: data?.errors,
+      });
 
     case 401:
-      return new AppError(
-        'Oturum süreniz doldu. Lütfen tekrar giriş yapın.',
-        ErrorType.AUTH,
-        { code: 'SESSION_EXPIRED', isRecoverable: false }
-      );
+      return new AppError('Oturum süreniz doldu. Lütfen tekrar giriş yapın.', ErrorType.AUTH, {
+        code: 'SESSION_EXPIRED',
+        isRecoverable: false,
+      });
 
     case 403:
-      return new AppError(
-        'Bu işlem için yetkiniz yok',
-        ErrorType.PERMISSION,
-        { code: 'FORBIDDEN' }
-      );
+      return new AppError('Bu işlem için yetkiniz yok', ErrorType.PERMISSION, {
+        code: 'FORBIDDEN',
+      });
 
     case 404:
-      return new AppError(
-        data?.message || 'İstek yapılan kaynak bulunamadı',
-        ErrorType.SERVER,
-        { code: 'NOT_FOUND' }
-      );
+      return new AppError(data?.message || 'İstek yapılan kaynak bulunamadı', ErrorType.SERVER, {
+        code: 'NOT_FOUND',
+      });
 
     case 422:
-      return new AppError(
-        data?.message || 'Doğrulama hatası',
-        ErrorType.VALIDATION,
-        { context: data?.errors }
-      );
+      return new AppError(data?.message || 'Doğrulama hatası', ErrorType.VALIDATION, {
+        context: data?.errors,
+      });
 
     case 429:
-      return new AppError(
-        'Çok fazla istek gönderdiniz. Lütfen biraz bekleyin.',
-        ErrorType.SERVER,
-        { code: 'RATE_LIMITED', isRecoverable: true }
-      );
+      return new AppError('Çok fazla istek gönderdiniz. Lütfen biraz bekleyin.', ErrorType.SERVER, {
+        code: 'RATE_LIMITED',
+        isRecoverable: true,
+      });
 
     case 500:
     case 502:
@@ -121,15 +110,13 @@ export function parseApiError(error: any): AppError {
       return new AppError(
         'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.',
         ErrorType.SERVER,
-        { code: 'SERVER_ERROR', isRecoverable: true }
+        { code: 'SERVER_ERROR', isRecoverable: true },
       );
 
     default:
-      return new AppError(
-        data?.message || 'Beklenmeyen bir hata oluştu',
-        ErrorType.UNKNOWN,
-        { context: { status, data } }
-      );
+      return new AppError(data?.message || 'Beklenmeyen bir hata oluştu', ErrorType.UNKNOWN, {
+        context: { status, data },
+      });
   }
 }
 
@@ -142,13 +129,17 @@ export function showErrorAlert(
     title?: string;
     onRetry?: () => void;
     onDismiss?: () => void;
-  }
+  },
 ): void {
   const isAppError = error instanceof AppError;
   const title = options?.title || 'Hata';
   const message = error.message || 'Beklenmeyen bir hata oluştu';
 
-  const buttons: Array<{ text: string; onPress?: () => void; style?: 'cancel' | 'default' | 'destructive' }> = [];
+  const buttons: Array<{
+    text: string;
+    onPress?: () => void;
+    style?: 'cancel' | 'default' | 'destructive';
+  }> = [];
 
   if (options?.onDismiss) {
     buttons.push({
@@ -223,14 +214,11 @@ export interface ErrorFallbackProps {
  */
 export function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
-  FallbackComponent: React.ComponentType<ErrorFallbackProps>
+  FallbackComponent: React.ComponentType<ErrorFallbackProps>,
 ): React.ComponentType<P> {
   const React = require('react');
 
-  class ErrorBoundary extends React.Component<
-    P,
-    { hasError: boolean; error: Error | null }
-  > {
+  class ErrorBoundary extends React.Component<P, { hasError: boolean; error: Error | null }> {
     constructor(props: P) {
       super(props);
       this.state = { hasError: false, error: null };
@@ -271,7 +259,7 @@ export function withErrorBoundary<P extends object>(
  */
 export async function tryCatch<T>(
   fn: () => Promise<T>,
-  errorContext?: Record<string, any>
+  errorContext?: Record<string, any>,
 ): Promise<[T, null] | [null, AppError]> {
   try {
     const result = await fn();
@@ -294,7 +282,7 @@ export async function retryWithBackoff<T>(
     maxDelay?: number;
     factor?: number;
     onRetry?: (attempt: number, error: Error) => void;
-  }
+  },
 ): Promise<T> {
   const {
     maxRetries = 3,
@@ -317,7 +305,7 @@ export async function retryWithBackoff<T>(
         onRetry?.(attempt + 1, lastError);
 
         // Wait with exponential backoff
-        await new Promise((resolve) => setTimeout(resolve, delay));
+        await new Promise(resolve => setTimeout(resolve, delay));
         delay = Math.min(delay * factor, maxDelay);
       }
     }

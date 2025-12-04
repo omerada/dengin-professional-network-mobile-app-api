@@ -5,7 +5,7 @@
 import React, { memo } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import { useTheme } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, fontSize } from '@theme';
 import { GoogleSignInButton } from './GoogleSignInButton';
 import { AppleSignInButton } from './AppleSignInButton';
 
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
   },
   dividerText: {
     marginHorizontal: spacing.md,
-    fontSize: typography.fontSize.sm,
+    fontSize: fontSize.sm,
   },
   buttons: {
     gap: spacing.md,
@@ -89,3 +89,4 @@ const styles = StyleSheet.create({
 });
 
 SocialLoginButtons.displayName = 'SocialLoginButtons';
+

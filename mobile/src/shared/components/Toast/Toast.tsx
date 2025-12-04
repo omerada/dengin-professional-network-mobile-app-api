@@ -14,7 +14,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, fontSize } from '@theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -175,9 +175,10 @@ const styles = StyleSheet.create({
   },
   message: {
     flex: 1,
-    fontSize: typography.fontSize.base,
+    fontSize: fontSize.base,
     marginHorizontal: spacing.sm,
   },
 });
 
 Toast.displayName = 'Toast';
+

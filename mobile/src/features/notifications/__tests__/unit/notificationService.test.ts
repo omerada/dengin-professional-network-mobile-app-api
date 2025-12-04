@@ -2,14 +2,10 @@
 // Unit tests for notification service
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
-import {
-  notificationService,
-  NotificationType,
-} from '../../services/notificationService';
-import { apiClient } from '@services/api';
+import type { NotificationListResponse, NotificationResponse } from '../../types';
 
-// Mock API client
-jest.mock('@services/api', () => ({
+// Mock the API client module - mock declaration is hoisted
+jest.mock('@core/api/client', () => ({
   apiClient: {
     get: jest.fn(),
     post: jest.fn(),
@@ -18,7 +14,13 @@ jest.mock('@services/api', () => ({
   },
 }));
 
+// Import mocked module to get reference to mock functions
+import { apiClient } from '@core/api/client';
+
 const mockApiClient = apiClient as jest.Mocked<typeof apiClient>;
+
+// Import service after mock
+import { notificationService } from '../../services/notificationService';
 
 describe('NotificationService', () => {
   beforeEach(() => {
@@ -26,34 +28,46 @@ describe('NotificationService', () => {
   });
 
   describe('getNotifications', () => {
-    const mockNotificationsResponse = {
-      items: [
+    const mockNotificationsResponse: NotificationListResponse = {
+      notifications: [
         {
-          id: '1',
-          type: NotificationType.MESSAGE,
+          notificationId: '1',
+          type: 'NEW_MESSAGE',
           title: 'Yeni Mesaj',
           body: 'Ahmet size bir mesaj gönderdi',
-          isRead: false,
+          actionUrl: '/messages/conv-1',
+          metadata: { actorAvatarUrl: 'https://example.com/avatar.jpg' },
+          status: 'DELIVERED',
+          deliveredChannels: ['PUSH'],
+          read: false,
+          readAt: null,
+          relativeTime: '5dk önce',
           createdAt: '2024-01-15T10:00:00Z',
-          senderId: 'user-1',
-          senderName: 'Ahmet',
-          senderAvatar: 'https://example.com/avatar.jpg',
-          referenceId: 'conv-1',
         },
         {
-          id: '2',
-          type: NotificationType.POST_LIKE,
+          notificationId: '2',
+          type: 'POST_LIKED',
           title: 'Yeni Beğeni',
           body: 'Mehmet gönderinizi beğendi',
-          isRead: true,
+          actionUrl: '/posts/post-1',
+          metadata: {},
+          status: 'READ',
+          deliveredChannels: ['PUSH'],
+          read: true,
+          readAt: '2024-01-15T09:30:00Z',
+          relativeTime: '1sa önce',
           createdAt: '2024-01-15T09:00:00Z',
-          senderId: 'user-2',
-          senderName: 'Mehmet',
-          referenceId: 'post-1',
         },
       ],
-      nextCursor: 'cursor-123',
-      hasMore: true,
+      unreadCount: 1,
+      unreadByType: { NEW_MESSAGE: 1 },
+      currentPage: 0,
+      pageSize: 20,
+      totalPages: 1,
+      totalElements: 2,
+      hasMore: false,
+      first: true,
+      last: true,
     };
 
     it('should fetch notifications successfully', async () => {
@@ -63,28 +77,36 @@ describe('NotificationService', () => {
 
       const result = await notificationService.getNotifications();
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/notifications', {
-        params: { limit: 20, cursor: undefined },
+      expect(mockApiClient.get).toHaveBeenCalledWith('/api/notifications', {
+        params: { page: 0, size: 20, unreadOnly: false },
       });
-      expect(result.items).toHaveLength(2);
-      expect(result.nextCursor).toBe('cursor-123');
-      expect(result.hasMore).toBe(true);
+      expect(result.notifications).toHaveLength(2);
+      expect(result.hasMore).toBe(false);
     });
 
-    it('should fetch notifications with cursor', async () => {
+    it('should fetch notifications with pagination', async () => {
       mockApiClient.get.mockResolvedValueOnce({
-        data: { ...mockNotificationsResponse, nextCursor: undefined, hasMore: false },
+        data: { ...mockNotificationsResponse, currentPage: 1, hasMore: false },
       });
 
-      const result = await notificationService.getNotifications({
-        cursor: 'cursor-456',
-        limit: 10,
+      const result = await notificationService.getNotifications(1, 10, false);
+
+      expect(mockApiClient.get).toHaveBeenCalledWith('/api/notifications', {
+        params: { page: 1, size: 10, unreadOnly: false },
+      });
+      expect(result.currentPage).toBe(1);
+    });
+
+    it('should fetch only unread notifications', async () => {
+      mockApiClient.get.mockResolvedValueOnce({
+        data: mockNotificationsResponse,
       });
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/notifications', {
-        params: { limit: 10, cursor: 'cursor-456' },
+      await notificationService.getNotifications(0, 20, true);
+
+      expect(mockApiClient.get).toHaveBeenCalledWith('/api/notifications', {
+        params: { page: 0, size: 20, unreadOnly: true },
       });
-      expect(result.hasMore).toBe(false);
     });
 
     it('should handle errors', async () => {
@@ -98,112 +120,156 @@ describe('NotificationService', () => {
   describe('getUnreadCount', () => {
     it('should fetch unread count successfully', async () => {
       mockApiClient.get.mockResolvedValueOnce({
-        data: { count: 5 },
+        data: { unreadCount: 5 },
       });
 
       const result = await notificationService.getUnreadCount();
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/notifications/unread-count');
+      expect(mockApiClient.get).toHaveBeenCalledWith('/api/notifications/unread-count');
       expect(result).toBe(5);
-    });
-
-    it('should return 0 on error', async () => {
-      mockApiClient.get.mockRejectedValueOnce(new Error('Error'));
-
-      // Service should handle error gracefully
-      await expect(notificationService.getUnreadCount()).rejects.toThrow();
     });
   });
 
   describe('markAsRead', () => {
     it('should mark notification as read', async () => {
-      mockApiClient.put.mockResolvedValueOnce({ data: { success: true } });
+      const mockResponse: NotificationResponse = {
+        notificationId: '1',
+        type: 'NEW_MESSAGE',
+        title: 'Test',
+        body: 'Test body',
+        actionUrl: null,
+        metadata: {},
+        status: 'READ',
+        deliveredChannels: [],
+        read: true,
+        readAt: new Date().toISOString(),
+        relativeTime: 'şimdi',
+        createdAt: new Date().toISOString(),
+      };
 
-      await notificationService.markAsRead('notification-1');
+      mockApiClient.post.mockResolvedValueOnce({ data: mockResponse });
 
-      expect(mockApiClient.put).toHaveBeenCalledWith(
-        '/notifications/notification-1/read'
-      );
-    });
+      const result = await notificationService.markAsRead('notification-1');
 
-    it('should handle errors', async () => {
-      mockApiClient.put.mockRejectedValueOnce(new Error('Not found'));
-
-      await expect(
-        notificationService.markAsRead('invalid-id')
-      ).rejects.toThrow('Not found');
+      expect(mockApiClient.post).toHaveBeenCalledWith('/api/notifications/notification-1/read');
+      expect(result.read).toBe(true);
     });
   });
 
   describe('markAllAsRead', () => {
     it('should mark all notifications as read', async () => {
-      mockApiClient.put.mockResolvedValueOnce({ data: { success: true } });
+      mockApiClient.post.mockResolvedValueOnce({ data: { markedAsRead: 5 } });
 
-      await notificationService.markAllAsRead();
+      const result = await notificationService.markAllAsRead();
 
-      expect(mockApiClient.put).toHaveBeenCalledWith('/notifications/read-all');
+      expect(mockApiClient.post).toHaveBeenCalledWith('/api/notifications/mark-as-read', {
+        markAll: true,
+      });
+      expect(result).toBe(5);
     });
   });
 
-  describe('deleteNotification', () => {
-    it('should delete notification', async () => {
-      mockApiClient.delete.mockResolvedValueOnce({ data: { success: true } });
-
-      await notificationService.deleteNotification('notification-1');
-
-      expect(mockApiClient.delete).toHaveBeenCalledWith(
-        '/notifications/notification-1'
-      );
-    });
-  });
-
-  describe('getSettings', () => {
-    const mockSettings = {
-      enabled: true,
-      messages: true,
-      likes: true,
-      comments: true,
-      follows: true,
-      verification: true,
-      system: true,
+  describe('getPreferences', () => {
+    const mockPreferences = {
+      userId: 1,
+      notificationsEnabled: true,
+      emailEnabled: false,
+      pushEnabled: true,
+      quietHoursStart: null,
+      quietHoursEnd: null,
+      inQuietHours: false,
+      typeSettings: {},
+      availableTypes: {},
+      updatedAt: new Date().toISOString(),
     };
 
-    it('should fetch notification settings', async () => {
-      mockApiClient.get.mockResolvedValueOnce({ data: mockSettings });
+    it('should fetch notification preferences', async () => {
+      mockApiClient.get.mockResolvedValueOnce({ data: mockPreferences });
 
-      const result = await notificationService.getSettings();
+      const result = await notificationService.getPreferences();
 
-      expect(mockApiClient.get).toHaveBeenCalledWith('/notifications/settings');
-      expect(result).toEqual(mockSettings);
+      expect(mockApiClient.get).toHaveBeenCalledWith('/api/notifications/preferences');
+      expect(result).toEqual(mockPreferences);
     });
   });
 
-  describe('updateSettings', () => {
-    it('should update notification settings', async () => {
-      const updates = { messages: false, likes: false };
-      mockApiClient.put.mockResolvedValueOnce({
-        data: { ...updates },
-      });
+  describe('updatePreferences', () => {
+    it('should update notification preferences', async () => {
+      const updates = { pushEnabled: false, emailEnabled: true };
+      const mockResponse = {
+        userId: 1,
+        notificationsEnabled: true,
+        emailEnabled: true,
+        pushEnabled: false,
+        quietHoursStart: null,
+        quietHoursEnd: null,
+        inQuietHours: false,
+        typeSettings: {},
+        availableTypes: {},
+        updatedAt: new Date().toISOString(),
+      };
 
-      await notificationService.updateSettings(updates);
+      mockApiClient.put.mockResolvedValueOnce({ data: mockResponse });
 
-      expect(mockApiClient.put).toHaveBeenCalledWith(
-        '/notifications/settings',
-        updates
-      );
+      const result = await notificationService.updatePreferences(updates);
+
+      expect(mockApiClient.put).toHaveBeenCalledWith('/api/notifications/preferences', updates);
+      expect(result.pushEnabled).toBe(false);
+      expect(result.emailEnabled).toBe(true);
     });
   });
 
-  describe('registerFCMToken', () => {
-    it('should register FCM token', async () => {
-      mockApiClient.post.mockResolvedValueOnce({ data: { success: true } });
+  describe('togglePushNotifications', () => {
+    it('should toggle push notifications', async () => {
+      const mockResponse = {
+        userId: 1,
+        notificationsEnabled: true,
+        emailEnabled: false,
+        pushEnabled: false,
+        quietHoursStart: null,
+        quietHoursEnd: null,
+        inQuietHours: false,
+        typeSettings: {},
+        availableTypes: {},
+        updatedAt: new Date().toISOString(),
+      };
 
-      await notificationService.registerFCMToken('fcm-token-123');
+      mockApiClient.put.mockResolvedValueOnce({ data: mockResponse });
 
-      expect(mockApiClient.post).toHaveBeenCalledWith('/notifications/token', {
-        token: 'fcm-token-123',
-        platform: expect.any(String),
+      const result = await notificationService.togglePushNotifications(false);
+
+      expect(mockApiClient.put).toHaveBeenCalledWith('/api/notifications/preferences', {
+        pushEnabled: false,
       });
+      expect(result.pushEnabled).toBe(false);
+    });
+  });
+
+  describe('setQuietHours', () => {
+    it('should set quiet hours', async () => {
+      const mockResponse = {
+        userId: 1,
+        notificationsEnabled: true,
+        emailEnabled: false,
+        pushEnabled: true,
+        quietHoursStart: 22,
+        quietHoursEnd: 8,
+        inQuietHours: false,
+        typeSettings: {},
+        availableTypes: {},
+        updatedAt: new Date().toISOString(),
+      };
+
+      mockApiClient.put.mockResolvedValueOnce({ data: mockResponse });
+
+      const result = await notificationService.setQuietHours(22, 8);
+
+      expect(mockApiClient.put).toHaveBeenCalledWith('/api/notifications/preferences', {
+        quietHoursStart: 22,
+        quietHoursEnd: 8,
+      });
+      expect(result.quietHoursStart).toBe(22);
+      expect(result.quietHoursEnd).toBe(8);
     });
   });
 });

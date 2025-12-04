@@ -30,6 +30,7 @@ interface InputProps extends Omit<TextInputProps, 'style'> {
   inputStyle?: TextStyle;
   required?: boolean;
   disabled?: boolean;
+  testID?: string;
 }
 
 /**
@@ -49,6 +50,7 @@ export const Input = forwardRef<TextInput, InputProps>(
       required = false,
       disabled = false,
       secureTextEntry,
+      testID,
       ...props
     },
     ref,
@@ -156,6 +158,7 @@ export const Input = forwardRef<TextInput, InputProps>(
 
           <TextInput
             ref={ref}
+            testID={testID}
             style={inputStyles}
             placeholderTextColor={theme.colors.text.tertiary}
             editable={!disabled}

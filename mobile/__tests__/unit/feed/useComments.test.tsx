@@ -4,19 +4,18 @@
 
 import { renderHook, act, waitFor } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useComments, useCommentsData, useAddComment, useDeleteComment } from '../../../src/features/feed/hooks';
+import {
+  useComments,
+  useCommentsData,
+  useAddComment,
+  useDeleteComment,
+} from '../../../src/features/feed/hooks';
 import { feedService } from '../../../src/features/feed/services';
 import type { CommentListResponse, Comment } from '../../../src/features/feed/types';
 import React from 'react';
 
-// Mock feedService
-jest.mock('../../../src/features/feed/services', () => ({
-  feedService: {
-    getComments: jest.fn(),
-    addComment: jest.fn(),
-    deleteComment: jest.fn(),
-  },
-}));
+// Mock feedService - use jest.mock with auto-mocking
+jest.mock('../../../src/features/feed/services');
 
 const mockFeedService = feedService as jest.Mocked<typeof feedService>;
 

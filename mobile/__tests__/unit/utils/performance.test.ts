@@ -2,7 +2,7 @@
 // Unit tests for performance utilities
 // Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-native';
 import {
   createMemoComparator,
   useDebouncedCallback,
@@ -169,12 +169,7 @@ describe('Performance Utilities', () => {
       const array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
       const chunks = chunkArray(array, 3);
 
-      expect(chunks).toEqual([
-        [1, 2, 3],
-        [4, 5, 6],
-        [7, 8, 9],
-        [10],
-      ]);
+      expect(chunks).toEqual([[1, 2, 3], [4, 5, 6], [7, 8, 9], [10]]);
     });
 
     it('should handle empty array', () => {
