@@ -1,0 +1,175 @@
+# ========================================
+# DEPENDENCIES
+# ========================================
+node_modules/
+**/node_modules/
+mobile/node_modules/
+.pnp/
+.pnp.js
+
+# ========================================
+# BUILD & COMPILED OUTPUT
+# ========================================
+# React Native / Expo
+.expo/
+dist/
+web-build/
+*.jsbundle
+
+# Maven / Java
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+
+# TypeScript
+*.tsbuildinfo
+
+# ========================================
+# IDE & EDITORS
+# ========================================
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.classpath
+.project
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# ========================================
+# OS GENERATED FILES
+# ========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ========================================
+# ENVIRONMENT & SECRETS
+# ========================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.key
+*.crt
+secrets/
+
+# ========================================
+# LOGS
+# ========================================
+logs/
+*.log
+log/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# ========================================
+# TESTING & COVERAGE
+# ========================================
+coverage/
+.nyc_output/
+*.lcov
+test-results/
+junit.xml
+
+# ========================================
+# MOBILE SPECIFIC (React Native / Expo)
+# ========================================
+# Android
+mobile/android/app/build/
+mobile/android/.gradle/
+mobile/android/build/
+mobile/android/local.properties
+mobile/android/*.keystore
+!mobile/android/app/debug.keystore
+mobile/android/app/.cxx/
+*.apk
+*.aab
+
+# iOS
+mobile/ios/Pods/
+mobile/ios/build/
+mobile/ios/*.xcworkspace
+!mobile/ios/*.xcodeproj/
+mobile/ios/DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Expo
+.expo-shared/
+*.hbc
+
+# Metro Bundler
+.metro-health-check*
+
+# ========================================
+# PACKAGE MANAGERS
+# ========================================
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnpm-store/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ========================================
+# MISC
+# ========================================
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Application data
+uploads/
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker
+.docker/
+
+# AWS / Cloud
+.serverless/
+.aws-sam/
+
+# Sentry
+.sentryclirc
+
+# FastLane
+mobile/fastlane/report.xml
+mobile/fastlane/Preview.html
+mobile/fastlane/screenshots/
+mobile/fastlane/test_output/
+
+# Watchman
+.watchmanconfig
+
+# Buck
+.buckd/
+buck-out/
+
