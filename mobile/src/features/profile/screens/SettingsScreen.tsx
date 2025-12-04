@@ -1,24 +1,278 @@
 // src/features/profile/screens/SettingsScreen.tsx
-// Placeholder - will be implemented later
+// Settings screen with organized sections
+// Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
 
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useMemo, useCallback, useState } from 'react';
+import { StyleSheet, ScrollView, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@contexts/ThemeContext';
+import { spacing } from '@theme';
+import { SettingsSection } from '../components';
+import { useDeleteAccount, useChangePassword } from '../hooks';
+import type { SettingsSectionType } from '../types';
 
+/**
+ * SettingsScreen
+ *
+ * Organized settings in sections:
+ * - Account (profile, password, biometric)
+ * - Notifications
+ * - Privacy & Security
+ * - Support
+ * - Danger Zone (delete account)
+ */
 export const SettingsScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const { theme, toggleTheme, isDarkMode } = useTheme();
+  const navigation = useNavigation();
+
+  // Mutations
+  const deleteAccount = useDeleteAccount();
+
+  // Loading states
+  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
+
+  // Handlers
+  const handleEditProfile = useCallback(() => {
+    navigation.navigate('EditProfile' as never);
+  }, [navigation]);
+
+  const handleChangePassword = useCallback(() => {
+    // Navigate to change password screen or show modal
+    Alert.prompt(
+      'Şifre Değiştir',
+      'Yeni şifrenizi girin',
+      [
+        { text: 'İptal', style: 'cancel' },
+        {
+          text: 'Değiştir',
+          onPress: (password) => {
+            // TODO: Implement password change flow
+            console.log('Password change requested');
+          },
+        },
+      ],
+      'secure-text',
+    );
+  }, []);
+
+  const handleBiometric = useCallback(() => {
+    navigation.navigate('BiometricSettings' as never);
+  }, [navigation]);
+
+  const handleNotificationSettings = useCallback(() => {
+    navigation.navigate('NotificationSettings' as never);
+  }, [navigation]);
+
+  const handlePrivacySettings = useCallback(() => {
+    navigation.navigate('PrivacySettings' as never);
+  }, [navigation]);
+
+  const handleBlockedUsers = useCallback(() => {
+    navigation.navigate('BlockedUsers' as never);
+  }, [navigation]);
+
+  const handleHelp = useCallback(() => {
+    // Open help center or FAQ
+    Alert.alert('Yardım', 'Yardım merkezi yakında eklenecek.');
+  }, []);
+
+  const handleContact = useCallback(() => {
+    // Open contact support
+    Alert.alert('İletişim', 'destek@meslektas.app');
+  }, []);
+
+  const handleDeleteAccount = useCallback(() => {
+    Alert.alert(
+      'Hesabı Sil',
+      'Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+      [
+        { text: 'İptal', style: 'cancel' },
+        {
+          text: 'Hesabı Sil',
+          style: 'destructive',
+          onPress: () => {
+            Alert.prompt(
+              'Şifrenizi Girin',
+              'Hesabınızı silmek için şifrenizi girin',
+              [
+                { text: 'İptal', style: 'cancel' },
+                {
+                  text: 'Sil',
+                  style: 'destructive',
+                  onPress: async (password) => {
+                    if (!password) return;
+                    setLoadingStates(prev => ({ ...prev, deleteAccount: true }));
+                    try {
+                      await deleteAccount.mutateAsync({ password });
+                    } catch (error) {
+                      Alert.alert('Hata', 'Hesap silinirken bir hata oluştu.');
+                    } finally {
+                      setLoadingStates(prev => ({ ...prev, deleteAccount: false }));
+                    }
+                  },
+                },
+              ],
+              'secure-text',
+            );
+          },
+        },
+      ],
+    );
+  }, [deleteAccount]);
+
+  // Settings sections
+  const sections: SettingsSectionType[] = useMemo(
+    () => [
+      {
+        title: 'Hesap',
+        items: [
+          {
+            id: 'editProfile',
+            title: 'Profili Düzenle',
+            subtitle: 'Ad, soyad, bio ve fotoğraf',
+            icon: 'person-outline',
+            type: 'navigation',
+            onPress: handleEditProfile,
+          },
+          {
+            id: 'changePassword',
+            title: 'Şifre Değiştir',
+            icon: 'lock-closed-outline',
+            type: 'navigation',
+            onPress: handleChangePassword,
+          },
+          {
+            id: 'biometric',
+            title: 'Biyometrik Giriş',
+            subtitle: 'Face ID / Touch ID',
+            icon: 'finger-print-outline',
+            type: 'navigation',
+            onPress: handleBiometric,
+          },
+        ],
+      },
+      {
+        title: 'Bildirimler',
+        items: [
+          {
+            id: 'notifications',
+            title: 'Bildirim Ayarları',
+            subtitle: 'Push bildirimleri ve e-posta',
+            icon: 'notifications-outline',
+            type: 'navigation',
+            onPress: handleNotificationSettings,
+          },
+        ],
+      },
+      {
+        title: 'Gizlilik ve Güvenlik',
+        items: [
+          {
+            id: 'privacy',
+            title: 'Gizlilik Ayarları',
+            subtitle: 'Profil görünürlüğü',
+            icon: 'shield-outline',
+            type: 'navigation',
+            onPress: handlePrivacySettings,
+          },
+          {
+            id: 'blockedUsers',
+            title: 'Engellenen Kullanıcılar',
+            icon: 'ban-outline',
+            type: 'navigation',
+            onPress: handleBlockedUsers,
+          },
+        ],
+      },
+      {
+        title: 'Görünüm',
+        items: [
+          {
+            id: 'darkMode',
+            title: 'Karanlık Mod',
+            icon: 'moon-outline',
+            type: 'toggle',
+            value: isDarkMode,
+            onToggle: toggleTheme,
+          },
+        ],
+      },
+      {
+        title: 'Destek',
+        items: [
+          {
+            id: 'help',
+            title: 'Yardım Merkezi',
+            icon: 'help-circle-outline',
+            type: 'navigation',
+            onPress: handleHelp,
+          },
+          {
+            id: 'contact',
+            title: 'Bize Ulaşın',
+            icon: 'mail-outline',
+            type: 'navigation',
+            onPress: handleContact,
+          },
+        ],
+      },
+      {
+        title: 'Tehlikeli Bölge',
+        items: [
+          {
+            id: 'deleteAccount',
+            title: 'Hesabı Sil',
+            subtitle: 'Bu işlem geri alınamaz',
+            icon: 'trash-outline',
+            type: 'danger',
+            onPress: handleDeleteAccount,
+          },
+        ],
+      },
+    ],
+    [
+      isDarkMode,
+      toggleTheme,
+      handleEditProfile,
+      handleChangePassword,
+      handleBiometric,
+      handleNotificationSettings,
+      handlePrivacySettings,
+      handleBlockedUsers,
+      handleHelp,
+      handleContact,
+      handleDeleteAccount,
+    ],
+  );
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background.primary }]}>
-      <Text style={{ color: theme.colors.text.primary }}>Settings Screen</Text>
-    </View>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background.secondary }]}
+      edges={['bottom']}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {sections.map(section => (
+          <SettingsSection
+            key={section.title}
+            title={section.title}
+            items={section.items}
+            loadingStates={loadingStates}
+          />
+        ))}
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  },
+  scrollContent: {
+    paddingVertical: spacing.lg,
   },
 });

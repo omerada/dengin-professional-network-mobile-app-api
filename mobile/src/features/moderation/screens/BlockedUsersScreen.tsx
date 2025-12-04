@@ -1,0 +1,150 @@
+// src/features/moderation/screens/BlockedUsersScreen.tsx
+// Blocked users list screen
+// Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART5.md
+
+import React, { useCallback } from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from '@contexts/ThemeContext';
+import { Avatar, EmptyState, Loading, Button } from '@shared/components';
+import { spacing, typography } from '@theme';
+import { useBlockedUsers } from '../hooks';
+import { useUnblock } from '@features/social';
+import type { BlockedUser } from '../types';
+
+/**
+ * BlockedUsersScreen
+ *
+ * Displays list of blocked users with option to unblock.
+ */
+export const BlockedUsersScreen: React.FC = () => {
+  const { theme } = useTheme();
+  const { data: blockedUsers, isLoading, refetch } = useBlockedUsers();
+  const unblock = useUnblock();
+
+  const handleUnblock = useCallback(
+    async (user: BlockedUser) => {
+      Alert.alert(
+        'Engeli Kaldır',
+        `${user.fullName} engelini kaldırmak istediğinize emin misiniz?`,
+        [
+          { text: 'İptal', style: 'cancel' },
+          {
+            text: 'Engeli Kaldır',
+            onPress: async () => {
+              try {
+                await unblock.mutateAsync(user.id);
+                refetch();
+              } catch (error) {
+                Alert.alert('Hata', 'Engel kaldırılırken bir hata oluştu');
+              }
+            },
+          },
+        ],
+      );
+    },
+    [unblock, refetch],
+  );
+
+  const renderItem = useCallback(
+    ({ item }: { item: BlockedUser }) => (
+      <View
+        style={[styles.item, { backgroundColor: theme.colors.background.primary }]}
+      >
+        <Avatar uri={item.avatarUrl} name={item.fullName} size="lg" />
+        <View style={styles.info}>
+          <Text style={[styles.name, { color: theme.colors.text.primary }]}>
+            {item.fullName}
+          </Text>
+          <Text style={[styles.date, { color: theme.colors.text.tertiary }]}>
+            {new Date(item.blockedAt).toLocaleDateString('tr-TR')}
+          </Text>
+        </View>
+        <Button
+          title="Engeli Kaldır"
+          variant="outline"
+          size="sm"
+          onPress={() => handleUnblock(item)}
+          loading={unblock.isPending}
+        />
+      </View>
+    ),
+    [theme, handleUnblock, unblock.isPending],
+  );
+
+  const keyExtractor = useCallback((item: BlockedUser) => item.id.toString(), []);
+
+  const ItemSeparatorComponent = useCallback(
+    () => (
+      <View
+        style={[styles.separator, { backgroundColor: theme.colors.border.light }]}
+      />
+    ),
+    [theme],
+  );
+
+  if (isLoading) {
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
+      >
+        <Loading message="Yükleniyor..." />
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
+      edges={['bottom']}
+    >
+      <FlatList
+        data={blockedUsers || []}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        ItemSeparatorComponent={ItemSeparatorComponent}
+        ListEmptyComponent={
+          <EmptyState
+            icon="person-remove-outline"
+            title="Engellenen kullanıcı yok"
+            message="Engellediğiniz kullanıcılar burada görünecektir"
+          />
+        }
+        contentContainerStyle={
+          (!blockedUsers || blockedUsers.length === 0) && styles.emptyContent
+        }
+      />
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  item: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.md,
+  },
+  info: {
+    flex: 1,
+    marginLeft: spacing.md,
+    marginRight: spacing.sm,
+  },
+  name: {
+    fontSize: typography.fontSize.md,
+    fontWeight: '600',
+  },
+  date: {
+    fontSize: typography.fontSize.xs,
+    marginTop: 2,
+  },
+  separator: {
+    height: 1,
+    marginLeft: 76,
+  },
+  emptyContent: {
+    flex: 1,
+  },
+});
