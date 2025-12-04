@@ -1,5 +1,6 @@
 // src/features/notifications/components/NotificationList.tsx
 // Notification list with infinite scroll and pull-to-refresh
+// Backend: GET /api/notifications (page-based pagination)
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 import React, { memo, useCallback } from 'react';
@@ -13,42 +14,44 @@ import {
 import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
 import { NotificationItem } from './NotificationItem';
 import { EmptyNotifications } from './EmptyNotifications';
-import { useNotifications, useNotificationActions } from '../hooks';
+import { useNotifications, useMarkAsRead, useDeleteNotification } from '../hooks';
 import { useTheme } from '@contexts/ThemeContext';
-import type { NotificationData } from '../types';
+import type { NotificationResponse } from '../types';
 
-const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<NotificationData>);
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<NotificationResponse>);
 
 const ITEM_HEIGHT = 80;
 const PAGE_SIZE = 20;
 
 interface NotificationListProps {
-  onNotificationPress?: (notification: NotificationData) => void;
+  onNotificationPress?: (notification: NotificationResponse) => void;
+  unreadOnly?: boolean;
 }
 
 export const NotificationList: React.FC<NotificationListProps> = memo(
-  ({ onNotificationPress }) => {
+  ({ onNotificationPress, unreadOnly = false }) => {
     const { theme } = useTheme();
+    
+    // Backend page-based pagination hook
     const {
-      data,
+      notifications,
       isLoading,
       isFetchingNextPage,
       hasNextPage,
       fetchNextPage,
       refetch,
-      isRefetching,
-    } = useNotifications();
-    const { markAsRead, deleteNotification } = useNotificationActions();
-
-    // Flatten pages into single array
-    const notifications = data?.pages.flatMap((page) => page.items) ?? [];
+      isRefreshing,
+    } = useNotifications({ pageSize: PAGE_SIZE, unreadOnly });
+    
+    const { markAsRead } = useMarkAsRead();
+    const { deleteNotification } = useDeleteNotification();
 
     // Handle notification press
     const handleNotificationPress = useCallback(
-      (notification: NotificationData) => {
+      (notification: NotificationResponse) => {
         // Mark as read if unread
-        if (!notification.isRead) {
-          markAsRead(notification.id);
+        if (!notification.read) {
+          markAsRead(notification.notificationId);
         }
 
         // Call external handler for navigation
@@ -57,15 +60,15 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
       [markAsRead, onNotificationPress]
     );
 
-    // Handle notification delete
+    // Handle notification delete (swipe action)
     const handleDelete = useCallback(
-      (id: string) => {
-        deleteNotification(id);
+      (notificationId: string) => {
+        deleteNotification(notificationId);
       },
       [deleteNotification]
     );
 
-    // Handle load more
+    // Handle load more (next page)
     const handleEndReached = useCallback(() => {
       if (hasNextPage && !isFetchingNextPage) {
         fetchNextPage();
@@ -82,12 +85,15 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
       []
     );
 
-    // Extract key
-    const keyExtractor = useCallback((item: NotificationData) => item.id, []);
+    // Extract key - backend notificationId
+    const keyExtractor = useCallback(
+      (item: NotificationResponse) => item.notificationId,
+      []
+    );
 
     // Render item
     const renderItem = useCallback(
-      ({ item }: { item: NotificationData }) => (
+      ({ item }: { item: NotificationResponse }) => (
         <Animated.View
           entering={FadeIn.duration(200)}
           exiting={FadeOut.duration(150)}
@@ -96,14 +102,14 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
           <NotificationItem
             notification={item}
             onPress={handleNotificationPress}
-            onDelete={handleDelete}
+            onLongPress={() => handleDelete(item.notificationId)}
           />
         </Animated.View>
       ),
       [handleNotificationPress, handleDelete]
     );
 
-    // Render footer (loading indicator)
+    // Render footer (loading indicator for next page)
     const renderFooter = useCallback(() => {
       if (!isFetchingNextPage) return null;
 
@@ -140,7 +146,7 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
         }
         refreshControl={
           <RefreshControl
-            refreshing={isRefetching}
+            refreshing={isRefreshing}
             onRefresh={refetch}
             colors={[theme.colors.primary[500]]}
             tintColor={theme.colors.primary[500]}

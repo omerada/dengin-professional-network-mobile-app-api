@@ -1,17 +1,20 @@
 // src/features/notifications/hooks/useNotificationActions.ts
-// Notification action hooks
+// Notification action hooks - Backend NotificationController ile uyumlu
+// Backend: POST /api/notifications/{id}/read, POST /api/notifications/mark-as-read
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 import { useCallback } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { notificationService, notifeeService } from '../services';
 import { useNotificationStore } from '../stores';
+import type { MarkAsReadRequest, NotificationResponse } from '../types';
 
 const NOTIFICATIONS_QUERY_KEY = ['notifications'];
 const UNREAD_COUNT_QUERY_KEY = ['notifications', 'unread-count'];
 
 /**
  * Bildirimi okundu olarak işaretle
+ * @see NotificationController.markAsRead()
  */
 export function useMarkAsRead() {
   const queryClient = useQueryClient();
@@ -22,7 +25,7 @@ export function useMarkAsRead() {
     mutationFn: (notificationId: string) =>
       notificationService.markAsRead(notificationId),
     onMutate: async (notificationId) => {
-      // Optimistic update
+      // Optimistic update in store
       storeMarkAsRead(notificationId);
       decrementUnreadCount();
 
@@ -31,7 +34,12 @@ export function useMarkAsRead() {
       await notifeeService.setBadgeCount(Math.max(0, currentBadge - 1));
     },
     onSuccess: () => {
+      // Invalidate to sync with server
       queryClient.invalidateQueries({ queryKey: UNREAD_COUNT_QUERY_KEY });
+    },
+    onError: (_error, notificationId) => {
+      // Revert on error - re-fetch to sync
+      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
     },
   });
 
@@ -42,11 +50,52 @@ export function useMarkAsRead() {
   return {
     markAsRead,
     isPending: mutation.isPending,
+    error: mutation.error,
+  };
+}
+
+/**
+ * Birden fazla bildirimi okundu olarak işaretle
+ * @see NotificationController.markMultipleAsRead()
+ */
+export function useMarkMultipleAsRead() {
+  const queryClient = useQueryClient();
+  const storeMarkMultipleAsRead = useNotificationStore((state) => state.markMultipleAsRead);
+
+  const mutation = useMutation({
+    mutationFn: (request: MarkAsReadRequest) =>
+      notificationService.markMultipleAsRead(request),
+    onMutate: async (request) => {
+      if (request.notificationIds) {
+        storeMarkMultipleAsRead(request.notificationIds);
+        
+        // Update badge
+        const currentBadge = await notifeeService.getBadgeCount();
+        await notifeeService.setBadgeCount(
+          Math.max(0, currentBadge - request.notificationIds.length)
+        );
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: UNREAD_COUNT_QUERY_KEY });
+    },
+  });
+
+  const markMultipleAsRead = useCallback((notificationIds: string[]) => {
+    mutation.mutate({ markAll: false, notificationIds });
+  }, [mutation]);
+
+  return {
+    markMultipleAsRead,
+    isPending: mutation.isPending,
+    error: mutation.error,
   };
 }
 
 /**
  * Tüm bildirimleri okundu olarak işaretle
+ * @see NotificationController.markMultipleAsRead() with markAll=true
  */
 export function useMarkAllAsRead() {
   const queryClient = useQueryClient();
@@ -67,6 +116,11 @@ export function useMarkAllAsRead() {
       queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: UNREAD_COUNT_QUERY_KEY });
     },
+    onError: () => {
+      // Revert on error - re-fetch to sync
+      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: UNREAD_COUNT_QUERY_KEY });
+    },
   });
 
   const markAllAsRead = useCallback(() => {
@@ -76,71 +130,76 @@ export function useMarkAllAsRead() {
   return {
     markAllAsRead,
     isPending: mutation.isPending,
+    error: mutation.error,
   };
 }
 
 /**
- * Bildirimi sil
+ * Bildirimi sil (local only - backend silme API'si yoksa)
  */
 export function useDeleteNotification() {
   const queryClient = useQueryClient();
   const removeNotification = useNotificationStore((state) => state.removeNotification);
 
-  const mutation = useMutation({
-    mutationFn: (notificationId: string) =>
-      notificationService.deleteNotification(notificationId),
-    onMutate: async (notificationId) => {
-      // Optimistic update
-      removeNotification(notificationId);
+  const deleteNotification = useCallback(async (notificationId: string) => {
+    // Local store'dan kaldır
+    removeNotification(notificationId);
 
-      // Cancel notification if displayed
-      await notifeeService.cancelNotification(notificationId);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: UNREAD_COUNT_QUERY_KEY });
-    },
-  });
+    // Displayed notification'ı iptal et
+    await notifeeService.cancelNotification(notificationId);
 
-  const deleteNotification = useCallback((notificationId: string) => {
-    mutation.mutate(notificationId);
-  }, [mutation]);
+    // Cache'i güncelle
+    queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
+    queryClient.invalidateQueries({ queryKey: UNREAD_COUNT_QUERY_KEY });
+  }, [removeNotification, queryClient]);
 
   return {
     deleteNotification,
-    isPending: mutation.isPending,
   };
 }
 
 /**
- * Tüm bildirimleri temizle
+ * Tüm bildirimleri temizle (local only)
  */
 export function useClearAllNotifications() {
   const queryClient = useQueryClient();
   const clearAll = useNotificationStore((state) => state.clearAllNotifications);
 
-  const mutation = useMutation({
-    mutationFn: () => notificationService.clearAllNotifications(),
-    onMutate: async () => {
-      // Optimistic update
-      clearAll();
+  const clearAllNotifications = useCallback(async () => {
+    // Local store'u temizle
+    clearAll();
 
-      // Clear all displayed notifications
-      await notifeeService.cancelAllNotifications();
-      await notifeeService.setBadgeCount(0);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: UNREAD_COUNT_QUERY_KEY });
-    },
-  });
+    // Tüm displayed notifications'ları iptal et
+    await notifeeService.cancelAllNotifications();
+    await notifeeService.setBadgeCount(0);
 
-  const clearAllNotifications = useCallback(() => {
-    mutation.mutate();
-  }, [mutation]);
+    // Cache'i güncelle
+    queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
+    queryClient.invalidateQueries({ queryKey: UNREAD_COUNT_QUERY_KEY });
+  }, [clearAll, queryClient]);
 
   return {
     clearAllNotifications,
-    isPending: mutation.isPending,
+  };
+}
+
+/**
+ * Bildirim tıklama işleyicisi
+ */
+export function useNotificationHandler() {
+  const { markAsRead } = useMarkAsRead();
+
+  const handleNotificationPress = useCallback((notification: NotificationResponse) => {
+    // Okunmamışsa okundu olarak işaretle
+    if (!notification.read) {
+      markAsRead(notification.notificationId);
+    }
+
+    // actionUrl varsa navigate et (navigation hook'u ile birlikte kullanılmalı)
+    return notification.actionUrl;
+  }, [markAsRead]);
+
+  return {
+    handleNotificationPress,
   };
 }

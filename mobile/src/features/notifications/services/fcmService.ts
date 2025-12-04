@@ -1,18 +1,28 @@
 // src/features/notifications/services/fcmService.ts
-// Firebase Cloud Messaging service
+// Firebase Cloud Messaging service - Backend DeviceTokenController ile uyumlu
+// Backend: com.meslektas.notification.api.DeviceTokenController
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { Platform } from 'react-native';
 import { apiClient } from '@services/apiClient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import type { 
+  RegisterDeviceRequest, 
+  UnregisterDeviceRequest,
+  DeviceTokenResponse,
+  DevicePlatform 
+} from '../types';
 
 const FCM_TOKEN_KEY = '@meslektas/fcm_token';
+const DEVICE_ID_KEY = '@meslektas/device_id';
 
 /**
- * FCM Servis sınıfı
+ * FCM Servis sınıfı - Backend DeviceTokenController ile uyumlu
+ * @see DeviceTokenController.java
  */
 class FCMService {
+  private readonly DEVICE_API_PATH = '/api/v1/devices';
   private token: string | null = null;
 
   /**
@@ -88,16 +98,66 @@ class FCMService {
   }
 
   /**
-   * Token'ı sunucuya gönder
+   * Platform bilgisini al
+   */
+  private getPlatform(): DevicePlatform {
+    return Platform.OS === 'ios' ? 'IOS' : 'ANDROID';
+  }
+
+  /**
+   * Cihaz adını al
+   */
+  private getDeviceName(): string {
+    return `${Platform.OS} ${Platform.Version}`;
+  }
+
+  /**
+   * Cihazı sunucuya kaydet
+   * POST /api/v1/devices/register
+   */
+  async registerDevice(token: string): Promise<DeviceTokenResponse> {
+    const request: RegisterDeviceRequest = {
+      token,
+      platform: this.getPlatform(),
+      deviceName: this.getDeviceName(),
+    };
+
+    const response = await apiClient.post<DeviceTokenResponse>(
+      `${this.DEVICE_API_PATH}/register`,
+      request
+    );
+
+    console.log('[FCM] Device registered successfully');
+    return response.data;
+  }
+
+  /**
+   * Cihaz kaydını sil
+   * POST /api/v1/devices/unregister
+   */
+  async unregisterDevice(token: string): Promise<void> {
+    const request: UnregisterDeviceRequest = { token };
+
+    await apiClient.post(`${this.DEVICE_API_PATH}/unregister`, request);
+    console.log('[FCM] Device unregistered successfully');
+  }
+
+  /**
+   * Tüm cihazların kaydını sil (güvenlik için)
+   * POST /api/v1/devices/unregister-all
+   */
+  async unregisterAllDevices(): Promise<void> {
+    await apiClient.post(`${this.DEVICE_API_PATH}/unregister-all`);
+    console.log('[FCM] All devices unregistered');
+  }
+
+  /**
+   * Token'ı sunucuya gönder (eski API uyumluluğu için)
+   * @deprecated registerDevice kullanın
    */
   async sendTokenToServer(token: string): Promise<void> {
     try {
-      await apiClient.post('/users/fcm-token', {
-        token,
-        platform: Platform.OS,
-        deviceId: await this.getDeviceId(),
-      });
-      console.log('[FCM] Token sent to server');
+      await this.registerDevice(token);
     } catch (error) {
       console.error('[FCM] Error sending token to server:', error);
       throw error;
@@ -111,13 +171,21 @@ class FCMService {
     try {
       const token = await this.getToken();
       if (token) {
-        await apiClient.delete('/users/fcm-token', {
-          data: { token },
-        });
-        console.log('[FCM] Token removed from server');
+        await this.unregisterDevice(token);
       }
     } catch (error) {
       console.error('[FCM] Error removing token from server:', error);
+    }
+  }
+
+  /**
+   * Tüm cihazları sunucudan kaldır (logout için)
+   */
+  async removeAllTokensFromServer(): Promise<void> {
+    try {
+      await this.unregisterAllDevices();
+    } catch (error) {
+      console.error('[FCM] Error removing all tokens from server:', error);
     }
   }
 

@@ -1,5 +1,6 @@
 // src/features/notifications/screens/NotificationSettingsScreen.tsx
 // Notification settings management screen
+// Backend: GET/PUT /api/notifications/preferences
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 import React, { useCallback, useMemo } from 'react';
@@ -21,12 +22,12 @@ import {
   useNotificationSettings,
   useNotificationPermission,
 } from '../hooks';
-import type { NotificationSettings } from '../types';
+import type { NotificationType } from '../types';
 
 interface SettingsSection {
   title: string;
   items: {
-    key: keyof NotificationSettings;
+    type: NotificationType;
     icon: string;
     title: string;
     description: string;
@@ -36,19 +37,32 @@ interface SettingsSection {
 export const NotificationSettingsScreen: React.FC = () => {
   const { theme } = useTheme();
   const navigation = useNavigation();
-  const { settings, isLoading, updateSettings, isUpdating } = useNotificationSettings();
-  const { permissionStatus, requestPermission } = useNotificationPermission();
+  const { 
+    preferences, 
+    isLoading, 
+    toggleNotifications,
+    togglePush,
+    toggleEmail,
+    toggleTypeEnabled,
+    setQuietHours,
+    isSaving,
+    isNotificationsEnabled,
+    isPushEnabled,
+    isEmailEnabled,
+    inQuietHours,
+  } = useNotificationSettings();
+  const { isPermissionGranted, promptForPermission } = useNotificationPermission();
 
-  const isNotificationsDisabled = permissionStatus !== 'granted';
+  const isSystemNotificationsDisabled = !isPermissionGranted;
 
-  // Settings sections
+  // Settings sections - Backend NotificationType enum ile uyumlu
   const sections: SettingsSection[] = useMemo(
     () => [
       {
         title: 'Mesajlar',
         items: [
           {
-            key: 'messages',
+            type: 'NEW_MESSAGE',
             icon: 'chatbubble',
             title: 'Yeni Mesajlar',
             description: 'Biri size mesaj gönderdiğinde bildirim alın',
@@ -59,19 +73,25 @@ export const NotificationSettingsScreen: React.FC = () => {
         title: 'Etkileşimler',
         items: [
           {
-            key: 'likes',
+            type: 'POST_LIKED',
             icon: 'heart',
             title: 'Beğeniler',
             description: 'Gönderileriniz beğenildiğinde bildirim alın',
           },
           {
-            key: 'comments',
+            type: 'POST_COMMENTED',
             icon: 'chatbubble-ellipses',
             title: 'Yorumlar',
             description: 'Gönderilerinize yorum yapıldığında bildirim alın',
           },
           {
-            key: 'follows',
+            type: 'MENTION',
+            icon: 'at',
+            title: 'Bahsetmeler',
+            description: 'Birisi sizi etiketlediğinde bildirim alın',
+          },
+          {
+            type: 'NEW_FOLLOWER',
             icon: 'person-add',
             title: 'Yeni Takipçiler',
             description: 'Biri sizi takip ettiğinde bildirim alın',
@@ -79,19 +99,30 @@ export const NotificationSettingsScreen: React.FC = () => {
         ],
       },
       {
+        title: 'Doğrulama',
+        items: [
+          {
+            type: 'VERIFICATION_APPROVED',
+            icon: 'shield-checkmark',
+            title: 'Doğrulama Onaylandı',
+            description: 'Hesabınız doğrulandığında bildirim alın',
+          },
+          {
+            type: 'VERIFICATION_REJECTED',
+            icon: 'shield-half',
+            title: 'Doğrulama Reddedildi',
+            description: 'Doğrulama başvurunuz reddedildiğinde bildirim alın',
+          },
+        ],
+      },
+      {
         title: 'Sistem',
         items: [
           {
-            key: 'verification',
-            icon: 'checkmark-circle',
-            title: 'Doğrulama Güncellemeleri',
-            description: 'Doğrulama durumunuz değiştiğinde bildirim alın',
-          },
-          {
-            key: 'system',
-            icon: 'information-circle',
-            title: 'Sistem Bildirimleri',
-            description: 'Önemli duyurular ve güncellemeler',
+            type: 'WELCOME',
+            icon: 'happy',
+            title: 'Hoşgeldiniz',
+            description: 'Hoşgeldiniz mesajları',
           },
         ],
       },
@@ -99,65 +130,46 @@ export const NotificationSettingsScreen: React.FC = () => {
     []
   );
 
-  // Handle toggle change
-  const handleToggle = useCallback(
-    (key: keyof NotificationSettings, value: boolean) => {
-      if (!settings) return;
+  // Get toggle value for a notification type
+  const getTypeEnabled = useCallback((type: NotificationType): boolean => {
+    return preferences.typeSettings?.[type]?.enabled ?? true;
+  }, [preferences.typeSettings]);
 
-      updateSettings({ [key]: value });
+  // Handle type toggle
+  const handleTypeToggle = useCallback(
+    (type: NotificationType, value: boolean) => {
+      toggleTypeEnabled(type, value);
     },
-    [settings, updateSettings]
+    [toggleTypeEnabled]
   );
 
   // Handle master toggle
   const handleMasterToggle = useCallback(
     (value: boolean) => {
-      if (!settings) return;
-
       if (!value) {
-        // Turning off all notifications
         Alert.alert(
           'Tüm Bildirimleri Kapat',
-          'Tüm bildirim kategorileri kapatılacak. Devam etmek istiyor musunuz?',
+          'Tüm bildirimler kapatılacak. Devam etmek istiyor musunuz?',
           [
             { text: 'İptal', style: 'cancel' },
             {
               text: 'Kapat',
               style: 'destructive',
-              onPress: () => {
-                updateSettings({
-                  enabled: false,
-                  messages: false,
-                  likes: false,
-                  comments: false,
-                  follows: false,
-                  verification: false,
-                  system: false,
-                });
-              },
+              onPress: () => toggleNotifications(false),
             },
           ]
         );
       } else {
-        // Turning on - restore default settings
-        updateSettings({
-          enabled: true,
-          messages: true,
-          likes: true,
-          comments: true,
-          follows: true,
-          verification: true,
-          system: true,
-        });
+        toggleNotifications(true);
       }
     },
-    [settings, updateSettings]
+    [toggleNotifications]
   );
 
   // Handle enable notifications (system permission)
   const handleEnableNotifications = useCallback(() => {
-    requestPermission();
-  }, [requestPermission]);
+    promptForPermission();
+  }, [promptForPermission]);
 
   if (isLoading) {
     return (
@@ -201,7 +213,7 @@ export const NotificationSettingsScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
       >
         {/* Permission Warning */}
-        {isNotificationsDisabled && (
+        {isSystemNotificationsDisabled && (
           <Pressable
             onPress={handleEnableNotifications}
             style={[
@@ -241,6 +253,26 @@ export const NotificationSettingsScreen: React.FC = () => {
           </Pressable>
         )}
 
+        {/* Quiet Hours Info */}
+        {inQuietHours && (
+          <View
+            style={[
+              styles.quietHoursInfo,
+              { backgroundColor: theme.colors.info[50] },
+            ]}
+          >
+            <Icon
+              name="moon"
+              size={20}
+              color={theme.colors.info[500]}
+              style={styles.warningIcon}
+            />
+            <Text style={[styles.quietHoursText, { color: theme.colors.info[700] }]}>
+              Sessiz saatler aktif ({preferences.quietHoursStart} - {preferences.quietHoursEnd})
+            </Text>
+          </View>
+        )}
+
         {/* Master Toggle */}
         <View
           style={[
@@ -252,13 +284,52 @@ export const NotificationSettingsScreen: React.FC = () => {
             icon="notifications"
             title="Bildirimleri Etkinleştir"
             description="Tüm bildirimleri açıp kapatın"
-            value={settings?.enabled ?? true}
+            value={isNotificationsEnabled}
             onValueChange={handleMasterToggle}
-            disabled={isNotificationsDisabled || isUpdating}
+            disabled={isSystemNotificationsDisabled || isSaving}
           />
         </View>
 
-        {/* Settings Sections */}
+        {/* Delivery Channel Toggles */}
+        <Text
+          style={[
+            styles.sectionTitle,
+            { color: theme.colors.text.secondary },
+          ]}
+        >
+          Bildirim Kanalları
+        </Text>
+        <View
+          style={[
+            styles.section,
+            { backgroundColor: theme.colors.surface },
+          ]}
+        >
+          <NotificationSettingsToggle
+            icon="phone-portrait"
+            title="Push Bildirimleri"
+            description="Mobil cihazınıza push bildirimleri gönderin"
+            value={isPushEnabled}
+            onValueChange={togglePush}
+            disabled={!isNotificationsEnabled || isSystemNotificationsDisabled || isSaving}
+          />
+          <View
+            style={[
+              styles.separator,
+              { backgroundColor: theme.colors.border },
+            ]}
+          />
+          <NotificationSettingsToggle
+            icon="mail"
+            title="E-posta Bildirimleri"
+            description="Önemli güncellemeleri e-posta ile alın"
+            value={isEmailEnabled}
+            onValueChange={toggleEmail}
+            disabled={!isNotificationsEnabled || isSaving}
+          />
+        </View>
+
+        {/* Settings Sections by Type */}
         {sections.map((section) => (
           <View key={section.title}>
             <Text
@@ -277,7 +348,7 @@ export const NotificationSettingsScreen: React.FC = () => {
               ]}
             >
               {section.items.map((item, index) => (
-                <React.Fragment key={item.key}>
+                <React.Fragment key={item.type}>
                   {index > 0 && (
                     <View
                       style={[
@@ -290,12 +361,12 @@ export const NotificationSettingsScreen: React.FC = () => {
                     icon={item.icon}
                     title={item.title}
                     description={item.description}
-                    value={settings?.[item.key] ?? true}
-                    onValueChange={(value) => handleToggle(item.key, value)}
+                    value={getTypeEnabled(item.type)}
+                    onValueChange={(value) => handleTypeToggle(item.type, value)}
                     disabled={
-                      isNotificationsDisabled ||
-                      !settings?.enabled ||
-                      isUpdating
+                      isSystemNotificationsDisabled ||
+                      !isNotificationsEnabled ||
+                      isSaving
                     }
                   />
                 </React.Fragment>
@@ -362,6 +433,18 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginTop: 16,
     borderRadius: 12,
+  },
+  quietHoursInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    marginHorizontal: 16,
+    marginTop: 16,
+    borderRadius: 8,
+  },
+  quietHoursText: {
+    fontSize: 14,
+    flex: 1,
   },
   warningIcon: {
     marginRight: 12,

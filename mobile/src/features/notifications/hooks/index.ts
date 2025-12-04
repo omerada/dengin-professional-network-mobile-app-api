@@ -6,9 +6,11 @@ export { useNotifications } from './useNotifications';
 export { useUnreadCount } from './useUnreadCount';
 export {
   useMarkAsRead,
+  useMarkMultipleAsRead,
   useMarkAllAsRead,
   useDeleteNotification,
   useClearAllNotifications,
+  useNotificationHandler,
 } from './useNotificationActions';
 export { useNotificationSettings } from './useNotificationSettings';
 export { useNotificationPermission } from './useNotificationPermission';

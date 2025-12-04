@@ -1,50 +1,249 @@
 // src/features/notifications/types/notification.types.ts
-// Notification type definitions
-// Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
+// Notification type definitions - Backend DTO'larına %100 uyumlu
+// Backend: com.meslektas.notification.application.dto.*
+// Backend: com.meslektas.notification.domain.model.*
+
+// =============================================================================
+// ENUMS - Backend ile uyumlu
+// =============================================================================
 
 /**
- * Bildirim türleri
+ * Bildirim türleri - Backend NotificationType enum ile uyumlu
+ * @see NotificationType.java
  */
 export type NotificationType =
-  | 'message'
-  | 'post_like'
-  | 'post_comment'
-  | 'comment_reply'
-  | 'follow'
-  | 'verification_update'
-  | 'system';
+  // Social
+  | 'NEW_FOLLOWER'
+  | 'POST_LIKED'
+  | 'POST_COMMENTED'
+  | 'MENTION'
+  // Messaging
+  | 'NEW_MESSAGE'
+  // Verification
+  | 'VERIFICATION_APPROVED'
+  | 'VERIFICATION_REJECTED'
+  | 'VERIFICATION_PENDING_REVIEW'
+  // Moderation
+  | 'POST_FLAGGED'
+  | 'CONTENT_REMOVED'
+  | 'WARNING_ISSUED'
+  // System
+  | 'WELCOME'
+  | 'PASSWORD_RESET'
+  | 'ACCOUNT_SUSPENDED'
+  | 'ACCOUNT_REACTIVATED';
 
 /**
- * Bildirim durumu
+ * Bildirim durumu - Backend NotificationStatus enum ile uyumlu
+ * @see NotificationStatus.java
  */
-export type NotificationStatus = 'unread' | 'read';
+export type NotificationStatus =
+  | 'PENDING'
+  | 'SENT'
+  | 'DELIVERED'
+  | 'READ'
+  | 'FAILED'
+  | 'EXPIRED';
 
 /**
- * Bildirim veri yapısı
+ * Teslimat kanalları - Backend DeliveryChannel enum ile uyumlu
+ * @see DeliveryChannel.java
  */
-export interface Notification {
-  id: string;
+export type DeliveryChannel = 'IN_APP' | 'EMAIL' | 'PUSH';
+
+/**
+ * Bildirim kategorileri
+ */
+export type NotificationCategory =
+  | 'SOCIAL'
+  | 'MESSAGING'
+  | 'VERIFICATION'
+  | 'MODERATION'
+  | 'SYSTEM';
+
+// =============================================================================
+// BACKEND DTOs - REST API Response Types
+// =============================================================================
+
+/**
+ * Bildirim yanıtı - Backend NotificationResponse ile uyumlu
+ * @see NotificationResponse.java
+ */
+export interface NotificationResponse {
+  /** Bildirim UUID */
+  notificationId: string;
+  /** Bildirim türü */
   type: NotificationType;
+  /** Bildirim başlığı */
   title: string;
+  /** Bildirim içeriği */
   body: string;
-  data?: NotificationData;
+  /** Tıklama URL'i (deep link) */
+  actionUrl: string | null;
+  /** Ek meta veriler */
+  metadata: Record<string, string>;
+  /** Bildirim durumu */
   status: NotificationStatus;
+  /** Teslimat yapılan kanallar */
+  deliveredChannels: DeliveryChannel[];
+  /** Okundu mu */
+  read: boolean;
+  /** Okunma zamanı - ISO 8601 */
+  readAt: string | null;
+  /** Göreceli zaman (ör: "2 saat önce") */
+  relativeTime: string;
+  /** Oluşturulma zamanı - ISO 8601 */
   createdAt: string;
-  readAt?: string;
+  /** İkon adı (backend'den hesaplanır, opsiyonel) */
+  icon?: string;
+  /** Renk (backend'den hesaplanır, opsiyonel) */
+  color?: string;
 }
 
 /**
- * Bildirim içindeki veri
+ * Bildirim listesi yanıtı - Backend NotificationListResponse ile uyumlu
+ * @see NotificationListResponse.java
  */
-export interface NotificationData {
-  type: NotificationType;
-  id?: string;
-  conversationId?: string;
-  postId?: string;
-  userId?: string;
-  imageUrl?: string;
-  [key: string]: string | undefined;
+export interface NotificationListResponse {
+  /** Bildirim listesi */
+  notifications: NotificationResponse[];
+  /** Toplam okunmamış sayısı */
+  unreadCount: number;
+  /** Türe göre okunmamış sayıları */
+  unreadByType: Record<string, number>;
+  /** Mevcut sayfa (0-indexed) */
+  currentPage: number;
+  /** Sayfa boyutu */
+  pageSize: number;
+  /** Toplam sayfa sayısı */
+  totalPages: number;
+  /** Toplam bildirim sayısı */
+  totalElements: number;
+  /** Daha fazla sayfa var mı */
+  hasMore: boolean;
+  /** İlk sayfa mı */
+  first: boolean;
+  /** Son sayfa mı */
+  last: boolean;
 }
+
+/**
+ * Bildirim tipi bilgisi - Backend NotificationTypeInfo ile uyumlu
+ */
+export interface NotificationTypeInfo {
+  /** Tip adı */
+  name: string;
+  /** Görünen ad */
+  displayName: string;
+  /** Açıklama */
+  description: string;
+  /** Kategori */
+  category: NotificationCategory;
+  /** Opsiyonel mi (kapatılabilir) */
+  optional: boolean;
+}
+
+/**
+ * Bildirim tercihleri yanıtı - Backend NotificationPreferencesResponse ile uyumlu
+ * @see NotificationPreferencesResponse.java
+ */
+export interface NotificationPreferencesResponse {
+  /** Kullanıcı ID */
+  userId: number;
+  /** Tüm bildirimler aktif mi */
+  notificationsEnabled: boolean;
+  /** E-posta bildirimleri aktif mi */
+  emailEnabled: boolean;
+  /** Push bildirimleri aktif mi */
+  pushEnabled: boolean;
+  /** Sessiz saatler başlangıcı (0-23), null ise ayarlanmamış */
+  quietHoursStart: number | null;
+  /** Sessiz saatler bitişi (0-23), null ise ayarlanmamış */
+  quietHoursEnd: number | null;
+  /** Şu an sessiz saatlerde mi */
+  inQuietHours: boolean;
+  /** Her bildirim türü için aktif kanallar */
+  typeSettings: Record<string, DeliveryChannel[]>;
+  /** Mevcut bildirim türleri ve açıklamaları */
+  availableTypes: Record<string, NotificationTypeInfo>;
+  /** Son güncelleme zamanı - ISO 8601 */
+  updatedAt: string;
+}
+
+/**
+ * Bildirim tercihleri güncelleme isteği
+ */
+export interface NotificationPreferencesRequest {
+  /** Tüm bildirimler aktif mi */
+  notificationsEnabled?: boolean;
+  /** E-posta bildirimleri aktif mi */
+  emailEnabled?: boolean;
+  /** Push bildirimleri aktif mi */
+  pushEnabled?: boolean;
+  /** Sessiz saatler başlangıcı (0-23) */
+  quietHoursStart?: number | null;
+  /** Sessiz saatler bitişi (0-23) */
+  quietHoursEnd?: number | null;
+  /** Her bildirim türü için aktif kanallar */
+  typeSettings?: Record<string, DeliveryChannel[]>;
+}
+
+/**
+ * Okundu işaretle isteği
+ */
+export interface MarkAsReadRequest {
+  /** Tümünü okundu işaretle */
+  markAll?: boolean;
+  /** İşaretlenecek bildirim ID'leri */
+  notificationIds?: string[];
+}
+
+// =============================================================================
+// DEVICE TOKEN DTOs - Backend DeviceTokenController ile uyumlu
+// =============================================================================
+
+/**
+ * Cihaz platformu
+ */
+export type DevicePlatform = 'IOS' | 'ANDROID';
+
+/**
+ * Cihaz kayıt isteği - Backend RegisterDeviceRequest ile uyumlu
+ */
+export interface RegisterDeviceRequest {
+  /** FCM token */
+  token: string;
+  /** Platform (IOS/ANDROID) */
+  platform: DevicePlatform;
+  /** Cihaz adı (opsiyonel) */
+  deviceName?: string;
+}
+
+/**
+ * Cihaz kayıt silme isteği
+ */
+export interface UnregisterDeviceRequest {
+  /** FCM token */
+  token: string;
+}
+
+/**
+ * Cihaz token yanıtı
+ */
+export interface DeviceTokenResponse {
+  /** Token ID */
+  id: number;
+  /** Platform */
+  platform: string;
+  /** Cihaz adı */
+  deviceName: string | null;
+  /** Aktif mi */
+  active: boolean;
+}
+
+// =============================================================================
+// FCM / REMOTE MESSAGE TYPES
+// =============================================================================
 
 /**
  * FCM uzak mesaj yapısı
@@ -62,38 +261,30 @@ export interface RemoteMessage {
 }
 
 /**
- * Bildirim ayarları
+ * Bildirim verisi (data payload)
  */
-export interface NotificationSettings {
-  messages: boolean;
-  postLikes: boolean;
-  postComments: boolean;
-  commentReplies: boolean;
-  follows: boolean;
-  verificationUpdates: boolean;
-  systemNotifications: boolean;
-  soundEnabled: boolean;
-  vibrationEnabled: boolean;
-  quietHoursEnabled: boolean;
-  quietHoursStart?: string; // HH:mm format
-  quietHoursEnd?: string;   // HH:mm format
+export interface NotificationPayload {
+  /** Bildirim türü */
+  type: NotificationType;
+  /** Bildirim ID */
+  notificationId?: string;
+  /** Deep link URL */
+  actionUrl?: string;
+  /** İlgili kaynak ID'leri */
+  conversationId?: string;
+  postId?: string;
+  userId?: string;
+  commentId?: string;
 }
 
+// =============================================================================
+// NOTIFICATION CHANNELS (Android)
+// =============================================================================
+
 /**
- * Varsayılan bildirim ayarları
+ * Bildirim kanalı önem seviyesi
  */
-export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
-  messages: true,
-  postLikes: true,
-  postComments: true,
-  commentReplies: true,
-  follows: true,
-  verificationUpdates: true,
-  systemNotifications: true,
-  soundEnabled: true,
-  vibrationEnabled: true,
-  quietHoursEnabled: false,
-};
+export type ChannelImportance = 'none' | 'min' | 'low' | 'default' | 'high';
 
 /**
  * Bildirim kanalı (Android)
@@ -102,7 +293,7 @@ export interface NotificationChannel {
   id: string;
   name: string;
   description?: string;
-  importance: 'none' | 'min' | 'low' | 'default' | 'high';
+  importance: ChannelImportance;
   sound?: string;
   vibration?: boolean;
 }
@@ -120,19 +311,12 @@ export const NOTIFICATION_CHANNELS: NotificationChannel[] = [
     vibration: true,
   },
   {
-    id: 'posts',
-    name: 'Gönderiler',
-    description: 'Beğeni ve yorum bildirimleri',
+    id: 'social',
+    name: 'Sosyal',
+    description: 'Beğeni, yorum ve takip bildirimleri',
     importance: 'default',
     sound: 'default',
     vibration: true,
-  },
-  {
-    id: 'social',
-    name: 'Sosyal',
-    description: 'Takip bildirimleri',
-    importance: 'default',
-    vibration: false,
   },
   {
     id: 'verification',
@@ -150,37 +334,115 @@ export const NOTIFICATION_CHANNELS: NotificationChannel[] = [
   },
 ];
 
+// =============================================================================
+// STORE TYPES
+// =============================================================================
+
 /**
- * Store state tipi
+ * Bildirim store state
  */
 export interface NotificationStoreState {
   // State
-  notifications: Notification[];
+  notifications: NotificationResponse[];
   unreadCount: number;
-  settings: NotificationSettings;
+  unreadByType: Record<string, number>;
+  preferences: NotificationPreferencesResponse | null;
   fcmToken: string | null;
   isPermissionGranted: boolean;
+  isLoading: boolean;
+  error: string | null;
 
   // Actions
-  setNotifications: (notifications: Notification[]) => void;
-  addNotification: (notification: Notification) => void;
+  setNotifications: (notifications: NotificationResponse[]) => void;
+  addNotification: (notification: NotificationResponse) => void;
+  prependNotification: (notification: NotificationResponse) => void;
+  updateNotification: (notificationId: string, updates: Partial<NotificationResponse>) => void;
   markAsRead: (notificationId: string) => void;
   markAllAsRead: () => void;
   removeNotification: (notificationId: string) => void;
   clearAllNotifications: () => void;
-  setSettings: (settings: Partial<NotificationSettings>) => void;
-  setFcmToken: (token: string | null) => void;
-  setPermissionGranted: (granted: boolean) => void;
+  setPreferences: (preferences: NotificationPreferencesResponse) => void;
+  updatePreferences: (updates: Partial<NotificationPreferencesRequest>) => void;
+  setUnreadCount: (count: number) => void;
+  setUnreadByType: (unreadByType: Record<string, number>) => void;
   incrementUnreadCount: () => void;
   decrementUnreadCount: () => void;
-  resetUnreadCount: () => void;
+  setFcmToken: (token: string | null) => void;
+  setPermissionGranted: (granted: boolean) => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
+  reset: () => void;
 }
 
+// =============================================================================
+// HELPER TYPES
+// =============================================================================
+
 /**
- * Paginated notifications response
+ * Bildirim ikonu ve rengi için yardımcı fonksiyonlar
  */
-export interface PaginatedNotifications {
-  content: Notification[];
-  hasNext: boolean;
-  nextCursor: string | null;
-}
+export const getNotificationIcon = (type: NotificationType): string => {
+  const icons: Record<NotificationType, string> = {
+    NEW_FOLLOWER: 'person-add',
+    POST_LIKED: 'heart',
+    POST_COMMENTED: 'chatbubble',
+    MENTION: 'at',
+    NEW_MESSAGE: 'mail',
+    VERIFICATION_APPROVED: 'checkmark-circle',
+    VERIFICATION_REJECTED: 'close-circle',
+    VERIFICATION_PENDING_REVIEW: 'time',
+    POST_FLAGGED: 'warning',
+    CONTENT_REMOVED: 'trash',
+    WARNING_ISSUED: 'warning',
+    WELCOME: 'hand-right',
+    PASSWORD_RESET: 'key',
+    ACCOUNT_SUSPENDED: 'ban',
+    ACCOUNT_REACTIVATED: 'checkmark-circle',
+  };
+  return icons[type] || 'notifications';
+};
+
+export const getNotificationColor = (type: NotificationType): string => {
+  const colors: Record<NotificationType, string> = {
+    NEW_FOLLOWER: '#3B82F6', // Blue
+    POST_LIKED: '#EF4444', // Red
+    POST_COMMENTED: '#10B981', // Green
+    MENTION: '#6366F1', // Indigo
+    NEW_MESSAGE: '#6366F1', // Indigo
+    VERIFICATION_APPROVED: '#10B981', // Green
+    VERIFICATION_REJECTED: '#EF4444', // Red
+    VERIFICATION_PENDING_REVIEW: '#F59E0B', // Amber
+    POST_FLAGGED: '#F59E0B', // Amber
+    CONTENT_REMOVED: '#EF4444', // Red
+    WARNING_ISSUED: '#F59E0B', // Amber
+    WELCOME: '#8B5CF6', // Purple
+    PASSWORD_RESET: '#6366F1', // Indigo
+    ACCOUNT_SUSPENDED: '#EF4444', // Red
+    ACCOUNT_REACTIVATED: '#10B981', // Green
+  };
+  return colors[type] || '#6B7280';
+};
+
+/**
+ * Bildirim kategorisi al
+ */
+export const getNotificationCategory = (type: NotificationType): NotificationCategory => {
+  const categories: Record<NotificationType, NotificationCategory> = {
+    NEW_FOLLOWER: 'SOCIAL',
+    POST_LIKED: 'SOCIAL',
+    POST_COMMENTED: 'SOCIAL',
+    MENTION: 'SOCIAL',
+    NEW_MESSAGE: 'MESSAGING',
+    VERIFICATION_APPROVED: 'VERIFICATION',
+    VERIFICATION_REJECTED: 'VERIFICATION',
+    VERIFICATION_PENDING_REVIEW: 'VERIFICATION',
+    POST_FLAGGED: 'MODERATION',
+    CONTENT_REMOVED: 'MODERATION',
+    WARNING_ISSUED: 'MODERATION',
+    WELCOME: 'SYSTEM',
+    PASSWORD_RESET: 'SYSTEM',
+    ACCOUNT_SUSPENDED: 'SYSTEM',
+    ACCOUNT_REACTIVATED: 'SYSTEM',
+  };
+  return categories[type] || 'SYSTEM';
+};

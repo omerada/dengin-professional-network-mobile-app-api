@@ -1,5 +1,6 @@
 // src/features/notifications/screens/NotificationsScreen.tsx
 // Notifications screen with list and actions
+// Backend: NotificationController API
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -19,12 +20,11 @@ import { useTheme } from '@contexts/ThemeContext';
 import { NotificationList } from '../components/NotificationList';
 import { PermissionPrompt } from '../components/PermissionPrompt';
 import {
-  useNotificationActions,
+  useMarkAllAsRead,
   useNotificationPermission,
+  useUnreadCount,
 } from '../hooks';
-import { useNotificationStore } from '../stores';
-import { NotificationType } from '../types';
-import type { NotificationData } from '../types';
+import type { NotificationResponse, NotificationType } from '../types';
 import type { RootStackParamList } from '@navigation/types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -32,62 +32,75 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 export const NotificationsScreen: React.FC = () => {
   const { theme } = useTheme();
   const navigation = useNavigation<NavigationProp>();
-  const { markAllAsRead, isMarkingAllAsRead } = useNotificationActions();
-  const { permissionStatus, requestPermission, isRequesting } =
-    useNotificationPermission();
-  const unreadCount = useNotificationStore((state) => state.unreadCount);
+  const { markAllAsRead, isPending: isMarkingAllAsRead } = useMarkAllAsRead();
+  const { isPermissionGranted, promptForPermission } = useNotificationPermission();
+  const { unreadCount } = useUnreadCount();
 
   const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
 
   // Check permission on mount
   useEffect(() => {
-    if (permissionStatus === 'denied' || permissionStatus === 'not-determined') {
+    if (!isPermissionGranted) {
       // Show prompt after a short delay
       const timer = setTimeout(() => {
         setShowPermissionPrompt(true);
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [permissionStatus]);
+  }, [isPermissionGranted]);
 
-  // Handle notification press - navigate to relevant screen
+  // Handle notification press - navigate based on type and actionUrl
   const handleNotificationPress = useCallback(
-    (notification: NotificationData) => {
-      switch (notification.type) {
-        case NotificationType.MESSAGE:
-          if (notification.referenceId) {
+    (notification: NotificationResponse) => {
+      const type = notification.type as NotificationType;
+      const metadata = notification.metadata;
+      
+      switch (type) {
+        case 'NEW_MESSAGE':
+          if (metadata?.conversationId) {
             navigation.navigate('Chat', {
-              conversationId: notification.referenceId,
+              conversationId: metadata.conversationId,
             });
           }
           break;
 
-        case NotificationType.POST_LIKE:
-        case NotificationType.POST_COMMENT:
-        case NotificationType.COMMENT_REPLY:
-          if (notification.referenceId) {
+        case 'POST_LIKED':
+        case 'POST_COMMENTED':
+        case 'MENTION':
+          if (metadata?.postId) {
             navigation.navigate('PostDetail', {
-              postId: notification.referenceId,
+              postId: metadata.postId,
             });
           }
           break;
 
-        case NotificationType.FOLLOW:
-          if (notification.senderId) {
+        case 'NEW_FOLLOWER':
+          if (metadata?.actorId) {
             navigation.navigate('Profile', {
-              userId: notification.senderId,
+              userId: metadata.actorId,
             });
           }
           break;
 
-        case NotificationType.VERIFICATION_UPDATE:
+        case 'VERIFICATION_APPROVED':
+        case 'VERIFICATION_REJECTED':
+        case 'VERIFICATION_PENDING_REVIEW':
           navigation.navigate('VerificationStatus');
           break;
 
-        case NotificationType.SYSTEM:
-          // System notifications might have deep links
-          if (notification.data?.deepLink) {
-            // Handle deep link
+        case 'POST_FLAGGED':
+        case 'CONTENT_REMOVED':
+        case 'WARNING_ISSUED':
+          // Moderation notifications - show details
+          if (notification.actionUrl) {
+            // Parse and navigate to actionUrl
+          }
+          break;
+
+        default:
+          // Use actionUrl if available
+          if (notification.actionUrl) {
+            // Handle deep link navigation
           }
           break;
       }
@@ -119,9 +132,9 @@ export const NotificationsScreen: React.FC = () => {
 
   // Handle permission request
   const handleRequestPermission = useCallback(async () => {
-    await requestPermission();
+    await promptForPermission();
     setShowPermissionPrompt(false);
-  }, [requestPermission]);
+  }, [promptForPermission]);
 
   return (
     <SafeAreaView
@@ -182,7 +195,7 @@ export const NotificationsScreen: React.FC = () => {
         visible={showPermissionPrompt}
         onRequestPermission={handleRequestPermission}
         onDismiss={() => setShowPermissionPrompt(false)}
-        permissionDenied={permissionStatus === 'denied'}
+        permissionDenied={!isPermissionGranted}
       />
     </SafeAreaView>
   );

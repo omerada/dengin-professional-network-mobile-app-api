@@ -1,5 +1,6 @@
 // src/features/notifications/components/NotificationItem.tsx
-// Notification list item component
+// Notification list item component - Backend NotificationResponse ile uyumlu
+// Backend: NotificationResponse DTO
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 import React, { memo, useCallback } from 'react';
@@ -12,37 +13,67 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@contexts/ThemeContext';
-import type { Notification, NotificationType } from '../types';
+import type { NotificationResponse, NotificationType } from '../types';
 
 interface NotificationItemProps {
-  notification: Notification;
-  onPress: (notification: Notification) => void;
-  onLongPress?: (notification: Notification) => void;
+  notification: NotificationResponse;
+  onPress: (notification: NotificationResponse) => void;
+  onLongPress?: (notification: NotificationResponse) => void;
 }
 
 /**
- * Bildirim türüne göre ikon
+ * Bildirim türüne göre ikon - Backend NotificationType enum ile uyumlu
+ * @see NotificationType.java
  */
 const getNotificationIcon = (type: NotificationType): { name: string; color: string } => {
   switch (type) {
-    case 'message':
-      return { name: 'chatbubble', color: '#007AFF' };
-    case 'post_like':
-      return { name: 'heart', color: '#FF2D55' };
-    case 'post_comment':
-    case 'comment_reply':
-      return { name: 'chatbubble-ellipses', color: '#FF9500' };
-    case 'follow':
+    // Social notifications
+    case 'NEW_FOLLOWER':
       return { name: 'person-add', color: '#5856D6' };
-    case 'verification_update':
+    case 'POST_LIKED':
+      return { name: 'heart', color: '#FF2D55' };
+    case 'POST_COMMENTED':
+      return { name: 'chatbubble-ellipses', color: '#FF9500' };
+    case 'MENTION':
+      return { name: 'at', color: '#007AFF' };
+    
+    // Messaging
+    case 'NEW_MESSAGE':
+      return { name: 'chatbubble', color: '#007AFF' };
+    
+    // Verification
+    case 'VERIFICATION_APPROVED':
       return { name: 'shield-checkmark', color: '#34C759' };
+    case 'VERIFICATION_REJECTED':
+      return { name: 'shield-half', color: '#FF3B30' };
+    case 'VERIFICATION_PENDING_REVIEW':
+      return { name: 'time', color: '#FF9500' };
+    
+    // Moderation
+    case 'POST_FLAGGED':
+      return { name: 'flag', color: '#FF9500' };
+    case 'CONTENT_REMOVED':
+      return { name: 'trash', color: '#FF3B30' };
+    case 'WARNING_ISSUED':
+      return { name: 'warning', color: '#FF9500' };
+    
+    // System
+    case 'WELCOME':
+      return { name: 'happy', color: '#34C759' };
+    case 'PASSWORD_RESET':
+      return { name: 'key', color: '#8E8E93' };
+    case 'ACCOUNT_SUSPENDED':
+      return { name: 'ban', color: '#FF3B30' };
+    case 'ACCOUNT_REACTIVATED':
+      return { name: 'checkmark-circle', color: '#34C759' };
+    
     default:
       return { name: 'notifications', color: '#8E8E93' };
   }
 };
 
 /**
- * Göreli zaman formatlama
+ * Göreli zaman formatlama (backend relativeTime yoksa kullan)
  */
 const formatRelativeTime = (dateString: string): string => {
   const date = new Date(dateString);
@@ -78,9 +109,19 @@ export const NotificationItem: React.FC<NotificationItemProps> = memo(({
     onLongPress?.(notification);
   }, [notification, onLongPress]);
 
-  const isUnread = notification.status === 'unread';
-  const iconConfig = getNotificationIcon(notification.type);
-  const imageUrl = notification.data?.imageUrl;
+  // Backend: read field (boolean)
+  const isUnread = !notification.read;
+  
+  // Backend icon field (derived) veya type'dan hesapla
+  const iconConfig = notification.icon 
+    ? { name: notification.icon, color: notification.color || '#8E8E93' }
+    : getNotificationIcon(notification.type);
+  
+  // Metadata'dan resim URL'i
+  const imageUrl = notification.metadata?.imageUrl || notification.metadata?.actorAvatarUrl;
+
+  // Backend relativeTime field veya hesaplanan
+  const displayTime = notification.relativeTime || formatRelativeTime(notification.createdAt);
 
   return (
     <Pressable
@@ -136,7 +177,7 @@ export const NotificationItem: React.FC<NotificationItemProps> = memo(({
           {notification.body}
         </Text>
         <Text style={[styles.time, { color: theme.colors.text.tertiary }]}>
-          {formatRelativeTime(notification.createdAt)}
+          {displayTime}
         </Text>
       </View>
 
