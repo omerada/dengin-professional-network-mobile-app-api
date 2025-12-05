@@ -1,201 +1,420 @@
 // src/shared/components/Input/Input.tsx
-// Oku: mobile-development-guide/ui/17-DESIGN-SYSTEM.md
-// Oku: mobile-development-guide/ui/20-ACCESSIBILITY.md
+// Meslektaş Design System - Modern Input Component
+// Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
-import React, { useState, useCallback, useMemo, forwardRef } from 'react';
+import React, {
+  forwardRef,
+  memo,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
-  View,
-  TextInput,
-  Text,
-  StyleSheet,
-  ViewStyle,
-  TextStyle,
-  TextInputProps,
-  TouchableOpacity,
   Platform,
+  Pressable,
+  Text,
+  TextInput,
+  UIManager,
+  View,
+  type NativeSyntheticEvent,
+  type TextInputFocusEventData,
 } from 'react-native';
-import { useTheme } from '@contexts/ThemeContext';
-import { spacing, borderRadius, borderWidth } from '@theme';
+import Animated, {
+  interpolate,
+  interpolateColor,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 
-/**
- * Input props
- */
-interface InputProps extends Omit<TextInputProps, 'style'> {
-  label?: string;
-  error?: string;
-  hint?: string;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
-  containerStyle?: ViewStyle;
-  inputStyle?: TextStyle;
-  required?: boolean;
-  disabled?: boolean;
-  testID?: string;
+import { useColors } from '@contexts/ThemeContext';
+import { spring, duration } from '@theme/animations';
+
+import { styles, getVariantStyles } from './Input.styles';
+import { INPUT_SIZE_CONFIG, type InputProps, type InputRef } from './Input.types';
+
+// Enable LayoutAnimation on Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
+// Create animated components
+const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
+const AnimatedText = Animated.createAnimatedComponent(Text);
+
 /**
- * Input component
- * Reusable text input with label, error, and icon support
+ * Modern Input Component
+ *
+ * Features:
+ * - Floating label animation with spring physics
+ * - Multiple variants (outlined, filled, underlined)
+ * - Multiple sizes (small, medium, large)
+ * - Error/Success states with shake animation
+ * - Clear button support
+ * - Character count display
+ * - Full accessibility support
+ *
+ * @example
+ * ```tsx
+ * <Input
+ *   label="Email"
+ *   placeholder="Enter your email"
+ *   variant="outlined"
+ *   size="medium"
+ *   leftIcon={<MailIcon />}
+ *   error={errors.email}
+ *   required
+ * />
+ * ```
  */
-export const Input = forwardRef<TextInput, InputProps>(
-  (
-    {
-      label,
-      error,
-      hint,
-      leftIcon,
-      rightIcon,
-      containerStyle,
-      inputStyle,
-      required = false,
-      disabled = false,
-      secureTextEntry,
-      testID,
-      ...props
-    },
-    ref,
-  ) => {
-    const { theme } = useTheme();
-    const [isFocused, setIsFocused] = useState(false);
-    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-
-    const handleFocus = useCallback(
-      (e: Parameters<NonNullable<TextInputProps['onFocus']>>[0]) => {
-        setIsFocused(true);
-        props.onFocus?.(e);
+export const Input = memo(
+  forwardRef<InputRef, InputProps>(
+    (
+      {
+        variant = 'outlined',
+        size = 'medium',
+        label,
+        error,
+        hint,
+        success = false,
+        leftIcon,
+        rightIcon,
+        required = false,
+        disabled = false,
+        containerStyle,
+        inputStyle,
+        labelStyle,
+        testID,
+        onClear,
+        clearable = false,
+        floatingLabel = true,
+        maxLength,
+        showCharCount = false,
+        accessibilityHint,
+        value,
+        onFocus,
+        onBlur,
+        secureTextEntry,
+        ...props
       },
-      [props],
-    );
+      ref,
+    ) => {
+      const colors = useColors();
+      const inputRef = useRef<TextInput>(null);
+      const [isFocused, setIsFocused] = useState(false);
+      const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-    const handleBlur = useCallback(
-      (e: Parameters<NonNullable<TextInputProps['onBlur']>>[0]) => {
-        setIsFocused(false);
-        props.onBlur?.(e);
-      },
-      [props],
-    );
+      // Animation values
+      const focusProgress = useSharedValue(0);
+      const labelPosition = useSharedValue(value ? 1 : 0);
+      const shakeOffset = useSharedValue(0);
 
-    const togglePasswordVisibility = useCallback(() => {
-      setIsPasswordVisible(prev => !prev);
-    }, []);
+      // Get size and variant configs
+      const sizeConfig = INPUT_SIZE_CONFIG[size];
+      const variantStyles = getVariantStyles(variant, colors);
 
-    const containerStyles = useMemo<ViewStyle[]>(() => {
-      const baseStyle: ViewStyle = {
-        marginBottom: spacing.lg,
-      };
+      // Expose methods via ref
+      useImperativeHandle(ref, () => ({
+        focus: () => inputRef.current?.focus(),
+        blur: () => inputRef.current?.blur(),
+        clear: () => inputRef.current?.clear(),
+        isFocused: () => isFocused,
+      }));
 
-      return [baseStyle, containerStyle].filter(Boolean) as ViewStyle[];
-    }, [containerStyle]);
+      // Update label position when value changes
+      useEffect(() => {
+        if (value && labelPosition.value === 0) {
+          labelPosition.value = withSpring(1, spring.gentle);
+        }
+      }, [value, labelPosition]);
 
-    const inputContainerStyles = useMemo<ViewStyle[]>(() => {
-      const baseStyle: ViewStyle = {
-        flexDirection: 'row',
-        alignItems: 'center',
-        borderWidth: borderWidth.thin,
-        borderRadius: borderRadius.md,
-        backgroundColor: disabled
-          ? theme.colors.background.tertiary
-          : theme.colors.background.primary,
-        borderColor: error
-          ? theme.colors.error.main
-          : isFocused
-            ? theme.colors.primary[500]
-            : theme.colors.border.medium,
-        paddingHorizontal: spacing.md,
-        minHeight: 48,
-      };
+      // Shake animation on error
+      useEffect(() => {
+        if (error) {
+          shakeOffset.value = withSequence(
+            withTiming(10, { duration: 50 }),
+            withTiming(-10, { duration: 50 }),
+            withTiming(8, { duration: 50 }),
+            withTiming(-8, { duration: 50 }),
+            withTiming(0, { duration: 50 }),
+          );
+        }
+      }, [error, shakeOffset]);
 
-      return [baseStyle];
-    }, [theme, isFocused, error, disabled]);
+      // Floating label animated style
+      const animatedLabelStyle = useAnimatedStyle(() => {
+        if (!floatingLabel) {
+          return {};
+        }
 
-    const inputStyles = useMemo<TextStyle[]>(() => {
-      const baseStyle: TextStyle = {
-        flex: 1,
-        fontSize: 16,
-        color: disabled ? theme.colors.text.disabled : theme.colors.text.primary,
-        paddingVertical: Platform.OS === 'ios' ? spacing.md : spacing.sm,
-      };
+        const translateY = interpolate(
+          labelPosition.value,
+          [0, 1],
+          [
+            sizeConfig.height / 2 - sizeConfig.labelFontSize / 2 - 2,
+            -sizeConfig.labelFontSize / 2 - 4,
+          ],
+        );
 
-      return [baseStyle, inputStyle].filter(Boolean) as TextStyle[];
-    }, [theme, disabled, inputStyle]);
+        const scale = interpolate(labelPosition.value, [0, 1], [1, 0.85]);
 
-    const labelStyles = useMemo<TextStyle>(() => {
-      return {
-        fontSize: 14,
-        fontWeight: '500',
-        color: error ? theme.colors.error.main : theme.colors.text.primary,
-        marginBottom: spacing.xs,
-      };
-    }, [theme, error]);
+        const colorValue = interpolateColor(
+          focusProgress.value,
+          [0, 1],
+          [colors.text.tertiary, colors.interactive.default],
+        );
 
-    const errorStyles = useMemo<TextStyle>(() => {
-      return {
-        fontSize: 12,
-        color: theme.colors.error.main,
-        marginTop: spacing.xs,
-      };
-    }, [theme]);
+        const labelColor = error
+          ? colors.status.error
+          : success
+            ? colors.status.success
+            : colorValue;
 
-    const hintStyles = useMemo<TextStyle>(() => {
-      return {
-        fontSize: 12,
-        color: theme.colors.text.secondary,
-        marginTop: spacing.xs,
-      };
-    }, [theme]);
+        return {
+          color: labelColor,
+          fontSize: sizeConfig.labelFontSize,
+          transform: [{ translateY }, { scale }],
+        };
+      });
 
-    return (
-      <View style={containerStyles}>
-        {label && (
-          <Text style={labelStyles}>
-            {label}
-            {required && <Text style={{ color: theme.colors.error.main }}> *</Text>}
-          </Text>
-        )}
+      // Border animated style
+      const animatedBorderStyle = useAnimatedStyle(() => {
+        const borderColorValue = interpolateColor(
+          focusProgress.value,
+          [0, 1],
+          [variantStyles.borderColor, variantStyles.focusedBorderColor],
+        );
 
-        <View style={inputContainerStyles}>
-          {leftIcon && <View style={{ marginRight: spacing.sm }}>{leftIcon}</View>}
+        const borderColor = error
+          ? colors.status.error
+          : success
+            ? colors.status.success
+            : borderColorValue;
 
-          <TextInput
-            ref={ref}
-            testID={testID}
-            style={inputStyles}
-            placeholderTextColor={theme.colors.text.tertiary}
-            editable={!disabled}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-            secureTextEntry={secureTextEntry && !isPasswordVisible}
-            accessible={true}
-            accessibilityLabel={label || props.placeholder}
-            accessibilityHint={hint}
-            accessibilityState={{
-              disabled,
-            }}
-            {...props}
-          />
+        const borderWidth = withTiming(
+          focusProgress.value > 0 ? variantStyles.focusedBorderWidth : variantStyles.borderWidth,
+          { duration: duration.fast },
+        );
 
-          {secureTextEntry && (
-            <TouchableOpacity
-              onPress={togglePasswordVisibility}
-              accessible={true}
-              accessibilityRole="button"
-              accessibilityLabel={isPasswordVisible ? 'Şifreyi gizle' : 'Şifreyi göster'}>
-              <Text style={{ color: theme.colors.text.secondary }}>
-                {isPasswordVisible ? '👁️' : '👁️‍🗨️'}
+        return {
+          borderColor,
+          borderWidth,
+        };
+      });
+
+      // Shake animation style
+      const animatedContainerStyle = useAnimatedStyle(() => ({
+        transform: [{ translateX: shakeOffset.value }],
+      }));
+
+      // Focus handler
+      const handleFocus = useCallback(
+        (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
+          setIsFocused(true);
+          focusProgress.value = withSpring(1, spring.snappy);
+          labelPosition.value = withSpring(1, spring.gentle);
+          onFocus?.(e);
+        },
+        [onFocus, focusProgress, labelPosition],
+      );
+
+      // Blur handler
+      const handleBlur = useCallback(
+        (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
+          setIsFocused(false);
+          focusProgress.value = withSpring(0, spring.snappy);
+          if (!value) {
+            labelPosition.value = withSpring(0, spring.gentle);
+          }
+          onBlur?.(e);
+        },
+        [value, onBlur, focusProgress, labelPosition],
+      );
+
+      // Toggle password visibility
+      const togglePasswordVisibility = useCallback(() => {
+        setIsPasswordVisible(prev => !prev);
+      }, []);
+
+      // Clear input
+      const handleClear = useCallback(() => {
+        inputRef.current?.clear();
+        onClear?.();
+      }, [onClear]);
+
+      // Character count
+      const charCount = useMemo(() => {
+        const currentLength = value?.length ?? 0;
+        return maxLength ? `${currentLength}/${maxLength}` : `${currentLength}`;
+      }, [value, maxLength]);
+
+      // Helper text color
+      const helperTextColor = useMemo(() => {
+        if (error) return colors.status.error;
+        if (success) return colors.status.success;
+        return colors.text.tertiary;
+      }, [error, success, colors]);
+
+      // Underlined variant adjustments
+      const isUnderlined = variant === 'underlined';
+
+      return (
+        <Animated.View
+          style={[styles.container, animatedContainerStyle, containerStyle]}
+          testID={testID}>
+          {/* Floating Label */}
+          {label && floatingLabel && (
+            <AnimatedText
+              style={[
+                styles.label,
+                {
+                  left: leftIcon
+                    ? sizeConfig.paddingX + sizeConfig.iconSize + 8
+                    : sizeConfig.paddingX,
+                },
+                animatedLabelStyle,
+                labelStyle,
+              ]}>
+              {label}
+              {required && (
+                <Text style={[styles.requiredStar, { color: colors.status.error }]}> *</Text>
+              )}
+            </AnimatedText>
+          )}
+
+          {/* Static Label (non-floating) */}
+          {label && !floatingLabel && (
+            <Text
+              style={[
+                {
+                  color: error ? colors.status.error : colors.text.primary,
+                  fontSize: sizeConfig.labelFontSize,
+                  fontWeight: '500',
+                  marginBottom: 8,
+                },
+                labelStyle,
+              ]}>
+              {label}
+              {required && (
+                <Text style={[styles.requiredStar, { color: colors.status.error }]}> *</Text>
+              )}
+            </Text>
+          )}
+
+          {/* Input Container */}
+          <Animated.View
+            style={[
+              styles.inputContainer,
+              {
+                backgroundColor: variantStyles.backgroundColor,
+                borderRadius: isUnderlined ? 0 : sizeConfig.borderRadius,
+                minHeight: sizeConfig.height,
+                paddingHorizontal: sizeConfig.paddingX,
+              },
+              isUnderlined && styles.underlinedContainer,
+              disabled && styles.disabled,
+              animatedBorderStyle,
+            ]}>
+            {/* Left Icon */}
+            {leftIcon && (
+              <View style={[styles.leftIcon, { width: sizeConfig.iconSize }]}>{leftIcon}</View>
+            )}
+
+            {/* Text Input */}
+            <AnimatedTextInput
+              ref={inputRef}
+              style={[
+                styles.input,
+                {
+                  color: disabled ? colors.text.disabled : colors.text.primary,
+                  fontSize: sizeConfig.fontSize,
+                  paddingVertical: sizeConfig.paddingY,
+                },
+                inputStyle,
+              ]}
+              value={value}
+              editable={!disabled}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              placeholderTextColor={colors.text.tertiary}
+              selectionColor={colors.interactive.default}
+              secureTextEntry={secureTextEntry && !isPasswordVisible}
+              maxLength={maxLength}
+              accessible
+              accessibilityLabel={label ?? props.placeholder}
+              accessibilityHint={accessibilityHint ?? hint}
+              accessibilityState={{ disabled }}
+              {...props}
+            />
+
+            {/* Password Toggle */}
+            {secureTextEntry && (
+              <Pressable
+                onPress={togglePasswordVisibility}
+                style={styles.clearButton}
+                accessible
+                accessibilityRole="button"
+                accessibilityLabel={isPasswordVisible ? 'Şifreyi gizle' : 'Şifreyi göster'}>
+                <Text style={{ color: colors.text.secondary, fontSize: sizeConfig.iconSize }}>
+                  {isPasswordVisible ? '👁️' : '👁️‍🗨️'}
+                </Text>
+              </Pressable>
+            )}
+
+            {/* Clear Button */}
+            {clearable && value && !secureTextEntry && (
+              <Pressable
+                onPress={handleClear}
+                style={styles.clearButton}
+                accessible
+                accessibilityRole="button"
+                accessibilityLabel="Temizle">
+                <Text style={{ color: colors.text.tertiary, fontSize: 18 }}>✕</Text>
+              </Pressable>
+            )}
+
+            {/* Right Icon */}
+            {rightIcon && !secureTextEntry && !clearable && (
+              <View style={[styles.rightIcon, { width: sizeConfig.iconSize }]}>{rightIcon}</View>
+            )}
+          </Animated.View>
+
+          {/* Helper Text Row */}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            {/* Error/Hint Text */}
+            {(error || hint) && (
+              <Text style={[styles.helperText, { color: helperTextColor, flex: 1 }]}>
+                {error ?? hint}
               </Text>
-            </TouchableOpacity>
-          )}
+            )}
 
-          {rightIcon && !secureTextEntry && (
-            <View style={{ marginLeft: spacing.sm }}>{rightIcon}</View>
-          )}
-        </View>
-
-        {error && <Text style={errorStyles}>{error}</Text>}
-        {hint && !error && <Text style={hintStyles}>{hint}</Text>}
-      </View>
-    );
-  },
+            {/* Character Count */}
+            {showCharCount && (
+              <Text
+                style={[
+                  styles.characterCount,
+                  {
+                    color:
+                      maxLength && (value?.length ?? 0) >= maxLength
+                        ? colors.status.error
+                        : colors.text.tertiary,
+                  },
+                ]}>
+                {charCount}
+              </Text>
+            )}
+          </View>
+        </Animated.View>
+      );
+    },
+  ),
 );
+
+Input.displayName = 'Input';
 
 Input.displayName = 'Input';

@@ -1,184 +1,211 @@
 // src/shared/components/Toast/Toast.tsx
-// Toast bildirim komponenti
-// Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART4.md
+// Meslektaş Design System - Modern Toast Component
+// Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
-import React, { memo, useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Animated,
-  TouchableOpacity,
-  Dimensions,
-} from 'react-native';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import { Pressable, Text, View } from 'react-native';
+import Animated, {
+  Easing,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSequence,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '@contexts/ThemeContext';
-import { spacing, fontSize } from '@theme';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+import { useColors } from '@contexts/ThemeContext';
+import { useHaptic } from '@shared/hooks/useHaptic';
+import { shadows } from '@theme/shadows';
+import { spring } from '@theme/animations';
 
-export type ToastType = 'success' | 'error' | 'warning' | 'info';
+import { styles } from './Toast.styles';
+import { TOAST_DURATION, TOAST_ICONS, type ToastProps, type ToastType } from './Toast.types';
 
-export interface ToastData {
-  id: string;
-  type: ToastType;
-  message: string;
-  duration?: number;
-}
-
-interface ToastProps {
-  /**
-   * Toast data containing type, message, etc.
-   */
-  toast: ToastData;
-  /**
-   * Callback when toast should be hidden
-   */
-  onHide: (id: string) => void;
-}
-
-const ICONS: Record<ToastType, string> = {
-  success: 'checkmark-circle',
-  error: 'close-circle',
-  warning: 'warning',
-  info: 'information-circle',
-};
+// Re-export types for backward compatibility
+export type { ToastData, ToastType } from './Toast.types';
 
 /**
- * Toast Component
- * 
- * Animated toast notification that appears at the top of the screen.
- * Auto-hides after specified duration.
- * 
+ * Modern Toast Component
+ *
+ * Features:
+ * - Spring-based slide animations
+ * - Multiple types (success, error, warning, info)
+ * - Optional title and action button
+ * - Haptic feedback based on type
+ * - Safe area aware positioning
+ * - Swipe to dismiss (optional)
+ *
  * @example
  * ```tsx
- * // Used internally by ToastProvider
  * <Toast
- *   toast={{ id: '1', type: 'success', message: 'Saved!' }}
+ *   toast={{
+ *     id: '1',
+ *     type: 'success',
+ *     message: 'Profile updated successfully!',
+ *     title: 'Success',
+ *   }}
  *   onHide={(id) => removeToast(id)}
  * />
  * ```
  */
-export const Toast: React.FC<ToastProps> = memo(({ toast, onHide }) => {
-  const { theme } = useTheme();
-  const insets = useSafeAreaInsets();
-  const translateY = useRef(new Animated.Value(-100)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
+export const Toast: React.FC<ToastProps> = memo(
+  ({ toast, onHide, position = 'top', animation = 'slide', style, testID }) => {
+    const colors = useColors();
+    const insets = useSafeAreaInsets();
+    const { trigger } = useHaptic();
 
-  const getColor = (): string => {
-    switch (toast.type) {
-      case 'success':
-        return theme.colors.success.main;
-      case 'error':
-        return theme.colors.error.main;
-      case 'warning':
-        return theme.colors.warning.main;
-      case 'info':
-        return theme.colors.info.main;
-    }
-  };
+    // Animation values
+    const translateY = useSharedValue(position === 'top' ? -100 : 100);
+    const opacity = useSharedValue(0);
+    const scale = useSharedValue(0.9);
 
-  const hideToast = () => {
-    Animated.parallel([
-      Animated.timing(translateY, {
-        toValue: -100,
+    // Get color based on toast type
+    const getTypeColor = useCallback(
+      (type: ToastType): string => {
+        switch (type) {
+          case 'success':
+            return colors.status.success;
+          case 'error':
+            return colors.status.error;
+          case 'warning':
+            return colors.status.warning;
+          case 'info':
+            return colors.status.info;
+        }
+      },
+      [colors.status],
+    );
+
+    const typeColor = useMemo(() => getTypeColor(toast.type), [getTypeColor, toast.type]);
+
+    // Hide toast animation
+    const hideToast = useCallback(() => {
+      const hideY = position === 'top' ? -100 : 100;
+
+      translateY.value = withTiming(hideY, {
         duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-    ]).start(() => onHide(toast.id));
-  };
+        easing: Easing.out(Easing.ease),
+      });
+      opacity.value = withTiming(0, { duration: 200 });
+      scale.value = withTiming(0.9, { duration: 200 }, () => {
+        runOnJS(onHide)(toast.id);
+      });
+    }, [position, translateY, opacity, scale, onHide, toast.id]);
 
-  useEffect(() => {
-    // Show animation
-    Animated.parallel([
-      Animated.timing(translateY, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    // Show animation and auto-hide timer
+    useEffect(() => {
+      // Trigger haptic based on type
+      if (toast.type === 'error') {
+        trigger('notificationError');
+      } else if (toast.type === 'success') {
+        trigger('notificationSuccess');
+      } else {
+        trigger('impactLight');
+      }
 
-    // Auto hide
-    const timer = setTimeout(() => {
+      // Show animation
+      if (animation === 'bounce') {
+        translateY.value = withSequence(
+          withSpring(position === 'top' ? -10 : 10, spring.bouncy),
+          withSpring(0, spring.gentle),
+        );
+      } else {
+        translateY.value = withSpring(0, spring.snappy);
+      }
+
+      opacity.value = withTiming(1, { duration: 300 });
+      scale.value = withSpring(1, spring.snappy);
+
+      // Auto hide
+      const duration = toast.duration ?? TOAST_DURATION[toast.type];
+      const timer = setTimeout(() => {
+        hideToast();
+      }, duration);
+
+      return () => clearTimeout(timer);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Animated container style
+    const animatedContainerStyle = useAnimatedStyle(() => ({
+      opacity: opacity.value,
+      transform: [{ translateY: translateY.value }, { scale: scale.value }],
+    }));
+
+    // Position style
+    const positionStyle = useMemo(
+      () =>
+        position === 'top'
+          ? { left: 0, right: 0, top: insets.top + 8 }
+          : { bottom: insets.bottom + 8, left: 0, right: 0 },
+      [position, insets.top, insets.bottom],
+    );
+
+    // Handle action press
+    const handleActionPress = useCallback(() => {
+      toast.action?.onPress();
       hideToast();
-    }, toast.duration || 3000);
+    }, [toast.action, hideToast]);
 
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    return (
+      <Animated.View
+        style={[
+          styles.container,
+          { backgroundColor: colors.background.primary },
+          shadows.toast,
+          positionStyle,
+          animatedContainerStyle,
+          style,
+        ]}
+        testID={testID}
+        accessible
+        accessibilityRole="alert"
+        accessibilityLiveRegion="polite"
+        accessibilityLabel={toast.title ? `${toast.title}: ${toast.message}` : toast.message}>
+        {/* Color Indicator */}
+        <View style={[styles.indicator, { backgroundColor: typeColor }]} />
 
-  return (
-    <Animated.View
-      style={[
-        styles.container,
-        {
-          backgroundColor: theme.colors.background.primary,
-          top: insets.top + spacing.sm,
-          transform: [{ translateY }],
-          opacity,
-        },
-      ]}
-    >
-      <View style={[styles.indicator, { backgroundColor: getColor() }]} />
-      <Icon name={ICONS[toast.type]} size={24} color={getColor()} />
-      <Text
-        style={[styles.message, { color: theme.colors.text.primary }]}
-        numberOfLines={2}
-      >
-        {toast.message}
-      </Text>
-      <TouchableOpacity
-        onPress={hideToast}
-        hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
-      >
-        <Icon name="close" size={20} color={theme.colors.text.tertiary} />
-      </TouchableOpacity>
-    </Animated.View>
-  );
-});
+        {/* Icon */}
+        <View style={styles.icon}>
+          <Icon name={TOAST_ICONS[toast.type]} size={24} color={typeColor} />
+        </View>
 
-const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    left: spacing.md,
-    right: spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing.md,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
-    zIndex: 9999,
+        {/* Content */}
+        <View style={styles.content}>
+          {toast.title && (
+            <Text style={[styles.title, { color: colors.text.primary }]}>{toast.title}</Text>
+          )}
+          <Text style={[styles.message, { color: colors.text.secondary }]} numberOfLines={2}>
+            {toast.message}
+          </Text>
+        </View>
+
+        {/* Action Button */}
+        {toast.action && (
+          <Pressable onPress={handleActionPress}>
+            <Text style={[styles.action, { color: colors.interactive.default }]}>
+              {toast.action.label}
+            </Text>
+          </Pressable>
+        )}
+
+        {/* Close Button */}
+        <Pressable
+          onPress={hideToast}
+          style={styles.closeButton}
+          hitSlop={{ bottom: 10, left: 10, right: 10, top: 10 }}
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel="Kapat">
+          <Icon name="close" size={20} color={colors.text.tertiary} />
+        </Pressable>
+      </Animated.View>
+    );
   },
-  indicator: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: 4,
-    borderTopLeftRadius: 12,
-    borderBottomLeftRadius: 12,
-  },
-  message: {
-    flex: 1,
-    fontSize: fontSize.base,
-    marginHorizontal: spacing.sm,
-  },
-});
+);
 
 Toast.displayName = 'Toast';
-

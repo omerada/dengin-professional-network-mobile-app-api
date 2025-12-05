@@ -1,53 +1,48 @@
 // src/shared/components/Button/Button.tsx
-// Oku: mobile-development-guide/ui/17-DESIGN-SYSTEM.md
+// Meslektaş Design System - Modern Button Component
+// Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
-import React, { useCallback, useMemo } from 'react';
-import {
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-  ViewStyle,
-  TextStyle,
-  TouchableOpacityProps,
-} from 'react-native';
+import React, { memo, useCallback, useMemo } from 'react';
+import { Text, View, ActivityIndicator, Pressable } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  interpolate,
+} from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '@contexts/ThemeContext';
-import { spacing, borderRadius } from '@theme';
-import { hapticLight } from '@shared/utils/haptics';
+import { useHaptic } from '@shared/hooks/useHaptic';
+import { spring } from '@theme/animations';
+import { styles, getVariantStyles } from './Button.styles';
+import { ButtonProps, BUTTON_SIZE_CONFIG } from './Button.types';
+
+// Create animated pressable
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 /**
- * Button variants
+ * Modern Button Component
+ *
+ * Features:
+ * - Spring animations on press
+ * - Haptic feedback
+ * - Multiple variants (primary, secondary, outline, ghost, danger, success, gradient, premium)
+ * - Multiple sizes (xs, sm, md, lg, xl)
+ * - Loading state
+ * - Icon support
+ * - Full accessibility
+ *
+ * @example
+ * <Button
+ *   title="Submit"
+ *   variant="primary"
+ *   size="md"
+ *   onPress={handleSubmit}
+ * />
  */
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
-
-/**
- * Button sizes
- */
-type ButtonSize = 'sm' | 'md' | 'lg';
-
-/**
- * Button props
- */
-interface ButtonProps extends Omit<TouchableOpacityProps, 'style'> {
-  title: string;
-  variant?: ButtonVariant;
-  size?: ButtonSize;
-  loading?: boolean;
-  disabled?: boolean;
-  fullWidth?: boolean;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
-  testID?: string;
-}
-
-/**
- * Button component
- * Reusable button with multiple variants and sizes
- */
-export const Button = React.memo<ButtonProps>(
+export const Button = memo<ButtonProps>(
   ({
+    children,
     title,
     variant = 'primary',
     size = 'md',
@@ -56,144 +51,194 @@ export const Button = React.memo<ButtonProps>(
     fullWidth = false,
     leftIcon,
     rightIcon,
+    onPress,
+    onLongPress,
+    hapticType = 'light',
+    pressScale = 0.97,
     style,
     textStyle,
+    loadingColor,
     testID,
-    onPress,
-    ...props
+    accessibilityLabel,
+    accessibilityHint,
+    ...accessibilityProps
   }) => {
-    const { theme } = useTheme();
+    // Hooks
+    const { colors } = useTheme();
+    const { trigger } = useHaptic();
 
-    // Memoized styles based on variant and size
-    const buttonStyles = useMemo(() => {
-      const baseStyle: ViewStyle = {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: borderRadius.md,
+    // Animation value
+    const pressed = useSharedValue(0);
+
+    // Get configuration
+    const sizeConfig = BUTTON_SIZE_CONFIG[size];
+    const variantStyles = useMemo(() => getVariantStyles(variant, colors), [variant, colors]);
+
+    // Determine loading indicator color
+    const indicatorColor = useMemo(() => {
+      if (loadingColor) return loadingColor;
+      if (variant === 'outline' || variant === 'ghost') {
+        return colors.interactive.default;
+      }
+      return '#FFFFFF';
+    }, [loadingColor, variant, colors]);
+
+    // Animation handlers
+    const handlePressIn = useCallback(() => {
+      pressed.value = withSpring(1, spring.press);
+    }, [pressed]);
+
+    const handlePressOut = useCallback(() => {
+      pressed.value = withSpring(0, spring.press);
+    }, [pressed]);
+
+    const handlePress = useCallback(() => {
+      if (disabled || loading) return;
+      trigger(hapticType);
+      onPress?.();
+    }, [disabled, loading, trigger, hapticType, onPress]);
+
+    const handleLongPress = useCallback(() => {
+      if (disabled || loading || !onLongPress) return;
+      trigger('medium');
+      onLongPress();
+    }, [disabled, loading, trigger, onLongPress]);
+
+    // Animated styles
+    const animatedContainerStyle = useAnimatedStyle(() => {
+      const scaleValue = interpolate(pressed.value, [0, 1], [1, pressScale]);
+      return {
+        transform: [{ scale: scaleValue }],
       };
+    });
 
-      // Size styles
-      const sizeStyles: Record<ButtonSize, ViewStyle> = {
-        sm: {
-          paddingVertical: spacing.sm,
-          paddingHorizontal: spacing.md,
-          minHeight: 36,
-        },
-        md: {
-          paddingVertical: spacing.md,
-          paddingHorizontal: spacing.lg,
-          minHeight: 44,
-        },
-        lg: {
-          paddingVertical: spacing.lg,
-          paddingHorizontal: spacing.xl,
-          minHeight: 52,
-        },
+    const animatedBgStyle = useAnimatedStyle(() => {
+      const opacityValue = interpolate(pressed.value, [0, 1], [1, 0.9]);
+      return {
+        opacity: opacityValue,
       };
+    });
 
-      // Variant styles
-      const variantStyles: Record<ButtonVariant, ViewStyle> = {
-        primary: {
-          backgroundColor: theme.colors.primary[500],
-        },
-        secondary: {
-          backgroundColor: theme.colors.secondary[500],
-        },
-        outline: {
-          backgroundColor: 'transparent',
-          borderWidth: 1,
-          borderColor: theme.colors.primary[500],
-        },
-        ghost: {
-          backgroundColor: 'transparent',
-        },
-        danger: {
-          backgroundColor: theme.colors.error.main,
-        },
-      };
+    // Display text
+    const displayText = title || (typeof children === 'string' ? children : null);
 
-      // Disabled styles
-      const disabledStyle: ViewStyle = disabled
-        ? {
-            opacity: 0.5,
-          }
-        : {};
+    // Accessibility label
+    const a11yLabel = accessibilityLabel || displayText || 'Button';
 
-      return [
-        baseStyle,
-        sizeStyles[size],
-        variantStyles[variant],
-        disabledStyle,
-        fullWidth && { width: '100%' },
+    // Container style
+    const containerStyle = useMemo(
+      () => [
+        styles.container,
+        {
+          height: sizeConfig.height,
+          paddingHorizontal: sizeConfig.paddingX,
+          backgroundColor: variantStyles.backgroundColor,
+          borderColor: variantStyles.borderColor,
+          borderWidth: variantStyles.borderWidth,
+          borderRadius: sizeConfig.borderRadius,
+        },
+        fullWidth && styles.fullWidth,
+        disabled && styles.disabled,
         style,
-      ];
-    }, [theme, variant, size, disabled, fullWidth, style]);
-
-    const textStyles = useMemo(() => {
-      const baseTextStyle: TextStyle = {
-        fontWeight: '600',
-        textAlign: 'center',
-      };
-
-      // Size text styles
-      const sizeTextStyles: Record<ButtonSize, TextStyle> = {
-        sm: { fontSize: 14 },
-        md: { fontSize: 16 },
-        lg: { fontSize: 18 },
-      };
-
-      // Variant text styles
-      const variantTextStyles: Record<ButtonVariant, TextStyle> = {
-        primary: { color: theme.colors.neutral[0] },
-        secondary: { color: theme.colors.neutral[0] },
-        outline: { color: theme.colors.primary[500] },
-        ghost: { color: theme.colors.primary[500] },
-        danger: { color: theme.colors.neutral[0] },
-      };
-
-      return [baseTextStyle, sizeTextStyles[size], variantTextStyles[variant], textStyle];
-    }, [theme, variant, size, textStyle]);
-
-    const handlePress = useCallback(
-      (event: Parameters<NonNullable<TouchableOpacityProps['onPress']>>[0]) => {
-        if (!disabled && !loading && onPress) {
-          hapticLight();
-          onPress(event);
-        }
-      },
-      [disabled, loading, onPress],
+      ],
+      [sizeConfig, variantStyles, fullWidth, disabled, style],
     );
 
-    const loadingColor =
-      variant === 'outline' || variant === 'ghost'
-        ? theme.colors.primary[500]
-        : theme.colors.neutral[0];
+    // Gradient button rendering
+    if (variant === 'gradient' || variant === 'premium') {
+      const gradientColors =
+        variant === 'premium' ? colors.gradient.premium : colors.gradient.primary;
 
+      return (
+        <AnimatedPressable
+          testID={testID}
+          style={[containerStyle, animatedContainerStyle]}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          onPress={handlePress}
+          onLongPress={onLongPress ? handleLongPress : undefined}
+          disabled={disabled || loading}
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel={a11yLabel}
+          accessibilityHint={accessibilityHint}
+          accessibilityState={{ disabled: disabled || loading, busy: loading }}
+          {...accessibilityProps}>
+          <Animated.View
+            style={[styles.gradient, { borderRadius: sizeConfig.borderRadius }, animatedBgStyle]}>
+            <LinearGradient
+              colors={gradientColors as unknown as string[]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={[styles.gradient, { borderRadius: sizeConfig.borderRadius }]}
+            />
+          </Animated.View>
+
+          <View style={styles.content}>
+            {loading ? (
+              <ActivityIndicator size="small" color={indicatorColor} />
+            ) : (
+              <>
+                {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
+                {displayText && (
+                  <Text
+                    style={[
+                      styles.text,
+                      { fontSize: sizeConfig.fontSize, color: variantStyles.textColor },
+                      textStyle,
+                    ]}>
+                    {displayText}
+                  </Text>
+                )}
+                {!displayText && typeof children !== 'string' && children}
+                {rightIcon && <View style={styles.rightIcon}>{rightIcon}</View>}
+              </>
+            )}
+          </View>
+        </AnimatedPressable>
+      );
+    }
+
+    // Standard button rendering
     return (
-      <TouchableOpacity
+      <AnimatedPressable
         testID={testID}
-        style={buttonStyles}
+        style={[containerStyle, animatedContainerStyle]}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
         onPress={handlePress}
+        onLongPress={onLongPress ? handleLongPress : undefined}
         disabled={disabled || loading}
-        activeOpacity={0.7}
-        accessible={true}
+        accessible
         accessibilityRole="button"
-        accessibilityLabel={title}
-        accessibilityState={{ disabled: disabled || loading }}
-        {...props}>
+        accessibilityLabel={a11yLabel}
+        accessibilityHint={accessibilityHint}
+        accessibilityState={{ disabled: disabled || loading, busy: loading }}
+        {...accessibilityProps}>
         {loading ? (
-          <ActivityIndicator size="small" color={loadingColor} />
+          <ActivityIndicator size="small" color={indicatorColor} />
         ) : (
-          <>
-            {leftIcon}
-            <Text style={textStyles}>{title}</Text>
-            {rightIcon}
-          </>
+          <View style={styles.content}>
+            {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
+            {displayText && (
+              <Text
+                style={[
+                  styles.text,
+                  { fontSize: sizeConfig.fontSize, color: variantStyles.textColor },
+                  textStyle,
+                ]}>
+                {displayText}
+              </Text>
+            )}
+            {!displayText && typeof children !== 'string' && children}
+            {rightIcon && <View style={styles.rightIcon}>{rightIcon}</View>}
+          </View>
         )}
-      </TouchableOpacity>
+      </AnimatedPressable>
     );
   },
 );
 
 Button.displayName = 'Button';
+
+export default Button;

@@ -1,76 +1,63 @@
 // src/shared/components/Card/Card.tsx
-// Genel amaçlı kart komponenti
-// Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART4.md
+// Meslektaş Design System - Modern Card Component
+// Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
-import React, { memo, ReactNode } from 'react';
-import { View, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
-import { useTheme } from '@contexts/ThemeContext';
-import { spacing, shadows } from '@theme';
+import React, { memo, useCallback, useMemo } from 'react';
+import { Pressable, View } from 'react-native';
+import Animated, {
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
+import LinearGradient from 'react-native-linear-gradient';
 
-type CardVariant = 'elevated' | 'outlined' | 'filled';
-type CardPadding = 'none' | 'sm' | 'md' | 'lg';
+import { useColors } from '@contexts/ThemeContext';
+import { useHaptic } from '@shared/hooks/useHaptic';
+import { shadows } from '@theme/shadows';
+import { spring } from '@theme/animations';
 
-interface CardProps {
-  /**
-   * Card content
-   */
-  children: ReactNode;
-  /**
-   * Visual variant of the card
-   * @default 'elevated'
-   */
-  variant?: CardVariant;
-  /**
-   * Padding size
-   * @default 'md'
-   */
-  padding?: CardPadding;
-  /**
-   * Callback when card is pressed (makes card interactive)
-   */
-  onPress?: () => void;
-  /**
-   * Disable card interactions
-   */
-  disabled?: boolean;
-  /**
-   * Additional container styles
-   */
-  style?: ViewStyle;
-  /**
-   * Test ID for testing
-   */
-  testID?: string;
-}
+import { styles, getVariantStyles } from './Card.styles';
+import { CARD_PADDING_VALUES, CARD_RADIUS_VALUES, type CardProps } from './Card.types';
 
-const PADDING_VALUES: Record<CardPadding, number> = {
-  none: 0,
-  sm: spacing.sm,
-  md: spacing.md,
-  lg: spacing.lg,
-};
+// Create animated component
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 /**
- * Card Component
- * 
- * General purpose container component with elevation, border, or filled variants.
- * Can be made interactive with onPress prop.
- * 
+ * Modern Card Component
+ *
+ * Features:
+ * - Multiple variants (elevated, outlined, filled, glass, gradient)
+ * - Spring-based press animations
+ * - Haptic feedback
+ * - Glass morphism support
+ * - Gradient background support
+ * - Header/Footer slots
+ * - Selection state
+ *
  * @example
  * ```tsx
- * // Elevated card (default)
+ * // Basic elevated card
  * <Card>
  *   <Text>Card content</Text>
  * </Card>
- * 
- * // Outlined card
- * <Card variant="outlined" padding="lg">
- *   <Text>Outlined card</Text>
+ *
+ * // Interactive card with gradient
+ * <Card
+ *   variant="gradient"
+ *   gradientColors={['#FF6B6B', '#4ECDC4']}
+ *   onPress={() => handlePress()}
+ *   animated
+ * >
+ *   <Text>Gradient card</Text>
  * </Card>
- * 
- * // Interactive card
- * <Card onPress={() => console.log('pressed')}>
- *   <Text>Clickable card</Text>
+ *
+ * // Card with header and footer
+ * <Card
+ *   header={<Text>Header</Text>}
+ *   footer={<Text>Footer</Text>}
+ * >
+ *   <Text>Content</Text>
  * </Card>
  * ```
  */
@@ -79,60 +66,165 @@ export const Card: React.FC<CardProps> = memo(
     children,
     variant = 'elevated',
     padding = 'md',
+    size = 'medium',
     onPress,
+    onLongPress,
     disabled = false,
+    animated = true,
+    pressScale = 0.98,
     style,
     testID,
+    accessibilityLabel,
+    accessibilityHint,
+    gradientColors,
+    selected = false,
+    hapticType = 'light',
+    header,
+    footer,
   }) => {
-    const { theme } = useTheme();
+    const colors = useColors();
+    const { trigger } = useHaptic();
 
-    const getContainerStyle = (): ViewStyle => {
-      const baseStyle: ViewStyle = {
-        borderRadius: 12,
-        padding: PADDING_VALUES[padding],
-        backgroundColor: theme.colors.background.primary,
-      };
+    // Animation values
+    const pressed = useSharedValue(0);
 
-      switch (variant) {
-        case 'elevated':
-          return {
-            ...baseStyle,
-            ...shadows.md,
-          };
-        case 'outlined':
-          return {
-            ...baseStyle,
-            borderWidth: 1,
-            borderColor: theme.colors.border.light,
-          };
-        case 'filled':
-          return {
-            ...baseStyle,
-            backgroundColor: theme.colors.background.secondary,
-          };
-        default:
-          return baseStyle;
+    // Get variant and size config
+    const variantStyles = getVariantStyles(variant, colors);
+    const paddingValue = CARD_PADDING_VALUES[padding];
+    const borderRadius = CARD_RADIUS_VALUES[size];
+
+    // Default gradient colors
+    const defaultGradientColors = gradientColors ?? colors.gradient.primary;
+
+    // Shadow styles (only for elevated and gradient variants)
+    const shadowStyle = useMemo(() => {
+      if (!variantStyles.shadowEnabled) return {};
+      return shadows.card;
+    }, [variantStyles.shadowEnabled]);
+
+    // Animated container style
+    const animatedContainerStyle = useAnimatedStyle(() => {
+      if (!animated || (!onPress && !onLongPress)) {
+        return {};
       }
-    };
 
-    if (onPress) {
+      const scale = interpolate(pressed.value, [0, 1], [1, pressScale]);
+
+      return {
+        transform: [{ scale }],
+      };
+    });
+
+    // Press handlers
+    const handlePressIn = useCallback(() => {
+      if (!disabled) {
+        pressed.value = withSpring(1, spring.press);
+      }
+    }, [disabled, pressed]);
+
+    const handlePressOut = useCallback(() => {
+      pressed.value = withSpring(0, spring.press);
+    }, [pressed]);
+
+    const handlePress = useCallback(() => {
+      if (hapticType !== 'none') {
+        trigger(hapticType === 'medium' ? 'impactMedium' : 'impactLight');
+      }
+      onPress?.();
+    }, [hapticType, onPress, trigger]);
+
+    const handleLongPress = useCallback(() => {
+      trigger('impactMedium');
+      onLongPress?.();
+    }, [onLongPress, trigger]);
+
+    // Container styles
+    const containerStyles = useMemo(
+      () => [
+        styles.container,
+        {
+          backgroundColor: variantStyles.backgroundColor,
+          borderColor: selected ? colors.interactive.default : variantStyles.borderColor,
+          borderRadius,
+          borderWidth: selected ? 2 : variantStyles.borderWidth,
+          padding: paddingValue,
+        },
+        shadowStyle,
+        disabled && styles.disabled,
+        style,
+      ],
+      [
+        variantStyles,
+        borderRadius,
+        paddingValue,
+        shadowStyle,
+        disabled,
+        selected,
+        colors.interactive.default,
+        style,
+      ],
+    );
+
+    // Content wrapper
+    const renderContent = () => (
+      <>
+        {/* Gradient Background */}
+        {variant === 'gradient' && (
+          <LinearGradient
+            colors={defaultGradientColors}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[styles.gradient, { borderRadius }]}
+          />
+        )}
+
+        {/* Header */}
+        {header && (
+          <View style={[styles.header, { borderBottomColor: colors.border.default }]}>
+            {header}
+          </View>
+        )}
+
+        {/* Main Content */}
+        <View style={styles.content}>{children}</View>
+
+        {/* Footer */}
+        {footer && (
+          <View style={[styles.footer, { borderTopColor: colors.border.default }]}>{footer}</View>
+        )}
+      </>
+    );
+
+    // Interactive card
+    if (onPress || onLongPress) {
       return (
-        <TouchableOpacity
-          style={[getContainerStyle(), style]}
-          onPress={onPress}
+        <AnimatedPressable
+          style={[containerStyles, animatedContainerStyle]}
+          onPress={handlePress}
+          onLongPress={onLongPress ? handleLongPress : undefined}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
           disabled={disabled}
-          activeOpacity={0.7}
           testID={testID}
-        >
-          {children}
-        </TouchableOpacity>
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel={accessibilityLabel}
+          accessibilityHint={accessibilityHint}
+          accessibilityState={{ disabled, selected }}>
+          {renderContent()}
+        </AnimatedPressable>
       );
     }
 
+    // Static card
     return (
-      <View style={[getContainerStyle(), style]} testID={testID}>
-        {children}
-      </View>
+      <Animated.View
+        style={[containerStyles, animatedContainerStyle]}
+        testID={testID}
+        accessible
+        accessibilityLabel={accessibilityLabel}>
+        {renderContent()}
+      </Animated.View>
     );
   },
 );

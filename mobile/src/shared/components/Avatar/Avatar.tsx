@@ -1,106 +1,95 @@
 // src/shared/components/Avatar/Avatar.tsx
-// Kullanıcı avatar komponenti
-// Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART4.md
+// Meslektaş Design System - Modern Avatar Component
+// Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
+import { Image, Pressable, Text, View } from 'react-native';
+import Animated, {
+  FadeIn,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
+
+import { useColors } from '@contexts/ThemeContext';
+import { useHaptic } from '@shared/hooks/useHaptic';
+import { spring } from '@theme/animations';
+
+import { styles } from './Avatar.styles';
 import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-  ViewStyle,
-} from 'react-native';
-import { useTheme } from '@contexts/ThemeContext';
+  AVATAR_BACKGROUND_COLORS,
+  AVATAR_SIZE_CONFIG,
+  STATUS_COLORS,
+  type AvatarProps,
+  type AvatarStatus,
+} from './Avatar.types';
 
-type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
-
-interface AvatarProps {
-  /**
-   * Image URI for the avatar
-   */
-  uri?: string | null;
-  /**
-   * User's name for generating initials and background color
-   */
-  name?: string;
-  /**
-   * Size of the avatar
-   * @default 'md'
-   */
-  size?: AvatarSize;
-  /**
-   * Callback when avatar is pressed
-   */
-  onPress?: () => void;
-  /**
-   * Show online/status badge
-   */
-  showBadge?: boolean;
-  /**
-   * Badge color (defaults to success color)
-   */
-  badgeColor?: string;
-  /**
-   * Additional container styles
-   */
-  style?: ViewStyle;
-  /**
-   * Test ID for testing
-   */
-  testID?: string;
-}
-
-const SIZES: Record<AvatarSize, number> = {
-  xs: 24,
-  sm: 32,
-  md: 40,
-  lg: 56,
-  xl: 80,
-  '2xl': 120,
-};
-
-const FONT_SIZES: Record<AvatarSize, number> = {
-  xs: 10,
-  sm: 12,
-  md: 14,
-  lg: 20,
-  xl: 28,
-  '2xl': 42,
-};
+// Create animated components
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 /**
- * Avatar Component
- * 
- * Displays user avatar with image or initials fallback.
- * Supports various sizes, badges, and touch interactions.
- * 
+ * Modern Avatar Component
+ *
+ * Features:
+ * - Image with fallback to initials
+ * - Consistent color generation from name
+ * - Multiple sizes (xs to 2xl)
+ * - Status badge (online, offline, busy, away)
+ * - Custom badge content (notification count)
+ * - Press animations with spring physics
+ * - Edit overlay support
+ * - Selection state
+ *
  * @example
  * ```tsx
  * // With image
- * <Avatar uri="https://example.com/avatar.jpg" name="John Doe" size="lg" />
- * 
+ * <Avatar
+ *   uri="https://example.com/avatar.jpg"
+ *   name="John Doe"
+ *   size="lg"
+ *   status="online"
+ * />
+ *
  * // With initials fallback
  * <Avatar name="Jane Smith" size="md" />
- * 
- * // With online badge
- * <Avatar name="User" showBadge badgeColor="#22C55E" />
+ *
+ * // With notification badge
+ * <Avatar
+ *   name="User"
+ *   badgeContent={5}
+ *   badgeColor="#FF6B6B"
+ * />
  * ```
  */
 export const Avatar: React.FC<AvatarProps> = memo(
   ({
     uri,
+    source,
     name,
     size = 'md',
     onPress,
-    showBadge = false,
+    onLongPress,
+    status = 'none',
     badgeColor,
+    badgeContent,
+    showEditOverlay = false,
+    animated = true,
+    borderColor,
+    borderWidth,
     style,
     testID,
+    accessibilityLabel,
+    selected = false,
+    hapticType = 'light',
   }) => {
-    const { theme } = useTheme();
-    const dimension = SIZES[size];
-    const fontSize = FONT_SIZES[size];
+    const colors = useColors();
+    const { trigger } = useHaptic();
+
+    // Animation values
+    const pressed = useSharedValue(0);
+    const sizeConfig = AVATAR_SIZE_CONFIG[size];
 
     // Generate initials from name
     const initials = useMemo(() => {
@@ -114,98 +103,191 @@ export const Avatar: React.FC<AvatarProps> = memo(
 
     // Generate consistent background color from name
     const backgroundColor = useMemo(() => {
-      if (!name) return theme.colors.neutral[300];
+      if (!name) return colors.background.tertiary;
+
       let hash = 0;
       for (let i = 0; i < name.length; i++) {
         hash = name.charCodeAt(i) + ((hash << 5) - hash);
       }
-      const colors = [
-        theme.colors.primary[400],
-        theme.colors.secondary[400],
-        theme.colors.success.main,
-        theme.colors.warning.main,
-        theme.colors.info.main,
-      ];
-      return colors[Math.abs(hash) % colors.length];
-    }, [name, theme]);
 
-    const containerStyle: ViewStyle = {
-      width: dimension,
-      height: dimension,
-      borderRadius: dimension / 2,
-      backgroundColor,
-      overflow: 'hidden',
+      return AVATAR_BACKGROUND_COLORS[Math.abs(hash) % AVATAR_BACKGROUND_COLORS.length];
+    }, [name, colors.background.tertiary]);
+
+    // Get status color
+    const statusColor = useMemo(() => {
+      if (badgeColor) return badgeColor;
+      if (status === 'none') return undefined;
+      return STATUS_COLORS[status as Exclude<AvatarStatus, 'none'>];
+    }, [status, badgeColor]);
+
+    // Animated press style
+    const animatedPressStyle = useAnimatedStyle(() => {
+      if (!animated || (!onPress && !onLongPress)) {
+        return {};
+      }
+
+      const scale = interpolate(pressed.value, [0, 1], [1, 0.95]);
+      return { transform: [{ scale }] };
+    });
+
+    // Press handlers
+    const handlePressIn = useCallback(() => {
+      if (!onPress && !onLongPress) return;
+      pressed.value = withSpring(1, spring.press);
+    }, [onPress, onLongPress, pressed]);
+
+    const handlePressOut = useCallback(() => {
+      pressed.value = withSpring(0, spring.press);
+    }, [pressed]);
+
+    const handlePress = useCallback(() => {
+      if (hapticType !== 'none') {
+        trigger(hapticType === 'medium' ? 'impactMedium' : 'impactLight');
+      }
+      onPress?.();
+    }, [hapticType, onPress, trigger]);
+
+    const handleLongPress = useCallback(() => {
+      trigger('impactMedium');
+      onLongPress?.();
+    }, [onLongPress, trigger]);
+
+    // Container styles
+    const containerStyles = useMemo(
+      () => [
+        styles.container,
+        {
+          backgroundColor,
+          borderColor: selected ? colors.interactive.default : borderColor,
+          borderRadius: sizeConfig.dimension / 2,
+          borderWidth: selected ? 3 : (borderWidth ?? 0),
+          height: sizeConfig.dimension,
+          width: sizeConfig.dimension,
+        },
+        style,
+      ],
+      [
+        backgroundColor,
+        borderColor,
+        borderWidth,
+        colors.interactive.default,
+        selected,
+        sizeConfig.dimension,
+        style,
+      ],
+    );
+
+    // Render image or initials
+    const renderContent = () => {
+      const imageSource = source ?? (uri ? { uri } : null);
+
+      if (imageSource) {
+        return (
+          <AnimatedImage
+            source={imageSource}
+            style={styles.image}
+            resizeMode="cover"
+            entering={animated ? FadeIn.duration(300) : undefined}
+          />
+        );
+      }
+
+      return (
+        <View style={[styles.placeholder, { backgroundColor }]}>
+          <Text style={[styles.initials, { color: '#FFFFFF', fontSize: sizeConfig.fontSize }]}>
+            {initials}
+          </Text>
+        </View>
+      );
     };
 
-    const content = uri ? (
-      <Image source={{ uri }} style={styles.image} resizeMode="cover" />
-    ) : (
-      <View style={[styles.placeholder, { backgroundColor }]}>
-        <Text style={[styles.initials, { fontSize, color: '#FFFFFF' }]}>
-          {initials}
-        </Text>
-      </View>
-    );
+    // Render badge (status or content)
+    const renderBadge = () => {
+      const showBadge = status !== 'none' || badgeContent !== undefined;
+      if (!showBadge) return null;
 
-    const badge = showBadge && (
-      <View
-        style={[
-          styles.badge,
-          {
-            backgroundColor: badgeColor || theme.colors.success.main,
-            width: dimension * 0.25,
-            height: dimension * 0.25,
-            borderRadius: dimension * 0.125,
-            borderColor: theme.colors.background.primary,
-          },
-        ]}
-      />
-    );
+      const badgeSize =
+        badgeContent !== undefined ? sizeConfig.badgeSize * 1.5 : sizeConfig.badgeSize;
 
-    if (onPress) {
       return (
-        <TouchableOpacity
-          style={[containerStyle, style]}
-          onPress={onPress}
-          activeOpacity={0.7}
+        <View
+          style={[
+            styles.badge,
+            {
+              backgroundColor: statusColor ?? colors.status.error,
+              borderColor: colors.background.primary,
+              borderRadius: badgeSize / 2,
+              borderWidth: sizeConfig.badgeBorderWidth,
+              height: badgeSize,
+              minWidth: badgeSize,
+              paddingHorizontal: badgeContent !== undefined ? 4 : 0,
+              width: badgeContent !== undefined ? undefined : badgeSize,
+            },
+          ]}>
+          {badgeContent !== undefined && (
+            <Text
+              style={[
+                styles.badgeContent,
+                {
+                  color: '#FFFFFF',
+                  fontSize: sizeConfig.fontSize * 0.5,
+                },
+              ]}>
+              {typeof badgeContent === 'number' && badgeContent > 99 ? '99+' : badgeContent}
+            </Text>
+          )}
+        </View>
+      );
+    };
+
+    // Render edit overlay
+    const renderEditOverlay = () => {
+      if (!showEditOverlay) return null;
+
+      return (
+        <View style={[styles.editOverlay, { backgroundColor: 'rgba(0, 0, 0, 0.4)' }]}>
+          <Text style={{ color: '#FFFFFF', fontSize: sizeConfig.fontSize }}>📷</Text>
+        </View>
+      );
+    };
+
+    // Accessibility label
+    const a11yLabel =
+      accessibilityLabel ?? (name ? `${name} profil fotoğrafı` : 'Profil fotoğrafı');
+
+    // Interactive avatar
+    if (onPress || onLongPress) {
+      return (
+        <AnimatedPressable
+          style={[containerStyles, animatedPressStyle]}
+          onPress={handlePress}
+          onLongPress={onLongPress ? handleLongPress : undefined}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
           testID={testID}
-          accessibilityLabel={name ? `${name} profil fotoğrafı` : 'Profil fotoğrafı'}
+          accessible
           accessibilityRole="button"
-        >
-          {content}
-          {badge}
-        </TouchableOpacity>
+          accessibilityLabel={a11yLabel}>
+          {renderContent()}
+          {renderEditOverlay()}
+          {renderBadge()}
+        </AnimatedPressable>
       );
     }
 
+    // Static avatar
     return (
-      <View style={[containerStyle, style]} testID={testID}>
-        {content}
-        {badge}
-      </View>
+      <Animated.View
+        style={[containerStyles, animatedPressStyle]}
+        testID={testID}
+        accessible
+        accessibilityLabel={a11yLabel}>
+        {renderContent()}
+        {renderEditOverlay()}
+        {renderBadge()}
+      </Animated.View>
     );
   },
 );
-
-const styles = StyleSheet.create({
-  image: {
-    width: '100%',
-    height: '100%',
-  },
-  placeholder: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  initials: {
-    fontWeight: '600',
-  },
-  badge: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    borderWidth: 2,
-  },
-});
 
 Avatar.displayName = 'Avatar';
