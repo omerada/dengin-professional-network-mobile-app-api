@@ -21,26 +21,26 @@ import java.util.UUID;
  */
 @Repository
 public interface JpaPostRepository extends JpaRepository<Post, Long> {
-    
+
     /**
      * Find by PostId (UUID)
      */
     @Query("SELECT p FROM Post p WHERE p.postId.value = :postId")
     Optional<Post> findByPostId(@Param("postId") UUID postId);
-    
+
     /**
      * Find posts by author
      * Ordered by creation date (newest first)
      */
     @Query("SELECT p FROM Post p WHERE p.authorId = :authorId ORDER BY p.createdAt DESC")
     List<Post> findByAuthorId(@Param("authorId") Long authorId);
-    
+
     /**
      * Find visible posts by author (excluding deleted)
      */
     @Query("SELECT p FROM Post p WHERE p.authorId = :authorId AND p.status = 'PUBLISHED' ORDER BY p.createdAt DESC")
     List<Post> findVisiblePostsByAuthorId(@Param("authorId") Long authorId);
-    
+
     /**
      * Find posts for feed generation with relevance scoring
      * 
@@ -53,23 +53,47 @@ public interface JpaPostRepository extends JpaRepository<Post, Long> {
      * Note: Relevance scoring is done in application layer (FeedService)
      */
     @Query(value = """
-        SELECT p.* FROM posts p
-        WHERE p.status = 'PUBLISHED'
-        AND p.created_at >= :since
-        AND (
-            p.author_id IN (:followedUserIds)
-            OR (:professionId IS NOT NULL AND p.profession_id = :professionId)
-        )
-        ORDER BY p.created_at DESC
-        LIMIT :limit
-        """, nativeQuery = true)
+            SELECT p.* FROM posts p
+            WHERE p.status = 'PUBLISHED'
+            AND p.created_at >= :since
+            AND (
+                p.author_id IN (:followedUserIds)
+                OR (:professionId IS NOT NULL AND p.profession_id = :professionId)
+            )
+            ORDER BY p.created_at DESC
+            LIMIT :limit
+            """, nativeQuery = true)
     List<Post> findPostsForFeed(
-        @Param("followedUserIds") List<Long> followedUserIds,
-        @Param("professionId") Long professionId,
-        @Param("since") LocalDateTime since,
-        @Param("limit") int limit
-    );
-    
+            @Param("followedUserIds") List<Long> followedUserIds,
+            @Param("professionId") Long professionId,
+            @Param("since") LocalDateTime since,
+            @Param("limit") int limit);
+
+    /**
+     * Find posts for feed with cursor-based pagination
+     * 
+     * Same as findPostsForFeed but with cursor support for infinite scroll.
+     * Returns posts with ID < beforeId for pagination.
+     */
+    @Query(value = """
+            SELECT p.* FROM posts p
+            WHERE p.status = 'PUBLISHED'
+            AND p.created_at >= :since
+            AND (:beforeId IS NULL OR p.id < :beforeId)
+            AND (
+                p.author_id IN (:followedUserIds)
+                OR (:professionId IS NOT NULL AND p.profession_id = :professionId)
+            )
+            ORDER BY p.id DESC
+            LIMIT :limit
+            """, nativeQuery = true)
+    List<Post> findPostsForFeedWithCursor(
+            @Param("followedUserIds") List<Long> followedUserIds,
+            @Param("professionId") Long professionId,
+            @Param("since") LocalDateTime since,
+            @Param("limit") int limit,
+            @Param("beforeId") Long beforeId);
+
     /**
      * Find trending posts (high engagement in recent period)
      * 
@@ -80,29 +104,28 @@ public interface JpaPostRepository extends JpaRepository<Post, Long> {
      * - Engagement = (like_count * 2) + (comment_count * 5)
      */
     @Query(value = """
-        SELECT p.* FROM posts p
-        WHERE p.status = 'PUBLISHED'
-        AND p.created_at >= :since
-        ORDER BY (p.like_count * 2 + p.comment_count * 5) DESC, p.created_at DESC
-        LIMIT :limit
-        """, nativeQuery = true)
+            SELECT p.* FROM posts p
+            WHERE p.status = 'PUBLISHED'
+            AND p.created_at >= :since
+            ORDER BY (p.like_count * 2 + p.comment_count * 5) DESC, p.created_at DESC
+            LIMIT :limit
+            """, nativeQuery = true)
     List<Post> findTrendingPosts(
-        @Param("since") LocalDateTime since,
-        @Param("limit") int limit
-    );
-    
+            @Param("since") LocalDateTime since,
+            @Param("limit") int limit);
+
     /**
      * Count posts by author
      */
     @Query("SELECT COUNT(p) FROM Post p WHERE p.authorId = :authorId")
     long countByAuthorId(@Param("authorId") Long authorId);
-    
+
     /**
      * Count visible posts by author
      */
     @Query("SELECT COUNT(p) FROM Post p WHERE p.authorId = :authorId AND p.status = 'PUBLISHED'")
     long countVisiblePostsByAuthorId(@Param("authorId") Long authorId);
-    
+
     /**
      * Check if post exists and has specific status
      */

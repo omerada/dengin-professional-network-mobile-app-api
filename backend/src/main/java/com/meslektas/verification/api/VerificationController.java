@@ -17,7 +17,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Verification REST API Controller
@@ -39,9 +38,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class VerificationController {
-    
+
     private final VerificationService verificationService;
-    
+
     /**
      * Submit new verification request
      * 
@@ -53,18 +52,17 @@ public class VerificationController {
     @PostMapping("/verifications")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<VerificationResponse> submitVerification(
-        @Valid @RequestBody SubmitVerificationRequest request,
-        Authentication authentication
-    ) {
+            @Valid @RequestBody SubmitVerificationRequest request,
+            Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
-        
+
         log.info("User {} submitting verification request", userId);
-        
+
         VerificationResponse response = verificationService.submitVerification(request, userId);
-        
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-    
+
     /**
      * Get user's verification requests
      * 
@@ -73,15 +71,14 @@ public class VerificationController {
     @GetMapping("/verifications")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<VerificationResponse>> getUserVerifications(
-        Authentication authentication
-    ) {
+            Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
-        
+
         List<VerificationResponse> verifications = verificationService.getUserVerifications(userId);
-        
+
         return ResponseEntity.ok(verifications);
     }
-    
+
     /**
      * Get verification details by ID
      * 
@@ -90,15 +87,15 @@ public class VerificationController {
     @GetMapping("/verifications/{id}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<VerificationResponse> getVerificationById(
-        @PathVariable Long id,
-        Authentication authentication
-    ) {
+            @PathVariable Long id,
+            Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
-        
+
         VerificationResponse verification = verificationService.getVerificationById(id, userId);
-        
+
         return ResponseEntity.ok(verification);
     }
+
     /**
      * Get user's verification history
      * 
@@ -109,15 +106,14 @@ public class VerificationController {
     @GetMapping("/verifications/history")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<VerificationAttemptResponse>> getVerificationHistory(
-        Authentication authentication
-    ) {
+            Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
-        
+
         List<VerificationAttemptResponse> history = verificationService.getUserVerificationHistory(userId);
-        
+
         return ResponseEntity.ok(history);
     }
-    
+
     /**
      * Check if user can submit verification for profession
      * 
@@ -128,20 +124,18 @@ public class VerificationController {
     @GetMapping("/verifications/check/{professionId}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<VerificationEligibilityResponse> checkEligibility(
-        @PathVariable Long professionId,
-        Authentication authentication
-    ) {
+            @PathVariable Long professionId,
+            Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
-        
-        VerificationEligibilityResponse eligibility = 
-            verificationService.checkEligibility(userId, professionId);
-        
+
+        VerificationEligibilityResponse eligibility = verificationService.checkEligibility(userId, professionId);
+
         return ResponseEntity.ok(eligibility);
     }
-    
+
     // ========== Admin Endpoints ==========
     // ========== Admin Endpoints ==========
-    
+
     /**
      * Get pending manual reviews (admin only)
      * 
@@ -151,10 +145,10 @@ public class VerificationController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<VerificationResponse>> getPendingManualReviews() {
         List<VerificationResponse> pending = verificationService.getPendingManualReviews();
-        
+
         return ResponseEntity.ok(pending);
     }
-    
+
     /**
      * Approve verification (admin only)
      * 
@@ -163,23 +157,21 @@ public class VerificationController {
     @PostMapping("/admin/verifications/{id}/approve")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<VerificationResponse> approveVerification(
-        @PathVariable Long id,
-        @Valid @RequestBody ManualReviewDecisionRequest request,
-        Authentication authentication
-    ) {
+            @PathVariable Long id,
+            @Valid @RequestBody ManualReviewDecisionRequest request,
+            Authentication authentication) {
         Long adminId = Long.parseLong(authentication.getName());
-        
+
         log.info("Admin {} approving verification {}", adminId, id);
-        
+
         VerificationResponse response = verificationService.approveVerification(
-            id, 
-            adminId, 
-            request.getNotes()
-        );
-        
+                id,
+                adminId,
+                request.getNotes());
+
         return ResponseEntity.ok(response);
     }
-    
+
     /**
      * Reject verification (admin only)
      * 
@@ -188,23 +180,21 @@ public class VerificationController {
     @PostMapping("/admin/verifications/{id}/reject")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<VerificationResponse> rejectVerification(
-        @PathVariable Long id,
-        @Valid @RequestBody ManualReviewDecisionRequest request,
-        Authentication authentication
-    ) {
+            @PathVariable Long id,
+            @Valid @RequestBody ManualReviewDecisionRequest request,
+            Authentication authentication) {
         Long adminId = Long.parseLong(authentication.getName());
-        
+
         log.info("Admin {} rejecting verification {}", adminId, id);
-        
+
         VerificationResponse response = verificationService.rejectVerification(
-            id, 
-            adminId, 
-            request.getNotes()
-        );
-        
+                id,
+                adminId,
+                request.getNotes());
+
         return ResponseEntity.ok(response);
     }
-    
+
     /**
      * Get admin dashboard statistics
      * 
@@ -220,9 +210,9 @@ public class VerificationController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<VerificationStatisticsResponse> getStatistics() {
         log.debug("Admin fetching verification statistics");
-        
+
         VerificationStatisticsResponse statistics = verificationService.getStatistics();
-        
+
         return ResponseEntity.ok(statistics);
     }
 }

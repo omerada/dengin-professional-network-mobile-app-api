@@ -2,14 +2,13 @@
 // Feed hook (React Query - Infinite Query)
 // Backend API Reference: mobile-development-guide/core/14-BACKEND-API-REFERENCE.md
 //
-// NOT: Backend FeedController 'page' parametresi KULLANMAZ, sadece 'limit' alır.
-// Bu yüzden true infinite scroll yerine "load more" yaklaşımı kullanılır.
-// Backend cursor-based pagination desteklerse bu hook güncellenebilir.
+// Cursor-based pagination desteklenir:
+// - beforeId: Son post ID'sinden önceki postları getirmek için kullanılır
+// - Her sayfa için son post'un ID'si cursor olarak kullanılır
 
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { feedService } from '../services';
-import { useFeedStore } from '../stores';
-import type { FeedResponse, FeedFilter } from '../types';
+import type { FeedResponse } from '../types';
 
 /**
  * Query keys
@@ -18,12 +17,8 @@ export const FEED_QUERY_KEY = 'feed';
 export const TRENDING_FEED_KEY = 'trending-feed';
 
 /**
- * Feed hook
- * GET /api/feed with limit-based loading
- *
- * NOT: Backend pagination DESTEKLEMEZ (page parametresi yok).
- * Her request'te 'limit' kadar post getirilir.
- * Şu anki implementasyon ilk sayfa için çalışır.
+ * Feed hook with cursor-based pagination
+ * GET /api/feed with beforeId cursor
  *
  * @param professionFilter - Meslek filtresi (optional)
  * @param limit - Kaç post getirilecek (max 50, default 20)
@@ -31,18 +26,16 @@ export const TRENDING_FEED_KEY = 'trending-feed';
 export function useFeed(professionFilter?: number, limit = 20) {
   return useInfiniteQuery<FeedResponse, Error>({
     queryKey: [FEED_QUERY_KEY, professionFilter, limit],
-    queryFn: async () => {
-      // Backend sadece 'limit' parametresi alır, pagination yok
-      return feedService.getFeed(limit, professionFilter);
+    queryFn: async ({ pageParam }) => {
+      // pageParam = beforeId (son post'un ID'si)
+      return feedService.getFeed(limit, professionFilter, pageParam as number | undefined);
     },
-    initialPageParam: 0,
+    initialPageParam: undefined as number | undefined,
     getNextPageParam: lastPage => {
-      // Backend pagination desteklemediği için şimdilik devre dışı
-      // Cursor-based pagination eklenirse burası güncellenecek
+      // Sonraki sayfa için son post'un ID'sini cursor olarak kullan
       if (lastPage.hasNext && lastPage.content.length > 0) {
-        // Backend'de lastId/cursor desteği gelince:
-        // return lastPage.content[lastPage.content.length - 1].id;
-        return undefined; // Şimdilik pagination devre dışı
+        const lastPost = lastPage.content[lastPage.content.length - 1];
+        return lastPost.postId; // Son post'un ID'si = bir sonraki sayfa için cursor
       }
       return undefined;
     },

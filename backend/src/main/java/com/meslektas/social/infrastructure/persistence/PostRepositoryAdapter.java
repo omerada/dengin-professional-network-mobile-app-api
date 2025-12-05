@@ -20,74 +20,92 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class PostRepositoryAdapter implements PostRepository {
-    
+
     private final JpaPostRepository jpaRepository;
-    
+
     @Override
     public Post save(Post post) {
         return jpaRepository.save(post);
     }
-    
+
     @Override
     public Optional<Post> findById(Long id) {
         return jpaRepository.findById(id);
     }
-    
+
     @Override
     public Optional<Post> findByPostId(PostId postId) {
         return jpaRepository.findByPostId(postId.getValue());
     }
-    
+
     @Override
     public List<Post> findByAuthorId(Long authorId) {
         return jpaRepository.findByAuthorId(authorId);
     }
-    
+
     @Override
     public List<Post> findVisiblePostsByAuthorId(Long authorId) {
         return jpaRepository.findVisiblePostsByAuthorId(authorId);
     }
-    
+
     @Override
     public List<Post> findPostsForFeed(
-        List<Long> followedUserIds,
-        Long professionId,
-        LocalDateTime since,
-        int limit
-    ) {
+            List<Long> followedUserIds,
+            Long professionId,
+            LocalDateTime since,
+            int limit) {
         // Handle empty followed list
         if (followedUserIds == null || followedUserIds.isEmpty()) {
             followedUserIds = List.of(-1L); // Dummy ID to avoid SQL error
         }
-        
+
         return jpaRepository.findPostsForFeed(
-            followedUserIds,
-            professionId,
-            since,
-            limit
-        );
+                followedUserIds,
+                professionId,
+                since,
+                limit);
     }
-    
+
+    @Override
+    public List<Post> findPostsForFeedWithCursor(
+            List<Long> followedUserIds,
+            Long professionId,
+            LocalDateTime since,
+            int limit,
+            Long beforeId) {
+        // Handle empty followed list
+        if (followedUserIds == null || followedUserIds.isEmpty()) {
+            followedUserIds = List.of(-1L); // Dummy ID to avoid SQL error
+        }
+
+        return jpaRepository.findPostsForFeedWithCursor(
+                followedUserIds,
+                professionId,
+                since,
+                limit,
+                beforeId);
+    }
+
     @Override
     public List<Post> findTrendingPosts(LocalDateTime since, int limit) {
         return jpaRepository.findTrendingPosts(since, limit);
     }
-    
+
     @Override
     public long countByAuthorId(Long authorId) {
         return jpaRepository.countByAuthorId(authorId);
     }
-    
+
     @Override
     public long countVisiblePostsByAuthorId(Long authorId) {
         return jpaRepository.countVisiblePostsByAuthorId(authorId);
     }
-    
+
     @Override
     public boolean existsByIdAndStatus(Long id, PostStatus status) {
         return jpaRepository.existsByIdAndStatus(id, status);
     }
-    
+
     @Override
     public void delete(Post post) {
         jpaRepository.delete(post);

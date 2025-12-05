@@ -82,23 +82,21 @@ export const API_ENDPOINTS = {
   },
 
   // Comments - Backend: /api/posts/{postId}/comments/*
-  // NOT: Backend CommentController sadece bu 3 endpoint'i destekliyor:
+  // Backend CommentController endpoints:
   // - POST /api/posts/{postId}/comments - Yorum ekle
   // - GET /api/posts/{postId}/comments - Yorumları getir
   // - DELETE /api/posts/{postId}/comments/{commentId} - Yorum sil
-  // Comment like/unlike henüz backend'de mevcut değil!
+  // - POST /api/posts/{postId}/comments/{commentId}/like - Yorum beğen
+  // - DELETE /api/posts/{postId}/comments/{commentId}/like - Yorum beğenmekten vazgeç
   COMMENTS: {
     BY_POST: (postId: string | number) => `/api/posts/${postId}/comments`,
     CREATE: (postId: string | number) => `/api/posts/${postId}/comments`,
-    // DELETE doğru format: /api/posts/{postId}/comments/{commentId}
     DELETE: (postId: string | number, commentId: string) =>
       `/api/posts/${postId}/comments/${commentId}`,
-    // Aşağıdaki endpoint'ler BACKEND'DE MEVCUT DEĞİL - Sprint scope dışı
-    // Comment update ve like özelliği gelecek sprintlerde eklenebilir
-    // UPDATE: (id: string | number) => `/api/comments/${id}`,
-    // LIKE: (postId: string | number, commentId: string) => `/api/posts/${postId}/comments/${commentId}/like`,
-    // UNLIKE: (postId: string | number, commentId: string) => `/api/posts/${postId}/comments/${commentId}/like`,
-    // REPLIES: (id: string | number) => `/api/comments/${id}/replies`,
+    LIKE: (postId: string | number, commentId: string) =>
+      `/api/posts/${postId}/comments/${commentId}/like`,
+    UNLIKE: (postId: string | number, commentId: string) =>
+      `/api/posts/${postId}/comments/${commentId}/like`,
   },
 
   // Messaging - Backend: /api/conversations/*

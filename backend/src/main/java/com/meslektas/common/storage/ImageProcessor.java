@@ -8,7 +8,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
@@ -28,8 +27,7 @@ public class ImageProcessor {
             "image/jpeg",
             "image/jpg",
             "image/png",
-            "image/webp"
-    );
+            "image/webp");
 
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     private static final int MAX_WIDTH = 2048;
@@ -48,8 +46,7 @@ public class ImageProcessor {
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new BusinessException(
                     "Dosya boyutu izin verilen maksimum boyutu aşıyor (10MB)",
-                    "FILE_TOO_LARGE"
-            );
+                    "FILE_TOO_LARGE");
         }
 
         // Check content type
@@ -57,8 +54,7 @@ public class ImageProcessor {
         if (contentType == null || !ALLOWED_TYPES.contains(contentType.toLowerCase())) {
             throw new BusinessException(
                     "Geçersiz dosya tipi. İzin verilen tipler: JPEG, PNG, WebP",
-                    "INVALID_FILE_TYPE"
-            );
+                    "INVALID_FILE_TYPE");
         }
 
         // Validate actual image
@@ -67,14 +63,12 @@ public class ImageProcessor {
             if (image == null) {
                 throw new BusinessException(
                         "Dosya geçerli bir resim değil",
-                        "INVALID_IMAGE"
-                );
+                        "INVALID_IMAGE");
             }
         } catch (IOException e) {
             throw new BusinessException(
                     "Resim dosyası okunamadı",
-                    "IMAGE_READ_FAILED"
-            );
+                    "IMAGE_READ_FAILED");
         }
     }
 
@@ -169,8 +163,7 @@ public class ImageProcessor {
             log.error("Failed to process image", e);
             throw new BusinessException(
                     "Failed to process image: " + e.getMessage(),
-                    "IMAGE_PROCESSING_FAILED"
-            );
+                    "IMAGE_PROCESSING_FAILED");
         }
     }
 }

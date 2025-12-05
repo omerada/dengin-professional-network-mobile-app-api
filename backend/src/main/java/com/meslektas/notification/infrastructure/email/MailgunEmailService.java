@@ -56,7 +56,6 @@ public class MailgunEmailService implements EmailService {
 
     private static final int MAX_RETRIES = 3;
     private static final long INITIAL_RETRY_DELAY_MS = 1000;
-    private static final MediaType FORM = MediaType.get("application/x-www-form-urlencoded");
 
     @PostConstruct
     public void init() {
@@ -81,7 +80,7 @@ public class MailgunEmailService implements EmailService {
             NotificationType type,
             NotificationContent content,
             Map<String, String> metadata) {
-        
+
         if (!isReady()) {
             logEmail("notification", recipientEmail, type.name());
             return;
@@ -208,11 +207,11 @@ public class MailgunEmailService implements EmailService {
     /**
      * Send email with retry logic and exponential backoff
      */
-    private void sendEmailWithRetry(String recipientEmail, String recipientName, String subject, String htmlBody) 
+    private void sendEmailWithRetry(String recipientEmail, String recipientName, String subject, String htmlBody)
             throws IOException {
 
-        String fromAddress = senderName != null && !senderName.isBlank() 
-                ? senderName + " <" + senderEmail + ">" 
+        String fromAddress = senderName != null && !senderName.isBlank()
+                ? senderName + " <" + senderEmail + ">"
                 : senderEmail;
 
         String toAddress = recipientName != null && !recipientName.isBlank()
@@ -258,12 +257,12 @@ public class MailgunEmailService implements EmailService {
                     } else {
                         String responseBody = response.body() != null ? response.body().string() : "No body";
                         log.warn("Mailgun returned error: status={}, body={}", response.code(), responseBody);
-                        
+
                         // Don't retry on client errors (4xx except 429)
                         if (response.code() >= 400 && response.code() < 500 && response.code() != 429) {
                             throw new IOException("Mailgun client error: " + response.code() + " - " + responseBody);
                         }
-                        
+
                         throw new IOException("Mailgun error: " + response.code());
                     }
                 }
@@ -298,8 +297,8 @@ public class MailgunEmailService implements EmailService {
     }
 
     private void logEmail(String type, String recipient, String details) {
-        log.info("📧 [DEV MODE] Email would be sent: type={}, recipient={}, details={}", 
-            type, recipient, details);
+        log.info("📧 [DEV MODE] Email would be sent: type={}, recipient={}, details={}",
+                type, recipient, details);
     }
 
     private String getSubjectForType(NotificationType type, NotificationContent content) {

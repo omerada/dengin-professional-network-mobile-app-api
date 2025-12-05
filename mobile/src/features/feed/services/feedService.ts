@@ -33,26 +33,31 @@ interface ApiResponse<T> {
  * - PostController: /api/posts/* (CRUD, like/unlike)
  * - CommentController: /api/posts/{postId}/comments/* (CRUD)
  *
- * NOT: Backend FeedController sadece 'limit' parametresi kullanır, 'page' değil.
- * Cursor-based pagination yerine limit-based yaklaşım kullanılır.
+ * Cursor-based pagination desteklenir:
+ * - beforeId: Son post ID'sinden önceki postları getir
  */
 export const feedService = {
   /**
    * Personalized feed getir
-   * GET /api/feed?limit=20&professionFilter={professionId}
+   * GET /api/feed?limit=20&professionFilter={professionId}&beforeId={lastPostId}
    *
    * Backend: FeedController.getFeed()
    * - limit: Max results (max 50, default 20)
    * - professionFilter: Optional profession ID filter
+   * - beforeId: Optional cursor for pagination (get posts before this ID)
    *
-   * NOT: Backend 'page' parametresi KULLANMAZ, sadece 'limit' alır.
-   * İleri sayfalama için cursor/lastId yaklaşımı kullanılabilir (henüz backend'de yok).
+   * Cursor-based pagination için beforeId kullanılır.
+   * İlk sayfa için beforeId gönderilmez, sonraki sayfalar için son post'un ID'si gönderilir.
    */
-  async getFeed(limit = 20, professionFilter?: number): Promise<FeedResponse> {
+  async getFeed(limit = 20, professionFilter?: number, beforeId?: number): Promise<FeedResponse> {
     const response = await apiClient.get<ApiResponse<FeedResponse>>(
       API_ENDPOINTS.FEED.PERSONALIZED,
       {
-        params: { limit: Math.min(limit, 50), professionFilter },
+        params: {
+          limit: Math.min(limit, 50),
+          professionFilter,
+          beforeId,
+        },
       },
     );
     return response.data.data;
@@ -192,9 +197,6 @@ export const feedService = {
   async deleteComment(postId: number, commentId: string): Promise<void> {
     await apiClient.delete(`/api/posts/${postId}/comments/${commentId}`);
   },
-
-  // NOT: Comment like/unlike endpoint'leri backend'de MEVCUT DEĞİL (Sprint 5-6 scope dışı)
-  // Bu özellik gelecek sprintlerde eklenebilir. Şimdilik stub olarak bırakıyoruz.
 
   /**
    * Yorum beğen

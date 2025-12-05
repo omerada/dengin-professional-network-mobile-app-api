@@ -3,7 +3,6 @@ package com.meslektas.messaging.infrastructure.websocket;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
@@ -22,8 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @RequiredArgsConstructor
 public class WebSocketEventListener {
-
-    private final SimpMessageSendingOperations messagingTemplate;
 
     // Track active sessions per user
     // Key: userId, Value: Set of sessionIds

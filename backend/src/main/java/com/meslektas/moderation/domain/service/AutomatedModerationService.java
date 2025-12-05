@@ -1,7 +1,6 @@
 package com.meslektas.moderation.domain.service;
 
 import com.meslektas.moderation.domain.model.ModerationScore;
-import com.meslektas.moderation.domain.model.RiskLevel;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

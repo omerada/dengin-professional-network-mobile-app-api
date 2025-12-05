@@ -32,12 +32,12 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class OAuth2AuthenticationService {
-    
+
     private final GoogleTokenVerifier googleTokenVerifier;
     private final AppleTokenVerifier appleTokenVerifier;
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
-    
+
     /**
      * Authenticate with Google ID token
      * 
@@ -47,36 +47,35 @@ public class OAuth2AuthenticationService {
     @Transactional
     public OAuth2AuthResult authenticateWithGoogle(String idToken) {
         log.info("Processing Google OAuth2 authentication");
-        
+
         // Verify token with Google
         GoogleTokenVerifier.GoogleUserInfo googleUser = googleTokenVerifier.verify(idToken);
-        
+
         if (googleUser == null) {
             log.warn("Invalid Google ID token");
             throw new OAuth2AuthenticationException("Geçersiz Google token");
         }
-        
+
         // Find or create user
         Optional<User> existingUser = userRepository.findByEmail(googleUser.email());
-        
+
         boolean isNewUser = existingUser.isEmpty();
         User user;
-        
+
         if (isNewUser) {
             // Create new user from Google info
             user = User.createFromOAuth(
-                googleUser.email(),
-                googleUser.givenName(),
-                googleUser.familyName(),
-                googleUser.pictureUrl(),
-                OAuthProvider.GOOGLE,
-                googleUser.sub()
-            );
+                    googleUser.email(),
+                    googleUser.givenName(),
+                    googleUser.familyName(),
+                    googleUser.pictureUrl(),
+                    OAuthProvider.GOOGLE,
+                    googleUser.sub());
             user = userRepository.save(user);
             log.info("Created new user from Google OAuth: {}", user.getId());
         } else {
             user = existingUser.get();
-            
+
             // Update OAuth info if this is first OAuth login for existing user
             if (user.getOauthProvider() == null) {
                 user.linkOAuthProvider(OAuthProvider.GOOGLE, googleUser.sub());
@@ -84,45 +83,44 @@ public class OAuth2AuthenticationService {
                 log.info("Linked Google OAuth to existing user: {}", user.getId());
             } else if (user.getOauthProvider() != OAuthProvider.GOOGLE) {
                 // User exists with different OAuth provider
-                log.warn("User {} already linked with different OAuth provider: {}", 
-                    user.getId(), user.getOauthProvider());
+                log.warn("User {} already linked with different OAuth provider: {}",
+                        user.getId(), user.getOauthProvider());
             }
         }
-        
+
         // Generate JWT tokens
         return generateAuthResult(user, isNewUser);
     }
-    
+
     /**
      * Authenticate with Apple ID token
      * 
-     * @param idToken Apple ID token
+     * @param idToken           Apple ID token
      * @param authorizationCode Apple authorization code (for first login)
-     * @param fullName User's full name (only provided on first login)
+     * @param fullName          User's full name (only provided on first login)
      * @return OAuth2AuthResult with tokens and user info
      */
     @Transactional
     public OAuth2AuthResult authenticateWithApple(
-        String idToken,
-        String authorizationCode,
-        Map<String, String> fullName
-    ) {
+            String idToken,
+            String authorizationCode,
+            Map<String, String> fullName) {
         log.info("Processing Apple OAuth2 authentication");
-        
+
         // Verify token with Apple
         AppleTokenVerifier.AppleUserInfo appleUser = appleTokenVerifier.verify(idToken);
-        
+
         if (appleUser == null) {
             log.warn("Invalid Apple ID token");
             throw new OAuth2AuthenticationException("Geçersiz Apple token");
         }
-        
+
         // Find or create user
         Optional<User> existingUser = userRepository.findByEmail(appleUser.email());
-        
+
         boolean isNewUser = existingUser.isEmpty();
         User user;
-        
+
         if (isNewUser) {
             // Extract name from provided fullName (only available on first login)
             String firstName = null;
@@ -131,21 +129,20 @@ public class OAuth2AuthenticationService {
                 firstName = fullName.get("givenName");
                 lastName = fullName.get("familyName");
             }
-            
+
             // Create new user from Apple info
             user = User.createFromOAuth(
-                appleUser.email(),
-                firstName,
-                lastName,
-                null, // Apple doesn't provide avatar
-                OAuthProvider.APPLE,
-                appleUser.sub()
-            );
+                    appleUser.email(),
+                    firstName,
+                    lastName,
+                    null, // Apple doesn't provide avatar
+                    OAuthProvider.APPLE,
+                    appleUser.sub());
             user = userRepository.save(user);
             log.info("Created new user from Apple OAuth: {}", user.getId());
         } else {
             user = existingUser.get();
-            
+
             // Update OAuth info if this is first OAuth login for existing user
             if (user.getOauthProvider() == null) {
                 user.linkOAuthProvider(OAuthProvider.APPLE, appleUser.sub());
@@ -153,40 +150,36 @@ public class OAuth2AuthenticationService {
                 log.info("Linked Apple OAuth to existing user: {}", user.getId());
             }
         }
-        
+
         // Generate JWT tokens
         return generateAuthResult(user, isNewUser);
     }
-    
+
     /**
      * Generate authentication result with JWT tokens
      */
     private OAuth2AuthResult generateAuthResult(User user, boolean isNewUser) {
-        UserDetailsImpl userDetails = UserDetailsImpl.build(user);
-        
         String accessToken = jwtTokenProvider.generateTokenFromUserId(
-            user.getId(), 
-            user.getEmail()
-        );
+                user.getId(),
+                user.getEmail());
         String refreshToken = jwtTokenProvider.generateRefreshToken(
-            user.getId(), 
-            user.getEmail()
-        );
-        
+                user.getId(),
+                user.getEmail());
+
         return OAuth2AuthResult.builder()
-            .accessToken(accessToken)
-            .refreshToken(refreshToken)
-            .tokenType("Bearer")
-            .expiresIn(jwtTokenProvider.getExpirationInSeconds())
-            .isNewUser(isNewUser)
-            .user(OAuth2AuthResult.UserInfo.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .surname(user.getSurname())
-                .avatarUrl(user.getAvatarUrl())
-                .verificationStatus(user.isVerified() ? "VERIFIED" : "UNVERIFIED")
-                .build())
-            .build();
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .tokenType("Bearer")
+                .expiresIn(jwtTokenProvider.getExpirationInSeconds())
+                .isNewUser(isNewUser)
+                .user(OAuth2AuthResult.UserInfo.builder()
+                        .id(user.getId())
+                        .email(user.getEmail())
+                        .name(user.getName())
+                        .surname(user.getSurname())
+                        .avatarUrl(user.getAvatarUrl())
+                        .verificationStatus(user.isVerified() ? "VERIFIED" : "UNVERIFIED")
+                        .build())
+                .build();
     }
 }

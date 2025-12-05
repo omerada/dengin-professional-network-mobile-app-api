@@ -6,8 +6,6 @@ import com.meslektas.moderation.domain.model.ContentReport;
 import com.meslektas.moderation.domain.model.ReportReason;
 import com.meslektas.moderation.domain.model.ReportType;
 import com.meslektas.moderation.domain.repository.ContentReportRepository;
-import com.meslektas.moderation.domain.service.AutomatedModerationService;
-import com.meslektas.moderation.domain.model.ModerationScore;
 import com.meslektas.common.exception.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +27,9 @@ public class ReportContentService {
     private static final Logger log = LoggerFactory.getLogger(ReportContentService.class);
 
     private final ContentReportRepository reportRepository;
-    private final AutomatedModerationService automatedModerationService;
 
-    public ReportContentService(
-            ContentReportRepository reportRepository,
-            AutomatedModerationService automatedModerationService) {
+    public ReportContentService(ContentReportRepository reportRepository) {
         this.reportRepository = reportRepository;
-        this.automatedModerationService = automatedModerationService;
     }
 
     /**

@@ -98,7 +98,7 @@ class FeedServiceTest {
             when(userRepository.findById(3L)).thenReturn(Optional.of(sameProfessionUser));
 
             // When
-            List<FeedPostResponse> feed = feedService.getFeed(userId, null, limit);
+            List<FeedPostResponse> feed = feedService.getFeed(userId, null, limit, null);
 
             // Then
             assertThat(feed).isNotEmpty();
@@ -125,7 +125,7 @@ class FeedServiceTest {
             when(userRepository.findById(3L)).thenReturn(Optional.of(sameProfessionUser));
 
             // When
-            List<FeedPostResponse> feed = feedService.getFeed(userId, professionFilter, limit);
+            List<FeedPostResponse> feed = feedService.getFeed(userId, professionFilter, limit, null);
 
             // Then
             assertThat(feed).isNotEmpty();
@@ -141,7 +141,7 @@ class FeedServiceTest {
             when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
             // When & Then
-            assertThatThrownBy(() -> feedService.getFeed(userId, null, 20))
+            assertThatThrownBy(() -> feedService.getFeed(userId, null, 20, null))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("User not found");
         }
@@ -158,10 +158,42 @@ class FeedServiceTest {
                     .thenReturn(List.of());
 
             // When
-            List<FeedPostResponse> feed = feedService.getFeed(userId, null, 20);
+            List<FeedPostResponse> feed = feedService.getFeed(userId, null, 20, null);
 
             // Then
             assertThat(feed).isEmpty();
+        }
+
+        @Test
+        @DisplayName("Should get feed with cursor-based pagination")
+        void shouldGetFeed_WithCursorPagination() {
+            // Given
+            Long userId = 1L;
+            int limit = 20;
+            Long beforeId = 100L;
+
+            Post post1 = createMockPost(99L, 2L, "Older post before cursor position.");
+            Post post2 = createMockPost(98L, 3L, "Even older post before cursor position.");
+
+            when(userRepository.findById(userId)).thenReturn(Optional.of(currentUser));
+            when(followRepository.getFollowingIds(userId)).thenReturn(Set.of(2L));
+            when(postRepository.findPostsForFeedWithCursor(anyList(), any(), any(LocalDateTime.class), anyInt(),
+                    eq(beforeId)))
+                    .thenReturn(List.of(post1, post2));
+            when(userRepository.findById(2L)).thenReturn(Optional.of(followedUser));
+            when(userRepository.findById(3L)).thenReturn(Optional.of(sameProfessionUser));
+
+            // When
+            List<FeedPostResponse> feed = feedService.getFeed(userId, null, limit, beforeId);
+
+            // Then
+            assertThat(feed).isNotEmpty();
+            assertThat(feed.size()).isLessThanOrEqualTo(limit);
+
+            // Verify cursor-based query was used
+            verify(postRepository).findPostsForFeedWithCursor(anyList(), any(), any(LocalDateTime.class), anyInt(),
+                    eq(beforeId));
+            verify(postRepository, never()).findPostsForFeed(anyList(), any(), any(LocalDateTime.class), anyInt());
         }
     }
 
@@ -229,7 +261,7 @@ class FeedServiceTest {
             when(userRepository.findById(4L)).thenReturn(Optional.of(otherUser));
 
             // When
-            List<FeedPostResponse> feed = feedService.getFeed(userId, null, 20);
+            List<FeedPostResponse> feed = feedService.getFeed(userId, null, 20, null);
 
             // Then
             assertThat(feed).hasSize(2);
@@ -255,7 +287,7 @@ class FeedServiceTest {
             when(userRepository.findById(4L)).thenReturn(Optional.of(otherUser));
 
             // When
-            List<FeedPostResponse> feed = feedService.getFeed(userId, null, 20);
+            List<FeedPostResponse> feed = feedService.getFeed(userId, null, 20, null);
 
             // Then
             assertThat(feed).hasSize(2);

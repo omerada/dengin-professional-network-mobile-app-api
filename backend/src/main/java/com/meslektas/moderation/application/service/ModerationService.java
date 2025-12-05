@@ -8,7 +8,6 @@ import com.meslektas.moderation.application.dto.response.ReportResponse;
 import com.meslektas.moderation.application.dto.response.SanctionResponse;
 import com.meslektas.moderation.domain.model.ContentReport;
 import com.meslektas.moderation.domain.model.UserSanction;
-import com.meslektas.moderation.domain.model.ModerationDecision;
 import com.meslektas.moderation.domain.model.ReportReason;
 import com.meslektas.moderation.domain.model.ReportStatus;
 import com.meslektas.moderation.domain.model.SanctionType;
@@ -17,7 +16,6 @@ import com.meslektas.moderation.domain.repository.UserSanctionRepository;
 import com.meslektas.common.exception.BusinessException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,15 +36,12 @@ public class ModerationService {
 
     private final ContentReportRepository reportRepository;
     private final UserSanctionRepository sanctionRepository;
-    private final ApplicationEventPublisher eventPublisher;
 
     public ModerationService(
             ContentReportRepository reportRepository,
-            UserSanctionRepository sanctionRepository,
-            ApplicationEventPublisher eventPublisher) {
+            UserSanctionRepository sanctionRepository) {
         this.reportRepository = reportRepository;
         this.sanctionRepository = sanctionRepository;
-        this.eventPublisher = eventPublisher;
     }
 
     // ================== Report Management ==================

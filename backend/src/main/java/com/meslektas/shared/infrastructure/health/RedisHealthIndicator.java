@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -30,32 +29,32 @@ public class RedisHealthIndicator implements HealthIndicator {
     public Health health() {
         try {
             long startTime = System.currentTimeMillis();
-            
+
             // Execute PING command
             String result = redisTemplate.getConnectionFactory()
-                .getConnection()
-                .ping();
-            
+                    .getConnection()
+                    .ping();
+
             long responseTime = System.currentTimeMillis() - startTime;
-            
+
             if ("PONG".equals(result)) {
                 return Health.up()
-                    .withDetail("ping", "PONG")
-                    .withDetail("responseTimeMs", responseTime)
-                    .withDetail("status", responseTime < PING_TIMEOUT_MS ? "healthy" : "slow")
-                    .build();
+                        .withDetail("ping", "PONG")
+                        .withDetail("responseTimeMs", responseTime)
+                        .withDetail("status", responseTime < PING_TIMEOUT_MS ? "healthy" : "slow")
+                        .build();
             } else {
                 return Health.down()
-                    .withDetail("ping", result)
-                    .withDetail("error", "Unexpected ping response")
-                    .build();
+                        .withDetail("ping", result)
+                        .withDetail("error", "Unexpected ping response")
+                        .build();
             }
         } catch (Exception e) {
             log.warn("Redis health check failed: {}", e.getMessage());
             return Health.down()
-                .withDetail("error", e.getMessage())
-                .withException(e)
-                .build();
+                    .withDetail("error", e.getMessage())
+                    .withException(e)
+                    .build();
         }
     }
 }

@@ -13,7 +13,6 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 
@@ -44,7 +43,6 @@ public class MessageWebSocketController {
 
     private final ConversationService conversationService;
     private final SimpMessagingTemplate messagingTemplate;
-    private final WebSocketEventListener eventListener;
 
     /**
      * Handle sending a message via WebSocket.
@@ -145,17 +143,9 @@ public class MessageWebSocketController {
 
             conversationService.markMessagesAsRead(command, userId);
 
-            // Send read receipt to the other participant
-            // (The service would need to return who the other participant is)
-            WsReadReceipt receipt = WsReadReceipt.builder()
-                    .conversationId(readReceipt.getConversationId())
-                    .readByUserId(null) // Would be converted from userId
-                    .messagesRead(0) // Would need to track actual count
-                    .readAt(LocalDateTime.now())
-                    .build();
-
-            // Note: In a full implementation, we'd get the other participant's ID
-            // and send them the read receipt
+            // TODO: Future enhancement - Send read receipt to the other participant
+            // This would require getting the other participant's ID from the service
+            // and sending them a WsReadReceipt notification
 
             log.info("WS: Messages marked as read in conversation {}",
                     readReceipt.getConversationId());

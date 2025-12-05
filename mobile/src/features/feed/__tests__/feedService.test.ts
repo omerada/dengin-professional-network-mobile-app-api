@@ -272,37 +272,40 @@ describe('feedService', () => {
   });
 
   describe('likeComment', () => {
-    it('should log warning since backend endpoint does not exist', async () => {
-      // Backend'de comment like endpoint mevcut değil
-      // Fonksiyon sadece warning loglar ve resolve eder
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+    it('should like a comment and return updated count', async () => {
+      const mockResponse = {
+        commentId: 'comment-1',
+        isLiked: true,
+        likeCount: 5,
+      };
 
-      await feedService.likeComment(1, 'comment-1');
+      mockApiClient.post.mockResolvedValue({
+        data: { success: true, data: mockResponse },
+      });
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'likeComment: Backend endpoint mevcut değil. Bu özellik gelecek sprintlerde eklenecek.',
-      );
-      // apiClient.post çağrılmaz
-      expect(mockApiClient.post).not.toHaveBeenCalled();
+      const result = await feedService.likeComment(1, 'comment-1');
 
-      consoleSpy.mockRestore();
+      expect(mockApiClient.post).toHaveBeenCalledWith('/api/posts/1/comments/comment-1/like');
+      expect(result).toEqual(mockResponse);
     });
   });
 
   describe('unlikeComment', () => {
-    it('should log warning since backend endpoint does not exist', async () => {
-      // Backend'de comment unlike endpoint mevcut değil
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+    it('should unlike a comment and return updated count', async () => {
+      const mockResponse = {
+        commentId: 'comment-1',
+        isLiked: false,
+        likeCount: 4,
+      };
 
-      await feedService.unlikeComment(1, 'comment-1');
+      mockApiClient.delete.mockResolvedValue({
+        data: { success: true, data: mockResponse },
+      });
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'unlikeComment: Backend endpoint mevcut değil. Bu özellik gelecek sprintlerde eklenecek.',
-      );
-      // apiClient.delete çağrılmaz
-      expect(mockApiClient.delete).not.toHaveBeenCalled();
+      const result = await feedService.unlikeComment(1, 'comment-1');
 
-      consoleSpy.mockRestore();
+      expect(mockApiClient.delete).toHaveBeenCalledWith('/api/posts/1/comments/comment-1/like');
+      expect(result).toEqual(mockResponse);
     });
   });
 

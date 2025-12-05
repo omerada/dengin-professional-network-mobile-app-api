@@ -6,7 +6,6 @@ import com.meslektas.moderation.application.service.ReportContentService;
 import com.meslektas.moderation.domain.model.ReportType;
 import com.meslektas.identity.infrastructure.security.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
