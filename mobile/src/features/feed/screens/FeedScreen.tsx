@@ -1,20 +1,32 @@
 // src/features/feed/screens/FeedScreen.tsx
-// Ana feed ekranı - Backend API uyumlu
-// Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
+// Ana feed ekranı - Modern Design System ile güncellendi
+// Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, FlatList, StyleSheet, RefreshControl, ActivityIndicator, Alert } from 'react-native';
+import { View, FlatList, RefreshControl, ActivityIndicator, Alert } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '@contexts/ThemeContext';
+
+import { useColors } from '@contexts/ThemeContext';
 import { useFeedPosts, useLikePost, useBookmarkPost, useDeletePost } from '../hooks';
 import { PostCard, FeedHeader, EmptyFeed } from '../components';
-import { ActionSheet, type ActionSheetOption } from '@shared/components';
+import { ActionSheet, type ActionSheetOption, Skeleton } from '@shared/components';
 import { sharePost, showShareError } from '@shared/utils/share';
 import { useAuthStore } from '@features/auth/stores';
 import type { Post } from '../types';
+import { styles } from './FeedScreen.styles';
 
+/**
+ * FeedScreen - Modern Instagram-kalitesinde feed deneyimi
+ *
+ * Features:
+ * - Staggered post animations
+ * - Pull-to-refresh with haptic feedback
+ * - Infinite scroll with skeleton loading
+ * - Optimized list performance
+ */
 export const FeedScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const navigation = useNavigation();
   const currentUserId = useAuthStore(state => state.user?.id);
 
@@ -163,9 +175,10 @@ export const FeedScreen: React.FC = () => {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const renderPost = useCallback(
-    ({ item }: { item: Post }) => (
+    ({ item, index }: { item: Post; index: number }) => (
       <PostCard
         post={item}
+        index={index}
         onLike={handleLike}
         onComment={handleComment}
         onShare={handleShare}
@@ -201,22 +214,36 @@ export const FeedScreen: React.FC = () => {
     if (!isFetchingNextPage) return null;
 
     return (
-      <View style={styles.footer}>
-        <ActivityIndicator size="small" color={theme.colors.primary[500]} />
-      </View>
+      <Animated.View entering={FadeIn.duration(200)} style={styles.footer}>
+        <ActivityIndicator size="small" color={colors.interactive.default} />
+      </Animated.View>
     );
-  }, [isFetchingNextPage, theme.colors.primary]);
+  }, [isFetchingNextPage, colors.interactive]);
+
+  // Skeleton loading for initial load
+  const LoadingSkeleton = useMemo(
+    () => (
+      <Animated.View
+        entering={FadeIn.duration(300)}
+        style={[styles.skeletonContainer, { backgroundColor: colors.background.primary }]}>
+        {[0, 1, 2].map(index => (
+          <View key={index} style={styles.skeletonItem}>
+            <Skeleton variant="postCard" />
+          </View>
+        ))}
+      </Animated.View>
+    ),
+    [colors.background.primary],
+  );
 
   if (isLoading && posts.length === 0) {
-    return (
-      <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background.primary }]}>
-        <ActivityIndicator size="large" color={theme.colors.primary[500]} />
-      </View>
-    );
+    return LoadingSkeleton;
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background.primary }]}>
+    <Animated.View
+      entering={FadeIn.duration(300)}
+      style={[styles.container, { backgroundColor: colors.background.primary }]}>
       <FlatList
         data={posts}
         renderItem={renderPost}
@@ -230,8 +257,8 @@ export const FeedScreen: React.FC = () => {
           <RefreshControl
             refreshing={isRefetching}
             onRefresh={refetch}
-            tintColor={theme.colors.primary[500]}
-            colors={[theme.colors.primary[500]]}
+            tintColor={colors.interactive.default}
+            colors={[colors.interactive.default]}
           />
         }
         showsVerticalScrollIndicator={false}
@@ -246,21 +273,8 @@ export const FeedScreen: React.FC = () => {
         onClose={handleCloseActionSheet}
         options={actionSheetOptions}
       />
-    </View>
+    </Animated.View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  footer: {
-    paddingVertical: 20,
-    alignItems: 'center',
-  },
-});
+export default FeedScreen;
