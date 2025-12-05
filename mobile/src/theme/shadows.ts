@@ -1,43 +1,64 @@
 // src/theme/shadows.ts
-// Oku: mobile-development-guide/ui/17-DESIGN-SYSTEM.md
+// Meslektaş Design System - Shadow Tokens
+// Oku: mobile-development-guide/ui-ux-modernization/03-DESIGN-SYSTEM-OVERHAUL.md
 
 import { Platform, ViewStyle } from 'react-native';
+import type { ShadowStyle, ShadowVariant, LayeredShadowVariant } from './types';
 
 /**
- * Shadow styles for elevation
- * Uses platform-specific implementations
+ * Shadow Generator
+ * Creates platform-specific shadows
  */
-export const shadows: Record<string, ViewStyle> = {
-  /** No shadow */
-  none: {
-    shadowColor: 'transparent',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0,
-    shadowRadius: 0,
-    elevation: 0,
-  },
+const createShadow = (
+  offsetY: number,
+  blur: number,
+  opacity: number,
+  elevation: number,
+  color: string = '#000000',
+): ShadowStyle => ({
+  shadowColor: color,
+  shadowOffset: { width: 0, height: offsetY },
+  shadowOpacity: opacity,
+  shadowRadius: blur,
+  elevation: elevation,
+});
 
-  /** Extra small shadow - subtle elevation */
-  xs: Platform.select({
+/**
+ * Base Shadow Scale
+ */
+export const shadows: Record<ShadowVariant, ShadowStyle> = {
+  none: createShadow(0, 0, 0, 0),
+
+  // Extra Small - Subtle lift
+  xs: createShadow(1, 2, 0.05, 1),
+
+  // Small - Cards, buttons
+  sm: createShadow(1, 3, 0.1, 2),
+
+  // Medium - Dropdowns, active cards
+  md: createShadow(4, 6, 0.1, 4),
+
+  // Large - Modals, popovers
+  lg: createShadow(10, 15, 0.1, 8),
+
+  // Extra Large - Dialogs
+  xl: createShadow(20, 25, 0.1, 12),
+
+  // 2XL - Maximum elevation
+  '2xl': createShadow(25, 50, 0.12, 16),
+} as const;
+
+/**
+ * Layered Shadows
+ * More realistic multi-layer shadows
+ */
+export const layeredShadows: Record<LayeredShadowVariant, ViewStyle> = {
+  card: Platform.select<ViewStyle>({
     ios: {
-      shadowColor: '#000',
+      shadowColor: '#000000',
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.05,
       shadowRadius: 1,
-    },
-    android: {
-      elevation: 1,
-    },
-    default: {},
-  }) as ViewStyle,
-
-  /** Small shadow - cards, buttons */
-  sm: Platform.select({
-    ios: {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 2,
     },
     android: {
       elevation: 2,
@@ -45,13 +66,25 @@ export const shadows: Record<string, ViewStyle> = {
     default: {},
   }) as ViewStyle,
 
-  /** Medium shadow - dropdowns, popovers */
-  md: Platform.select({
+  cardHover: Platform.select<ViewStyle>({
     ios: {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.15,
-      shadowRadius: 4,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+    },
+    android: {
+      elevation: 6,
+    },
+    default: {},
+  }) as ViewStyle,
+
+  button: Platform.select<ViewStyle>({
+    ios: {
+      shadowColor: '#0066FF',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
     },
     android: {
       elevation: 4,
@@ -59,13 +92,25 @@ export const shadows: Record<string, ViewStyle> = {
     default: {},
   }) as ViewStyle,
 
-  /** Large shadow - modals, dialogs */
-  lg: Platform.select({
+  modal: Platform.select<ViewStyle>({
     ios: {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.2,
-      shadowRadius: 8,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: -8 },
+      shadowOpacity: 0.15,
+      shadowRadius: 24,
+    },
+    android: {
+      elevation: 24,
+    },
+    default: {},
+  }) as ViewStyle,
+
+  fab: Platform.select<ViewStyle>({
+    ios: {
+      shadowColor: '#0066FF',
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.35,
+      shadowRadius: 12,
     },
     android: {
       elevation: 8,
@@ -73,33 +118,37 @@ export const shadows: Record<string, ViewStyle> = {
     default: {},
   }) as ViewStyle,
 
-  /** Extra large shadow - floating action buttons */
-  xl: Platform.select({
+  image: Platform.select<ViewStyle>({
     ios: {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.25,
-      shadowRadius: 16,
+      shadowColor: '#000000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.15,
+      shadowRadius: 6,
     },
     android: {
-      elevation: 12,
+      elevation: 3,
     },
     default: {},
   }) as ViewStyle,
+} as const;
 
-  /** 2XL shadow - maximum elevation */
-  '2xl': Platform.select({
-    ios: {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 12 },
-      shadowOpacity: 0.3,
-      shadowRadius: 24,
-    },
-    android: {
-      elevation: 16,
-    },
-    default: {},
-  }) as ViewStyle,
-};
+/**
+ * Inner Shadows (for inputs, wells)
+ * Simulated with border + background
+ */
+export const innerShadows = {
+  input: {
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.1)',
+    backgroundColor: 'rgba(0,0,0,0.02)',
+  },
 
-export type ShadowKey = keyof typeof shadows;
+  well: {
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+    backgroundColor: 'rgba(0,0,0,0.03)',
+  },
+} as const;
+
+export type ShadowKey = ShadowVariant;
+export type { ShadowVariant, LayeredShadowVariant };

@@ -1,22 +1,24 @@
 // src/contexts/ThemeContext.tsx
-// Oku: mobile-development-guide/state/16-CONTEXT-API.md
+// Meslektaş Design System - Modern Theme Provider
+// Oku: mobile-development-guide/ui-ux-modernization/03-DESIGN-SYSTEM-OVERHAUL.md
 
 import React, { createContext, useContext, useCallback, useMemo, useEffect, useState } from 'react';
-import { useColorScheme } from 'react-native';
-import { Theme, light, dark } from '@theme';
+import { useColorScheme, StatusBar, Platform } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  interpolateColor,
+} from 'react-native-reanimated';
+import { light, dark, duration } from '@theme';
 import { asyncStorage, STORAGE_KEYS } from '@core/storage';
-import { ThemeMode } from '@shared/types';
-
-/**
- * Theme context value type
- */
-interface ThemeContextValue {
-  theme: Theme;
-  themeMode: ThemeMode;
-  setThemeMode: (mode: ThemeMode) => void;
-  toggleTheme: () => void;
-  isDark: boolean;
-}
+import type {
+  Theme,
+  ThemeMode,
+  ThemeContextValue,
+  ThemeColors,
+  TypographyStyles,
+} from '@theme/types';
 
 /**
  * Theme context
@@ -31,22 +33,30 @@ interface ThemeProviderProps {
 }
 
 /**
- * Theme Provider
- * Manages theme state and provides theme to entire app
+ * Modern Theme Provider
+ * Manages theme state with animated transitions
  */
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const systemColorScheme = useColorScheme();
   const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
   const [isLoaded, setIsLoaded] = useState(false);
 
+  // Animated theme transition value
+  const themeProgress = useSharedValue(0);
+
   // Load saved theme preference on mount
   useEffect(() => {
     const loadThemePreference = async () => {
-      const savedMode = await asyncStorage.get<ThemeMode>(STORAGE_KEYS.THEME);
-      if (savedMode) {
-        setThemeModeState(savedMode);
+      try {
+        const savedMode = await asyncStorage.get<ThemeMode>(STORAGE_KEYS.THEME);
+        if (savedMode) {
+          setThemeModeState(savedMode);
+        }
+      } catch (error) {
+        console.warn('Failed to load theme preference:', error);
+      } finally {
+        setIsLoaded(true);
       }
-      setIsLoaded(true);
     };
 
     loadThemePreference();
@@ -60,12 +70,45 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     return themeMode === 'dark';
   }, [themeMode, systemColorScheme]);
 
-  const theme = useMemo(() => (isDark ? dark : light), [isDark]);
+  // Update theme progress when isDark changes
+  useEffect(() => {
+    themeProgress.value = withTiming(isDark ? 1 : 0, {
+      duration: duration.stateChange,
+    });
+  }, [isDark, themeProgress]);
+
+  // Update status bar based on theme
+  useEffect(() => {
+    StatusBar.setBarStyle(isDark ? 'light-content' : 'dark-content', true);
+    if (Platform.OS === 'android') {
+      StatusBar.setBackgroundColor(
+        isDark ? dark.colors.background.primary : light.colors.background.primary,
+      );
+    }
+  }, [isDark]);
+
+  const theme = useMemo<Theme>(() => (isDark ? dark : light), [isDark]);
+
+  // Memoized colors for quick access
+  const colors = useMemo<ThemeColors>(() => theme.colors, [theme.colors]);
+
+  // Memoized typography for quick access
+  const typography = useMemo<TypographyStyles>(() => theme.typography, [theme.typography]);
+
+  // Memoized spacing for quick access
+  const spacing = useMemo(() => theme.spacing, [theme.spacing]);
+
+  // Memoized shadows for quick access
+  const shadows = useMemo(() => theme.shadows, [theme.shadows]);
 
   // Set theme mode and persist
   const setThemeMode = useCallback(async (mode: ThemeMode) => {
     setThemeModeState(mode);
-    await asyncStorage.set(STORAGE_KEYS.THEME, mode);
+    try {
+      await asyncStorage.set(STORAGE_KEYS.THEME, mode);
+    } catch (error) {
+      console.warn('Failed to save theme preference:', error);
+    }
   }, []);
 
   // Toggle between light and dark
@@ -74,15 +117,19 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     setThemeMode(newMode);
   }, [isDark, setThemeMode]);
 
-  const value = useMemo(
+  const value = useMemo<ThemeContextValue>(
     () => ({
       theme,
+      colors,
+      typography,
+      spacing,
+      shadows,
+      isDark,
       themeMode,
       setThemeMode,
       toggleTheme,
-      isDark,
     }),
-    [theme, themeMode, setThemeMode, toggleTheme, isDark],
+    [theme, colors, typography, spacing, shadows, isDark, themeMode, setThemeMode, toggleTheme],
   );
 
   // Don't render until theme preference is loaded
@@ -95,6 +142,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
 /**
  * Hook to access theme context
+ * Provides full theme access with type safety
  */
 export const useTheme = (): ThemeContextValue => {
   const context = useContext(ThemeContext);
@@ -104,4 +152,64 @@ export const useTheme = (): ThemeContextValue => {
   }
 
   return context;
+};
+
+/**
+ * Hook for animated theme transitions
+ * Returns animated style that transitions between light/dark
+ */
+export const useAnimatedThemeStyle = (
+  lightStyle: Record<string, string>,
+  darkStyle: Record<string, string>,
+) => {
+  const { isDark } = useTheme();
+  const progress = useSharedValue(isDark ? 1 : 0);
+
+  useEffect(() => {
+    progress.value = withTiming(isDark ? 1 : 0, {
+      duration: duration.stateChange,
+    });
+  }, [isDark, progress]);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    const result: Record<string, string> = {};
+
+    Object.keys(lightStyle).forEach(key => {
+      if (lightStyle[key] && darkStyle[key]) {
+        result[key] = interpolateColor(
+          progress.value,
+          [0, 1],
+          [lightStyle[key], darkStyle[key]],
+        ) as string;
+      }
+    });
+
+    return result;
+  });
+
+  return animatedStyle;
+};
+
+/**
+ * Hook for quick color access
+ */
+export const useColors = (): ThemeColors => {
+  const { colors } = useTheme();
+  return colors;
+};
+
+/**
+ * Hook for quick typography access
+ */
+export const useTypography = (): TypographyStyles => {
+  const { typography } = useTheme();
+  return typography;
+};
+
+/**
+ * Hook for quick spacing access
+ */
+export const useSpacing = () => {
+  const { spacing } = useTheme();
+  return spacing;
 };

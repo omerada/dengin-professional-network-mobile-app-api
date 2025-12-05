@@ -1,12 +1,37 @@
 // src/theme/typography.ts
-// Oku: mobile-development-guide/ui/17-DESIGN-SYSTEM.md
+// Meslektaş Design System - Typography Tokens
+// Oku: mobile-development-guide/ui-ux-modernization/03-DESIGN-SYSTEM-OVERHAUL.md
 
 import { TextStyle, Platform } from 'react-native';
+import type { TypographyVariant, TypographyStyles } from './types';
 
 /**
- * Font family configuration
+ * Font Families
+ * iOS: SF Pro, Android: Roboto
  */
 export const fontFamily = {
+  // Display & Headings
+  display: Platform.select({
+    ios: 'SF Pro Display',
+    android: 'Roboto',
+    default: 'System',
+  }),
+
+  // Body Text
+  body: Platform.select({
+    ios: 'SF Pro Text',
+    android: 'Roboto',
+    default: 'System',
+  }),
+
+  // Monospace
+  mono: Platform.select({
+    ios: 'SF Mono',
+    android: 'Roboto Mono',
+    default: 'Courier',
+  }),
+
+  // Legacy support
   regular: Platform.select({
     ios: 'System',
     android: 'Roboto',
@@ -30,151 +55,227 @@ export const fontFamily = {
 } as const;
 
 /**
- * Font sizes following 8px grid system
+ * Font Sizes
+ * Based on 4px scale
  */
 export const fontSize = {
-  xs: 10,
-  sm: 12,
-  base: 14,
-  md: 16,
-  lg: 18,
-  xl: 20,
-  '2xl': 24,
-  '3xl': 30,
-  '4xl': 36,
+  xs: 11,
+  sm: 13,
+  base: 15,
+  md: 17,
+  lg: 19,
+  xl: 22,
+  '2xl': 26,
+  '3xl': 32,
+  '4xl': 40,
   '5xl': 48,
 } as const;
 
 /**
- * Line heights
+ * Line Heights
+ * Calculated for optimal readability
  */
 export const lineHeight = {
+  none: 1,
   tight: 1.2,
+  snug: 1.375,
   normal: 1.5,
-  relaxed: 1.75,
+  relaxed: 1.625,
+  loose: 2,
 } as const;
 
 /**
- * Font weights
+ * Letter Spacing
+ */
+export const letterSpacing = {
+  tighter: -0.8,
+  tight: -0.4,
+  normal: 0,
+  wide: 0.4,
+  wider: 0.8,
+  widest: 1.6,
+} as const;
+
+/**
+ * Font Weights
+ * Platform-specific weight mapping
  */
 export const fontWeight = {
+  thin: '100' as const,
   light: '300' as const,
   regular: '400' as const,
   medium: '500' as const,
   semibold: '600' as const,
   bold: '700' as const,
+  heavy: '800' as const,
+  black: '900' as const,
 };
 
 /**
- * Typography presets
+ * Typography Presets
+ * Ready-to-use text styles
  */
-export const typography: Record<string, TextStyle> = {
-  // Headings
-  h1: {
-    fontFamily: fontFamily.bold,
+export const typography: TypographyStyles = {
+  // Display - Large headers, hero text
+  displayLarge: {
+    fontFamily: fontFamily.display,
+    fontSize: fontSize['5xl'],
+    fontWeight: fontWeight.bold,
+    lineHeight: fontSize['5xl'] * lineHeight.tight,
+    letterSpacing: letterSpacing.tighter,
+  } as TextStyle,
+
+  displayMedium: {
+    fontFamily: fontFamily.display,
     fontSize: fontSize['4xl'],
     fontWeight: fontWeight.bold,
     lineHeight: fontSize['4xl'] * lineHeight.tight,
-    letterSpacing: -0.5,
-  },
-  h2: {
-    fontFamily: fontFamily.bold,
+    letterSpacing: letterSpacing.tight,
+  } as TextStyle,
+
+  displaySmall: {
+    fontFamily: fontFamily.display,
     fontSize: fontSize['3xl'],
     fontWeight: fontWeight.bold,
     lineHeight: fontSize['3xl'] * lineHeight.tight,
-    letterSpacing: -0.25,
-  },
-  h3: {
-    fontFamily: fontFamily.bold,
+    letterSpacing: letterSpacing.tight,
+  } as TextStyle,
+
+  // Headings
+  h1: {
+    fontFamily: fontFamily.display,
     fontSize: fontSize['2xl'],
     fontWeight: fontWeight.bold,
-    lineHeight: fontSize['2xl'] * lineHeight.tight,
-  },
-  h4: {
-    fontFamily: fontFamily.medium,
+    lineHeight: fontSize['2xl'] * lineHeight.snug,
+    letterSpacing: letterSpacing.tight,
+  } as TextStyle,
+
+  h2: {
+    fontFamily: fontFamily.display,
     fontSize: fontSize.xl,
     fontWeight: fontWeight.semibold,
-    lineHeight: fontSize.xl * lineHeight.normal,
-  },
-  h5: {
-    fontFamily: fontFamily.medium,
+    lineHeight: fontSize.xl * lineHeight.snug,
+    letterSpacing: letterSpacing.normal,
+  } as TextStyle,
+
+  h3: {
+    fontFamily: fontFamily.display,
     fontSize: fontSize.lg,
     fontWeight: fontWeight.semibold,
     lineHeight: fontSize.lg * lineHeight.normal,
-  },
-  h6: {
-    fontFamily: fontFamily.medium,
+    letterSpacing: letterSpacing.normal,
+  } as TextStyle,
+
+  h4: {
+    fontFamily: fontFamily.display,
     fontSize: fontSize.md,
     fontWeight: fontWeight.medium,
     lineHeight: fontSize.md * lineHeight.normal,
-  },
+    letterSpacing: letterSpacing.normal,
+  } as TextStyle,
 
-  // Body text
+  // Body Text
   bodyLarge: {
-    fontFamily: fontFamily.regular,
+    fontFamily: fontFamily.body,
     fontSize: fontSize.md,
     fontWeight: fontWeight.regular,
     lineHeight: fontSize.md * lineHeight.relaxed,
-  },
+    letterSpacing: letterSpacing.wide,
+  } as TextStyle,
+
   body: {
-    fontFamily: fontFamily.regular,
+    fontFamily: fontFamily.body,
     fontSize: fontSize.base,
     fontWeight: fontWeight.regular,
     lineHeight: fontSize.base * lineHeight.relaxed,
-  },
+    letterSpacing: letterSpacing.normal,
+  } as TextStyle,
+
   bodySmall: {
-    fontFamily: fontFamily.regular,
+    fontFamily: fontFamily.body,
     fontSize: fontSize.sm,
     fontWeight: fontWeight.regular,
     lineHeight: fontSize.sm * lineHeight.relaxed,
-  },
+    letterSpacing: letterSpacing.normal,
+  } as TextStyle,
 
   // Labels
-  label: {
-    fontFamily: fontFamily.medium,
+  labelLarge: {
+    fontFamily: fontFamily.body,
     fontSize: fontSize.base,
     fontWeight: fontWeight.medium,
     lineHeight: fontSize.base * lineHeight.normal,
-  },
-  labelSmall: {
-    fontFamily: fontFamily.medium,
+    letterSpacing: letterSpacing.wide,
+  } as TextStyle,
+
+  label: {
+    fontFamily: fontFamily.body,
     fontSize: fontSize.sm,
     fontWeight: fontWeight.medium,
     lineHeight: fontSize.sm * lineHeight.normal,
-  },
+    letterSpacing: letterSpacing.wide,
+  } as TextStyle,
 
-  // Captions
+  labelSmall: {
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.xs,
+    fontWeight: fontWeight.medium,
+    lineHeight: fontSize.xs * lineHeight.normal,
+    letterSpacing: letterSpacing.wider,
+  } as TextStyle,
+
+  // Caption
   caption: {
-    fontFamily: fontFamily.regular,
+    fontFamily: fontFamily.body,
     fontSize: fontSize.xs,
     fontWeight: fontWeight.regular,
     lineHeight: fontSize.xs * lineHeight.normal,
-  },
+    letterSpacing: letterSpacing.wide,
+  } as TextStyle,
 
   // Buttons
-  button: {
-    fontFamily: fontFamily.medium,
+  buttonLarge: {
+    fontFamily: fontFamily.body,
     fontSize: fontSize.md,
-    fontWeight: fontWeight.medium,
-    lineHeight: fontSize.md * lineHeight.normal,
-    letterSpacing: 0.5,
-  },
-  buttonSmall: {
-    fontFamily: fontFamily.medium,
-    fontSize: fontSize.base,
-    fontWeight: fontWeight.medium,
-    lineHeight: fontSize.base * lineHeight.normal,
-    letterSpacing: 0.25,
-  },
+    fontWeight: fontWeight.semibold,
+    lineHeight: fontSize.md * lineHeight.none,
+    letterSpacing: letterSpacing.wide,
+  } as TextStyle,
 
-  // Links
-  link: {
-    fontFamily: fontFamily.regular,
+  button: {
+    fontFamily: fontFamily.body,
     fontSize: fontSize.base,
-    fontWeight: fontWeight.regular,
+    fontWeight: fontWeight.semibold,
+    lineHeight: fontSize.base * lineHeight.none,
+    letterSpacing: letterSpacing.wide,
+  } as TextStyle,
+
+  buttonSmall: {
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.semibold,
+    lineHeight: fontSize.sm * lineHeight.none,
+    letterSpacing: letterSpacing.wide,
+  } as TextStyle,
+
+  // Numeric
+  numeric: {
+    fontFamily: fontFamily.mono,
+    fontSize: fontSize.base,
+    fontWeight: fontWeight.medium,
     lineHeight: fontSize.base * lineHeight.normal,
-    textDecorationLine: 'underline',
-  },
+    letterSpacing: letterSpacing.normal,
+    fontVariant: ['tabular-nums'] as TextStyle['fontVariant'],
+  } as TextStyle,
+
+  numericLarge: {
+    fontFamily: fontFamily.mono,
+    fontSize: fontSize['2xl'],
+    fontWeight: fontWeight.bold,
+    lineHeight: fontSize['2xl'] * lineHeight.tight,
+    letterSpacing: letterSpacing.tight,
+    fontVariant: ['tabular-nums'] as TextStyle['fontVariant'],
+  } as TextStyle,
 } as const;
 
-export type TypographyVariant = keyof typeof typography;
+export type { TypographyVariant };

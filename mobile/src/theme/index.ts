@@ -1,46 +1,82 @@
 // src/theme/index.ts
-// Oku: mobile-development-guide/ui/17-DESIGN-SYSTEM.md
+// Meslektaş Design System - Unified Exports
+// Oku: mobile-development-guide/ui-ux-modernization/03-DESIGN-SYSTEM-OVERHAUL.md
 
-export { colors, lightTheme, darkTheme, type ThemeColors } from './colors';
+// Types
+export type {
+  Theme,
+  ThemeColors,
+  ThemeContextValue,
+  ThemeMode,
+  TypographyVariant,
+  TypographyStyles,
+  SpacingKey,
+  BorderRadiusKey,
+  BorderWidthKey,
+  ZIndexKey,
+  ShadowVariant,
+  ShadowStyle,
+  LayeredShadowVariant,
+  SpringConfig,
+  SpringPreset,
+  DurationKey,
+  HapticType,
+  HapticFeedback,
+  TouchTargetSizes,
+  ColorPalette,
+  BackgroundColors,
+  TextColors,
+  InteractiveColors,
+  BorderColors,
+  StatusColors,
+  SpecialColors,
+  GradientColors,
+} from './types';
+
+// Colors
+export { palette, colors, lightTheme, darkTheme } from './colors';
+
+// Typography
 export {
   fontFamily,
   fontSize,
   lineHeight,
+  letterSpacing,
   fontWeight,
   typography,
-  type TypographyVariant,
 } from './typography';
+
+// Spacing
 export {
   spacing,
+  semanticSpacing,
   borderRadius,
   borderWidth,
+  touchTarget,
   zIndex,
-  type SpacingKey,
-  type BorderRadiusKey,
 } from './spacing';
-export { shadows, type ShadowKey } from './shadows';
 
-import { lightTheme, darkTheme, ThemeColors } from './colors';
+// Shadows
+export { shadows, layeredShadows, innerShadows } from './shadows';
+
+// Animations
+export {
+  duration,
+  spring,
+  easing,
+  animationPresets,
+  layoutAnimations,
+  gestureAnimations,
+} from './animations';
+
+import { lightTheme, darkTheme } from './colors';
 import { typography } from './typography';
-import { spacing, borderRadius, borderWidth, zIndex } from './spacing';
-import { shadows } from './shadows';
+import { spacing, borderRadius, borderWidth, zIndex, touchTarget } from './spacing';
+import { shadows, layeredShadows } from './shadows';
+import type { Theme } from './types';
 
 /**
- * Complete theme object
- */
-export interface Theme {
-  colors: ThemeColors;
-  typography: typeof typography;
-  spacing: typeof spacing;
-  borderRadius: typeof borderRadius;
-  borderWidth: typeof borderWidth;
-  zIndex: typeof zIndex;
-  shadows: typeof shadows;
-  isDark: boolean;
-}
-
-/**
- * Light theme
+ * Light Theme Object
  */
 export const light: Theme = {
   colors: lightTheme,
@@ -50,11 +86,13 @@ export const light: Theme = {
   borderWidth,
   zIndex,
   shadows,
+  layeredShadows,
+  touchTarget,
   isDark: false,
 };
 
 /**
- * Dark theme
+ * Dark Theme Object
  */
 export const dark: Theme = {
   colors: darkTheme,
@@ -64,5 +102,23 @@ export const dark: Theme = {
   borderWidth,
   zIndex,
   shadows,
+  layeredShadows,
+  touchTarget,
   isDark: true,
+};
+
+/**
+ * Default export for convenience
+ */
+export default {
+  light,
+  dark,
+  typography,
+  spacing,
+  shadows,
+  animations: {
+    duration: require('./animations').duration,
+    spring: require('./animations').spring,
+    easing: require('./animations').easing,
+  },
 };
