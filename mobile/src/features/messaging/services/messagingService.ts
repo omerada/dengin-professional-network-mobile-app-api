@@ -4,6 +4,7 @@
 // Oku: backend-development-guide/sprint-planning/26-SPRINT-7-8.md
 
 import { apiClient } from '@core/api/client';
+import { API_ENDPOINTS } from '@core/api/endpoints';
 import type {
   Conversation,
   ConversationListResponse,
@@ -65,7 +66,7 @@ interface SendMessageResponse {
 
 /**
  * Messaging API Servisi
- * 
+ *
  * Endpoints:
  * - GET /api/conversations - Konuşmaları getir
  * - GET /api/conversations/{conversationId}/messages - Mesajları getir
@@ -87,12 +88,12 @@ export const messagingService = {
    */
   async getConversations(params: ConversationListParams = {}): Promise<ConversationListResponse> {
     const { page = 0, size = 20 } = params;
-    
+
     const response = await apiClient.get<ApiResponse<ConversationListResponse>>(
-      '/api/conversations',
-      { params: { page, size } }
+      API_ENDPOINTS.MESSAGING.CONVERSATIONS,
+      { params: { page, size } },
     );
-    
+
     return response.data.data;
   },
 
@@ -101,16 +102,16 @@ export const messagingService = {
    * Konuşmadaki mesajları sayfalanmış olarak getir
    */
   async getMessages(
-    conversationId: string, 
-    params: MessageListParams = {}
+    conversationId: string,
+    params: MessageListParams = {},
   ): Promise<MessageListResponse> {
     const { page = 0, size = 30 } = params;
-    
+
     const response = await apiClient.get<ApiResponse<MessageListResponse>>(
-      `/api/conversations/${conversationId}/messages`,
-      { params: { page, size } }
+      API_ENDPOINTS.MESSAGING.MESSAGES(conversationId),
+      { params: { page, size } },
     );
-    
+
     return response.data.data;
   },
 
@@ -119,10 +120,8 @@ export const messagingService = {
    * Toplam okunmamış mesaj sayısını getir
    */
   async getUnreadCount(): Promise<number> {
-    const response = await apiClient.get<ApiResponse<number>>(
-      '/api/conversations/unread-count'
-    );
-    
+    const response = await apiClient.get<ApiResponse<number>>(API_ENDPOINTS.MESSAGING.UNREAD_COUNT);
+
     return response.data.data;
   },
 
@@ -133,13 +132,16 @@ export const messagingService = {
   /**
    * POST /api/messages
    * Yeni mesaj gönder (HTTP fallback - WebSocket tercih edilir)
+   *
+   * NOT: Backend /api/messages endpoint'i bekliyor, conversationId URL'de DEĞİL!
+   * Request body: { recipientId, content, attachment? }
    */
   async sendMessage(request: SendMessageRequest): Promise<SendMessageResponse> {
     const response = await apiClient.post<ApiResponse<SendMessageResponse>>(
-      '/api/messages',
-      request
+      API_ENDPOINTS.MESSAGING.SEND_MESSAGE,
+      request,
     );
-    
+
     return response.data.data;
   },
 
@@ -148,9 +150,7 @@ export const messagingService = {
    * Konuşmadaki tüm mesajları okundu olarak işaretle
    */
   async markAsRead(conversationId: string): Promise<void> {
-    await apiClient.put<ApiResponse<void>>(
-      `/api/conversations/${conversationId}/read`
-    );
+    await apiClient.put<ApiResponse<void>>(API_ENDPOINTS.MESSAGING.MARK_READ(conversationId));
   },
 
   /**
@@ -159,7 +159,7 @@ export const messagingService = {
    */
   async deleteMessage(conversationId: string, messageId: string): Promise<void> {
     await apiClient.delete<ApiResponse<void>>(
-      `/api/conversations/${conversationId}/messages/${messageId}`
+      API_ENDPOINTS.MESSAGING.DELETE_MESSAGE(conversationId, messageId),
     );
   },
 
@@ -173,19 +173,19 @@ export const messagingService = {
    */
   async searchMessages(params: MessageSearchParams): Promise<MessageSearchResponse> {
     const { query, conversationId, page = 0, size = 20 } = params;
-    
+
     const response = await apiClient.get<ApiResponse<MessageSearchResponse>>(
-      '/api/messages/search',
-      { 
-        params: { 
-          q: query, 
-          conversationId, 
-          page, 
-          size 
-        } 
-      }
+      API_ENDPOINTS.MESSAGING.SEARCH,
+      {
+        params: {
+          q: query,
+          conversationId,
+          page,
+          size,
+        },
+      },
     );
-    
+
     return response.data.data;
   },
 
@@ -196,22 +196,22 @@ export const messagingService = {
   /**
    * POST /api/messages/attachments/upload-url
    * Ek dosya yüklemek için presigned URL al
-   * 
+   *
    * Desteklenen formatlar: JPEG, PNG, GIF, WebP
    * Max boyut: 10MB
    */
   async getAttachmentUploadUrl(
     conversationId: string,
-    request: PresignedUrlRequest
+    request: PresignedUrlRequest,
   ): Promise<AttachmentUploadResponse> {
     const response = await apiClient.post<ApiResponse<AttachmentUploadResponse>>(
-      '/api/messages/attachments/upload-url',
+      API_ENDPOINTS.MESSAGING.ATTACHMENT_UPLOAD_URL,
       {
         conversationId,
         ...request,
-      }
+      },
     );
-    
+
     return response.data.data;
   },
 

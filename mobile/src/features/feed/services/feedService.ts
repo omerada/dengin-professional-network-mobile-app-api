@@ -308,7 +308,7 @@ export const feedService = {
    * - Soft delete uygulanır
    */
   async deleteComment(postId: number, commentId: string): Promise<void> {
-    await apiClient.delete(`/api/posts/${postId}/comments/${commentId}`);
+    await apiClient.delete(API_ENDPOINTS.COMMENTS.DELETE(postId, commentId));
   },
 
   /**
@@ -323,7 +323,7 @@ export const feedService = {
    */
   async likeComment(postId: number, commentId: string): Promise<CommentLikeResponse> {
     const response = await apiClient.post<ApiResponse<CommentLikeResponse>>(
-      `/api/posts/${postId}/comments/${commentId}/like`,
+      API_ENDPOINTS.COMMENTS.LIKE(postId, commentId),
     );
     return response.data.data;
   },
@@ -340,7 +340,7 @@ export const feedService = {
    */
   async unlikeComment(postId: number, commentId: string): Promise<CommentLikeResponse> {
     const response = await apiClient.delete<ApiResponse<CommentLikeResponse>>(
-      `/api/posts/${postId}/comments/${commentId}/like`,
+      API_ENDPOINTS.COMMENTS.UNLIKE(postId, commentId),
     );
     return response.data.data;
   },

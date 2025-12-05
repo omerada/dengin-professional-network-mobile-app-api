@@ -191,7 +191,22 @@ export const socialApi = {
    * Backend: BlockController.getBlockedUsers()
    */
   getBlockedUsers: async (): Promise<BlockedUserDto[]> => {
-    const response = await apiClient.get<ApiResponse<BlockedUserDto[]>>('/api/users/me/blocked');
+    const response = await apiClient.get<ApiResponse<BlockedUserDto[]>>(
+      API_ENDPOINTS.SOCIAL.BLOCKED_USERS,
+    );
+    return response.data.data;
+  },
+
+  /**
+   * Engel durumunu kontrol et
+   * GET /api/users/{userId}/block/status
+   *
+   * Backend: BlockController.checkBlockStatus()
+   */
+  checkBlockStatus: async (userId: number): Promise<{ blocked: boolean; blockedBy: boolean }> => {
+    const response = await apiClient.get<ApiResponse<{ blocked: boolean; blockedBy: boolean }>>(
+      API_ENDPOINTS.SOCIAL.BLOCK_STATUS(userId),
+    );
     return response.data.data;
   },
 };

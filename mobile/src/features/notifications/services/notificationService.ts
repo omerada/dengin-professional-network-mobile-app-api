@@ -4,6 +4,7 @@
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 import { apiClient } from '@core/api/client';
+import { API_ENDPOINTS } from '@core/api/endpoints';
 import type {
   NotificationResponse,
   NotificationListResponse,
@@ -17,8 +18,6 @@ import type {
  * @see NotificationController.java
  */
 class NotificationService {
-  private readonly BASE_PATH = '/api/notifications';
-
   /**
    * Bildirimleri getir (sayfalama destekli)
    * GET /api/notifications
@@ -32,9 +31,12 @@ class NotificationService {
     size: number = 20,
     unreadOnly: boolean = false,
   ): Promise<NotificationListResponse> {
-    const response = await apiClient.get<NotificationListResponse>(this.BASE_PATH, {
-      params: { page, size, unreadOnly },
-    });
+    const response = await apiClient.get<NotificationListResponse>(
+      API_ENDPOINTS.NOTIFICATIONS.LIST,
+      {
+        params: { page, size, unreadOnly },
+      },
+    );
     return response.data;
   }
 
@@ -44,7 +46,7 @@ class NotificationService {
    */
   async getNotification(notificationId: string): Promise<NotificationResponse> {
     const response = await apiClient.get<NotificationResponse>(
-      `${this.BASE_PATH}/${notificationId}`,
+      API_ENDPOINTS.NOTIFICATIONS.BY_ID(notificationId),
     );
     return response.data;
   }
@@ -54,7 +56,9 @@ class NotificationService {
    * GET /api/notifications/unread-count
    */
   async getUnreadCount(): Promise<number> {
-    const response = await apiClient.get<{ unreadCount: number }>(`${this.BASE_PATH}/unread-count`);
+    const response = await apiClient.get<{ unreadCount: number }>(
+      API_ENDPOINTS.NOTIFICATIONS.UNREAD_COUNT,
+    );
     return response.data.unreadCount;
   }
 
@@ -64,7 +68,7 @@ class NotificationService {
    */
   async markAsRead(notificationId: string): Promise<NotificationResponse> {
     const response = await apiClient.post<NotificationResponse>(
-      `${this.BASE_PATH}/${notificationId}/read`,
+      API_ENDPOINTS.NOTIFICATIONS.MARK_READ(notificationId),
     );
     return response.data;
   }
@@ -77,7 +81,7 @@ class NotificationService {
    */
   async markMultipleAsRead(request: MarkAsReadRequest): Promise<{ markedAsRead: number }> {
     const response = await apiClient.post<{ markedAsRead: number }>(
-      `${this.BASE_PATH}/mark-as-read`,
+      API_ENDPOINTS.NOTIFICATIONS.MARK_ALL_READ,
       request,
     );
     return response.data;
@@ -98,7 +102,7 @@ class NotificationService {
    */
   async getPreferences(): Promise<NotificationPreferencesResponse> {
     const response = await apiClient.get<NotificationPreferencesResponse>(
-      `${this.BASE_PATH}/preferences`,
+      API_ENDPOINTS.NOTIFICATIONS.SETTINGS,
     );
     return response.data;
   }
@@ -111,7 +115,7 @@ class NotificationService {
     request: NotificationPreferencesRequest,
   ): Promise<NotificationPreferencesResponse> {
     const response = await apiClient.put<NotificationPreferencesResponse>(
-      `${this.BASE_PATH}/preferences`,
+      API_ENDPOINTS.NOTIFICATIONS.UPDATE_SETTINGS,
       request,
     );
     return response.data;

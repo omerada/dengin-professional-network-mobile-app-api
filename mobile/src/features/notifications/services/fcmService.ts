@@ -4,6 +4,7 @@
 
 import { Platform } from 'react-native';
 import { apiClient } from '@core/api/client';
+import { API_ENDPOINTS } from '@core/api/endpoints';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type {
   RegisterDeviceRequest,
@@ -34,7 +35,6 @@ export interface RemoteMessage {
  * Expo'da gerçek Firebase yerine expo-notifications kullanılacak
  */
 class FCMService {
-  private readonly DEVICE_API_PATH = '/api/devices';
   private token: string | null = null;
   private listeners: Map<string, (() => void)[]> = new Map();
 
@@ -112,7 +112,7 @@ class FCMService {
     };
 
     const response = await apiClient.post<DeviceTokenResponse>(
-      `${this.DEVICE_API_PATH}/register`,
+      API_ENDPOINTS.NOTIFICATIONS.REGISTER_DEVICE,
       request,
     );
 
@@ -127,7 +127,7 @@ class FCMService {
   async unregisterDevice(token: string): Promise<void> {
     const request: UnregisterDeviceRequest = { token };
 
-    await apiClient.post(`${this.DEVICE_API_PATH}/unregister`, request);
+    await apiClient.post(API_ENDPOINTS.NOTIFICATIONS.UNREGISTER_DEVICE, request);
     console.log('[FCM Stub] Device unregistered successfully');
   }
 
@@ -136,7 +136,7 @@ class FCMService {
    * POST /api/devices/unregister-all
    */
   async unregisterAllDevices(): Promise<void> {
-    await apiClient.post(`${this.DEVICE_API_PATH}/unregister-all`);
+    await apiClient.post(API_ENDPOINTS.NOTIFICATIONS.UNREGISTER_ALL_DEVICES);
     console.log('[FCM Stub] All devices unregistered');
   }
 

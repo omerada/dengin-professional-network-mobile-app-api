@@ -36,19 +36,27 @@ export const API_ENDPOINTS = {
   },
 
   // Professions - Backend: /api/professions/*
+  // Backend: com.meslektas.identity.api.ProfessionController
   PROFESSIONS: {
     LIST: '/api/professions',
     SEARCH: '/api/professions/search',
     BY_CATEGORY: (category: string) => `/api/professions/category/${category}`,
     BY_ID: (id: string | number) => `/api/professions/${id}`,
+    // GET /api/professions/verification-required - Professions requiring AI verification
+    VERIFICATION_REQUIRED: '/api/professions/verification-required',
+    // GET /api/professions/stats - Profession statistics
+    STATS: '/api/professions/stats',
   },
 
   // Verification - Backend: /api/verifications/*
+  // Backend: com.meslektas.verification.api.VerificationController
   VERIFICATION: {
     // POST /api/verifications - Submit verification
     SUBMIT: '/api/verifications',
     // GET /api/verifications - Get user's verification list
     LIST: '/api/verifications',
+    // GET /api/verifications/{id} - Get verification by ID
+    BY_ID: (id: string | number) => `/api/verifications/${id}`,
     // GET /api/verifications/check/{professionId} - Check eligibility
     CHECK_ELIGIBILITY: (professionId: number) => `/api/verifications/check/${professionId}`,
     // GET /api/verifications/history - Get verification history
@@ -99,15 +107,27 @@ export const API_ENDPOINTS = {
       `/api/posts/${postId}/comments/${commentId}/like`,
   },
 
-  // Messaging - Backend: /api/conversations/*
+  // Messaging - Backend: /api/conversations/* and /api/messages/*
+  // Backend: com.meslektas.messaging.api.ConversationController
   MESSAGING: {
+    // Conversation endpoints
     CONVERSATIONS: '/api/conversations',
     CONVERSATION_BY_ID: (id: string | number) => `/api/conversations/${id}`,
     MESSAGES: (conversationId: string | number) => `/api/conversations/${conversationId}/messages`,
-    SEND_MESSAGE: (conversationId: string | number) =>
-      `/api/conversations/${conversationId}/messages`,
+    // POST /api/messages - Backend expects recipientId in body, not in URL
+    SEND_MESSAGE: '/api/messages',
     START_CONVERSATION: '/api/conversations',
     MARK_READ: (conversationId: string | number) => `/api/conversations/${conversationId}/read`,
+    // DELETE /api/conversations/{conversationId}/messages/{messageId}
+    DELETE_MESSAGE: (conversationId: string | number, messageId: string) =>
+      `/api/conversations/${conversationId}/messages/${messageId}`,
+    // GET /api/conversations/unread-count
+    UNREAD_COUNT: '/api/conversations/unread-count',
+    // GET /api/messages/search
+    SEARCH: '/api/messages/search',
+    // POST /api/messages/attachments/upload-url
+    ATTACHMENT_UPLOAD_URL: '/api/messages/attachments/upload-url',
+    // Archive endpoints (not implemented in backend yet)
     ARCHIVE: (conversationId: string | number) => `/api/conversations/${conversationId}/archive`,
     UNARCHIVE: (conversationId: string | number) =>
       `/api/conversations/${conversationId}/unarchive`,
@@ -117,6 +137,8 @@ export const API_ENDPOINTS = {
   // Device token işlemleri /api/devices/* altında
   NOTIFICATIONS: {
     LIST: '/api/notifications',
+    BY_ID: (id: string | number) => `/api/notifications/${id}`,
+    UNREAD_COUNT: '/api/notifications/unread-count',
     MARK_READ: (id: string | number) => `/api/notifications/${id}/read`,
     MARK_ALL_READ: '/api/notifications/mark-as-read',
     SETTINGS: '/api/notifications/preferences',
@@ -137,13 +159,21 @@ export const API_ENDPOINTS = {
   },
 
   // Social - Backend: /api/users/{userId}/*
+  // Backend: com.meslektas.social.api.FollowController, BlockController
   SOCIAL: {
+    // Follow endpoints
     FOLLOW: (userId: string | number) => `/api/users/${userId}/follow`,
     UNFOLLOW: (userId: string | number) => `/api/users/${userId}/follow`,
     FOLLOWERS: (userId: string | number) => `/api/users/${userId}/followers`,
     FOLLOWING: (userId: string | number) => `/api/users/${userId}/following`,
+    // Block endpoints
     BLOCK: (userId: string | number) => `/api/users/${userId}/block`,
     UNBLOCK: (userId: string | number) => `/api/users/${userId}/block`,
+    // GET /api/users/me/blocked - Get list of blocked users
+    BLOCKED_USERS: '/api/users/me/blocked',
+    // GET /api/users/{userId}/block/status - Check block status
+    BLOCK_STATUS: (userId: string | number) => `/api/users/${userId}/block/status`,
+    // Report endpoint (not implemented in backend yet)
     REPORT: (userId: string | number) => `/api/users/${userId}/report`,
   },
 } as const;

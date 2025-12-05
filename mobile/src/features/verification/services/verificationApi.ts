@@ -112,6 +112,20 @@ export const verificationApi = {
     );
     return response.data.data;
   },
+
+  /**
+   * Get verification by ID
+   * GET /api/verifications/{verificationId}
+   *
+   * @param verificationId - The ID of the verification to retrieve
+   * @returns VerificationResponse
+   */
+  getById: async (verificationId: number): Promise<VerificationResponse> => {
+    const response = await apiClient.get<ApiResponse<VerificationResponse>>(
+      API_ENDPOINTS.VERIFICATION.BY_ID(verificationId),
+    );
+    return response.data.data;
+  },
 };
 
 export default verificationApi;

@@ -247,9 +247,40 @@ export type VerificationStatusType =
   | 'MANUAL_REVIEW';
 
 /**
- * Submit verification request
+ * Submit verification request - Backend SubmitVerificationRequest.java ile %100 uyumlu
+ * POST /api/verifications
+ *
+ * NOT: Backend URL değil, S3 key ve metadata bekliyor!
+ * Dosyalar önce S3'e yüklenmeli, sonra bu request gönderilmeli.
+ *
+ * @see verification.types.ts for detailed documentation
  */
 export interface SubmitVerificationRequest {
+  /** Profession ID - ZORUNLU */
+  professionId: number;
+  /** S3'e yüklenmiş belge dosyasının key'i (URL değil!) */
+  documentS3Key: string;
+  /** Belge dosya adı */
+  documentFileName: string;
+  /** MIME type (image/jpeg, image/png, application/pdf) */
+  documentContentType: string;
+  /** Dosya boyutu (bytes) */
+  documentFileSize: number;
+  /** S3'e yüklenmiş selfie dosyasının key'i */
+  selfieS3Key: string;
+  /** Selfie dosya adı */
+  selfieFileName: string;
+  /** MIME type */
+  selfieContentType: string;
+  /** Dosya boyutu (bytes) */
+  selfieFileSize: number;
+}
+
+/**
+ * @deprecated Eski format - SubmitVerificationRequest kullanın
+ * Backend artık S3 key + metadata bekliyor, URL değil
+ */
+export interface LegacySubmitVerificationRequest {
   professionId: number;
   documentUrl: string;
   selfieUrl: string;
@@ -279,9 +310,46 @@ export interface Post {
 export type PostVisibility = 'PUBLIC' | 'VERIFIED_ONLY' | 'FOLLOWERS_ONLY';
 
 /**
- * Create post request
+ * Post image DTO - Backend PostImageDto.java ile uyumlu
+ */
+export interface PostImageDto {
+  /** S3 URL veya CDN URL */
+  url: string;
+  /** Thumbnail URL (opsiyonel) */
+  thumbnailUrl?: string;
+  /** Görsel genişliği (pixel) */
+  width?: number;
+  /** Görsel yüksekliği (pixel) */
+  height?: number;
+  /** Blurhash placeholder (opsiyonel) */
+  blurhash?: string;
+}
+
+/**
+ * Create post request - Backend CreatePostRequest.java ile %100 uyumlu
+ * POST /api/posts
+ *
+ * Backend validation kuralları:
+ * - professionId: @NotNull - ZORUNLU!
+ * - content: @Size(min=10, max=5000) - 10-5000 karakter arası
+ * - images: @Size(max=5) - Maksimum 5 görsel, List<PostImageDto> formatında
+ *
+ * @see feed.types.ts CreatePostRequest for the canonical definition
  */
 export interface CreatePostRequest {
+  /** Meslek ID'si - ZORUNLU! Backend @NotNull validation */
+  professionId: number;
+  /** Post içeriği - 10-5000 karakter arası olmalı */
+  content: string;
+  /** Post görselleri - Maksimum 5 adet, PostImageDto formatında */
+  images?: PostImageDto[];
+}
+
+/**
+ * @deprecated Eski format - CreatePostRequest kullanın
+ * Backend artık images: PostImageDto[] bekliyor, imageUrls: string[] değil
+ */
+export interface LegacyCreatePostRequest {
   content: string;
   imageUrls?: string[];
   visibility?: PostVisibility;
