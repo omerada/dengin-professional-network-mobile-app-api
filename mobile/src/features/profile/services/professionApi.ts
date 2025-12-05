@@ -15,19 +15,32 @@ interface ApiResponse<T> {
 }
 
 /**
- * Profession Category - Backend ProfessionCategory enum
+ * Profession Category - Backend ProfessionCategory enum ile %100 uyumlu
+ * @see backend/src/main/java/com/meslektas/identity/domain/model/ProfessionCategory.java
  */
 export type ProfessionCategory =
-  | 'HEALTHCARE'
-  | 'ENGINEERING'
-  | 'LAW'
-  | 'EDUCATION'
-  | 'FINANCE'
-  | 'IT'
-  | 'ARTS'
-  | 'SCIENCE'
-  | 'TRADES'
-  | 'OTHER';
+  | 'MEDICAL' // Sağlık
+  | 'LEGAL' // Hukuk
+  | 'ENGINEERING' // Mühendislik
+  | 'EDUCATION' // Eğitim
+  | 'SERVICE' // Hizmet Sektörü
+  | 'CREATIVE' // Yaratıcı Sektör
+  | 'BUSINESS' // İş Dünyası
+  | 'OTHER'; // Diğer
+
+/**
+ * Profession category display names (Turkish)
+ */
+export const PROFESSION_CATEGORY_NAMES: Record<ProfessionCategory, string> = {
+  MEDICAL: 'Sağlık',
+  LEGAL: 'Hukuk',
+  ENGINEERING: 'Mühendislik',
+  EDUCATION: 'Eğitim',
+  SERVICE: 'Hizmet Sektörü',
+  CREATIVE: 'Yaratıcı Sektör',
+  BUSINESS: 'İş Dünyası',
+  OTHER: 'Diğer',
+};
 
 /**
  * Profession Response - Backend ProfessionResponse record

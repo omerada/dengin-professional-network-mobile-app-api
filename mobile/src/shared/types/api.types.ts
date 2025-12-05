@@ -112,15 +112,18 @@ export interface Profession {
 }
 
 /**
- * Profession category enum
+ * Profession category enum - Backend ProfessionCategory.java ile %100 uyumlu
+ * @see backend/src/main/java/com/meslektas/identity/domain/model/ProfessionCategory.java
  */
 export type ProfessionCategory =
-  | 'MEDICAL'
-  | 'LEGAL'
-  | 'ENGINEERING'
-  | 'EDUCATION'
-  | 'FINANCE'
-  | 'OTHER';
+  | 'MEDICAL' // Sağlık
+  | 'LEGAL' // Hukuk
+  | 'ENGINEERING' // Mühendislik
+  | 'EDUCATION' // Eğitim
+  | 'SERVICE' // Hizmet Sektörü
+  | 'CREATIVE' // Yaratıcı Sektör
+  | 'BUSINESS' // İş Dünyası
+  | 'OTHER'; // Diğer
 
 /**
  * Authentication tokens
@@ -310,19 +313,20 @@ export interface Post {
 export type PostVisibility = 'PUBLIC' | 'VERIFIED_ONLY' | 'FOLLOWERS_ONLY';
 
 /**
- * Post image DTO - Backend PostImageDto.java ile uyumlu
+ * Post image DTO - Backend PostImageDto.java ile %100 uyumlu
+ * @see backend/src/main/java/com/meslektas/social/application/dto/PostImageDto.java
  */
 export interface PostImageDto {
-  /** S3 URL veya CDN URL */
+  /** S3 key - ZORUNLU! Backend @NotBlank validation */
+  s3Key: string;
+  /** S3 URL veya CDN URL - ZORUNLU! Backend @NotBlank validation */
   url: string;
-  /** Thumbnail URL (opsiyonel) */
-  thumbnailUrl?: string;
   /** Görsel genişliği (pixel) */
   width?: number;
   /** Görsel yüksekliği (pixel) */
   height?: number;
-  /** Blurhash placeholder (opsiyonel) */
-  blurhash?: string;
+  /** Dosya boyutu (bytes) */
+  fileSize?: number;
 }
 
 /**

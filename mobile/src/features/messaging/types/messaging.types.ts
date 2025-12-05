@@ -3,6 +3,11 @@
 // Backend: com.meslektas.messaging.api.dto.*
 // WebSocket: com.meslektas.messaging.infrastructure.websocket.dto.*
 
+import { UUID, isValidUUID, toUUID } from '@shared/types/common.types';
+
+// Re-export UUID utilities for convenience
+export { UUID, isValidUUID, toUUID };
+
 // =============================================================================
 // ENUMS - Backend ile uyumlu
 // =============================================================================
@@ -193,14 +198,46 @@ export interface MessageListResponse {
 
 /**
  * Mesaj gönderme isteği - Backend SendMessageRequest ile uyumlu
+ *
+ * Backend beklentisi:
+ * - recipientId: UUID format (required)
+ * - content: String, max 2000 karakter
+ * - attachment: AttachmentDto (optional)
+ *
+ * NOT: recipientId mutlaka UUID formatında olmalı!
+ * Validasyon için isValidUUID() veya toUUID() kullanın.
+ *
+ * @example
+ * const request: SendMessageRequest = {
+ *   recipientId: toUUID('550e8400-e29b-41d4-a716-446655440000'),
+ *   content: 'Merhaba!',
+ * };
  */
 export interface SendMessageRequest {
-  /** Alıcı UUID */
-  recipientId: string;
-  /** Mesaj içeriği */
+  /** Alıcı UUID - Backend UUID tipi bekler */
+  recipientId: UUID;
+  /** Mesaj içeriği (max 2000 karakter) */
   content: string;
   /** Opsiyonel ek */
-  attachment?: MessageAttachment;
+  attachment?: SendMessageAttachment;
+}
+
+/**
+ * Mesaj eki gönderme tipi - Backend AttachmentDto ile uyumlu
+ *
+ * NOT: Backend s3Key alanı da bekler (upload sonrası)
+ */
+export interface SendMessageAttachment {
+  /** S3 key (upload sonrası alınır) */
+  s3Key: string;
+  /** Dosya URL */
+  url: string;
+  /** MIME type */
+  contentType: string;
+  /** Dosya boyutu (bytes) */
+  fileSize: number;
+  /** Dosya adı */
+  fileName: string;
 }
 
 /**
@@ -234,14 +271,16 @@ export interface PresignedUrlResponse {
 /**
  * WebSocket mesaj gönderme isteği - Backend WsSendMessageRequest ile uyumlu
  * Destination: /app/chat.send
+ *
+ * NOT: recipientId mutlaka UUID formatında olmalı!
  */
 export interface WsSendMessageRequest {
-  /** Alıcı UUID */
-  recipientId: string;
+  /** Alıcı UUID - Backend UUID tipi bekler */
+  recipientId: UUID;
   /** Mesaj içeriği */
   content: string;
   /** Opsiyonel ek */
-  attachment?: MessageAttachment;
+  attachment?: SendMessageAttachment;
 }
 
 /**
@@ -306,7 +345,7 @@ export interface WsReadReceipt {
 /**
  * STOMP bağlantı durumu
  */
-export type StompConnectionState = 
+export type StompConnectionState =
   | 'DISCONNECTED'
   | 'CONNECTING'
   | 'CONNECTED'
@@ -319,14 +358,14 @@ export type StompConnectionState =
 export const STOMP_ENDPOINTS = {
   /** WebSocket bağlantı URL */
   WS_URL: '/ws',
-  
+
   /** Mesaj gönderme */
   SEND_MESSAGE: '/app/chat.send',
   /** Yazıyor bildirimi */
   SEND_TYPING: '/app/chat.typing',
   /** Okundu bildirimi */
   SEND_READ: '/app/chat.read',
-  
+
   /** Yeni mesaj dinleme */
   SUBSCRIBE_MESSAGES: '/user/queue/messages',
   /** Yazıyor bildirimi dinleme */

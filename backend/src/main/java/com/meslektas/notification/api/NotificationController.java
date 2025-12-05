@@ -1,10 +1,10 @@
 package com.meslektas.notification.api;
 
+import com.meslektas.common.api.ApiResponse;
 import com.meslektas.notification.application.dto.*;
 import com.meslektas.notification.application.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -14,8 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -42,8 +40,8 @@ public class NotificationController {
      */
     @GetMapping
     @Operation(summary = "Get notifications", description = "Retrieve user's notifications with pagination support")
-    @ApiResponse(responseCode = "200", description = "Notifications retrieved successfully")
-    public ResponseEntity<NotificationListResponse> getNotifications(
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Notifications retrieved successfully")
+    public ResponseEntity<ApiResponse<NotificationListResponse>> getNotifications(
             @Parameter(description = "Page number (0-indexed)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size,
             @Parameter(description = "Only return unread notifications") @RequestParam(defaultValue = "false") boolean unreadOnly,
@@ -57,7 +55,7 @@ public class NotificationController {
         log.info("Notifications retrieved - userId: {}, count: {}, unreadCount: {}",
                 userId, response.getNotifications().size(), response.getUnreadCount());
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success("Notifications retrieved successfully", response));
     }
 
     /**
@@ -65,9 +63,9 @@ public class NotificationController {
      */
     @GetMapping("/{notificationId}")
     @Operation(summary = "Get notification by ID")
-    @ApiResponse(responseCode = "200", description = "Notification retrieved successfully")
-    @ApiResponse(responseCode = "404", description = "Notification not found")
-    public ResponseEntity<NotificationResponse> getNotification(
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Notification retrieved successfully")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Notification not found")
+    public ResponseEntity<ApiResponse<NotificationResponse>> getNotification(
             @PathVariable UUID notificationId,
             Authentication authentication) {
         Long userId = getUserId(authentication);
@@ -75,7 +73,7 @@ public class NotificationController {
 
         NotificationResponse response = notificationService.getNotification(notificationId, userId);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     /**
@@ -83,24 +81,29 @@ public class NotificationController {
      */
     @GetMapping("/unread-count")
     @Operation(summary = "Get unread notification count")
-    @ApiResponse(responseCode = "200", description = "Unread count retrieved successfully")
-    public ResponseEntity<Map<String, Long>> getUnreadCount(Authentication authentication) {
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Unread count retrieved successfully")
+    public ResponseEntity<ApiResponse<UnreadCountResponse>> getUnreadCount(Authentication authentication) {
         Long userId = getUserId(authentication);
         log.debug("GET /api/notifications/unread-count - userId: {}", userId);
 
         long count = notificationService.getUnreadCount(userId);
 
-        return ResponseEntity.ok(Collections.singletonMap("unreadCount", count));
+        return ResponseEntity.ok(ApiResponse.success(new UnreadCountResponse(count)));
     }
+
+    /**
+     * DTO for unread count response.
+     */
+    public record UnreadCountResponse(long unreadCount) {}
 
     /**
      * Mark single notification as read.
      */
     @PostMapping("/{notificationId}/read")
     @Operation(summary = "Mark notification as read")
-    @ApiResponse(responseCode = "200", description = "Notification marked as read")
-    @ApiResponse(responseCode = "404", description = "Notification not found")
-    public ResponseEntity<NotificationResponse> markAsRead(
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Notification marked as read")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Notification not found")
+    public ResponseEntity<ApiResponse<NotificationResponse>> markAsRead(
             @PathVariable UUID notificationId,
             Authentication authentication) {
         Long userId = getUserId(authentication);
@@ -108,7 +111,7 @@ public class NotificationController {
 
         NotificationResponse response = notificationService.markAsRead(notificationId, userId);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success("Notification marked as read", response));
     }
 
     /**
@@ -116,8 +119,8 @@ public class NotificationController {
      */
     @PostMapping("/mark-as-read")
     @Operation(summary = "Mark multiple notifications as read")
-    @ApiResponse(responseCode = "200", description = "Notifications marked as read")
-    public ResponseEntity<Map<String, Integer>> markAsRead(
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Notifications marked as read")
+    public ResponseEntity<ApiResponse<MarkAsReadResponse>> markAsRead(
             @Valid @RequestBody MarkAsReadRequest request,
             Authentication authentication) {
         Long userId = getUserId(authentication);
@@ -136,22 +139,27 @@ public class NotificationController {
 
         log.info("Notifications marked as read - userId: {}, count: {}", userId, count);
 
-        return ResponseEntity.ok(Collections.singletonMap("markedAsRead", count));
+        return ResponseEntity.ok(ApiResponse.success("Notifications marked as read", new MarkAsReadResponse(count)));
     }
+
+    /**
+     * DTO for mark as read response.
+     */
+    public record MarkAsReadResponse(int markedAsRead) {}
 
     /**
      * Get user's notification preferences.
      */
     @GetMapping("/preferences")
     @Operation(summary = "Get notification preferences")
-    @ApiResponse(responseCode = "200", description = "Preferences retrieved successfully")
-    public ResponseEntity<NotificationPreferencesResponse> getPreferences(Authentication authentication) {
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Preferences retrieved successfully")
+    public ResponseEntity<ApiResponse<NotificationPreferencesResponse>> getPreferences(Authentication authentication) {
         Long userId = getUserId(authentication);
         log.debug("GET /api/notifications/preferences - userId: {}", userId);
 
         NotificationPreferencesResponse response = notificationService.getPreferences(userId);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     /**
@@ -159,8 +167,8 @@ public class NotificationController {
      */
     @PutMapping("/preferences")
     @Operation(summary = "Update notification preferences")
-    @ApiResponse(responseCode = "200", description = "Preferences updated successfully")
-    public ResponseEntity<NotificationPreferencesResponse> updatePreferences(
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Preferences updated successfully")
+    public ResponseEntity<ApiResponse<NotificationPreferencesResponse>> updatePreferences(
             @Valid @RequestBody NotificationPreferencesRequest request,
             Authentication authentication) {
         Long userId = getUserId(authentication);
@@ -170,7 +178,7 @@ public class NotificationController {
 
         log.info("Notification preferences updated - userId: {}", userId);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success("Preferences updated successfully", response));
     }
 
     /**

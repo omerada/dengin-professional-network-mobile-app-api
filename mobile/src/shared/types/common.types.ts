@@ -108,3 +108,68 @@ export type Optional<T> = T | undefined;
 export type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
+
+// ============================================
+// UUID TYPE & VALIDATION
+// ============================================
+
+/**
+ * UUID branded type for type-safety
+ * Backend'de UUID olarak tanımlanan alanlar için kullanılır
+ *
+ * @example
+ * const userId: UUID = '550e8400-e29b-41d4-a716-446655440000' as UUID;
+ */
+export type UUID = string & { readonly __brand: 'UUID' };
+
+/**
+ * UUID format regex pattern
+ * RFC 4122 uyumlu UUID formatı
+ */
+export const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/**
+ * Validates if a string is a valid UUID format
+ *
+ * @param value - String to validate
+ * @returns true if valid UUID format
+ *
+ * @example
+ * isValidUUID('550e8400-e29b-41d4-a716-446655440000') // true
+ * isValidUUID('invalid-uuid') // false
+ */
+export function isValidUUID(value: string): value is UUID {
+  return UUID_REGEX.test(value);
+}
+
+/**
+ * Converts a string to UUID type with validation
+ * Throws error if invalid format
+ *
+ * @param value - String to convert
+ * @returns UUID branded string
+ * @throws Error if invalid UUID format
+ *
+ * @example
+ * const userId = toUUID('550e8400-e29b-41d4-a716-446655440000');
+ */
+export function toUUID(value: string): UUID {
+  if (!isValidUUID(value)) {
+    throw new Error(`Invalid UUID format: ${value}`);
+  }
+  return value;
+}
+
+/**
+ * Safely converts a string to UUID, returns null if invalid
+ *
+ * @param value - String to convert
+ * @returns UUID or null if invalid
+ */
+export function toUUIDSafe(value: string | null | undefined): UUID | null {
+  if (!value || !isValidUUID(value)) {
+    return null;
+  }
+  return value;
+}

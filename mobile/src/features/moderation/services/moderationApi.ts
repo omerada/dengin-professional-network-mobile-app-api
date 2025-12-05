@@ -72,10 +72,13 @@ export const moderationApi = {
    * Backend: ReportController.checkIfReported()
    */
   checkIfReported: async (contentId: string, type: string): Promise<{ hasReported: boolean }> => {
-    const response = await apiClient.get<{ hasReported: boolean }>('/api/reports/check', {
-      params: { contentId, type },
-    });
-    return response.data;
+    const response = await apiClient.get<ApiResponse<{ hasReported: boolean }>>(
+      '/api/reports/check',
+      {
+        params: { contentId, type },
+      },
+    );
+    return response.data.data;
   },
 
   /**

@@ -1,12 +1,12 @@
 package com.meslektas.moderation.api;
 
+import com.meslektas.common.api.ApiResponse;
 import com.meslektas.moderation.application.dto.request.ReportRequest;
 import com.meslektas.moderation.application.dto.response.ReportResponse;
 import com.meslektas.moderation.application.service.ReportContentService;
 import com.meslektas.moderation.domain.model.ReportType;
 import com.meslektas.identity.infrastructure.security.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -39,10 +39,10 @@ public class ReportController {
      */
     @PostMapping
     @Operation(summary = "Create a report", description = "Report inappropriate content")
-    @ApiResponse(responseCode = "201", description = "Report created successfully")
-    @ApiResponse(responseCode = "400", description = "Invalid request")
-    @ApiResponse(responseCode = "409", description = "Duplicate report")
-    public ResponseEntity<ReportResponse> createReport(
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Report created successfully")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Duplicate report")
+    public ResponseEntity<ApiResponse<ReportResponse>> createReport(
             @Valid @RequestBody ReportRequest request,
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @RequestParam(required = false) Long contentOwnerId,
@@ -58,7 +58,8 @@ public class ReportController {
         ReportResponse response = reportService.createReport(
                 request, userId, contentOwnerId, contentText);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Report created successfully", response));
     }
 
     /**
@@ -66,11 +67,11 @@ public class ReportController {
      */
     @GetMapping("/my-reports")
     @Operation(summary = "Get my reports", description = "Get reports submitted by the current user")
-    public ResponseEntity<List<ReportResponse>> getMyReports(
+    public ResponseEntity<ApiResponse<List<ReportResponse>>> getMyReports(
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         List<ReportResponse> reports = reportService.getMyReports(userDetails.getId());
-        return ResponseEntity.ok(reports);
+        return ResponseEntity.ok(ApiResponse.success(reports));
     }
 
     /**
@@ -78,15 +79,15 @@ public class ReportController {
      */
     @GetMapping("/{reportId}")
     @Operation(summary = "Get a report", description = "Get details of a specific report")
-    @ApiResponse(responseCode = "200", description = "Report found")
-    @ApiResponse(responseCode = "404", description = "Report not found")
-    @ApiResponse(responseCode = "403", description = "Access denied")
-    public ResponseEntity<ReportResponse> getReport(
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Report found")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Report not found")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Access denied")
+    public ResponseEntity<ApiResponse<ReportResponse>> getReport(
             @PathVariable UUID reportId,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         ReportResponse response = reportService.getReport(reportId, userDetails.getId());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     /**
@@ -94,15 +95,15 @@ public class ReportController {
      */
     @DeleteMapping("/{reportId}")
     @Operation(summary = "Cancel a report", description = "Cancel a pending report")
-    @ApiResponse(responseCode = "204", description = "Report cancelled")
-    @ApiResponse(responseCode = "400", description = "Cannot cancel - report not pending")
-    @ApiResponse(responseCode = "404", description = "Report not found")
-    public ResponseEntity<Void> cancelReport(
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Report cancelled")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Cannot cancel - report not pending")
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Report not found")
+    public ResponseEntity<ApiResponse<Void>> cancelReport(
             @PathVariable UUID reportId,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         reportService.cancelReport(reportId, userDetails.getId());
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ApiResponse.success("Report cancelled successfully", null));
     }
 
     /**
@@ -110,13 +111,13 @@ public class ReportController {
      */
     @GetMapping("/check")
     @Operation(summary = "Check if reported", description = "Check if the current user has already reported specific content")
-    public ResponseEntity<Map<String, Boolean>> checkIfReported(
+    public ResponseEntity<ApiResponse<Map<String, Boolean>>> checkIfReported(
             @RequestParam UUID contentId,
             @RequestParam ReportType type,
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         boolean hasReported = reportService.hasReported(userDetails.getId(), contentId, type);
-        return ResponseEntity.ok(Map.of("hasReported", hasReported));
+        return ResponseEntity.ok(ApiResponse.success(Map.of("hasReported", hasReported)));
     }
 
     /**
@@ -124,11 +125,11 @@ public class ReportController {
      */
     @GetMapping("/count")
     @Operation(summary = "Get report count", description = "Get the number of reports for specific content")
-    public ResponseEntity<Map<String, Integer>> getReportCount(
+    public ResponseEntity<ApiResponse<Map<String, Integer>>> getReportCount(
             @RequestParam UUID contentId,
             @RequestParam ReportType type) {
 
         int count = reportService.getReportCount(contentId, type);
-        return ResponseEntity.ok(Map.of("count", count));
+        return ResponseEntity.ok(ApiResponse.success(Map.of("count", count)));
     }
 }

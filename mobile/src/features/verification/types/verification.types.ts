@@ -227,6 +227,45 @@ export interface VerificationEligibilityResponse {
 }
 
 /**
+ * Doğrulama geçmişi yanıtı - Backend VerificationAttemptResponse ile %100 uyumlu
+ * GET /api/verifications/history endpoint'i için
+ *
+ * NOT: Bu tip VerificationResponse'dan farklı! History endpoint'i daha detaylı bilgi döner.
+ */
+export interface VerificationAttemptResponse {
+  /** Backend: id (Long) */
+  id: number;
+  /** Backend: verificationId (UUID) */
+  verificationId: string;
+  /** Backend: professionId (Long) */
+  professionId: number;
+  /** Backend: professionName (String) - Joined from profession table */
+  professionName: string;
+  /** Backend: status (VerificationStatus enum) */
+  status: VerificationStatus;
+  /** Backend: attemptNumber (Integer) */
+  attemptNumber: number;
+  /** Backend: submittedAt (Instant) */
+  submittedAt: string;
+  /** Backend: processedAt (Instant) */
+  processedAt?: string;
+  /** Backend: aiConfidence (Double) */
+  aiConfidence?: number;
+  /** Backend: faceSimilarity (Double) */
+  faceSimilarity?: number;
+  /** Backend: reviewNotes (String) */
+  reviewNotes?: string;
+  /** Backend: isApproved (boolean) - Helper flag */
+  isApproved: boolean;
+  /** Backend: isRejected (boolean) - Helper flag */
+  isRejected: boolean;
+  /** Backend: isPending (boolean) - Helper flag */
+  isPending: boolean;
+  /** Backend: daysSinceSubmission (long) - Calculated field */
+  daysSinceSubmission?: number;
+}
+
+/**
  * AI Doğrulama sonucu - Internal
  */
 export interface VerificationResult {

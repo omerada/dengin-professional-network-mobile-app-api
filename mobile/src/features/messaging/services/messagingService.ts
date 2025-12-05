@@ -5,6 +5,7 @@
 
 import { apiClient } from '@core/api/client';
 import { API_ENDPOINTS } from '@core/api/endpoints';
+import { isValidUUID } from '@shared/types/common.types';
 import type {
   Conversation,
   ConversationListResponse,
@@ -135,8 +136,15 @@ export const messagingService = {
    *
    * NOT: Backend /api/messages endpoint'i bekliyor, conversationId URL'de DEĞİL!
    * Request body: { recipientId, content, attachment? }
+   *
+   * @throws Error if recipientId is not a valid UUID format
    */
   async sendMessage(request: SendMessageRequest): Promise<SendMessageResponse> {
+    // Validate UUID format before sending
+    if (!isValidUUID(request.recipientId)) {
+      throw new Error(`Invalid recipientId UUID format: ${request.recipientId}`);
+    }
+
     const response = await apiClient.post<ApiResponse<SendMessageResponse>>(
       API_ENDPOINTS.MESSAGING.SEND_MESSAGE,
       request,

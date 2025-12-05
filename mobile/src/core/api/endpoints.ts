@@ -64,6 +64,7 @@ export const API_ENDPOINTS = {
   },
 
   // Feed - Backend: /api/feed/* and /api/posts/*
+  // NOT: Tüm postId'ler string olarak gönderilmeli (Backend String olarak alıyor)
   FEED: {
     // GET /api/feed - Personalized feed
     PERSONALIZED: '/api/feed',
@@ -71,21 +72,21 @@ export const API_ENDPOINTS = {
     TRENDING: '/api/feed/trending',
     // GET /api/posts - All posts (for search/filter)
     LIST: '/api/posts',
-    POST_BY_ID: (id: string | number) => `/api/posts/${id}`,
+    POST_BY_ID: (id: string | number) => `/api/posts/${String(id)}`,
     CREATE_POST: '/api/posts',
-    UPDATE_POST: (id: string | number) => `/api/posts/${id}`,
-    DELETE_POST: (id: string | number) => `/api/posts/${id}`,
-    LIKE_POST: (id: string | number) => `/api/posts/${id}/like`,
-    UNLIKE_POST: (id: string | number) => `/api/posts/${id}/like`,
+    UPDATE_POST: (id: string | number) => `/api/posts/${String(id)}`,
+    DELETE_POST: (id: string | number) => `/api/posts/${String(id)}`,
+    LIKE_POST: (id: string | number) => `/api/posts/${String(id)}/like`,
+    UNLIKE_POST: (id: string | number) => `/api/posts/${String(id)}/like`,
     // POST /api/posts/{id}/save - Save post
-    SAVE_POST: (id: string | number) => `/api/posts/${id}/save`,
+    SAVE_POST: (id: string | number) => `/api/posts/${String(id)}/save`,
     // DELETE /api/posts/{id}/save - Unsave post
-    UNSAVE_POST: (id: string | number) => `/api/posts/${id}/save`,
-    REPORT_POST: (id: string | number) => `/api/posts/${id}/report`,
-    SHARE_POST: (id: string | number) => `/api/posts/${id}/share`,
+    UNSAVE_POST: (id: string | number) => `/api/posts/${String(id)}/save`,
+    REPORT_POST: (id: string | number) => `/api/posts/${String(id)}/report`,
+    SHARE_POST: (id: string | number) => `/api/posts/${String(id)}/share`,
     // GET /api/posts/saved - Get saved posts
     SAVED: '/api/posts/saved',
-    USER_POSTS: (userId: string | number) => `/api/users/${userId}/posts`,
+    USER_POSTS: (userId: string | number) => `/api/users/${String(userId)}/posts`,
     FOLLOWING: '/api/posts/following',
   },
 
@@ -96,15 +97,16 @@ export const API_ENDPOINTS = {
   // - DELETE /api/posts/{postId}/comments/{commentId} - Yorum sil
   // - POST /api/posts/{postId}/comments/{commentId}/like - Yorum beğen
   // - DELETE /api/posts/{postId}/comments/{commentId}/like - Yorum beğenmekten vazgeç
+  // NOT: postId string olarak gönderilmeli
   COMMENTS: {
-    BY_POST: (postId: string | number) => `/api/posts/${postId}/comments`,
-    CREATE: (postId: string | number) => `/api/posts/${postId}/comments`,
+    BY_POST: (postId: string | number) => `/api/posts/${String(postId)}/comments`,
+    CREATE: (postId: string | number) => `/api/posts/${String(postId)}/comments`,
     DELETE: (postId: string | number, commentId: string) =>
-      `/api/posts/${postId}/comments/${commentId}`,
+      `/api/posts/${String(postId)}/comments/${commentId}`,
     LIKE: (postId: string | number, commentId: string) =>
-      `/api/posts/${postId}/comments/${commentId}/like`,
+      `/api/posts/${String(postId)}/comments/${commentId}/like`,
     UNLIKE: (postId: string | number, commentId: string) =>
-      `/api/posts/${postId}/comments/${commentId}/like`,
+      `/api/posts/${String(postId)}/comments/${commentId}/like`,
   },
 
   // Messaging - Backend: /api/conversations/* and /api/messages/*

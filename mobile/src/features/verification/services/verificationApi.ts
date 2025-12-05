@@ -8,6 +8,7 @@ import type {
   SubmitVerificationRequest,
   VerificationResponse,
   VerificationEligibilityResponse,
+  VerificationAttemptResponse,
 } from '../types';
 
 /**
@@ -104,10 +105,13 @@ export const verificationApi = {
    * Get verification history
    * GET /api/verifications/history
    *
-   * @returns List of all verification attempts
+   * NOT: Backend VerificationAttemptResponse döndürür, VerificationResponse değil!
+   * VerificationAttemptResponse daha detaylı bilgi içerir (professionName, helper flags, vb.)
+   *
+   * @returns List of all verification attempts with detailed status
    */
-  getHistory: async (): Promise<VerificationResponse[]> => {
-    const response = await apiClient.get<ApiResponse<VerificationResponse[]>>(
+  getHistory: async (): Promise<VerificationAttemptResponse[]> => {
+    const response = await apiClient.get<ApiResponse<VerificationAttemptResponse[]>>(
       API_ENDPOINTS.VERIFICATION.HISTORY,
     );
     return response.data.data;

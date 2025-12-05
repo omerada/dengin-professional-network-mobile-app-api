@@ -26,6 +26,7 @@ if (Platform.OS !== 'web') {
 import { ENV } from '@config/env';
 import { tokenService } from '@features/auth/services';
 import { messageQueue } from './messageQueue';
+import { isValidUUID } from '@shared/types/common.types';
 import {
   SocketStatus,
   type SocketConfig,
@@ -228,10 +229,16 @@ class StompClient {
   /**
    * Send a chat message
    * @returns true if sent via WebSocket, false if queued
+   * @throws Error if recipientId is not a valid UUID format
    */
   sendMessage(
     request: WsSendMessageRequest & { conversationId: string; clientMessageId: string },
   ): boolean {
+    // Validate UUID format before sending
+    if (!isValidUUID(request.recipientId)) {
+      throw new Error(`Invalid recipientId UUID format: ${request.recipientId}`);
+    }
+
     if (this.client?.connected) {
       this.publish(DESTINATIONS.SEND_MESSAGE, request);
       return true;
@@ -250,10 +257,14 @@ class StompClient {
   /**
    * Send typing indicator
    * @param conversationId - Conversation UUID
-   * @param recipientId - Recipient user UUID (string, not number)
+   * @param recipientId - Recipient user UUID (must be valid UUID format)
    * @param isTyping - Whether user is currently typing
+   * @throws Error if recipientId is not a valid UUID format
    */
   sendTyping(conversationId: string, recipientId: string, isTyping: boolean): void {
+    if (!isValidUUID(recipientId)) {
+      throw new Error(`Invalid recipientId UUID format: ${recipientId}`);
+    }
     this.publish(DESTINATIONS.TYPING, { conversationId, recipientId, isTyping });
   }
 
