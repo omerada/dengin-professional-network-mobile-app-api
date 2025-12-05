@@ -19,8 +19,8 @@ export const API_ENDPOINTS = {
     // Şifre değiştirme - authenticated users only
     CHANGE_PASSWORD: '/api/auth/change-password',
     // OAuth2 endpoints - Backend: OAuth2Controller
-    OAUTH_GOOGLE: '/api/v1/auth/oauth/google',
-    OAUTH_APPLE: '/api/v1/auth/oauth/apple',
+    OAUTH_GOOGLE: '/api/auth/oauth/google',
+    OAUTH_APPLE: '/api/auth/oauth/apple',
   },
 
   // User - Backend: /api/users/*
@@ -114,18 +114,18 @@ export const API_ENDPOINTS = {
   },
 
   // Notifications - Backend: /api/notifications/*
-  // NOT: Device token işlemleri /api/v1/devices/* altında!
+  // Device token işlemleri /api/devices/* altında
   NOTIFICATIONS: {
     LIST: '/api/notifications',
     MARK_READ: (id: string | number) => `/api/notifications/${id}/read`,
     MARK_ALL_READ: '/api/notifications/mark-as-read',
     SETTINGS: '/api/notifications/preferences',
     UPDATE_SETTINGS: '/api/notifications/preferences',
-    // Device token endpoints - Backend: /api/v1/devices/*
+    // Device token endpoints - Backend: /api/devices/*
     // NOT: Bu endpoint'ler DeviceTokenController altında, NotificationController'da değil!
-    REGISTER_DEVICE: '/api/v1/devices/register',
-    UNREGISTER_DEVICE: '/api/v1/devices/unregister',
-    UNREGISTER_ALL_DEVICES: '/api/v1/devices/unregister-all',
+    REGISTER_DEVICE: '/api/devices/register',
+    UNREGISTER_DEVICE: '/api/devices/unregister',
+    UNREGISTER_ALL_DEVICES: '/api/devices/unregister-all',
   },
 
   // Media - Backend: /api/media/*

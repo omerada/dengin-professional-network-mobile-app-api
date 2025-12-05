@@ -2,6 +2,8 @@
 // Feed modülü tip tanımlamaları
 // Backend API Reference: mobile-development-guide/core/14-BACKEND-API-REFERENCE.md
 
+import type { PagedResponse } from '@shared/types';
+
 /**
  * Post yazarı - Backend API uyumlu
  */
@@ -106,7 +108,8 @@ export interface CommentListResponse {
 }
 
 /**
- * Feed sayfalama - Backend PaginatedResponse uyumlu
+ * Feed sayfalama - Backend PagedResponse uyumlu
+ * @deprecated PagedResponse<Post> kullanın
  */
 export interface FeedPagination {
   page: number;
@@ -118,17 +121,14 @@ export interface FeedPagination {
 }
 
 /**
- * Feed yanıtı - Backend API uyumlu
+ * Feed yanıtı - Backend PagedResponse<FeedPostResponse> ile %100 uyumlu
  * GET /api/feed response
+ *
+ * Backend artık PagedResponse wrapper döndürüyor
  */
-export interface FeedResponse {
-  content: Post[];
-  page: number;
-  size: number;
-  totalElements: number;
-  totalPages: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
+export interface FeedResponse extends PagedResponse<Post> {
+  /** Last post ID for cursor-based pagination */
+  lastId?: number;
 }
 
 /**

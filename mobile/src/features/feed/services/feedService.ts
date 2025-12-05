@@ -86,12 +86,27 @@ function mapToPost(response: BackendFeedPostResponse): Post {
 }
 
 /**
- * Feed list response - Backend List<FeedPostResponse> döndürüyor
- * NOT: Backend pagination wrapper KULLANMIYOR, sadece array döndürüyor!
+ * Backend PagedResponse<FeedPostResponse> yapısı
+ * ÖNEMLİ: Backend artık PagedResponse döndürüyor!
+ */
+interface BackendPagedFeedResponse {
+  content: BackendFeedPostResponse[];
+  page?: number;
+  size: number;
+  totalElements?: number;
+  totalPages?: number;
+  hasNext: boolean;
+  hasPrevious?: boolean;
+  lastId?: number;
+}
+
+/**
+ * Feed list response - Mobile tarafında kullanılan response
  */
 interface FeedListResponse {
   posts: Post[];
   hasMore: boolean;
+  lastId?: number;
 }
 
 /**
@@ -105,7 +120,7 @@ interface FeedListResponse {
  * Cursor-based pagination desteklenir:
  * - beforeId: Son post ID'sinden önceki postları getir
  *
- * ÖNEMLİ: Backend List<FeedPostResponse> döndürüyor, pagination wrapper YOK!
+ * ÖNEMLİ: Backend PagedResponse<FeedPostResponse> döndürüyor!
  */
 export const feedService = {
   /**
@@ -117,14 +132,14 @@ export const feedService = {
    * - professionFilter: Optional profession ID filter
    * - beforeId: Optional cursor for pagination (get posts before this ID)
    *
-   * NOT: Backend List<FeedPostResponse> döndürüyor, FeedResponse pagination wrapper DEĞİL!
+   * Backend PagedResponse<FeedPostResponse> döndürüyor
    */
   async getFeed(
     limit = 20,
     professionFilter?: number,
     beforeId?: number,
   ): Promise<FeedListResponse> {
-    const response = await apiClient.get<ApiResponse<BackendFeedPostResponse[]>>(
+    const response = await apiClient.get<ApiResponse<BackendPagedFeedResponse>>(
       API_ENDPOINTS.FEED.PERSONALIZED,
       {
         params: {
@@ -134,10 +149,12 @@ export const feedService = {
         },
       },
     );
-    const posts = response.data.data.map(mapToPost);
+    const pagedData = response.data.data;
+    const posts = pagedData.content.map(mapToPost);
     return {
       posts,
-      hasMore: posts.length === limit, // Tam limit kadar geldiyse daha var demektir
+      hasMore: pagedData.hasNext,
+      lastId: pagedData.lastId,
     };
   },
 
@@ -150,16 +167,19 @@ export const feedService = {
    *
    * Trending Score = (likes × 2) + (comments × 5)
    * Son 7 günlük postlar dahil edilir.
+   * Backend PagedResponse<FeedPostResponse> döndürüyor
    */
   async getTrendingFeed(limit = 20): Promise<FeedListResponse> {
-    const response = await apiClient.get<ApiResponse<BackendFeedPostResponse[]>>(
+    const response = await apiClient.get<ApiResponse<BackendPagedFeedResponse>>(
       API_ENDPOINTS.FEED.TRENDING,
       { params: { limit: Math.min(limit, 50) } },
     );
-    const posts = response.data.data.map(mapToPost);
+    const pagedData = response.data.data;
+    const posts = pagedData.content.map(mapToPost);
     return {
       posts,
-      hasMore: posts.length === limit,
+      hasMore: pagedData.hasNext,
+      lastId: pagedData.lastId,
     };
   },
 

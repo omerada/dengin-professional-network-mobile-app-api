@@ -23,10 +23,7 @@ export const authApi = {
    * POST /api/auth/login
    */
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>(
-      API_ENDPOINTS.AUTH.LOGIN,
-      credentials,
-    );
+    const response = await apiClient.post<AuthResponse>(API_ENDPOINTS.AUTH.LOGIN, credentials);
     return response.data;
   },
 
@@ -35,10 +32,7 @@ export const authApi = {
    * POST /api/auth/register
    */
   register: async (data: RegisterData): Promise<RegisterResponse> => {
-    const response = await apiClient.post<RegisterResponse>(
-      API_ENDPOINTS.AUTH.REGISTER,
-      data,
-    );
+    const response = await apiClient.post<RegisterResponse>(API_ENDPOINTS.AUTH.REGISTER, data);
     return response.data;
   },
 
@@ -93,10 +87,9 @@ export const authApi = {
    * POST /api/auth/verify-email
    */
   verifyEmail: async (token: string): Promise<{ message: string }> => {
-    const response = await apiClient.post<{ message: string }>(
-      API_ENDPOINTS.AUTH.VERIFY_EMAIL,
-      { token },
-    );
+    const response = await apiClient.post<{ message: string }>(API_ENDPOINTS.AUTH.VERIFY_EMAIL, {
+      token,
+    });
     return response.data;
   },
 
@@ -104,10 +97,7 @@ export const authApi = {
    * Change password for authenticated user
    * POST /api/auth/change-password
    */
-  changePassword: async (
-    currentPassword: string,
-    newPassword: string,
-  ): Promise<void> => {
+  changePassword: async (currentPassword: string, newPassword: string): Promise<void> => {
     await apiClient.post(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, {
       currentPassword,
       newPassword,
@@ -125,19 +115,18 @@ export const authApi = {
 
   /**
    * OAuth2 - Google Sign In
-   * POST /api/v1/auth/oauth/google
+   * POST /api/auth/oauth/google
    */
   loginWithGoogle: async (idToken: string): Promise<OAuth2AuthResponse> => {
-    const response = await apiClient.post<OAuth2AuthResponse>(
-      API_ENDPOINTS.AUTH.OAUTH_GOOGLE,
-      { idToken },
-    );
+    const response = await apiClient.post<OAuth2AuthResponse>(API_ENDPOINTS.AUTH.OAUTH_GOOGLE, {
+      idToken,
+    });
     return response.data;
   },
 
   /**
    * OAuth2 - Apple Sign In
-   * POST /api/v1/auth/oauth/apple
+   * POST /api/auth/oauth/apple
    * Note: Apple only provides user's name on FIRST login
    */
   loginWithApple: async (
@@ -145,14 +134,11 @@ export const authApi = {
     authorizationCode?: string,
     fullName?: { givenName?: string; familyName?: string },
   ): Promise<OAuth2AuthResponse> => {
-    const response = await apiClient.post<OAuth2AuthResponse>(
-      API_ENDPOINTS.AUTH.OAUTH_APPLE,
-      {
-        idToken,
-        authorizationCode,
-        fullName,
-      },
-    );
+    const response = await apiClient.post<OAuth2AuthResponse>(API_ENDPOINTS.AUTH.OAUTH_APPLE, {
+      idToken,
+      authorizationCode,
+      fullName,
+    });
     return response.data;
   },
 };

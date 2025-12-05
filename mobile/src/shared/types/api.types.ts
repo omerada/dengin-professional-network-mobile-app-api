@@ -3,6 +3,66 @@
 
 import { VerificationStatus, UserRole, BaseEntity } from './common.types';
 
+// ============================================
+// PAGINATION TYPES - Backend PagedResponse uyumlu
+// ============================================
+
+/**
+ * Paginated response wrapper - Backend PagedResponse ile %100 uyumlu
+ *
+ * Offset-based pagination: page, totalPages, totalElements kullanır
+ * Cursor-based pagination: lastId, hasNext kullanır
+ *
+ * @example
+ * {
+ *   content: [...],
+ *   page: 0,
+ *   size: 20,
+ *   totalElements: 150,
+ *   totalPages: 8,
+ *   hasNext: true,
+ *   hasPrevious: false,
+ *   lastId: 12345
+ * }
+ */
+export interface PagedResponse<T> {
+  /** Content items for current page */
+  content: T[];
+  /** Current page number (0-indexed) */
+  page?: number;
+  /** Page size (number of items per page) */
+  size: number;
+  /** Total number of elements across all pages */
+  totalElements?: number;
+  /** Total number of pages */
+  totalPages?: number;
+  /** Whether there are more pages after current */
+  hasNext: boolean;
+  /** Whether there are pages before current */
+  hasPrevious?: boolean;
+  /** Last item ID for cursor-based pagination */
+  lastId?: number;
+}
+
+/**
+ * Create an empty paged response
+ */
+export function emptyPagedResponse<T>(): PagedResponse<T> {
+  return {
+    content: [],
+    page: 0,
+    size: 0,
+    totalElements: 0,
+    totalPages: 0,
+    hasNext: false,
+    hasPrevious: false,
+  };
+}
+
+// ============================================
+// USER TYPES
+// ============================================
+
 /**
  * User entity from API
  * Backend: LoginResponse.user format
@@ -129,7 +189,7 @@ export interface RefreshTokenResponse {
 
 /**
  * OAuth2 response (Google/Apple)
- * Backend: POST /api/v1/auth/oauth/* response
+ * Backend: POST /api/auth/oauth/* response
  */
 export interface OAuth2AuthResponse {
   success: boolean;

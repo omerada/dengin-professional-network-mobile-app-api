@@ -2,6 +2,8 @@
 // Backend FollowController ve BlockController ile %100 uyumlu tipler
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART5.md
 
+import type { PagedResponse } from '@shared/types';
+
 /**
  * Takipçi/Takip edilen kullanıcı
  * Backend: UserFollowDto
@@ -22,17 +24,18 @@ export interface FollowUser {
 }
 
 /**
- * Takipçi/Takip listesi response
- * NOT: Backend şu an List<UserFollowDto> döndürüyor, pagination wrapper YOK
- * Bu interface gelecekte backend pagination eklediğinde kullanılacak
+ * Takipçi/Takip listesi response - Backend PagedResponse<UserFollowDto> ile %100 uyumlu
+ * GET /api/users/{userId}/followers ve GET /api/users/{userId}/following
+ *
+ * Backend artık PagedResponse wrapper döndürüyor:
+ * - page: Mevcut sayfa (0-indexed)
+ * - size: Sayfa boyutu
+ * - totalElements: Toplam eleman sayısı
+ * - totalPages: Toplam sayfa sayısı
+ * - hasNext: Sonraki sayfa var mı
+ * - hasPrevious: Önceki sayfa var mı
  */
-export interface FollowListResponse {
-  users: FollowUser[];
-  totalCount: number;
-  page: number;
-  pageSize: number;
-  hasMore: boolean;
-}
+export type FollowListResponse = PagedResponse<FollowUser>;
 
 /**
  * Follow/Unfollow response - Backend FollowResponse record ile %100 uyumlu

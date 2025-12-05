@@ -34,7 +34,7 @@ export interface RemoteMessage {
  * Expo'da gerçek Firebase yerine expo-notifications kullanılacak
  */
 class FCMService {
-  private readonly DEVICE_API_PATH = '/api/v1/devices';
+  private readonly DEVICE_API_PATH = '/api/devices';
   private token: string | null = null;
   private listeners: Map<string, (() => void)[]> = new Map();
 
@@ -102,7 +102,7 @@ class FCMService {
 
   /**
    * Cihazı sunucuya kaydet
-   * POST /api/v1/devices/register
+   * POST /api/devices/register
    */
   async registerDevice(token: string): Promise<DeviceTokenResponse> {
     const request: RegisterDeviceRequest = {
@@ -122,7 +122,7 @@ class FCMService {
 
   /**
    * Cihaz kaydını sil
-   * POST /api/v1/devices/unregister
+   * POST /api/devices/unregister
    */
   async unregisterDevice(token: string): Promise<void> {
     const request: UnregisterDeviceRequest = { token };
@@ -133,7 +133,7 @@ class FCMService {
 
   /**
    * Tüm cihazların kaydını sil (güvenlik için)
-   * POST /api/v1/devices/unregister-all
+   * POST /api/devices/unregister-all
    */
   async unregisterAllDevices(): Promise<void> {
     await apiClient.post(`${this.DEVICE_API_PATH}/unregister-all`);

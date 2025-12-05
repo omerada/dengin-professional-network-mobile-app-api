@@ -126,15 +126,11 @@ describe('AuthApi', () => {
 
       await authApi.refreshToken(refreshToken);
 
-      expect(apiClient.post).toHaveBeenCalledWith(
-        API_ENDPOINTS.AUTH.REFRESH_TOKEN,
-        null,
-        {
-          headers: {
-            'Refresh-Token': refreshToken,
-          },
+      expect(apiClient.post).toHaveBeenCalledWith(API_ENDPOINTS.AUTH.REFRESH_TOKEN, null, {
+        headers: {
+          'Refresh-Token': refreshToken,
         },
-      );
+      });
     });
 
     it('should return new tokens', async () => {
@@ -247,7 +243,7 @@ describe('AuthApi', () => {
       },
     };
 
-    it('should call correct endpoint POST /api/v1/auth/oauth/google', async () => {
+    it('should call correct endpoint POST /api/auth/oauth/google', async () => {
       (apiClient.post as jest.Mock).mockResolvedValue(mockResponse);
 
       await authApi.loginWithGoogle(idToken);
@@ -289,7 +285,7 @@ describe('AuthApi', () => {
       },
     };
 
-    it('should call correct endpoint POST /api/v1/auth/oauth/apple', async () => {
+    it('should call correct endpoint POST /api/auth/oauth/apple', async () => {
       (apiClient.post as jest.Mock).mockResolvedValue(mockResponse);
 
       await authApi.loginWithApple(idToken, authorizationCode, fullName);

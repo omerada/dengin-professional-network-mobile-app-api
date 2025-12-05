@@ -189,7 +189,7 @@ describe('FCMService', () => {
 
       const result = await fcmService.registerDevice('fcm-token');
 
-      expect(apiClient.post).toHaveBeenCalledWith('/api/v1/devices/register', {
+      expect(apiClient.post).toHaveBeenCalledWith('/api/devices/register', {
         token: 'fcm-token',
         platform: 'ANDROID',
         deviceName: expect.stringContaining('android'),
@@ -212,7 +212,7 @@ describe('FCMService', () => {
 
       await fcmService.registerDevice('ios-token');
 
-      expect(apiClient.post).toHaveBeenCalledWith('/api/v1/devices/register', {
+      expect(apiClient.post).toHaveBeenCalledWith('/api/devices/register', {
         token: 'ios-token',
         platform: 'IOS',
         deviceName: expect.stringContaining('ios'),
@@ -226,7 +226,7 @@ describe('FCMService', () => {
 
       await fcmService.unregisterDevice('fcm-token');
 
-      expect(apiClient.post).toHaveBeenCalledWith('/api/v1/devices/unregister', {
+      expect(apiClient.post).toHaveBeenCalledWith('/api/devices/unregister', {
         token: 'fcm-token',
       });
     });
@@ -238,7 +238,7 @@ describe('FCMService', () => {
 
       await fcmService.unregisterAllDevices();
 
-      expect(apiClient.post).toHaveBeenCalledWith('/api/v1/devices/unregister-all');
+      expect(apiClient.post).toHaveBeenCalledWith('/api/devices/unregister-all');
     });
   });
 
@@ -253,7 +253,7 @@ describe('FCMService', () => {
 
       // The service uses getToken() which may return cached or stored token
       expect(apiClient.post).toHaveBeenCalledWith(
-        '/api/v1/devices/unregister',
+        '/api/devices/unregister',
         expect.objectContaining({ token: expect.any(String) }),
       );
     });

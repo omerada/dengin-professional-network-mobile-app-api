@@ -1,6 +1,7 @@
 package com.meslektas.social.api;
 
 import com.meslektas.common.api.ApiResponse;
+import com.meslektas.common.api.PagedResponse;
 import com.meslektas.identity.infrastructure.security.UserDetailsImpl;
 import com.meslektas.social.application.dto.FeedPostResponse;
 import com.meslektas.social.application.service.FeedService;
@@ -73,12 +74,12 @@ public class FeedController {
             +
             "Feed is cached for 5 minutes per user.", security = @SecurityRequirement(name = "Bearer Authentication"))
     @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Feed retrieved successfully", content = @Content(schema = @Schema(implementation = List.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Feed retrieved successfully", content = @Content(schema = @Schema(implementation = PagedResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid pagination parameters"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "429", description = "Too many requests - Rate limit exceeded (60 requests/minute)")
     })
-    public ResponseEntity<ApiResponse<List<FeedPostResponse>>> getFeed(
+    public ResponseEntity<ApiResponse<PagedResponse<FeedPostResponse>>> getFeed(
             @Parameter(description = "Filter by profession ID (optional)") @RequestParam(required = false) Long professionFilter,
 
             @Parameter(description = "Max results (max 50)", example = "20") @RequestParam(defaultValue = "20") int limit,
@@ -101,9 +102,15 @@ public class FeedController {
 
         List<FeedPostResponse> feed = feedService.getFeed(userId, professionFilter, limit, beforeId);
 
+        // Get last post ID for cursor-based pagination
+        Long lastId = feed.isEmpty() ? null : feed.get(feed.size() - 1).getId();
+
+        // Create paged response with cursor-based pagination
+        PagedResponse<FeedPostResponse> pagedResponse = PagedResponse.ofCursor(feed, limit, lastId);
+
         log.info("Feed retrieved - userId: {}, postCount: {}", userId, feed.size());
 
-        return ResponseEntity.ok(ApiResponse.success(feed));
+        return ResponseEntity.ok(ApiResponse.success(pagedResponse));
     }
 
     /**
@@ -113,8 +120,7 @@ public class FeedController {
      * Trending Score = (like_count * 2 + comment_count * 5)
      * Only posts from last 7 days considered
      * 
-     * @param page        Page number (default 0)
-     * @param size        Page size (default 20, max 50)
+     * @param limit       Max results (max 50)
      * @param currentUser Authenticated user
      * @return Paginated PostResponse list sorted by engagement
      */
@@ -123,11 +129,11 @@ public class FeedController {
             +
             "Score = (likes * 2 + comments * 5)", security = @SecurityRequirement(name = "Bearer Authentication"))
     @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Trending posts retrieved successfully", content = @Content(schema = @Schema(implementation = List.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Trending posts retrieved successfully", content = @Content(schema = @Schema(implementation = PagedResponse.class))),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid pagination parameters"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "Unauthorized")
     })
-    public ResponseEntity<ApiResponse<List<FeedPostResponse>>> getTrendingPosts(
+    public ResponseEntity<ApiResponse<PagedResponse<FeedPostResponse>>> getTrendingPosts(
             @Parameter(description = "Max results (max 50)", example = "20") @RequestParam(defaultValue = "20") int limit,
 
             @AuthenticationPrincipal UserDetailsImpl currentUser) {
@@ -145,8 +151,14 @@ public class FeedController {
 
         List<FeedPostResponse> trending = feedService.getTrendingPosts(userId, limit);
 
+        // Get last post ID for cursor-based pagination
+        Long lastId = trending.isEmpty() ? null : trending.get(trending.size() - 1).getId();
+
+        // Create paged response
+        PagedResponse<FeedPostResponse> pagedResponse = PagedResponse.ofCursor(trending, limit, lastId);
+
         log.info("Trending posts retrieved - userId: {}, postCount: {}", userId, trending.size());
 
-        return ResponseEntity.ok(ApiResponse.success(trending));
+        return ResponseEntity.ok(ApiResponse.success(pagedResponse));
     }
 }

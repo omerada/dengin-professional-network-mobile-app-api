@@ -3,7 +3,13 @@
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART5.md
 
 import { apiClient, API_ENDPOINTS } from '@core/api';
-import type { FollowUser, FollowResponse, BlockResponse, BlockedUserDto } from '../types';
+import type {
+  FollowUser,
+  FollowResponse,
+  BlockResponse,
+  BlockedUserDto,
+  FollowListResponse,
+} from '../types';
 
 interface ApiResponse<T> {
   success: boolean;
@@ -12,8 +18,7 @@ interface ApiResponse<T> {
 }
 
 /**
- * Backend UserFollowDto - List<UserFollowDto> olarak döner
- * NOT: Backend pagination wrapper KULLANMIYOR!
+ * Backend UserFollowDto - PagedResponse<UserFollowDto> içinde döner
  */
 interface BackendUserFollowDto {
   userId: number;
@@ -24,6 +29,19 @@ interface BackendUserFollowDto {
   verified: boolean;
   followerCount: number;
   followingCount: number;
+}
+
+/**
+ * Backend PagedResponse<UserFollowDto>
+ */
+interface BackendFollowListResponse {
+  content: BackendUserFollowDto[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
 }
 
 /**
@@ -49,13 +67,28 @@ function mapToFollowUser(dto: BackendUserFollowDto): FollowUser {
 }
 
 /**
+ * Backend PagedResponse'u FollowListResponse'a dönüştür
+ */
+function mapToFollowListResponse(response: BackendFollowListResponse): FollowListResponse {
+  return {
+    content: response.content.map(mapToFollowUser),
+    page: response.page,
+    size: response.size,
+    totalElements: response.totalElements,
+    totalPages: response.totalPages,
+    hasNext: response.hasNext,
+    hasPrevious: response.hasPrevious,
+  };
+}
+
+/**
  * Social API Service
  *
  * Endpoints:
  * - POST /api/users/{userId}/follow - Takip et
  * - DELETE /api/users/{userId}/follow - Takipten çık
- * - GET /api/users/{userId}/followers - Takipçileri getir (List döner, pagination YOK)
- * - GET /api/users/{userId}/following - Takip edilenleri getir (List döner, pagination YOK)
+ * - GET /api/users/{userId}/followers - Takipçileri getir (PagedResponse döner)
+ * - GET /api/users/{userId}/following - Takip edilenleri getir (PagedResponse döner)
  * - POST /api/users/{userId}/block - Engelle
  * - DELETE /api/users/{userId}/block - Engeli kaldır
  */
@@ -90,29 +123,36 @@ export const socialApi = {
 
   /**
    * GET /api/users/{userId}/followers
-   * Takipçileri getir
+   * Takipçileri getir - PagedResponse döner
    *
-   * NOT: Backend List<UserFollowDto> döndürüyor, pagination wrapper YOK!
-   * Sayfalama parametreleri şimdilik görmezden geliniyor.
+   * @param userId Kullanıcı ID
+   * @param page Sayfa numarası (0-indexed)
+   * @param size Sayfa boyutu (max 50)
+   * @returns PagedResponse<FollowUser>
    */
-  getFollowers: async (userId: number, _page = 0, _size = 20): Promise<FollowUser[]> => {
-    const response = await apiClient.get<ApiResponse<BackendUserFollowDto[]>>(
+  getFollowers: async (userId: number, page = 0, size = 20): Promise<FollowListResponse> => {
+    const response = await apiClient.get<ApiResponse<BackendFollowListResponse>>(
       API_ENDPOINTS.SOCIAL.FOLLOWERS(userId),
+      { params: { page, size } },
     );
-    return response.data.data.map(mapToFollowUser);
+    return mapToFollowListResponse(response.data.data);
   },
 
   /**
    * GET /api/users/{userId}/following
-   * Takip edilenleri getir
+   * Takip edilenleri getir - PagedResponse döner
    *
-   * NOT: Backend List<UserFollowDto> döndürüyor, pagination wrapper YOK!
+   * @param userId Kullanıcı ID
+   * @param page Sayfa numarası (0-indexed)
+   * @param size Sayfa boyutu (max 50)
+   * @returns PagedResponse<FollowUser>
    */
-  getFollowing: async (userId: number, _page = 0, _size = 20): Promise<FollowUser[]> => {
-    const response = await apiClient.get<ApiResponse<BackendUserFollowDto[]>>(
+  getFollowing: async (userId: number, page = 0, size = 20): Promise<FollowListResponse> => {
+    const response = await apiClient.get<ApiResponse<BackendFollowListResponse>>(
       API_ENDPOINTS.SOCIAL.FOLLOWING(userId),
+      { params: { page, size } },
     );
-    return response.data.data.map(mapToFollowUser);
+    return mapToFollowListResponse(response.data.data);
   },
 
   /**

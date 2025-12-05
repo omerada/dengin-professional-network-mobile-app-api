@@ -21,16 +21,21 @@ import java.security.Principal;
  * 
  * Endpoints for managing FCM device tokens for push notifications.
  * Used by mobile apps to register/unregister for push notifications.
+ * 
+ * Endpoints:
+ * - POST /api/devices/register - Register device token
+ * - POST /api/devices/unregister - Unregister device token
+ * - POST /api/devices/unregister-all - Unregister all device tokens
  */
 @RestController
-@RequestMapping("/api/v1/devices")
+@RequestMapping("/api/devices")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Device Tokens", description = "Push notification device token management")
 public class DeviceTokenController {
-    
+
     private final DeviceTokenService deviceTokenService;
-    
+
     /**
      * Register a device token for push notifications
      * Called when app starts or when FCM token is refreshed
@@ -38,21 +43,19 @@ public class DeviceTokenController {
     @PostMapping("/register")
     @Operation(summary = "Register device for push notifications")
     public ResponseEntity<DeviceTokenResponse> registerDevice(
-        @Valid @RequestBody RegisterDeviceRequest request,
-        @CurrentUser Principal principal
-    ) {
+            @Valid @RequestBody RegisterDeviceRequest request,
+            @CurrentUser Principal principal) {
         Long userId = Long.parseLong(principal.getName());
-        
+
         DeviceToken deviceToken = deviceTokenService.registerToken(
-            userId,
-            request.getToken(),
-            request.getPlatform(),
-            request.getDeviceName()
-        );
-        
+                userId,
+                request.getToken(),
+                request.getPlatform(),
+                request.getDeviceName());
+
         return ResponseEntity.ok(DeviceTokenResponse.from(deviceToken));
     }
-    
+
     /**
      * Unregister a device token
      * Called on logout or when user disables notifications
@@ -60,13 +63,12 @@ public class DeviceTokenController {
     @PostMapping("/unregister")
     @Operation(summary = "Unregister device from push notifications")
     public ResponseEntity<Void> unregisterDevice(
-        @Valid @RequestBody UnregisterDeviceRequest request,
-        @CurrentUser Principal principal
-    ) {
+            @Valid @RequestBody UnregisterDeviceRequest request,
+            @CurrentUser Principal principal) {
         deviceTokenService.deactivateToken(request.getToken());
         return ResponseEntity.ok().build();
     }
-    
+
     /**
      * Unregister all devices for current user
      * Called on password change or account security event
@@ -78,33 +80,33 @@ public class DeviceTokenController {
         deviceTokenService.deactivateAllUserTokens(userId);
         return ResponseEntity.ok().build();
     }
-    
+
     // Request/Response DTOs
-    
+
     @Data
     public static class RegisterDeviceRequest {
         @NotBlank(message = "Device token is required")
         private String token;
-        
+
         @NotNull(message = "Platform is required")
         private DeviceToken.Platform platform;
-        
+
         private String deviceName;
     }
-    
+
     @Data
     public static class UnregisterDeviceRequest {
         @NotBlank(message = "Device token is required")
         private String token;
     }
-    
+
     @Data
     public static class DeviceTokenResponse {
         private Long id;
         private String platform;
         private String deviceName;
         private boolean active;
-        
+
         public static DeviceTokenResponse from(DeviceToken token) {
             DeviceTokenResponse response = new DeviceTokenResponse();
             response.id = token.getId();

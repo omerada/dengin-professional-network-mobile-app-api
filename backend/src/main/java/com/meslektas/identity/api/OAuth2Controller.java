@@ -23,18 +23,18 @@ import java.util.Map;
  * Mobile app authenticates with provider and sends token to backend.
  * 
  * Endpoints:
- * - POST /api/v1/auth/oauth/google - Google sign-in
- * - POST /api/v1/auth/oauth/apple - Apple sign-in
+ * - POST /api/auth/oauth/google - Google sign-in
+ * - POST /api/auth/oauth/apple - Apple sign-in
  */
 @RestController
-@RequestMapping("/api/v1/auth/oauth")
+@RequestMapping("/api/auth/oauth")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "OAuth Authentication", description = "Social login endpoints")
 public class OAuth2Controller {
-    
+
     private final OAuth2AuthenticationService oAuth2AuthenticationService;
-    
+
     /**
      * Authenticate with Google
      * 
@@ -44,24 +44,22 @@ public class OAuth2Controller {
     @PostMapping("/google")
     @Operation(summary = "Sign in with Google")
     public ResponseEntity<OAuth2AuthResponse> authenticateWithGoogle(
-        @Valid @RequestBody GoogleAuthRequest request
-    ) {
+            @Valid @RequestBody GoogleAuthRequest request) {
         log.info("Google OAuth authentication request");
-        
+
         try {
             OAuth2AuthResult result = oAuth2AuthenticationService.authenticateWithGoogle(
-                request.getIdToken()
-            );
-            
+                    request.getIdToken());
+
             return ResponseEntity.ok(OAuth2AuthResponse.from(result));
-            
+
         } catch (OAuth2AuthenticationException e) {
             log.warn("Google OAuth failed: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(OAuth2AuthResponse.error(e.getMessage()));
+                    .body(OAuth2AuthResponse.error(e.getMessage()));
         }
     }
-    
+
     /**
      * Authenticate with Apple
      * 
@@ -71,53 +69,51 @@ public class OAuth2Controller {
     @PostMapping("/apple")
     @Operation(summary = "Sign in with Apple")
     public ResponseEntity<OAuth2AuthResponse> authenticateWithApple(
-        @Valid @RequestBody AppleAuthRequest request
-    ) {
+            @Valid @RequestBody AppleAuthRequest request) {
         log.info("Apple OAuth authentication request");
-        
+
         try {
             OAuth2AuthResult result = oAuth2AuthenticationService.authenticateWithApple(
-                request.getIdToken(),
-                request.getAuthorizationCode(),
-                request.getFullName()
-            );
-            
+                    request.getIdToken(),
+                    request.getAuthorizationCode(),
+                    request.getFullName());
+
             return ResponseEntity.ok(OAuth2AuthResponse.from(result));
-            
+
         } catch (OAuth2AuthenticationException e) {
             log.warn("Apple OAuth failed: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(OAuth2AuthResponse.error(e.getMessage()));
+                    .body(OAuth2AuthResponse.error(e.getMessage()));
         }
     }
-    
+
     // ==================== Request DTOs ====================
-    
+
     @Data
     public static class GoogleAuthRequest {
         @NotBlank(message = "ID token is required")
         private String idToken;
     }
-    
+
     @Data
     public static class AppleAuthRequest {
         @NotBlank(message = "ID token is required")
         private String idToken;
-        
+
         /**
          * Authorization code from Apple (needed for token refresh)
          */
         private String authorizationCode;
-        
+
         /**
          * User's full name (only provided on first login!)
          * Keys: "givenName", "familyName"
          */
         private Map<String, String> fullName;
     }
-    
+
     // ==================== Response DTO ====================
-    
+
     @Data
     public static class OAuth2AuthResponse {
         private boolean success;
@@ -128,7 +124,7 @@ public class OAuth2Controller {
         private long expiresIn;
         private boolean isNewUser;
         private UserInfo user;
-        
+
         public static OAuth2AuthResponse from(OAuth2AuthResult result) {
             OAuth2AuthResponse response = new OAuth2AuthResponse();
             response.success = true;
@@ -137,7 +133,7 @@ public class OAuth2Controller {
             response.tokenType = result.getTokenType();
             response.expiresIn = result.getExpiresIn();
             response.isNewUser = result.isNewUser();
-            
+
             if (result.getUser() != null) {
                 response.user = new UserInfo();
                 response.user.id = result.getUser().getId();
@@ -148,17 +144,17 @@ public class OAuth2Controller {
                 response.user.avatarUrl = result.getUser().getAvatarUrl();
                 response.user.verificationStatus = result.getUser().getVerificationStatus();
             }
-            
+
             return response;
         }
-        
+
         public static OAuth2AuthResponse error(String message) {
             OAuth2AuthResponse response = new OAuth2AuthResponse();
             response.success = false;
             response.error = message;
             return response;
         }
-        
+
         @Data
         public static class UserInfo {
             private Long id;
