@@ -1,9 +1,11 @@
 # 🌐 API Spesifikasyonları ve Endpoint Dokümantasyonu
 
-**Doküman Versiyonu:** 1.0  
-**Son Güncelleme:** 29 Kasım 2025  
+**Doküman Versiyonu:** 1.1  
+**Son Güncelleme:** 5 Aralık 2025  
 **Durum:** ✅ Onaylandı  
 **Base URL:** `https://api.meslektas.com`
+
+> ⚠️ **Not:** Tüm endpoint'ler `/api/*` prefix'i kullanır (~~`/api/v1/*`~~ değil).
 
 ---
 
@@ -29,7 +31,7 @@
 ```yaml
 Protocol: HTTPS (TLS 1.3)
 Base URL: https://api.meslektas.com
-API Version: v1
+API Prefix: /api (NOT /api/v1)
 Content-Type: application/json
 Charset: UTF-8
 ```
@@ -112,7 +114,7 @@ X-RateLimit-Reset: 1638360000
 
 ### 1. Register
 
-**Endpoint:** `POST /api/v1/auth/register`  
+**Endpoint:** `POST /api/auth/register`  
 **Auth Required:** No
 
 **Request:**

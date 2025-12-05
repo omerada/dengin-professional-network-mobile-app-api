@@ -5,6 +5,7 @@ import com.meslektas.identity.infrastructure.security.UserDetailsImpl;
 import com.meslektas.social.application.dto.CreatePostRequest;
 import com.meslektas.social.application.dto.LikeResponse;
 import com.meslektas.social.application.dto.PostResponse;
+import com.meslektas.social.application.dto.ShareResponse;
 import com.meslektas.social.application.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -284,5 +285,176 @@ public class PostController {
         log.info("Post unliked - postId: {}, userId: {}, newLikeCount: {}", 
             postId, userId, likeResponse.getLikeCount());
         return ResponseEntity.ok(ApiResponse.success("Beğeni kaldırıldı", likeResponse));
+    }
+
+    // ====================================
+    // POST SAVE/BOOKMARK ENDPOINTS
+    // ====================================
+
+    /**
+     * POST /api/posts/{postId}/save
+     * Save/bookmark a post
+     * 
+     * @param postId Post ID
+     * @param currentUser Authenticated user
+     * @return Success response
+     */
+    @PostMapping("/{postId}/save")
+    @Operation(
+        summary = "Save a post",
+        description = "Saves/bookmarks a post for later viewing. Idempotent operation.",
+        security = @SecurityRequirement(name = "Bearer Authentication")
+    )
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Post saved successfully"
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404",
+            description = "Post not found"
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized"
+        )
+    })
+    public ResponseEntity<ApiResponse<Void>> savePost(
+            @Parameter(description = "Post ID", required = true)
+            @PathVariable Long postId,
+            @AuthenticationPrincipal UserDetailsImpl currentUser
+    ) {
+        Long userId = currentUser.getId();
+        log.info("POST /api/posts/{}/save - userId: {}", postId, userId);
+        
+        postService.savePost(postId, userId);
+        
+        log.info("Post saved - postId: {}, userId: {}", postId, userId);
+        return ResponseEntity.ok(ApiResponse.success("Post kaydedildi", null));
+    }
+
+    /**
+     * DELETE /api/posts/{postId}/save
+     * Unsave/remove bookmark from a post
+     * 
+     * @param postId Post ID
+     * @param currentUser Authenticated user
+     * @return Success response
+     */
+    @DeleteMapping("/{postId}/save")
+    @Operation(
+        summary = "Unsave a post",
+        description = "Removes a post from saved/bookmarks. Idempotent operation.",
+        security = @SecurityRequirement(name = "Bearer Authentication")
+    )
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Post unsaved successfully"
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404",
+            description = "Post not found"
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized"
+        )
+    })
+    public ResponseEntity<ApiResponse<Void>> unsavePost(
+            @Parameter(description = "Post ID", required = true)
+            @PathVariable Long postId,
+            @AuthenticationPrincipal UserDetailsImpl currentUser
+    ) {
+        Long userId = currentUser.getId();
+        log.info("DELETE /api/posts/{}/save - userId: {}", postId, userId);
+        
+        postService.unsavePost(postId, userId);
+        
+        log.info("Post unsaved - postId: {}, userId: {}", postId, userId);
+        return ResponseEntity.ok(ApiResponse.success("Kayıt kaldırıldı", null));
+    }
+
+    /**
+     * GET /api/posts/saved
+     * Get user's saved/bookmarked posts
+     * 
+     * @param page Page number (0-indexed)
+     * @param size Page size
+     * @param currentUser Authenticated user
+     * @return Paginated list of saved posts
+     */
+    @GetMapping("/saved")
+    @Operation(
+        summary = "Get saved posts",
+        description = "Retrieves user's saved/bookmarked posts with pagination.",
+        security = @SecurityRequirement(name = "Bearer Authentication")
+    )
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Saved posts retrieved successfully"
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized"
+        )
+    })
+    public ResponseEntity<ApiResponse<com.meslektas.common.api.PagedResponse<PostResponse>>> getSavedPosts(
+            @Parameter(description = "Page number (0-indexed)")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size (max 50)")
+            @RequestParam(defaultValue = "20") int size,
+            @AuthenticationPrincipal UserDetailsImpl currentUser
+    ) {
+        Long userId = currentUser.getId();
+        log.info("GET /api/posts/saved - userId: {}, page: {}, size: {}", userId, page, size);
+        
+        var savedPosts = postService.getSavedPosts(userId, page, Math.min(size, 50));
+        
+        log.info("Saved posts retrieved - userId: {}, count: {}", userId, savedPosts.getContent().size());
+        return ResponseEntity.ok(ApiResponse.success(savedPosts));
+    }
+
+    /**
+     * POST /api/posts/{postId}/share
+     * Track post share action
+     * 
+     * @param postId Post ID
+     * @param currentUser Authenticated user
+     * @return Updated share count
+     */
+    @PostMapping("/{postId}/share")
+    @Operation(
+        summary = "Share a post",
+        description = "Tracks a share action and increments share count.",
+        security = @SecurityRequirement(name = "Bearer Authentication")
+    )
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200",
+            description = "Share tracked successfully"
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404",
+            description = "Post not found"
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized"
+        )
+    })
+    public ResponseEntity<ApiResponse<ShareResponse>> sharePost(
+            @Parameter(description = "Post ID", required = true)
+            @PathVariable Long postId,
+            @AuthenticationPrincipal UserDetailsImpl currentUser
+    ) {
+        Long userId = currentUser.getId();
+        log.info("POST /api/posts/{}/share - userId: {}", postId, userId);
+        
+        ShareResponse response = postService.sharePost(postId, userId);
+        
+        log.info("Post shared - postId: {}, userId: {}, shareCount: {}", postId, userId, response.getSharesCount());
+        return ResponseEntity.ok(ApiResponse.success("Post paylaşıldı", response));
     }
 }

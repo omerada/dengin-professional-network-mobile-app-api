@@ -96,4 +96,17 @@ public class UserController {
         userService.deleteAccount(userDetails.getId());
         return ResponseEntity.ok(ApiResponse.success("Account deleted successfully", null));
     }
+
+    /**
+     * DELETE /api/users/me/avatar
+     * Delete user's avatar
+     */
+    @DeleteMapping("/me/avatar")
+    @Operation(summary = "Delete avatar", description = "Remove user's profile picture and reset to default")
+    public ResponseEntity<ApiResponse<UserResponse>> deleteAvatar(
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
+        UserResponse user = userService.deleteAvatar(userDetails.getId());
+        return ResponseEntity.ok(ApiResponse.success("Avatar deleted successfully", user));
+    }
 }

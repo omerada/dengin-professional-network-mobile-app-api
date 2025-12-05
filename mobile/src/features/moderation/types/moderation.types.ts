@@ -78,3 +78,67 @@ export const REPORT_REASONS: ReportReasonInfo[] = [
   { value: 'INTELLECTUAL_PROPERTY', label: 'Fikri Mülkiyet', icon: 'document-outline' },
   { value: 'OTHER', label: 'Diğer', icon: 'ellipsis-horizontal-outline' },
 ];
+
+// ==================== SANCTIONS ====================
+
+/**
+ * Sanction tipi
+ * Backend: SanctionType enum
+ */
+export type SanctionType = 'WARNING' | 'TEMPORARY_SUSPENSION' | 'PERMANENT_BAN';
+
+/**
+ * Appeal durumu
+ * Backend: AppealStatus enum
+ */
+export type AppealStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+/**
+ * Sanction response
+ * Backend: SanctionResponse record
+ */
+export interface SanctionResponse {
+  id: string;
+  sanctionType: SanctionType;
+  reason: string;
+  description?: string;
+  issuedAt: string;
+  expiresAt?: string;
+  remainingDays: number;
+  appealStatus?: AppealStatus;
+  appealReason?: string;
+  appealedAt?: string;
+  canAppeal: boolean;
+}
+
+/**
+ * Appeal request
+ * Backend: AppealRequest record
+ */
+export interface AppealRequest {
+  sanctionId: string;
+  reason: string;
+}
+
+/**
+ * Sanction status response
+ * Backend: SanctionController.checkStatus() response
+ */
+export interface SanctionStatusResponse {
+  isBanned: boolean;
+  isSuspended: boolean;
+  totalSanctions: number;
+  canAct: boolean;
+  activeSanction?: SanctionResponse;
+}
+
+/**
+ * Remaining time response
+ * Backend: SanctionController.getRemainingTime() response
+ */
+export interface RemainingTimeResponse {
+  sanctionType?: SanctionType;
+  remainingDays?: number;
+  expiresAt?: string;
+  message?: string;
+}

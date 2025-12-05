@@ -28,12 +28,15 @@ interface ApiResponse<T> {
 
 /**
  * Backend FeedPostResponse - AuthorDto nested object içerir
+ * Backend artık name ve surname alanlarını ayrı döndürüyor
  */
 interface BackendFeedPostResponse {
   id: number;
   postId: string; // UUID format
   author: {
     userId: number;
+    name: string;
+    surname: string;
     fullName: string;
     profileImageUrl: string | null;
     professionId: number | null;
@@ -56,15 +59,16 @@ interface BackendFeedPostResponse {
 
 /**
  * Backend response'u Post'a dönüştür
- * NOT: Backend FeedPostResponse, Mobile Post tipinden farklı yapıda
+ * Backend artık name ve surname alanlarını ayrı döndürüyor
  */
 function mapToPost(response: BackendFeedPostResponse): Post {
   return {
     postId: response.id,
     author: {
       id: response.author.userId,
-      name: response.author.fullName.split(' ')[0] || '',
-      surname: response.author.fullName.split(' ').slice(1).join(' ') || '',
+      name: response.author.name || response.author.fullName.split(' ')[0] || '',
+      surname:
+        response.author.surname || response.author.fullName.split(' ').slice(1).join(' ') || '',
       avatarUrl: response.author.profileImageUrl || undefined,
       isVerified: response.author.verified,
       profession: response.author.professionName || undefined,

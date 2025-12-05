@@ -1,5 +1,6 @@
 package com.meslektas.verification.api;
 
+import com.meslektas.common.api.ApiResponse;
 import com.meslektas.verification.application.dto.ManualReviewDecisionRequest;
 import com.meslektas.verification.application.dto.SubmitVerificationRequest;
 import com.meslektas.verification.application.dto.VerificationResponse;
@@ -51,7 +52,7 @@ public class VerificationController {
      */
     @PostMapping("/verifications")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<VerificationResponse> submitVerification(
+    public ResponseEntity<ApiResponse<VerificationResponse>> submitVerification(
             @Valid @RequestBody SubmitVerificationRequest request,
             Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
@@ -60,7 +61,8 @@ public class VerificationController {
 
         VerificationResponse response = verificationService.submitVerification(request, userId);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Verification submitted successfully", response));
     }
 
     /**
@@ -70,13 +72,13 @@ public class VerificationController {
      */
     @GetMapping("/verifications")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<VerificationResponse>> getUserVerifications(
+    public ResponseEntity<ApiResponse<List<VerificationResponse>>> getUserVerifications(
             Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
 
         List<VerificationResponse> verifications = verificationService.getUserVerifications(userId);
 
-        return ResponseEntity.ok(verifications);
+        return ResponseEntity.ok(ApiResponse.success(verifications));
     }
 
     /**
@@ -86,14 +88,14 @@ public class VerificationController {
      */
     @GetMapping("/verifications/{id}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<VerificationResponse> getVerificationById(
+    public ResponseEntity<ApiResponse<VerificationResponse>> getVerificationById(
             @PathVariable Long id,
             Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
 
         VerificationResponse verification = verificationService.getVerificationById(id, userId);
 
-        return ResponseEntity.ok(verification);
+        return ResponseEntity.ok(ApiResponse.success(verification));
     }
 
     /**
@@ -105,13 +107,13 @@ public class VerificationController {
      */
     @GetMapping("/verifications/history")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<List<VerificationAttemptResponse>> getVerificationHistory(
+    public ResponseEntity<ApiResponse<List<VerificationAttemptResponse>>> getVerificationHistory(
             Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
 
         List<VerificationAttemptResponse> history = verificationService.getUserVerificationHistory(userId);
 
-        return ResponseEntity.ok(history);
+        return ResponseEntity.ok(ApiResponse.success(history));
     }
 
     /**
@@ -123,14 +125,14 @@ public class VerificationController {
      */
     @GetMapping("/verifications/check/{professionId}")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<VerificationEligibilityResponse> checkEligibility(
+    public ResponseEntity<ApiResponse<VerificationEligibilityResponse>> checkEligibility(
             @PathVariable Long professionId,
             Authentication authentication) {
         Long userId = Long.parseLong(authentication.getName());
 
         VerificationEligibilityResponse eligibility = verificationService.checkEligibility(userId, professionId);
 
-        return ResponseEntity.ok(eligibility);
+        return ResponseEntity.ok(ApiResponse.success(eligibility));
     }
 
     // ========== Admin Endpoints ==========

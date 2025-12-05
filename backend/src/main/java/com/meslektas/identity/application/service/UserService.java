@@ -359,4 +359,39 @@ public class UserService {
 
         log.info("Account deleted successfully: {}", userId);
     }
+
+    /**
+     * Delete user avatar
+     * 
+     * Business Rule: Users can remove their avatar
+     */
+    @Transactional
+    public UserResponse deleteAvatar(Long userId) {
+        log.info("Deleting avatar for user: {}", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        // Delete avatar from storage if exists
+        if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
+            try {
+                storageService.delete(user.getAvatarUrl());
+                log.info("Avatar deleted from storage: {}", user.getAvatarUrl());
+            } catch (Exception e) {
+                log.warn("Failed to delete avatar from storage: {}", e.getMessage());
+            }
+        }
+
+        // Clear avatar in domain
+        user.updateAvatar(null);
+        User updatedUser = userRepository.save(user);
+
+        // Publish events
+        updatedUser.getEvents().forEach(eventPublisher::publishEvent);
+        updatedUser.clearEvents();
+
+        log.info("Avatar deleted successfully for user: {}", userId);
+
+        return userMapper.toResponse(updatedUser);
+    }
 }

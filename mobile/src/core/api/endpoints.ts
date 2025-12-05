@@ -176,6 +176,23 @@ export const API_ENDPOINTS = {
     // Report endpoint (not implemented in backend yet)
     REPORT: (userId: string | number) => `/api/users/${userId}/report`,
   },
+
+  // Sanctions - Backend: /api/sanctions/*
+  // Backend: com.meslektas.moderation.api.SanctionController
+  SANCTIONS: {
+    // GET /api/sanctions/my-sanctions - Get all my sanctions
+    MY_SANCTIONS: '/api/sanctions/my-sanctions',
+    // GET /api/sanctions/my-sanctions/active - Get active sanctions only
+    MY_ACTIVE_SANCTIONS: '/api/sanctions/my-sanctions/active',
+    // GET /api/sanctions/{sanctionId} - Get sanction by ID
+    BY_ID: (sanctionId: string) => `/api/sanctions/${sanctionId}`,
+    // POST /api/sanctions/appeal - Submit appeal
+    APPEAL: '/api/sanctions/appeal',
+    // GET /api/sanctions/status - Check sanction status
+    STATUS: '/api/sanctions/status',
+    // GET /api/sanctions/remaining-time - Get remaining suspension time
+    REMAINING_TIME: '/api/sanctions/remaining-time',
+  },
 } as const;
 
 /**

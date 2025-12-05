@@ -43,14 +43,13 @@ export interface ProfessionResponse {
 }
 
 /**
- * Profession Stats Response
+ * Profession Stats Response - Backend ProfessionService.ProfessionStatsResponse
+ * Genel meslek istatistikleri
  */
 export interface ProfessionStatsResponse {
-  professionId: number;
-  professionName: string;
-  totalUsers: number;
-  verifiedUsers: number;
-  activeUsers: number;
+  totalProfessions: number;
+  verificationRequired: number;
+  optionalVerification: number;
 }
 
 /**
@@ -135,10 +134,11 @@ export const professionApi = {
    * Get profession statistics
    * GET /api/professions/stats
    *
-   * Backend: ProfessionController.getProfessionStats()
+   * Backend: ProfessionController.getStatistics()
+   * Returns total profession counts and verification stats
    */
-  getStats: async (): Promise<ProfessionStatsResponse[]> => {
-    const response = await apiClient.get<ApiResponse<ProfessionStatsResponse[]>>(
+  getStats: async (): Promise<ProfessionStatsResponse> => {
+    const response = await apiClient.get<ApiResponse<ProfessionStatsResponse>>(
       API_ENDPOINTS.PROFESSIONS.STATS,
     );
     return response.data.data;

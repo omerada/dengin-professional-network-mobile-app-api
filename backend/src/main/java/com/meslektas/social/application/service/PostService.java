@@ -298,6 +298,97 @@ public class PostService {
     }
 
     // ============================================
+    // POST SAVE/BOOKMARK METHODS
+    // ============================================
+
+    /**
+     * Save/bookmark a post
+     */
+    @Transactional
+    public void savePost(Long postId, Long userId) {
+        log.debug("User {} saving post {}", userId, postId);
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found: " + postId));
+
+        if (!post.isVisible()) {
+            throw new IllegalArgumentException("Post not available");
+        }
+
+        post.saveByUser(userId);
+        postRepository.save(post);
+
+        log.debug("Post {} saved by user {}", postId, userId);
+    }
+
+    /**
+     * Unsave/remove bookmark from a post
+     */
+    @Transactional
+    public void unsavePost(Long postId, Long userId) {
+        log.debug("User {} unsaving post {}", userId, postId);
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found: " + postId));
+
+        post.unsaveByUser(userId);
+        postRepository.save(post);
+
+        log.debug("Post {} unsaved by user {}", postId, userId);
+    }
+
+    /**
+     * Get user's saved posts with pagination
+     */
+    @Transactional(readOnly = true)
+    public com.meslektas.common.api.PagedResponse<PostResponse> getSavedPosts(Long userId, int page, int size) {
+        log.debug("Getting saved posts for user {}, page: {}, size: {}", userId, page, size);
+
+        var savedPosts = postRepository.findSavedPostsByUserId(userId, page, size);
+        
+        List<PostResponse> content = savedPosts.getContent().stream()
+                .map(post -> {
+                    User author = userRepository.findById(post.getAuthorId())
+                            .orElseThrow(() -> new IllegalArgumentException("Author not found"));
+                    boolean liked = post.isLikedBy(userId);
+                    return mapToResponse(post, author, liked);
+                })
+                .collect(Collectors.toList());
+
+        return com.meslektas.common.api.PagedResponse.<PostResponse>builder()
+                .content(content)
+                .page(page)
+                .size(size)
+                .totalElements(savedPosts.getTotalElements())
+                .totalPages(savedPosts.getTotalPages())
+                .hasNext(savedPosts.hasNext())
+                .hasPrevious(page > 0)
+                .build();
+    }
+
+    /**
+     * Track post share action
+     */
+    @Transactional
+    public ShareResponse sharePost(Long postId, Long userId) {
+        log.debug("User {} sharing post {}", userId, postId);
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found: " + postId));
+
+        if (!post.isVisible()) {
+            throw new IllegalArgumentException("Post not available");
+        }
+
+        post.share(userId);
+        postRepository.save(post);
+
+        log.debug("Post {} shared by user {}, new count: {}", postId, userId, post.getShareCount());
+
+        return ShareResponse.of(postId, post.getShareCount());
+    }
+
+    // ============================================
     // MAPPING METHODS
     // ============================================
 

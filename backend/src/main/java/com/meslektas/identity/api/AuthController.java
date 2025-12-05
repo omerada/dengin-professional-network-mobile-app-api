@@ -170,4 +170,38 @@ public class AuthController {
         return ResponseEntity.ok(
                 ApiResponse.success("Şifreniz başarıyla değiştirildi", null));
     }
+
+    /**
+     * POST /api/auth/verify-email
+     * Verify user's email address with token
+     * 
+     * Flow:
+     * 1. User clicks verification link in email
+     * 2. Token is validated
+     * 3. Email marked as verified
+     * 4. User can now access email-verified features
+     * 
+     * @param request Email verification request with token
+     * @return 200 OK with success message
+     */
+    @PostMapping("/verify-email")
+    @Operation(summary = "Verify email", description = "Verifies user's email address using token from verification email")
+    public ResponseEntity<ApiResponse<Void>> verifyEmail(
+            @Valid @RequestBody EmailVerificationRequest request) {
+        log.info("POST /api/auth/verify-email - token: {}", request.getToken());
+
+        authService.verifyEmail(request.getToken());
+
+        log.info("Email verified successfully - token: {}", request.getToken());
+        return ResponseEntity.ok(
+                ApiResponse.success("Email adresiniz başarıyla doğrulandı", null));
+    }
+
+    /**
+     * Email verification request DTO
+     */
+    public record EmailVerificationRequest(
+            @jakarta.validation.constraints.NotBlank(message = "Token is required")
+            String token
+    ) {}
 }

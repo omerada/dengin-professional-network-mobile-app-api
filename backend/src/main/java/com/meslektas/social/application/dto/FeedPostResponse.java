@@ -41,6 +41,8 @@ public class FeedPostResponse {
     @Builder
     public static class AuthorDto {
         private Long userId;
+        private String name;
+        private String surname;
         private String fullName;
         private String profileImageUrl;
         private Long professionId;
