@@ -1,5 +1,5 @@
 // src/features/feed/services/feedService.ts
-// Feed API servisi
+// Feed API servisi - Backend FeedController, PostController, CommentController ile %100 uyumlu
 // Backend API Reference: mobile-development-guide/core/14-BACKEND-API-REFERENCE.md
 
 import { apiClient } from '@core/api/client';
@@ -17,12 +17,81 @@ import type {
 } from '../types';
 
 /**
- * API Response wrapper
+ * API Response wrapper - Backend ApiResponse<T> formatı
  */
 interface ApiResponse<T> {
   success: boolean;
   data: T;
   message?: string;
+  timestamp?: string;
+}
+
+/**
+ * Backend FeedPostResponse - AuthorDto nested object içerir
+ */
+interface BackendFeedPostResponse {
+  id: number;
+  postId: string; // UUID format
+  author: {
+    userId: number;
+    fullName: string;
+    profileImageUrl: string | null;
+    professionId: number | null;
+    professionName: string | null;
+    verified: boolean;
+  };
+  content: string;
+  images: Array<{
+    url: string;
+    thumbnailUrl?: string;
+    width?: number;
+    height?: number;
+  }>;
+  likeCount: number;
+  commentCount: number;
+  liked: boolean;
+  relevanceScore?: number;
+  createdAt: string;
+}
+
+/**
+ * Backend response'u Post'a dönüştür
+ * NOT: Backend FeedPostResponse, Mobile Post tipinden farklı yapıda
+ */
+function mapToPost(response: BackendFeedPostResponse): Post {
+  return {
+    postId: response.id,
+    author: {
+      id: response.author.userId,
+      name: response.author.fullName.split(' ')[0] || '',
+      surname: response.author.fullName.split(' ').slice(1).join(' ') || '',
+      avatarUrl: response.author.profileImageUrl || undefined,
+      isVerified: response.author.verified,
+      profession: response.author.professionName || undefined,
+    },
+    content: response.content,
+    images: response.images.map(img => img.url),
+    stats: {
+      likeCount: response.likeCount,
+      commentCount: response.commentCount,
+      viewCount: 0, // Backend'den gelmiyor
+    },
+    userInteraction: {
+      isLiked: response.liked,
+      isSaved: false, // Backend'den ayrı endpoint'ten alınmalı
+    },
+    createdAt: response.createdAt,
+    updatedAt: response.createdAt, // Backend'den gelmiyor
+  };
+}
+
+/**
+ * Feed list response - Backend List<FeedPostResponse> döndürüyor
+ * NOT: Backend pagination wrapper KULLANMIYOR, sadece array döndürüyor!
+ */
+interface FeedListResponse {
+  posts: Post[];
+  hasMore: boolean;
 }
 
 /**
@@ -35,6 +104,8 @@ interface ApiResponse<T> {
  *
  * Cursor-based pagination desteklenir:
  * - beforeId: Son post ID'sinden önceki postları getir
+ *
+ * ÖNEMLİ: Backend List<FeedPostResponse> döndürüyor, pagination wrapper YOK!
  */
 export const feedService = {
   /**
@@ -46,11 +117,14 @@ export const feedService = {
    * - professionFilter: Optional profession ID filter
    * - beforeId: Optional cursor for pagination (get posts before this ID)
    *
-   * Cursor-based pagination için beforeId kullanılır.
-   * İlk sayfa için beforeId gönderilmez, sonraki sayfalar için son post'un ID'si gönderilir.
+   * NOT: Backend List<FeedPostResponse> döndürüyor, FeedResponse pagination wrapper DEĞİL!
    */
-  async getFeed(limit = 20, professionFilter?: number, beforeId?: number): Promise<FeedResponse> {
-    const response = await apiClient.get<ApiResponse<FeedResponse>>(
+  async getFeed(
+    limit = 20,
+    professionFilter?: number,
+    beforeId?: number,
+  ): Promise<FeedListResponse> {
+    const response = await apiClient.get<ApiResponse<BackendFeedPostResponse[]>>(
       API_ENDPOINTS.FEED.PERSONALIZED,
       {
         params: {
@@ -60,7 +134,11 @@ export const feedService = {
         },
       },
     );
-    return response.data.data;
+    const posts = response.data.data.map(mapToPost);
+    return {
+      posts,
+      hasMore: posts.length === limit, // Tam limit kadar geldiyse daha var demektir
+    };
   },
 
   /**
@@ -73,11 +151,16 @@ export const feedService = {
    * Trending Score = (likes × 2) + (comments × 5)
    * Son 7 günlük postlar dahil edilir.
    */
-  async getTrendingFeed(limit = 20): Promise<FeedResponse> {
-    const response = await apiClient.get<ApiResponse<FeedResponse>>(API_ENDPOINTS.FEED.TRENDING, {
-      params: { limit: Math.min(limit, 50) },
-    });
-    return response.data.data;
+  async getTrendingFeed(limit = 20): Promise<FeedListResponse> {
+    const response = await apiClient.get<ApiResponse<BackendFeedPostResponse[]>>(
+      API_ENDPOINTS.FEED.TRENDING,
+      { params: { limit: Math.min(limit, 50) } },
+    );
+    const posts = response.data.data.map(mapToPost);
+    return {
+      posts,
+      hasMore: posts.length === limit,
+    };
   },
 
   /**
@@ -85,28 +168,38 @@ export const feedService = {
    * GET /api/posts/{postId}
    */
   async getPost(postId: number): Promise<Post> {
-    const response = await apiClient.get<ApiResponse<Post>>(API_ENDPOINTS.FEED.POST_BY_ID(postId));
-    return response.data.data;
+    const response = await apiClient.get<ApiResponse<BackendFeedPostResponse>>(
+      API_ENDPOINTS.FEED.POST_BY_ID(postId),
+    );
+    return mapToPost(response.data.data);
   },
 
   /**
    * Post oluştur
    * POST /api/posts
+   *
+   * Backend beklentisi (CreatePostRequest.java):
+   * - professionId: Long (ZORUNLU! @NotNull)
+   * - content: String (10-5000 karakter, @Size(min=10, max=5000))
+   * - images: List<PostImageDto> (max 5, @Size(max=5))
    */
   async createPost(data: CreatePostRequest): Promise<Post> {
-    const response = await apiClient.post<ApiResponse<Post>>(API_ENDPOINTS.FEED.CREATE_POST, data);
-    return response.data.data;
+    const response = await apiClient.post<ApiResponse<BackendFeedPostResponse>>(
+      API_ENDPOINTS.FEED.CREATE_POST,
+      data,
+    );
+    return mapToPost(response.data.data);
   },
 
   /**
    * Post güncelle
    */
   async updatePost(postId: number, dto: UpdatePostDto): Promise<Post> {
-    const response = await apiClient.put<ApiResponse<Post>>(
+    const response = await apiClient.put<ApiResponse<BackendFeedPostResponse>>(
       API_ENDPOINTS.FEED.UPDATE_POST(postId),
       dto,
     );
-    return response.data.data;
+    return mapToPost(response.data.data);
   },
 
   /**

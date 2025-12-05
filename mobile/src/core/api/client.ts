@@ -71,11 +71,21 @@ apiClient.interceptors.response.use(
         const refreshToken = await secureStorage.get(SECURE_KEYS.REFRESH_TOKEN);
 
         if (refreshToken) {
-          const response = await axios.post(`${ENV.API_BASE_URL}/api/v1/auth/refresh`, {
-            refreshToken,
-          });
+          // Backend expects refresh token in header, not body
+          // Endpoint: POST /api/auth/refresh with Refresh-Token header
+          const response = await axios.post(
+            `${ENV.API_BASE_URL}/api/auth/refresh`,
+            null, // No body needed
+            {
+              headers: {
+                'Refresh-Token': refreshToken,
+              },
+            },
+          );
 
-          const { accessToken, refreshToken: newRefreshToken } = response.data;
+          // Backend returns ApiResponse<LoginResponse> format
+          const responseData = response.data.data || response.data;
+          const { accessToken, refreshToken: newRefreshToken } = responseData;
 
           // Save new tokens
           await secureStorage.set(SECURE_KEYS.ACCESS_TOKEN, accessToken);

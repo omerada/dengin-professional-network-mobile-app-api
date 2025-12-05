@@ -150,13 +150,48 @@ export interface CommentLikeResponse {
 }
 
 /**
- * Post oluşturma isteği - Backend API uyumlu
+ * Post görsel DTO - Backend PostImageDto ile %100 uyumlu
+ * POST /api/posts request body içinde kullanılır
+ */
+export interface PostImageDto {
+  /** S3 URL veya CDN URL */
+  url: string;
+  /** Thumbnail URL (opsiyonel) */
+  thumbnailUrl?: string;
+  /** Görsel genişliği (pixel) */
+  width?: number;
+  /** Görsel yüksekliği (pixel) */
+  height?: number;
+  /** Blurhash placeholder (opsiyonel) */
+  blurhash?: string;
+}
+
+/**
+ * Post oluşturma isteği - Backend CreatePostRequest ile %100 uyumlu
  * POST /api/posts
+ *
+ * Backend validation kuralları:
+ * - professionId: @NotNull - ZORUNLU! (Mobile'da optional değil)
+ * - content: @Size(min=10, max=5000) - 10-5000 karakter arası
+ * - images: @Size(max=5) - Maksimum 5 görsel, List<PostImageDto> formatında
  */
 export interface CreatePostRequest {
-  content: string; // 1-1000 chars
-  images?: string[]; // Max 5 S3 URLs
-  professionId?: number; // Optional profession tag
+  /** Meslek ID'si - ZORUNLU! Backend @NotNull validation */
+  professionId: number;
+  /** Post içeriği - 10-5000 karakter arası olmalı */
+  content: string;
+  /** Post görselleri - Maksimum 5 adet, PostImageDto formatında */
+  images?: PostImageDto[];
+}
+
+/**
+ * @deprecated Eski format - CreatePostRequest kullanın
+ * Backend artık string[] yerine PostImageDto[] bekliyor
+ */
+export interface LegacyCreatePostRequest {
+  content: string;
+  images?: string[];
+  professionId?: number;
 }
 
 /**

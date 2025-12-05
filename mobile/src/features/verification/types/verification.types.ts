@@ -86,13 +86,42 @@ export interface VerificationData {
 }
 
 /**
- * Doğrulama isteği - Backend API uyumlu
+ * Doğrulama isteği - Backend SubmitVerificationRequest ile %100 uyumlu
  * POST /api/verifications
+ *
+ * Backend beklentileri:
+ * - professionId: Meslek ID'si (zorunlu)
+ * - documentS3Key: S3'e yüklenmiş belge dosyasının key'i (URL değil!)
+ * - documentFileName: Belge dosya adı
+ * - documentContentType: MIME type (image/jpeg, image/png, application/pdf)
+ * - documentFileSize: Dosya boyutu (bytes)
+ * - selfieS3Key: S3'e yüklenmiş selfie dosyasının key'i
+ * - selfieFileName: Selfie dosya adı
+ * - selfieContentType: MIME type
+ * - selfieFileSize: Dosya boyutu (bytes)
  */
 export interface SubmitVerificationRequest {
   professionId: number;
-  documentUrl: string; // S3 URL of uploaded document
-  selfieUrl: string;   // S3 URL of selfie with document
+  // Document metadata (already uploaded to S3)
+  documentS3Key: string;
+  documentFileName: string;
+  documentContentType: string;
+  documentFileSize: number;
+  // Selfie metadata (already uploaded to S3)
+  selfieS3Key: string;
+  selfieFileName: string;
+  selfieContentType: string;
+  selfieFileSize: number;
+}
+
+/**
+ * @deprecated Use SubmitVerificationRequest - Bu eski format artık kullanılmıyor
+ * S3 URL'leri yerine S3 key'leri ve metadata kullanılmalı
+ */
+export interface LegacySubmitVerificationRequest {
+  professionId: number;
+  documentUrl: string;
+  selfieUrl: string;
 }
 
 /**
@@ -107,10 +136,47 @@ export interface VerificationRequest {
 }
 
 /**
- * Doğrulama yanıtı - Backend API uyumlu
+ * Doğrulama yanıtı - Backend VerificationResponse ile %100 uyumlu
  * Response from POST /api/verifications and GET /api/verifications
+ *
+ * NOT: Backend farklı alan isimleri kullanıyor, bu interface backend'e göre düzenlendi
  */
 export interface VerificationResponse {
+  /** Backend: id (Long) */
+  id: number;
+  /** Backend: verificationId (UUID) - Opsiyonel, bazı endpoint'lerde döner */
+  verificationId?: string;
+  /** Backend: userId (Long) - Doğrulama isteğini yapan kullanıcı */
+  userId?: number;
+  /** Backend: professionId (Long) - Sadece ID döner, nested object değil */
+  professionId: number;
+  /** Backend: status (VerificationStatus enum) */
+  status: VerificationStatus;
+  /** Backend: documentS3Key - S3 key for document */
+  documentS3Key?: string;
+  /** Backend: selfieS3Key - S3 key for selfie */
+  selfieS3Key?: string;
+  /** Backend: attemptNumber (Integer) - NOT: attemptCount değil! */
+  attemptNumber: number;
+  /** Backend: submittedAt (Instant) - NOT: createdAt değil! */
+  submittedAt: string;
+  /** Backend: processedAt (Instant) - İşlenme zamanı */
+  processedAt?: string;
+  /** Backend: expiresAt (Instant) - Son geçerlilik tarihi */
+  expiresAt?: string;
+  /** Backend: aiConfidence (Double) - AI güven skoru */
+  aiConfidence?: number;
+  /** Backend: faceSimilarity (Double) - Yüz benzerlik skoru */
+  faceSimilarity?: number;
+  /** Backend: manualReviewNotes (String) - Manuel inceleme notları */
+  manualReviewNotes?: string;
+}
+
+/**
+ * Mobile-friendly Verification Response
+ * Backend response'u client için daha kullanışlı formata dönüştürür
+ */
+export interface VerificationDisplayResponse {
   id: number;
   status: VerificationStatus;
   profession: {
@@ -120,9 +186,33 @@ export interface VerificationResponse {
   aiConfidenceScore?: number;
   rejectionReason?: string;
   attemptCount: number;
-  maxAttempts: number; // Usually 3
+  maxAttempts: number;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
+}
+
+/**
+ * Backend response'u display response'a dönüştürme helper'ı
+ */
+export function mapToDisplayResponse(
+  response: VerificationResponse,
+  professionName: string,
+  maxAttempts: number = 3,
+): VerificationDisplayResponse {
+  return {
+    id: response.id,
+    status: response.status,
+    profession: {
+      id: response.professionId,
+      name: professionName,
+    },
+    aiConfidenceScore: response.aiConfidence,
+    rejectionReason: response.manualReviewNotes,
+    attemptCount: response.attemptNumber,
+    maxAttempts,
+    createdAt: response.submittedAt,
+    updatedAt: response.processedAt,
+  };
 }
 
 /**

@@ -1,9 +1,10 @@
 // src/features/social/types/social.types.ts
-// Backend FollowController ile uyumlu tipler
+// Backend FollowController ve BlockController ile %100 uyumlu tipler
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART5.md
 
 /**
  * Takipçi/Takip edilen kullanıcı
+ * Backend: UserFollowDto
  */
 export interface FollowUser {
   id: number;
@@ -22,6 +23,8 @@ export interface FollowUser {
 
 /**
  * Takipçi/Takip listesi response
+ * NOT: Backend şu an List<UserFollowDto> döndürüyor, pagination wrapper YOK
+ * Bu interface gelecekte backend pagination eklediğinde kullanılacak
  */
 export interface FollowListResponse {
   users: FollowUser[];
@@ -32,27 +35,39 @@ export interface FollowListResponse {
 }
 
 /**
- * Follow/Unfollow response
+ * Follow/Unfollow response - Backend FollowResponse record ile %100 uyumlu
+ * POST/DELETE /api/users/{userId}/follow
+ *
+ * Backend response:
+ * - userId: Long - Takip edilen kullanıcı ID'si
+ * - following: boolean - Takip durumu (NOT: isFollowing değil!)
+ * - followerCount: long - Takipçi sayısı
+ * - followingCount: long - Takip edilen sayısı
  */
 export interface FollowResponse {
-  success: boolean;
-  isFollowing: boolean;
+  userId: number;
+  following: boolean;
   followerCount: number;
+  followingCount: number;
 }
 
 /**
- * Block response - Backend API uyumlu
+ * Block response - Backend BlockResponse record ile %100 uyumlu
  * POST/DELETE /api/users/{userId}/block
+ *
+ * Backend response:
+ * - userId: Long - Engellenen kullanıcı ID'si
+ * - blocked: boolean - Engel durumu (NOT: isBlocked değil!)
+ * - message: String - İşlem mesajı
  */
 export interface BlockResponse {
   userId: number;
-  isBlocked: boolean;
-  wasAlreadyBlocked?: boolean;
-  message?: string;
+  blocked: boolean;
+  message: string;
 }
 
 /**
- * Blocked user DTO - Backend API uyumlu
+ * Blocked user DTO - Backend BlockedUserDto ile uyumlu
  * GET /api/users/me/blocked
  */
 export interface BlockedUserDto {

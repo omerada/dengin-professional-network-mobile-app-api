@@ -1,9 +1,9 @@
 // src/features/social/services/socialApi.ts
-// Backend FollowController ile %100 uyumlu
+// Backend FollowController ve BlockController ile %100 uyumlu
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART5.md
 
 import { apiClient, API_ENDPOINTS } from '@core/api';
-import type { FollowListResponse, FollowResponse, BlockResponse, BlockedUserDto } from '../types';
+import type { FollowUser, FollowResponse, BlockResponse, BlockedUserDto } from '../types';
 
 interface ApiResponse<T> {
   success: boolean;
@@ -12,13 +12,50 @@ interface ApiResponse<T> {
 }
 
 /**
+ * Backend UserFollowDto - List<UserFollowDto> olarak döner
+ * NOT: Backend pagination wrapper KULLANMIYOR!
+ */
+interface BackendUserFollowDto {
+  userId: number;
+  fullName: string;
+  profileImageUrl: string | null;
+  professionId: number | null;
+  professionName: string | null;
+  verified: boolean;
+  followerCount: number;
+  followingCount: number;
+}
+
+/**
+ * Backend response'u FollowUser'a dönüştür
+ */
+function mapToFollowUser(dto: BackendUserFollowDto): FollowUser {
+  return {
+    id: dto.userId,
+    name: dto.fullName.split(' ')[0] || '',
+    surname: dto.fullName.split(' ').slice(1).join(' ') || '',
+    fullName: dto.fullName,
+    avatarUrl: dto.profileImageUrl,
+    profession: dto.professionId
+      ? {
+          id: dto.professionId,
+          name: dto.professionName || '',
+        }
+      : null,
+    isProfessionVerified: dto.verified,
+    isFollowing: false, // Backend'den gelmiyor, ayrı endpoint'ten kontrol edilmeli
+    isFollowedBy: false, // Backend'den gelmiyor
+  };
+}
+
+/**
  * Social API Service
  *
  * Endpoints:
  * - POST /api/users/{userId}/follow - Takip et
  * - DELETE /api/users/{userId}/follow - Takipten çık
- * - GET /api/users/{userId}/followers - Takipçileri getir
- * - GET /api/users/{userId}/following - Takip edilenleri getir
+ * - GET /api/users/{userId}/followers - Takipçileri getir (List döner, pagination YOK)
+ * - GET /api/users/{userId}/following - Takip edilenleri getir (List döner, pagination YOK)
  * - POST /api/users/{userId}/block - Engelle
  * - DELETE /api/users/{userId}/block - Engeli kaldır
  */
@@ -26,6 +63,12 @@ export const socialApi = {
   /**
    * POST /api/users/{userId}/follow
    * Kullanıcıyı takip et
+   *
+   * Backend Response: FollowResponse record
+   * - userId: Long
+   * - following: boolean (NOT: isFollowing!)
+   * - followerCount: long
+   * - followingCount: long
    */
   follow: async (userId: number): Promise<FollowResponse> => {
     const response = await apiClient.post<ApiResponse<FollowResponse>>(
@@ -48,25 +91,28 @@ export const socialApi = {
   /**
    * GET /api/users/{userId}/followers
    * Takipçileri getir
+   *
+   * NOT: Backend List<UserFollowDto> döndürüyor, pagination wrapper YOK!
+   * Sayfalama parametreleri şimdilik görmezden geliniyor.
    */
-  getFollowers: async (userId: number, page = 0, size = 20): Promise<FollowListResponse> => {
-    const response = await apiClient.get<ApiResponse<FollowListResponse>>(
+  getFollowers: async (userId: number, _page = 0, _size = 20): Promise<FollowUser[]> => {
+    const response = await apiClient.get<ApiResponse<BackendUserFollowDto[]>>(
       API_ENDPOINTS.SOCIAL.FOLLOWERS(userId),
-      { params: { page, size } },
     );
-    return response.data.data;
+    return response.data.data.map(mapToFollowUser);
   },
 
   /**
    * GET /api/users/{userId}/following
    * Takip edilenleri getir
+   *
+   * NOT: Backend List<UserFollowDto> döndürüyor, pagination wrapper YOK!
    */
-  getFollowing: async (userId: number, page = 0, size = 20): Promise<FollowListResponse> => {
-    const response = await apiClient.get<ApiResponse<FollowListResponse>>(
+  getFollowing: async (userId: number, _page = 0, _size = 20): Promise<FollowUser[]> => {
+    const response = await apiClient.get<ApiResponse<BackendUserFollowDto[]>>(
       API_ENDPOINTS.SOCIAL.FOLLOWING(userId),
-      { params: { page, size } },
     );
-    return response.data.data;
+    return response.data.data.map(mapToFollowUser);
   },
 
   /**
@@ -74,16 +120,15 @@ export const socialApi = {
    * POST /api/users/{userId}/block
    *
    * Backend: BlockController.blockUser()
-   * - Kendini engelleyemezsin
-   * - Engelleme varolan takip ilişkilerini kaldırır
-   * - Engellenen kullanıcı mesaj gönderemez
-   *
-   * @returns BlockResponse - Güncel engel durumu
+   * Response: BlockResponse record
+   * - userId: Long
+   * - blocked: boolean (NOT: isBlocked!)
+   * - message: String
    */
   block: async (userId: number, reason?: string): Promise<BlockResponse> => {
     const response = await apiClient.post<ApiResponse<BlockResponse>>(
       API_ENDPOINTS.SOCIAL.BLOCK(userId),
-      { reason },
+      reason ? { reason } : undefined,
     );
     return response.data.data;
   },
@@ -91,11 +136,6 @@ export const socialApi = {
   /**
    * Engeli kaldır
    * DELETE /api/users/{userId}/block
-   *
-   * Backend: BlockController.unblockUser()
-   * - Sadece kendi engellediğin kullanıcıların engelini kaldırabilirsin
-   *
-   * @returns BlockResponse - Güncel engel durumu
    */
   unblock: async (userId: number): Promise<BlockResponse> => {
     const response = await apiClient.delete<ApiResponse<BlockResponse>>(
@@ -109,8 +149,6 @@ export const socialApi = {
    * GET /api/users/me/blocked
    *
    * Backend: BlockController.getBlockedUsers()
-   *
-   * @returns BlockedUserDto[] - Engellenen kullanıcı listesi
    */
   getBlockedUsers: async (): Promise<BlockedUserDto[]> => {
     const response = await apiClient.get<ApiResponse<BlockedUserDto[]>>('/api/users/me/blocked');
