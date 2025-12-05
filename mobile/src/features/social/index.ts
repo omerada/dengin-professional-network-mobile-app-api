@@ -9,17 +9,13 @@ export * from './types';
 export { socialApi } from './services';
 
 // Hooks
-export {
-  useFollow,
-  useUnfollow,
-  useBlock,
-  useUnblock,
-  useFollowers,
-  useFollowing,
-} from './hooks';
+export { useFollow, useUnfollow, useBlock, useUnblock, useFollowers, useFollowing } from './hooks';
 
 // Components
 export { FollowButton, UserListItem } from './components';
+
+// Stores
+export { useSocialStore, useFollowState, useFollowersList, useFollowingList } from './stores';
 
 // Screens
 export { FollowersListScreen, FollowingListScreen } from './screens';

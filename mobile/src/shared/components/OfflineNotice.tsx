@@ -40,16 +40,16 @@ export const OfflineNotice: React.FC = memo(() => {
         } else if (wasOffline) {
           // Coming back online
           setIsOffline(false);
-          
+
           // Show "back online" briefly then hide
           setTimeout(() => {
             translateY.value = withSequence(
               withTiming(0, { duration: 300 }),
-              withTiming(-100, { duration: 300 })
+              withTiming(-100, { duration: 300 }),
             );
             opacity.value = withSequence(
               withTiming(1, { duration: 300 }),
-              withTiming(0, { duration: 300 })
+              withTiming(0, { duration: 300 }),
             );
           }, 2000);
         }
@@ -61,15 +61,14 @@ export const OfflineNotice: React.FC = memo(() => {
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
-    opacity: interpolate(
-      opacity.value,
-      [0, 1],
-      [0, 1],
-      Extrapolation.CLAMP
-    ),
+    opacity: interpolate(opacity.value, [0, 1], [0, 1], Extrapolation.CLAMP),
   }));
 
   if (!isOffline && !wasOffline) return null;
+
+  const accessibilityMessage = isOffline
+    ? 'İnternet bağlantısı yok. Bazı özellikler kullanılamayabilir.'
+    : 'Bağlantı yeniden kuruldu.';
 
   return (
     <Animated.View
@@ -78,12 +77,13 @@ export const OfflineNotice: React.FC = memo(() => {
         animatedStyle,
         {
           paddingTop: insets.top + 8,
-          backgroundColor: isOffline
-            ? theme.colors.error[500]
-            : theme.colors.success[500],
+          backgroundColor: isOffline ? theme.colors.error[500] : theme.colors.success[500],
         },
       ]}
-    >
+      accessible={true}
+      accessibilityRole="alert"
+      accessibilityLabel={accessibilityMessage}
+      accessibilityLiveRegion="assertive">
       <Icon
         name={isOffline ? 'cloud-offline' : 'cloud-done'}
         size={18}
@@ -91,9 +91,7 @@ export const OfflineNotice: React.FC = memo(() => {
         style={styles.icon}
       />
       <Text style={styles.text}>
-        {isOffline
-          ? 'İnternet bağlantısı yok'
-          : 'Bağlantı yeniden kuruldu'}
+        {isOffline ? 'İnternet bağlantısı yok' : 'Bağlantı yeniden kuruldu'}
       </Text>
     </Animated.View>
   );

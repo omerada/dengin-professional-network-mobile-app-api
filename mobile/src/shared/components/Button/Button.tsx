@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useTheme } from '@contexts/ThemeContext';
 import { spacing, borderRadius } from '@theme';
+import { hapticLight } from '@shared/utils/haptics';
 
 /**
  * Button variants
@@ -157,6 +158,7 @@ export const Button = React.memo<ButtonProps>(
     const handlePress = useCallback(
       (event: Parameters<NonNullable<TouchableOpacityProps['onPress']>>[0]) => {
         if (!disabled && !loading && onPress) {
+          hapticLight();
           onPress(event);
         }
       },

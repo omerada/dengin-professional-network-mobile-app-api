@@ -3,13 +3,7 @@
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART4.md
 
 import React, { memo, useEffect, useRef } from 'react';
-import {
-  View,
-  StyleSheet,
-  Animated,
-  ViewStyle,
-  Dimensions,
-} from 'react-native';
+import { View, StyleSheet, Animated, ViewStyle, Dimensions } from 'react-native';
 import { useTheme } from '@contexts/ThemeContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -47,31 +41,24 @@ interface SkeletonProps {
 
 /**
  * Skeleton Component
- * 
+ *
  * Shimmer loading placeholder for content loading states.
  * Provides visual feedback while data is being fetched.
- * 
+ *
  * @example
  * ```tsx
  * // Text skeleton
  * <Skeleton width="80%" height={16} />
- * 
+ *
  * // Circular skeleton (for avatars)
  * <Skeleton variant="circular" height={40} />
- * 
+ *
  * // Rectangular skeleton (for images)
  * <Skeleton variant="rectangular" width={100} height={100} />
  * ```
  */
 export const Skeleton: React.FC<SkeletonProps> = memo(
-  ({
-    variant = 'text',
-    width = '100%',
-    height,
-    borderRadius,
-    style,
-    testID,
-  }) => {
+  ({ variant = 'text', width = '100%', height, borderRadius, style, testID }) => {
     const { theme } = useTheme();
     const shimmerAnim = useRef(new Animated.Value(0)).current;
 
@@ -126,7 +113,10 @@ export const Skeleton: React.FC<SkeletonProps> = memo(
           style,
         ]}
         testID={testID}
-      >
+        accessible={true}
+        accessibilityRole="progressbar"
+        accessibilityLabel="İçerik yükleniyor"
+        accessibilityState={{ busy: true }}>
         <Animated.View
           style={[
             styles.shimmer,
@@ -143,7 +133,7 @@ export const Skeleton: React.FC<SkeletonProps> = memo(
 
 /**
  * SkeletonPost Component
- * 
+ *
  * Pre-built skeleton layout for post/feed items
  */
 export const SkeletonPost: React.FC = memo(() => {
@@ -151,11 +141,7 @@ export const SkeletonPost: React.FC = memo(() => {
 
   return (
     <View
-      style={[
-        skeletonStyles.postContainer,
-        { backgroundColor: theme.colors.background.primary },
-      ]}
-    >
+      style={[skeletonStyles.postContainer, { backgroundColor: theme.colors.background.primary }]}>
       <View style={skeletonStyles.header}>
         <Skeleton variant="circular" height={40} />
         <View style={skeletonStyles.headerText}>
@@ -172,15 +158,13 @@ export const SkeletonPost: React.FC = memo(() => {
 
 /**
  * SkeletonMessage Component
- * 
+ *
  * Pre-built skeleton layout for message/chat items
  */
 export const SkeletonMessage: React.FC<{ isOwn?: boolean }> = memo(({ isOwn = false }) => {
   return (
     <View style={[skeletonStyles.messageContainer, isOwn && skeletonStyles.ownMessage]}>
-      {!isOwn && (
-        <Skeleton variant="circular" height={32} style={{ marginRight: 8 }} />
-      )}
+      {!isOwn && <Skeleton variant="circular" height={32} style={{ marginRight: 8 }} />}
       <View style={{ flex: 1, alignItems: isOwn ? 'flex-end' : 'flex-start' }}>
         <Skeleton width={isOwn ? '60%' : '70%'} height={36} borderRadius={16} />
       </View>

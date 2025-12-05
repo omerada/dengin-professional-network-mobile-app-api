@@ -11,5 +11,16 @@ export { moderationApi } from './services';
 // Hooks
 export { useCreateReport, useMyReports, useBlockedUsers } from './hooks';
 
+// Components
+export { ReportForm, BlockUserButton, ReportReasonItem, BlockedUserItem } from './components';
+
+// Stores
+export {
+  useModerationStore,
+  useIsBlockedUsersCacheStale,
+  useIsReportsCacheStale,
+  useBlockedUserIds,
+} from './stores';
+
 // Screens
 export { ReportScreen, BlockedUsersScreen } from './screens';
