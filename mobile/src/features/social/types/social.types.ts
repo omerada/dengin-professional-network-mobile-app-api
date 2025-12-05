@@ -41,9 +41,24 @@ export interface FollowResponse {
 }
 
 /**
- * Block response
+ * Block response - Backend API uyumlu
+ * POST/DELETE /api/users/{userId}/block
  */
 export interface BlockResponse {
-  success: boolean;
+  userId: number;
   isBlocked: boolean;
+  wasAlreadyBlocked?: boolean;
+  message?: string;
+}
+
+/**
+ * Blocked user DTO - Backend API uyumlu
+ * GET /api/users/me/blocked
+ */
+export interface BlockedUserDto {
+  userId: number;
+  fullName: string;
+  avatarUrl?: string;
+  profession?: string;
+  blockedAt: string;
 }

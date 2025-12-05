@@ -70,8 +70,7 @@ public class AuthService {
         if (userRepository.existsByEmail(request.email())) {
             throw new BusinessException(
                     "Bu e-posta adresi zaten kullanılıyor: " + request.email(),
-                    "EMAIL_ALREADY_EXISTS"
-            );
+                    "EMAIL_ALREADY_EXISTS");
         }
 
         // Create user aggregate (domain factory method)
@@ -79,8 +78,7 @@ public class AuthService {
                 request.email(),
                 passwordEncoder.encode(request.password()),
                 request.name(),
-                request.surname()
-        );
+                request.surname());
 
         // Save
         User savedUser = userRepository.save(user);
@@ -110,9 +108,7 @@ public class AuthService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.email(),
-                        request.password()
-                )
-        );
+                        request.password()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -120,8 +116,7 @@ public class AuthService {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new BusinessException(
                         "Kullanıcı bulunamadı: " + request.email(),
-                        "USER_NOT_FOUND"
-                ));
+                        "USER_NOT_FOUND"));
 
         // Check if user is active
         if (!user.isActive()) {
@@ -168,8 +163,7 @@ public class AuthService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(
                         "Kullanıcı bulunamadı: " + userId,
-                        "USER_NOT_FOUND"
-                ));
+                        "USER_NOT_FOUND"));
 
         // Check if user is active
         if (!user.isActive()) {
@@ -238,7 +232,8 @@ public class AuthService {
     @Transactional
     public void resendVerificationEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("'" + email + "' e-posta adresine sahip kullanıcı bulunamadı"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "'" + email + "' e-posta adresine sahip kullanıcı bulunamadı"));
 
         if (Boolean.TRUE.equals(user.getIsEmailVerified())) {
             throw new BusinessException("E-posta zaten doğrulanmış", "EMAIL_ALREADY_VERIFIED");
@@ -260,8 +255,7 @@ public class AuthService {
                 redisKey,
                 user.getId().toString(),
                 VERIFICATION_TOKEN_TTL_HOURS,
-                TimeUnit.HOURS
-        );
+                TimeUnit.HOURS);
 
         // Build verification link
         String verificationLink = frontendUrl + "/verify-email?token=" + token;
@@ -270,5 +264,57 @@ public class AuthService {
         emailService.sendVerificationEmail(user.getEmail(), user.getName(), verificationLink);
 
         log.info("Verification email sent to: {}", user.getEmail());
+    }
+
+    /**
+     * Change password for authenticated user
+     * 
+     * Business Rules:
+     * - Current password must be verified
+     * - New password must be different from current
+     * - New password must meet strength requirements
+     * 
+     * Security:
+     * - Rate limited: max 5 requests per hour per user
+     * - Logs security event for audit trail
+     * - Optionally invalidates all other sessions
+     * 
+     * @param userId          User ID
+     * @param currentPassword Current password for verification
+     * @param newPassword     New password
+     * @throws BusinessException if current password is incorrect or new password is
+     *                           same as current
+     */
+    @Transactional
+    public void changePassword(Long userId, String currentPassword, String newPassword) {
+        log.info("Changing password for user: {}", userId);
+
+        // Find user
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        // Verify current password
+        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            log.warn("Password change failed for user {}: incorrect current password", userId);
+            throw new BusinessException("Mevcut şifreniz hatalı", "INCORRECT_CURRENT_PASSWORD");
+        }
+
+        // Verify new password is different
+        if (passwordEncoder.matches(newPassword, user.getPasswordHash())) {
+            throw new BusinessException("Yeni şifre mevcut şifrenizden farklı olmalıdır", "PASSWORD_SAME_AS_CURRENT");
+        }
+
+        // Update password (domain behavior)
+        user.updatePassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // Publish password changed event
+        user.getEvents().forEach(eventPublisher::publishEvent);
+        user.clearEvents();
+
+        // Send confirmation email
+        emailService.sendPasswordChangedEmail(user.getEmail(), user.getName());
+
+        log.info("Password changed successfully for user: {}", userId);
     }
 }

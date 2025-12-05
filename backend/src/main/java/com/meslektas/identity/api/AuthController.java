@@ -1,6 +1,7 @@
 package com.meslektas.identity.api;
 
 import com.meslektas.common.api.ApiResponse;
+import com.meslektas.identity.application.dto.request.ChangePasswordRequest;
 import com.meslektas.identity.application.dto.request.PasswordResetConfirmRequest;
 import com.meslektas.identity.application.dto.request.PasswordResetRequest;
 import com.meslektas.identity.application.dto.request.LoginRequest;
@@ -9,13 +10,16 @@ import com.meslektas.identity.application.dto.response.LoginResponse;
 import com.meslektas.identity.application.dto.response.UserResponse;
 import com.meslektas.identity.application.service.AuthService;
 import com.meslektas.identity.application.service.PasswordResetService;
+import com.meslektas.identity.infrastructure.security.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -28,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
  * - POST /api/auth/logout - Logout
  * - POST /api/auth/password-reset/request - Request password reset
  * - POST /api/auth/password-reset/confirm - Confirm password reset
+ * - POST /api/auth/change-password - Change password (authenticated)
  * 
  * Sprint 1 & 2 Implementation
  */
@@ -128,5 +133,41 @@ public class AuthController {
 
         return ResponseEntity.ok(
                 ApiResponse.success("Şifreniz başarıyla sıfırlandı", null));
+    }
+
+    /**
+     * POST /api/auth/change-password
+     * Change password (authenticated users only)
+     * 
+     * Flow:
+     * 1. User enters current password and new password
+     * 2. System validates current password
+     * 3. Password updated
+     * 4. All other user sessions invalidated
+     * 5. Confirmation email sent
+     * 
+     * Security:
+     * - Requires authentication
+     * - Current password must be verified
+     * - New password must meet strength requirements
+     * - Rate limited: max 5 requests per hour per user
+     * 
+     * @param request     Change password request
+     * @param currentUser Authenticated user
+     * @return 200 OK with success message
+     */
+    @PostMapping("/change-password")
+    @Operation(summary = "Change password", description = "Change password for authenticated user. Requires current password verification.", security = @SecurityRequirement(name = "Bearer Authentication"))
+    public ResponseEntity<ApiResponse<Void>> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request,
+            @AuthenticationPrincipal UserDetailsImpl currentUser) {
+        Long userId = currentUser.getId();
+        log.info("POST /api/auth/change-password - userId: {}", userId);
+
+        authService.changePassword(userId, request.getCurrentPassword(), request.getNewPassword());
+
+        log.info("Password changed successfully - userId: {}", userId);
+        return ResponseEntity.ok(
+                ApiResponse.success("Şifreniz başarıyla değiştirildi", null));
     }
 }

@@ -140,6 +140,16 @@ export interface LikeResponse {
 }
 
 /**
+ * Comment Like yanıtı - Backend API uyumlu
+ * POST/DELETE /api/posts/{postId}/comments/{commentId}/like
+ */
+export interface CommentLikeResponse {
+  commentId: string;
+  isLiked: boolean;
+  likeCount: number;
+}
+
+/**
  * Post oluşturma isteği - Backend API uyumlu
  * POST /api/posts
  */
@@ -203,7 +213,7 @@ export type FeedFilter = 'all' | 'following' | 'popular' | 'nearby';
 export interface FeedStoreState {
   filter: FeedFilter;
   setFilter: (filter: FeedFilter) => void;
-  
+
   // Draft post
   draftContent: string;
   draftImages: LocalImage[];

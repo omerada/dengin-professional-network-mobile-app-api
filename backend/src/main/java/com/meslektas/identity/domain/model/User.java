@@ -122,8 +122,7 @@ public class User extends AggregateRoot {
             String email,
             String passwordHash,
             String name,
-            String surname
-    ) {
+            String surname) {
         User user = User.builder()
                 .email(email)
                 .passwordHash(passwordHash)
@@ -149,15 +148,14 @@ public class User extends AggregateRoot {
             String surname,
             String avatarUrl,
             OAuthProvider provider,
-            String providerId
-    ) {
+            String providerId) {
         User user = User.builder()
                 .email(email)
                 .name(name)
                 .surname(surname)
                 .avatarUrl(avatarUrl)
                 .status(UserStatus.ACTIVE)
-                .isEmailVerified(true)  // OAuth emails are pre-verified
+                .isEmailVerified(true) // OAuth emails are pre-verified
                 .emailVerifiedAt(LocalDateTime.now())
                 .oauthProvider(provider)
                 .oauthProviderId(providerId)
@@ -174,7 +172,7 @@ public class User extends AggregateRoot {
      */
     public void updateProfile(String name, String surname, String bio, LocalDate dateOfBirth) {
         java.util.List<String> updatedFields = new java.util.ArrayList<>();
-        
+
         if (!this.name.equals(name)) {
             this.name = name;
             updatedFields.add("name");
@@ -187,19 +185,18 @@ public class User extends AggregateRoot {
             this.bio = bio;
             updatedFields.add("bio");
         }
-        if ((this.dateOfBirth == null && dateOfBirth != null) || 
-            (this.dateOfBirth != null && !this.dateOfBirth.equals(dateOfBirth))) {
+        if ((this.dateOfBirth == null && dateOfBirth != null) ||
+                (this.dateOfBirth != null && !this.dateOfBirth.equals(dateOfBirth))) {
             this.dateOfBirth = dateOfBirth;
             updatedFields.add("dateOfBirth");
         }
-        
+
         checkProfileCompleteness();
-        
+
         if (!updatedFields.isEmpty()) {
             registerEvent(new com.meslektas.identity.domain.event.ProfileUpdatedEvent(
-                this.getId(),
-                String.join(",", updatedFields)
-            ));
+                    this.getId(),
+                    String.join(",", updatedFields)));
         }
     }
 
@@ -209,11 +206,10 @@ public class User extends AggregateRoot {
     public void updateAvatar(String avatarUrl) {
         this.avatarUrl = avatarUrl;
         checkProfileCompleteness();
-        
+
         registerEvent(new com.meslektas.identity.domain.event.ProfileUpdatedEvent(
-            this.getId(),
-            "avatarUrl"
-        ));
+                this.getId(),
+                "avatarUrl"));
     }
 
     /**
@@ -226,15 +222,14 @@ public class User extends AggregateRoot {
             if (!this.profession.isGeneralCategory()) {
                 throw new BusinessException(
                         "Doğrulanmış meslek değiştirilemez",
-                        "PROFESSION_CHANGE_NOT_ALLOWED"
-                );
+                        "PROFESSION_CHANGE_NOT_ALLOWED");
             }
         }
 
         this.profession = profession;
         this.isProfessionVerified = false;
         this.professionVerifiedAt = null;
-        
+
         checkProfileCompleteness();
     }
 
@@ -247,20 +242,18 @@ public class User extends AggregateRoot {
         if (this.profession == null) {
             throw new BusinessException(
                     "Meslek seçilmeden doğrulama yapılamaz",
-                    "NO_PROFESSION_SELECTED"
-            );
+                    "NO_PROFESSION_SELECTED");
         }
 
         this.isProfessionVerified = true;
         this.professionVerifiedAt = LocalDateTime.now();
-        
+
         checkProfileCompleteness();
-        
+
         registerEvent(new UserProfessionVerifiedEvent(
                 this.getId(),
                 this.profession.getId(),
-                this.profession.getName()
-        ));
+                this.profession.getName()));
     }
 
     /**
@@ -308,13 +301,12 @@ public class User extends AggregateRoot {
         this.banReason = reason;
         this.bannedUntil = until;
         this.bannedAt = LocalDateTime.now();
-        
+
         registerEvent(new UserStatusChangedEvent(
                 this.getId(),
                 oldStatus,
                 UserStatus.SUSPENDED,
-                reason
-        ));
+                reason));
     }
 
     /**
@@ -326,13 +318,12 @@ public class User extends AggregateRoot {
         this.banReason = reason;
         this.bannedAt = LocalDateTime.now();
         this.bannedUntil = null;
-        
+
         registerEvent(new UserStatusChangedEvent(
                 this.getId(),
                 oldStatus,
                 UserStatus.BANNED,
-                reason
-        ));
+                reason));
     }
 
     /**
@@ -343,13 +334,12 @@ public class User extends AggregateRoot {
         this.status = UserStatus.ACTIVE;
         this.banReason = null;
         this.bannedUntil = null;
-        
+
         registerEvent(new UserStatusChangedEvent(
                 this.getId(),
                 oldStatus,
                 UserStatus.ACTIVE,
-                "User activated"
-        ));
+                "User activated"));
     }
 
     /**
@@ -358,15 +348,14 @@ public class User extends AggregateRoot {
     public void delete() {
         UserStatus oldStatus = this.status;
         this.status = UserStatus.DELETED;
-        
+
         registerEvent(new UserStatusChangedEvent(
                 this.getId(),
                 oldStatus,
                 UserStatus.DELETED,
-                "User deleted"
-        ));
+                "User deleted"));
     }
-    
+
     /**
      * Reset password (for password reset flow)
      * 
@@ -376,6 +365,19 @@ public class User extends AggregateRoot {
      * @param newHashedPassword Hashed password from PasswordEncoder
      */
     public void resetPassword(String newHashedPassword) {
+        this.passwordHash = newHashedPassword;
+        // Note: PasswordChangedEvent published by service layer
+    }
+
+    /**
+     * Update password (for authenticated password change)
+     * 
+     * Business Rule: Used by authenticated users changing their own password
+     * Different from resetPassword as it's a user-initiated action vs system reset
+     * 
+     * @param newHashedPassword Hashed password from PasswordEncoder
+     */
+    public void updatePassword(String newHashedPassword) {
         this.passwordHash = newHashedPassword;
         // Note: PasswordChangedEvent published by service layer
     }
@@ -441,24 +443,23 @@ public class User extends AggregateRoot {
     public boolean isOAuthUser() {
         return this.oauthProvider != null && this.oauthProvider != OAuthProvider.LOCAL;
     }
-    
+
     /**
      * Link OAuth provider to existing account
      * 
-     * Used when a user with email/password account 
+     * Used when a user with email/password account
      * signs in with OAuth for the first time.
      */
     public void linkOAuthProvider(OAuthProvider provider, String providerId) {
         if (this.oauthProvider != null && this.oauthProvider != OAuthProvider.LOCAL) {
             throw new BusinessException(
-                "Bu hesap zaten " + this.oauthProvider.getDisplayName() + " ile bağlantılı",
-                "OAUTH_ALREADY_LINKED"
-            );
+                    "Bu hesap zaten " + this.oauthProvider.getDisplayName() + " ile bağlantılı",
+                    "OAUTH_ALREADY_LINKED");
         }
-        
+
         this.oauthProvider = provider;
         this.oauthProviderId = providerId;
-        
+
         // OAuth emails are considered verified
         if (!Boolean.TRUE.equals(this.isEmailVerified)) {
             this.isEmailVerified = true;
@@ -485,14 +486,14 @@ public class User extends AggregateRoot {
         }
         return true;
     }
-    
+
     /**
      * Check if user is verified (profession verified)
      */
     public boolean isVerified() {
         return Boolean.TRUE.equals(this.isProfessionVerified);
     }
-    
+
     /**
      * Get profile image URL (alias for avatarUrl)
      */

@@ -89,8 +89,9 @@ describe('feedService', () => {
 
       const result = await feedService.getFeed();
 
+      // Backend sadece 'limit' ve 'professionFilter' alır, 'page' yok!
       expect(mockApiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.FEED.PERSONALIZED, {
-        params: { page: 0, limit: 20, professionFilter: undefined },
+        params: { limit: 20, professionFilter: undefined },
       });
       expect(result).toEqual(mockFeedResponse);
     });
@@ -98,12 +99,23 @@ describe('feedService', () => {
     it('should fetch feed with custom parameters', async () => {
       mockApiClient.get.mockResolvedValue({ data: { data: mockFeedResponse } });
 
-      const result = await feedService.getFeed(1, 15, 5);
+      const result = await feedService.getFeed(15, 5);
 
+      // limit ve professionFilter parametreleri
       expect(mockApiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.FEED.PERSONALIZED, {
-        params: { page: 1, limit: 15, professionFilter: 5 },
+        params: { limit: 15, professionFilter: 5 },
       });
       expect(result).toEqual(mockFeedResponse);
+    });
+
+    it('should cap limit at 50', async () => {
+      mockApiClient.get.mockResolvedValue({ data: { data: mockFeedResponse } });
+
+      await feedService.getFeed(100); // 100 > 50
+
+      expect(mockApiClient.get).toHaveBeenCalledWith(API_ENDPOINTS.FEED.PERSONALIZED, {
+        params: { limit: 50, professionFilter: undefined }, // Max 50
+      });
     });
 
     it('should handle empty feed', async () => {
@@ -260,12 +272,37 @@ describe('feedService', () => {
   });
 
   describe('likeComment', () => {
-    it('should like comment', async () => {
-      mockApiClient.post.mockResolvedValue({});
+    it('should log warning since backend endpoint does not exist', async () => {
+      // Backend'de comment like endpoint mevcut değil
+      // Fonksiyon sadece warning loglar ve resolve eder
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
 
       await feedService.likeComment(1, 'comment-1');
 
-      expect(mockApiClient.post).toHaveBeenCalledWith('/api/posts/1/comments/comment-1/like');
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'likeComment: Backend endpoint mevcut değil. Bu özellik gelecek sprintlerde eklenecek.',
+      );
+      // apiClient.post çağrılmaz
+      expect(mockApiClient.post).not.toHaveBeenCalled();
+
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe('unlikeComment', () => {
+    it('should log warning since backend endpoint does not exist', async () => {
+      // Backend'de comment unlike endpoint mevcut değil
+      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+      await feedService.unlikeComment(1, 'comment-1');
+
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'unlikeComment: Backend endpoint mevcut değil. Bu özellik gelecek sprintlerde eklenecek.',
+      );
+      // apiClient.delete çağrılmaz
+      expect(mockApiClient.delete).not.toHaveBeenCalled();
+
+      consoleSpy.mockRestore();
     });
   });
 

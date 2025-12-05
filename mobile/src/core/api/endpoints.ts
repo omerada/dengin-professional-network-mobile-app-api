@@ -7,6 +7,7 @@
  */
 export const API_ENDPOINTS = {
   // Authentication - Backend: /api/auth/*
+  // Backend: com.meslektas.identity.api.AuthController
   AUTH: {
     LOGIN: '/api/auth/login',
     REGISTER: '/api/auth/register',
@@ -15,8 +16,9 @@ export const API_ENDPOINTS = {
     FORGOT_PASSWORD: '/api/auth/password-reset/request',
     RESET_PASSWORD: '/api/auth/password-reset/confirm',
     VERIFY_EMAIL: '/api/auth/verify-email',
+    // Şifre değiştirme - authenticated users only
     CHANGE_PASSWORD: '/api/auth/change-password',
-    // OAuth2 endpoints
+    // OAuth2 endpoints - Backend: OAuth2Controller
     OAUTH_GOOGLE: '/api/v1/auth/oauth/google',
     OAUTH_APPLE: '/api/v1/auth/oauth/apple',
   },
@@ -80,14 +82,23 @@ export const API_ENDPOINTS = {
   },
 
   // Comments - Backend: /api/posts/{postId}/comments/*
+  // NOT: Backend CommentController sadece bu 3 endpoint'i destekliyor:
+  // - POST /api/posts/{postId}/comments - Yorum ekle
+  // - GET /api/posts/{postId}/comments - Yorumları getir
+  // - DELETE /api/posts/{postId}/comments/{commentId} - Yorum sil
+  // Comment like/unlike henüz backend'de mevcut değil!
   COMMENTS: {
     BY_POST: (postId: string | number) => `/api/posts/${postId}/comments`,
     CREATE: (postId: string | number) => `/api/posts/${postId}/comments`,
-    UPDATE: (id: string | number) => `/api/comments/${id}`,
-    DELETE: (id: string | number) => `/api/comments/${id}`,
-    LIKE: (id: string | number) => `/api/comments/${id}/like`,
-    UNLIKE: (id: string | number) => `/api/comments/${id}/like`,
-    REPLIES: (id: string | number) => `/api/comments/${id}/replies`,
+    // DELETE doğru format: /api/posts/{postId}/comments/{commentId}
+    DELETE: (postId: string | number, commentId: string) =>
+      `/api/posts/${postId}/comments/${commentId}`,
+    // Aşağıdaki endpoint'ler BACKEND'DE MEVCUT DEĞİL - Sprint scope dışı
+    // Comment update ve like özelliği gelecek sprintlerde eklenebilir
+    // UPDATE: (id: string | number) => `/api/comments/${id}`,
+    // LIKE: (postId: string | number, commentId: string) => `/api/posts/${postId}/comments/${commentId}/like`,
+    // UNLIKE: (postId: string | number, commentId: string) => `/api/posts/${postId}/comments/${commentId}/like`,
+    // REPLIES: (id: string | number) => `/api/comments/${id}/replies`,
   },
 
   // Messaging - Backend: /api/conversations/*
@@ -95,22 +106,28 @@ export const API_ENDPOINTS = {
     CONVERSATIONS: '/api/conversations',
     CONVERSATION_BY_ID: (id: string | number) => `/api/conversations/${id}`,
     MESSAGES: (conversationId: string | number) => `/api/conversations/${conversationId}/messages`,
-    SEND_MESSAGE: (conversationId: string | number) => `/api/conversations/${conversationId}/messages`,
+    SEND_MESSAGE: (conversationId: string | number) =>
+      `/api/conversations/${conversationId}/messages`,
     START_CONVERSATION: '/api/conversations',
     MARK_READ: (conversationId: string | number) => `/api/conversations/${conversationId}/read`,
     ARCHIVE: (conversationId: string | number) => `/api/conversations/${conversationId}/archive`,
-    UNARCHIVE: (conversationId: string | number) => `/api/conversations/${conversationId}/unarchive`,
+    UNARCHIVE: (conversationId: string | number) =>
+      `/api/conversations/${conversationId}/unarchive`,
   },
 
   // Notifications - Backend: /api/notifications/*
+  // NOT: Device token işlemleri /api/v1/devices/* altında!
   NOTIFICATIONS: {
     LIST: '/api/notifications',
     MARK_READ: (id: string | number) => `/api/notifications/${id}/read`,
-    MARK_ALL_READ: '/api/notifications/read-all',
-    SETTINGS: '/api/notifications/settings',
-    UPDATE_SETTINGS: '/api/notifications/settings',
-    REGISTER_DEVICE: '/api/notifications/devices',
-    UNREGISTER_DEVICE: (deviceId: string) => `/api/notifications/devices/${deviceId}`,
+    MARK_ALL_READ: '/api/notifications/mark-as-read',
+    SETTINGS: '/api/notifications/preferences',
+    UPDATE_SETTINGS: '/api/notifications/preferences',
+    // Device token endpoints - Backend: /api/v1/devices/*
+    // NOT: Bu endpoint'ler DeviceTokenController altında, NotificationController'da değil!
+    REGISTER_DEVICE: '/api/v1/devices/register',
+    UNREGISTER_DEVICE: '/api/v1/devices/unregister',
+    UNREGISTER_ALL_DEVICES: '/api/v1/devices/unregister-all',
   },
 
   // Media - Backend: /api/media/*
@@ -135,23 +152,52 @@ export const API_ENDPOINTS = {
 
 /**
  * WebSocket STOMP destinations
+ *
+ * Backend: WebSocketConfig.java, MessageWebSocketController.java
+ *
+ * Endpoint: /ws (SockJS), /ws-raw (Raw WebSocket for mobile)
+ *
+ * Akış:
+ * - Client → Server: /app/* prefix'i ile @MessageMapping metodlarına
+ * - Server → Client: /user/queue/* veya /topic/* ile subscribe edilen kanallara
  */
 export const WS_DESTINATIONS = {
-  // Subscribe destinations
+  // WebSocket endpoint (SockJS veya raw)
+  ENDPOINT: '/ws',
+  ENDPOINT_RAW: '/ws-raw', // Mobile için tercih edilir
+
+  // Subscribe destinations (Server → Client)
+  // NOT: Spring /user/ prefix'ini otomatik ekler, client sadece /queue/* subscribe eder
   SUBSCRIBE: {
-    USER_QUEUE: (userId: string) => `/user/${userId}/queue/messages`,
-    CONVERSATION: (conversationId: string) => `/topic/conversation/${conversationId}`,
-    TYPING: (conversationId: string) => `/topic/conversation/${conversationId}/typing`,
+    // Mesajlar için - "/user/queue/messages" olarak gelir
+    MESSAGES: '/queue/messages',
+    // Typing indicator - "/user/queue/typing" olarak gelir
+    TYPING: '/queue/typing',
+    // Okundu bildirimleri - "/user/queue/read" olarak gelir
+    READ_RECEIPTS: '/queue/read',
+    // Hatalar - "/user/queue/errors" olarak gelir
+    ERRORS: '/queue/errors',
+    // Bildirimler için - "/user/queue/notifications" olarak gelir
+    NOTIFICATIONS: '/queue/notifications',
+    // Presence (online/offline) - topic broadcast
     PRESENCE: '/topic/presence',
-    NOTIFICATIONS: (userId: string) => `/user/${userId}/queue/notifications`,
   },
 
-  // Publish destinations
+  // Publish destinations (Client → Server)
+  // Prefix: /app
   PUBLISH: {
+    // Mesaj gönder - MessageWebSocketController.sendMessage()
     SEND_MESSAGE: '/app/chat.send',
-    TYPING_START: '/app/chat.typing.start',
-    TYPING_STOP: '/app/chat.typing.stop',
+    // Typing indicator - MessageWebSocketController.notifyTyping()
+    TYPING: '/app/chat.typing',
+    // Okundu işaretle - MessageWebSocketController.markAsRead()
     MARK_READ: '/app/chat.read',
-    PRESENCE_UPDATE: '/app/presence.update',
+    // Bildirim işlemleri - NotificationWebSocketController
+    NOTIFICATIONS: {
+      SUBSCRIBE: '/app/notifications/subscribe',
+      MARK_READ: '/app/notifications/mark-read',
+      MARK_ALL_READ: '/app/notifications/mark-all-read',
+      UNREAD_COUNT: '/app/notifications/unread-count',
+    },
   },
 } as const;

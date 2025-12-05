@@ -46,9 +46,7 @@ export const profileApi = {
    * Backend: UserController.getCurrentUser()
    */
   getMyProfile: async (): Promise<MyProfileResponse> => {
-    const response = await apiClient.get<ApiResponse<MyProfileResponse>>(
-      API_ENDPOINTS.USER.ME,
-    );
+    const response = await apiClient.get<ApiResponse<MyProfileResponse>>(API_ENDPOINTS.USER.ME);
     return response.data.data;
   },
 
@@ -137,14 +135,20 @@ export const profileApi = {
 
   /**
    * POST /api/auth/change-password
-   * Şifre değiştir
+   * Şifre değiştir (authenticated users only)
    *
    * Backend: AuthController.changePassword()
+   *
+   * Validation:
+   * - Mevcut şifre doğru olmalı
+   * - Yeni şifre mevcut şifreden farklı olmalı
+   * - Yeni şifre en az 8 karakter, 1 büyük harf, 1 küçük harf, 1 rakam, 1 özel karakter
    */
   changePassword: async (data: ChangePasswordRequest): Promise<void> => {
     await apiClient.post(API_ENDPOINTS.AUTH.CHANGE_PASSWORD, {
       currentPassword: data.currentPassword,
       newPassword: data.newPassword,
+      confirmPassword: data.confirmPassword || data.newPassword,
     });
   },
 

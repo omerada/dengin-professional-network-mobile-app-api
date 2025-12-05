@@ -10,12 +10,10 @@ import type {
   CommentListResponse,
   Comment,
   CreatePostRequest,
-  CreatePostDto,
-  CreateCommentDto,
   AddCommentRequest,
   UpdatePostDto,
-  FeedFilter,
   LikeResponse,
+  CommentLikeResponse,
 } from '../types';
 
 /**
@@ -29,17 +27,32 @@ interface ApiResponse<T> {
 
 /**
  * Feed API servisi
+ *
+ * Backend Controllers:
+ * - FeedController: /api/feed/* (personalized, trending)
+ * - PostController: /api/posts/* (CRUD, like/unlike)
+ * - CommentController: /api/posts/{postId}/comments/* (CRUD)
+ *
+ * NOT: Backend FeedController sadece 'limit' parametresi kullanır, 'page' değil.
+ * Cursor-based pagination yerine limit-based yaklaşım kullanılır.
  */
 export const feedService = {
   /**
    * Personalized feed getir
    * GET /api/feed?limit=20&professionFilter={professionId}
+   *
+   * Backend: FeedController.getFeed()
+   * - limit: Max results (max 50, default 20)
+   * - professionFilter: Optional profession ID filter
+   *
+   * NOT: Backend 'page' parametresi KULLANMAZ, sadece 'limit' alır.
+   * İleri sayfalama için cursor/lastId yaklaşımı kullanılabilir (henüz backend'de yok).
    */
-  async getFeed(page = 0, limit = 20, professionFilter?: number): Promise<FeedResponse> {
+  async getFeed(limit = 20, professionFilter?: number): Promise<FeedResponse> {
     const response = await apiClient.get<ApiResponse<FeedResponse>>(
       API_ENDPOINTS.FEED.PERSONALIZED,
       {
-        params: { page, limit, professionFilter },
+        params: { limit: Math.min(limit, 50), professionFilter },
       },
     );
     return response.data.data;
@@ -48,10 +61,16 @@ export const feedService = {
   /**
    * Trending postları getir
    * GET /api/feed/trending?limit=20
+   *
+   * Backend: FeedController.getTrendingPosts()
+   * - limit: Max results (max 50, default 20)
+   *
+   * Trending Score = (likes × 2) + (comments × 5)
+   * Son 7 günlük postlar dahil edilir.
    */
   async getTrendingFeed(limit = 20): Promise<FeedResponse> {
     const response = await apiClient.get<ApiResponse<FeedResponse>>(API_ENDPOINTS.FEED.TRENDING, {
-      params: { limit },
+      params: { limit: Math.min(limit, 50) },
     });
     return response.data.data;
   },
@@ -165,25 +184,50 @@ export const feedService = {
   /**
    * Yorum sil
    * DELETE /api/posts/{postId}/comments/{commentId}
+   *
+   * Backend: CommentController.deleteComment()
+   * - Sadece yorum sahibi veya post sahibi silebilir
+   * - Soft delete uygulanır
    */
   async deleteComment(postId: number, commentId: string): Promise<void> {
     await apiClient.delete(`/api/posts/${postId}/comments/${commentId}`);
   },
 
+  // NOT: Comment like/unlike endpoint'leri backend'de MEVCUT DEĞİL (Sprint 5-6 scope dışı)
+  // Bu özellik gelecek sprintlerde eklenebilir. Şimdilik stub olarak bırakıyoruz.
+
   /**
    * Yorum beğen
    * POST /api/posts/{postId}/comments/{commentId}/like
+   *
+   * Backend: CommentController.likeComment()
+   * - Bir kullanıcı aynı yorumu sadece bir kez beğenebilir
+   * - Zaten beğenilmişse 400 hatası döner
+   *
+   * @returns CommentLikeResponse - Updated like status and count
    */
-  async likeComment(postId: number, commentId: string): Promise<void> {
-    await apiClient.post(`/api/posts/${postId}/comments/${commentId}/like`);
+  async likeComment(postId: number, commentId: string): Promise<CommentLikeResponse> {
+    const response = await apiClient.post<ApiResponse<CommentLikeResponse>>(
+      `/api/posts/${postId}/comments/${commentId}/like`,
+    );
+    return response.data.data;
   },
 
   /**
    * Yorum beğenmekten vazgeç
    * DELETE /api/posts/{postId}/comments/{commentId}/like
+   *
+   * Backend: CommentController.unlikeComment()
+   * - Sadece önceden beğenilmiş yorumlar için geçerli
+   * - Beğenilmemişse 400 hatası döner
+   *
+   * @returns CommentLikeResponse - Updated like status and count
    */
-  async unlikeComment(postId: number, commentId: string): Promise<void> {
-    await apiClient.delete(`/api/posts/${postId}/comments/${commentId}/like`);
+  async unlikeComment(postId: number, commentId: string): Promise<CommentLikeResponse> {
+    const response = await apiClient.delete<ApiResponse<CommentLikeResponse>>(
+      `/api/posts/${postId}/comments/${commentId}/like`,
+    );
+    return response.data.data;
   },
 
   /**
