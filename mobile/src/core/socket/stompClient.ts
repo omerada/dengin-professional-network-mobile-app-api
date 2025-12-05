@@ -249,8 +249,11 @@ class StompClient {
 
   /**
    * Send typing indicator
+   * @param conversationId - Conversation UUID
+   * @param recipientId - Recipient user UUID (string, not number)
+   * @param isTyping - Whether user is currently typing
    */
-  sendTyping(conversationId: string, recipientId: number, isTyping: boolean): void {
+  sendTyping(conversationId: string, recipientId: string, isTyping: boolean): void {
     this.publish(DESTINATIONS.TYPING, { conversationId, recipientId, isTyping });
   }
 

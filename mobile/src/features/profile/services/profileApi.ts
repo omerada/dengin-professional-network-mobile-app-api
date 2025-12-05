@@ -168,16 +168,30 @@ export const profileApi = {
   },
 
   /**
-   * GET /api/users/{id}/stats
+   * GET /api/users/{id}
    * Kullanıcı istatistiklerini getir
    *
-   * Backend: FollowController (Social Context)
+   * NOT: Backend'de ayrı /stats endpoint'i yok!
+   * Stats bilgisi kullanıcı response'unun içinde geliyor.
+   * Bu fonksiyon kullanıcı bilgilerinden stats'ı çıkarıyor.
+   *
+   * Backend: UserController.getUserById() → UserResponse.stats
    */
   getProfileStats: async (userId: number): Promise<ProfileStats> => {
-    const response = await apiClient.get<ApiResponse<ProfileStats>>(
-      `${API_ENDPOINTS.USER.BY_ID(userId)}/stats`,
+    // Backend'de ayrı stats endpoint'i yok, user response'dan al
+    const response = await apiClient.get<ApiResponse<ProfileResponse>>(
+      API_ENDPOINTS.USER.BY_ID(userId),
     );
-    return response.data.data;
+    const user = response.data.data;
+
+    // Stats yoksa default değerler döndür
+    return (
+      user.stats || {
+        postCount: 0,
+        followerCount: 0,
+        followingCount: 0,
+      }
+    );
   },
 };
 

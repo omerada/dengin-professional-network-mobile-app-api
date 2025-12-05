@@ -49,6 +49,7 @@ interface BackendFeedPostResponse {
     thumbnailUrl?: string;
     width?: number;
     height?: number;
+    blurhash?: string;
   }>;
   likeCount: number;
   commentCount: number;
@@ -59,33 +60,70 @@ interface BackendFeedPostResponse {
 
 /**
  * Backend response'u Post'a dönüştür
- * Backend artık name ve surname alanlarını ayrı döndürüyor
+ *
+ * GÜNCELLEME: Yeni Post tipi artık backend FeedPostResponse ile %100 uyumlu.
+ * - id: Long (API çağrılarında kullan)
+ * - postId: UUID string
+ * - images: PostImageDto[] (string[] değil)
+ * - flat likeCount, commentCount (stats objesi içinde değil)
+ * - liked: boolean (userInteraction içinde değil)
  */
 function mapToPost(response: BackendFeedPostResponse): Post {
   return {
-    postId: response.id,
+    // Primary identifiers
+    id: response.id,
+    postId: response.postId,
+
+    // Author - Backend AuthorDto format
     author: {
-      id: response.author.userId,
+      userId: response.author.userId,
+      id: response.author.userId, // Backward compatibility
       name: response.author.name || response.author.fullName.split(' ')[0] || '',
       surname:
         response.author.surname || response.author.fullName.split(' ').slice(1).join(' ') || '',
-      avatarUrl: response.author.profileImageUrl || undefined,
-      isVerified: response.author.verified,
-      profession: response.author.professionName || undefined,
+      fullName: response.author.fullName,
+      profileImageUrl: response.author.profileImageUrl || undefined,
+      avatarUrl: response.author.profileImageUrl || undefined, // Backward compatibility
+      professionId: response.author.professionId || undefined,
+      professionName: response.author.professionName || undefined,
+      verified: response.author.verified,
+      isVerified: response.author.verified, // Backward compatibility
+      profession: response.author.professionName || undefined, // Backward compatibility
     },
+
+    // Content
     content: response.content,
-    images: response.images.map(img => img.url),
+
+    // Images - PostImageDto[] format (NOT string[])
+    images: response.images.map(img => ({
+      url: img.url,
+      thumbnailUrl: img.thumbnailUrl,
+      width: img.width,
+      height: img.height,
+      blurhash: img.blurhash,
+    })),
+
+    // Engagement - Flat format (NOT nested in stats)
+    likeCount: response.likeCount,
+    commentCount: response.commentCount,
+    liked: response.liked,
+
+    // Feed algorithm
+    relevanceScore: response.relevanceScore,
+
+    // Timestamps
+    createdAt: response.createdAt,
+
+    // Backward compatibility - Deprecated nested objects
     stats: {
       likeCount: response.likeCount,
       commentCount: response.commentCount,
-      viewCount: 0, // Backend'den gelmiyor
+      viewCount: 0,
     },
     userInteraction: {
       isLiked: response.liked,
-      isSaved: false, // Backend'den ayrı endpoint'ten alınmalı
+      isSaved: false,
     },
-    createdAt: response.createdAt,
-    updatedAt: response.createdAt, // Backend'den gelmiyor
   };
 }
 

@@ -40,9 +40,13 @@ export enum SocketStatus {
 
 /**
  * Send message request via WebSocket
+ * Backend: com.meslektas.messaging.application.dto.SendMessageRequest
+ *
+ * NOT: Backend UUID tipi bekliyor, number değil!
  */
 export interface WsSendMessageRequest {
-  recipientId: number;
+  /** Recipient user UUID (string format) */
+  recipientId: string;
   content: string;
   attachment?: WsAttachment;
 }
@@ -62,12 +66,17 @@ export interface WsAttachment {
 
 /**
  * Message response from WebSocket
+ * Backend: com.meslektas.messaging.application.dto.MessageDto
+ *
+ * NOT: Backend UUID tipleri kullanıyor
  */
 export interface WsMessageResponse {
   messageId: string;
   conversationId: string;
-  senderId: number;
-  recipientId: number;
+  /** Sender user UUID */
+  senderId: string;
+  /** Recipient user UUID (optional in response) */
+  recipientId?: string;
   content: string;
   attachment?: WsAttachment;
   status: 'SENT' | 'DELIVERED' | 'READ';
@@ -76,20 +85,24 @@ export interface WsMessageResponse {
 
 /**
  * Typing notification
+ * Backend: com.meslektas.messaging.infrastructure.websocket.dto.TypingNotification
  */
 export interface WsTypingNotification {
   conversationId: string;
-  userId: number;
+  /** User UUID */
+  userId: string;
   userName: string;
   isTyping: boolean;
 }
 
 /**
  * Read receipt
+ * Backend: com.meslektas.messaging.infrastructure.websocket.dto.ReadReceipt
  */
 export interface WsReadReceipt {
   conversationId: string;
-  readByUserId: number;
+  /** User UUID who read the messages */
+  readByUserId: string;
   messagesRead: number;
   readAt: string;
 }
@@ -117,9 +130,11 @@ export interface WsNotification {
 
 /**
  * Presence update
+ * Backend: Presence tracking for online/offline status
  */
 export interface WsPresenceUpdate {
-  userId: number;
+  /** User UUID */
+  userId: string;
   isOnline: boolean;
   lastSeenAt?: string;
 }

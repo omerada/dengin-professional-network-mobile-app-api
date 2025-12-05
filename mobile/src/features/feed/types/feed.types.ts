@@ -5,14 +5,28 @@
 import type { PagedResponse } from '@shared/types';
 
 /**
- * Post yazarı - Backend API uyumlu
+ * Post yazarı - Backend FeedPostResponse.AuthorDto ile %100 uyumlu
+ * Backend: com.meslektas.social.application.dto.FeedPostResponse.AuthorDto
  */
 export interface PostAuthor {
-  id: number;
+  /** Backend: userId (Long) */
+  userId: number;
+  /** Backward compatibility alias for userId */
+  id?: number;
   name: string;
   surname: string;
+  fullName?: string;
+  /** Backend: profileImageUrl */
+  profileImageUrl?: string;
+  /** Backward compatibility alias for profileImageUrl */
   avatarUrl?: string;
-  isVerified: boolean;
+  professionId?: number;
+  professionName?: string;
+  /** Backend: verified (not isVerified) */
+  verified: boolean;
+  /** Backward compatibility alias */
+  isVerified?: boolean;
+  /** @deprecated Use professionName instead */
   profession?: string;
 }
 
@@ -46,31 +60,60 @@ export interface UserInteraction {
 }
 
 /**
- * Post - Backend FeedPostResponse uyumlu
+ * Post - Backend FeedPostResponse ile %100 uyumlu
+ * Backend: com.meslektas.social.application.dto.FeedPostResponse
+ *
+ * NOT: Backend hem Long id hem UUID postId döndürüyor.
+ * - API çağrılarında Long id kullanılmalı (PostController Long.parseLong kullanıyor)
+ * - UUID postId referans için saklanabilir
  */
 export interface Post {
-  postId: number;
+  /** Primary identifier (Long) - API çağrılarında bunu kullan */
+  id: number;
+  /** UUID identifier - Backend'den gelen UUID string olarak */
+  postId?: string;
   author: PostAuthor;
   content: string;
-  images: string[]; // Backend returns string[] for images
-  stats: PostStats;
-  userInteraction: UserInteraction;
+  /** Backend: List<PostImageDto> - NOT: string[] değil! */
+  images: PostImageDto[];
+  /** Backend: likeCount, commentCount (flat, not nested) */
+  likeCount: number;
+  commentCount: number;
+  /** Backend: liked (not in stats object) */
+  liked: boolean;
+  /** Feed algorithm relevance score (optional) */
+  relevanceScore?: number;
   createdAt: string;
-  updatedAt: string;
+  /** @deprecated Backend FeedPostResponse'da yok, opsiyonel */
+  updatedAt?: string;
+  /** @deprecated Use flat likeCount, commentCount instead */
+  stats?: PostStats;
+  /** @deprecated Use liked instead */
+  userInteraction?: UserInteraction;
 }
 
 /**
- * Post özeti (liste için) - Backward compatibility
+ * Post özeti (liste için)
+ * @deprecated Yeni API ile Post tipini doğrudan kullanın
  */
 export interface PostSummary {
-  postId: number;
+  /** Primary ID (Long) */
+  id: number;
+  /** @deprecated Use id instead */
+  postId?: number;
   content: string;
   previewImage: string | null;
   imageCount: number;
   author: PostAuthor;
-  stats: PostStats;
-  userInteraction: UserInteraction;
+  /** Flat engagement counts */
+  likeCount: number;
+  commentCount: number;
+  liked: boolean;
   createdAt: string;
+  /** @deprecated Use flat counts instead */
+  stats?: PostStats;
+  /** @deprecated Use liked instead */
+  userInteraction?: UserInteraction;
 }
 
 /**

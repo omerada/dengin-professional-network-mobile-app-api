@@ -107,7 +107,7 @@ describe('stompClient', () => {
   describe('sendTyping', () => {
     it('should not throw when not connected', () => {
       expect(() => {
-        stompClient.sendTyping('conv1', 123, true);
+        stompClient.sendTyping('conv1', 'recipient-uuid-123', true);
       }).not.toThrow();
     });
   });
