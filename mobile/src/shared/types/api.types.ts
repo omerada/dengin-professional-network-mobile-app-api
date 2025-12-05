@@ -306,11 +306,6 @@ export interface Notification {
   actionUrl?: string;
   createdAt: string;
 }
-  body: string;
-  data?: Record<string, string>;
-  isRead: boolean;
-  actionUrl?: string;
-}
 
 /**
  * Notification type enum

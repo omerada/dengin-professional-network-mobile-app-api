@@ -1,6 +1,6 @@
 // src/shared/services/analytics.ts
 // Analytics stub for Expo managed workflow
-// TODO: Implement with expo-firebase-analytics or similar when needed
+// Note: Full implementation with expo-firebase-analytics will be done during EAS Build phase
 // Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
 
 import { Platform } from 'react-native';

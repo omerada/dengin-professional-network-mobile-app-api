@@ -3,10 +3,12 @@
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import React from 'react';
+import { View, StyleSheet, ActivityIndicator, Text } from 'react-native';
 import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@shared/types';
 import { useAuthStore } from '@features/auth/stores/authStore';
+import { useTheme } from '@contexts/ThemeContext';
 import { linking } from './linking';
 import { AuthNavigator } from './AuthNavigator';
 import { MainNavigator } from './MainNavigator';
@@ -45,7 +47,7 @@ export const goBack = () => {
  */
 export const resetNavigation = (
   index: number,
-  routes: Array<{ name: keyof RootStackParamList; params?: any }>
+  routes: Array<{ name: keyof RootStackParamList; params?: any }>,
 ) => {
   if (navigationRef.isReady()) {
     navigationRef.reset({ index, routes });
@@ -57,12 +59,22 @@ export const resetNavigation = (
  * Handles auth state based navigation
  */
 export const AppNavigator: React.FC = () => {
+  const { theme } = useTheme();
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
   const isLoading = useAuthStore(state => state.isLoading);
 
   // Show loading screen while checking auth state
   if (isLoading) {
-    return null; // TODO: Add SplashScreen component
+    return (
+      <View style={[styles.splashContainer, { backgroundColor: theme.colors.background.primary }]}>
+        <Text style={[styles.splashLogo, { color: theme.colors.primary[500] }]}>Meslektaş</Text>
+        <ActivityIndicator
+          size="large"
+          color={theme.colors.primary[500]}
+          style={styles.splashLoader}
+        />
+      </View>
+    );
   }
 
   return (
@@ -92,3 +104,19 @@ export const AppNavigator: React.FC = () => {
     </NavigationContainer>
   );
 };
+
+const styles = StyleSheet.create({
+  splashContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  splashLogo: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: 24,
+  },
+  splashLoader: {
+    marginTop: 16,
+  },
+});

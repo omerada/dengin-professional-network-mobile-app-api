@@ -141,11 +141,24 @@ public class MessageWebSocketController {
                     .conversationId(readReceipt.getConversationId())
                     .build();
 
-            conversationService.markMessagesAsRead(command, userId);
+            Long otherParticipantId = conversationService.markMessagesAsRead(command, userId);
 
-            // TODO: Future enhancement - Send read receipt to the other participant
-            // This would require getting the other participant's ID from the service
-            // and sending them a WsReadReceipt notification
+            // Send read receipt to the other participant
+            if (otherParticipantId != null) {
+                WsReadReceipt receiptNotification = WsReadReceipt.builder()
+                        .conversationId(readReceipt.getConversationId())
+                        .readerId(userId)
+                        .readAt(LocalDateTime.now())
+                        .build();
+
+                messagingTemplate.convertAndSendToUser(
+                        otherParticipantId.toString(),
+                        "/queue/read",
+                        receiptNotification);
+
+                log.debug("WS: Read receipt sent to user {} for conversation {}",
+                        otherParticipantId, readReceipt.getConversationId());
+            }
 
             log.info("WS: Messages marked as read in conversation {}",
                     readReceipt.getConversationId());

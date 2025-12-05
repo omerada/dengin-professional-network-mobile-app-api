@@ -24,7 +24,10 @@ public class WsReadReceipt {
     @Schema(description = "Conversation ID")
     private UUID conversationId;
 
-    @Schema(description = "User ID who read the messages")
+    @Schema(description = "User ID who read the messages (Long for internal use)")
+    private Long readerId;
+
+    @Schema(description = "User UUID who read the messages (for client)")
     private UUID readByUserId;
 
     @Schema(description = "Last read message ID")

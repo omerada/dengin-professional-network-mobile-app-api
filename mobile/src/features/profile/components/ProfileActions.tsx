@@ -2,10 +2,11 @@
 // Profile action buttons (Follow, Message, etc.)
 // Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Button } from '@shared/components';
+import { useFollow, useUnfollow, useBlock, useUnblock } from '@features/social/hooks/useFollow';
 import { spacing } from '@theme';
 
 interface ProfileActionsProps {
@@ -53,69 +54,101 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
     onBlockChange,
   }) => {
     const navigation = useNavigation();
-    const [isLoading, setIsLoading] = useState(false);
+
+    // Mutations
+    const followMutation = useFollow();
+    const unfollowMutation = useUnfollow();
+    const blockMutation = useBlock();
+    const unblockMutation = useUnblock();
+
+    const isLoading = followMutation.isPending || unfollowMutation.isPending;
+    const isBlockLoading = blockMutation.isPending || unblockMutation.isPending;
 
     // Handle follow/unfollow
     const handleFollowPress = useCallback(async () => {
-      setIsLoading(true);
-      try {
-        // TODO: Integrate with useFollow/useUnfollow hooks when available
-        onFollowChange?.(!isFollowing);
-      } catch (error) {
-        Alert.alert('Hata', 'İşlem gerçekleştirilemedi. Lütfen tekrar deneyin.');
-      } finally {
-        setIsLoading(false);
+      if (isFollowing) {
+        unfollowMutation.mutate(userId, {
+          onSuccess: () => {
+            onFollowChange?.(false);
+          },
+          onError: () => {
+            Alert.alert('Hata', 'Takipten çıkılamadı. Lütfen tekrar deneyin.');
+          },
+        });
+      } else {
+        followMutation.mutate(userId, {
+          onSuccess: () => {
+            onFollowChange?.(true);
+          },
+          onError: () => {
+            Alert.alert('Hata', 'Takip edilemedi. Lütfen tekrar deneyin.');
+          },
+        });
       }
-    }, [isFollowing, onFollowChange]);
+    }, [userId, isFollowing, followMutation, unfollowMutation, onFollowChange]);
 
     // Handle message button
     const handleMessagePress = useCallback(() => {
       // Navigate to messaging - create or open conversation
-      navigation.navigate('Conversation' as never, {
-        userId,
-        isNew: true,
-      } as never);
+      navigation.navigate(
+        'Conversation' as never,
+        {
+          userId,
+          isNew: true,
+        } as never,
+      );
     }, [navigation, userId]);
 
     // Handle more options (report, block, etc.)
     const handleMorePress = useCallback(() => {
-      Alert.alert(
-        'Seçenekler',
-        '',
-        [
-          {
-            text: isBlocked ? 'Engeli Kaldır' : 'Engelle',
-            style: isBlocked ? 'default' : 'destructive',
-            onPress: () => {
-              Alert.alert(
-                isBlocked ? 'Engeli Kaldır' : 'Kullanıcıyı Engelle',
-                isBlocked
-                  ? 'Bu kullanıcının engelini kaldırmak istediğinize emin misiniz?'
-                  : 'Bu kullanıcıyı engellemek istediğinize emin misiniz?',
-                [
-                  { text: 'İptal', style: 'cancel' },
-                  {
-                    text: isBlocked ? 'Engeli Kaldır' : 'Engelle',
-                    style: isBlocked ? 'default' : 'destructive',
-                    onPress: () => onBlockChange?.(!isBlocked),
+      Alert.alert('Seçenekler', '', [
+        {
+          text: isBlocked ? 'Engeli Kaldır' : 'Engelle',
+          style: isBlocked ? 'default' : 'destructive',
+          onPress: () => {
+            Alert.alert(
+              isBlocked ? 'Engeli Kaldır' : 'Kullanıcıyı Engelle',
+              isBlocked
+                ? 'Bu kullanıcının engelini kaldırmak istediğinize emin misiniz?'
+                : 'Bu kullanıcıyı engellemek istediğinize emin misiniz?',
+              [
+                { text: 'İptal', style: 'cancel' },
+                {
+                  text: isBlocked ? 'Engeli Kaldır' : 'Engelle',
+                  style: isBlocked ? 'default' : 'destructive',
+                  onPress: () => {
+                    if (isBlocked) {
+                      unblockMutation.mutate(userId, {
+                        onSuccess: () => onBlockChange?.(false),
+                        onError: () => Alert.alert('Hata', 'Engel kaldırılamadı.'),
+                      });
+                    } else {
+                      blockMutation.mutate(userId, {
+                        onSuccess: () => onBlockChange?.(true),
+                        onError: () => Alert.alert('Hata', 'Engellenemedi.'),
+                      });
+                    }
                   },
-                ],
-              );
-            },
+                },
+              ],
+            );
           },
-          {
-            text: 'Şikayet Et',
-            onPress: () => {
-              navigation.navigate('Report' as never, {
+        },
+        {
+          text: 'Şikayet Et',
+          onPress: () => {
+            navigation.navigate(
+              'Report' as never,
+              {
                 type: 'USER',
                 targetId: userId,
-              } as never);
-            },
+              } as never,
+            );
           },
-          { text: 'İptal', style: 'cancel' },
-        ],
-      );
-    }, [isBlocked, navigation, onBlockChange, userId]);
+        },
+        { text: 'İptal', style: 'cancel' },
+      ]);
+    }, [isBlocked, navigation, userId, blockMutation, unblockMutation, onBlockChange]);
 
     // Get follow button text
     const getFollowButtonText = () => {

@@ -9,22 +9,25 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
+  Alert,
+  FlatList,
+  Text,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTheme } from '@contexts/ThemeContext';
 import { useAuthStore } from '@features/auth/stores';
 import { useLogout } from '@features/auth/hooks';
+import { useFollow, useUnfollow } from '@features/social/hooks/useFollow';
+import { useUserPosts } from '@features/feed/hooks';
+import { PostCard } from '@features/feed/components';
 import { Button, Loading } from '@shared/components';
 import { spacing } from '@theme';
-import {
-  ProfileHeader,
-  ProfileStats,
-  ProfileBio,
-  ProfileActions,
-} from '../components';
+import { ProfileHeader, ProfileStats, ProfileBio, ProfileActions } from '../components';
 import { useMyProfile, useProfile, useProfileStats } from '../hooks';
 import type { ProfileStats as ProfileStatsType } from '../types';
+import type { Post } from '@features/feed/types';
 
 interface RouteParams {
   userId?: string;
@@ -52,6 +55,10 @@ export const ProfileScreen: React.FC = () => {
   const currentUser = useAuthStore(state => state.user);
   const { logout, isLoading: isLoggingOut } = useLogout();
 
+  // Follow mutations
+  const followMutation = useFollow();
+  const unfollowMutation = useUnfollow();
+
   // Determine if viewing own profile
   const viewedUserId = params?.userId ? parseInt(params.userId, 10) : undefined;
   const isOwnProfile = !viewedUserId || viewedUserId === currentUser?.id;
@@ -77,12 +84,20 @@ export const ProfileScreen: React.FC = () => {
   const isRefetching = isOwnProfile ? isRefetchingMyProfile : isRefetchingOtherProfile;
 
   // Get user ID for stats
-  const profileUserId = isOwnProfile
-    ? (myProfile?.id ?? currentUser?.id)
-    : viewedUserId;
+  const profileUserId = isOwnProfile ? (myProfile?.id ?? currentUser?.id) : viewedUserId;
 
   // Fetch profile stats
   const { data: profileStats } = useProfileStats(profileUserId);
+
+  // Fetch user posts
+  const {
+    posts: userPosts,
+    isLoading: isLoadingPosts,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch: refetchPosts,
+  } = useUserPosts({ userId: profileUserId, enabled: !!profileUserId });
 
   // Combine stats from profile or separate query
   const stats: ProfileStatsType = useMemo(() => {
@@ -118,12 +133,45 @@ export const ProfileScreen: React.FC = () => {
     } else {
       refetchOtherProfile();
     }
-  }, [isOwnProfile, refetchMyProfile, refetchOtherProfile]);
+    refetchPosts();
+  }, [isOwnProfile, refetchMyProfile, refetchOtherProfile, refetchPosts]);
 
-  const handleFollowChange = useCallback((isFollowing: boolean) => {
-    // TODO: Integrate with useFollow/useUnfollow
-    console.log('Follow changed:', isFollowing);
-  }, []);
+  const handlePostPress = useCallback(
+    (postId: number) => {
+      // @ts-expect-error - navigation types not fully typed
+      navigation.navigate('PostDetail', { postId });
+    },
+    [navigation],
+  );
+
+  const handleLoadMorePosts = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const handleFollowChange = useCallback(
+    (isFollowing: boolean) => {
+      if (!viewedUserId) return;
+
+      if (isFollowing) {
+        // Currently following, so unfollow
+        unfollowMutation.mutate(viewedUserId, {
+          onError: () => {
+            Alert.alert('Hata', 'Takipten çıkılamadı. Lütfen tekrar deneyin.');
+          },
+        });
+      } else {
+        // Not following, so follow
+        followMutation.mutate(viewedUserId, {
+          onError: () => {
+            Alert.alert('Hata', 'Takip edilemedi. Lütfen tekrar deneyin.');
+          },
+        });
+      }
+    },
+    [viewedUserId, followMutation, unfollowMutation],
+  );
 
   const handleLogout = useCallback(() => {
     logout();
@@ -134,8 +182,7 @@ export const ProfileScreen: React.FC = () => {
     return (
       <SafeAreaView
         style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
-        edges={['top']}
-      >
+        edges={['top']}>
         <Loading message="Profil yükleniyor..." />
       </SafeAreaView>
     );
@@ -146,8 +193,7 @@ export const ProfileScreen: React.FC = () => {
     return (
       <SafeAreaView
         style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
-        edges={['top']}
-      >
+        edges={['top']}>
         <Loading message="Profil bulunamadı" />
       </SafeAreaView>
     );
@@ -156,8 +202,7 @@ export const ProfileScreen: React.FC = () => {
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
-      edges={['top']}
-    >
+      edges={['top']}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -167,8 +212,7 @@ export const ProfileScreen: React.FC = () => {
             onRefresh={handleRefresh}
             tintColor={theme.colors.primary[500]}
           />
-        }
-      >
+        }>
         {/* Profile Header */}
         <ProfileHeader
           profile={profile}
@@ -178,16 +222,10 @@ export const ProfileScreen: React.FC = () => {
         />
 
         {/* Profile Stats */}
-        <ProfileStats
-          stats={stats}
-          userId={profileUserId ?? 0}
-          interactive={!isOwnProfile}
-        />
+        <ProfileStats stats={stats} userId={profileUserId ?? 0} interactive={!isOwnProfile} />
 
         {/* Bio */}
-        {'bio' in profile && profile.bio && (
-          <ProfileBio bio={profile.bio} />
-        )}
+        {'bio' in profile && profile.bio && <ProfileBio bio={profile.bio} />}
 
         {/* Actions for other users */}
         {!isOwnProfile && 'userId' in profile && (
@@ -224,9 +262,46 @@ export const ProfileScreen: React.FC = () => {
           </View>
         )}
 
-        {/* Posts section placeholder */}
+        {/* Posts section */}
         <View style={styles.postsSection}>
-          {/* TODO: Integrate with Feed - show user's posts */}
+          <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
+            Gönderiler
+          </Text>
+          {isLoadingPosts && userPosts.length === 0 ? (
+            <View style={styles.postsLoading}>
+              <ActivityIndicator size="small" color={theme.colors.primary[500]} />
+            </View>
+          ) : userPosts.length === 0 ? (
+            <View style={styles.emptyPosts}>
+              <Text style={[styles.emptyText, { color: theme.colors.text.secondary }]}>
+                Henüz gönderi yok
+              </Text>
+            </View>
+          ) : (
+            <>
+              {userPosts.map((post: Post) => (
+                <PostCard
+                  key={post.postId}
+                  post={post}
+                  onPress={() => handlePostPress(post.postId)}
+                  onLike={() => {}}
+                  onComment={() => handlePostPress(post.postId)}
+                  onShare={() => {}}
+                  onBookmark={() => {}}
+                  onMenuPress={() => {}}
+                />
+              ))}
+              {hasNextPage && (
+                <Button
+                  title={isFetchingNextPage ? 'Yükleniyor...' : 'Daha Fazla Göster'}
+                  onPress={handleLoadMorePosts}
+                  variant="ghost"
+                  size="sm"
+                  loading={isFetchingNextPage}
+                />
+              )}
+            </>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -250,5 +325,22 @@ const styles = StyleSheet.create({
   postsSection: {
     flex: 1,
     paddingTop: spacing.lg,
+    paddingHorizontal: spacing.md,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: spacing.md,
+  },
+  postsLoading: {
+    paddingVertical: spacing.xl,
+    alignItems: 'center',
+  },
+  emptyPosts: {
+    paddingVertical: spacing.xl,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 14,
   },
 });

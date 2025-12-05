@@ -129,9 +129,11 @@ public class ConversationService {
 
         /**
          * Mark messages as read in a conversation
+         * 
+         * @return the other participant's user ID for sending read receipt notification
          */
         @Transactional
-        public void markMessagesAsRead(MarkMessagesReadCommand command, Long userId) {
+        public Long markMessagesAsRead(MarkMessagesReadCommand command, Long userId) {
                 log.info("User {} marking messages as read in conversation {}",
                                 userId, command.getConversationId());
 
@@ -156,6 +158,9 @@ public class ConversationService {
 
                 log.info("Messages marked as read for user {} in conversation {}",
                                 userId, command.getConversationId());
+
+                // Return the other participant for read receipt notification
+                return conversation.getOtherParticipant(userId);
         }
 
         /**
