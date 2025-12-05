@@ -3,6 +3,8 @@ package com.meslektas.social.infrastructure.persistence;
 import com.meslektas.social.domain.model.Post;
 import com.meslektas.social.domain.model.PostId;
 import com.meslektas.social.domain.model.PostStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -130,4 +132,14 @@ public interface JpaPostRepository extends JpaRepository<Post, Long> {
      * Check if post exists and has specific status
      */
     boolean existsByIdAndStatus(Long id, PostStatus status);
+    
+    /**
+     * Find posts saved/bookmarked by a user with pagination
+     * 
+     * @param userId User ID
+     * @param pageable Pagination parameters
+     * @return Page of saved posts
+     */
+    @Query("SELECT p FROM Post p JOIN p.savedByUsers s WHERE s = :userId AND p.status = 'PUBLISHED' ORDER BY p.createdAt DESC")
+    Page<Post> findSavedPostsByUserId(@Param("userId") Long userId, Pageable pageable);
 }

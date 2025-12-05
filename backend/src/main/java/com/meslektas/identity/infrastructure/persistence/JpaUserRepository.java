@@ -84,4 +84,19 @@ public interface JpaUserRepository extends JpaRepository<User, Long>, UserReposi
     @Override
     @Query("SELECT COUNT(u) FROM User u WHERE u.lastLoginAt >= :dateTime")
     long countByLastLoginAfter(@Param("dateTime") LocalDateTime dateTime);
+    
+    /**
+     * Search users by name, surname or full name (case-insensitive)
+     * Only returns active users
+     * 
+     * @param query Search query
+     * @param pageable Pagination info
+     * @return Page of matching users
+     */
+    @Override
+    @Query("SELECT u FROM User u WHERE u.status = 'ACTIVE' AND " +
+           "(LOWER(u.name) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(u.surname) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(CONCAT(u.name, ' ', u.surname)) LIKE LOWER(CONCAT('%', :query, '%')))")
+    Page<User> searchByNameContaining(@Param("query") String query, Pageable pageable);
 }

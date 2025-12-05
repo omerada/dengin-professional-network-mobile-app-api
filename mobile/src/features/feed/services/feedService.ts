@@ -352,21 +352,29 @@ export const feedService = {
   /**
    * Kayıtlı postları getir
    * GET /api/posts/saved
+   *
+   * Backend: PostController.getSavedPosts()
+   * - page: Sayfa numarası (0-indexed)
+   * - size: Sayfa boyutu (max 50) - NOT: limit değil!
    */
-  async getSavedPosts(page = 0, limit = 20): Promise<FeedResponse> {
+  async getSavedPosts(page = 0, size = 20): Promise<FeedResponse> {
     const response = await apiClient.get<ApiResponse<FeedResponse>>(API_ENDPOINTS.FEED.SAVED, {
-      params: { page, limit },
+      params: { page, size: Math.min(size, 50) },
     });
     return response.data.data;
   },
 
   /**
    * Kullanıcının postlarını getir
+   * GET /api/users/{userId}/posts
+   *
+   * - page: Sayfa numarası (0-indexed)
+   * - size: Sayfa boyutu (max 50)
    */
-  async getUserPosts(userId: number, page = 0, limit = 20): Promise<FeedResponse> {
+  async getUserPosts(userId: number, page = 0, size = 20): Promise<FeedResponse> {
     const response = await apiClient.get<ApiResponse<FeedResponse>>(
       API_ENDPOINTS.FEED.USER_POSTS(userId),
-      { params: { page, limit } },
+      { params: { page, size: Math.min(size, 50) } },
     );
     return response.data.data;
   },

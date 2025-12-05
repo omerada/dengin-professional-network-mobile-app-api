@@ -188,11 +188,11 @@ public class AuthController {
     @Operation(summary = "Verify email", description = "Verifies user's email address using token from verification email")
     public ResponseEntity<ApiResponse<Void>> verifyEmail(
             @Valid @RequestBody EmailVerificationRequest request) {
-        log.info("POST /api/auth/verify-email - token: {}", request.getToken());
+        log.info("POST /api/auth/verify-email - token: {}", request.token());
 
-        authService.verifyEmail(request.getToken());
+        authService.verifyEmail(request.token());
 
-        log.info("Email verified successfully - token: {}", request.getToken());
+        log.info("Email verified successfully - token: {}", request.token());
         return ResponseEntity.ok(
                 ApiResponse.success("Email adresiniz başarıyla doğrulandı", null));
     }

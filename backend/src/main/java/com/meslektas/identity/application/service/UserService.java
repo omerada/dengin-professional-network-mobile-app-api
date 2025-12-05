@@ -1,5 +1,6 @@
 package com.meslektas.identity.application.service;
 
+import com.meslektas.common.api.PagedResponse;
 import com.meslektas.common.exception.BusinessException;
 import com.meslektas.common.exception.ResourceNotFoundException;
 import com.meslektas.common.storage.ImageProcessor;
@@ -17,6 +18,9 @@ import com.meslektas.identity.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -393,5 +397,48 @@ public class UserService {
         log.info("Avatar deleted successfully for user: {}", userId);
 
         return userMapper.toResponse(updatedUser);
+    }
+    
+    /**
+     * Search users by name
+     * 
+     * Searches for users by name, surname, or full name (case-insensitive).
+     * Only returns active users.
+     * 
+     * @param query Search query (min 2 characters)
+     * @param page Page number (0-indexed)
+     * @param size Page size (max 50)
+     * @return PagedResponse of matching users
+     */
+    @Transactional(readOnly = true)
+    public PagedResponse<UserResponse> searchUsers(String query, int page, int size) {
+        log.info("Searching users: query={}, page={}, size={}", query, page, size);
+        
+        // Validate query
+        if (query == null || query.trim().length() < 2) {
+            throw new BusinessException(
+                "Arama sorgusu en az 2 karakter olmalıdır",
+                "SEARCH_QUERY_TOO_SHORT"
+            );
+        }
+        
+        // Limit page size
+        int limitedSize = Math.min(size, 50);
+        Pageable pageable = PageRequest.of(page, limitedSize);
+        
+        // Search users
+        Page<User> userPage = userRepository.searchByNameContaining(query.trim(), pageable);
+        
+        // Map to response
+        Page<UserResponse> responsePage = userPage.map(userMapper::toResponse);
+        
+        log.info("User search completed: query={}, results={}", query, userPage.getTotalElements());
+        
+        return PagedResponse.of(
+            responsePage.getContent(),
+            responsePage.getNumber(),
+            responsePage.getSize(),
+            responsePage.getTotalElements()
+        );
     }
 }

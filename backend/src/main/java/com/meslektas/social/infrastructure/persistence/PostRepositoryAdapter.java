@@ -5,6 +5,8 @@ import com.meslektas.social.domain.model.PostId;
 import com.meslektas.social.domain.model.PostStatus;
 import com.meslektas.social.domain.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -109,5 +111,10 @@ public class PostRepositoryAdapter implements PostRepository {
     @Override
     public void delete(Post post) {
         jpaRepository.delete(post);
+    }
+    
+    @Override
+    public Page<Post> findSavedPostsByUserId(Long userId, Pageable pageable) {
+        return jpaRepository.findSavedPostsByUserId(userId, pageable);
     }
 }

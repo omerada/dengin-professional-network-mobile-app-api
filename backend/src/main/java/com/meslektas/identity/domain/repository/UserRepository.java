@@ -103,4 +103,14 @@ public interface UserRepository {
      * Count users who logged in after a specific time
      */
     long countByLastLoginAfter(LocalDateTime dateTime);
+    
+    /**
+     * Search users by name, surname or full name (case-insensitive)
+     * Only returns active users
+     * 
+     * @param query Search query (name, surname, or fullName)
+     * @param pageable Pagination info
+     * @return Page of matching users
+     */
+    Page<User> searchByNameContaining(String query, Pageable pageable);
 }

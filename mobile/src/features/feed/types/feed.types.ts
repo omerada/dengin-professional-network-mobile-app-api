@@ -132,10 +132,17 @@ export interface FeedResponse extends PagedResponse<Post> {
 }
 
 /**
- * Like yanıtı - Backend API uyumlu
+ * Like yanıtı - Backend LikeResponse ile %100 uyumlu
+ * POST/DELETE /api/posts/{postId}/like
+ *
+ * Backend response:
+ * - postId: UUID (opsiyonel, client'ta kullanılmayabilir)
+ * - liked: boolean - Beğeni durumu (NOT: isLiked değil!)
+ * - likeCount: int - Toplam beğeni sayısı
  */
 export interface LikeResponse {
-  isLiked: boolean;
+  postId?: string;
+  liked: boolean;
   likeCount: number;
 }
 

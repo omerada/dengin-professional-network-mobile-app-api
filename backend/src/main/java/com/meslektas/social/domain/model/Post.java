@@ -70,6 +70,17 @@ public class Post extends AggregateRoot {
     @Column(name = "comment_count", nullable = false)
     private int commentCount = 0;
     
+    @Column(name = "share_count", nullable = false)
+    private int shareCount = 0;
+    
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(
+        name = "post_saves",
+        joinColumns = @JoinColumn(name = "post_id")
+    )
+    @Column(name = "user_id")
+    private Set<Long> savedByUsers = new HashSet<>();
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private PostStatus status;
@@ -272,5 +283,56 @@ public class Post extends AggregateRoot {
      */
     public boolean isAuthor(Long userId) {
         return this.authorId.equals(userId);
+    }
+    
+    // ============================================
+    // SAVE/BOOKMARK METHODS
+    // ============================================
+    
+    /**
+     * Save/bookmark post by user
+     * 
+     * @param userId User ID who is saving the post
+     */
+    public void saveByUser(Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+        savedByUsers.add(userId);
+    }
+    
+    /**
+     * Unsave/remove bookmark from post
+     * 
+     * @param userId User ID who is removing the save
+     */
+    public void unsaveByUser(Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+        savedByUsers.remove(userId);
+    }
+    
+    /**
+     * Check if post is saved by user
+     */
+    public boolean isSavedBy(Long userId) {
+        return savedByUsers.contains(userId);
+    }
+    
+    // ============================================
+    // SHARE METHODS
+    // ============================================
+    
+    /**
+     * Track share action
+     * 
+     * @param userId User ID who shared the post
+     */
+    public void share(Long userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+        this.shareCount++;
     }
 }

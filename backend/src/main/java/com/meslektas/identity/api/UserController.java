@@ -1,12 +1,14 @@
 package com.meslektas.identity.api;
 
 import com.meslektas.common.api.ApiResponse;
+import com.meslektas.common.api.PagedResponse;
 import com.meslektas.identity.application.dto.request.ChangeProfessionRequest;
 import com.meslektas.identity.application.dto.request.UpdateUserRequest;
 import com.meslektas.identity.application.dto.response.UserResponse;
 import com.meslektas.identity.application.service.UserService;
 import com.meslektas.identity.infrastructure.security.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -27,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
  * - POST /api/users/me/avatar - Upload avatar
  * - PUT /api/users/me/profession - Change profession
  * - DELETE /api/users/me - Delete account
+ * - GET /api/users/search - Search users by name
  */
 @RestController
 @RequestMapping("/api/users")
@@ -44,6 +47,17 @@ public class UserController {
     ) {
         UserResponse user = userService.getCurrentUser(userDetails.getId());
         return ResponseEntity.ok(ApiResponse.success(user));
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "Search users", description = "Search users by name with pagination")
+    public ResponseEntity<ApiResponse<PagedResponse<UserResponse>>> searchUsers(
+            @RequestParam @Parameter(description = "Search query (min 2 characters)") String q,
+            @RequestParam(defaultValue = "0") @Parameter(description = "Page number (0-based)") int page,
+            @RequestParam(defaultValue = "20") @Parameter(description = "Page size (max 50)") int size
+    ) {
+        PagedResponse<UserResponse> users = userService.searchUsers(q, page, size);
+        return ResponseEntity.ok(ApiResponse.success(users));
     }
 
     @GetMapping("/{id}")

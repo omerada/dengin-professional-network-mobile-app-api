@@ -10,6 +10,7 @@ import com.meslektas.social.domain.repository.CommentRepository;
 import com.meslektas.social.domain.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -344,7 +345,7 @@ public class PostService {
     public com.meslektas.common.api.PagedResponse<PostResponse> getSavedPosts(Long userId, int page, int size) {
         log.debug("Getting saved posts for user {}, page: {}, size: {}", userId, page, size);
 
-        var savedPosts = postRepository.findSavedPostsByUserId(userId, page, size);
+        var savedPosts = postRepository.findSavedPostsByUserId(userId, PageRequest.of(page, size));
         
         List<PostResponse> content = savedPosts.getContent().stream()
                 .map(post -> {

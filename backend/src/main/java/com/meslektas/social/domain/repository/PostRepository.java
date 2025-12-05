@@ -3,6 +3,8 @@ package com.meslektas.social.domain.repository;
 import com.meslektas.social.domain.model.Post;
 import com.meslektas.social.domain.model.PostId;
 import com.meslektas.social.domain.model.PostStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -98,4 +100,13 @@ public interface PostRepository {
      * Delete post (used for hard delete after 30 days)
      */
     void delete(Post post);
+    
+    /**
+     * Find posts saved/bookmarked by a user with pagination
+     * 
+     * @param userId User ID
+     * @param pageable Pagination parameters
+     * @return Page of saved posts
+     */
+    Page<Post> findSavedPostsByUserId(Long userId, Pageable pageable);
 }
