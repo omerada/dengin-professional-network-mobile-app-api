@@ -3,13 +3,12 @@
 // Oku: mobile-development-guide/state/15-REACT-QUERY.md
 
 import { useMutation } from '@tanstack/react-query';
-import { useNavigation } from '@react-navigation/native';
 import { useCallback } from 'react';
 import { authApi, tokenService } from '../services';
 import { useAuthStore } from '../stores';
 import type { LoginFormData } from '../types';
-import type { RootStackNavigationProp } from '@shared/types';
 import { getErrorMessage } from '@core/utils/errorUtils';
+import { resetNavigation } from '@core/navigation/AppNavigator';
 
 /**
  * Login hook with React Query mutation
@@ -19,7 +18,6 @@ import { getErrorMessage } from '@core/utils/errorUtils';
  * Response format: { user, accessToken, refreshToken, tokenType, expiresIn }
  */
 export const useLogin = () => {
-  const navigation = useNavigation<RootStackNavigationProp>();
   const { setUser, setLastLoginEmail } = useAuthStore();
 
   const mutation = useMutation({
@@ -54,11 +52,8 @@ export const useLogin = () => {
           setLastLoginEmail(variables.email);
         }
 
-        // Navigate to main app
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'Main' }],
-        });
+        // Navigate to main app using helper function
+        resetNavigation(0, [{ name: 'Main' }]);
       } catch (error) {
         console.error('[useLogin] Error in onSuccess:', getErrorMessage(error));
         throw error;
