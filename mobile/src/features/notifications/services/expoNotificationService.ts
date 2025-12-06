@@ -50,8 +50,11 @@ class ExpoNotificationService {
     try {
       // Check if device supports push notifications
       if (!Device.isDevice) {
-        console.warn('[ExpoNotification] Push notifications only work on physical devices');
-        return null;
+        console.log('[ExpoNotification] Development mode: Using mock notifications');
+        // In development, return mock token to allow testing
+        const mockToken = `ExpoToken[dev-simulator-${Date.now()}]`;
+        this.expoPushToken = mockToken;
+        return mockToken;
       }
 
       // Request permissions
@@ -141,17 +144,31 @@ class ExpoNotificationService {
         return storedToken;
       }
 
-      // Get new token
-      const tokenData = await Notifications.getExpoPushTokenAsync({
-        projectId: 'your-project-id', // Will be configured in app.json
-      });
+      // Development mode: Use mock token for Expo Go
+      // Production: Will use real Expo Push Token with EAS Build
+      if (__DEV__) {
+        // Generate mock token for development
+        const mockToken = `ExpoToken[dev-${Date.now()}]`;
+        this.expoPushToken = mockToken;
+        await AsyncStorage.setItem(EXPO_PUSH_TOKEN_KEY, mockToken);
+        console.log('[ExpoNotification] Mock token generated for dev:', mockToken);
+        return mockToken;
+      }
 
-      const token = tokenData.data;
-      this.expoPushToken = token;
-      await AsyncStorage.setItem(EXPO_PUSH_TOKEN_KEY, token);
-
-      console.log('[ExpoNotification] Expo push token obtained:', token);
-      return token;
+      // Production: Get real Expo push token
+      try {
+        const tokenData = await Notifications.getExpoPushTokenAsync();
+        const token = tokenData.data;
+        this.expoPushToken = token;
+        await AsyncStorage.setItem(EXPO_PUSH_TOKEN_KEY, token);
+        console.log('[ExpoNotification] Expo push token obtained:', token);
+        return token;
+      } catch (tokenError) {
+        console.warn('[ExpoNotification] Failed to get Expo token, using mock:', tokenError);
+        const fallbackToken = `ExpoToken[fallback-${Date.now()}]`;
+        this.expoPushToken = fallbackToken;
+        return fallbackToken;
+      }
     } catch (error) {
       console.error('[ExpoNotification] Error getting Expo push token:', error);
       return null;

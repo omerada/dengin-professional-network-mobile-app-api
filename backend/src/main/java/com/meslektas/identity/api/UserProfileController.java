@@ -1,11 +1,14 @@
 package com.meslektas.identity.api;
 
 import com.meslektas.common.api.ApiResponse;
+import com.meslektas.common.api.PagedResponse;
 import com.meslektas.common.storage.ImageProcessor;
 import com.meslektas.common.storage.StorageService;
 import com.meslektas.identity.application.dto.request.UpdateProfileRequest;
 import com.meslektas.identity.application.dto.response.UserProfileResponse;
 import com.meslektas.identity.application.service.UserService;
+import com.meslektas.social.application.dto.PostResponse;
+import com.meslektas.social.application.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,14 +17,21 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * User Profile REST Controller
@@ -49,6 +59,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserProfileController {
 
     private final UserService userService;
+    private final PostService postService;
     private final StorageService storageService;
     private final ImageProcessor imageProcessor;
 
@@ -276,5 +287,75 @@ public class UserProfileController {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /**
+     * GET /api/users/{userId}/posts
+     * Get user's posts with pagination
+     * 
+     * @param userId User ID
+     * @param page Page number (0-indexed)
+     * @param size Page size
+     * @return Paginated list of user posts
+     */
+    @GetMapping("/{userId}/posts")
+    @Operation(
+        summary = "Get user posts", 
+        description = "Retrieves paginated list of user's posts. Returns public posts for all users, own posts include all visibility levels.",
+        security = @SecurityRequirement(name = "Bearer Authentication")
+    )
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200", 
+            description = "Posts retrieved successfully"
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "404", 
+            description = "User not found"
+        ),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "401", 
+            description = "Unauthorized"
+        )
+    })
+    public ResponseEntity<ApiResponse<PagedResponse<PostResponse>>> getUserPosts(
+            @Parameter(description = "User ID", required = true) @PathVariable Long userId,
+            @Parameter(description = "Page number (0-indexed)") @RequestParam(defaultValue = "0") @Min(0) int page,
+            @Parameter(description = "Page size (max 50)") @RequestParam(defaultValue = "20") @Min(1) @Max(50) int size
+    ) {
+        Long currentUserId = getCurrentUserIdOrNull();
+        log.info("GET /api/users/{}/posts - requestingUserId: {}, page: {}, size: {}", 
+            userId, currentUserId, page, size);
+
+        // Get user posts from PostService
+        List<PostResponse> posts = postService.getUserPosts(userId, currentUserId);
+
+        // Convert to paginated response
+        int start = page * size;
+        int end = Math.min(start + size, posts.size());
+        
+        List<PostResponse> pagedPosts = start < posts.size() 
+            ? posts.subList(start, end) 
+            : List.of();
+
+        Page<PostResponse> postPage = new PageImpl<>(
+            pagedPosts,
+            PageRequest.of(page, size),
+            posts.size()
+        );
+
+        PagedResponse<PostResponse> response = PagedResponse.<PostResponse>builder()
+            .content(postPage.getContent())
+            .page(postPage.getNumber())
+            .size(postPage.getSize())
+            .totalElements(postPage.getTotalElements())
+            .totalPages(postPage.getTotalPages())
+            .hasNext(postPage.hasNext())
+            .build();
+
+        log.info("User posts retrieved - userId: {}, count: {}, hasNext: {}", 
+            userId, response.getContent().size(), response.getHasNext());
+
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

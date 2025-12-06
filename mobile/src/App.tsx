@@ -67,7 +67,9 @@ const AppContent: React.FC = () => {
 
   // Initialize notifications when user is authenticated
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !__DEV__) {
+      // Only initialize in production builds
+      // Development builds use Expo Go which doesn't support remote notifications
       notificationHandler.initialize().catch(error => {
         console.error('[App] Failed to initialize notifications:', error);
       });
@@ -75,7 +77,7 @@ const AppContent: React.FC = () => {
 
     // Cleanup on unmount
     return () => {
-      if (isAuthenticated) {
+      if (isAuthenticated && !__DEV__) {
         notificationHandler.cleanup();
       }
     };

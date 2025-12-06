@@ -268,18 +268,23 @@ export const ProfileScreen: React.FC = () => {
             </View>
           ) : (
             <>
-              {userPosts.map((post: Post, index: number) => (
-                <PostCard
-                  key={post.postId}
-                  post={post}
-                  index={index}
-                  onLike={() => {}}
-                  onComment={() => handlePostPress(Number(post.postId))}
-                  onShare={() => {}}
-                  onBookmark={() => {}}
-                  onMenuPress={() => {}}
-                />
-              ))}
+              {userPosts.map((post: Post, index: number) => {
+                // Ensure post has all required fields for PostCard
+                if (!post || !post.postId) return null;
+
+                return (
+                  <PostCard
+                    key={post.postId}
+                    post={post}
+                    index={index}
+                    onLike={() => {}}
+                    onComment={() => handlePostPress(Number(post.postId))}
+                    onShare={() => {}}
+                    onBookmark={() => {}}
+                    onMenuPress={() => {}}
+                  />
+                );
+              })}
               {hasNextPage && (
                 <View style={styles.loadMoreButton}>
                   <Button
