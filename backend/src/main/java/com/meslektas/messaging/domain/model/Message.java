@@ -32,7 +32,7 @@ public class Message extends BaseEntity {
     private MessageId messageId;
 
     @Column(name = "conversation_id", nullable = false)
-    private Long conversationIdValue;
+    private Long conversationIdLong;
 
     @Transient
     private ConversationId conversationId;
@@ -130,7 +130,6 @@ public class Message extends BaseEntity {
         Message message = new Message();
         message.messageId = MessageId.generate();
         message.conversationId = conversationId;
-        message.conversationIdValue = 0L; // Placeholder, will be set by repository
         message.senderId = senderId;
         message.recipientId = 0L; // Placeholder, will be set by conversation
         message.content = content;
@@ -145,12 +144,12 @@ public class Message extends BaseEntity {
      * Create a new message with full parameters
      */
     public static Message createWithRecipient(
-            Long conversationIdValue,
+            Long conversationIdLong,
             Long senderId,
             Long recipientId,
             MessageContent content,
             MessageAttachment attachment) {
-        if (conversationIdValue == null) {
+        if (conversationIdLong == null) {
             throw new IllegalArgumentException("Conversation ID cannot be null");
         }
         if (senderId == null) {
@@ -165,7 +164,7 @@ public class Message extends BaseEntity {
 
         Message message = new Message();
         message.messageId = MessageId.generate();
-        message.conversationIdValue = conversationIdValue;
+        message.conversationIdLong = conversationIdLong;
         message.senderId = senderId;
         message.recipientId = recipientId;
         message.content = content;

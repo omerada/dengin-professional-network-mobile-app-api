@@ -1,6 +1,6 @@
 package com.meslektas.messaging.domain.model;
 
-import com.meslektas.common.domain.AggregateRoot;
+import com.meslektas.common.domain.DomainEvent;
 import com.meslektas.messaging.domain.event.ConversationCreatedEvent;
 import com.meslektas.messaging.domain.event.MessageReadEvent;
 import com.meslektas.messaging.domain.event.MessageSentEvent;
@@ -8,9 +8,13 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,12 +33,20 @@ import java.util.Optional;
 @Entity
 @Table(name = "conversations", uniqueConstraints = @UniqueConstraint(name = "uk_conversation_participants", columnNames = {
         "participant1_id", "participant2_id" }))
+@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class Conversation extends AggregateRoot {
+public class Conversation {
+
+    // Domain Events Management
+    private final transient List<DomainEvent> domainEvents = new ArrayList<>();
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "conversation_id"))
+    @AttributeOverride(name = "value", column = @Column(name = "conversation_uuid"))
     private ConversationId conversationId;
 
     @Column(name = "participant1_id", nullable = false)
@@ -68,6 +80,19 @@ public class Conversation extends AggregateRoot {
 
     @Column(name = "participant2_deleted_at")
     private LocalDateTime participant2DeletedAt;
+
+    // Auditing fields
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    @Version
+    @Column(name = "version")
+    private Long version;
 
     // ============================================
     // FACTORY METHOD
@@ -133,7 +158,18 @@ public class Conversation extends AggregateRoot {
     public Message sendMessage(Long senderId, MessageContent content, MessageAttachment attachment) {
         validateSenderIsParticipant(senderId);
 
-        Message message = Message.createForConversation(this.conversationId, senderId, content, attachment);
+        // Get recipient ID
+        Long recipientId = getOtherParticipant(senderId);
+
+        // Create message with conversation's Long ID (not UUID)
+        Message message = Message.createWithRecipient(
+            this.id,  // Use Long ID for database foreign key
+            senderId,
+            recipientId,
+            content,
+            attachment
+        );
+        
         this.messages.add(message);
 
         // Update conversation metadata
@@ -142,7 +178,6 @@ public class Conversation extends AggregateRoot {
         this.lastMessageSenderId = senderId;
 
         // Increment unread count for recipient
-        Long recipientId = getOtherParticipant(senderId);
         incrementUnreadCount(recipientId);
 
         // Clear deleted status if conversation was deleted
@@ -354,5 +389,32 @@ public class Conversation extends AggregateRoot {
         } else if (participant2Id.equals(userId) && participant2DeletedAt != null) {
             this.participant2DeletedAt = null;
         }
+    }
+
+    // ============================================
+    // DOMAIN EVENTS MANAGEMENT
+    // ============================================
+
+    /**
+     * Register a domain event.
+     * Events will be published after transaction commit.
+     */
+    protected void registerEvent(DomainEvent event) {
+        domainEvents.add(event);
+    }
+
+    /**
+     * Get all domain events (immutable copy).
+     */
+    public List<DomainEvent> getEvents() {
+        return Collections.unmodifiableList(domainEvents);
+    }
+
+    /**
+     * Clear all domain events.
+     * Should be called after events are published.
+     */
+    public void clearEvents() {
+        domainEvents.clear();
     }
 }

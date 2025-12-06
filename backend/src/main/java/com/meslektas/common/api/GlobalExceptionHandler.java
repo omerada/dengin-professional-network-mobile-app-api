@@ -222,6 +222,34 @@ public class GlobalExceptionHandler {
                 return ResponseEntity.badRequest().body(error);
         }
 
+        @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+        public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
+                        org.springframework.dao.DataIntegrityViolationException ex,
+                        HttpServletRequest request) {
+                log.error("Data integrity violation: {}", ex.getMessage());
+
+                // Extract user-friendly message from constraint violation
+                String message = "Veri bütünlüğü hatası oluştu.";
+                if (ex.getMessage() != null) {
+                        if (ex.getMessage().contains("foreign key constraint")) {
+                                message = "İlişkili veri bulunamadı. Lütfen sayfayı yenileyip tekrar deneyin.";
+                        } else if (ex.getMessage().contains("unique constraint")) {
+                                message = "Bu kayıt zaten mevcut.";
+                        }
+                }
+
+                ErrorResponse error = ErrorResponse.builder()
+                                .status(HttpStatus.BAD_REQUEST.value())
+                                .error("Bad Request")
+                                .message(message)
+                                .errorCode(VALIDATION_ERROR)
+                                .path(request.getRequestURI())
+                                .timestamp(LocalDateTime.now())
+                                .build();
+
+                return ResponseEntity.badRequest().body(error);
+        }
+
         @ExceptionHandler(RateLimitExceededException.class)
         public ResponseEntity<ErrorResponse> handleRateLimitExceeded(
                         RateLimitExceededException ex,
