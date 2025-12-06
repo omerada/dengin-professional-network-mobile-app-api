@@ -1,13 +1,22 @@
 // src/core/navigation/MainNavigator.tsx
+// Meslektaş Design System - Modern Main Navigator
 // Oku: mobile-development-guide/core/09-NAVIGATION.md
+// Oku: mobile-development-guide/ui-ux-modernization/06-MICRO-INTERACTIONS.md
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { MainTabParamList, FeedStackParamList, MessagingStackParamList, NotificationsStackParamList, ProfileStackParamList } from '@shared/types';
-import { useTheme } from '@contexts/ThemeContext';
+import {
+  MainTabParamList,
+  FeedStackParamList,
+  MessagingStackParamList,
+  NotificationsStackParamList,
+  ProfileStackParamList,
+} from '@shared/types';
+import { useColors } from '@contexts/ThemeContext';
+import { AnimatedTabBar, TabItem } from './components/AnimatedTabBar';
 
-// Placeholder screens - will be implemented in later sprints
+// Screens
 import { FeedScreen } from '@features/feed/screens/FeedScreen';
 import { PostDetailScreen } from '@features/feed/screens/PostDetailScreen';
 import { CreatePostScreen } from '@features/feed/screens/CreatePostScreen';
@@ -19,8 +28,44 @@ import { ProfileScreen } from '@features/profile/screens/ProfileScreen';
 import { EditProfileScreen } from '@features/profile/screens/EditProfileScreen';
 import { SettingsScreen } from '@features/profile/screens/SettingsScreen';
 
-// Tab icons - will be replaced with proper icons
-const TabIcon = ({ focused, color }: { focused: boolean; color: string }) => null;
+// ============================================================================
+// Tab Configuration
+// ============================================================================
+
+const TAB_CONFIG: TabItem[] = [
+  {
+    name: 'FeedTab',
+    label: 'Ana Sayfa',
+    icon: 'home-outline',
+    focusedIcon: 'home',
+    accessibilityLabel: 'Ana sayfa sekmesi',
+  },
+  {
+    name: 'MessagingTab',
+    label: 'Mesajlar',
+    icon: 'chatbubble-outline',
+    focusedIcon: 'chatbubble',
+    accessibilityLabel: 'Mesajlar sekmesi',
+  },
+  {
+    name: 'NotificationsTab',
+    label: 'Bildirimler',
+    icon: 'notifications-outline',
+    focusedIcon: 'notifications',
+    accessibilityLabel: 'Bildirimler sekmesi',
+  },
+  {
+    name: 'ProfileTab',
+    label: 'Profil',
+    icon: 'person-outline',
+    focusedIcon: 'person',
+    accessibilityLabel: 'Profil sekmesi',
+  },
+];
+
+// ============================================================================
+// Stack Navigators
+// ============================================================================
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -30,7 +75,11 @@ const FeedStackNavigator: React.FC = () => (
   <FeedStack.Navigator screenOptions={{ headerShown: false }}>
     <FeedStack.Screen name="Feed" component={FeedScreen} />
     <FeedStack.Screen name="PostDetail" component={PostDetailScreen} />
-    <FeedStack.Screen name="CreatePost" component={CreatePostScreen} options={{ presentation: 'modal' }} />
+    <FeedStack.Screen
+      name="CreatePost"
+      component={CreatePostScreen}
+      options={{ presentation: 'modal' }}
+    />
     <FeedStack.Screen name="Comments" component={CommentsScreen} />
   </FeedStack.Navigator>
 );
@@ -62,55 +111,38 @@ const ProfileStackNavigator: React.FC = () => (
   </ProfileStack.Navigator>
 );
 
+// ============================================================================
+// Main Navigator
+// ============================================================================
+
 /**
  * Main Tab Navigator - authenticated user's main navigation
+ *
+ * Features:
+ * - Custom animated tab bar with spring physics
+ * - Haptic feedback on tab changes
+ * - Badge support for notifications/messages
+ * - Blur background on iOS
  */
 export const MainNavigator: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
+
+  // Custom tab bar renderer
+  const renderTabBar = useCallback(
+    (props: any) => <AnimatedTabBar {...props} tabs={TAB_CONFIG} />,
+    [],
+  );
 
   return (
     <Tab.Navigator
+      tabBar={renderTabBar}
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.colors.primary[500],
-        tabBarInactiveTintColor: theme.colors.text.secondary,
-        tabBarStyle: {
-          backgroundColor: theme.colors.background.primary,
-          borderTopColor: theme.colors.border.light,
-        },
       }}>
-      <Tab.Screen
-        name="FeedTab"
-        component={FeedStackNavigator}
-        options={{
-          tabBarLabel: 'Ana Sayfa',
-          tabBarAccessibilityLabel: 'Ana sayfa sekmesi',
-        }}
-      />
-      <Tab.Screen
-        name="MessagingTab"
-        component={MessagingStackNavigator}
-        options={{
-          tabBarLabel: 'Mesajlar',
-          tabBarAccessibilityLabel: 'Mesajlar sekmesi',
-        }}
-      />
-      <Tab.Screen
-        name="NotificationsTab"
-        component={NotificationsStackNavigator}
-        options={{
-          tabBarLabel: 'Bildirimler',
-          tabBarAccessibilityLabel: 'Bildirimler sekmesi',
-        }}
-      />
-      <Tab.Screen
-        name="ProfileTab"
-        component={ProfileStackNavigator}
-        options={{
-          tabBarLabel: 'Profil',
-          tabBarAccessibilityLabel: 'Profil sekmesi',
-        }}
-      />
+      <Tab.Screen name="FeedTab" component={FeedStackNavigator} />
+      <Tab.Screen name="MessagingTab" component={MessagingStackNavigator} />
+      <Tab.Screen name="NotificationsTab" component={NotificationsStackNavigator} />
+      <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} />
     </Tab.Navigator>
   );
 };
