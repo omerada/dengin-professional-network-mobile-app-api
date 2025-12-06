@@ -110,13 +110,13 @@ export const uploadService = {
     onProgress?: (progress: UploadProgress) => void,
   ): Promise<VerificationResponse> {
     if (!data.professionId) {
-      throw new Error('Profession ID is required');
+      throw new Error('Meslek seçimi zorunludur');
     }
     if (!data.documentFront) {
-      throw new Error('Document image is required');
+      throw new Error('Belge fotoğrafı zorunludur');
     }
     if (!data.selfie) {
-      throw new Error('Selfie image is required');
+      throw new Error('Selfie fotoğrafı zorunludur');
     }
 
     // Step 1: Upload document image

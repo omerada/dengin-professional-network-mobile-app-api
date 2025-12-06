@@ -12,10 +12,8 @@ const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
  * Password requirements
  * - At least 8 characters
  * - At least one uppercase letter
- * - At least one lowercase letter
- * - At least one number
  */
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
+const passwordRegex = /^(?=.*[A-Z]).{8,}$/;;
 
 /**
  * Phone number validation (Turkish format)
@@ -49,7 +47,7 @@ export const registerSchema = z
       .min(8, 'Şifre en az 8 karakter olmalı')
       .regex(
         passwordRegex,
-        'Şifre en az bir büyük harf, bir küçük harf ve bir rakam içermeli',
+        'Şifre en az 8 karakter ve bir büyük harf içermeli',
       ),
     confirmPassword: z.string().min(1, 'Şifre tekrarı gerekli'),
     firstName: z
@@ -98,7 +96,7 @@ export const resetPasswordSchema = z
       .min(8, 'Şifre en az 8 karakter olmalı')
       .regex(
         passwordRegex,
-        'Şifre en az bir büyük harf, bir küçük harf ve bir rakam içermeli',
+        'Şifre en az 8 karakter ve bir büyük harf içermeli',
       ),
     confirmPassword: z.string().min(1, 'Şifre tekrarı gerekli'),
   })
@@ -119,7 +117,7 @@ export const changePasswordSchema = z
       .min(8, 'Şifre en az 8 karakter olmalı')
       .regex(
         passwordRegex,
-        'Şifre en az bir büyük harf, bir küçük harf ve bir rakam içermeli',
+        'Şifre en az 8 karakter ve bir büyük harf içermeli',
       ),
     confirmPassword: z.string().min(1, 'Şifre tekrarı gerekli'),
   })

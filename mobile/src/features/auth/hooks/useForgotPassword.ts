@@ -5,11 +5,12 @@ import { useMutation } from '@tanstack/react-query';
 import { useCallback, useState } from 'react';
 import { authApi } from '../services';
 import type { ForgotPasswordFormData } from '../types';
+import { getErrorMessage } from '@core/utils/errorUtils';
 
 /**
  * Forgot password hook
  * Handles password reset email request
- * 
+ *
  * Backend API: POST /api/auth/password-reset/request
  * Note: Always returns 204 No Content for security (prevents email enumeration)
  */
@@ -28,8 +29,7 @@ export const useForgotPassword = () => {
     },
 
     onError: (error: Error) => {
-      // Network or server errors only
-      console.error('[useForgotPassword] Error:', error.message);
+      console.error('[useForgotPassword] Error:', getErrorMessage(error));
     },
   });
 

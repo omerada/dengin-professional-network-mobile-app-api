@@ -21,19 +21,30 @@ export const authApi = {
   /**
    * Login with email and password
    * POST /api/auth/login
+   * Backend returns: ApiResponse<LoginResponse> = { success, message, data: LoginResponse }
    */
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>(API_ENDPOINTS.AUTH.LOGIN, credentials);
-    return response.data;
+    const response = await apiClient.post<{
+      success: boolean;
+      message?: string;
+      data: AuthResponse;
+    }>(API_ENDPOINTS.AUTH.LOGIN, credentials);
+    // Backend wraps response in ApiResponse format
+    return response.data.data || (response.data as any);
   },
 
   /**
    * Register new user
    * POST /api/auth/register
+   * Backend returns: ApiResponse<RegisterResponse>
    */
   register: async (data: RegisterData): Promise<RegisterResponse> => {
-    const response = await apiClient.post<RegisterResponse>(API_ENDPOINTS.AUTH.REGISTER, data);
-    return response.data;
+    const response = await apiClient.post<{
+      success: boolean;
+      message?: string;
+      data: RegisterResponse;
+    }>(API_ENDPOINTS.AUTH.REGISTER, data);
+    return response.data.data || (response.data as any);
   },
 
   /**

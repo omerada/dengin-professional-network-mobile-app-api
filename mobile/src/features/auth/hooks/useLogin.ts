@@ -9,6 +9,7 @@ import { authApi, tokenService } from '../services';
 import { useAuthStore } from '../stores';
 import type { LoginFormData } from '../types';
 import type { RootStackNavigationProp } from '@shared/types';
+import { getErrorMessage } from '@core/utils/errorUtils';
 
 /**
  * Login hook with React Query mutation
@@ -27,21 +28,22 @@ export const useLogin = () => {
         email: data.email,
         password: data.password,
       });
+
+      // Validate required fields
+      if (!response.accessToken || !response.refreshToken || !response.user) {
+        throw new Error('Sunucudan geçersiz yanıt alındı');
+      }
+
       return response;
     },
 
     onSuccess: async (data, variables) => {
       try {
-        console.log('[useLogin] Login successful, response:', JSON.stringify(data, null, 2));
-        console.log('[useLogin] AccessToken type:', typeof data.accessToken);
-        console.log('[useLogin] AccessToken value:', data.accessToken);
-        console.log('[useLogin] RefreshToken type:', typeof data.refreshToken);
-
-        // Save tokens securely (backend format: accessToken, refreshToken, expiresIn)
+        // Save tokens securely
         const tokensSaved = await tokenService.saveTokens(data);
 
         if (!tokensSaved) {
-          console.error('[useLogin] Failed to save tokens, but continuing...');
+          throw new Error('Oturum bilgileri kaydedilemedi');
         }
 
         // Update auth store with user data
@@ -53,18 +55,18 @@ export const useLogin = () => {
         }
 
         // Navigate to main app
-        console.log('[useLogin] Navigating to Main screen...');
         navigation.reset({
           index: 0,
           routes: [{ name: 'Main' }],
         });
       } catch (error) {
-        console.error('[useLogin] Error in onSuccess:', error);
+        console.error('[useLogin] Error in onSuccess:', getErrorMessage(error));
+        throw error;
       }
     },
 
     onError: (error: Error) => {
-      console.error('[useLogin] Error:', error.message);
+      console.error('[useLogin] Login error:', getErrorMessage(error));
     },
   });
 

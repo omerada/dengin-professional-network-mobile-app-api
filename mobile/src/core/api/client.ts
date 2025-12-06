@@ -6,6 +6,7 @@ import { Platform } from 'react-native';
 import { ENV } from '@config/env';
 import { APP_CONFIG } from '@config/app';
 import { secureStorage, SECURE_KEYS } from '@core/storage';
+import { getErrorMessage } from '@core/utils/errorUtils';
 
 /**
  * Get the correct API base URL for the current platform
@@ -41,7 +42,7 @@ const createApiClient = (): AxiosInstance => {
       'Content-Type': 'application/json',
       Accept: 'application/json',
     },
-    validateStatus: status => status < 500, // Don't throw on 4xx errors
+    // Let axios throw on 4xx and 5xx errors by default
   });
 
   return instance;
@@ -103,6 +104,15 @@ apiClient.interceptors.request.use(
  */
 apiClient.interceptors.response.use(
   response => {
+    // Check if response contains error fields (backend ApiResponse error format)
+    if (response.data && ('error' in response.data || 'errorCode' in response.data)) {
+      const errorMessage = getErrorMessage(response.data);
+      const error = new Error(errorMessage);
+      (error as any).response = response;
+      (error as any).isApiError = true;
+      (error as any).errorCode = response.data.errorCode;
+      return Promise.reject(error);
+    }
     return response;
   },
   async error => {
@@ -159,39 +169,25 @@ apiClient.interceptors.response.use(
     if (__DEV__) {
       if (!error.response) {
         // Network error - no response received
-        console.error('[API] Network Error - Backend unreachable:', {
-          message: error.message,
+        console.error('[API] Network Error:', {
+          message: getErrorMessage(error),
           url: `${error.config?.baseURL}${error.config?.url}`,
           method: error.config?.method,
-          code: error.code,
-          timeout: error.config?.timeout,
-        });
-        console.error('[API] Troubleshooting:');
-        console.error('  1. Backend çalışıyor mu? Test: http://localhost:8080/actuator/health');
-        console.error('  2. Android HTTP traffic: usesCleartextTraffic=true (app.json)');
-        console.error('  3. Android emulator: 10.0.2.2 yerine localhost deneyin');
-        console.error('  4. Expo Go kullanıyorsanız: npx expo start --tunnel deneyin');
-        console.error("  5. CORS: Backend'de 10.0.2.2 origin'i eklenmiş mi?");
-
-        // Test backend connection
-        testBackendConnection().then(isReachable => {
-          if (isReachable) {
-            console.error('[API] Backend reachable but request failed - check request format');
-          } else {
-            console.error('[API] Backend NOT reachable - network/firewall issue');
-          }
         });
       } else {
         console.error('[API] Response error:', {
+          message: getErrorMessage(error),
           status: error.response?.status,
-          statusText: error.response?.statusText,
-          data: error.response?.data,
           url: error.config?.url,
         });
       }
     }
 
-    return Promise.reject(error);
+    // Enhance error with user-friendly message
+    const enhancedError = error;
+    enhancedError.message = getErrorMessage(error);
+
+    return Promise.reject(enhancedError);
   },
 );
 

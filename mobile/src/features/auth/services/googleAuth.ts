@@ -26,7 +26,7 @@ const nullGoogleAuth = {
     console.warn('Google Sign-In is not available on this platform');
   },
   signIn: async (): Promise<{ userInfo: GoogleUser; tokens: GoogleTokens }> => {
-    throw new Error('Google Sign-In bu platformda desteklenmiyor');
+    throw new Error('Google ile giriş bu cihazda desteklenmiyor');
   },
   signOut: async () => {},
   isSignInError: (_error: any, _type: 'cancelled' | 'inProgress' | 'playServices') => false,

@@ -59,7 +59,7 @@ class StompClient {
       const token = await tokenService.getAccessToken();
 
       if (!token) {
-        throw new Error('No access token available');
+        throw new Error('Oturum bilgisi bulunamadı');
       }
 
       const wsUrl = `${ENV.API_BASE_URL}/ws`;

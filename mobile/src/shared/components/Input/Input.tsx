@@ -252,10 +252,13 @@ export const Input = memo(
               style={[
                 styles.label,
                 {
-                  top: -2,
+                  top: -6, // Higher position
+                  fontSize: sizeConfig.labelFontSize + 2, // Slightly larger (14px for medium)
+                  fontWeight: '600', // Bolder
                   backgroundColor:
                     variant === 'outlined' ? colors.background.primary : 'transparent',
                   paddingHorizontal: variant === 'outlined' ? 4 : 0,
+                  marginLeft: 0, // Ensure no left margin
                 },
                 animatedLabelStyle,
                 labelStyle,
@@ -273,9 +276,10 @@ export const Input = memo(
               style={[
                 {
                   color: error ? colors.status.error : colors.text.primary,
-                  fontSize: sizeConfig.labelFontSize,
-                  fontWeight: '500',
+                  fontSize: sizeConfig.labelFontSize + 2, // Larger
+                  fontWeight: '600', // Bolder
                   marginBottom: 8,
+                  marginLeft: 0, // Align to left edge
                 },
                 labelStyle,
               ]}>

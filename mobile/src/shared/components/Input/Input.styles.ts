@@ -90,7 +90,7 @@ export const styles = StyleSheet.create({
 
   container: {
     marginBottom: 16,
-    paddingTop: 20, // More space for label on top
+    paddingTop: 24, // More space for larger label
   },
 
   content: {
@@ -104,7 +104,7 @@ export const styles = StyleSheet.create({
 
   helperText: {
     fontSize: 12,
-    marginLeft: 4,
+    marginLeft: 0, // Align with label
     marginTop: 4,
   },
 
@@ -121,7 +121,7 @@ export const styles = StyleSheet.create({
 
   label: {
     alignSelf: 'flex-start',
-    left: 16,
+    left: 0,
     position: 'absolute',
     textAlign: 'left',
     zIndex: 1,

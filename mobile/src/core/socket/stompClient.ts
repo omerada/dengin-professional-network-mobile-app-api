@@ -219,7 +219,7 @@ class StompClient {
   ): boolean {
     // Validate UUID format before sending
     if (!isValidUUID(request.recipientId)) {
-      throw new Error(`Invalid recipientId UUID format: ${request.recipientId}`);
+      throw new Error('Geçersiz alıcı bilgisi');
     }
 
     if (this.client?.connected) {
@@ -246,7 +246,7 @@ class StompClient {
    */
   sendTyping(conversationId: string, recipientId: string, isTyping: boolean): void {
     if (!isValidUUID(recipientId)) {
-      throw new Error(`Invalid recipientId UUID format: ${recipientId}`);
+      throw new Error('Geçersiz alıcı bilgisi');
     }
     this.publish(DESTINATIONS.TYPING, { conversationId, recipientId, isTyping });
   }

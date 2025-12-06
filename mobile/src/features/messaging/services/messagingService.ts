@@ -140,7 +140,7 @@ export const messagingService = {
   async sendMessage(request: SendMessageRequest): Promise<SendMessageResponse> {
     // Validate UUID format before sending
     if (!isValidUUID(request.recipientId)) {
-      throw new Error(`Invalid recipientId UUID format: ${request.recipientId}`);
+      throw new Error('Geçersiz alıcı bilgisi');
     }
 
     const response = await apiClient.post<ApiResponse<SendMessageResponse>>(

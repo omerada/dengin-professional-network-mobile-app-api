@@ -25,6 +25,7 @@ import { useRegister } from '../hooks';
 import { registerSchema, RegisterSchemaType } from '../validation';
 import { AuthStackNavigationProp } from '@shared/types';
 import { spacing } from '@theme';
+import { getErrorMessage as getErrorMsg } from '@core/utils/errorUtils';
 
 /**
  * Register Screen
@@ -56,10 +57,7 @@ export const RegisterScreen: React.FC = () => {
 
   // Helper to extract error message as string
   const getErrorMessage = (error: any): string | undefined => {
-    if (!error) return undefined;
-    if (typeof error === 'string') return error;
-    if (error.message && typeof error.message === 'string') return error.message;
-    return undefined;
+    return getErrorMsg(error) || undefined;
   };
 
   const onSubmit = useCallback(

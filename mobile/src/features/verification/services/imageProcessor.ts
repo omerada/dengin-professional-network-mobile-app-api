@@ -52,7 +52,7 @@ export const imageProcessor = {
       };
     } catch (error) {
       console.error('Image compression error:', error);
-      throw new Error('Görüntü sıkıştırılamadı');
+      throw new Error('Fotoğraf sıkıştırılamadı, lütfen tekrar deneyin');
     }
   },
 
@@ -186,7 +186,7 @@ export const imageProcessor = {
       };
     } catch (error) {
       console.error('Image crop error:', error);
-      throw new Error('Görüntü kırpılamadı');
+      throw new Error('Fotoğraf kırpılamadı, lütfen tekrar deneyin');
     }
   },
 
@@ -213,7 +213,7 @@ export const imageProcessor = {
       };
     } catch (error) {
       console.error('Image rotation error:', error);
-      throw new Error('Görüntü döndürülemedi');
+      throw new Error('Fotoğraf döndürülemedi, lütfen tekrar deneyin');
     }
   },
 
@@ -227,7 +227,7 @@ export const imageProcessor = {
       });
     } catch (error) {
       console.error('Base64 conversion error:', error);
-      throw new Error('Görüntü dönüştürülemedi');
+      throw new Error('Fotoğraf dönüştürülemedi, lütfen tekrar deneyin');
     }
   },
 

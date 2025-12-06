@@ -63,7 +63,7 @@ export function useSendMessage(conversationId: string) {
       // Validate content
       const trimmedContent = content.trim();
       if (!trimmedContent) {
-        throw new Error('Message content cannot be empty');
+        throw new Error('Mesaj içeriği boş olamaz');
       }
 
       // Try WebSocket first (real-time, lower latency)

@@ -9,6 +9,7 @@ import { Alert } from 'react-native';
 import { authApi } from '../services';
 import type { RegisterFormData } from '../types';
 import type { AuthStackNavigationProp } from '@shared/types';
+import { getErrorMessage } from '@core/utils/errorUtils';
 
 /**
  * Register hook with React Query mutation
@@ -48,7 +49,7 @@ export const useRegister = () => {
     },
 
     onError: (error: Error) => {
-      console.error('[useRegister] Error:', error.message);
+      console.error('[useRegister] Registration error:', getErrorMessage(error));
     },
   });
 

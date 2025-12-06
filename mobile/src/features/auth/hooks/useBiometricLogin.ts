@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { biometricService, authApi, tokenService } from '../services';
 import { useAuthStore } from '../stores';
 import type { RootStackNavigationProp } from '@shared/types';
+import { getErrorMessage } from '@core/utils/errorUtils';
 
 /**
  * Biometric login hook
@@ -80,7 +81,7 @@ export const useBiometricLogin = () => {
     },
 
     onError: (error: Error) => {
-      console.error('[useBiometricLogin] Error:', error.message);
+      console.error('[useBiometricLogin] Biometric auth error:', getErrorMessage(error));
     },
   });
 

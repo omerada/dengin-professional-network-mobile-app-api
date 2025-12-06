@@ -19,7 +19,7 @@ interface AppleCredential {
 const nullAppleAuth = {
   isAvailable: () => false,
   signIn: async (): Promise<AppleCredential> => {
-    throw new Error('Apple Sign-In bu platformda desteklenmiyor');
+    throw new Error('Apple ile giriş yalnızca iOS cihazlarda kullanılabilir');
   },
   signOut: async () => {},
 };
@@ -71,7 +71,7 @@ function createAppleAuth() {
         };
       }
 
-      throw new Error('Apple kimlik bilgileri doğrulanamadı');
+      throw new Error('Apple kimlik bilgileri alınamadı, lütfen tekrar deneyin');
     },
 
     signOut: async () => {

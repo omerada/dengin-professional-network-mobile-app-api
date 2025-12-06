@@ -116,7 +116,7 @@ export const tokenService = {
     const refreshToken = await tokenService.getRefreshToken();
 
     if (!refreshToken) {
-      throw new Error('No refresh token available');
+      throw new Error('Oturum bilgisi bulunamadı');
     }
 
     try {

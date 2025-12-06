@@ -47,7 +47,7 @@ export const oauth2Service = {
    */
   signInWithGoogle: async (): Promise<AuthResponse> => {
     if (!googleAuth.isAvailable()) {
-      throw new Error('Google Sign-In bu platformda desteklenmiyor');
+      throw new Error('Google ile giriş bu cihazda desteklenmiyor');
     }
 
     try {
@@ -68,7 +68,7 @@ export const oauth2Service = {
         throw new Error('Giriş işlemi devam ediyor');
       }
       if (googleAuth.isSignInError(error, 'playServices')) {
-        throw new Error('Google Play Servisleri kullanılamıyor');
+        throw new Error('Google Play Servisleri kullanılamıyor, lütfen güncelleyin');
       }
       throw error;
     }
@@ -79,7 +79,7 @@ export const oauth2Service = {
    */
   signInWithApple: async (): Promise<AuthResponse> => {
     if (!appleAuth.isAvailable()) {
-      throw new Error('Apple Sign-In sadece iOS destekler');
+      throw new Error('Apple ile giriş yalnızca iOS cihazlarda kullanılabilir');
     }
 
     try {
