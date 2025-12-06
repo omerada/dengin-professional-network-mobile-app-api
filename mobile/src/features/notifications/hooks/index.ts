@@ -13,4 +13,6 @@ export {
   useNotificationHandler,
 } from './useNotificationActions';
 export { useNotificationSettings } from './useNotificationSettings';
-export { useNotificationPermission } from './useNotificationPermission';
+
+// Use production hook for real notifications
+export { useNotificationPermission } from './useNotificationPermission.production';

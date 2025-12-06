@@ -27,6 +27,7 @@ interface UseUserPostsResult {
 
 /**
  * Hook to fetch user's posts with infinite scroll
+ * Backend: GET /api/users/{userId}/posts
  */
 export function useUserPosts({ userId, enabled = true }: UseUserPostsOptions): UseUserPostsResult {
   const query = useInfiniteQuery({

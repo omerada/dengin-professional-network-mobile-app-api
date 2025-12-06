@@ -22,7 +22,7 @@ export const NotificationsScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation<NavigationProp>();
   const { markAllAsRead, isPending: isMarkingAllAsRead } = useMarkAllAsRead();
-  const { isPermissionGranted, promptForPermission } = useNotificationPermission();
+  const { isPermissionGranted, requestWithPrompt } = useNotificationPermission();
   const { unreadCount } = useUnreadCount();
 
   const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
@@ -122,9 +122,9 @@ export const NotificationsScreen: React.FC = () => {
 
   // Handle permission request
   const handleRequestPermission = useCallback(async () => {
-    await promptForPermission();
+    await requestWithPrompt();
     setShowPermissionPrompt(false);
-  }, [promptForPermission]);
+  }, [requestWithPrompt]);
 
   return (
     <SafeAreaView

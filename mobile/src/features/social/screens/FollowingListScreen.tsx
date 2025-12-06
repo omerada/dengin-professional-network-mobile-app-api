@@ -13,6 +13,9 @@ import { spacing } from '@theme';
 import { UserListItem } from '../components';
 import { useFollowing } from '../hooks';
 import type { FollowUser } from '../types';
+import type { StyleProp, ViewStyle } from 'react-native';
+
+type ContentStyle = StyleProp<ViewStyle>;
 
 /**
  * FollowingListScreen
@@ -101,7 +104,6 @@ export const FollowingListScreen: React.FC = () => {
         contentContainerStyle={
           users.length === 0 ? ({ flexGrow: 1 } as unknown as ContentStyle) : undefined
         }
-        estimatedItemSize={70}
       />
     </SafeAreaView>
   );

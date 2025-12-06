@@ -108,13 +108,13 @@ public class MessageWebSocketController {
         log.debug("WS: User {} typing in conversation {}: {}",
                 senderId, notification.getConversationId(), notification.isTyping());
 
-        // Forward typing notification to recipient
+        // Forward typing notification to recipient (using Long ID)
         messagingTemplate.convertAndSendToUser(
                 notification.getRecipientId().toString(),
                 "/queue/typing",
                 WsTypingNotification.builder()
                         .conversationId(notification.getConversationId())
-                        .recipientId(UUID.randomUUID()) // Will be replaced with sender's UUID
+                        .recipientId(senderId) // Sender's Long ID
                         .isTyping(notification.isTyping())
                         .build());
     }
@@ -237,11 +237,12 @@ public class MessageWebSocketController {
         return WsMessageResponse.builder()
                 .messageId(response.getMessageId())
                 .conversationId(response.getConversationId())
-                .senderId(null)
+                .senderId(senderId) // Current user's ID
                 .recipientId(request.getRecipientId())
                 .content(request.getContent())
                 .attachment(attachment)
                 .status(response.getStatus())
+                .sentByMe(true) // Gönderen için her zaman true
                 .sentAt(response.getSentAt())
                 .build();
     }

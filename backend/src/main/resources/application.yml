@@ -86,18 +86,18 @@ springdoc:
 
 # Application Specific
 app:
-  name: Meslektaş
-  version: 1.0.0
+  name: ${APP_NAME:Meslektaş}
+  version: ${APP_VERSION:1.0.0}
 
   # JWT Configuration
   jwt:
-    secret: ${JWT_SECRET:meslektas-super-secret-key-change-in-production-please-use-env-variable-minimum-512-bits}
-    expiration: 3600000 # 1 hour
-    refresh-expiration: 604800000 # 7 days
+    secret: ${JWT_SECRET}
+    expiration: ${JWT_EXPIRATION:3600000}
+    refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
 
   # CORS
   cors:
-    allowed-origins: http://localhost:8080,http://10.0.2.2:8080,http://192.168.1.100:8080,http://192.168.1.100:8081,http://localhost:3000,http://localhost:19006,http://localhost:8081,http://10.0.2.2:8081,http://10.0.2.2:19006,meslektas://
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:8080}
     allowed-methods: GET,POST,PUT,PATCH,DELETE,OPTIONS
     allowed-headers: "*"
     allow-credentials: true
@@ -105,18 +105,18 @@ app:
 
 # Email (Mailgun)
 mailgun:
-  api-key: ${MAILGUN_API_KEY:}
-  domain: ${MAILGUN_DOMAIN:}
+  api-key: ${MAILGUN_API_KEY}
+  domain: ${MAILGUN_DOMAIN}
   sender-email: ${MAILGUN_SENDER_EMAIL:noreply@meslektas.com}
   sender-name: ${MAILGUN_SENDER_NAME:Meslektaş}
   enabled: ${MAILGUN_ENABLED:true}
-  base-url: ${MAILGUN_BASE_URL:https://api.eu.mailgun.net/v3}
+  base-url: ${MAILGUN_BASE_URL:https://api.mailgun.net}
 
 # Firebase (Push Notifications)
 firebase:
-  enabled: ${FIREBASE_ENABLED:false}
-  project-id: ${FIREBASE_PROJECT_ID:}
-  credentials-json: ${FIREBASE_CREDENTIALS_JSON:}
+  enabled: ${FIREBASE_ENABLED:true}
+  project-id: ${FIREBASE_PROJECT_ID}
+  credentials-json: ${FIREBASE_CREDENTIALS_JSON}
 
 ---
 # Development Profile
@@ -127,9 +127,9 @@ spring:
 
   # PostgreSQL
   datasource:
-    url: jdbc:postgresql://localhost:5433/meslektas_dev
-    username: postgres
-    password: postgres
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5433/meslektas_dev}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
     hikari:
       minimum-idle: 5
@@ -141,9 +141,9 @@ spring:
   # Redis
   data:
     redis:
-      host: localhost
-      port: 6380
-      password:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6380}
+      password: ${REDIS_PASSWORD:}
       timeout: 2000ms
 
   # OAuth2
@@ -158,8 +158,8 @@ spring:
               - email
               - profile
           instagram:
-            client-id: ${INSTAGRAM_CLIENT_ID:your-instagram-client-id}
-            client-secret: ${INSTAGRAM_CLIENT_SECRET:your-instagram-client-secret}
+            client-id: ${FACEBOOK_CLIENT_ID:your-instagram-client-id}
+            client-secret: ${FACEBOOK_CLIENT_SECRET:your-instagram-client-secret}
             client-authentication-method: client_secret_post
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/api/auth/oauth2/callback/{registrationId}"
@@ -176,25 +176,28 @@ spring:
 aws:
   access-key: ${AWS_ACCESS_KEY_ID:test}
   secret-key: ${AWS_SECRET_ACCESS_KEY:test}
-  region: eu-central-1
-  endpoint: http://localhost:4566 # LocalStack
+  region: ${AWS_REGION:eu-central-1}
+  endpoint: ${AWS_ENDPOINT:http://localhost:4566}
   s3:
-    bucket: meslektas-dev
+    bucket: ${AWS_S3_BUCKET:meslektas-dev}
     profile-images:
       folder: users # S3 folder for profile images: users/{userId}/avatar-{uuid}.jpg
     presigned-url:
       expiration: 300 # 5 minutes
+    presigned-url-expiration: ${AWS_S3_PRESIGNED_URL_EXPIRATION:15}
   cloudfront:
     domain: ${AWS_CLOUDFRONT_DOMAIN:} # Leave empty for dev (uses S3 direct URLs)
   rekognition:
-    endpoint: http://localhost:4566 # LocalStack
-    bucket-name: meslektas-verifications
+    endpoint: ${AWS_ENDPOINT:http://localhost:4566}
+    bucket-name: ${AWS_REKOGNITION_BUCKET:meslektas-verifications}
+    face-match-threshold: ${AWS_REKOGNITION_FACE_MATCH_THRESHOLD:80.0}
+    min-confidence: ${AWS_REKOGNITION_MIN_CONFIDENCE:70.0}
 
 # File Storage
 storage:
-  type: local # local or s3
+  type: ${STORAGE_TYPE:local}
   local:
-    upload-dir: ./uploads
+    upload-dir: ${STORAGE_LOCAL_UPLOAD_DIR:./uploads}
 
 ---
 # Production Profile
@@ -236,8 +239,8 @@ spring:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
           instagram:
-            client-id: ${INSTAGRAM_CLIENT_ID}
-            client-secret: ${INSTAGRAM_CLIENT_SECRET}
+            client-id: ${FACEBOOK_CLIENT_ID}
+            client-secret: ${FACEBOOK_CLIENT_SECRET}
 
 # AWS (Production)
 aws:

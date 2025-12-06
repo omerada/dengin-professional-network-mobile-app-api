@@ -51,8 +51,8 @@ export interface UserSummary {
  * @see ConversationDto.participant
  */
 export interface Participant {
-  /** UUID format */
-  userId: string;
+  /** Long ID (number) - Backend database ID */
+  userId: number;
   /** Tam ad (firstName + lastName) */
   fullName: string;
   /** Meslek/Unvan */
@@ -136,8 +136,8 @@ export interface Message {
   messageId: string;
   /** Konuşma UUID */
   conversationId: string;
-  /** Gönderen UUID */
-  senderId: string;
+  /** Gönderen Long ID (number) - Backend User entity ID */
+  senderId: number;
   /** Gönderen adı */
   senderName: string;
   /** Mesaj içeriği */
@@ -299,16 +299,18 @@ export interface WsMessageResponse {
   messageId: string;
   /** Konuşma UUID */
   conversationId: string;
-  /** Gönderen UUID */
-  senderId: string;
-  /** Alıcı UUID */
-  recipientId: string;
+  /** Gönderen Long ID (number) - Backend User entity ID */
+  senderId: number;
+  /** Alıcı Long ID (number) */
+  recipientId: number;
   /** Mesaj içeriği */
   content: string;
   /** Mesaj eki */
   attachment: MessageAttachment | null;
   /** Mesaj durumu */
   status: MessageStatus;
+  /** Benim gönderdiğim mi? - Backend tarafından hesaplanır */
+  sentByMe: boolean;
   /** Gönderim zamanı - ISO 8601 */
   sentAt: string;
 }
@@ -321,8 +323,8 @@ export interface WsMessageResponse {
 export interface WsTypingNotification {
   /** Konuşma UUID */
   conversationId: string;
-  /** Yazıyor bildirimi gönderilen kullanıcı UUID */
-  recipientId: string;
+  /** Yazıyor bildirimi gönderilen kullanıcı ID (Long number) */
+  recipientId: number;
   /** Yazıyor mu? */
   isTyping: boolean;
 }
@@ -422,8 +424,8 @@ export interface MessagingStoreState {
   clearTypingUsers: (conversationId: string) => void;
 
   // Online users (userId set)
-  onlineUsers: Set<string>;
-  setUserOnline: (userId: string, isOnline: boolean) => void;
+  onlineUsers: Set<number>;
+  setUserOnline: (userId: number, isOnline: boolean) => void;
 
   // Offline message queue
   messageQueue: QueuedMessage[];

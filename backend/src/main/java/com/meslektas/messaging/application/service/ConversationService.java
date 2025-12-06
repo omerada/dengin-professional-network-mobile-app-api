@@ -395,7 +395,7 @@ public class ConversationService {
                 User otherUser = userRepository.findById(otherParticipantId).orElse(null);
 
                 ParticipantDto participant = otherUser != null ? ParticipantDto.builder()
-                                .userId(null) // Will be set from user entity when UUID field is added
+                                .userId(otherUser.getId())
                                 .fullName(otherUser.getFullName())
                                 .profession(otherUser.getProfession() != null ? otherUser.getProfession().getName()
                                                 : null)
@@ -451,7 +451,7 @@ public class ConversationService {
                 return MessageDto.builder()
                                 .messageId(message.getMessageId().getValue())
                                 .conversationId(null) // ConversationId will be set from parent conversation context
-                                .senderId(null) // Will be set from user entity when UUID field is added
+                                .senderId(message.getSenderId()) // Long ID from User entity
                                 .senderName(sender != null ? sender.getFullName() : "Unknown")
                                 .senderProfileImageUrl(sender != null ? sender.getProfileImageUrl() : null)
                                 .content(message.getContent() != null ? message.getContent().getValue() : null)

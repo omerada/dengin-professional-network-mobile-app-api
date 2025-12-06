@@ -1,7 +1,7 @@
 // src/features/auth/screens/LoginScreen.tsx
+// Modern Login Screen - Giriş ekranı
 // Oku: mobile-development-guide/features/03-AUTH-MODULE.md
-// Oku: mobile-development-guide/sprints/23-SPRINT-1-2.md
-// Oku: mobile-development-guide/ui/19-FORMS.md
+// Oku: mobile-development-guide/ui-ux-modernization/07-SCREEN-REDESIGNS.md
 
 import React, { useCallback, useEffect } from 'react';
 import {
@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -27,8 +28,13 @@ import { AuthStackNavigationProp } from '@shared/types';
 import { spacing } from '@theme';
 
 /**
- * Login Screen
+ * Modern Login Screen
  * Email/password login with biometric option
+ * Features:
+ * - Animated entrance
+ * - Biometric authentication
+ * - Remember last email
+ * - Modern, clean UX
  */
 export const LoginScreen: React.FC = () => {
   const colors = useColors();

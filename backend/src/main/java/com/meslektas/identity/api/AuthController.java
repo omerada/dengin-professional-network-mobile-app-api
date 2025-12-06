@@ -47,13 +47,13 @@ public class AuthController {
     private final PasswordResetService passwordResetService;
 
     @PostMapping("/register")
-    @Operation(summary = "Register new user", description = "Create a new user account with email and password")
-    public ResponseEntity<ApiResponse<UserResponse>> register(
+    @Operation(summary = "Register new user", description = "Create a new user account with email, password and optional profession. Returns tokens for auto-login.")
+    public ResponseEntity<ApiResponse<LoginResponse>> register(
             @Valid @RequestBody RegisterRequest request) {
-        UserResponse user = authService.register(request);
+        LoginResponse response = authService.register(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.success("User registered successfully", user));
+                .body(ApiResponse.success("Kayıt başarılı! Otomatik giriş yapılıyor.", response));
     }
 
     @PostMapping("/login")

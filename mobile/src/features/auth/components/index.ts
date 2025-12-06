@@ -3,3 +3,4 @@
 export { GoogleSignInButton } from './GoogleSignInButton';
 export { AppleSignInButton } from './AppleSignInButton';
 export { SocialLoginButtons } from './SocialLoginButtons';
+export { ProfessionSelector } from './ProfessionSelector';

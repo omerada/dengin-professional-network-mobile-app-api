@@ -5,7 +5,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { messagingService } from './messagingService';
 import { socketClient } from './socketClient';
-import { toUUID } from '@shared/types/common.types';
 import type { SendMessageAttachment } from '../types';
 
 const QUEUE_STORAGE_KEY = 'messaging_queue';
@@ -132,7 +131,7 @@ class MessageQueue {
     for (const message of toProcess) {
       try {
         await messagingService.sendMessage({
-          recipientId: toUUID(message.recipientId),
+          recipientId: Number(message.recipientId),
           content: message.content,
           attachment: message.attachment,
         });

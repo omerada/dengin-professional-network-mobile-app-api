@@ -1,7 +1,7 @@
 // src/features/auth/screens/RegisterScreen.tsx
+// Modern Register Screen - Kayıt ekranı
 // Oku: mobile-development-guide/features/03-AUTH-MODULE.md
-// Oku: mobile-development-guide/sprints/23-SPRINT-1-2.md
-// Oku: mobile-development-guide/ui/19-FORMS.md
+// Oku: mobile-development-guide/ui-ux-modernization/07-SCREEN-REDESIGNS.md
 
 import React, { useCallback } from 'react';
 import {
@@ -21,6 +21,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useColors } from '@contexts/ThemeContext';
 import { useLocale } from '@contexts/LocaleContext';
 import { Button, Input } from '@shared/components';
+import { ProfessionSelector } from '../components';
 import { useRegister } from '../hooks';
 import { registerSchema, RegisterSchemaType } from '../validation';
 import { AuthStackNavigationProp } from '@shared/types';
@@ -28,8 +29,14 @@ import { spacing } from '@theme';
 import { getErrorMessage } from '@core/utils/errorUtils';
 
 /**
- * Register Screen
+ * Modern Register Screen
  * New user registration form
+ * Features:
+ * - Smart profession selector with dropdown
+ * - Custom profession support with profanity filter
+ * - Clickable Terms & Privacy links (can be reopened)
+ * - Auto-login after registration
+ * - Professional UX
  */
 export const RegisterScreen: React.FC = () => {
   const colors = useColors();
@@ -41,17 +48,18 @@ export const RegisterScreen: React.FC = () => {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm({
+    setValue,
+  } = useForm<RegisterSchemaType>({
     resolver: zodResolver(registerSchema),
-    mode: 'onTouched', // Validate only after user touches field
+    mode: 'onTouched',
     defaultValues: {
       email: '',
       password: '',
       confirmPassword: '',
       firstName: '',
       lastName: '',
-      phoneNumber: '',
-      profession: '',
+      professionId: null,
+      customProfession: '',
       acceptTerms: false,
     },
   });
@@ -66,6 +74,14 @@ export const RegisterScreen: React.FC = () => {
 
   const handleBack = useCallback(() => {
     navigation.goBack();
+  }, [navigation]);
+
+  const handleTermsPress = useCallback(() => {
+    navigation.navigate('Terms');
+  }, [navigation]);
+
+  const handlePrivacyPress = useCallback(() => {
+    navigation.navigate('Privacy');
   }, [navigation]);
 
   return (
@@ -87,7 +103,7 @@ export const RegisterScreen: React.FC = () => {
               accessibilityRole="button"
               accessibilityLabel="Geri dön"
               style={styles.backButton}>
-              <Text style={{ color: colors.text.primary, fontSize: 24 }}>←</Text>
+              <Text style={[styles.backButtonText, { color: colors.text.primary }]}>←</Text>
             </TouchableOpacity>
           </View>
 
@@ -175,39 +191,25 @@ export const RegisterScreen: React.FC = () => {
               )}
             />
 
-            {/* Phone (Optional) */}
+            {/* Profession Selector */}
             <Controller
               control={control}
-              name="phoneNumber"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label={t('auth.phone')}
-                  placeholder="5XX XXX XX XX"
-                  keyboardType="phone-pad"
-                  autoComplete="tel"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.phoneNumber?.message}
-                  hint="Opsiyonel"
-                />
-              )}
-            />
-
-            {/* Profession (Optional) */}
-            <Controller
-              control={control}
-              name="profession"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label={t('auth.profession')}
-                  placeholder="Mesleğiniz"
-                  autoCapitalize="words"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.profession?.message}
-                  hint="Opsiyonel"
+              name="professionId"
+              render={({ field: { value } }) => (
+                <Controller
+                  control={control}
+                  name="customProfession"
+                  render={({ field: { value: customValue } }) => (
+                    <ProfessionSelector
+                      value={value}
+                      customValue={customValue}
+                      onSelect={(professionId: number | null, customText?: string) => {
+                        setValue('professionId', professionId, { shouldValidate: true });
+                        setValue('customProfession', customText || '');
+                      }}
+                      error={errors.professionId?.message || errors.customProfession?.message}
+                    />
+                  )}
                 />
               )}
             />
@@ -274,22 +276,18 @@ export const RegisterScreen: React.FC = () => {
                   />
                   <View style={styles.termsTextContainer}>
                     <Text style={[styles.termsText, { color: colors.text.secondary }]}>
-                      <Text
-                        style={{ color: colors.interactive.default }}
-                        onPress={() => {
-                          /* Open terms */
-                        }}>
-                        Kullanım Koşulları
-                      </Text>
-                      'nı ve{' '}
-                      <Text
-                        style={{ color: colors.interactive.default }}
-                        onPress={() => {
-                          /* Open privacy */
-                        }}>
-                        Gizlilik Politikası
-                      </Text>
-                      'nı okudum ve kabul ediyorum.
+                      <TouchableOpacity onPress={handleTermsPress} activeOpacity={0.7}>
+                        <Text style={[styles.link, { color: colors.interactive.default }]}>
+                          Kullanım Koşulları
+                        </Text>
+                      </TouchableOpacity>{' '}
+                      nı ve{' '}
+                      <TouchableOpacity onPress={handlePrivacyPress} activeOpacity={0.7}>
+                        <Text style={[styles.link, { color: colors.interactive.default }]}>
+                          Gizlilik Politikası
+                        </Text>
+                      </TouchableOpacity>{' '}
+                      nı okudum ve kabul ediyorum.
                     </Text>
                     {errors.acceptTerms && (
                       <Text style={[styles.errorSmall, { color: colors.status.error }]}>
@@ -306,7 +304,7 @@ export const RegisterScreen: React.FC = () => {
           <View style={styles.actions}>
             <Button
               title={t('auth.register')}
-              onPress={handleSubmit(onSubmit as any)}
+              onPress={handleSubmit(onSubmit)}
               loading={isLoading}
               disabled={isLoading}
               size="lg"
@@ -322,7 +320,7 @@ export const RegisterScreen: React.FC = () => {
               accessible={true}
               accessibilityRole="link"
               accessibilityLabel="Giriş yap">
-              <Text style={{ color: colors.interactive.default, fontWeight: '600' }}>
+              <Text style={[styles.loginLink, { color: colors.interactive.default }]}>
                 {t('auth.login')}
               </Text>
             </TouchableOpacity>
@@ -334,41 +332,28 @@ export const RegisterScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  actions: {
+    marginBottom: spacing.xl,
+  },
+  backButton: {
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
+  },
+  backButtonText: {
+    fontSize: 24,
+  },
   container: {
     flex: 1,
   },
-  keyboardAvoid: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: spacing.xl,
-    paddingBottom: spacing.xl,
-  },
-  header: {
-    height: 56,
-    justifyContent: 'center',
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-  },
-  titleContainer: {
-    marginBottom: spacing['2xl'],
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: spacing.sm,
-  },
-  subtitle: {
-    fontSize: 16,
-  },
   errorContainer: {
-    padding: spacing.md,
     borderRadius: 8,
-    marginBottom: spacing.xl + spacing.md,
+    marginBottom: spacing.xl,
+    padding: spacing.md,
+  },
+  errorSmall: {
+    fontSize: 12,
+    marginTop: spacing.xs,
   },
   errorText: {
     fontSize: 14,
@@ -377,37 +362,60 @@ const styles = StyleSheet.create({
   form: {
     marginBottom: spacing.lg,
   },
-  row: {
-    flexDirection: 'row',
-    marginHorizontal: -spacing.sm,
-  },
   halfInput: {
     flex: 1,
     marginHorizontal: spacing.sm,
   },
-  termsContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginTop: spacing.sm,
+  header: {
+    height: 56,
+    justifyContent: 'center',
   },
-  termsTextContainer: {
+  keyboardAvoid: {
     flex: 1,
-    marginLeft: spacing.md,
   },
-  termsText: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  errorSmall: {
-    fontSize: 12,
-    marginTop: spacing.xs,
-  },
-  actions: {
-    marginBottom: spacing.xl,
+  link: {
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
   loginContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginBottom: spacing.xl,
+  },
+  loginLink: {
+    fontWeight: '600',
+  },
+  row: {
+    flexDirection: 'row',
+    marginHorizontal: -spacing.sm,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: spacing.xl,
+    paddingHorizontal: spacing.xl,
+  },
+  subtitle: {
+    fontSize: 16,
+  },
+  termsContainer: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    marginTop: spacing.sm,
+  },
+  termsText: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  termsTextContainer: {
+    flex: 1,
+    marginLeft: spacing.md,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: spacing.sm,
+  },
+  titleContainer: {
+    marginBottom: spacing['2xl'],
   },
 });

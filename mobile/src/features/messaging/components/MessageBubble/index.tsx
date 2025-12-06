@@ -2,17 +2,15 @@
 // Modern MessageBubble with swipe-to-reply and animations
 // Instagram/WhatsApp kalitesinde mesaj deneyimi
 
-import React, { memo, useCallback, useMemo, useEffect } from 'react';
+import React, { memo, useCallback, useMemo, useEffect, useState } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  SlideInRight,
-  SlideInLeft,
   interpolate,
   Extrapolate,
-  useAnimatedReaction,
+  runOnJS,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -59,17 +57,7 @@ const formatTime = (dateString: string | undefined | null): string => {
  * - Retry button for failed messages
  */
 export const MessageBubble: React.FC<MessageBubbleProps> = memo(
-  ({
-    message,
-    isOwn,
-    showAvatar = false,
-    index = 0,
-    onLongPress,
-    onReply,
-    onImagePress,
-    onRetry,
-    style,
-  }) => {
+  ({ message, isOwn, showAvatar = false, onLongPress, onReply, onImagePress, onRetry, style }) => {
     const colors = useColors();
     const { trigger: triggerHaptic } = useHaptic();
 
@@ -81,38 +69,22 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
     const scale = useSharedValue(1);
     const replyIconOpacity = useSharedValue(0);
     const isSwipeTriggered = useSharedValue(false);
-    const replyTriggeredFlag = useSharedValue(0);
+    const [shouldTriggerReply, setShouldTriggerReply] = useState(false);
 
-    // React to reply trigger - calls JS callback when swipe completes
-    useAnimatedReaction(
-      () => replyTriggeredFlag.value,
-      () => {
-        'worklet';
-        // This reaction is used to sync worklet state with JS thread
-        // The actual JS callback is handled via useEffect
-      },
-    );
-
-    // Effect to handle JS callbacks when reply is triggered
+    // Effect to handle reply callback
     useEffect(() => {
-      if (replyTriggeredFlag.value > 0 && onReply) {
+      if (shouldTriggerReply && onReply) {
         triggerHaptic('medium');
         onReply(message);
+        setShouldTriggerReply(false);
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [replyTriggeredFlag.value]);
+    }, [shouldTriggerReply, onReply, message, triggerHaptic]);
 
     // Colors
     const textColor = isSentByMe ? '#FFFFFF' : colors.text.primary;
     const metaColor = isSentByMe ? 'rgba(255,255,255,0.7)' : colors.text.tertiary;
 
-    // Entry animation
-    const enteringAnimation = useMemo(() => {
-      const baseDelay = Math.min(index * 30, 300);
-      return isSentByMe
-        ? SlideInRight.delay(baseDelay).springify().damping(15)
-        : SlideInLeft.delay(baseDelay).springify().damping(15);
-    }, [isSentByMe, index]);
+    // Entry animation disabled for better performance
 
     const handleLongPressHaptic = useCallback(() => {
       triggerHaptic('heavy');
@@ -158,19 +130,18 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
           })
           .onEnd(() => {
             'worklet';
-            const shouldTriggerReply = Math.abs(translateX.value) >= SWIPE_THRESHOLD;
+            const shouldReply = Math.abs(translateX.value) >= SWIPE_THRESHOLD;
 
             translateX.value = withSpring(0, { damping: 15 });
             replyIconOpacity.value = withSpring(0);
             isSwipeTriggered.value = false;
 
-            if (shouldTriggerReply) {
-              // Use runOnJS alternative - flag for useAnimatedReaction
-              replyTriggeredFlag.value = replyTriggeredFlag.value + 1;
+            if (shouldReply) {
+              runOnJS(setShouldTriggerReply)(true);
             }
           }),
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [isSentByMe],
+      [isSentByMe, setShouldTriggerReply],
     );
 
     // Long press gesture - use .runOnJS(true) for modern approach
@@ -210,8 +181,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
     const isFailed = message.status === 'FAILED';
 
     return (
-      <Animated.View
-        entering={enteringAnimation}
+      <View
         style={[styles.container, isSentByMe ? styles.ownContainer : styles.otherContainer, style]}>
         {/* Avatar placeholder for alignment */}
         {!isSentByMe && !showAvatar && <View style={styles.avatarPlaceholder} />}
@@ -272,7 +242,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
             )}
           </Animated.View>
         </GestureDetector>
-      </Animated.View>
+      </View>
     );
   },
 );

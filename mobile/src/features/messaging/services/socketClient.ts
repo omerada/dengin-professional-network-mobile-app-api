@@ -56,11 +56,8 @@ class StompClient {
     this.setConnectionState('CONNECTING');
 
     try {
-      const token = await tokenService.getAccessToken();
-
-      if (!token) {
-        throw new Error('Oturum bilgisi bulunamadı');
-      }
+      // Ensure we have a valid token before connecting
+      const token = await tokenService.ensureValidToken();
 
       const wsUrl = `${ENV.API_BASE_URL}/ws`;
 
@@ -163,9 +160,9 @@ class StompClient {
       if (data.isTyping) {
         // senderId'yi bulmak için conversationId kullanıyoruz
         // Typing notification gönderen kişi recipientId değil, karşı taraf
-        addTypingUser(data.conversationId, data.recipientId);
+        addTypingUser(data.conversationId, String(data.recipientId));
       } else {
-        removeTypingUser(data.conversationId, data.recipientId);
+        removeTypingUser(data.conversationId, String(data.recipientId));
       }
 
       this.notifyHandlers('typing', data);
@@ -323,7 +320,7 @@ class StompClient {
    * Yazıyor bildirimi gönder
    * Destination: /app/chat.typing
    */
-  sendTyping(conversationId: string, recipientId: string, isTyping: boolean): void {
+  sendTyping(conversationId: string, recipientId: number, isTyping: boolean): void {
     const notification: WsTypingNotification = {
       conversationId,
       recipientId,
@@ -347,14 +344,14 @@ class StompClient {
   /**
    * Yazıyor eventini başlat
    */
-  startTyping(conversationId: string, recipientId: string): void {
+  startTyping(conversationId: string, recipientId: number): void {
     this.sendTyping(conversationId, recipientId, true);
   }
 
   /**
    * Yazıyor eventini durdur
    */
-  stopTyping(conversationId: string, recipientId: string): void {
+  stopTyping(conversationId: string, recipientId: number): void {
     this.sendTyping(conversationId, recipientId, false);
   }
 }

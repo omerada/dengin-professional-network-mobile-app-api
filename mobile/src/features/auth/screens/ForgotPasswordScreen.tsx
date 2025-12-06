@@ -1,17 +1,20 @@
 // src/features/auth/screens/ForgotPasswordScreen.tsx
+// Modern Forgot Password Screen - Şifre sıfırlama
 // Oku: mobile-development-guide/features/03-AUTH-MODULE.md
+// Oku: mobile-development-guide/ui-ux-modernization/07-SCREEN-REDESIGNS.md
 
 import React, { useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,8 +27,12 @@ import { AuthStackNavigationProp } from '@shared/types';
 import { spacing, borderRadius } from '@theme';
 
 /**
- * Forgot Password Screen
+ * Modern Forgot Password Screen
  * Request password reset email
+ * Features:
+ * - Success state with animation
+ * - Clear UX guidance
+ * - Modern design
  */
 export const ForgotPasswordScreen: React.FC = () => {
   const colors = useColors();
@@ -67,26 +74,40 @@ export const ForgotPasswordScreen: React.FC = () => {
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.background.primary }]}
         edges={['top', 'bottom', 'left', 'right']}>
-        <View style={styles.successContent}>
-          <View style={[styles.successIcon, { backgroundColor: colors.status.success }]}>
-            <Text style={{ fontSize: 40 }}>✉️</Text>
-          </View>
-          <Text style={[styles.successTitle, { color: colors.text.primary }]}>
+        <Animated.View entering={FadeIn.duration(600)} style={styles.successContent}>
+          <Animated.View
+            entering={FadeInDown.springify()}
+            style={[
+              styles.successIcon,
+              { backgroundColor: colors.status.successBg, borderColor: colors.status.success },
+            ]}>
+            <Text style={{ fontSize: 48 }}>✉️</Text>
+          </Animated.View>
+
+          <Animated.Text
+            entering={FadeInDown.delay(200).springify()}
+            style={[styles.successTitle, { color: colors.text.primary }]}>
             E-posta Gönderildi
-          </Text>
-          <Text style={[styles.successText, { color: colors.text.secondary }]}>
-            Şifre sıfırlama bağlantısı e-posta adresinize gönderildi. Lütfen gelen kutunuzu kontrol
-            edin.
-          </Text>
-          <Button
-            title="Giriş Sayfasına Dön"
-            onPress={handleBackToLogin}
-            variant="primary"
-            size="lg"
-            fullWidth
-            style={{ marginTop: spacing.xl }}
-          />
-        </View>
+          </Animated.Text>
+
+          <Animated.Text
+            entering={FadeInDown.delay(300).springify()}
+            style={[styles.successText, { color: colors.text.secondary }]}>
+            Şifre sıfırlama bağlantısı e-posta adresinize gönderildi. Lütfen gelen kutunuzu ve spam
+            klasörünüzü kontrol edin.
+          </Animated.Text>
+
+          <Animated.View entering={FadeInDown.delay(400).springify()} style={{ width: '100%' }}>
+            <Button
+              title="Giriş Sayfasına Dön"
+              onPress={handleBackToLogin}
+              variant="primary"
+              size="lg"
+              fullWidth
+              style={{ marginTop: spacing.xl }}
+            />
+          </Animated.View>
+        </Animated.View>
       </SafeAreaView>
     );
   }
@@ -241,21 +262,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
   },
   successIcon: {
-    width: 80,
-    height: 80,
+    width: 120,
+    height: 120,
     borderRadius: borderRadius.full,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing.xl,
+    borderWidth: 3,
   },
   successTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: spacing.md,
+    textAlign: 'center',
   },
   successText: {
     fontSize: 16,
     textAlign: 'center',
     lineHeight: 24,
+    paddingHorizontal: spacing.md,
   },
 });

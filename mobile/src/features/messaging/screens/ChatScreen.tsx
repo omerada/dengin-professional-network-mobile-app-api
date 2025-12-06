@@ -35,10 +35,44 @@ export const ChatScreen: React.FC = () => {
   const { trigger: triggerHaptic } = useHaptic();
 
   // Route params - Backend Conversation yapısıyla uyumlu
-  const { conversationId, participant } = route.params as {
+  const routeParams = route.params as {
     conversationId: string;
     participant?: Participant;
+    conversation?: Conversation;
   };
+
+  const {
+    conversationId,
+    participant: initialParticipant,
+    conversation: initialConversation,
+  } = routeParams;
+
+  // Conversation state - header için güncel bilgi
+  const [conversation] = useState<Conversation | null>(
+    initialConversation ||
+      (initialParticipant
+        ? {
+            conversationId,
+            participant: initialParticipant,
+            lastMessage: null,
+            unreadCount: 0,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          }
+        : null),
+  );
+
+  const participant = conversation?.participant || initialParticipant;
+
+  // Validate required params
+  useEffect(() => {
+    if (!conversationId) {
+      console.error('[ChatScreen] Missing conversationId, navigating back');
+      Alert.alert('Hata', 'Konuşma ID bulunamadı', [
+        { text: 'Tamam', onPress: () => navigation.goBack() },
+      ]);
+    }
+  }, [conversationId, navigation]);
 
   // State
   const [messageText, setMessageText] = useState('');
@@ -51,6 +85,9 @@ export const ChatScreen: React.FC = () => {
   const { user } = useAuthStore();
   const { setActiveConversation, drafts, setDraft, clearDraft } = useMessagingStore();
 
+  // Computed
+  const currentUserId = user?.id?.toString() || '';
+
   // Hooks
   const {
     messages,
@@ -60,13 +97,14 @@ export const ChatScreen: React.FC = () => {
     refetch,
     fetchNextPage,
     markAsRead,
-  } = useMessages(conversationId);
+  } = useMessages(conversationId, currentUserId);
 
   const {
     sendMessage,
     isPending: isSending,
     retryMessage: _retryMessage,
   } = useSendMessage(conversationId);
+
   const {
     startTyping,
     stopTyping,
@@ -74,9 +112,7 @@ export const ChatScreen: React.FC = () => {
     isTyping: _otherUserTyping,
   } = useTyping(conversationId);
 
-  // Computed
-  const currentUserId = user?.id?.toString() || '';
-  const recipientId = participant?.userId || '';
+  const recipientId = participant?.userId || 0;
 
   // Set recipient for typing
   useEffect(() => {
@@ -209,7 +245,7 @@ export const ChatScreen: React.FC = () => {
 
   // Display data
   const displayParticipant: Participant = participant || {
-    userId: '',
+    userId: 0,
     fullName: 'Konuşma',
     profession: '',
     profileImageUrl: null,
@@ -236,20 +272,20 @@ export const ChatScreen: React.FC = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top', 'bottom']}>
-      <Animated.View entering={FadeIn.duration(300)} style={styles.content}>
-        {/* Header */}
-        <ChatHeader
-          conversation={displayConversation}
-          onBackPress={handleBackPress}
-          onProfilePress={handleProfilePress}
-          onOptionsPress={handleOptionsPress}
-        />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
+        <Animated.View entering={FadeIn.duration(300)} style={styles.content}>
+          {/* Header */}
+          <ChatHeader
+            conversation={displayConversation}
+            onBackPress={handleBackPress}
+            onProfilePress={handleProfilePress}
+            onOptionsPress={handleOptionsPress}
+          />
 
-        {/* Messages */}
-        <KeyboardAvoidingView
-          style={styles.keyboardView}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          keyboardVerticalOffset={0}>
+          {/* Messages */}
           <MessageList
             messages={messages}
             currentUserId={currentUserId}
@@ -268,19 +304,19 @@ export const ChatScreen: React.FC = () => {
             value={messageText}
             onChangeText={handleTextChange}
             onSend={handleSend}
-            disabled={isSending || !recipientId}
+            disabled={isSending}
           />
-        </KeyboardAvoidingView>
 
-        {/* Message options sheet */}
-        <MessageOptionsSheet
-          ref={messageOptionsRef}
-          message={selectedMessage}
-          isOwn={selectedMessage?.senderId === currentUserId}
-          onDelete={handleDeleteMessage}
-          onReport={handleReportMessage}
-        />
-      </Animated.View>
+          {/* Message options sheet */}
+          <MessageOptionsSheet
+            ref={messageOptionsRef}
+            message={selectedMessage}
+            isOwn={selectedMessage?.senderId === Number(currentUserId)}
+            onDelete={handleDeleteMessage}
+            onReport={handleReportMessage}
+          />
+        </Animated.View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -290,9 +326,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    flex: 1,
-  },
-  keyboardView: {
     flex: 1,
   },
 });

@@ -216,7 +216,6 @@ export const CommentsScreen: React.FC = () => {
           />
         }
         showsVerticalScrollIndicator={false}
-        estimatedItemSize={100}
       />
 
       <AddCommentForm

@@ -19,7 +19,7 @@ public class MessageDto {
 
     private UUID messageId;
     private UUID conversationId;
-    private UUID senderId;
+    private Long senderId; // Changed from UUID to Long - User entity ID
     private String senderName;
     private String senderProfileImageUrl;
     private String content;

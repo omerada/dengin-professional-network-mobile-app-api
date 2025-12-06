@@ -27,7 +27,8 @@ try {
   AndroidStyle = notifeeModule.AndroidStyle;
   AndroidCategory = notifeeModule.AndroidCategory;
 } catch (error) {
-  console.warn('[Notifee] Native module not available, notifications disabled');
+  // Silently handle missing module in development
+  // Production builds will have native module available
 }
 
 /**
@@ -47,7 +48,6 @@ class NotifeeService {
     try {
       await this.createChannels();
       this.initialized = true;
-      console.log('[Notifee] Initialized');
     } catch (error) {
       console.error('[Notifee] Initialization error:', error);
       this.isAvailable = false;
@@ -78,8 +78,6 @@ class NotifeeService {
         vibration: channel.vibration ?? true,
       });
     }
-
-    console.log('[Notifee] Channels created');
   }
 
   /**
@@ -94,7 +92,7 @@ class NotifeeService {
     imageUrl?: string;
   }): Promise<string> {
     if (!this.isAvailable || !notifee) {
-      console.warn('[Notifee] Cannot display notification - service not available');
+      // Silently skip in development when native module not available
       return '';
     }
 
@@ -129,7 +127,6 @@ class NotifeeService {
         },
       });
 
-      console.log('[Notifee] Notification displayed:', notificationId);
       return notificationId;
     } catch (error) {
       console.error('[Notifee] Error displaying notification:', error);
@@ -145,7 +142,6 @@ class NotifeeService {
 
     try {
       await notifee.setBadgeCount(count);
-      console.log('[Notifee] Badge count set:', count);
     } catch (error) {
       console.error('[Notifee] Error setting badge count:', error);
     }
@@ -201,7 +197,6 @@ class NotifeeService {
 
     try {
       await notifee.cancelNotification(id);
-      console.log('[Notifee] Notification cancelled:', id);
     } catch (error) {
       console.error('[Notifee] Error cancelling notification:', error);
     }
@@ -215,7 +210,6 @@ class NotifeeService {
 
     try {
       await notifee.cancelAllNotifications();
-      console.log('[Notifee] All notifications cancelled');
     } catch (error) {
       console.error('[Notifee] Error cancelling all notifications:', error);
     }

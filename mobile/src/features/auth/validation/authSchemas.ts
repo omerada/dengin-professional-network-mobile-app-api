@@ -16,11 +16,6 @@ const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const passwordRegex = /^(?=.*[A-Z]).{8,}$/;
 
 /**
- * Phone number validation (Turkish format)
- */
-const phoneRegex = /^(\+90|0)?[5][0-9]{9}$/;
-
-/**
  * Login form validation schema
  */
 export const loginSchema = z.object({
@@ -57,14 +52,10 @@ export const registerSchema = z
       .min(1, 'Soyad gerekli')
       .min(2, 'Soyad en az 2 karakter olmalı')
       .max(50, 'Soyad en fazla 50 karakter olabilir'),
-    phoneNumber: z
-      .string()
-      .regex(phoneRegex, 'Geçerli bir telefon numarası giriniz')
-      .optional()
-      .or(z.literal('')),
-    profession: z.string().max(100, 'Meslek en fazla 100 karakter olabilir').optional(),
-    acceptTerms: z.literal(true, {
-      errorMap: () => ({ message: 'Kullanım koşullarını kabul etmeniz gerekli' }),
+    professionId: z.number().nullable().optional(),
+    customProfession: z.string().max(100, 'Meslek en fazla 100 karakter olabilir').optional(),
+    acceptTerms: z.boolean().refine(val => val === true, {
+      message: 'Kullanım koşullarını kabul etmeniz gerekli',
     }),
   })
   .refine(data => data.password === data.confirmPassword, {

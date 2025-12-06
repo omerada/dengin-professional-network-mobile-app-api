@@ -22,6 +22,11 @@ public record RegisterRequest(
 
         @NotBlank(message = "Soyad gereklidir")
         @Size(min = 2, max = 100, message = "Soyad 2 ile 100 karakter arasında olmalıdır")
-        String surname
+        String surname,
+
+        Long professionId,
+
+        @Size(max = 100, message = "Özel meslek adı en fazla 100 karakter olabilir")
+        String customProfession
 ) {
 }

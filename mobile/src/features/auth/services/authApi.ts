@@ -7,10 +7,10 @@ import type {
   LoginCredentials,
   RegisterData,
   AuthResponse,
-  RegisterResponse,
   RefreshTokenResponse,
   User,
   OAuth2AuthResponse,
+  ApiResponse,
 } from '@shared/types';
 
 /**
@@ -36,13 +36,13 @@ export const authApi = {
   /**
    * Register new user
    * POST /api/auth/register
-   * Backend returns: ApiResponse<RegisterResponse>
+   * Backend returns: ApiResponse<LoginResponse> - Auto-login after registration
    */
-  register: async (data: RegisterData): Promise<RegisterResponse> => {
+  register: async (data: RegisterData): Promise<AuthResponse> => {
     const response = await apiClient.post<{
       success: boolean;
       message?: string;
-      data: RegisterResponse;
+      data: AuthResponse;
     }>(API_ENDPOINTS.AUTH.REGISTER, data);
     return response.data.data || (response.data as any);
   },
@@ -53,7 +53,7 @@ export const authApi = {
    * Header: Refresh-Token: {refreshToken}
    */
   refreshToken: async (refreshToken: string): Promise<RefreshTokenResponse> => {
-    const response = await apiClient.post<RefreshTokenResponse>(
+    const response = await apiClient.post<ApiResponse<RefreshTokenResponse>>(
       API_ENDPOINTS.AUTH.REFRESH_TOKEN,
       null,
       {
@@ -62,7 +62,8 @@ export const authApi = {
         },
       },
     );
-    return response.data;
+    // Backend returns ApiResponse<LoginResponse> format
+    return response.data.data || response.data;
   },
 
   /**

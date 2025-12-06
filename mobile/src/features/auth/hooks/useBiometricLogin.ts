@@ -2,12 +2,11 @@
 // Oku: mobile-development-guide/features/03-AUTH-MODULE.md
 
 import { useMutation } from '@tanstack/react-query';
-import { useNavigation } from '@react-navigation/native';
 import { useCallback, useEffect, useState } from 'react';
 import { biometricService, authApi, tokenService } from '../services';
 import { useAuthStore } from '../stores';
-import type { RootStackNavigationProp } from '@shared/types';
 import { getErrorMessage } from '@core/utils/errorUtils';
+import { resetNavigation } from '@core/navigation/AppNavigator';
 
 /**
  * Biometric login hook
@@ -21,7 +20,6 @@ import { getErrorMessage } from '@core/utils/errorUtils';
  * 5. Navigate to main app
  */
 export const useBiometricLogin = () => {
-  const navigation = useNavigation<RootStackNavigationProp>();
   const { setUser, biometricEnabled } = useAuthStore();
   const [isBiometricAvailable, setIsBiometricAvailable] = useState(false);
   const [biometricName, setBiometricName] = useState<string>('');
@@ -73,11 +71,8 @@ export const useBiometricLogin = () => {
       // Update auth store
       setUser(user);
 
-      // Navigate to main app
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Main' }],
-      });
+      // Navigate to main app using helper function
+      resetNavigation(0, [{ name: 'Main' }]);
     },
 
     onError: (error: Error) => {

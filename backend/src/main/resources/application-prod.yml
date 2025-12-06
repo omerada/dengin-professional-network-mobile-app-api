@@ -33,9 +33,13 @@ spring:
   data:
     redis:
       cluster:
-        nodes: ${REDIS_CLUSTER_NODES:localhost:6379}
+        nodes: ${REDIS_CLUSTER_NODES:}
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
-      timeout: 5000
+      timeout: ${REDIS_TIMEOUT:5000}
+      ssl:
+        enabled: ${REDIS_SSL_ENABLED:true}
       lettuce:
         pool:
           max-active: 50
@@ -100,8 +104,8 @@ logging:
 security:
   jwt:
     secret: ${JWT_SECRET}
-    access-token-validity: 900000 # 15 minutes
-    refresh-token-validity: 604800000 # 7 days
+    access-token-validity: ${JWT_EXPIRATION:900000}
+    refresh-token-validity: ${JWT_REFRESH_EXPIRATION:604800000}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:https://meslektas.com}
     allowed-methods: GET,POST,PUT,DELETE,PATCH,OPTIONS
@@ -112,12 +116,17 @@ security:
 # AWS - Production configuration
 aws:
   region: ${AWS_REGION:eu-west-1}
+  access-key: ${AWS_ACCESS_KEY_ID}
+  secret-key: ${AWS_SECRET_ACCESS_KEY}
+  endpoint: ${AWS_ENDPOINT:}
   s3:
-    bucket-name: ${S3_BUCKET_NAME:meslektas-production}
-    presigned-url-expiration: 3600
+    bucket: ${AWS_S3_BUCKET}
+    bucket-name: ${AWS_S3_BUCKET}
+    presigned-url-expiration: ${AWS_S3_PRESIGNED_URL_EXPIRATION:3600}
   rekognition:
-    face-match-threshold: 80.0
-    min-confidence: 70.0
+    bucket-name: ${AWS_REKOGNITION_BUCKET:meslektas-verifications}
+    face-match-threshold: ${AWS_REKOGNITION_FACE_MATCH_THRESHOLD:80.0}
+    min-confidence: ${AWS_REKOGNITION_MIN_CONFIDENCE:70.0}
   ses:
     from-email: ${SES_FROM_EMAIL:noreply@meslektas.com}
     reply-to-email: ${SES_REPLY_TO:support@meslektas.com}
@@ -125,7 +134,7 @@ aws:
 # Sentry - Error tracking
 sentry:
   dsn: ${SENTRY_DSN:}
-  environment: production
+  environment: ${SENTRY_ENVIRONMENT:production}
   traces-sample-rate: 0.2
   send-default-pii: false
   logging:
@@ -134,9 +143,9 @@ sentry:
 
 # Rate Limiting
 rate-limiting:
-  enabled: true
-  requests-per-minute: 60
-  burst-capacity: 100
+  enabled: ${RATE_LIMITING_ENABLED:true}
+  requests-per-minute: ${RATE_LIMITING_REQUESTS_PER_MINUTE:60}
+  burst-capacity: ${RATE_LIMITING_BURST_CAPACITY:100}
 
 # Database - Production connection pool
 spring.datasource:
@@ -151,3 +160,9 @@ spring.datasource:
     connection-timeout: 30000
     leak-detection-threshold: 60000
     pool-name: MeslektasHikariPool
+
+# Storage
+storage:
+  type: ${STORAGE_TYPE:s3}
+  local:
+    upload-dir: ${STORAGE_LOCAL_UPLOAD_DIR:./uploads}

@@ -11,6 +11,7 @@ import { AppNavigator } from '@core/navigation';
 import { LocaleProvider } from '@contexts/LocaleContext';
 import { useColors, useTheme, ThemeProvider } from '@contexts/ThemeContext';
 import { useAuthStore } from '@features/auth/stores/authStore';
+import { notificationHandler } from '@features/notifications/services/notificationHandler.production';
 
 // Disable all LogBox warnings and yellow box notifications
 // Errors will still appear in terminal/console for debugging
@@ -57,11 +58,30 @@ const AppContent: React.FC = () => {
   const { isDark } = useTheme();
   const colors = useColors();
   const initialize = useAuthStore(state => state.initialize);
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
 
   // Initialize auth state on app start
   useEffect(() => {
     initialize();
   }, [initialize]);
+
+  // Initialize notifications when user is authenticated
+  useEffect(() => {
+    if (isAuthenticated && !__DEV__) {
+      // Only initialize in production builds
+      // Development builds use Expo Go which doesn't support remote notifications
+      notificationHandler.initialize().catch(error => {
+        console.error('[App] Failed to initialize notifications:', error);
+      });
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (isAuthenticated && !__DEV__) {
+        notificationHandler.cleanup();
+      }
+    };
+  }, [isAuthenticated]);
 
   return (
     <>

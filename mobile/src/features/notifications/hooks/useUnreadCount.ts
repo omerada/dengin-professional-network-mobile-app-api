@@ -20,7 +20,7 @@ export function useUnreadCount() {
   const setUnreadCount = useNotificationStore(state => state.setUnreadCount);
   const resetUnreadCount = useNotificationStore(state => state.resetUnreadCount);
 
-  const { data, isLoading, refetch, isRefetching, error } = useQuery({
+  const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: UNREAD_COUNT_QUERY_KEY,
     queryFn: async () => {
       try {
