@@ -1,22 +1,21 @@
 // src/features/verification/services/cameraService.ts
-// Kamera servisi - Vision Camera wrapper - Web compatible
+// Kamera servisi - Vision Camera wrapper
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import { Platform, PermissionsAndroid } from 'react-native';
-import type { CameraSettings, CapturedImage } from '../types';
+import { Camera, type CameraDevice, type PhotoFile } from 'react-native-vision-camera';
+import type { CapturedImage } from '../types';
 
-// Tip tanımlamaları
-export interface CameraDevice {
-  id: string;
+export type { CameraDevice };
+
+/**
+ * Kamera ayarları
+ */
+export interface CameraSettings {
+  flash: 'off' | 'on' | 'auto';
+  focus: 'auto' | 'manual';
+  zoom: number;
   position: 'front' | 'back';
-  hasFlash: boolean;
-  supportsPhotoHdr: boolean;
-}
-
-export interface PhotoFile {
-  path: string;
-  width: number;
-  height: number;
 }
 
 /**
@@ -24,28 +23,14 @@ export interface PhotoFile {
  */
 export type CameraPermissionStatus = 'granted' | 'denied' | 'not-determined' | 'restricted';
 
-// Native modülü dinamik olarak yükle
-let Camera: any = null;
-
-if (Platform.OS !== 'web') {
-  try {
-    Camera = require('react-native-vision-camera').Camera;
-  } catch (e) {
-    console.log('[CameraService] Native module not available');
-  }
-}
-
 /**
- * Kamera servisi - Web compatible
+ * Kamera servisi
  */
 export const cameraService = {
   /**
    * Kamera iznini kontrol et
    */
   async checkPermission(): Promise<CameraPermissionStatus> {
-    if (Platform.OS === 'web' || !Camera) {
-      return 'not-determined';
-    }
     const status = await Camera.getCameraPermissionStatus();
     return status as CameraPermissionStatus;
   },
@@ -54,9 +39,6 @@ export const cameraService = {
    * Kamera izni iste
    */
   async requestPermission(): Promise<CameraPermissionStatus> {
-    if (Platform.OS === 'web' || !Camera) {
-      return 'denied';
-    }
     const status = await Camera.requestCameraPermission();
     return status as CameraPermissionStatus;
   },
@@ -65,9 +47,6 @@ export const cameraService = {
    * Mikrofon izni iste (video için)
    */
   async requestMicrophonePermission(): Promise<CameraPermissionStatus> {
-    if (Platform.OS === 'web' || !Camera) {
-      return 'denied';
-    }
     const status = await Camera.requestMicrophonePermission();
     return status as CameraPermissionStatus;
   },
@@ -76,7 +55,6 @@ export const cameraService = {
    * Android için özel izin kontrolü
    */
   async checkAndroidPermissions(): Promise<boolean> {
-    if (Platform.OS === 'web') return false;
     if (Platform.OS !== 'android') return true;
 
     try {
@@ -99,9 +77,6 @@ export const cameraService = {
    * Kullanılabilir kameraları getir
    */
   getAvailableDevices(): CameraDevice[] {
-    if (Platform.OS === 'web' || !Camera) {
-      return [];
-    }
     return Camera.getAvailableCameraDevices();
   },
 
@@ -111,9 +86,8 @@ export const cameraService = {
   getBestBackCamera(): CameraDevice | undefined {
     const devices = this.getAvailableDevices();
     return (
-      devices.find(
-        device => device.position === 'back' && device.hasFlash && device.supportsPhotoHdr,
-      ) || devices.find(device => device.position === 'back')
+      devices.find(device => device.position === 'back' && device.hasFlash) ||
+      devices.find(device => device.position === 'back')
     );
   },
 

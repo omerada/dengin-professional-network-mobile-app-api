@@ -3,21 +3,9 @@
 // Oku: mobile-development-guide/core/13-REAL-TIME.md
 // Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
 
-import { Platform } from 'react-native';
 import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
 import type { IMessage, StompSubscription } from '@stomp/stompjs';
-
-// Dynamic import for web compatibility
-let Client: any;
-
-if (Platform.OS !== 'web') {
-  const stomp = require('@stomp/stompjs');
-  Client = stomp.Client;
-} else {
-  // For web, use UMD bundle
-  const stomp = require('@stomp/stompjs/bundles/stomp.umd.js');
-  Client = stomp.Client;
-}
 import { ENV } from '@config/env';
 import { tokenService } from '@features/auth/services';
 import { messageQueue } from './messageQueue';

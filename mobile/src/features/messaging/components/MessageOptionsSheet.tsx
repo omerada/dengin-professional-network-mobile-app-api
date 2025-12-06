@@ -1,29 +1,18 @@
 // src/features/messaging/components/MessageOptionsSheet.tsx
-// Mesaj seçenekleri alt sayfası - Web compatible
+// Mesaj seçenekleri alt sayfası
 // Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
 
-import React, { memo, useCallback, forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, Platform, Modal } from 'react-native';
+import React, { memo, useCallback, forwardRef, useImperativeHandle, useRef } from 'react';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetView,
+  type BottomSheetBackdropProps,
+} from '@gorhom/bottom-sheet';
 import { useColors } from '@contexts/ThemeContext';
 import type { Message } from '../types';
-
-// BottomSheet'i sadece native platformlarda yükle
-let BottomSheet: any = null;
-let BottomSheetBackdrop: any = null;
-let BottomSheetView: any = null;
-
-if (Platform.OS !== 'web') {
-  try {
-    const bottomSheetModule = require('@gorhom/bottom-sheet');
-    BottomSheet = bottomSheetModule.default;
-    BottomSheetBackdrop = bottomSheetModule.BottomSheetBackdrop;
-    BottomSheetView = bottomSheetModule.BottomSheetView;
-  } catch (e) {
-    console.log('[MessageOptionsSheet] BottomSheet not available');
-  }
-}
 
 interface MessageOptionsSheetProps {
   message: Message | null;
@@ -71,31 +60,18 @@ export const MessageOptionsSheet = forwardRef<MessageOptionsSheetRef, MessageOpt
   ({ message, isOwn, onReply, onCopy, onDelete, onReport }, ref) => {
     const colors = useColors();
     const bottomSheetRef = useRef<any>(null);
-    const [isVisible, setIsVisible] = useState(false);
 
     useImperativeHandle(ref, () => ({
       open: () => {
-        if (Platform.OS === 'web') {
-          setIsVisible(true);
-        } else {
-          bottomSheetRef.current?.expand();
-        }
+        bottomSheetRef.current?.expand();
       },
       close: () => {
-        if (Platform.OS === 'web') {
-          setIsVisible(false);
-        } else {
-          bottomSheetRef.current?.close();
-        }
+        bottomSheetRef.current?.close();
       },
     }));
 
     const handleClose = useCallback(() => {
-      if (Platform.OS === 'web') {
-        setIsVisible(false);
-      } else {
-        bottomSheetRef.current?.close();
-      }
+      bottomSheetRef.current?.close();
     }, []);
 
     const handleReply = useCallback(() => {
@@ -128,56 +104,11 @@ export const MessageOptionsSheet = forwardRef<MessageOptionsSheetRef, MessageOpt
     }, [message, onReport, handleClose]);
 
     const renderBackdrop = useCallback(
-      (props: any) =>
-        BottomSheetBackdrop ? (
-          <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />
-        ) : null,
+      (props: BottomSheetBackdropProps) => (
+        <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />
+      ),
       [],
     );
-
-    const renderContent = () => (
-      <>
-        {/* Message preview */}
-        {message && (
-          <View style={[styles.preview, { backgroundColor: colors.background.secondary }]}>
-            <Text style={[styles.previewText, { color: colors.text.secondary }]} numberOfLines={2}>
-              {message.content}
-            </Text>
-          </View>
-        )}
-
-        {/* Options */}
-        <View style={styles.options}>
-          <OptionItem icon="arrow-undo-outline" label="Yanıtla" onPress={handleReply} />
-
-          <OptionItem icon="copy-outline" label="Kopyala" onPress={handleCopy} />
-
-          {isOwn ? (
-            <OptionItem icon="trash-outline" label="Sil" onPress={handleDelete} destructive />
-          ) : (
-            <OptionItem icon="flag-outline" label="Bildir" onPress={handleReport} destructive />
-          )}
-        </View>
-      </>
-    );
-
-    // Web: Modal kullan
-    if (Platform.OS === 'web') {
-      return (
-        <Modal visible={isVisible} transparent animationType="fade" onRequestClose={handleClose}>
-          <Pressable style={styles.modalOverlay} onPress={handleClose}>
-            <View style={[styles.modalContent, { backgroundColor: colors.background.primary }]}>
-              {renderContent()}
-            </View>
-          </Pressable>
-        </Modal>
-      );
-    }
-
-    // Native: BottomSheet kullan
-    if (!BottomSheet || !BottomSheetView) {
-      return null;
-    }
 
     return (
       <BottomSheet
@@ -188,7 +119,31 @@ export const MessageOptionsSheet = forwardRef<MessageOptionsSheetRef, MessageOpt
         backdropComponent={renderBackdrop}
         backgroundStyle={{ backgroundColor: colors.background.primary }}
         handleIndicatorStyle={{ backgroundColor: colors.text.secondary }}>
-        <BottomSheetView style={styles.content}>{renderContent()}</BottomSheetView>
+        <BottomSheetView style={styles.content}>
+          {/* Message preview */}
+          {message && (
+            <View style={[styles.preview, { backgroundColor: colors.background.secondary }]}>
+              <Text
+                style={[styles.previewText, { color: colors.text.secondary }]}
+                numberOfLines={2}>
+                {message.content}
+              </Text>
+            </View>
+          )}
+
+          {/* Options */}
+          <View style={styles.options}>
+            <OptionItem icon="arrow-undo-outline" label="Yanıtla" onPress={handleReply} />
+
+            <OptionItem icon="copy-outline" label="Kopyala" onPress={handleCopy} />
+
+            {isOwn ? (
+              <OptionItem icon="trash-outline" label="Sil" onPress={handleDelete} destructive />
+            ) : (
+              <OptionItem icon="flag-outline" label="Bildir" onPress={handleReport} destructive />
+            )}
+          </View>
+        </BottomSheetView>
       </BottomSheet>
     );
   },

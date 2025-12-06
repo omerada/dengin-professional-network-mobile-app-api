@@ -1,30 +1,14 @@
 // src/core/socket/connectionMonitor.ts
-// Connection monitor for WebSocket - Web compatible
+// Connection monitor for WebSocket
 // Oku: mobile-development-guide/core/13-REAL-TIME.md
 
-import { AppState, AppStateStatus, NativeEventSubscription, Platform } from 'react-native';
+import { AppState, AppStateStatus, NativeEventSubscription } from 'react-native';
+import NetInfo, {
+  type NetInfoState,
+  type NetInfoSubscription,
+} from '@react-native-community/netinfo';
 import { stompClient } from './stompClient';
 import { SocketStatus } from './types';
-
-// NetInfo tiplerini tanımla
-interface NetInfoState {
-  isConnected: boolean | null;
-  isInternetReachable: boolean | null;
-  type: string;
-}
-
-type NetInfoSubscription = (() => void) | null;
-
-// NetInfo'yu dinamik olarak yükle
-let NetInfo: any = null;
-
-if (Platform.OS !== 'web') {
-  try {
-    NetInfo = require('@react-native-community/netinfo').default;
-  } catch (e) {
-    console.log('[ConnectionMonitor] NetInfo not available');
-  }
-}
 
 /**
  * Connection Monitor
@@ -57,25 +41,6 @@ class ConnectionMonitor {
     // Monitor network state changes (native only)
     if (NetInfo) {
       this.netInfoSubscription = NetInfo.addEventListener(this.handleNetInfoChange.bind(this));
-    } else {
-      // Web: use navigator.onLine
-      if (typeof window !== 'undefined') {
-        this.isNetworkConnected = navigator.onLine;
-        window.addEventListener('online', () =>
-          this.handleNetInfoChange({
-            isConnected: true,
-            isInternetReachable: true,
-            type: 'unknown',
-          }),
-        );
-        window.addEventListener('offline', () =>
-          this.handleNetInfoChange({
-            isConnected: false,
-            isInternetReachable: false,
-            type: 'none',
-          }),
-        );
-      }
     }
 
     console.log('[ConnectionMonitor] Started');

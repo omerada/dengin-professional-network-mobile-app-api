@@ -1,23 +1,10 @@
 // src/features/feed/services/imagePickerService.ts
-// Image picker servisi - Web compatible
+// Image picker servisi
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
 import { Platform, PermissionsAndroid, Alert, Linking } from 'react-native';
+import { launchImageLibrary, launchCamera } from 'react-native-image-picker';
 import type { LocalImage, ImagePickerOptions } from '../types';
-
-// Native modülü dinamik olarak yükle
-let launchImageLibrary: any = null;
-let launchCamera: any = null;
-
-if (Platform.OS !== 'web') {
-  try {
-    const imagePicker = require('react-native-image-picker');
-    launchImageLibrary = imagePicker.launchImageLibrary;
-    launchCamera = imagePicker.launchCamera;
-  } catch (e) {
-    console.log('[ImagePickerService] Native module not available');
-  }
-}
 
 /**
  * Galeri izni iste (Android)
@@ -191,7 +178,17 @@ export const imagePickerService = {
         {
           mediaType: options.mediaType,
           selectionLimit: options.selectionLimit,
-          quality: options.quality || 0.8,
+          quality: (options.quality || 0.8) as
+            | 0.1
+            | 0.2
+            | 0.3
+            | 0.4
+            | 0.5
+            | 0.6
+            | 0.7
+            | 0.8
+            | 0.9
+            | 1,
           includeBase64: false,
           includeExtra: true,
         },

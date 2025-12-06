@@ -1,28 +1,17 @@
 // src/features/messaging/components/ConversationOptionsSheet.tsx
-// Konuşma seçenekleri alt sayfası - Web compatible
+// Konuşma seçenekleri alt sayfası
 // Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
 
-import React, { memo, useCallback, forwardRef, useImperativeHandle, useRef, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, Platform, Modal } from 'react-native';
+import React, { memo, useCallback, forwardRef, useImperativeHandle, useRef } from 'react';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import BottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetView,
+  type BottomSheetBackdropProps,
+} from '@gorhom/bottom-sheet';
 import { useColors } from '@contexts/ThemeContext';
 import type { ConversationSummary } from '../types';
-
-// BottomSheet'i sadece native platformlarda yükle
-let BottomSheet: any = null;
-let BottomSheetBackdrop: any = null;
-let BottomSheetView: any = null;
-
-if (Platform.OS !== 'web') {
-  try {
-    const bottomSheetModule = require('@gorhom/bottom-sheet');
-    BottomSheet = bottomSheetModule.default;
-    BottomSheetBackdrop = bottomSheetModule.BottomSheetBackdrop;
-    BottomSheetView = bottomSheetModule.BottomSheetView;
-  } catch (e) {
-    console.log('[ConversationOptionsSheet] BottomSheet not available');
-  }
-}
 
 interface ConversationOptionsSheetProps {
   conversation: ConversationSummary | null;
@@ -71,31 +60,18 @@ export const ConversationOptionsSheet = forwardRef<
 >(({ conversation, onPin, onMute, onDelete, onBlock }, ref) => {
   const colors = useColors();
   const bottomSheetRef = useRef<any>(null);
-  const [isVisible, setIsVisible] = useState(false);
 
   useImperativeHandle(ref, () => ({
     open: () => {
-      if (Platform.OS === 'web') {
-        setIsVisible(true);
-      } else {
-        bottomSheetRef.current?.expand();
-      }
+      bottomSheetRef.current?.expand();
     },
     close: () => {
-      if (Platform.OS === 'web') {
-        setIsVisible(false);
-      } else {
-        bottomSheetRef.current?.close();
-      }
+      bottomSheetRef.current?.close();
     },
   }));
 
   const handleClose = useCallback(() => {
-    if (Platform.OS === 'web') {
-      setIsVisible(false);
-    } else {
-      bottomSheetRef.current?.close();
-    }
+    bottomSheetRef.current?.close();
   }, []);
 
   const handlePin = useCallback(() => {
@@ -127,62 +103,11 @@ export const ConversationOptionsSheet = forwardRef<
   }, [conversation, onBlock, handleClose]);
 
   const renderBackdrop = useCallback(
-    (props: any) =>
-      BottomSheetBackdrop ? (
-        <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />
-      ) : null,
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />
+    ),
     [],
   );
-
-  const renderContent = () => (
-    <>
-      {/* Header */}
-      {conversation && (
-        <View style={[styles.header, { borderBottomColor: colors.border.default }]}>
-          <Text style={[styles.headerTitle, { color: colors.text.primary }]} numberOfLines={1}>
-            {conversation.name}
-          </Text>
-        </View>
-      )}
-
-      {/* Options */}
-      <View style={styles.options}>
-        <OptionItem
-          icon={conversation?.isPinned ? 'pin-outline' : 'pin'}
-          label={conversation?.isPinned ? 'Sabitlemeyi Kaldır' : 'Sabitle'}
-          onPress={handlePin}
-        />
-
-        <OptionItem
-          icon={conversation?.isMuted ? 'volume-high' : 'volume-mute'}
-          label={conversation?.isMuted ? 'Sesi Aç' : 'Sessize Al'}
-          onPress={handleMute}
-        />
-
-        <OptionItem icon="trash-outline" label="Konuşmayı Sil" onPress={handleDelete} destructive />
-
-        <OptionItem icon="ban" label="Engelle" onPress={handleBlock} destructive />
-      </View>
-    </>
-  );
-
-  // Web: Modal kullan
-  if (Platform.OS === 'web') {
-    return (
-      <Modal visible={isVisible} transparent animationType="fade" onRequestClose={handleClose}>
-        <Pressable style={styles.modalOverlay} onPress={handleClose}>
-          <View style={[styles.modalContent, { backgroundColor: colors.background.primary }]}>
-            {renderContent()}
-          </View>
-        </Pressable>
-      </Modal>
-    );
-  }
-
-  // Native: BottomSheet kullan
-  if (!BottomSheet || !BottomSheetView) {
-    return null;
-  }
 
   return (
     <BottomSheet
@@ -193,7 +118,40 @@ export const ConversationOptionsSheet = forwardRef<
       backdropComponent={renderBackdrop}
       backgroundStyle={{ backgroundColor: colors.background.primary }}
       handleIndicatorStyle={{ backgroundColor: colors.text.secondary }}>
-      <BottomSheetView style={styles.content}>{renderContent()}</BottomSheetView>
+      <BottomSheetView style={styles.content}>
+        {/* Header */}
+        {conversation && (
+          <View style={[styles.header, { borderBottomColor: colors.border.default }]}>
+            <Text style={[styles.headerTitle, { color: colors.text.primary }]} numberOfLines={1}>
+              {conversation.name}
+            </Text>
+          </View>
+        )}
+
+        {/* Options */}
+        <View style={styles.options}>
+          <OptionItem
+            icon={conversation?.isPinned ? 'pin-outline' : 'pin'}
+            label={conversation?.isPinned ? 'Sabitlemeyi Kaldır' : 'Sabitle'}
+            onPress={handlePin}
+          />
+
+          <OptionItem
+            icon={conversation?.isMuted ? 'volume-high' : 'volume-mute'}
+            label={conversation?.isMuted ? 'Sesi Aç' : 'Sessize Al'}
+            onPress={handleMute}
+          />
+
+          <OptionItem
+            icon="trash-outline"
+            label="Konuşmayı Sil"
+            onPress={handleDelete}
+            destructive
+          />
+
+          <OptionItem icon="ban" label="Engelle" onPress={handleBlock} destructive />
+        </View>
+      </BottomSheetView>
     </BottomSheet>
   );
 });
