@@ -13,7 +13,7 @@ import type { RootStackNavigationProp } from '@shared/types';
 /**
  * Login hook with React Query mutation
  * Handles login flow including token storage and navigation
- * 
+ *
  * Backend API: POST /api/auth/login
  * Response format: { user, accessToken, refreshToken, tokenType, expiresIn }
  */
@@ -31,22 +31,36 @@ export const useLogin = () => {
     },
 
     onSuccess: async (data, variables) => {
-      // Save tokens securely (backend format: accessToken, refreshToken, expiresIn)
-      await tokenService.saveTokens(data);
+      try {
+        console.log('[useLogin] Login successful, response:', JSON.stringify(data, null, 2));
+        console.log('[useLogin] AccessToken type:', typeof data.accessToken);
+        console.log('[useLogin] AccessToken value:', data.accessToken);
+        console.log('[useLogin] RefreshToken type:', typeof data.refreshToken);
 
-      // Update auth store with user data
-      setUser(data.user);
+        // Save tokens securely (backend format: accessToken, refreshToken, expiresIn)
+        const tokensSaved = await tokenService.saveTokens(data);
 
-      // Remember last login email
-      if (variables.rememberMe) {
-        setLastLoginEmail(variables.email);
+        if (!tokensSaved) {
+          console.error('[useLogin] Failed to save tokens, but continuing...');
+        }
+
+        // Update auth store with user data
+        setUser(data.user);
+
+        // Remember last login email
+        if (variables.rememberMe) {
+          setLastLoginEmail(variables.email);
+        }
+
+        // Navigate to main app
+        console.log('[useLogin] Navigating to Main screen...');
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Main' }],
+        });
+      } catch (error) {
+        console.error('[useLogin] Error in onSuccess:', error);
       }
-
-      // Navigate to main app
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Main' }],
-      });
     },
 
     onError: (error: Error) => {

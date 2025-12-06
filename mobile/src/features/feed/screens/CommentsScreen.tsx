@@ -4,7 +4,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { View, StyleSheet, ActivityIndicator, RefreshControl, Alert } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
+import { FlatList } from 'react-native';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
@@ -195,7 +195,7 @@ export const CommentsScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
-      <FlashList
+      <FlatList
         data={comments}
         renderItem={renderComment}
         keyExtractor={keyExtractor}

@@ -5,7 +5,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { View, RefreshControl, ActivityIndicator, Alert } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { FlashList } from '@shopify/flash-list';
+import { FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import { useColors } from '@contexts/ThemeContext';
@@ -245,7 +245,7 @@ export const FeedScreen: React.FC = () => {
     <Animated.View
       entering={FadeIn.duration(300)}
       style={[styles.container, { backgroundColor: colors.background.primary }]}>
-      <FlashList
+      <FlatList
         data={posts}
         renderItem={renderPost}
         keyExtractor={keyExtractor}

@@ -4,7 +4,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { View, StyleSheet, RefreshControl, ActivityIndicator } from 'react-native';
-import { FlashList, ContentStyle } from '@shopify/flash-list';
+import { FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
@@ -82,7 +82,7 @@ export const FollowersListScreen: React.FC = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['bottom']}>
-      <FlashList
+      <FlatList
         data={users}
         renderItem={renderItem}
         keyExtractor={keyExtractor}

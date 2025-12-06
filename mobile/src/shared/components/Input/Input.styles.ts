@@ -120,8 +120,10 @@ export const styles = StyleSheet.create({
   },
 
   label: {
+    alignSelf: 'flex-start',
     left: 16,
     position: 'absolute',
+    textAlign: 'left',
     zIndex: 1,
   },
 

@@ -2,16 +2,15 @@
 // Oku: mobile-development-guide/architecture/01-MOBILE-ARCHITECTURE.md
 // Oku: mobile-development-guide/sprints/23-SPRINT-1-2.md
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { StatusBar, LogBox } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppNavigator } from '@core/navigation';
-import { useAuthStore } from '@features/auth/stores';
 import { LocaleProvider } from '@contexts/LocaleContext';
 import { useColors, useTheme, ThemeProvider } from '@contexts/ThemeContext';
-import { testBackendConnection } from '@core/api';
+import { useAuthStore } from '@features/auth/stores/authStore';
 
 // Ignore specific warnings in development
 LogBox.ignoreLogs(['Non-serializable values were found in the navigation state']);
@@ -41,24 +40,6 @@ const queryClient = new QueryClient({
 const AppContent: React.FC = () => {
   const { isDark } = useTheme();
   const colors = useColors();
-  const initialize = useAuthStore(state => state.initialize);
-
-  // Initialize auth state on app start
-  useEffect(() => {
-    initialize();
-
-    // Test backend connection on startup (dev only)
-    if (__DEV__) {
-      testBackendConnection().then((isReachable: boolean) => {
-        if (isReachable) {
-          console.log('[App] ✅ Backend is reachable');
-        } else {
-          console.error('[App] ❌ Backend NOT reachable - check network configuration');
-        }
-      });
-    }
-  }, [initialize]);
-
   return (
     <>
       <StatusBar

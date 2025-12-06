@@ -252,15 +252,10 @@ export const Input = memo(
               style={[
                 styles.label,
                 {
-                  position: 'absolute',
-                  left: leftIcon
-                    ? sizeConfig.paddingX + sizeConfig.iconSize + 8
-                    : sizeConfig.paddingX,
                   top: -2,
                   backgroundColor:
                     variant === 'outlined' ? colors.background.primary : 'transparent',
                   paddingHorizontal: variant === 'outlined' ? 4 : 0,
-                  zIndex: 10,
                 },
                 animatedLabelStyle,
                 labelStyle,

@@ -27,14 +27,29 @@ export const tokenService = {
    */
   saveTokens: async (response: AuthResponse | RefreshTokenResponse): Promise<boolean> => {
     try {
+      // Validate tokens are strings (SecureStore requirement)
+      const accessToken = response.accessToken;
+      const refreshToken = response.refreshToken;
+
+      if (typeof accessToken !== 'string' || !accessToken) {
+        console.error('[TokenService] Invalid accessToken:', typeof accessToken, accessToken);
+        return false;
+      }
+
+      if (typeof refreshToken !== 'string' || !refreshToken) {
+        console.error('[TokenService] Invalid refreshToken:', typeof refreshToken, refreshToken);
+        return false;
+      }
+
       const expiresAt = Date.now() + response.expiresIn * 1000;
 
       await Promise.all([
-        secureStorage.set(TOKEN_KEYS.ACCESS_TOKEN, response.accessToken),
-        secureStorage.set(TOKEN_KEYS.REFRESH_TOKEN, response.refreshToken),
+        secureStorage.set(TOKEN_KEYS.ACCESS_TOKEN, accessToken),
+        secureStorage.set(TOKEN_KEYS.REFRESH_TOKEN, refreshToken),
         secureStorage.set(TOKEN_KEYS.EXPIRES_AT, expiresAt.toString()),
       ]);
 
+      console.log('[TokenService] Tokens saved successfully');
       return true;
     } catch (error) {
       console.error('[TokenService] Error saving tokens:', error);
