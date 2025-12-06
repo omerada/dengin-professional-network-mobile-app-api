@@ -22,6 +22,7 @@ import { useColors } from '@contexts/ThemeContext';
 import { useDebounce } from '@shared/hooks/useDebounce';
 import { useUserSearch } from '@features/social/hooks';
 import { useStartConversation } from '../hooks';
+import { getErrorMessage } from '@core/utils/errorUtils';
 import type { UserSummary } from '../types';
 import type { MessagingStackParamList } from '@core/navigation/types';
 
@@ -99,8 +100,8 @@ export const NewConversationScreen: React.FC = () => {
         const conversationId = await startConversation(user.id);
         navigation.replace('Chat', { conversationId });
       } catch (error) {
-        // Show user-friendly error message
-        const errorMessage = error instanceof Error ? error.message : 'Konuşma başlatılamadı';
+        // Show backend error message
+        const errorMessage = getErrorMessage(error);
         Alert.alert('Hata', errorMessage);
       } finally {
         setLoadingUserId(null);

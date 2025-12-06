@@ -289,7 +289,8 @@ public class MailgunEmailService implements EmailService {
     }
 
     private boolean isConfigured() {
-        return apiKey != null && !apiKey.isBlank() && domain != null && !domain.isBlank();
+        return apiKey != null && !apiKey.isBlank() && !"not-configured".equals(apiKey)
+                && domain != null && !domain.isBlank() && !"not-configured".equals(domain);
     }
 
     private boolean isReady() {
@@ -297,8 +298,15 @@ public class MailgunEmailService implements EmailService {
     }
 
     private void logEmail(String type, String recipient, String details) {
-        log.info("📧 [DEV MODE] Email would be sent: type={}, recipient={}, details={}",
-                type, recipient, details);
+        if (!emailEnabled) {
+            log.info("📧 [EMAIL DISABLED] Email sending is disabled in configuration");
+        } else if (!isConfigured()) {
+            log.info("📧 [EMAIL NOT CONFIGURED] Mailgun credentials not configured. Email would be sent: type={}, recipient={}, details={}",
+                    type, recipient, details);
+        } else {
+            log.info("📧 [DEV MODE] Email would be sent: type={}, recipient={}, details={}",
+                    type, recipient, details);
+        }
     }
 
     private String getSubjectForType(NotificationType type, NotificationContent content) {

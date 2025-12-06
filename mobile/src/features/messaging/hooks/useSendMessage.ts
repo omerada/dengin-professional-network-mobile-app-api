@@ -8,6 +8,7 @@ import { useMutation, useQueryClient, InfiniteData } from '@tanstack/react-query
 import { useCallback } from 'react';
 import { stompClient } from '../services/socketClient';
 import { messagingService } from '../services';
+import { getErrorMessage } from '@core/utils/errorUtils';
 import { MESSAGES_QUERY_KEY } from './useMessages';
 import { CONVERSATIONS_QUERY_KEY } from './useConversations';
 import { useAuthStore } from '@features/auth/stores';

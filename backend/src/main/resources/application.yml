@@ -105,12 +105,12 @@ app:
 
 # Email (Mailgun)
 mailgun:
-  api-key: ${MAILGUN_API_KEY}
-  domain: ${MAILGUN_DOMAIN}
+  api-key: ${MAILGUN_API_KEY:not-configured}
+  domain: ${MAILGUN_DOMAIN:not-configured}
   sender-email: ${MAILGUN_SENDER_EMAIL:noreply@meslektas.com}
   sender-name: ${MAILGUN_SENDER_NAME:Meslektaş}
   enabled: ${MAILGUN_ENABLED:true}
-  base-url: ${MAILGUN_BASE_URL:https://api.mailgun.net}
+  base-url: ${MAILGUN_BASE_URL:https://api.eu.mailgun.net/v3}
 
 # Firebase (Push Notifications)
 firebase:

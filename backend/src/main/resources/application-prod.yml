@@ -47,6 +47,10 @@ spring:
           min-idle: 5
           max-wait: 5000
 
+# Email (Mailgun) - Production
+mailgun:
+  enabled: ${MAILGUN_ENABLED:true}
+
 # Server - Production settings
 server:
   port: 8080

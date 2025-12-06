@@ -215,9 +215,13 @@ apiClient.interceptors.response.use(
       }
     }
 
-    // Enhance error with user-friendly message
-    const enhancedError = error;
-    enhancedError.message = getErrorMessage(error);
+    // Create new Error with user-friendly message from backend
+    // This ensures getErrorMessage() is used consistently
+    const userFriendlyMessage = getErrorMessage(error);
+    const enhancedError = Object.assign(error, {
+      message: userFriendlyMessage,
+      userMessage: userFriendlyMessage, // Fallback property
+    });
 
     return Promise.reject(enhancedError);
   },

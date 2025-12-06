@@ -46,6 +46,7 @@ export const CreatePostScreen: React.FC = () => {
   // Header buttons
   useLayoutEffect(() => {
     navigation.setOptions({
+      headerTitle: 'Yeni Gönderi',
       headerLeft: () => (
         <Pressable onPress={handleClose} style={styles.headerButton} disabled={isPosting}>
           <Icon name="close" size={24} color={colors.text.primary} />

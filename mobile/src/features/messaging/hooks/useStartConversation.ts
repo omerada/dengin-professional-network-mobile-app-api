@@ -4,6 +4,7 @@
 
 import { useCallback, useState } from 'react';
 import { messagingService } from '../services';
+import { getErrorMessage } from '@core/utils/errorUtils';
 import type { SendMessageRequest } from '../types';
 
 /**
@@ -37,7 +38,8 @@ export function useStartConversation() {
         const response = await messagingService.sendMessage(request);
         return response.conversationId;
       } catch (err) {
-        const error = err instanceof Error ? err : new Error('Konuşma başlatılamadı');
+        const errorMessage = getErrorMessage(err);
+        const error = new Error(errorMessage);
         setError(error);
         throw error;
       } finally {
