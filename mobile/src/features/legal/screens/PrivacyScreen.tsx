@@ -24,8 +24,18 @@ export const PrivacyScreen: React.FC = () => {
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.backButton}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Text style={[styles.backButtonText, { color: colors.text.primary }]}>←</Text>
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+          <View
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: 28,
+              backgroundColor: colors.background.secondary,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <Text style={[styles.backButtonText, { color: colors.text.primary }]}>←</Text>
+          </View>
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text.primary }]}>
           Gizlilik Politikası
@@ -139,16 +149,12 @@ export const PrivacyScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   backButton: {
-    height: 48,
-    width: 48,
     justifyContent: 'center',
     alignItems: 'flex-start',
-    paddingLeft: 0,
   },
   backButtonText: {
     fontSize: 32,
     fontWeight: '300',
-    lineHeight: 32,
   },
   container: {
     flex: 1,

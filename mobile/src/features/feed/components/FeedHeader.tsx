@@ -10,7 +10,6 @@ import Animated, {
   withSpring,
   withSequence,
 } from 'react-native-reanimated';
-import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
 import { spring } from '@theme/animations';
@@ -168,7 +167,7 @@ export const FeedHeader: React.FC<FeedHeaderProps> = memo(({ onCreatePress }) =>
           onPress={handleCreatePress}
           accessibilityLabel="Yeni gönderi oluştur"
           accessibilityRole="button">
-          <Icon name="add" size={24} color={colors.text.inverse} />
+          <Text style={{ color: '#FFFFFF', fontSize: 20, fontWeight: '600' }}>+</Text>
         </AnimatedPressable>
       )}
     </View>

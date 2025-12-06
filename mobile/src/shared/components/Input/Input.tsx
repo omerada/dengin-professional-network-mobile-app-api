@@ -85,6 +85,8 @@ export const Input = memo(
         onFocus,
         onBlur,
         secureTextEntry,
+        isPasswordVisible: propPasswordVisible,
+        onPasswordVisibilityToggle,
         ...props
       },
       ref,
@@ -92,7 +94,10 @@ export const Input = memo(
       const colors = useColors();
       const inputRef = useRef<TextInput>(null);
       const [isFocused, setIsFocused] = useState(false);
-      const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+      const [localPasswordVisible, setLocalPasswordVisible] = useState(false);
+
+      // Use shared password visibility if available, otherwise use local state
+      const isPasswordVisible = propPasswordVisible ?? localPasswordVisible;
 
       // Animation values
       const focusProgress = useSharedValue(0);
@@ -217,8 +222,12 @@ export const Input = memo(
 
       // Toggle password visibility
       const togglePasswordVisibility = useCallback(() => {
-        setIsPasswordVisible(prev => !prev);
-      }, []);
+        if (onPasswordVisibilityToggle) {
+          onPasswordVisibilityToggle();
+        } else {
+          setLocalPasswordVisible(prev => !prev);
+        }
+      }, [onPasswordVisibilityToggle]);
 
       // Clear input
       const handleClear = useCallback(() => {
@@ -346,9 +355,40 @@ export const Input = memo(
                 accessible
                 accessibilityRole="button"
                 accessibilityLabel={isPasswordVisible ? 'Şifreyi gizle' : 'Şifreyi göster'}>
-                <Text style={{ color: colors.text.secondary, fontSize: 20 }}>
-                  {isPasswordVisible ? '👁' : '🔒'}
-                </Text>
+                <View
+                  style={{ width: 24, height: 24, justifyContent: 'center', alignItems: 'center' }}>
+                  {isPasswordVisible ? (
+                    <View
+                      style={{
+                        width: 18,
+                        height: 18,
+                        borderRadius: 9,
+                        borderWidth: 2,
+                        borderColor: colors.text.secondary,
+                        backgroundColor: 'transparent',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}>
+                      <View
+                        style={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: 3,
+                          backgroundColor: colors.text.secondary,
+                        }}
+                      />
+                    </View>
+                  ) : (
+                    <View
+                      style={{
+                        width: 18,
+                        height: 18,
+                        borderRadius: 9,
+                        backgroundColor: colors.text.secondary,
+                      }}
+                    />
+                  )}
+                </View>
               </Pressable>
             )}
 

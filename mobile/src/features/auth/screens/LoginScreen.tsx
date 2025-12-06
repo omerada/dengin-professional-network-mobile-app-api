@@ -107,40 +107,44 @@ export const LoginScreen: React.FC = () => {
               accessibilityRole="button"
               accessibilityLabel="Geri dön"
               style={styles.backButton}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Text
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+              <View
                 style={{
-                  color: colors.text.primary,
-                  fontSize: 32,
-                  fontWeight: '300',
-                  lineHeight: 32,
+                  width: 56,
+                  height: 56,
+                  borderRadius: 28,
+                  backgroundColor: colors.background.secondary,
+                  justifyContent: 'center',
+                  alignItems: 'center',
                 }}>
-                ←
-              </Text>
+                <Text style={{ color: colors.text.primary, fontSize: 32, fontWeight: '300' }}>
+                  ←
+                </Text>
+              </View>
             </TouchableOpacity>
           </View>
 
-          {/* Logo */}
-          <View style={styles.logoContainer}>
-            <View
-              style={[
-                styles.logoPlaceholder,
-                {
-                  backgroundColor: colors.interactive.subtle,
-                },
-              ]}>
-              <Text style={[styles.logoText, { color: colors.interactive.default }]}>M</Text>
+          {/* Hero Section */}
+          <View style={styles.heroSection}>
+            <View style={styles.logoContainer}>
+              <View
+                style={[
+                  styles.logoPlaceholder,
+                  {
+                    backgroundColor: colors.interactive.default,
+                  },
+                ]}>
+                <Text style={[styles.logoText, { color: '#FFFFFF' }]}>M</Text>
+              </View>
             </View>
-          </View>
-
-          {/* Title */}
-          <View style={styles.titleContainer}>
-            <Text style={[styles.title, { color: colors.text.primary }]}>
-              {t('auth.welcomeBack')}
-            </Text>
-            <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
-              Hesabınıza giriş yapın
-            </Text>
+            <View style={styles.titleContainer}>
+              <Text style={[styles.title, { color: colors.text.primary }]}>
+                {t('auth.welcomeBack')}
+              </Text>
+              <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
+                Profesyonel ağınıza giriş yapın
+              </Text>
+            </View>
           </View>
 
           {/* Error Message */}
@@ -275,30 +279,36 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   backButton: {
-    width: 48,
-    height: 48,
     justifyContent: 'center',
     alignItems: 'flex-start',
-    paddingLeft: 0,
+  },
+  heroSection: {
+    alignItems: 'center',
+    marginBottom: spacing['2xl'],
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: spacing.xl,
+    marginBottom: spacing.lg,
   },
   logoPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 24,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
   },
   logoText: {
-    fontSize: 40,
-    fontWeight: '700',
-    letterSpacing: -1,
+    fontSize: 48,
+    fontWeight: 'bold',
   },
   titleContainer: {
-    marginBottom: spacing['2xl'],
+    marginBottom: spacing.md,
+    alignItems: 'center',
   },
   title: {
     fontSize: 28,

@@ -16,8 +16,7 @@ import {
 } from 'react-native';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing } from '@theme';
-import { useQuery } from '@tanstack/react-query';
-import { professionApi, type ProfessionResponse } from '@features/profile/services/professionApi';
+import { PROFESSIONS, type Profession } from '../constants/professions';
 
 const MODAL_OVERLAY_COLOR = 'rgba(0, 0, 0, 0.5)';
 
@@ -134,12 +133,9 @@ export const ProfessionSelector: React.FC<ProfessionSelectorProps> = ({
   const [customError, setCustomError] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
 
-  // Fetch professions from backend
-  const { data: professions, isLoading } = useQuery({
-    queryKey: ['professions'],
-    queryFn: professionApi.getAll,
-    staleTime: 1000 * 60 * 60, // 1 hour
-  });
+  // Use hardcoded professions
+  const professions = PROFESSIONS;
+  const isLoading = false;
 
   // Find selected profession
   const selectedProfession = useMemo(() => {
@@ -159,7 +155,7 @@ export const ProfessionSelector: React.FC<ProfessionSelectorProps> = ({
   const isOtherCategory = selectedProfession?.category === 'OTHER';
 
   const handleProfessionSelect = useCallback(
-    (profession: ProfessionResponse) => {
+    (profession: Profession) => {
       if (profession.category === 'OTHER') {
         setModalVisible(false);
         setShowCustomInput(true);

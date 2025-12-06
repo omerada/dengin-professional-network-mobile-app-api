@@ -131,16 +131,20 @@ export const ForgotPasswordScreen: React.FC = () => {
               accessibilityRole="button"
               accessibilityLabel="Geri dön"
               style={styles.backButton}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Text
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+              <View
                 style={{
-                  color: colors.text.primary,
-                  fontSize: 32,
-                  fontWeight: '300',
-                  lineHeight: 32,
+                  width: 56,
+                  height: 56,
+                  borderRadius: 28,
+                  backgroundColor: colors.background.secondary,
+                  justifyContent: 'center',
+                  alignItems: 'center',
                 }}>
-                ←
-              </Text>
+                <Text style={{ color: colors.text.primary, fontSize: 32, fontWeight: '300' }}>
+                  ←
+                </Text>
+              </View>
             </TouchableOpacity>
           </View>
 
@@ -229,11 +233,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   backButton: {
-    width: 48,
-    height: 48,
     justifyContent: 'center',
     alignItems: 'flex-start',
-    paddingLeft: 0,
   },
   titleContainer: {
     marginBottom: spacing['3xl'],

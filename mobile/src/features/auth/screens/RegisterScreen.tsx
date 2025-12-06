@@ -12,7 +12,7 @@ import {
   Platform,
   ScrollView,
   TouchableOpacity,
-  Switch,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -43,6 +43,7 @@ export const RegisterScreen: React.FC = () => {
   const { t } = useLocale();
   const navigation = useNavigation<AuthStackNavigationProp>();
   const { register, isLoading, error, isError, reset } = useRegister();
+  const [passwordVisible, setPasswordVisible] = React.useState(false);
 
   const {
     control,
@@ -103,8 +104,18 @@ export const RegisterScreen: React.FC = () => {
               accessibilityRole="button"
               accessibilityLabel="Geri dön"
               style={styles.backButton}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Text style={[styles.backButtonText, { color: colors.text.primary }]}>←</Text>
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+              <View
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 28,
+                  backgroundColor: colors.background.secondary,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <Text style={[styles.backButtonText, { color: colors.text.primary }]}>←</Text>
+              </View>
             </TouchableOpacity>
           </View>
 
@@ -234,6 +245,8 @@ export const RegisterScreen: React.FC = () => {
                   error={errors.password?.message}
                   hint="En az 8 karakter, büyük/küçük harf ve rakam içermeli"
                   required
+                  isPasswordVisible={passwordVisible}
+                  onPasswordVisibilityToggle={() => setPasswordVisible(!passwordVisible)}
                 />
               )}
             />
@@ -254,6 +267,8 @@ export const RegisterScreen: React.FC = () => {
                   onBlur={onBlur}
                   error={errors.confirmPassword?.message}
                   required
+                  isPasswordVisible={passwordVisible}
+                  onPasswordVisibilityToggle={() => setPasswordVisible(!passwordVisible)}
                 />
               )}
             />
@@ -263,29 +278,53 @@ export const RegisterScreen: React.FC = () => {
               control={control}
               name="acceptTerms"
               render={({ field: { onChange, value } }) => (
-                <View
+                <Pressable
                   style={[
                     styles.termsContainer,
                     {
                       backgroundColor: colors.background.secondary,
                       borderRadius: 12,
                       padding: spacing.md,
+                      borderWidth: 1,
+                      borderColor: errors.acceptTerms ? colors.status.error : colors.border.default,
                     },
-                  ]}>
+                  ]}
+                  onPress={e => {
+                    // Check if press is on links
+                    const target = e.target as any;
+                    if (!target?.onPress) {
+                      onChange(!value);
+                    }
+                  }}
+                  accessible={true}
+                  accessibilityRole="checkbox"
+                  accessibilityLabel="Kullanım koşullarını kabul et"
+                  accessibilityState={{ checked: value }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Switch
-                      value={value}
-                      onValueChange={onChange}
-                      trackColor={{
-                        false: colors.border.default,
-                        true: colors.interactive.subtle,
-                      }}
-                      thumbColor={value ? colors.interactive.default : colors.background.primary}
-                      accessible={true}
-                      accessibilityRole="switch"
-                      accessibilityLabel="Kullanım koşullarını kabul et"
-                      accessibilityState={{ checked: value }}
-                    />
+                    <View
+                      style={{
+                        width: 48,
+                        height: 32,
+                        borderRadius: 16,
+                        backgroundColor: value ? colors.interactive.default : colors.border.default,
+                        justifyContent: 'center',
+                        alignItems: value ? 'flex-end' : 'flex-start',
+                        paddingHorizontal: 3,
+                      }}>
+                      <View
+                        style={{
+                          width: 26,
+                          height: 26,
+                          borderRadius: 13,
+                          backgroundColor: '#FFFFFF',
+                          shadowColor: '#000',
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 0.2,
+                          shadowRadius: 2,
+                          elevation: 3,
+                        }}
+                      />
+                    </View>
                     <View style={styles.termsTextContainer}>
                       <Text style={[styles.termsText, { color: colors.text.secondary }]}>
                         <Text
@@ -307,12 +346,12 @@ export const RegisterScreen: React.FC = () => {
                     <Text
                       style={[
                         styles.errorSmall,
-                        { color: colors.status.error, marginTop: spacing.xs, marginLeft: 44 },
+                        { color: colors.status.error, marginTop: spacing.xs, marginLeft: 52 },
                       ]}>
                       {errors.acceptTerms.message}
                     </Text>
                   )}
-                </View>
+                </Pressable>
               )}
             />
           </View>
@@ -353,16 +392,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   backButton: {
-    height: 48,
     justifyContent: 'center',
-    width: 48,
     alignItems: 'flex-start',
-    paddingLeft: 0,
   },
   backButtonText: {
     fontSize: 32,
     fontWeight: '300',
-    lineHeight: 32,
   },
   container: {
     flex: 1,

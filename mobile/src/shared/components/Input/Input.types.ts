@@ -135,6 +135,12 @@ export interface InputProps extends Omit<TextInputProps, 'style'> {
 
   /** Accessibility hint */
   accessibilityHint?: string;
+
+  /** Password visibility state (for shared password visibility) */
+  isPasswordVisible?: boolean;
+
+  /** Callback when password visibility toggle is pressed */
+  onPasswordVisibilityToggle?: () => void;
 }
 
 /**
