@@ -15,7 +15,7 @@ import {
   Text,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { useAuthStore } from '@features/auth/stores/authStore';
 
 interface AddCommentFormProps {
@@ -42,7 +42,7 @@ export const AddCommentForm: React.FC<AddCommentFormProps> = memo(
     replyToId,
     onCancelReply,
   }) => {
-    const { theme } = useTheme();
+    const colors = useColors();
     const user = useAuthStore(state => state.user);
     const [content, setContent] = useState('');
     const inputRef = useRef<TextInput>(null);
@@ -75,18 +75,18 @@ export const AddCommentForm: React.FC<AddCommentFormProps> = memo(
             style={[
               styles.replyIndicator,
               {
-                backgroundColor: theme.colors.primary[50],
-                borderBottomColor: theme.colors.border.light,
+                backgroundColor: colors.interactive.subtle,
+                borderBottomColor: colors.border.default,
               },
             ]}>
-            <Icon name="arrow-undo" size={14} color={theme.colors.primary[500]} />
-            <Text style={[styles.replyText, { color: theme.colors.primary[700] }]}>
+            <Icon name="arrow-undo" size={14} color={colors.interactive.default} />
+            <Text style={[styles.replyText, { color: colors.interactive.default }]}>
               Yanıtlanıyor
             </Text>
             <Pressable
               onPress={onCancelReply}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Icon name="close" size={18} color={theme.colors.text.secondary} />
+              <Icon name="close" size={18} color={colors.text.secondary} />
             </Pressable>
           </View>
         )}
@@ -94,8 +94,8 @@ export const AddCommentForm: React.FC<AddCommentFormProps> = memo(
           style={[
             styles.container,
             {
-              backgroundColor: theme.colors.background.primary,
-              borderTopColor: theme.colors.border.light,
+              backgroundColor: colors.background.primary,
+              borderTopColor: colors.border.default,
             },
           ]}>
           {/* Avatar */}
@@ -103,19 +103,18 @@ export const AddCommentForm: React.FC<AddCommentFormProps> = memo(
             <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
           ) : (
             <View
-              style={[styles.avatarPlaceholder, { backgroundColor: theme.colors.primary[100] }]}>
-              <Icon name="person" size={16} color={theme.colors.primary[600]} />
+              style={[styles.avatarPlaceholder, { backgroundColor: colors.interactive.subtle }]}>
+              <Icon name="person" size={16} color={colors.interactive.default} />
             </View>
           )}
 
           {/* Input */}
-          <View
-            style={[styles.inputContainer, { backgroundColor: theme.colors.background.secondary }]}>
+          <View style={[styles.inputContainer, { backgroundColor: colors.background.secondary }]}>
             <TextInput
               ref={inputRef}
-              style={[styles.input, { color: theme.colors.text.primary }]}
+              style={[styles.input, { color: colors.text.primary }]}
               placeholder={placeholder}
-              placeholderTextColor={theme.colors.text.secondary}
+              placeholderTextColor={colors.text.secondary}
               value={content}
               onChangeText={setContent}
               multiline
@@ -131,12 +130,12 @@ export const AddCommentForm: React.FC<AddCommentFormProps> = memo(
             onPress={handleSubmit}
             disabled={isDisabled}>
             {isLoading ? (
-              <ActivityIndicator size="small" color={theme.colors.primary[500]} />
+              <ActivityIndicator size="small" color={colors.interactive.default} />
             ) : (
               <Icon
                 name="send"
                 size={20}
-                color={isDisabled ? theme.colors.text.disabled : theme.colors.primary[500]}
+                color={isDisabled ? colors.text.disabled : colors.interactive.default}
               />
             )}
           </Pressable>

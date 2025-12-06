@@ -12,7 +12,7 @@ import {
   AccessibilityInfo,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { Button, Input } from '@shared/components';
 import { spacing, fontSize, borderRadius } from '@theme';
 import { REPORT_REASONS } from '../types';
@@ -57,7 +57,7 @@ export const ReportForm = React.memo<ReportFormProps>(
     submitText = 'Şikayet Gönder',
     testID,
   }) => {
-    const { theme } = useTheme();
+    const colors = useColors();
     const [selectedReason, setSelectedReason] = useState<ReportReason | null>(null);
     const [description, setDescription] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -110,12 +110,10 @@ export const ReportForm = React.memo<ReportFormProps>(
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {/* Header */}
           <View style={styles.header}>
-            <Text
-              style={[styles.title, { color: theme.colors.text.primary }]}
-              accessibilityRole="header">
+            <Text style={[styles.title, { color: colors.text.primary }]} accessibilityRole="header">
               Neden şikayet ediyorsunuz?
             </Text>
-            <Text style={[styles.subtitle, { color: theme.colors.text.secondary }]}>
+            <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
               {getTypeLabel(type)} için en uygun nedeni seçin
             </Text>
           </View>
@@ -123,10 +121,10 @@ export const ReportForm = React.memo<ReportFormProps>(
           {/* Error message */}
           {error && (
             <View
-              style={[styles.errorContainer, { backgroundColor: theme.colors.error.background }]}
+              style={[styles.errorContainer, { backgroundColor: colors.error.background }]}
               accessibilityRole="alert">
-              <Icon name="alert-circle" size={20} color={theme.colors.error.main} />
-              <Text style={[styles.errorText, { color: theme.colors.error.dark }]}>{error}</Text>
+              <Icon name="alert-circle" size={20} color={colors.error.main} />
+              <Text style={[styles.errorText, { color: colors.error.dark }]}>{error}</Text>
             </View>
           )}
 
@@ -144,11 +142,9 @@ export const ReportForm = React.memo<ReportFormProps>(
                     styles.reasonItem,
                     {
                       backgroundColor: isSelected
-                        ? theme.colors.primary[50]
-                        : theme.colors.background.secondary,
-                      borderColor: isSelected
-                        ? theme.colors.primary[500]
-                        : theme.colors.border.light,
+                        ? colors.interactive.subtle
+                        : colors.background.secondary,
+                      borderColor: isSelected ? colors.interactive.default : colors.border.default,
                     },
                   ]}
                   onPress={() => handleReasonSelect(reason.value)}
@@ -162,20 +158,20 @@ export const ReportForm = React.memo<ReportFormProps>(
                     <Icon
                       name={reason.icon}
                       size={24}
-                      color={isSelected ? theme.colors.primary[500] : theme.colors.text.secondary}
+                      color={isSelected ? colors.interactive.default : colors.text.secondary}
                     />
                     <Text
                       style={[
                         styles.reasonLabel,
                         {
-                          color: isSelected ? theme.colors.primary[700] : theme.colors.text.primary,
+                          color: isSelected ? colors.interactive.pressed : colors.text.primary,
                         },
                       ]}>
                       {reason.label}
                     </Text>
                   </View>
                   {isSelected && (
-                    <Icon name="checkmark-circle" size={24} color={theme.colors.primary[500]} />
+                    <Icon name="checkmark-circle" size={24} color={colors.interactive.default} />
                   )}
                 </TouchableOpacity>
               );
@@ -184,7 +180,7 @@ export const ReportForm = React.memo<ReportFormProps>(
 
           {/* Description input */}
           <View style={styles.descriptionContainer}>
-            <Text style={[styles.descriptionLabel, { color: theme.colors.text.primary }]}>
+            <Text style={[styles.descriptionLabel, { color: colors.text.primary }]}>
               Ek bilgi (isteğe bağlı)
             </Text>
             <Input
@@ -199,14 +195,14 @@ export const ReportForm = React.memo<ReportFormProps>(
               accessibilityHint="Şikayetiniz hakkında ek detay girin"
               testID="report-description-input"
             />
-            <Text style={[styles.charCount, { color: theme.colors.text.tertiary }]}>
+            <Text style={[styles.charCount, { color: colors.text.tertiary }]}>
               {description.length}/500
             </Text>
           </View>
         </ScrollView>
 
         {/* Actions */}
-        <View style={[styles.actions, { borderTopColor: theme.colors.border.light }]}>
+        <View style={[styles.actions, { borderTopColor: colors.border.default }]}>
           {showCancel && onCancel && (
             <Button
               title="İptal"

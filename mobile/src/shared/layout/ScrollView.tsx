@@ -2,7 +2,7 @@
 // Enhanced ScrollView bileşeni - Pull-to-refresh, infinite scroll desteği
 // Oku: mobile-development-guide/ui/17-DESIGN-SYSTEM.md
 
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useMemo } from 'react';
 import {
   ScrollView as RNScrollView,
   StyleSheet,
@@ -12,13 +12,13 @@ import {
   NativeScrollEvent,
   Animated,
 } from 'react-native';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { spacing } from '@theme';
 
 /**
  * EnhancedScrollView props
  */
-interface EnhancedScrollViewProps {
+export interface EnhancedScrollViewProps {
   /** Children */
   children: React.ReactNode;
   /** Horizontal scroll */
@@ -66,9 +66,9 @@ interface EnhancedScrollViewProps {
  */
 const paddingValues = {
   none: 0,
-  sm: spacing.sm,
-  md: spacing.md,
-  lg: spacing.lg,
+  sm: spacing['2'],
+  md: spacing['4'],
+  lg: spacing['6'],
 };
 
 /**
@@ -113,7 +113,7 @@ export const EnhancedScrollView = React.memo<EnhancedScrollViewProps>(
     padding = 'none',
     testID,
   }) => {
-    const { theme } = useTheme();
+    const colors = useColors();
     const isEndReachedCalled = useRef(false);
 
     const handleScroll = useCallback(
@@ -146,11 +146,17 @@ export const EnhancedScrollView = React.memo<EnhancedScrollViewProps>(
 
     const paddingValue = paddingValues[padding];
 
-    const mergedContentStyle: ViewStyle = {
-      padding: paddingValue,
-      flexGrow: 1,
-      ...contentContainerStyle,
-    };
+    const mergedContentStyle = useMemo<ViewStyle>(
+      () => ({
+        padding: paddingValue,
+        flexGrow: 1,
+        ...contentContainerStyle,
+      }),
+      [paddingValue, contentContainerStyle],
+    );
+
+    // RefreshControl color
+    const refreshColor = colors.interactive.default;
 
     return (
       <RNScrollView
@@ -171,9 +177,9 @@ export const EnhancedScrollView = React.memo<EnhancedScrollViewProps>(
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor={theme.colors.primary[500]}
-              colors={[theme.colors.primary[500]]}
-              progressBackgroundColor={theme.colors.background.secondary}
+              tintColor={refreshColor}
+              colors={[refreshColor]}
+              progressBackgroundColor={colors.background.secondary}
             />
           ) : undefined
         }>
@@ -188,16 +194,19 @@ EnhancedScrollView.displayName = 'EnhancedScrollView';
 /**
  * AnimatedScrollView for scroll animations
  */
-interface AnimatedScrollViewProps extends EnhancedScrollViewProps {
+export interface AnimatedScrollViewProps extends EnhancedScrollViewProps {
   /** Animated scroll Y value */
   scrollY?: Animated.Value;
 }
 
 export const AnimatedScrollView = React.memo<AnimatedScrollViewProps>(
   ({ scrollY, onScroll, ...props }) => {
-    const { theme } = useTheme();
+    const colors = useColors();
     const internalScrollY = useRef(new Animated.Value(0)).current;
-    const animatedValue = scrollY || internalScrollY;
+    const animatedValue = scrollY ?? internalScrollY;
+
+    // RefreshControl color
+    const refreshColor = colors.interactive.default;
 
     const handleScroll = Animated.event(
       [{ nativeEvent: { contentOffset: { y: animatedValue } } }],
@@ -215,10 +224,10 @@ export const AnimatedScrollView = React.memo<AnimatedScrollViewProps>(
         refreshControl={
           props.refreshable ? (
             <RefreshControl
-              refreshing={props.refreshing || false}
+              refreshing={props.refreshing ?? false}
               onRefresh={props.onRefresh}
-              tintColor={theme.colors.primary[500]}
-              colors={[theme.colors.primary[500]]}
+              tintColor={refreshColor}
+              colors={[refreshColor]}
             />
           ) : undefined
         }
@@ -232,7 +241,7 @@ AnimatedScrollView.displayName = 'AnimatedScrollView';
 /**
  * HorizontalScrollView shorthand
  */
-interface HorizontalScrollViewProps extends Omit<EnhancedScrollViewProps, 'horizontal'> {
+export interface HorizontalScrollViewProps extends Omit<EnhancedScrollViewProps, 'horizontal'> {
   /** Show pagination dots */
   showPagination?: boolean;
   /** Current page index */

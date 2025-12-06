@@ -15,7 +15,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { useLocale } from '@contexts/LocaleContext';
 import { Button, Input } from '@shared/components';
 import { useForgotPassword } from '../hooks';
@@ -28,7 +28,7 @@ import { spacing, borderRadius } from '@theme';
  * Request password reset email
  */
 export const ForgotPasswordScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const { t } = useLocale();
   const navigation = useNavigation<AuthStackNavigationProp>();
   const { requestReset, isLoading, error, isError, isEmailSent, reset } = useForgotPassword();
@@ -63,22 +63,17 @@ export const ForgotPasswordScreen: React.FC = () => {
   // Success state
   if (isEmailSent) {
     return (
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: theme.colors.background.primary }]}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
         <View style={styles.successContent}>
-          <View
-            style={[
-              styles.successIcon,
-              { backgroundColor: theme.colors.success.background },
-            ]}>
+          <View style={[styles.successIcon, { backgroundColor: colors.status.success }]}>
             <Text style={{ fontSize: 40 }}>✉️</Text>
           </View>
-          <Text style={[styles.successTitle, { color: theme.colors.text.primary }]}>
+          <Text style={[styles.successTitle, { color: colors.text.primary }]}>
             E-posta Gönderildi
           </Text>
-          <Text style={[styles.successText, { color: theme.colors.text.secondary }]}>
-            Şifre sıfırlama bağlantısı e-posta adresinize gönderildi. Lütfen gelen kutunuzu
-            kontrol edin.
+          <Text style={[styles.successText, { color: colors.text.secondary }]}>
+            Şifre sıfırlama bağlantısı e-posta adresinize gönderildi. Lütfen gelen kutunuzu kontrol
+            edin.
           </Text>
           <Button
             title="Giriş Sayfasına Dön"
@@ -94,8 +89,7 @@ export const ForgotPasswordScreen: React.FC = () => {
   }
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background.primary }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
       <KeyboardAvoidingView
         style={styles.keyboardAvoid}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
@@ -111,28 +105,24 @@ export const ForgotPasswordScreen: React.FC = () => {
               accessibilityRole="button"
               accessibilityLabel="Geri dön"
               style={styles.backButton}>
-              <Text style={{ color: theme.colors.text.primary, fontSize: 24 }}>←</Text>
+              <Text style={{ color: colors.text.primary, fontSize: 24 }}>←</Text>
             </TouchableOpacity>
           </View>
 
           {/* Title */}
           <View style={styles.titleContainer}>
-            <Text style={[styles.title, { color: theme.colors.text.primary }]}>
+            <Text style={[styles.title, { color: colors.text.primary }]}>
               {t('auth.forgotPassword')}
             </Text>
-            <Text style={[styles.subtitle, { color: theme.colors.text.secondary }]}>
+            <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
               E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.
             </Text>
           </View>
 
           {/* Error Message */}
           {isError && error && (
-            <View
-              style={[
-                styles.errorContainer,
-                { backgroundColor: theme.colors.error.background },
-              ]}>
-              <Text style={[styles.errorText, { color: theme.colors.error.main }]}>
+            <View style={[styles.errorContainer, { backgroundColor: colors.status.error }]}>
+              <Text style={[styles.errorText, { color: colors.status.error }]}>
                 {(error as Error).message || 'Bir hata oluştu'}
               </Text>
             </View>
@@ -180,7 +170,7 @@ export const ForgotPasswordScreen: React.FC = () => {
             accessibilityRole="link"
             accessibilityLabel="Giriş sayfasına dön"
             style={styles.backToLogin}>
-            <Text style={{ color: theme.colors.primary[500] }}>← Giriş sayfasına dön</Text>
+            <Text style={{ color: colors.interactive.default }}>← Giriş sayfasına dön</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>

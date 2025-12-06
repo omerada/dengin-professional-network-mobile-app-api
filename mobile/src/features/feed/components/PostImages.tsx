@@ -15,7 +15,7 @@ import {
   StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const IMAGE_GAP = 2;
@@ -26,7 +26,7 @@ interface PostImagesProps {
 }
 
 export const PostImages: React.FC<PostImagesProps> = memo(({ images, postId }) => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -71,13 +71,8 @@ export const PostImages: React.FC<PostImagesProps> = memo(({ images, postId }) =
             <Pressable
               key={`${postId}-image-${index}`}
               style={styles.twoImageItem}
-              onPress={() => openImage(index)}
-            >
-              <Image
-                source={{ uri: imageUrl }}
-                style={styles.twoImageContent}
-                resizeMode="cover"
-              />
+              onPress={() => openImage(index)}>
+              <Image source={{ uri: imageUrl }} style={styles.twoImageContent} resizeMode="cover" />
             </Pressable>
           ))}
         </View>
@@ -108,8 +103,7 @@ export const PostImages: React.FC<PostImagesProps> = memo(({ images, postId }) =
               <Pressable
                 key={`${postId}-image-${index + 1}`}
                 style={styles.threeImageSideItem}
-                onPress={() => openImage(index + 1)}
-              >
+                onPress={() => openImage(index + 1)}>
                 <Image
                   source={{ uri: imageUrl }}
                   style={styles.threeImageSideContent}
@@ -137,13 +131,8 @@ export const PostImages: React.FC<PostImagesProps> = memo(({ images, postId }) =
           <Pressable
             key={`${postId}-image-${index}`}
             style={styles.fourImageItem}
-            onPress={() => openImage(index)}
-          >
-            <Image
-              source={{ uri: imageUrl }}
-              style={styles.fourImageContent}
-              resizeMode="cover"
-            />
+            onPress={() => openImage(index)}>
+            <Image source={{ uri: imageUrl }} style={styles.fourImageContent} resizeMode="cover" />
             {index === 3 && images.length > 4 && (
               <View style={styles.moreOverlay}>
                 <Text style={styles.moreText}>+{images.length - 4}</Text>
@@ -172,12 +161,7 @@ interface ImageModalProps {
   onClose: () => void;
 }
 
-const ImageModal: React.FC<ImageModalProps> = ({
-  visible,
-  images,
-  initialIndex,
-  onClose,
-}) => {
+const ImageModal: React.FC<ImageModalProps> = ({ visible, images, initialIndex, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
 
   const onViewableItemsChanged = useCallback(({ viewableItems }: any) => {
@@ -187,12 +171,7 @@ const ImageModal: React.FC<ImageModalProps> = ({
   }, []);
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <StatusBar hidden />
       <View style={styles.modalContainer}>
         <Pressable style={styles.closeButton} onPress={onClose}>
@@ -214,11 +193,7 @@ const ImageModal: React.FC<ImageModalProps> = ({
           viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
           renderItem={({ item: imageUrl, index }) => (
             <View style={styles.modalImageContainer}>
-              <Image
-                source={{ uri: imageUrl }}
-                style={styles.modalImage}
-                resizeMode="contain"
-              />
+              <Image source={{ uri: imageUrl }} style={styles.modalImage} resizeMode="contain" />
             </View>
           )}
           keyExtractor={(item, index) => `modal-image-${index}`}

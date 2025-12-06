@@ -5,35 +5,24 @@
 import React, { memo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 
 interface EmptyChatProps {
   userName?: string;
 }
 
 export const EmptyChat: React.FC<EmptyChatProps> = memo(({ userName }) => {
-  const { theme } = useTheme();
+  const colors = useColors();
 
   return (
     <View style={styles.container}>
-      <View
-        style={[
-          styles.iconContainer,
-          { backgroundColor: theme.colors.primary[50] },
-        ]}
-      >
-        <Icon
-          name="chatbubble-ellipses-outline"
-          size={40}
-          color={theme.colors.primary[500]}
-        />
+      <View style={[styles.iconContainer, { backgroundColor: colors.interactive.subtle }]}>
+        <Icon name="chatbubble-ellipses-outline" size={40} color={colors.interactive.default} />
       </View>
 
-      <Text style={[styles.title, { color: theme.colors.text.primary }]}>
-        Sohbete Başlayın
-      </Text>
+      <Text style={[styles.title, { color: colors.text.primary }]}>Sohbete Başlayın</Text>
 
-      <Text style={[styles.description, { color: theme.colors.text.secondary }]}>
+      <Text style={[styles.description, { color: colors.text.secondary }]}>
         {userName
           ? `${userName} ile ilk mesajınızı gönderin`
           : 'İlk mesajınızı göndererek sohbete başlayın'}

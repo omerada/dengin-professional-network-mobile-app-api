@@ -23,7 +23,6 @@ export const styles = StyleSheet.create({
     top: -4,
   },
   badgeText: {
-    color: '#FFFFFF',
     fontSize: 10,
     fontWeight: '700',
   },

@@ -1,26 +1,27 @@
 // src/shared/components/Divider/Divider.tsx
-// Divider bileşeni - Görsel ayırıcı
-// Oku: mobile-development-guide/ui/17-DESIGN-SYSTEM.md
+// Meslektaş Design System - Modern Divider Component
+// Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
-import React from 'react';
+import React, { memo, useMemo } from 'react';
 import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { spacing, fontSize } from '@theme';
 
-/**
- * Divider orientation
- */
+// ============================================================================
+// Types
+// ============================================================================
+
+/** Divider orientation */
 export type DividerOrientation = 'horizontal' | 'vertical';
 
-/**
- * Divider variant
- */
+/** Divider variant */
 export type DividerVariant = 'fullWidth' | 'inset' | 'middle';
 
-/**
- * Divider props
- */
-interface DividerProps {
+/** Divider spacing */
+export type DividerSpacing = 'none' | 'sm' | 'md' | 'lg';
+
+/** Divider props */
+export interface DividerProps {
   /** Orientation */
   orientation?: DividerOrientation;
   /** Variant */
@@ -38,18 +39,48 @@ interface DividerProps {
   /** Label style */
   labelStyle?: TextStyle;
   /** Spacing (margin) */
-  spacing?: 'none' | 'sm' | 'md' | 'lg';
+  spacing?: DividerSpacing;
   /** Test ID */
   testID?: string;
 }
 
+// ============================================================================
+// Constants
+// ============================================================================
+
+const SPACING_VALUES: Record<DividerSpacing, number> = {
+  lg: spacing['6'],
+  md: spacing['4'],
+  none: 0,
+  sm: spacing['2'],
+};
+
+// ============================================================================
+// Divider Component
+// ============================================================================
+
 /**
- * Divider component
+ * Modern Divider Component
  *
  * Visual separator for content sections. Supports horizontal and vertical
  * orientations, with optional text labels for section titles.
+ *
+ * @example
+ * ```tsx
+ * // Basic horizontal divider
+ * <Divider />
+ *
+ * // With label
+ * <Divider label="Veya" labelPosition="center" />
+ *
+ * // Inset variant
+ * <Divider variant="inset" />
+ *
+ * // Vertical divider
+ * <Divider orientation="vertical" />
+ * ```
  */
-export const Divider = React.memo<DividerProps>(
+export const Divider = memo<DividerProps>(
   ({
     orientation = 'horizontal',
     variant = 'fullWidth',
@@ -62,34 +93,23 @@ export const Divider = React.memo<DividerProps>(
     spacing: spacingProp = 'md',
     testID,
   }) => {
-    const { theme } = useTheme();
+    const colors = useColors();
 
-    const dividerColor = color || theme.colors.border.light;
-
-    // Spacing values
-    const spacingValues = {
-      none: 0,
-      sm: spacing.sm,
-      md: spacing.md,
-      lg: spacing.lg,
-    };
-
-    const spacingValue = spacingValues[spacingProp];
+    const dividerColor = color || colors.border.default;
+    const spacingValue = SPACING_VALUES[spacingProp];
 
     // Variant-specific insets
-    const getInset = (): { left?: number; right?: number } => {
+    const inset = useMemo(() => {
       switch (variant) {
         case 'inset':
-          return { left: spacing.xl };
+          return { left: spacing['6'] };
         case 'middle':
-          return { left: spacing.lg, right: spacing.lg };
+          return { left: spacing['4'], right: spacing['4'] };
         case 'fullWidth':
         default:
           return {};
       }
-    };
-
-    const inset = getInset();
+    }, [variant]);
 
     // Horizontal divider
     if (orientation === 'horizontal') {
@@ -106,14 +126,14 @@ export const Divider = React.memo<DividerProps>(
                   styles.line,
                   {
                     backgroundColor: dividerColor,
-                    height: thickness,
                     flex: labelPosition === 'center' ? 1 : undefined,
+                    height: thickness,
                     width: labelPosition === 'right' ? 40 : undefined,
                   },
                 ]}
               />
             )}
-            <Text style={[styles.label, { color: theme.colors.text.secondary }, labelStyle]}>
+            <Text style={[styles.label, { color: colors.text.secondary }, labelStyle]}>
               {label}
             </Text>
             {(labelPosition === 'center' || labelPosition === 'left') && (
@@ -122,8 +142,8 @@ export const Divider = React.memo<DividerProps>(
                   styles.line,
                   {
                     backgroundColor: dividerColor,
-                    height: thickness,
                     flex: labelPosition === 'center' ? 1 : undefined,
+                    height: thickness,
                     width: labelPosition === 'left' ? 40 : undefined,
                   },
                 ]}
@@ -141,9 +161,9 @@ export const Divider = React.memo<DividerProps>(
             {
               backgroundColor: dividerColor,
               height: thickness,
-              marginVertical: spacingValue,
               marginLeft: inset.left,
               marginRight: inset.right,
+              marginVertical: spacingValue,
             },
             style,
           ]}
@@ -160,8 +180,8 @@ export const Divider = React.memo<DividerProps>(
           styles.vertical,
           {
             backgroundColor: dividerColor,
-            width: thickness,
             marginHorizontal: spacingValue,
+            width: thickness,
           },
           style,
         ]}
@@ -174,25 +194,29 @@ export const Divider = React.memo<DividerProps>(
 
 Divider.displayName = 'Divider';
 
+// ============================================================================
+// Styles
+// ============================================================================
+
 const styles = StyleSheet.create({
   horizontal: {
     width: '100%',
   },
-  vertical: {
-    alignSelf: 'stretch',
+  label: {
+    fontSize: fontSize.sm,
+    fontWeight: '500',
+    paddingHorizontal: spacing['4'],
   },
   labelContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     width: '100%',
   },
   line: {
     flex: 1,
   },
-  label: {
-    fontSize: fontSize.sm,
-    fontWeight: '500',
-    paddingHorizontal: spacing.md,
+  vertical: {
+    alignSelf: 'stretch',
   },
 });
 

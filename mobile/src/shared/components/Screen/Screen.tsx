@@ -2,7 +2,7 @@
 // Screen wrapper bileşeni - SafeAreaView wrapper
 // Oku: mobile-development-guide/ui/17-DESIGN-SYSTEM.md
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   ScrollView,
@@ -14,7 +14,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView, Edge } from 'react-native-safe-area-context';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors, useTheme } from '@contexts/ThemeContext';
 import { spacing } from '@theme';
 import { Loading } from '../Loading';
 
@@ -26,7 +26,7 @@ export type ScreenPadding = 'none' | 'sm' | 'md' | 'lg';
 /**
  * Screen props
  */
-interface ScreenProps {
+export interface ScreenProps {
   /** Children */
   children: React.ReactNode;
   /** Safe area edges */
@@ -86,42 +86,55 @@ export const Screen = React.memo<ScreenProps>(
     contentContainerStyle,
     testID,
   }) => {
-    const { theme, isDark } = useTheme();
+    const colors = useColors();
+    const { isDark } = useTheme();
 
-    const bgColor = backgroundColor || theme.colors.background.primary;
-    const barStyle = statusBarStyle || (isDark ? 'light-content' : 'dark-content');
+    const bgColor = backgroundColor ?? colors.background.primary;
+    const barStyle = statusBarStyle ?? (isDark ? 'light-content' : 'dark-content');
 
     // Padding values
-    const paddingValues = {
-      none: 0,
-      sm: spacing.sm,
-      md: spacing.md,
-      lg: spacing.lg,
-    };
+    const paddingValues = useMemo(
+      () => ({
+        none: 0,
+        sm: spacing['2'],
+        md: spacing['4'],
+        lg: spacing['6'],
+      }),
+      [],
+    );
 
     const paddingValue = paddingValues[padding];
 
     // Content styles
-    const contentStyle: ViewStyle = {
-      flex: 1,
-      padding: paddingValue,
-      ...(centerContent && {
-        justifyContent: 'center',
-        alignItems: 'center',
+    const contentStyle = useMemo<ViewStyle>(
+      () => ({
+        flex: 1,
+        padding: paddingValue,
+        ...(centerContent && {
+          justifyContent: 'center',
+          alignItems: 'center',
+        }),
+        ...style,
       }),
-      ...style,
-    };
+      [paddingValue, centerContent, style],
+    );
 
     // Scroll content container style
-    const scrollContentStyle: ViewStyle = {
-      flexGrow: 1,
-      padding: paddingValue,
-      ...(centerContent && {
-        justifyContent: 'center',
-        alignItems: 'center',
+    const scrollContentStyle = useMemo<ViewStyle>(
+      () => ({
+        flexGrow: 1,
+        padding: paddingValue,
+        ...(centerContent && {
+          justifyContent: 'center',
+          alignItems: 'center',
+        }),
+        ...contentContainerStyle,
       }),
-      ...contentContainerStyle,
-    };
+      [paddingValue, centerContent, contentContainerStyle],
+    );
+
+    // RefreshControl colors
+    const refreshControlColor = colors.interactive.default;
 
     // Loading overlay
     if (loading) {
@@ -150,8 +163,8 @@ export const Screen = React.memo<ScreenProps>(
                 <RefreshControl
                   refreshing={refreshing}
                   onRefresh={onRefresh}
-                  tintColor={theme.colors.primary[500]}
-                  colors={[theme.colors.primary[500]]}
+                  tintColor={refreshControlColor}
+                  colors={[refreshControlColor]}
                 />
               ) : undefined
             }>

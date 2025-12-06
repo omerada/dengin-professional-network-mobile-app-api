@@ -11,7 +11,7 @@ import {
   VerificationReviewScreen,
   UploadStatusScreen,
 } from '@features/verification/screens';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { VerificationStackParamList } from '@shared/types';
 
 const Stack = createNativeStackNavigator<VerificationStackParamList>();
@@ -20,7 +20,7 @@ const Stack = createNativeStackNavigator<VerificationStackParamList>();
  * Verification Navigator
  */
 export const VerificationNavigator: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
 
   return (
     <Stack.Navigator
@@ -28,17 +28,16 @@ export const VerificationNavigator: React.FC = () => {
         headerShown: true,
         animation: 'slide_from_right',
         headerStyle: {
-          backgroundColor: theme.colors.background.primary,
+          backgroundColor: colors.background.primary,
         },
-        headerTintColor: theme.colors.text.primary,
+        headerTintColor: colors.text.primary,
         headerTitleStyle: {
           fontWeight: '600',
         },
         contentStyle: {
-          backgroundColor: theme.colors.background.primary,
+          backgroundColor: colors.background.primary,
         },
-      }}
-    >
+      }}>
       <Stack.Screen
         name="VerificationIntro"
         component={VerificationIntroScreen}

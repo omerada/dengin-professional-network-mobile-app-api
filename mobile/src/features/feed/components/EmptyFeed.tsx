@@ -3,14 +3,9 @@
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
 import React, { memo } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-} from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 
 interface EmptyFeedProps {
   title?: string;
@@ -20,52 +15,37 @@ interface EmptyFeedProps {
   icon?: string;
 }
 
-export const EmptyFeed: React.FC<EmptyFeedProps> = memo(({
-  title = 'Henüz gönderi yok',
-  message = 'Takip ettiğiniz kişilerden gönderiler burada görünecek.',
-  actionLabel,
-  onAction,
-  icon = 'newspaper-outline',
-}) => {
-  const { theme } = useTheme();
+export const EmptyFeed: React.FC<EmptyFeedProps> = memo(
+  ({
+    title = 'Henüz gönderi yok',
+    message = 'Takip ettiğiniz kişilerden gönderiler burada görünecek.',
+    actionLabel,
+    onAction,
+    icon = 'newspaper-outline',
+  }) => {
+    const colors = useColors();
 
-  return (
-    <View style={styles.container}>
-      <View
-        style={[
-          styles.iconContainer,
-          { backgroundColor: theme.colors.primary[100] },
-        ]}
-      >
-        <Icon
-          name={icon}
-          size={48}
-          color={theme.colors.primary[500]}
-        />
+    return (
+      <View style={styles.container}>
+        <View style={[styles.iconContainer, { backgroundColor: colors.interactive.subtle }]}>
+          <Icon name={icon} size={48} color={colors.interactive.default} />
+        </View>
+
+        <Text style={[styles.title, { color: colors.text.primary }]}>{title}</Text>
+
+        <Text style={[styles.message, { color: colors.text.secondary }]}>{message}</Text>
+
+        {actionLabel && onAction && (
+          <Pressable
+            style={[styles.actionButton, { backgroundColor: colors.interactive.default }]}
+            onPress={onAction}>
+            <Text style={styles.actionLabel}>{actionLabel}</Text>
+          </Pressable>
+        )}
       </View>
-
-      <Text style={[styles.title, { color: theme.colors.text.primary }]}>
-        {title}
-      </Text>
-
-      <Text style={[styles.message, { color: theme.colors.text.secondary }]}>
-        {message}
-      </Text>
-
-      {actionLabel && onAction && (
-        <Pressable
-          style={[
-            styles.actionButton,
-            { backgroundColor: theme.colors.primary[500] },
-          ]}
-          onPress={onAction}
-        >
-          <Text style={styles.actionLabel}>{actionLabel}</Text>
-        </Pressable>
-      )}
-    </View>
-  );
-});
+    );
+  },
+);
 
 EmptyFeed.displayName = 'EmptyFeed';
 

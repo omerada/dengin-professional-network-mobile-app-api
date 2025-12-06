@@ -1,19 +1,25 @@
 // src/features/feed/components/FeedHeader.tsx
-// Feed header - filter tabs
-// Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
+// Meslektaş Design System - Modern Feed Header
+// Oku: mobile-development-guide/ui-ux-modernization/07-SCREEN-REDESIGNS.md
 
-import React, { memo } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  ScrollView,
-} from 'react-native';
+import React, { memo, useCallback } from 'react';
+import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withSequence,
+} from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
+import { useHaptic } from '@shared/hooks/useHaptic';
+import { spring } from '@theme/animations';
 import { useFeedStore } from '../stores';
 import type { FeedFilter } from '../types';
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface FilterOption {
   key: FeedFilter;
@@ -32,69 +38,140 @@ interface FeedHeaderProps {
   onCreatePress?: () => void;
 }
 
+// ============================================================================
+// AnimatedPressable
+// ============================================================================
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+// ============================================================================
+// FilterButton Component
+// ============================================================================
+
+interface FilterButtonProps {
+  option: FilterOption;
+  isActive: boolean;
+  onPress: () => void;
+}
+
+const FilterButton: React.FC<FilterButtonProps> = memo(({ option, isActive, onPress }) => {
+  const colors = useColors();
+  const { trigger } = useHaptic();
+  const scale = useSharedValue(1);
+
+  const handlePress = useCallback(() => {
+    trigger('selection');
+    scale.value = withSequence(withSpring(0.9, spring.press), withSpring(1, spring.snappy));
+    onPress();
+  }, [onPress, trigger, scale]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  return (
+    <AnimatedPressable
+      style={[
+        styles.filterButton,
+        {
+          backgroundColor: isActive ? colors.interactive.default : colors.background.secondary,
+        },
+        animatedStyle,
+      ]}
+      onPress={handlePress}
+      accessibilityRole="tab"
+      accessibilityState={{ selected: isActive }}
+      accessibilityLabel={option.label}>
+      <Icon
+        name={option.icon}
+        size={16}
+        color={isActive ? colors.text.inverse : colors.text.secondary}
+      />
+      <Text
+        style={[
+          styles.filterLabel,
+          { color: isActive ? colors.text.inverse : colors.text.secondary },
+        ]}>
+        {option.label}
+      </Text>
+    </AnimatedPressable>
+  );
+});
+
+FilterButton.displayName = 'FilterButton';
+
+// ============================================================================
+// FeedHeader Component
+// ============================================================================
+
+/**
+ * Modern FeedHeader Component
+ *
+ * Features:
+ * - Animated filter buttons with spring physics
+ * - Haptic feedback on selection
+ * - Modern color tokens
+ * - Accessibility support
+ *
+ * @example
+ * ```tsx
+ * <FeedHeader onCreatePress={() => navigation.navigate('CreatePost')} />
+ * ```
+ */
 export const FeedHeader: React.FC<FeedHeaderProps> = memo(({ onCreatePress }) => {
-  const { theme } = useTheme();
-  const filter = useFeedStore((state) => state.filter);
-  const setFilter = useFeedStore((state) => state.setFilter);
+  const colors = useColors();
+  const { trigger } = useHaptic();
+  const filter = useFeedStore(state => state.filter);
+  const setFilter = useFeedStore(state => state.setFilter);
+
+  // Create button animation
+  const createScale = useSharedValue(1);
+
+  const handleCreatePress = useCallback(() => {
+    trigger('medium');
+    createScale.value = withSequence(withSpring(0.85, spring.press), withSpring(1, spring.snappy));
+    onCreatePress?.();
+  }, [onCreatePress, trigger, createScale]);
+
+  const createAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: createScale.value }],
+  }));
 
   return (
     <View
       style={[
         styles.container,
         {
-          backgroundColor: theme.colors.background.primary,
-          borderBottomColor: theme.colors.border.light,
+          backgroundColor: colors.background.primary,
+          borderBottomColor: colors.border.default,
         },
-      ]}
-    >
+      ]}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filters}
-      >
-        {FILTER_OPTIONS.map((option) => {
-          const isActive = filter === option.key;
-          return (
-            <Pressable
-              key={option.key}
-              style={[
-                styles.filterButton,
-                {
-                  backgroundColor: isActive
-                    ? theme.colors.primary[500]
-                    : theme.colors.background.secondary,
-                },
-              ]}
-              onPress={() => setFilter(option.key)}
-            >
-              <Icon
-                name={option.icon}
-                size={16}
-                color={isActive ? '#FFFFFF' : theme.colors.text.secondary}
-              />
-              <Text
-                style={[
-                  styles.filterLabel,
-                  { color: isActive ? '#FFFFFF' : theme.colors.text.secondary },
-                ]}
-              >
-                {option.label}
-              </Text>
-            </Pressable>
-          );
-        })}
+        contentContainerStyle={styles.filters}>
+        {FILTER_OPTIONS.map(option => (
+          <FilterButton
+            key={option.key}
+            option={option}
+            isActive={filter === option.key}
+            onPress={() => setFilter(option.key)}
+          />
+        ))}
       </ScrollView>
 
       {onCreatePress && (
-        <Pressable
+        <AnimatedPressable
           style={[
             styles.createButton,
-            { backgroundColor: theme.colors.primary[500] },
+            { backgroundColor: colors.interactive.default },
+            createAnimatedStyle,
           ]}
-          onPress={onCreatePress}
-        >
-          <Icon name="add" size={24} color="#FFFFFF" />
-        </Pressable>
+          onPress={handleCreatePress}
+          accessibilityLabel="Yeni gönderi oluştur"
+          accessibilityRole="button">
+          <Icon name="add" size={24} color={colors.text.inverse} />
+        </AnimatedPressable>
       )}
     </View>
   );
@@ -102,38 +179,42 @@ export const FeedHeader: React.FC<FeedHeaderProps> = memo(({ onCreatePress }) =>
 
 FeedHeader.displayName = 'FeedHeader';
 
+// ============================================================================
+// Styles
+// ============================================================================
+
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  filters: {
     flexDirection: 'row',
-    flex: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  createButton: {
+    alignItems: 'center',
+    borderRadius: 20,
+    height: 40,
+    justifyContent: 'center',
+    marginLeft: 12,
+    width: 40,
   },
   filterButton: {
-    flexDirection: 'row',
     alignItems: 'center',
+    borderRadius: 20,
+    flexDirection: 'row',
+    marginRight: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 8,
   },
   filterLabel: {
     fontSize: 13,
     fontWeight: '500',
     marginLeft: 6,
   },
-  createButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 12,
+  filters: {
+    flex: 1,
+    flexDirection: 'row',
   },
 });
 

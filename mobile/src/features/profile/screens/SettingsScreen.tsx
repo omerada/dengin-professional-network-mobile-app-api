@@ -6,7 +6,7 @@ import React, { useMemo, useCallback, useState } from 'react';
 import { StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '@contexts/ThemeContext';
+import { useTheme, useColors } from '@contexts/ThemeContext';
 import { spacing } from '@theme';
 import { SettingsSection } from '../components';
 import type { SettingsSectionType } from '../types';
@@ -22,7 +22,8 @@ import type { SettingsSectionType } from '../types';
  * - Danger Zone (delete account)
  */
 export const SettingsScreen: React.FC = () => {
-  const { theme, toggleTheme, isDarkMode } = useTheme();
+  const { toggleTheme, isDarkMode } = useTheme();
+  const colors = useColors();
   const navigation = useNavigation();
 
   // Loading states
@@ -194,13 +195,9 @@ export const SettingsScreen: React.FC = () => {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background.secondary }]}
-      edges={['bottom']}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      style={[styles.container, { backgroundColor: colors.background.secondary }]}
+      edges={['bottom']}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {sections.map(section => (
           <SettingsSection
             key={section.title}

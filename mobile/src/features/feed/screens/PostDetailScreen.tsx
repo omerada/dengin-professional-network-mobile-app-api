@@ -12,7 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { useAuthStore } from '@features/auth/stores';
 import {
   usePost,
@@ -40,7 +40,7 @@ import type { Comment, AddCommentRequest } from '../types';
 type PostDetailRouteProp = RouteProp<FeedStackParamList, 'PostDetail'>;
 
 export const PostDetailScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const navigation = useNavigation();
   const route = useRoute<PostDetailRouteProp>();
   const { postId } = route.params; // postId: number
@@ -197,21 +197,21 @@ export const PostDetailScreen: React.FC = () => {
 
   if (isLoading || !post) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background.primary }]}>
-        <ActivityIndicator size="large" color={theme.colors.primary[500]} />
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background.primary }]}>
+        <ActivityIndicator size="large" color={colors.interactive.default} />
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background.primary }]}>
+    <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
       <ScrollView
         style={styles.scrollView}
         refreshControl={
           <RefreshControl
             refreshing={isRefetching}
             onRefresh={refetch}
-            tintColor={theme.colors.primary[500]}
+            tintColor={colors.interactive.default}
           />
         }
         showsVerticalScrollIndicator={false}>
@@ -242,13 +242,13 @@ export const PostDetailScreen: React.FC = () => {
         </View>
 
         {/* Divider */}
-        <View style={[styles.divider, { backgroundColor: theme.colors.border.light }]} />
+        <View style={[styles.divider, { backgroundColor: colors.border.default }]} />
 
         {/* Comments */}
         <View style={styles.commentsContainer}>
           {commentsLoading ? (
             <View style={styles.commentsLoading}>
-              <ActivityIndicator size="small" color={theme.colors.primary[500]} />
+              <ActivityIndicator size="small" color={colors.interactive.default} />
             </View>
           ) : comments.length === 0 ? (
             <EmptyFeed

@@ -18,11 +18,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme } from '@contexts/ThemeContext';
-import {
-  ConversationItem,
-  EmptyConversations,
-} from '../components';
+import { useColors } from '@contexts/ThemeContext';
+import { ConversationItem, EmptyConversations } from '../components';
 import { useConversations, useSocket } from '../hooks';
 import type { Conversation } from '../types';
 import type { MessagingStackParamList } from '@navigation/types';
@@ -30,7 +27,7 @@ import type { MessagingStackParamList } from '@navigation/types';
 type NavigationProp = NativeStackNavigationProp<MessagingStackParamList>;
 
 export const ConversationListScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
 
@@ -51,35 +48,41 @@ export const ConversationListScreen: React.FC = () => {
 
   // Filtered conversations - participant.fullName ile arama
   const filteredConversations = searchQuery.trim()
-    ? conversations.filter(c =>
-        c.participant.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.participant.profession.toLowerCase().includes(searchQuery.toLowerCase())
+    ? conversations.filter(
+        c =>
+          c.participant.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          c.participant.profession.toLowerCase().includes(searchQuery.toLowerCase()),
       )
     : conversations;
 
   // Handlers
-  const handleConversationPress = useCallback((conversation: Conversation) => {
-    navigation.navigate('Chat', { 
-      conversationId: conversation.conversationId,
-      participant: conversation.participant,
-    });
-  }, [navigation]);
+  const handleConversationPress = useCallback(
+    (conversation: Conversation) => {
+      navigation.navigate('Chat', {
+        conversationId: conversation.conversationId,
+        participant: conversation.participant,
+      });
+    },
+    [navigation],
+  );
 
-  const handleConversationLongPress = useCallback((conversation: Conversation) => {
-    Alert.alert(
-      conversation.participant.fullName,
-      'Konuşma seçenekleri',
-      [
+  const handleConversationLongPress = useCallback(
+    (conversation: Conversation) => {
+      Alert.alert(conversation.participant.fullName, 'Konuşma seçenekleri', [
         { text: 'İptal', style: 'cancel' },
-        { 
-          text: 'Profili Görüntüle', 
+        {
+          text: 'Profili Görüntüle',
           onPress: () => {
-            navigation.navigate('Profile' as never, { userId: conversation.participant.userId } as never);
-          }
+            navigation.navigate(
+              'Profile' as never,
+              { userId: conversation.participant.userId } as never,
+            );
+          },
         },
-      ]
-    );
-  }, [navigation]);
+      ]);
+    },
+    [navigation],
+  );
 
   const handleNewConversation = useCallback(() => {
     navigation.navigate('NewConversation');
@@ -92,13 +95,16 @@ export const ConversationListScreen: React.FC = () => {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   // Render functions
-  const renderItem = useCallback(({ item }: { item: Conversation }) => (
-    <ConversationItem
-      conversation={item}
-      onPress={handleConversationPress}
-      onLongPress={handleConversationLongPress}
-    />
-  ), [handleConversationPress, handleConversationLongPress]);
+  const renderItem = useCallback(
+    ({ item }: { item: Conversation }) => (
+      <ConversationItem
+        conversation={item}
+        onPress={handleConversationPress}
+        onLongPress={handleConversationLongPress}
+      />
+    ),
+    [handleConversationPress, handleConversationLongPress],
+  );
 
   const keyExtractor = useCallback((item: Conversation) => item.conversationId, []);
 
@@ -106,56 +112,46 @@ export const ConversationListScreen: React.FC = () => {
     if (!isFetchingNextPage) return null;
     return (
       <View style={styles.loadingFooter}>
-        <ActivityIndicator size="small" color={theme.colors.primary[500]} />
+        <ActivityIndicator size="small" color={colors.interactive.default} />
       </View>
     );
-  }, [isFetchingNextPage, theme.colors.primary]);
+  }, [isFetchingNextPage, colors.interactive.default]);
 
   const ListEmptyComponent = useCallback(() => {
     if (isLoading) {
       return (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary[500]} />
+          <ActivityIndicator size="large" color={colors.interactive.default} />
         </View>
       );
     }
     return <EmptyConversations onStartConversation={handleNewConversation} />;
-  }, [isLoading, handleNewConversation, theme.colors.primary]);
+  }, [isLoading, handleNewConversation, colors.interactive.default]);
 
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: theme.colors.background.primary },
-      ]}
-    >
+    <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
       {/* Connection indicator */}
       {!isConnected && (
-        <View style={[styles.connectionBar, { backgroundColor: theme.colors.status.warning }]}>
+        <View style={[styles.connectionBar, { backgroundColor: colors.status.warning }]}>
           <Icon name="cloud-offline" size={16} color="#FFFFFF" />
         </View>
       )}
 
       {/* Search bar */}
-      <View style={[styles.searchContainer, { backgroundColor: theme.colors.background.secondary }]}>
-        <View
-          style={[
-            styles.searchInputContainer,
-            { backgroundColor: theme.colors.background.primary },
-          ]}
-        >
-          <Icon name="search" size={18} color={theme.colors.text.tertiary} />
+      <View style={[styles.searchContainer, { backgroundColor: colors.background.secondary }]}>
+        <View style={[styles.searchInputContainer, { backgroundColor: colors.background.primary }]}>
+          <Icon name="search" size={18} color={colors.text.tertiary} />
           <TextInput
-            style={[styles.searchInput, { color: theme.colors.text.primary }]}
+            style={[styles.searchInput, { color: colors.text.primary }]}
             placeholder="Konuşmalarda ara..."
-            placeholderTextColor={theme.colors.text.tertiary}
+            placeholderTextColor={colors.text.tertiary}
             value={searchQuery}
             onChangeText={setSearchQuery}
             returnKeyType="search"
           />
           {searchQuery.length > 0 && (
             <Pressable onPress={() => setSearchQuery('')}>
-              <Icon name="close-circle" size={18} color={theme.colors.text.tertiary} />
+              <Icon name="close-circle" size={18} color={colors.text.tertiary} />
             </Pressable>
           )}
         </View>
@@ -174,8 +170,8 @@ export const ConversationListScreen: React.FC = () => {
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={refetch}
-            colors={[theme.colors.primary[500]]}
-            tintColor={theme.colors.primary[500]}
+            colors={[colors.interactive.default]}
+            tintColor={colors.interactive.default}
           />
         }
         contentContainerStyle={[
@@ -191,10 +187,9 @@ export const ConversationListScreen: React.FC = () => {
         onPress={handleNewConversation}
         style={({ pressed }) => [
           styles.fab,
-          { backgroundColor: theme.colors.primary[500], bottom: insets.bottom + 16 },
+          { backgroundColor: colors.interactive.default, bottom: insets.bottom + 16 },
           pressed && styles.fabPressed,
-        ]}
-      >
+        ]}>
         <Icon name="create-outline" size={24} color="#FFFFFF" />
       </Pressable>
     </View>

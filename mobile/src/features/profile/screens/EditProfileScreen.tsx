@@ -15,16 +15,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { Button, Input } from '@shared/components';
 import { spacing, fontSize } from '@theme';
 import { AvatarPicker } from '../components';
-import {
-  useMyProfile,
-  useUpdateProfile,
-  useUploadAvatar,
-  useDeleteAvatar,
-} from '../hooks';
+import { useMyProfile, useUpdateProfile, useUploadAvatar, useDeleteAvatar } from '../hooks';
 import type { UpdateProfileRequest, Gender } from '../types';
 
 type GenderOption = { label: string; value: Gender };
@@ -45,7 +40,7 @@ const GENDER_OPTIONS: GenderOption[] = [
  * - Select gender
  */
 export const EditProfileScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const navigation = useNavigation();
 
   // Fetch current profile
@@ -132,10 +127,8 @@ export const EditProfileScreen: React.FC = () => {
     if (name !== profile?.name) updateData.name = name.trim();
     if (surname !== profile?.surname) updateData.surname = surname.trim();
     if (bio !== (profile?.bio || '')) updateData.bio = bio.trim();
-    if (dateOfBirth !== (profile?.dateOfBirth || ''))
-      updateData.dateOfBirth = dateOfBirth;
-    if (gender !== (profile?.gender || null) && gender)
-      updateData.gender = gender;
+    if (dateOfBirth !== (profile?.dateOfBirth || '')) updateData.dateOfBirth = dateOfBirth;
+    if (gender !== (profile?.gender || null) && gender) updateData.gender = gender;
 
     try {
       await updateProfile.mutateAsync(updateData);
@@ -145,17 +138,7 @@ export const EditProfileScreen: React.FC = () => {
     } catch (error) {
       Alert.alert('Hata', 'Profil güncellenirken bir hata oluştu.');
     }
-  }, [
-    hasChanges,
-    name,
-    surname,
-    bio,
-    dateOfBirth,
-    gender,
-    profile,
-    updateProfile,
-    navigation,
-  ]);
+  }, [hasChanges, name, surname, bio, dateOfBirth, gender, profile, updateProfile, navigation]);
 
   // Gender selector
   const handleGenderSelect = useCallback((selectedGender: Gender) => {
@@ -167,18 +150,15 @@ export const EditProfileScreen: React.FC = () => {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
-      edges={['bottom']}
-    >
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
+      edges={['bottom']}>
       <KeyboardAvoidingView
         style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
+          keyboardShouldPersistTaps="handled">
           {/* Avatar Picker */}
           <AvatarPicker
             currentAvatarUrl={profile?.avatarUrl ?? null}
@@ -229,9 +209,7 @@ export const EditProfileScreen: React.FC = () => {
 
             {/* Gender Selection */}
             <View style={styles.genderSection}>
-              <Text style={[styles.label, { color: theme.colors.text.primary }]}>
-                Cinsiyet
-              </Text>
+              <Text style={[styles.label, { color: colors.text.primary }]}>Cinsiyet</Text>
               <View style={styles.genderOptions}>
                 {GENDER_OPTIONS.map(option => (
                   <Button
@@ -249,12 +227,7 @@ export const EditProfileScreen: React.FC = () => {
         </ScrollView>
 
         {/* Save Button */}
-        <View
-          style={[
-            styles.footer,
-            { borderTopColor: theme.colors.border.light },
-          ]}
-        >
+        <View style={[styles.footer, { borderTopColor: colors.border.default }]}>
           <Button
             title="Kaydet"
             onPress={handleSave}
@@ -304,4 +277,3 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
 });
-

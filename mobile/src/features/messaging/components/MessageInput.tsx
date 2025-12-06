@@ -3,21 +3,10 @@
 // Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
 
 import React, { memo, useState, useCallback, useRef } from 'react';
-import {
-  View,
-  TextInput,
-  StyleSheet,
-  Pressable,
-  Keyboard,
-  Platform,
-} from 'react-native';
+import { View, TextInput, StyleSheet, Pressable, Keyboard, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import Animated, {
-  useAnimatedStyle,
-  withSpring,
-  interpolate,
-} from 'react-native-reanimated';
-import { useTheme } from '@contexts/ThemeContext';
+import Animated, { useAnimatedStyle, withSpring, interpolate } from 'react-native-reanimated';
+import { useColors } from '@contexts/ThemeContext';
 
 interface MessageInputProps {
   value: string;
@@ -32,131 +21,126 @@ interface MessageInputProps {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export const MessageInput: React.FC<MessageInputProps> = memo(({
-  value,
-  onChangeText,
-  onSend,
-  onTypingStart,
-  onTypingStop,
-  placeholder = 'Mesaj yaz...',
-  disabled = false,
-  maxLength = 2000,
-}) => {
-  const { theme } = useTheme();
-  const [isFocused, setIsFocused] = useState(false);
-  const inputRef = useRef<TextInput>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+export const MessageInput: React.FC<MessageInputProps> = memo(
+  ({
+    value,
+    onChangeText,
+    onSend,
+    onTypingStart,
+    onTypingStop,
+    placeholder = 'Mesaj yaz...',
+    disabled = false,
+    maxLength = 2000,
+  }) => {
+    const colors = useColors();
+    const [isFocused, setIsFocused] = useState(false);
+    const inputRef = useRef<TextInput>(null);
+    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const canSend = value.trim().length > 0 && !disabled;
+    const canSend = value.trim().length > 0 && !disabled;
 
-  const handleChangeText = useCallback((text: string) => {
-    onChangeText(text);
+    const handleChangeText = useCallback(
+      (text: string) => {
+        onChangeText(text);
 
-    // Typing indicator
-    if (text.length > 0) {
-      onTypingStart?.();
+        // Typing indicator
+        if (text.length > 0) {
+          onTypingStart?.();
 
-      // Clear previous timeout
+          // Clear previous timeout
+          if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+          }
+
+          // Set new timeout to stop typing
+          typingTimeoutRef.current = setTimeout(() => {
+            onTypingStop?.();
+          }, 3000);
+        } else {
+          onTypingStop?.();
+        }
+      },
+      [onChangeText, onTypingStart, onTypingStop],
+    );
+
+    const handleSend = useCallback(() => {
+      if (!canSend) return;
+
+      onSend();
+      Keyboard.dismiss();
+
+      // Stop typing when sent
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
-
-      // Set new timeout to stop typing
-      typingTimeoutRef.current = setTimeout(() => {
-        onTypingStop?.();
-      }, 3000);
-    } else {
       onTypingStop?.();
-    }
-  }, [onChangeText, onTypingStart, onTypingStop]);
+    }, [canSend, onSend, onTypingStop]);
 
-  const handleSend = useCallback(() => {
-    if (!canSend) return;
+    const handleFocus = useCallback(() => {
+      setIsFocused(true);
+    }, []);
 
-    onSend();
-    Keyboard.dismiss();
+    const handleBlur = useCallback(() => {
+      setIsFocused(false);
+      onTypingStop?.();
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    }, [onTypingStop]);
 
-    // Stop typing when sent
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
-    onTypingStop?.();
-  }, [canSend, onSend, onTypingStop]);
+    const buttonAnimatedStyle = useAnimatedStyle(() => {
+      const scale = withSpring(canSend ? 1 : 0.8, { damping: 15 });
+      const opacity = interpolate(canSend ? 1 : 0, [0, 1], [0.5, 1]);
 
-  const handleFocus = useCallback(() => {
-    setIsFocused(true);
-  }, []);
+      return {
+        transform: [{ scale }],
+        opacity,
+      };
+    }, [canSend]);
 
-  const handleBlur = useCallback(() => {
-    setIsFocused(false);
-    onTypingStop?.();
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current);
-    }
-  }, [onTypingStop]);
-
-  const buttonAnimatedStyle = useAnimatedStyle(() => {
-    const scale = withSpring(canSend ? 1 : 0.8, { damping: 15 });
-    const opacity = interpolate(canSend ? 1 : 0, [0, 1], [0.5, 1]);
-    
-    return {
-      transform: [{ scale }],
-      opacity,
-    };
-  }, [canSend]);
-
-  return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: theme.colors.background.primary },
-      ]}
-    >
-      <View
-        style={[
-          styles.inputContainer,
-          {
-            backgroundColor: theme.colors.background.secondary,
-            borderColor: isFocused ? theme.colors.primary[500] : 'transparent',
-          },
-        ]}
-      >
-        <TextInput
-          ref={inputRef}
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+        <View
           style={[
-            styles.input,
-            { color: theme.colors.text.primary },
-          ]}
-          value={value}
-          onChangeText={handleChangeText}
-          placeholder={placeholder}
-          placeholderTextColor={theme.colors.text.tertiary}
-          multiline
-          maxLength={maxLength}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          editable={!disabled}
-          returnKeyType="default"
-          blurOnSubmit={false}
-          textAlignVertical="center"
-        />
-      </View>
+            styles.inputContainer,
+            {
+              backgroundColor: colors.background.secondary,
+              borderColor: isFocused ? colors.interactive.default : 'transparent',
+            },
+          ]}>
+          <TextInput
+            ref={inputRef}
+            style={[styles.input, { color: colors.text.primary }]}
+            value={value}
+            onChangeText={handleChangeText}
+            placeholder={placeholder}
+            placeholderTextColor={colors.text.tertiary}
+            multiline
+            maxLength={maxLength}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            editable={!disabled}
+            returnKeyType="default"
+            blurOnSubmit={false}
+            textAlignVertical="center"
+          />
+        </View>
 
-      <AnimatedPressable
-        onPress={handleSend}
-        disabled={!canSend}
-        style={[
-          styles.sendButton,
-          { backgroundColor: theme.colors.primary[500] },
-          buttonAnimatedStyle,
-        ]}
-        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-      >
-        <Icon name="send" size={20} color="#FFFFFF" />
-      </AnimatedPressable>
-    </View>
-  );
-});
+        <AnimatedPressable
+          onPress={handleSend}
+          disabled={!canSend}
+          style={[
+            styles.sendButton,
+            { backgroundColor: colors.interactive.default },
+            buttonAnimatedStyle,
+          ]}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <Icon name="send" size={20} color="#FFFFFF" />
+        </AnimatedPressable>
+      </View>
+    );
+  },
+);
 
 MessageInput.displayName = 'MessageInput';
 

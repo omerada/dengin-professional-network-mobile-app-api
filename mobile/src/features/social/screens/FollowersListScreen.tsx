@@ -3,16 +3,10 @@
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART5.md
 
 import React, { useCallback, useMemo } from 'react';
-import {
-  View,
-  FlatList,
-  StyleSheet,
-  RefreshControl,
-  ActivityIndicator,
-} from 'react-native';
+import { View, FlatList, StyleSheet, RefreshControl, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { EmptyState, Loading } from '@shared/components';
 import { spacing } from '@theme';
 import { UserListItem } from '../components';
@@ -26,22 +20,15 @@ import type { FollowUser } from '../types';
  * Supports pull-to-refresh and infinite scroll.
  */
 export const FollowersListScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const route = useRoute();
   const { userId } = route.params as { userId: number };
 
-  const {
-    data,
-    isLoading,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
-    refetch,
-    isRefetching,
-  } = useFollowers(userId);
+  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, refetch, isRefetching } =
+    useFollowers(userId);
 
   const users = useMemo(() => {
-    return data?.pages.flatMap((page) => page.users) || [];
+    return data?.pages.flatMap(page => page.users) || [];
   }, [data]);
 
   const handleEndReached = useCallback(() => {
@@ -51,9 +38,7 @@ export const FollowersListScreen: React.FC = () => {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const renderItem = useCallback(
-    ({ item }: { item: FollowUser }) => (
-      <UserListItem user={item} showFollowButton />
-    ),
+    ({ item }: { item: FollowUser }) => <UserListItem user={item} showFollowButton />,
     [],
   );
 
@@ -63,10 +48,10 @@ export const FollowersListScreen: React.FC = () => {
     if (!isFetchingNextPage) return null;
     return (
       <View style={styles.footer}>
-        <ActivityIndicator color={theme.colors.primary[500]} />
+        <ActivityIndicator color={colors.interactive.default} />
       </View>
     );
-  }, [isFetchingNextPage, theme]);
+  }, [isFetchingNextPage, colors]);
 
   const ListEmptyComponent = useMemo(() => {
     if (isLoading) return null;
@@ -80,19 +65,13 @@ export const FollowersListScreen: React.FC = () => {
   }, [isLoading]);
 
   const ItemSeparatorComponent = useCallback(
-    () => (
-      <View
-        style={[styles.separator, { backgroundColor: theme.colors.border.light }]}
-      />
-    ),
-    [theme],
+    () => <View style={[styles.separator, { backgroundColor: colors.border.default }]} />,
+    [colors],
   );
 
   if (isLoading) {
     return (
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
-      >
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
         <Loading message="Yükleniyor..." />
       </SafeAreaView>
     );
@@ -100,9 +79,8 @@ export const FollowersListScreen: React.FC = () => {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
-      edges={['bottom']}
-    >
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
+      edges={['bottom']}>
       <FlatList
         data={users}
         renderItem={renderItem}
@@ -115,7 +93,7 @@ export const FollowersListScreen: React.FC = () => {
           <RefreshControl
             refreshing={isRefetching}
             onRefresh={refetch}
-            tintColor={theme.colors.primary[500]}
+            tintColor={colors.interactive.default}
           />
         }
         ItemSeparatorComponent={ItemSeparatorComponent}

@@ -5,7 +5,7 @@
 import React, { useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { Avatar, EmptyState, Loading, Button } from '@shared/components';
 import { spacing, fontSize } from '@theme';
 import { useBlockedUsers } from '../hooks';
@@ -18,7 +18,7 @@ import type { BlockedUser } from '../types';
  * Displays list of blocked users with option to unblock.
  */
 export const BlockedUsersScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const { data: blockedUsers, isLoading, refetch } = useBlockedUsers();
   const unblock = useUnblock();
 
@@ -48,15 +48,11 @@ export const BlockedUsersScreen: React.FC = () => {
 
   const renderItem = useCallback(
     ({ item }: { item: BlockedUser }) => (
-      <View
-        style={[styles.item, { backgroundColor: theme.colors.background.primary }]}
-      >
+      <View style={[styles.item, { backgroundColor: colors.background.primary }]}>
         <Avatar uri={item.avatarUrl} name={item.fullName} size="lg" />
         <View style={styles.info}>
-          <Text style={[styles.name, { color: theme.colors.text.primary }]}>
-            {item.fullName}
-          </Text>
-          <Text style={[styles.date, { color: theme.colors.text.tertiary }]}>
+          <Text style={[styles.name, { color: colors.text.primary }]}>{item.fullName}</Text>
+          <Text style={[styles.date, { color: colors.text.secondary }]}>
             {new Date(item.blockedAt).toLocaleDateString('tr-TR')}
           </Text>
         </View>
@@ -69,25 +65,19 @@ export const BlockedUsersScreen: React.FC = () => {
         />
       </View>
     ),
-    [theme, handleUnblock, unblock.isPending],
+    [colors, handleUnblock, unblock.isPending],
   );
 
   const keyExtractor = useCallback((item: BlockedUser) => item.id.toString(), []);
 
   const ItemSeparatorComponent = useCallback(
-    () => (
-      <View
-        style={[styles.separator, { backgroundColor: theme.colors.border.light }]}
-      />
-    ),
-    [theme],
+    () => <View style={[styles.separator, { backgroundColor: colors.border.default }]} />,
+    [colors],
   );
 
   if (isLoading) {
     return (
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
-      >
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
         <Loading message="Yükleniyor..." />
       </SafeAreaView>
     );
@@ -95,9 +85,8 @@ export const BlockedUsersScreen: React.FC = () => {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
-      edges={['bottom']}
-    >
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
+      edges={['bottom']}>
       <FlatList
         data={blockedUsers || []}
         renderItem={renderItem}
@@ -110,9 +99,7 @@ export const BlockedUsersScreen: React.FC = () => {
             message="Engellediğiniz kullanıcılar burada görünecektir"
           />
         }
-        contentContainerStyle={
-          (!blockedUsers || blockedUsers.length === 0) && styles.emptyContent
-        }
+        contentContainerStyle={(!blockedUsers || blockedUsers.length === 0) && styles.emptyContent}
       />
     </SafeAreaView>
   );
@@ -148,4 +135,3 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-

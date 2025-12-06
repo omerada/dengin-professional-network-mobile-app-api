@@ -17,7 +17,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { useLocale } from '@contexts/LocaleContext';
 import { Button, Input } from '@shared/components';
 import { useLogin, useBiometricLogin } from '../hooks';
@@ -31,7 +31,7 @@ import { spacing } from '@theme';
  * Email/password login with biometric option
  */
 export const LoginScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const { t } = useLocale();
   const navigation = useNavigation<AuthStackNavigationProp>();
 
@@ -82,8 +82,7 @@ export const LoginScreen: React.FC = () => {
   }, [navigation]);
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background.primary }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
       <KeyboardAvoidingView
         style={styles.keyboardAvoid}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
@@ -99,28 +98,24 @@ export const LoginScreen: React.FC = () => {
               accessibilityRole="button"
               accessibilityLabel="Geri dön"
               style={styles.backButton}>
-              <Text style={{ color: theme.colors.text.primary, fontSize: 24 }}>←</Text>
+              <Text style={{ color: colors.text.primary, fontSize: 24 }}>←</Text>
             </TouchableOpacity>
           </View>
 
           {/* Title */}
           <View style={styles.titleContainer}>
-            <Text style={[styles.title, { color: theme.colors.text.primary }]}>
+            <Text style={[styles.title, { color: colors.text.primary }]}>
               {t('auth.welcomeBack')}
             </Text>
-            <Text style={[styles.subtitle, { color: theme.colors.text.secondary }]}>
+            <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
               Hesabınıza giriş yapın
             </Text>
           </View>
 
           {/* Error Message */}
           {isError && error && (
-            <View
-              style={[
-                styles.errorContainer,
-                { backgroundColor: theme.colors.error.background },
-              ]}>
-              <Text style={[styles.errorText, { color: theme.colors.error.main }]}>
+            <View style={[styles.errorContainer, { backgroundColor: colors.status.error }]}>
+              <Text style={[styles.errorText, { color: colors.status.error }]}>
                 {(error as Error).message || 'Giriş yapılırken bir hata oluştu'}
               </Text>
             </View>
@@ -174,7 +169,7 @@ export const LoginScreen: React.FC = () => {
               accessibilityRole="link"
               accessibilityLabel="Şifremi unuttum"
               style={styles.forgotPassword}>
-              <Text style={{ color: theme.colors.primary[500], fontSize: 14 }}>
+              <Text style={{ color: colors.interactive.default, fontSize: 14 }}>
                 {t('auth.forgotPassword')}
               </Text>
             </TouchableOpacity>
@@ -195,21 +190,9 @@ export const LoginScreen: React.FC = () => {
             {isBiometricAvailable && (
               <>
                 <View style={styles.divider}>
-                  <View
-                    style={[
-                      styles.dividerLine,
-                      { backgroundColor: theme.colors.border.light },
-                    ]}
-                  />
-                  <Text style={[styles.dividerText, { color: theme.colors.text.tertiary }]}>
-                    veya
-                  </Text>
-                  <View
-                    style={[
-                      styles.dividerLine,
-                      { backgroundColor: theme.colors.border.light },
-                    ]}
-                  />
+                  <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
+                  <Text style={[styles.dividerText, { color: colors.text.secondary }]}>veya</Text>
+                  <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
                 </View>
 
                 <Button
@@ -227,15 +210,13 @@ export const LoginScreen: React.FC = () => {
 
           {/* Register Link */}
           <View style={styles.registerContainer}>
-            <Text style={{ color: theme.colors.text.secondary }}>
-              Hesabınız yok mu?{' '}
-            </Text>
+            <Text style={{ color: colors.text.secondary }}>Hesabınız yok mu? </Text>
             <TouchableOpacity
               onPress={() => navigation.navigate('Register')}
               accessible={true}
               accessibilityRole="link"
               accessibilityLabel="Kayıt ol">
-              <Text style={{ color: theme.colors.primary[500], fontWeight: '600' }}>
+              <Text style={{ color: colors.interactive.default, fontWeight: '600' }}>
                 {t('auth.register')}
               </Text>
             </TouchableOpacity>

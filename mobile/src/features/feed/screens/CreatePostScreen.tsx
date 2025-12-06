@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { useFeedStore } from '../stores';
 import { useCreatePost } from '../hooks';
 import { imagePickerService } from '../services';
@@ -24,7 +24,7 @@ import { PostTextInput, ImagePreviewGrid } from '../components';
 import type { UploadProgress, FeedStoreState } from '../types';
 
 export const CreatePostScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const navigation = useNavigation();
 
   // Store state
@@ -46,16 +46,8 @@ export const CreatePostScreen: React.FC = () => {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerLeft: () => (
-        <Pressable
-          onPress={handleClose}
-          style={styles.headerButton}
-          disabled={isPosting}
-        >
-          <Icon
-            name="close"
-            size={24}
-            color={theme.colors.text.primary}
-          />
+        <Pressable onPress={handleClose} style={styles.headerButton} disabled={isPosting}>
+          <Icon name="close" size={24} color={colors.text.primary} />
         </Pressable>
       ),
       headerRight: () => (
@@ -64,13 +56,11 @@ export const CreatePostScreen: React.FC = () => {
           style={[
             styles.postButton,
             {
-              backgroundColor: canPost && !isPosting
-                ? theme.colors.primary[500]
-                : theme.colors.primary[200],
+              backgroundColor:
+                canPost && !isPosting ? colors.interactive.default : colors.interactive.subtle,
             },
           ]}
-          disabled={!canPost || isPosting}
-        >
+          disabled={!canPost || isPosting}>
           {isPosting ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
@@ -79,7 +69,7 @@ export const CreatePostScreen: React.FC = () => {
         </Pressable>
       ),
     });
-  }, [navigation, canPost, isPosting, theme.colors, draftContent, draftImages]);
+  }, [navigation, canPost, isPosting, colors, draftContent, draftImages]);
 
   const handleClose = useCallback(() => {
     if (draftContent.trim() || draftImages.length > 0) {
@@ -96,7 +86,7 @@ export const CreatePostScreen: React.FC = () => {
               navigation.goBack();
             },
           },
-        ]
+        ],
       );
     } else {
       navigation.goBack();
@@ -129,7 +119,7 @@ export const CreatePostScreen: React.FC = () => {
       quality: 0.8,
     });
 
-    images.forEach((image) => {
+    images.forEach(image => {
       if (imagePickerService.validateFileSize(image.fileSize)) {
         addDraftImage(image);
       }
@@ -149,15 +139,13 @@ export const CreatePostScreen: React.FC = () => {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={88}
-    >
+      keyboardVerticalOffset={88}>
       <ScrollView
         style={styles.scrollView}
         keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
         {/* Text Input */}
         <PostTextInput
           value={draftContent}
@@ -179,15 +167,15 @@ export const CreatePostScreen: React.FC = () => {
         {/* Upload Progress */}
         {uploadProgress && (
           <View style={styles.progressContainer}>
-            <Text style={[styles.progressText, { color: theme.colors.text.secondary }]}>
+            <Text style={[styles.progressText, { color: colors.text.secondary }]}>
               Görsel yükleniyor ({uploadProgress.imageIndex + 1}/{uploadProgress.totalImages})...
             </Text>
-            <View style={[styles.progressBar, { backgroundColor: theme.colors.background.secondary }]}>
+            <View style={[styles.progressBar, { backgroundColor: colors.background.secondary }]}>
               <View
                 style={[
                   styles.progressFill,
                   {
-                    backgroundColor: theme.colors.primary[500],
+                    backgroundColor: colors.interactive.default,
                     width: `${uploadProgress.progress}%`,
                   },
                 ]}
@@ -202,44 +190,23 @@ export const CreatePostScreen: React.FC = () => {
         style={[
           styles.toolbar,
           {
-            backgroundColor: theme.colors.background.primary,
-            borderTopColor: theme.colors.border.light,
+            backgroundColor: colors.background.primary,
+            borderTopColor: colors.border.default,
           },
-        ]}
-      >
-        <Pressable
-          style={styles.toolbarButton}
-          onPress={handlePickImages}
-          disabled={isPosting}
-        >
-          <Icon
-            name="images-outline"
-            size={24}
-            color={theme.colors.primary[500]}
-          />
-          <Text style={[styles.toolbarLabel, { color: theme.colors.primary[500] }]}>
-            Galeri
-          </Text>
+        ]}>
+        <Pressable style={styles.toolbarButton} onPress={handlePickImages} disabled={isPosting}>
+          <Icon name="images-outline" size={24} color={colors.interactive.default} />
+          <Text style={[styles.toolbarLabel, { color: colors.interactive.default }]}>Galeri</Text>
         </Pressable>
 
-        <Pressable
-          style={styles.toolbarButton}
-          onPress={handleTakePhoto}
-          disabled={isPosting}
-        >
-          <Icon
-            name="camera-outline"
-            size={24}
-            color={theme.colors.primary[500]}
-          />
-          <Text style={[styles.toolbarLabel, { color: theme.colors.primary[500] }]}>
-            Kamera
-          </Text>
+        <Pressable style={styles.toolbarButton} onPress={handleTakePhoto} disabled={isPosting}>
+          <Icon name="camera-outline" size={24} color={colors.interactive.default} />
+          <Text style={[styles.toolbarLabel, { color: colors.interactive.default }]}>Kamera</Text>
         </Pressable>
 
         <View style={styles.toolbarSpacer} />
 
-        <Text style={[styles.imageCount, { color: theme.colors.text.secondary }]}>
+        <Text style={[styles.imageCount, { color: colors.text.secondary }]}>
           {draftImages.length}/5 görsel
         </Text>
       </View>

@@ -6,7 +6,7 @@ import React, { memo, useCallback, forwardRef, useImperativeHandle, useRef, useS
 import { View, Text, StyleSheet, Pressable, Platform, Modal } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import type { Message } from '../types';
 
 // BottomSheet'i sadece native platformlarda yükle
@@ -48,15 +48,15 @@ interface OptionItemProps {
 
 const OptionItem: React.FC<OptionItemProps> = memo(
   ({ icon, label, onPress, destructive = false }) => {
-    const { theme } = useTheme();
-    const color = destructive ? theme.colors.status.error : theme.colors.text.primary;
+    const colors = useColors();
+    const color = destructive ? colors.status.error : colors.text.primary;
 
     return (
       <Pressable
         onPress={onPress}
         style={({ pressed }) => [
           styles.optionItem,
-          pressed && { backgroundColor: theme.colors.background.secondary },
+          pressed && { backgroundColor: colors.background.secondary },
         ]}>
         <Icon name={icon} size={22} color={color} />
         <Text style={[styles.optionLabel, { color }]}>{label}</Text>
@@ -69,7 +69,7 @@ OptionItem.displayName = 'OptionItem';
 
 export const MessageOptionsSheet = forwardRef<MessageOptionsSheetRef, MessageOptionsSheetProps>(
   ({ message, isOwn, onReply, onCopy, onDelete, onReport }, ref) => {
-    const { theme } = useTheme();
+    const colors = useColors();
     const bottomSheetRef = useRef<any>(null);
     const [isVisible, setIsVisible] = useState(false);
 
@@ -139,10 +139,8 @@ export const MessageOptionsSheet = forwardRef<MessageOptionsSheetRef, MessageOpt
       <>
         {/* Message preview */}
         {message && (
-          <View style={[styles.preview, { backgroundColor: theme.colors.background.secondary }]}>
-            <Text
-              style={[styles.previewText, { color: theme.colors.text.secondary }]}
-              numberOfLines={2}>
+          <View style={[styles.preview, { backgroundColor: colors.background.secondary }]}>
+            <Text style={[styles.previewText, { color: colors.text.secondary }]} numberOfLines={2}>
               {message.content}
             </Text>
           </View>
@@ -168,8 +166,7 @@ export const MessageOptionsSheet = forwardRef<MessageOptionsSheetRef, MessageOpt
       return (
         <Modal visible={isVisible} transparent animationType="fade" onRequestClose={handleClose}>
           <Pressable style={styles.modalOverlay} onPress={handleClose}>
-            <View
-              style={[styles.modalContent, { backgroundColor: theme.colors.background.primary }]}>
+            <View style={[styles.modalContent, { backgroundColor: colors.background.primary }]}>
               {renderContent()}
             </View>
           </Pressable>
@@ -189,8 +186,8 @@ export const MessageOptionsSheet = forwardRef<MessageOptionsSheetRef, MessageOpt
         snapPoints={['30%']}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
-        backgroundStyle={{ backgroundColor: theme.colors.background.primary }}
-        handleIndicatorStyle={{ backgroundColor: theme.colors.text.tertiary }}>
+        backgroundStyle={{ backgroundColor: colors.background.primary }}
+        handleIndicatorStyle={{ backgroundColor: colors.text.secondary }}>
         <BottomSheetView style={styles.content}>{renderContent()}</BottomSheetView>
       </BottomSheet>
     );

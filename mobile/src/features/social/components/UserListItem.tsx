@@ -5,7 +5,7 @@
 import React, { memo, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { Avatar, Badge } from '@shared/components';
 import { spacing, fontSize } from '@theme';
 import { FollowButton } from './FollowButton';
@@ -44,7 +44,7 @@ interface UserListItemProps {
  */
 export const UserListItem: React.FC<UserListItemProps> = memo(
   ({ user, showFollowButton = true, onFollowChange }) => {
-    const { theme } = useTheme();
+    const colors = useColors();
     const navigation = useNavigation();
 
     const handlePress = useCallback(() => {
@@ -53,27 +53,20 @@ export const UserListItem: React.FC<UserListItemProps> = memo(
 
     return (
       <TouchableOpacity
-        style={[
-          styles.container,
-          { backgroundColor: theme.colors.background.primary },
-        ]}
+        style={[styles.container, { backgroundColor: colors.background.primary }]}
         onPress={handlePress}
-        activeOpacity={0.7}
-      >
+        activeOpacity={0.7}>
         <Avatar
           uri={user.avatarUrl}
           name={user.fullName}
           size="lg"
           showBadge={user.isProfessionVerified}
-          badgeColor={theme.colors.success.main}
+          badgeColor={colors.interactive.default}
         />
 
         <View style={styles.info}>
           <View style={styles.nameRow}>
-            <Text
-              style={[styles.name, { color: theme.colors.text.primary }]}
-              numberOfLines={1}
-            >
+            <Text style={[styles.name, { color: colors.text.primary }]} numberOfLines={1}>
               {user.fullName}
             </Text>
             {user.isProfessionVerified && (
@@ -82,16 +75,13 @@ export const UserListItem: React.FC<UserListItemProps> = memo(
           </View>
 
           {user.profession && (
-            <Text
-              style={[styles.profession, { color: theme.colors.text.secondary }]}
-              numberOfLines={1}
-            >
+            <Text style={[styles.profession, { color: colors.text.secondary }]} numberOfLines={1}>
               {user.profession.name}
             </Text>
           )}
 
           {user.isFollowedBy && !user.isFollowing && (
-            <Text style={[styles.followsYou, { color: theme.colors.text.tertiary }]}>
+            <Text style={[styles.followsYou, { color: colors.text.secondary }]}>
               Seni takip ediyor
             </Text>
           )}
@@ -143,4 +133,3 @@ const styles = StyleSheet.create({
 });
 
 UserListItem.displayName = 'UserListItem';
-

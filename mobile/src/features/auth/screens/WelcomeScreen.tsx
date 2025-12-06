@@ -5,7 +5,7 @@
 import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, Image, SafeAreaView, StatusBar } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { useLocale } from '@contexts/LocaleContext';
 import { Button } from '@shared/components';
 import { AuthStackNavigationProp } from '@shared/types';
@@ -16,7 +16,7 @@ import { spacing, borderRadius } from '@theme';
  * First screen user sees, provides login/register options
  */
 export const WelcomeScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const { t } = useLocale();
   const navigation = useNavigation<AuthStackNavigationProp>();
 
@@ -29,48 +29,26 @@ export const WelcomeScreen: React.FC = () => {
   }, [navigation]);
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background.primary }]}>
-      <StatusBar
-        barStyle={theme.isDark ? 'light-content' : 'dark-content'}
-        backgroundColor={theme.colors.background.primary}
-      />
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
       <View style={styles.content}>
         {/* Logo/Brand Area */}
         <View style={styles.brandContainer}>
-          <View
-            style={[
-              styles.logoPlaceholder,
-              { backgroundColor: theme.colors.primary[100] },
-            ]}>
-            <Text style={[styles.logoText, { color: theme.colors.primary[500] }]}>M</Text>
+          <View style={[styles.logoPlaceholder, { backgroundColor: colors.interactive.subtle }]}>
+            <Text style={[styles.logoText, { color: colors.interactive.default }]}>M</Text>
           </View>
-          <Text style={[styles.appName, { color: theme.colors.text.primary }]}>
-            Meslektaş
-          </Text>
-          <Text style={[styles.tagline, { color: theme.colors.text.secondary }]}>
+          <Text style={[styles.appName, { color: colors.text.primary }]}>Meslektaş</Text>
+          <Text style={[styles.tagline, { color: colors.text.secondary }]}>
             Profesyoneller için güvenli sosyal ağ
           </Text>
         </View>
 
         {/* Features List */}
         <View style={styles.featuresContainer}>
-          <FeatureItem
-            icon="✓"
-            text="Kimlik doğrulaması ile güvenli topluluk"
-            theme={theme}
-          />
-          <FeatureItem
-            icon="✓"
-            text="Meslektaşlarınızla bağlantı kurun"
-            theme={theme}
-          />
-          <FeatureItem
-            icon="✓"
-            text="Profesyonel içerik paylaşın"
-            theme={theme}
-          />
+          <FeatureItem icon="✓" text="Kimlik doğrulaması ile güvenli topluluk" colors={colors} />
+          <FeatureItem icon="✓" text="Meslektaşlarınızla bağlantı kurun" colors={colors} />
+          <FeatureItem icon="✓" text="Profesyonel içerik paylaşın" colors={colors} />
         </View>
 
         {/* Action Buttons */}
@@ -99,11 +77,9 @@ export const WelcomeScreen: React.FC = () => {
         </View>
 
         {/* Terms */}
-        <Text style={[styles.termsText, { color: theme.colors.text.tertiary }]}>
-          Devam ederek{' '}
-          <Text style={{ color: theme.colors.primary[500] }}>Kullanım Koşulları</Text>
-          {' '}ve{' '}
-          <Text style={{ color: theme.colors.primary[500] }}>Gizlilik Politikası</Text>
+        <Text style={[styles.termsText, { color: colors.text.secondary }]}>
+          Devam ederek <Text style={{ color: colors.interactive.default }}>Kullanım Koşulları</Text>{' '}
+          ve <Text style={{ color: colors.interactive.default }}>Gizlilik Politikası</Text>
           'nı kabul etmiş olursunuz.
         </Text>
       </View>
@@ -117,21 +93,15 @@ export const WelcomeScreen: React.FC = () => {
 interface FeatureItemProps {
   icon: string;
   text: string;
-  theme: ReturnType<typeof useTheme>['theme'];
+  colors: ReturnType<typeof useColors>;
 }
 
-const FeatureItem: React.FC<FeatureItemProps> = React.memo(({ icon, text, theme }) => (
+const FeatureItem: React.FC<FeatureItemProps> = React.memo(({ icon, text, colors }) => (
   <View style={styles.featureItem}>
-    <View
-      style={[
-        styles.featureIcon,
-        { backgroundColor: theme.colors.success.background },
-      ]}>
-      <Text style={{ color: theme.colors.success.main }}>{icon}</Text>
+    <View style={[styles.featureIcon, { backgroundColor: colors.status.success }]}>
+      <Text style={{ color: colors.status.success }}>{icon}</Text>
     </View>
-    <Text style={[styles.featureText, { color: theme.colors.text.secondary }]}>
-      {text}
-    </Text>
+    <Text style={[styles.featureText, { color: colors.text.secondary }]}>{text}</Text>
   </View>
 ));
 

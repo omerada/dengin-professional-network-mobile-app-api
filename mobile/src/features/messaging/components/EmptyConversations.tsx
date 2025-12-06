@@ -5,56 +5,44 @@
 import React, { memo } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 
 interface EmptyConversationsProps {
   onStartConversation?: () => void;
 }
 
-export const EmptyConversations: React.FC<EmptyConversationsProps> = memo(({
-  onStartConversation,
-}) => {
-  const { theme } = useTheme();
+export const EmptyConversations: React.FC<EmptyConversationsProps> = memo(
+  ({ onStartConversation }) => {
+    const colors = useColors();
 
-  return (
-    <View style={styles.container}>
-      <View
-        style={[
-          styles.iconContainer,
-          { backgroundColor: theme.colors.primary[50] },
-        ]}
-      >
-        <Icon
-          name="chatbubbles-outline"
-          size={48}
-          color={theme.colors.primary[500]}
-        />
+    return (
+      <View style={styles.container}>
+        <View style={[styles.iconContainer, { backgroundColor: colors.interactive.subtle }]}>
+          <Icon name="chatbubbles-outline" size={48} color={colors.interactive.default} />
+        </View>
+
+        <Text style={[styles.title, { color: colors.text.primary }]}>Henüz mesajınız yok</Text>
+
+        <Text style={[styles.description, { color: colors.text.secondary }]}>
+          Meslektaşlarınızla iletişime geçmek için yeni bir konuşma başlatın
+        </Text>
+
+        {onStartConversation && (
+          <Pressable
+            onPress={onStartConversation}
+            style={({ pressed }) => [
+              styles.button,
+              { backgroundColor: colors.interactive.default },
+              pressed && styles.buttonPressed,
+            ]}>
+            <Icon name="add" size={20} color="#FFFFFF" />
+            <Text style={styles.buttonText}>Yeni Konuşma</Text>
+          </Pressable>
+        )}
       </View>
-
-      <Text style={[styles.title, { color: theme.colors.text.primary }]}>
-        Henüz mesajınız yok
-      </Text>
-
-      <Text style={[styles.description, { color: theme.colors.text.secondary }]}>
-        Meslektaşlarınızla iletişime geçmek için yeni bir konuşma başlatın
-      </Text>
-
-      {onStartConversation && (
-        <Pressable
-          onPress={onStartConversation}
-          style={({ pressed }) => [
-            styles.button,
-            { backgroundColor: theme.colors.primary[500] },
-            pressed && styles.buttonPressed,
-          ]}
-        >
-          <Icon name="add" size={20} color="#FFFFFF" />
-          <Text style={styles.buttonText}>Yeni Konuşma</Text>
-        </Pressable>
-      )}
-    </View>
-  );
-});
+    );
+  },
+);
 
 EmptyConversations.displayName = 'EmptyConversations';
 

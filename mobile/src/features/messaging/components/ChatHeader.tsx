@@ -1,19 +1,26 @@
 // src/features/messaging/components/ChatHeader.tsx
-// Sohbet başlık komponenti
-// Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
+// Meslektaş Design System - Modern Chat Header
+// Oku: mobile-development-guide/ui-ux-modernization/09-MESSAGING-EXPERIENCE.md
 
 import React, { memo, useCallback } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  Image,
-} from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withSequence,
+  FadeIn,
+} from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
+import { useHaptic } from '@shared/hooks/useHaptic';
+import { spring } from '@theme/animations';
 import { useMessagingStore } from '../stores';
 import type { Conversation } from '../types';
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface ChatHeaderProps {
   conversation: Conversation;
@@ -22,185 +29,215 @@ interface ChatHeaderProps {
   onOptionsPress?: () => void;
 }
 
-export const ChatHeader: React.FC<ChatHeaderProps> = memo(({
-  conversation,
-  onBackPress,
-  onProfilePress,
-  onOptionsPress,
-}) => {
-  const { theme } = useTheme();
-  const { typingUsers, onlineUsers } = useMessagingStore();
+// ============================================================================
+// AnimatedPressable
+// ============================================================================
 
-  // Typing status
-  const conversationTypingUsers = typingUsers[conversation.id] || [];
-  const isTyping = conversationTypingUsers.length > 0;
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-  // Online status - participant tek obje olarak gelir (1:1 chat)
-  const participant = conversation.participant;
-  const isOnline = participant?.online || onlineUsers.has(participant?.id || '');
+// ============================================================================
+// ChatHeader Component
+// ============================================================================
 
-  const getStatusText = useCallback((): string => {
-    if (isTyping) {
-      const names = conversationTypingUsers.slice(0, 2).join(', ');
-      return `${names} yazıyor...`;
-    }
-    if (isOnline) return 'çevrimiçi';
-    return '';
-  }, [isTyping, conversationTypingUsers, isOnline]);
+/**
+ * Modern ChatHeader Component
+ *
+ * Features:
+ * - Animated button presses with spring physics
+ * - Online/typing status indicators
+ * - Haptic feedback on interactions
+ * - Modern color tokens
+ *
+ * @example
+ * ```tsx
+ * <ChatHeader
+ *   conversation={conversation}
+ *   onBackPress={() => navigation.goBack()}
+ *   onProfilePress={() => navigation.navigate('Profile')}
+ *   onOptionsPress={() => showOptions()}
+ * />
+ * ```
+ */
+export const ChatHeader: React.FC<ChatHeaderProps> = memo(
+  ({ conversation, onBackPress, onProfilePress, onOptionsPress }) => {
+    const colors = useColors();
+    const { trigger } = useHaptic();
+    const { typingUsers, onlineUsers } = useMessagingStore();
 
-  const statusText = getStatusText();
+    // Animation values
+    const backScale = useSharedValue(1);
+    const optionsScale = useSharedValue(1);
 
-  return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: theme.colors.background.primary },
-      ]}
-    >
-      {/* Back button */}
-      <Pressable
-        onPress={onBackPress}
-        style={({ pressed }) => [
-          styles.backButton,
-          pressed && styles.buttonPressed,
-        ]}
-        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-      >
-        <Icon name="arrow-back" size={24} color={theme.colors.text.primary} />
-      </Pressable>
+    // Typing status
+    const conversationTypingUsers = typingUsers[conversation.id] || [];
+    const isTyping = conversationTypingUsers.length > 0;
 
-      {/* Profile */}
-      <Pressable
-        onPress={onProfilePress}
-        style={({ pressed }) => [
-          styles.profileContainer,
-          pressed && styles.profilePressed,
-        ]}
-        disabled={!onProfilePress}
-      >
-        {/* Avatar */}
-        <View style={styles.avatarContainer}>
-          {participant?.profileImageUrl ? (
-            <Image
-              source={{ uri: participant.profileImageUrl }}
-              style={styles.avatar}
-            />
-          ) : (
-            <View
-              style={[
-                styles.avatarPlaceholder,
-                { backgroundColor: theme.colors.primary[100] },
-              ]}
-            >
-              <Icon name="person" size={18} color={theme.colors.primary[500]} />
-            </View>
-          )}
+    // Online status - participant tek obje olarak gelir (1:1 chat)
+    const participant = conversation.participant;
+    const isOnline = participant?.online || onlineUsers.has(participant?.id || '');
 
-          {isOnline && (
-            <View
-              style={[
-                styles.onlineIndicator,
-                { backgroundColor: theme.colors.status.success },
-              ]}
-            />
-          )}
-        </View>
+    const getStatusText = useCallback((): string => {
+      if (isTyping) {
+        const names = conversationTypingUsers.slice(0, 2).join(', ');
+        return `${names} yazıyor...`;
+      }
+      if (isOnline) return 'çevrimiçi';
+      return '';
+    }, [isTyping, conversationTypingUsers, isOnline]);
 
-        {/* Info */}
-        <View style={styles.info}>
-          <Text
-            style={[styles.name, { color: theme.colors.text.primary }]}
-            numberOfLines={1}
-          >
-            {participant?.fullName || 'Kullanıcı'}
-          </Text>
-          {statusText && (
-            <Text
-              style={[
-                styles.status,
-                {
-                  color: isTyping
-                    ? theme.colors.primary[500]
-                    : theme.colors.status.success,
-                },
-              ]}
-              numberOfLines={1}
-            >
-              {statusText}
-            </Text>
-          )}
-        </View>
-      </Pressable>
+    const statusText = getStatusText();
 
-      {/* Options button */}
-      {onOptionsPress && (
-        <Pressable
-          onPress={onOptionsPress}
-          style={({ pressed }) => [
-            styles.optionsButton,
-            pressed && styles.buttonPressed,
-          ]}
+    // Handle back press
+    const handleBackPress = useCallback(() => {
+      trigger('light');
+      backScale.value = withSequence(withSpring(0.8, spring.press), withSpring(1, spring.snappy));
+      onBackPress();
+    }, [onBackPress, trigger, backScale]);
+
+    // Handle options press
+    const handleOptionsPress = useCallback(() => {
+      trigger('light');
+      optionsScale.value = withSequence(
+        withSpring(0.8, spring.press),
+        withSpring(1, spring.snappy),
+      );
+      onOptionsPress?.();
+    }, [onOptionsPress, trigger, optionsScale]);
+
+    // Handle profile press
+    const handleProfilePress = useCallback(() => {
+      trigger('light');
+      onProfilePress?.();
+    }, [onProfilePress, trigger]);
+
+    // Animated styles
+    const backAnimatedStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: backScale.value }],
+    }));
+
+    const optionsAnimatedStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: optionsScale.value }],
+    }));
+
+    return (
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: colors.background.primary,
+            borderBottomColor: colors.border.default,
+          },
+        ]}>
+        {/* Back button */}
+        <AnimatedPressable
+          onPress={handleBackPress}
+          style={[styles.backButton, backAnimatedStyle]}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Icon name="ellipsis-vertical" size={20} color={theme.colors.text.primary} />
+          accessibilityLabel="Geri"
+          accessibilityRole="button">
+          <Icon name="arrow-back" size={24} color={colors.text.primary} />
+        </AnimatedPressable>
+
+        {/* Profile */}
+        <Pressable
+          onPress={handleProfilePress}
+          style={styles.profileContainer}
+          disabled={!onProfilePress}
+          accessibilityLabel={`${participant?.fullName || 'Kullanıcı'} profili`}
+          accessibilityRole="button">
+          {/* Avatar */}
+          <View style={styles.avatarContainer}>
+            {participant?.profileImageUrl ? (
+              <Image source={{ uri: participant.profileImageUrl }} style={styles.avatar} />
+            ) : (
+              <View
+                style={[styles.avatarPlaceholder, { backgroundColor: colors.interactive.focus }]}>
+                <Icon name="person" size={18} color={colors.interactive.default} />
+              </View>
+            )}
+
+            {isOnline && (
+              <Animated.View
+                entering={FadeIn.duration(200)}
+                style={[
+                  styles.onlineIndicator,
+                  {
+                    backgroundColor: colors.status.success,
+                    borderColor: colors.background.primary,
+                  },
+                ]}
+              />
+            )}
+          </View>
+
+          {/* Info */}
+          <View style={styles.info}>
+            <Text style={[styles.name, { color: colors.text.primary }]} numberOfLines={1}>
+              {participant?.fullName || 'Kullanıcı'}
+            </Text>
+            {statusText && (
+              <Text
+                style={[
+                  styles.status,
+                  {
+                    color: isTyping ? colors.interactive.default : colors.status.success,
+                  },
+                ]}
+                numberOfLines={1}>
+                {statusText}
+              </Text>
+            )}
+          </View>
         </Pressable>
-      )}
-    </View>
-  );
-});
+
+        {/* Options button */}
+        {onOptionsPress && (
+          <AnimatedPressable
+            onPress={handleOptionsPress}
+            style={[styles.optionsButton, optionsAnimatedStyle]}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            accessibilityLabel="Seçenekler"
+            accessibilityRole="button">
+            <Icon name="ellipsis-vertical" size={20} color={colors.text.primary} />
+          </AnimatedPressable>
+        )}
+      </View>
+    );
+  },
+);
 
 ChatHeader.displayName = 'ChatHeader';
 
+// ============================================================================
+// Styles
+// ============================================================================
+
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-    minHeight: 56,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(0,0,0,0.1)',
-  },
-  backButton: {
-    padding: 8,
-  },
-  buttonPressed: {
-    opacity: 0.7,
-  },
-  profileContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    gap: 12,
-  },
-  profilePressed: {
-    opacity: 0.8,
+  avatar: {
+    borderRadius: 20,
+    height: 40,
+    width: 40,
   },
   avatarContainer: {
     position: 'relative',
   },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
   avatarPlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 20,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
   },
-  onlineIndicator: {
-    position: 'absolute',
-    right: -2,
-    bottom: -2,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
+  backButton: {
+    padding: 8,
+  },
+  container: {
+    alignItems: 'center',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    flexDirection: 'row',
+    minHeight: 56,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
   },
   info: {
     flex: 1,
@@ -210,12 +247,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  status: {
-    fontSize: 12,
-    marginTop: 2,
+  onlineIndicator: {
+    borderRadius: 6,
+    borderWidth: 2,
+    bottom: -2,
+    height: 12,
+    position: 'absolute',
+    right: -2,
+    width: 12,
   },
   optionsButton: {
     padding: 8,
+  },
+  profileContainer: {
+    alignItems: 'center',
+    flex: 1,
+    flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 8,
+  },
+  status: {
+    fontSize: 12,
+    marginTop: 2,
   },
 });
 

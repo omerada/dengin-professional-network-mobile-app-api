@@ -3,16 +3,9 @@
 // Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
 
 import React, { memo, useCallback } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Switch,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Switch, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { spacing, fontSize } from '@theme';
 import type { SettingsItemType } from '../types';
 
@@ -45,7 +38,7 @@ export const SettingsItem: React.FC<SettingsItemProps> = memo(
     onToggle,
     isLoading = false,
   }) => {
-    const { theme } = useTheme();
+    const colors = useColors();
 
     const handlePress = useCallback(() => {
       if (!isLoading && onPress) {
@@ -63,25 +56,13 @@ export const SettingsItem: React.FC<SettingsItemProps> = memo(
     );
 
     // Determine colors based on type
-    const textColor =
-      type === 'danger' ? theme.colors.error[500] : theme.colors.text.primary;
-    const iconColor =
-      type === 'danger' ? theme.colors.error[500] : theme.colors.text.secondary;
+    const textColor = type === 'danger' ? colors.status.error : colors.text.primary;
+    const iconColor = type === 'danger' ? colors.status.error : colors.text.secondary;
 
     const content = (
-      <View
-        style={[
-          styles.container,
-          { backgroundColor: theme.colors.background.primary },
-        ]}
-      >
+      <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
         {/* Icon */}
-        <View
-          style={[
-            styles.iconContainer,
-            { backgroundColor: theme.colors.background.secondary },
-          ]}
-        >
+        <View style={[styles.iconContainer, { backgroundColor: colors.background.secondary }]}>
           <Icon name={icon} size={20} color={iconColor} />
         </View>
 
@@ -89,10 +70,7 @@ export const SettingsItem: React.FC<SettingsItemProps> = memo(
         <View style={styles.textContainer}>
           <Text style={[styles.title, { color: textColor }]}>{title}</Text>
           {subtitle && (
-            <Text
-              style={[styles.subtitle, { color: theme.colors.text.tertiary }]}
-              numberOfLines={1}
-            >
+            <Text style={[styles.subtitle, { color: colors.text.secondary }]} numberOfLines={1}>
               {subtitle}
             </Text>
           )}
@@ -100,26 +78,22 @@ export const SettingsItem: React.FC<SettingsItemProps> = memo(
 
         {/* Right Side */}
         <View style={styles.rightContainer}>
-          {isLoading && <ActivityIndicator size="small" color={theme.colors.primary[500]} />}
+          {isLoading && <ActivityIndicator size="small" color={colors.interactive.default} />}
 
           {!isLoading && type === 'toggle' && (
             <Switch
               value={value}
               onValueChange={handleToggle}
               trackColor={{
-                false: theme.colors.border.medium,
-                true: theme.colors.primary[500],
+                false: colors.border.default,
+                true: colors.interactive.default,
               }}
               thumbColor="#FFFFFF"
             />
           )}
 
           {!isLoading && type === 'navigation' && (
-            <Icon
-              name="chevron-forward"
-              size={20}
-              color={theme.colors.text.tertiary}
-            />
+            <Icon name="chevron-forward" size={20} color={colors.text.secondary} />
           )}
         </View>
       </View>
@@ -131,11 +105,7 @@ export const SettingsItem: React.FC<SettingsItemProps> = memo(
     }
 
     return (
-      <TouchableOpacity
-        onPress={handlePress}
-        disabled={isLoading}
-        activeOpacity={0.7}
-      >
+      <TouchableOpacity onPress={handlePress} disabled={isLoading} activeOpacity={0.7}>
         {content}
       </TouchableOpacity>
     );
@@ -176,4 +146,3 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
-

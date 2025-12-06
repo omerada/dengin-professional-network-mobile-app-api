@@ -13,7 +13,7 @@ import {
   AccessibilityInfo,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { spacing, fontSize, borderRadius } from '@theme';
 import { socialApi } from '@features/social/services';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -57,7 +57,7 @@ export const BlockUserButton = React.memo<BlockUserButtonProps>(
     onToggle,
     testID,
   }) => {
-    const { theme } = useTheme();
+    const colors = useColors();
     const queryClient = useQueryClient();
     const [isBlocked, setIsBlocked] = useState(initialIsBlocked);
 
@@ -157,18 +157,18 @@ export const BlockUserButton = React.memo<BlockUserButtonProps>(
             paddingVertical: padding,
             paddingHorizontal: padding * 1.5,
             borderRadius: borderRadius.md,
-            backgroundColor: isBlocked ? theme.colors.background.secondary : theme.colors.error[50],
+            backgroundColor: isBlocked ? colors.background.secondary : colors.status.error,
             borderWidth: 1,
-            borderColor: isBlocked ? theme.colors.border.default : theme.colors.error[200],
+            borderColor: isBlocked ? colors.border.default : colors.status.error,
           };
       }
     };
 
     const getTextColor = (): string => {
       if (isBlocked) {
-        return theme.colors.text.secondary;
+        return colors.text.secondary;
       }
-      return theme.colors.error[600];
+      return colors.status.error;
     };
 
     const buttonText = isBlocked ? 'Engeli Kaldır' : 'Engelle';

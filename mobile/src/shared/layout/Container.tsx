@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { View, StyleSheet, ViewStyle, Dimensions } from 'react-native';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { spacing } from '@theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -86,7 +86,7 @@ export const Container = React.memo<ContainerProps>(
     style,
     testID,
   }) => {
-    const { theme } = useTheme();
+    const colors = useColors();
 
     const maxWidth = maxWidthValues[size];
     const horizontalPadding = paddingValues[padding];
@@ -97,7 +97,7 @@ export const Container = React.memo<ContainerProps>(
       paddingHorizontal: horizontalPadding,
       alignSelf: center ? 'center' : undefined,
       flex: flex ? 1 : undefined,
-      backgroundColor: backgroundColor || theme.colors.background.primary,
+      backgroundColor: backgroundColor || colors.background.primary,
     };
 
     return (

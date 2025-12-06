@@ -3,15 +3,9 @@
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
 import React, { memo, useCallback } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  Image,
-} from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { formatRelativeTime } from '@shared/utils/dateUtils';
 import type { Comment } from '../types';
 
@@ -24,119 +18,107 @@ interface CommentCardProps {
   isReply?: boolean;
 }
 
-export const CommentCard: React.FC<CommentCardProps> = memo(({
-  comment,
-  onLike,
-  onReply,
-  onAuthorPress,
-  onMenuPress,
-  isReply = false,
-}) => {
-  const { theme } = useTheme();
-  const { author } = comment;
+export const CommentCard: React.FC<CommentCardProps> = memo(
+  ({ comment, onLike, onReply, onAuthorPress, onMenuPress, isReply = false }) => {
+    const colors = useColors();
+    const { author } = comment;
 
-  const handleAuthorPress = useCallback(() => {
-    onAuthorPress?.(author.id);
-  }, [onAuthorPress, author.id]);
+    const handleAuthorPress = useCallback(() => {
+      onAuthorPress?.(author.id);
+    }, [onAuthorPress, author.id]);
 
-  const handleLike = useCallback(() => {
-    onLike?.(comment.id, comment.isLiked);
-  }, [onLike, comment.id, comment.isLiked]);
+    const handleLike = useCallback(() => {
+      onLike?.(comment.id, comment.isLiked);
+    }, [onLike, comment.id, comment.isLiked]);
 
-  const handleReply = useCallback(() => {
-    onReply?.(comment.id);
-  }, [onReply, comment.id]);
+    const handleReply = useCallback(() => {
+      onReply?.(comment.id);
+    }, [onReply, comment.id]);
 
-  const handleMenu = useCallback(() => {
-    onMenuPress?.(comment.id);
-  }, [onMenuPress, comment.id]);
+    const handleMenu = useCallback(() => {
+      onMenuPress?.(comment.id);
+    }, [onMenuPress, comment.id]);
 
-  return (
-    <View style={[styles.container, isReply && styles.replyContainer]}>
-      <Pressable onPress={handleAuthorPress}>
-        {author.avatarUrl ? (
-          <Image
-            source={{ uri: author.avatarUrl }}
-            style={[styles.avatar, isReply && styles.replyAvatar]}
-          />
-        ) : (
-          <View
-            style={[
-              styles.avatarPlaceholder,
-              isReply && styles.replyAvatar,
-              { backgroundColor: theme.colors.primary[100] },
-            ]}
-          >
-            <Text style={[styles.avatarText, { color: theme.colors.primary[600] }]}>
-              {author.firstName[0]}{author.lastName[0]}
-            </Text>
-          </View>
-        )}
-      </Pressable>
-
-      <View style={styles.content}>
-        <View style={styles.bubble}>
-          <View style={styles.header}>
-            <Pressable onPress={handleAuthorPress}>
-              <Text style={[styles.authorName, { color: theme.colors.text.primary }]}>
-                {author.firstName} {author.lastName}
-              </Text>
-            </Pressable>
-            {author.isVerified && (
-              <Icon
-                name="checkmark-circle"
-                size={14}
-                color={theme.colors.primary[500]}
-                style={styles.verifiedIcon}
-              />
-            )}
-          </View>
-
-          <Text style={[styles.commentText, { color: theme.colors.text.primary }]}>
-            {comment.content}
-          </Text>
-        </View>
-
-        <View style={styles.actions}>
-          <Text style={[styles.time, { color: theme.colors.text.secondary }]}>
-            {formatRelativeTime(comment.createdAt)}
-          </Text>
-
-          <Pressable style={styles.actionButton} onPress={handleLike}>
-            <Text
-              style={[
-                styles.actionText,
-                {
-                  color: comment.isLiked
-                    ? theme.colors.error.main
-                    : theme.colors.text.secondary,
-                },
-              ]}
-            >
-              Beğen{comment.likesCount > 0 && ` · ${comment.likesCount}`}
-            </Text>
-          </Pressable>
-
-          {!isReply && (
-            <Pressable style={styles.actionButton} onPress={handleReply}>
-              <Text style={[styles.actionText, { color: theme.colors.text.secondary }]}>
-                Yanıtla{comment.repliesCount > 0 && ` · ${comment.repliesCount}`}
-              </Text>
-            </Pressable>
-          )}
-
-          <Pressable style={styles.menuButton} onPress={handleMenu}>
-            <Icon
-              name="ellipsis-horizontal"
-              size={16}
-              color={theme.colors.text.secondary}
+    return (
+      <View style={[styles.container, isReply && styles.replyContainer]}>
+        <Pressable onPress={handleAuthorPress}>
+          {author.avatarUrl ? (
+            <Image
+              source={{ uri: author.avatarUrl }}
+              style={[styles.avatar, isReply && styles.replyAvatar]}
             />
-          </Pressable>
+          ) : (
+            <View
+              style={[
+                styles.avatarPlaceholder,
+                isReply && styles.replyAvatar,
+                { backgroundColor: colors.interactive.subtle },
+              ]}>
+              <Text style={[styles.avatarText, { color: colors.interactive.default }]}>
+                {author.firstName[0]}
+                {author.lastName[0]}
+              </Text>
+            </View>
+          )}
+        </Pressable>
+
+        <View style={styles.content}>
+          <View style={styles.bubble}>
+            <View style={styles.header}>
+              <Pressable onPress={handleAuthorPress}>
+                <Text style={[styles.authorName, { color: colors.text.primary }]}>
+                  {author.firstName} {author.lastName}
+                </Text>
+              </Pressable>
+              {author.isVerified && (
+                <Icon
+                  name="checkmark-circle"
+                  size={14}
+                  color={colors.interactive.default}
+                  style={styles.verifiedIcon}
+                />
+              )}
+            </View>
+
+            <Text style={[styles.commentText, { color: colors.text.primary }]}>
+              {comment.content}
+            </Text>
+          </View>
+
+          <View style={styles.actions}>
+            <Text style={[styles.time, { color: colors.text.secondary }]}>
+              {formatRelativeTime(comment.createdAt)}
+            </Text>
+
+            <Pressable style={styles.actionButton} onPress={handleLike}>
+              <Text
+                style={[
+                  styles.actionText,
+                  {
+                    color: comment.isLiked ? colors.error.main : colors.text.secondary,
+                  },
+                ]}>
+                Beğen{comment.likesCount > 0 && ` · ${comment.likesCount}`}
+              </Text>
+            </Pressable>
+
+            {!isReply && (
+              <Pressable style={styles.actionButton} onPress={handleReply}>
+                <Text style={[styles.actionText, { color: colors.text.secondary }]}>
+                  Yanıtla{comment.repliesCount > 0 && ` · ${comment.repliesCount}`}
+                </Text>
+              </Pressable>
+            )}
+
+            <Pressable style={styles.menuButton} onPress={handleMenu}>
+              <Icon name="ellipsis-horizontal" size={16} color={colors.text.secondary} />
+            </Pressable>
+          </View>
         </View>
       </View>
-    </View>
-  );
-});
+    );
+  },
+);
 
 CommentCard.displayName = 'CommentCard';
 

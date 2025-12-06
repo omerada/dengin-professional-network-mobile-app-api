@@ -2,18 +2,18 @@
 // Follow/Unfollow button component
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART5.md
 
-import React, { memo, useCallback } from 'react';
-import {
-  StyleSheet,
-  TouchableOpacity,
-  Text,
-  ActivityIndicator,
-} from 'react-native';
-import { useTheme } from '@contexts/ThemeContext';
+import React, { memo, useCallback, useMemo } from 'react';
+import { StyleSheet, Text, ActivityIndicator, Pressable } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { useColors } from '@contexts/ThemeContext';
 import { spacing, fontSize } from '@theme';
+import { springPresets } from '@theme/animations';
+import { useHaptic } from '@hooks/useHaptic';
 import { useFollow, useUnfollow } from '../hooks';
 
-interface FollowButtonProps {
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+export interface FollowButtonProps {
   /**
    * ID of user to follow/unfollow
    */
@@ -50,13 +50,22 @@ interface FollowButtonProps {
  */
 export const FollowButton: React.FC<FollowButtonProps> = memo(
   ({ userId, isFollowing, onFollowChange, size = 'md' }) => {
-    const { theme } = useTheme();
+    const colors = useColors();
+    const haptic = useHaptic();
     const follow = useFollow();
     const unfollow = useUnfollow();
 
     const isLoading = follow.isPending || unfollow.isPending;
 
+    // Animation
+    const scale = useSharedValue(1);
+
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: scale.value }],
+    }));
+
     const handlePress = useCallback(async () => {
+      haptic.medium();
       try {
         if (isFollowing) {
           await unfollow.mutateAsync(userId);
@@ -64,49 +73,58 @@ export const FollowButton: React.FC<FollowButtonProps> = memo(
         } else {
           await follow.mutateAsync(userId);
           onFollowChange?.(userId, true);
+          haptic.success();
         }
       } catch (error) {
-        // Error is handled by React Query
+        haptic.error();
         console.error('Follow/Unfollow error:', error);
       }
-    }, [userId, isFollowing, follow, unfollow, onFollowChange]);
+    }, [userId, isFollowing, follow, unfollow, onFollowChange, haptic]);
 
-    const buttonStyle = [
-      styles.button,
-      size === 'sm' ? styles.buttonSm : styles.buttonMd,
-      isFollowing
-        ? {
-            backgroundColor: theme.colors.background.secondary,
-            borderColor: theme.colors.border.medium,
-            borderWidth: 1,
-          }
-        : { backgroundColor: theme.colors.primary[500] },
-    ];
+    const buttonStyle = useMemo(
+      () => [
+        styles.button,
+        size === 'sm' ? styles.buttonSm : styles.buttonMd,
+        isFollowing
+          ? {
+              backgroundColor: colors.background.secondary,
+              borderColor: colors.border.default,
+              borderWidth: 1,
+            }
+          : { backgroundColor: colors.interactive.default },
+      ],
+      [size, isFollowing, colors],
+    );
 
-    const textStyle = [
-      styles.text,
-      size === 'sm' ? styles.textSm : styles.textMd,
-      { color: isFollowing ? theme.colors.text.primary : '#FFFFFF' },
-    ];
+    const textStyle = useMemo(
+      () => [
+        styles.text,
+        size === 'sm' ? styles.textSm : styles.textMd,
+        { color: isFollowing ? colors.text.primary : '#FFFFFF' },
+      ],
+      [size, isFollowing, colors],
+    );
 
     return (
-      <TouchableOpacity
-        style={buttonStyle}
+      <AnimatedPressable
+        style={[buttonStyle, animatedStyle]}
         onPress={handlePress}
+        onPressIn={() => {
+          scale.value = withSpring(0.95, springPresets.press);
+        }}
+        onPressOut={() => {
+          scale.value = withSpring(1, springPresets.press);
+        }}
         disabled={isLoading}
-        activeOpacity={0.7}
-      >
+        accessibilityRole="button"
+        accessibilityLabel={isFollowing ? 'Takipten çık' : 'Takip et'}
+        accessibilityState={{ disabled: isLoading }}>
         {isLoading ? (
-          <ActivityIndicator
-            size="small"
-            color={isFollowing ? theme.colors.text.primary : '#FFFFFF'}
-          />
+          <ActivityIndicator size="small" color={isFollowing ? colors.text.primary : '#FFFFFF'} />
         ) : (
-          <Text style={textStyle}>
-            {isFollowing ? 'Takipten Çık' : 'Takip Et'}
-          </Text>
+          <Text style={textStyle}>{isFollowing ? 'Takipten Çık' : 'Takip Et'}</Text>
         )}
-      </TouchableOpacity>
+      </AnimatedPressable>
     );
   },
 );
@@ -118,13 +136,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   buttonSm: {
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.md,
+    paddingVertical: spacing['1'],
+    paddingHorizontal: spacing['4'],
     minWidth: 90,
   },
   buttonMd: {
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing['2'],
+    paddingHorizontal: spacing['6'],
     minWidth: 110,
   },
   text: {
@@ -139,4 +157,3 @@ const styles = StyleSheet.create({
 });
 
 FollowButton.displayName = 'FollowButton';
-

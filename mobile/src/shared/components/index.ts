@@ -9,6 +9,9 @@ export type { ButtonProps, ButtonVariant, ButtonSize } from './Button';
 export { Input } from './Input';
 export type { InputProps, InputVariant, InputSize, InputRef } from './Input';
 
+export { SearchBar } from './SearchBar';
+export type { SearchBarProps, SearchBarSize } from './SearchBar';
+
 // Loading & Feedback components
 export { Loading, LoadingOverlay, Spinner, DotsLoading } from './Loading';
 export { ErrorFallback } from './ErrorFallback';

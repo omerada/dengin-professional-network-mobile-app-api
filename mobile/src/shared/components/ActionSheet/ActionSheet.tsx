@@ -1,11 +1,29 @@
 // src/shared/components/ActionSheet/ActionSheet.tsx
-// Bottom action sheet component for menus
+// Meslektaş Design System - Modern ActionSheet Component
+// Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
-import React, { useCallback, useMemo } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, Pressable, Platform } from 'react-native';
+import React, { memo, useCallback } from 'react';
+import { View, Text, Pressable, StyleSheet, Modal, Platform } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+  withSequence,
+  FadeIn,
+  FadeOut,
+  SlideInDown,
+  SlideOutDown,
+} from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@contexts/ThemeContext';
-import type { Theme } from '@theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColors } from '@contexts/ThemeContext';
+import { useHaptic } from '@shared/hooks/useHaptic';
+import { spring } from '@theme/animations';
+
+// ============================================================================
+// Types
+// ============================================================================
 
 export interface ActionSheetOption {
   id: string;
@@ -23,179 +41,295 @@ export interface ActionSheetProps {
   message?: string;
   options: ActionSheetOption[];
   cancelLabel?: string;
+  testID?: string;
 }
 
-export const ActionSheet: React.FC<ActionSheetProps> = ({
-  visible,
-  onClose,
-  title,
-  message,
-  options,
-  cancelLabel = 'İptal',
-}) => {
-  const { theme } = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
+// ============================================================================
+// AnimatedPressable
+// ============================================================================
 
-  const handleOptionPress = useCallback(
-    (option: ActionSheetOption) => {
-      if (!option.disabled) {
-        onClose();
-        // Small delay to allow modal to close before action
-        setTimeout(() => option.onPress(), 100);
-      }
-    },
-    [onClose],
-  );
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+// ============================================================================
+// OptionButton Component
+// ============================================================================
+
+interface OptionButtonProps {
+  option: ActionSheetOption;
+  isFirst: boolean;
+  isLast: boolean;
+  onPress: () => void;
+}
+
+const OptionButton: React.FC<OptionButtonProps> = memo(({ option, isFirst, isLast, onPress }) => {
+  const colors = useColors();
+  const { trigger } = useHaptic();
+  const scale = useSharedValue(1);
+
+  const handlePress = useCallback(() => {
+    if (option.disabled) return;
+    trigger(option.destructive ? 'warning' : 'selection');
+    scale.value = withSequence(withSpring(0.97, spring.press), withSpring(1, spring.snappy));
+    onPress();
+  }, [option, onPress, trigger, scale]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const iconColor = option.disabled
+    ? colors.text.disabled
+    : option.destructive
+      ? colors.status.error
+      : colors.text.primary;
+
+  const labelColor = option.disabled
+    ? colors.text.disabled
+    : option.destructive
+      ? colors.status.error
+      : colors.interactive.default;
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <View style={styles.container}>
-          <Pressable onPress={e => e.stopPropagation()}>
-            {/* Header */}
-            {(title || message) && (
-              <View style={styles.header}>
-                {title && <Text style={styles.title}>{title}</Text>}
-                {message && <Text style={styles.message}>{message}</Text>}
-              </View>
-            )}
-
-            {/* Options */}
-            <View style={styles.optionsContainer}>
-              {options.map((option, index) => (
-                <TouchableOpacity
-                  key={option.id}
-                  style={[
-                    styles.option,
-                    index === 0 && styles.firstOption,
-                    index === options.length - 1 && styles.lastOption,
-                    option.disabled && styles.disabledOption,
-                  ]}
-                  onPress={() => handleOptionPress(option)}
-                  disabled={option.disabled}
-                  activeOpacity={0.7}>
-                  {option.icon && (
-                    <Icon
-                      name={option.icon}
-                      size={22}
-                      color={
-                        option.disabled
-                          ? theme.colors.text.disabled
-                          : option.destructive
-                            ? theme.colors.error.main
-                            : theme.colors.text.primary
-                      }
-                      style={styles.optionIcon}
-                    />
-                  )}
-                  <Text
-                    style={[
-                      styles.optionLabel,
-                      option.destructive && styles.destructiveLabel,
-                      option.disabled && styles.disabledLabel,
-                    ]}>
-                    {option.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            {/* Cancel Button */}
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose} activeOpacity={0.7}>
-              <Text style={styles.cancelLabel}>{cancelLabel}</Text>
-            </TouchableOpacity>
-          </Pressable>
-        </View>
-      </Pressable>
-    </Modal>
+    <AnimatedPressable
+      style={[
+        styles.option,
+        {
+          backgroundColor: colors.background.secondary,
+          borderBottomColor: colors.border.default,
+        },
+        isFirst && styles.firstOption,
+        isLast && styles.lastOption,
+        option.disabled && styles.disabledOption,
+        animatedStyle,
+      ]}
+      onPress={handlePress}
+      disabled={option.disabled}
+      accessibilityRole="button"
+      accessibilityLabel={option.label}
+      accessibilityState={{ disabled: option.disabled }}>
+      {option.icon && (
+        <Icon name={option.icon} size={22} color={iconColor} style={styles.optionIcon} />
+      )}
+      <Text style={[styles.optionLabel, { color: labelColor }]}>{option.label}</Text>
+    </AnimatedPressable>
   );
-};
+});
 
-const createStyles = (theme: Theme) =>
-  StyleSheet.create({
-    overlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'flex-end',
-    },
-    container: {
-      paddingHorizontal: 8,
-      paddingBottom: Platform.OS === 'ios' ? 34 : 16,
-    },
-    header: {
-      backgroundColor: theme.colors.background.secondary,
-      borderTopLeftRadius: 14,
-      borderTopRightRadius: 14,
-      paddingVertical: 16,
-      paddingHorizontal: 16,
-      alignItems: 'center',
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: theme.colors.border.light,
-    },
-    title: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: theme.colors.text.secondary,
-      textAlign: 'center',
-    },
-    message: {
-      fontSize: 12,
-      color: theme.colors.text.tertiary,
-      textAlign: 'center',
-      marginTop: 4,
-    },
-    optionsContainer: {
-      backgroundColor: theme.colors.background.secondary,
-      borderRadius: 14,
-      overflow: 'hidden',
-    },
-    option: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 16,
-      paddingHorizontal: 20,
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: theme.colors.border.light,
-    },
-    firstOption: {
-      borderTopLeftRadius: 14,
-      borderTopRightRadius: 14,
-    },
-    lastOption: {
-      borderBottomWidth: 0,
-      borderBottomLeftRadius: 14,
-      borderBottomRightRadius: 14,
-    },
-    disabledOption: {
-      opacity: 0.5,
-    },
-    optionIcon: {
-      marginRight: 12,
-    },
-    optionLabel: {
-      fontSize: 18,
-      color: theme.colors.primary[500],
-      textAlign: 'center',
-    },
-    destructiveLabel: {
-      color: theme.colors.error.main,
-    },
-    disabledLabel: {
-      color: theme.colors.text.disabled,
-    },
-    cancelButton: {
-      backgroundColor: theme.colors.background.secondary,
-      borderRadius: 14,
-      paddingVertical: 16,
-      alignItems: 'center',
-      marginTop: 8,
-    },
-    cancelLabel: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: theme.colors.primary[500],
-    },
-  });
+OptionButton.displayName = 'OptionButton';
+
+// ============================================================================
+// ActionSheet Component
+// ============================================================================
+
+/**
+ * Modern ActionSheet Component
+ *
+ * Features:
+ * - Animated slide-in/out with spring physics
+ * - Haptic feedback on option selection
+ * - Destructive option styling
+ * - Safe area aware
+ * - Accessibility support
+ *
+ * @example
+ * ```tsx
+ * <ActionSheet
+ *   visible={showSheet}
+ *   onClose={() => setShowSheet(false)}
+ *   title="Seçenekler"
+ *   options={[
+ *     { id: '1', label: 'Düzenle', icon: 'pencil', onPress: handleEdit },
+ *     { id: '2', label: 'Sil', icon: 'trash', destructive: true, onPress: handleDelete },
+ *   ]}
+ * />
+ * ```
+ */
+export const ActionSheet: React.FC<ActionSheetProps> = memo(
+  ({ visible, onClose, title, message, options, cancelLabel = 'İptal', testID }) => {
+    const colors = useColors();
+    const { trigger } = useHaptic();
+    const insets = useSafeAreaInsets();
+
+    // Cancel button animation
+    const cancelScale = useSharedValue(1);
+
+    const handleOptionPress = useCallback(
+      (option: ActionSheetOption) => {
+        onClose();
+        // Small delay to allow modal to close before action
+        setTimeout(() => option.onPress(), 150);
+      },
+      [onClose],
+    );
+
+    const handleCancel = useCallback(() => {
+      trigger('light');
+      cancelScale.value = withSequence(
+        withSpring(0.97, spring.press),
+        withSpring(1, spring.snappy),
+      );
+      onClose();
+    }, [onClose, trigger, cancelScale]);
+
+    const cancelAnimatedStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: cancelScale.value }],
+    }));
+
+    if (!visible) return null;
+
+    return (
+      <Modal
+        visible={visible}
+        transparent
+        animationType="none"
+        onRequestClose={onClose}
+        statusBarTranslucent>
+        <View style={styles.modalContainer} testID={testID}>
+          {/* Overlay */}
+          <Animated.View
+            entering={FadeIn.duration(200)}
+            exiting={FadeOut.duration(200)}
+            style={styles.overlay}>
+            <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+          </Animated.View>
+
+          {/* Content */}
+          <Animated.View
+            entering={SlideInDown.springify().damping(18)}
+            exiting={SlideOutDown.duration(200)}
+            style={[styles.container, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+            <Pressable onPress={e => e.stopPropagation()}>
+              {/* Header */}
+              {(title || message) && (
+                <View
+                  style={[
+                    styles.header,
+                    {
+                      backgroundColor: colors.background.secondary,
+                      borderBottomColor: colors.border.default,
+                    },
+                  ]}>
+                  {title && (
+                    <Text style={[styles.title, { color: colors.text.secondary }]}>{title}</Text>
+                  )}
+                  {message && (
+                    <Text style={[styles.message, { color: colors.text.tertiary }]}>{message}</Text>
+                  )}
+                </View>
+              )}
+
+              {/* Options */}
+              <View style={styles.optionsContainer}>
+                {options.map((option, index) => (
+                  <OptionButton
+                    key={option.id}
+                    option={option}
+                    isFirst={index === 0 && !title && !message}
+                    isLast={index === options.length - 1}
+                    onPress={() => handleOptionPress(option)}
+                  />
+                ))}
+              </View>
+
+              {/* Cancel Button */}
+              <AnimatedPressable
+                style={[
+                  styles.cancelButton,
+                  { backgroundColor: colors.background.secondary },
+                  cancelAnimatedStyle,
+                ]}
+                onPress={handleCancel}
+                accessibilityRole="button"
+                accessibilityLabel={cancelLabel}>
+                <Text style={[styles.cancelLabel, { color: colors.interactive.default }]}>
+                  {cancelLabel}
+                </Text>
+              </AnimatedPressable>
+            </Pressable>
+          </Animated.View>
+        </View>
+      </Modal>
+    );
+  },
+);
+
+ActionSheet.displayName = 'ActionSheet';
+
+// ============================================================================
+// Styles
+// ============================================================================
+
+const styles = StyleSheet.create({
+  cancelButton: {
+    alignItems: 'center',
+    borderRadius: 14,
+    marginTop: 8,
+    paddingVertical: 16,
+  },
+  cancelLabel: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  container: {
+    paddingHorizontal: 8,
+  },
+  disabledOption: {
+    opacity: 0.5,
+  },
+  firstOption: {
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 14,
+  },
+  header: {
+    alignItems: 'center',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderTopLeftRadius: 14,
+    borderTopRightRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  lastOption: {
+    borderBottomLeftRadius: 14,
+    borderBottomRightRadius: 14,
+    borderBottomWidth: 0,
+  },
+  message: {
+    fontSize: 12,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  option: {
+    alignItems: 'center',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  optionIcon: {
+    marginRight: 12,
+  },
+  optionLabel: {
+    fontSize: 18,
+    textAlign: 'center',
+  },
+  optionsContainer: {
+    borderRadius: 14,
+    overflow: 'hidden',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  title: {
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+});
 
 export default ActionSheet;

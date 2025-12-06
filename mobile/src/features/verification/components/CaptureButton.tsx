@@ -11,7 +11,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { useTheme } from '@contexts';
+import { useColors } from '@contexts';
 
 /**
  * Yakalama butonu props
@@ -65,8 +65,7 @@ export const CaptureButton: React.FC<CaptureButtonProps> = memo(
     style,
     accessibilityLabel = 'Fotoğraf çek',
   }) => {
-    const { theme } = useTheme();
-    const { colors } = theme;
+    const colors = useColors();
     const scale = useSharedValue(1);
 
     const sizeValues = SIZES[size];
@@ -132,7 +131,7 @@ export const CaptureButton: React.FC<CaptureButtonProps> = memo(
                 height: sizeValues.outer,
                 borderRadius: sizeValues.outer / 2,
                 borderWidth: sizeValues.border,
-                borderColor: disabled ? colors.textDisabled : colors.background,
+                borderColor: disabled ? colors.text.disabled : colors.background.primary,
               },
             ]}>
             <View
@@ -142,10 +141,10 @@ export const CaptureButton: React.FC<CaptureButtonProps> = memo(
                   width: sizeValues.inner,
                   height: sizeValues.inner,
                   borderRadius: sizeValues.inner / 2,
-                  backgroundColor: disabled ? colors.textDisabled : colors.background,
+                  backgroundColor: disabled ? colors.text.disabled : colors.background.primary,
                 },
               ]}>
-              {loading && <ActivityIndicator size="small" color={colors.primary} />}
+              {loading && <ActivityIndicator size="small" color={colors.interactive.default} />}
             </View>
           </View>
         </TouchableOpacity>

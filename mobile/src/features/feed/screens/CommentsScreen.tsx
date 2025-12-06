@@ -5,7 +5,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { View, FlatList, StyleSheet, ActivityIndicator, RefreshControl, Alert } from 'react-native';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { useAuthStore } from '@features/auth/stores';
 import { useCommentsData, useAddComment, useLikeComment, useDeleteComment } from '../hooks';
 import { CommentCard, AddCommentForm, EmptyFeed } from '../components';
@@ -16,7 +16,7 @@ import type { FeedStackParamList } from '@shared/types';
 type CommentsRouteProp = RouteProp<FeedStackParamList, 'Comments'>;
 
 export const CommentsScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const navigation = useNavigation();
   const route = useRoute<CommentsRouteProp>();
   const { postId } = route.params; // postId: number
@@ -178,21 +178,21 @@ export const CommentsScreen: React.FC = () => {
 
     return (
       <View style={styles.footer}>
-        <ActivityIndicator size="small" color={theme.colors.primary[500]} />
+        <ActivityIndicator size="small" color={colors.interactive.default} />
       </View>
     );
-  }, [isFetchingNextPage, theme.colors.primary]);
+  }, [isFetchingNextPage, colors.interactive.default]);
 
   if (isLoading && comments.length === 0) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background.primary }]}>
-        <ActivityIndicator size="large" color={theme.colors.primary[500]} />
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background.primary }]}>
+        <ActivityIndicator size="large" color={colors.interactive.default} />
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background.primary }]}>
+    <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
       <FlatList
         data={comments}
         renderItem={renderComment}
@@ -205,7 +205,7 @@ export const CommentsScreen: React.FC = () => {
           <RefreshControl
             refreshing={isRefetching}
             onRefresh={refetch}
-            tintColor={theme.colors.primary[500]}
+            tintColor={colors.interactive.default}
           />
         }
         showsVerticalScrollIndicator={false}

@@ -16,12 +16,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { NotificationSettingsToggle } from '../components/NotificationSettingsToggle';
-import {
-  useNotificationSettings,
-  useNotificationPermission,
-} from '../hooks';
+import { useNotificationSettings, useNotificationPermission } from '../hooks';
 import type { NotificationType } from '../types';
 
 interface SettingsSection {
@@ -35,11 +32,11 @@ interface SettingsSection {
 }
 
 export const NotificationSettingsScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const navigation = useNavigation();
-  const { 
-    preferences, 
-    isLoading, 
+  const {
+    preferences,
+    isLoading,
     toggleNotifications,
     togglePush,
     toggleEmail,
@@ -127,20 +124,23 @@ export const NotificationSettingsScreen: React.FC = () => {
         ],
       },
     ],
-    []
+    [],
   );
 
   // Get toggle value for a notification type
-  const getTypeEnabled = useCallback((type: NotificationType): boolean => {
-    return preferences.typeSettings?.[type]?.enabled ?? true;
-  }, [preferences.typeSettings]);
+  const getTypeEnabled = useCallback(
+    (type: NotificationType): boolean => {
+      return preferences.typeSettings?.[type]?.enabled ?? true;
+    },
+    [preferences.typeSettings],
+  );
 
   // Handle type toggle
   const handleTypeToggle = useCallback(
     (type: NotificationType, value: boolean) => {
       toggleTypeEnabled(type, value);
     },
-    [toggleTypeEnabled]
+    [toggleTypeEnabled],
   );
 
   // Handle master toggle
@@ -157,13 +157,13 @@ export const NotificationSettingsScreen: React.FC = () => {
               style: 'destructive',
               onPress: () => toggleNotifications(false),
             },
-          ]
+          ],
         );
       } else {
         toggleNotifications(true);
       }
     },
-    [toggleNotifications]
+    [toggleNotifications],
   );
 
   // Handle enable notifications (system permission)
@@ -173,11 +173,9 @@ export const NotificationSettingsScreen: React.FC = () => {
 
   if (isLoading) {
     return (
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
-      >
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary[500]} />
+          <ActivityIndicator size="large" color={colors.interactive.default} />
         </View>
       </SafeAreaView>
     );
@@ -185,24 +183,17 @@ export const NotificationSettingsScreen: React.FC = () => {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
-      edges={['top']}
-    >
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
+      edges={['top']}>
       {/* Header */}
-      <View style={[styles.header, { borderBottomColor: theme.colors.border }]}>
+      <View style={[styles.header, { borderBottomColor: colors.border.default }]}>
         <Pressable
           onPress={() => navigation.goBack()}
-          style={({ pressed }) => [
-            styles.backButton,
-            pressed && styles.buttonPressed,
-          ]}
-        >
-          <Icon name="arrow-back" size={24} color={theme.colors.text.primary} />
+          style={({ pressed }) => [styles.backButton, pressed && styles.buttonPressed]}>
+          <Icon name="arrow-back" size={24} color={colors.text.primary} />
         </Pressable>
 
-        <Text style={[styles.headerTitle, { color: theme.colors.text.primary }]}>
-          Bildirim Ayarları
-        </Text>
+        <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Bildirim Ayarları</Text>
 
         <View style={styles.headerSpacer} />
       </View>
@@ -210,76 +201,42 @@ export const NotificationSettingsScreen: React.FC = () => {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
         {/* Permission Warning */}
         {isSystemNotificationsDisabled && (
           <Pressable
             onPress={handleEnableNotifications}
-            style={[
-              styles.permissionWarning,
-              { backgroundColor: theme.colors.warning[50] },
-            ]}
-          >
+            style={[styles.permissionWarning, { backgroundColor: colors.status.warning }]}>
             <Icon
               name="warning"
               size={24}
-              color={theme.colors.warning[500]}
+              color={colors.status.warning}
               style={styles.warningIcon}
             />
             <View style={styles.warningContent}>
-              <Text
-                style={[
-                  styles.warningTitle,
-                  { color: theme.colors.warning[700] },
-                ]}
-              >
+              <Text style={[styles.warningTitle, { color: colors.status.warning }]}>
                 Bildirimler Kapalı
               </Text>
-              <Text
-                style={[
-                  styles.warningText,
-                  { color: theme.colors.warning[600] },
-                ]}
-              >
+              <Text style={[styles.warningText, { color: colors.status.warning }]}>
                 Bildirimleri almak için cihaz ayarlarından izin vermeniz gerekiyor.
               </Text>
             </View>
-            <Icon
-              name="chevron-forward"
-              size={20}
-              color={theme.colors.warning[500]}
-            />
+            <Icon name="chevron-forward" size={20} color={colors.status.warning} />
           </Pressable>
         )}
 
         {/* Quiet Hours Info */}
         {inQuietHours && (
-          <View
-            style={[
-              styles.quietHoursInfo,
-              { backgroundColor: theme.colors.info[50] },
-            ]}
-          >
-            <Icon
-              name="moon"
-              size={20}
-              color={theme.colors.info[500]}
-              style={styles.warningIcon}
-            />
-            <Text style={[styles.quietHoursText, { color: theme.colors.info[700] }]}>
+          <View style={[styles.quietHoursInfo, { backgroundColor: colors.status.info }]}>
+            <Icon name="moon" size={20} color={colors.status.info} style={styles.warningIcon} />
+            <Text style={[styles.quietHoursText, { color: colors.status.info }]}>
               Sessiz saatler aktif ({preferences.quietHoursStart} - {preferences.quietHoursEnd})
             </Text>
           </View>
         )}
 
         {/* Master Toggle */}
-        <View
-          style={[
-            styles.section,
-            { backgroundColor: theme.colors.surface },
-          ]}
-        >
+        <View style={[styles.section, { backgroundColor: colors.background.secondary }]}>
           <NotificationSettingsToggle
             icon="notifications"
             title="Bildirimleri Etkinleştir"
@@ -291,20 +248,10 @@ export const NotificationSettingsScreen: React.FC = () => {
         </View>
 
         {/* Delivery Channel Toggles */}
-        <Text
-          style={[
-            styles.sectionTitle,
-            { color: theme.colors.text.secondary },
-          ]}
-        >
+        <Text style={[styles.sectionTitle, { color: colors.text.secondary }]}>
           Bildirim Kanalları
         </Text>
-        <View
-          style={[
-            styles.section,
-            { backgroundColor: theme.colors.surface },
-          ]}
-        >
+        <View style={[styles.section, { backgroundColor: colors.background.secondary }]}>
           <NotificationSettingsToggle
             icon="phone-portrait"
             title="Push Bildirimleri"
@@ -313,12 +260,7 @@ export const NotificationSettingsScreen: React.FC = () => {
             onValueChange={togglePush}
             disabled={!isNotificationsEnabled || isSystemNotificationsDisabled || isSaving}
           />
-          <View
-            style={[
-              styles.separator,
-              { backgroundColor: theme.colors.border },
-            ]}
-          />
+          <View style={[styles.separator, { backgroundColor: colors.border.default }]} />
           <NotificationSettingsToggle
             icon="mail"
             title="E-posta Bildirimleri"
@@ -330,44 +272,25 @@ export const NotificationSettingsScreen: React.FC = () => {
         </View>
 
         {/* Settings Sections by Type */}
-        {sections.map((section) => (
+        {sections.map(section => (
           <View key={section.title}>
-            <Text
-              style={[
-                styles.sectionTitle,
-                { color: theme.colors.text.secondary },
-              ]}
-            >
+            <Text style={[styles.sectionTitle, { color: colors.text.secondary }]}>
               {section.title}
             </Text>
 
-            <View
-              style={[
-                styles.section,
-                { backgroundColor: theme.colors.surface },
-              ]}
-            >
+            <View style={[styles.section, { backgroundColor: colors.background.secondary }]}>
               {section.items.map((item, index) => (
                 <React.Fragment key={item.type}>
                   {index > 0 && (
-                    <View
-                      style={[
-                        styles.separator,
-                        { backgroundColor: theme.colors.border },
-                      ]}
-                    />
+                    <View style={[styles.separator, { backgroundColor: colors.border.default }]} />
                   )}
                   <NotificationSettingsToggle
                     icon={item.icon}
                     title={item.title}
                     description={item.description}
                     value={getTypeEnabled(item.type)}
-                    onValueChange={(value) => handleTypeToggle(item.type, value)}
-                    disabled={
-                      isSystemNotificationsDisabled ||
-                      !isNotificationsEnabled ||
-                      isSaving
-                    }
+                    onValueChange={value => handleTypeToggle(item.type, value)}
+                    disabled={isSystemNotificationsDisabled || !isNotificationsEnabled || isSaving}
                   />
                 </React.Fragment>
               ))}
@@ -376,9 +299,9 @@ export const NotificationSettingsScreen: React.FC = () => {
         ))}
 
         {/* Help Text */}
-        <Text style={[styles.helpText, { color: theme.colors.text.secondary }]}>
-          Bildirim tercihlerinizi istediğiniz zaman değiştirebilirsiniz. Bazı önemli
-          sistem bildirimleri kapatılamaz.
+        <Text style={[styles.helpText, { color: colors.text.secondary }]}>
+          Bildirim tercihlerinizi istediğiniz zaman değiştirebilirsiniz. Bazı önemli sistem
+          bildirimleri kapatılamaz.
         </Text>
       </ScrollView>
     </SafeAreaView>

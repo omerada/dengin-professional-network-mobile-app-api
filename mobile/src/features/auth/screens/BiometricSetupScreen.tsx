@@ -4,16 +4,10 @@
 // Oku: mobile-development-guide/features/03-AUTH-MODULE.md
 
 import React, { useState, useCallback, useEffect } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  Platform,
-  Alert,
-} from 'react-native';
+import { StyleSheet, View, Text, Platform, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import { Button, Loading } from '@shared/components';
 import { spacing, typography } from '@theme';
@@ -43,7 +37,7 @@ const BIOMETRIC_ICONS = {
  * - Requires successful biometric auth before enabling
  */
 export const BiometricSetupScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const navigation = useNavigation();
   const toast = useToast();
 
@@ -98,7 +92,7 @@ export const BiometricSetupScreen: React.FC = () => {
     try {
       // First, verify biometric works
       const { success, error } = await biometricService.authenticate(
-        `${biometricName} ile giriş özelliğini etkinleştirmek için kimliğinizi doğrulayın`
+        `${biometricName} ile giriş özelliğini etkinleştirmek için kimliğinizi doğrulayın`,
       );
 
       if (!success) {
@@ -168,9 +162,8 @@ export const BiometricSetupScreen: React.FC = () => {
   if (isLoading) {
     return (
       <SafeAreaView
-        style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
-        edges={['bottom']}
-      >
+        style={[styles.container, { backgroundColor: colors.background.primary }]}
+        edges={['bottom']}>
         <Loading size="large" text="Kontrol ediliyor..." />
       </SafeAreaView>
     );
@@ -180,29 +173,26 @@ export const BiometricSetupScreen: React.FC = () => {
   if (!isAvailable) {
     return (
       <SafeAreaView
-        style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
-        edges={['bottom']}
-      >
+        style={[styles.container, { backgroundColor: colors.background.primary }]}
+        edges={['bottom']}>
         <View style={styles.content}>
           <View style={styles.iconContainer}>
             <Text style={styles.icon}>🚫</Text>
           </View>
-          <Text style={[styles.title, { color: theme.colors.text.primary }]}>
+          <Text style={[styles.title, { color: colors.text.primary }]}>
             Biyometrik Kullanılamıyor
           </Text>
-          <Text style={[styles.description, { color: theme.colors.text.secondary }]}>
-            Cihazınızda biyometrik kimlik doğrulama (Face ID, Touch ID veya parmak izi) 
+          <Text style={[styles.description, { color: colors.text.secondary }]}>
+            Cihazınızda biyometrik kimlik doğrulama (Face ID, Touch ID veya parmak izi)
             desteklenmiyor veya ayarlanmamış.
           </Text>
-          <View
-            style={[styles.infoCard, { backgroundColor: theme.colors.background.secondary }]}
-          >
-            <Text style={[styles.infoTitle, { color: theme.colors.text.primary }]}>
+          <View style={[styles.infoCard, { backgroundColor: colors.background.secondary }]}>
+            <Text style={[styles.infoTitle, { color: colors.text.primary }]}>
               Nasıl Etkinleştirilir?
             </Text>
-            <Text style={[styles.infoText, { color: theme.colors.text.secondary }]}>
+            <Text style={[styles.infoText, { color: colors.text.secondary }]}>
               {Platform.OS === 'ios'
-                ? '1. Ayarlar uygulamasını açın\n2. Face ID & Parola veya Touch ID & Parola\'ya gidin\n3. Biyometrik kimliğinizi ayarlayın'
+                ? "1. Ayarlar uygulamasını açın\n2. Face ID & Parola veya Touch ID & Parola'ya gidin\n3. Biyometrik kimliğinizi ayarlayın"
                 : '1. Ayarlar uygulamasını açın\n2. Güvenlik bölümüne gidin\n3. Parmak izi ekleyin'}
             </Text>
           </View>
@@ -219,31 +209,27 @@ export const BiometricSetupScreen: React.FC = () => {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
-      edges={['bottom']}
-    >
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
+      edges={['bottom']}>
       <View style={styles.content}>
         {/* Biometric Icon */}
         <View
           style={[
             styles.iconContainer,
             {
-              backgroundColor: isEnabled
-                ? theme.colors.success.background
-                : theme.colors.background.secondary,
+              backgroundColor: isEnabled ? colors.status.success : colors.background.secondary,
             },
-          ]}
-        >
+          ]}>
           <Text style={styles.icon}>{getBiometricIcon()}</Text>
         </View>
 
         {/* Title */}
-        <Text style={[styles.title, { color: theme.colors.text.primary }]}>
+        <Text style={[styles.title, { color: colors.text.primary }]}>
           {biometricName} ile Giriş
         </Text>
 
         {/* Description */}
-        <Text style={[styles.description, { color: theme.colors.text.secondary }]}>
+        <Text style={[styles.description, { color: colors.text.secondary }]}>
           {isEnabled
             ? `${biometricName} ile hızlı ve güvenli giriş yapabilirsiniz. Şifrenizi girmeden uygulamaya erişebilirsiniz.`
             : `${biometricName} özelliğini etkinleştirerek uygulamaya daha hızlı ve güvenli giriş yapabilirsiniz.`}
@@ -254,31 +240,23 @@ export const BiometricSetupScreen: React.FC = () => {
           style={[
             styles.statusBadge,
             {
-              backgroundColor: isEnabled
-                ? theme.colors.success.background
-                : theme.colors.warning.background,
+              backgroundColor: isEnabled ? colors.status.success : colors.status.warning,
             },
-          ]}
-        >
+          ]}>
           <Text
             style={[
               styles.statusText,
               {
-                color: isEnabled ? theme.colors.success.main : theme.colors.warning.main,
+                color: isEnabled ? colors.status.success : colors.status.warning,
               },
-            ]}
-          >
+            ]}>
             {isEnabled ? '✓ Etkin' : '○ Devre Dışı'}
           </Text>
         </View>
 
         {/* Benefits */}
-        <View
-          style={[styles.benefitsCard, { backgroundColor: theme.colors.background.secondary }]}
-        >
-          <Text style={[styles.benefitsTitle, { color: theme.colors.text.primary }]}>
-            Avantajlar
-          </Text>
+        <View style={[styles.benefitsCard, { backgroundColor: colors.background.secondary }]}>
+          <Text style={[styles.benefitsTitle, { color: colors.text.primary }]}>Avantajlar</Text>
           {[
             { icon: '⚡', text: 'Hızlı giriş - şifre girmeye gerek yok' },
             { icon: '🔒', text: 'Güvenli - biyometrik verileriniz cihazda kalır' },
@@ -286,7 +264,7 @@ export const BiometricSetupScreen: React.FC = () => {
           ].map((benefit, index) => (
             <View key={index} style={styles.benefitItem}>
               <Text style={styles.benefitIcon}>{benefit.icon}</Text>
-              <Text style={[styles.benefitText, { color: theme.colors.text.secondary }]}>
+              <Text style={[styles.benefitText, { color: colors.text.secondary }]}>
                 {benefit.text}
               </Text>
             </View>
@@ -314,10 +292,10 @@ export const BiometricSetupScreen: React.FC = () => {
         </View>
 
         {/* Security Note */}
-        <View style={[styles.noteCard, { borderColor: theme.colors.border.light }]}>
-          <Text style={[styles.noteText, { color: theme.colors.text.tertiary }]}>
-            🔐 Güvenlik Notu: Biyometrik verileriniz asla sunucularımıza gönderilmez. 
-            Tüm doğrulama işlemleri cihazınızda gerçekleştirilir.
+        <View style={[styles.noteCard, { borderColor: colors.border.default }]}>
+          <Text style={[styles.noteText, { color: colors.text.secondary }]}>
+            🔐 Güvenlik Notu: Biyometrik verileriniz asla sunucularımıza gönderilmez. Tüm doğrulama
+            işlemleri cihazınızda gerçekleştirilir.
           </Text>
         </View>
       </View>

@@ -12,7 +12,7 @@ import {
 } from 'react-native-vision-camera';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme } from '@contexts';
+import { useColors } from '@contexts';
 import { spacing, typography } from '@theme';
 import { Button, Loading } from '@shared/components';
 import { useVerificationStore } from '../stores';
@@ -28,8 +28,7 @@ type NavigationProp = NativeStackNavigationProp<VerificationStackParamList, 'Sel
  */
 export const SelfieCaptureScreen: React.FC = memo(() => {
   const navigation = useNavigation<NavigationProp>();
-  const { theme } = useTheme();
-  const { colors } = theme;
+  const colors = useColors();
 
   const { hasPermission, requestPermission } = useCameraPermission();
   const device = useCameraDevice('front');
@@ -140,11 +139,13 @@ export const SelfieCaptureScreen: React.FC = memo(() => {
    */
   if (!hasPermission) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
         <View style={styles.permissionContainer}>
           <Text style={styles.permissionIcon}>📷</Text>
-          <Text style={[styles.permissionTitle, { color: colors.text }]}>Kamera İzni Gerekli</Text>
-          <Text style={[styles.permissionText, { color: colors.textSecondary }]}>
+          <Text style={[styles.permissionTitle, { color: colors.text.primary }]}>
+            Kamera İzni Gerekli
+          </Text>
+          <Text style={[styles.permissionText, { color: colors.text.secondary }]}>
             Selfie çekmek için kamera erişimine ihtiyacımız var.
           </Text>
           <Button title="İzin Ver" onPress={requestPermission} style={styles.permissionButton} />
@@ -158,11 +159,13 @@ export const SelfieCaptureScreen: React.FC = memo(() => {
    */
   if (!device) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
         <View style={styles.permissionContainer}>
           <Text style={styles.permissionIcon}>⚠️</Text>
-          <Text style={[styles.permissionTitle, { color: colors.text }]}>Ön Kamera Bulunamadı</Text>
-          <Text style={[styles.permissionText, { color: colors.textSecondary }]}>
+          <Text style={[styles.permissionTitle, { color: colors.text.primary }]}>
+            Ön Kamera Bulunamadı
+          </Text>
+          <Text style={[styles.permissionText, { color: colors.text.secondary }]}>
             Bu cihazda kullanılabilir ön kamera bulunamadı.
           </Text>
         </View>

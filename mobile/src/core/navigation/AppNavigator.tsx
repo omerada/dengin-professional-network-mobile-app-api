@@ -8,7 +8,7 @@ import { NavigationContainer, createNavigationContainerRef } from '@react-naviga
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@shared/types';
 import { useAuthStore } from '@features/auth/stores/authStore';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { linking } from './linking';
 import { AuthNavigator } from './AuthNavigator';
 import { MainNavigator } from './MainNavigator';
@@ -59,18 +59,18 @@ export const resetNavigation = (
  * Handles auth state based navigation
  */
 export const AppNavigator: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
   const isLoading = useAuthStore(state => state.isLoading);
 
   // Show loading screen while checking auth state
   if (isLoading) {
     return (
-      <View style={[styles.splashContainer, { backgroundColor: theme.colors.background.primary }]}>
-        <Text style={[styles.splashLogo, { color: theme.colors.primary[500] }]}>Meslektaş</Text>
+      <View style={[styles.splashContainer, { backgroundColor: colors.background.primary }]}>
+        <Text style={[styles.splashLogo, { color: colors.interactive.default }]}>Meslektaş</Text>
         <ActivityIndicator
           size="large"
-          color={theme.colors.primary[500]}
+          color={colors.interactive.default}
           style={styles.splashLoader}
         />
       </View>

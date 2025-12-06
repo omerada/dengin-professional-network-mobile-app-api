@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { Button, Input } from '@shared/components';
 import { spacing, typography } from '@theme';
 import { useDeleteAccount } from '../hooks';
@@ -49,7 +49,7 @@ const DELETION_REASONS = [
  * - Email can be reused after 30 days
  */
 export const AccountDeletionScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const navigation = useNavigation();
   const deleteAccount = useDeleteAccount();
 
@@ -120,9 +120,7 @@ export const AccountDeletionScreen: React.FC = () => {
               // User will be logged out automatically by the hook
             } catch (error: any) {
               const errorMessage =
-                error?.response?.data?.message ||
-                error?.message ||
-                'Hesap silme işlemi başarısız';
+                error?.response?.data?.message || error?.message || 'Hesap silme işlemi başarısız';
 
               if (errorMessage.toLowerCase().includes('password')) {
                 setErrors(prev => ({ ...prev, password: 'Şifre yanlış' }));
@@ -152,26 +150,23 @@ export const AccountDeletionScreen: React.FC = () => {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
-      edges={['bottom']}
-    >
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
+      edges={['bottom']}>
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
-      >
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
+          showsVerticalScrollIndicator={false}>
           {/* Warning Card */}
-          <View style={[styles.warningCard, { backgroundColor: theme.colors.error.background }]}>
+          <View style={[styles.warningCard, { backgroundColor: colors.status.errorBg }]}>
             <Text style={styles.warningIcon}>⚠️</Text>
-            <Text style={[styles.warningTitle, { color: theme.colors.error.main }]}>
+            <Text style={[styles.warningTitle, { color: colors.status.error }]}>
               Dikkat! Bu işlem geri alınamaz
             </Text>
-            <Text style={[styles.warningText, { color: theme.colors.error.dark }]}>
+            <Text style={[styles.warningText, { color: colors.status.error }]}>
               Hesabınızı sildiğinizde:
             </Text>
             <View style={styles.warningList}>
@@ -183,8 +178,8 @@ export const AccountDeletionScreen: React.FC = () => {
                 'Bu e-posta ile 30 gün boyunca yeni hesap açılamayacak',
               ].map((item, index) => (
                 <View key={index} style={styles.warningItem}>
-                  <Text style={[styles.warningBullet, { color: theme.colors.error.main }]}>•</Text>
-                  <Text style={[styles.warningItemText, { color: theme.colors.error.dark }]}>
+                  <Text style={[styles.warningBullet, { color: colors.status.error }]}>•</Text>
+                  <Text style={[styles.warningItemText, { color: colors.status.error }]}>
                     {item}
                   </Text>
                 </View>
@@ -194,10 +189,10 @@ export const AccountDeletionScreen: React.FC = () => {
 
           {/* Reason Selection */}
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>
               Neden ayrılıyorsunuz? (Opsiyonel)
             </Text>
-            <Text style={[styles.sectionSubtitle, { color: theme.colors.text.secondary }]}>
+            <Text style={[styles.sectionSubtitle, { color: colors.text.secondary }]}>
               Geri bildiriminiz uygulamamızı geliştirmemize yardımcı olur
             </Text>
             <View style={styles.reasonsContainer}>
@@ -221,10 +216,10 @@ export const AccountDeletionScreen: React.FC = () => {
 
           {/* Password Verification */}
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>
               Şifrenizi Girin
             </Text>
-            <Text style={[styles.sectionSubtitle, { color: theme.colors.text.secondary }]}>
+            <Text style={[styles.sectionSubtitle, { color: colors.text.secondary }]}>
               Kimliğinizi doğrulamak için şifrenizi girin
             </Text>
             <Input
@@ -245,12 +240,10 @@ export const AccountDeletionScreen: React.FC = () => {
 
           {/* Confirmation Text */}
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
-              Onay Metni
-            </Text>
-            <Text style={[styles.sectionSubtitle, { color: theme.colors.text.secondary }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Onay Metni</Text>
+            <Text style={[styles.sectionSubtitle, { color: colors.text.secondary }]}>
               Devam etmek için aşağıya{' '}
-              <Text style={[styles.confirmTextHighlight, { color: theme.colors.error.main }]}>
+              <Text style={[styles.confirmTextHighlight, { color: colors.status.error }]}>
                 {CONFIRM_TEXT}
               </Text>{' '}
               yazın
@@ -287,10 +280,10 @@ export const AccountDeletionScreen: React.FC = () => {
           </View>
 
           {/* Info Note */}
-          <View style={[styles.infoCard, { backgroundColor: theme.colors.background.secondary }]}>
-            <Text style={[styles.infoText, { color: theme.colors.text.secondary }]}>
-              ℹ️ Hesabınız 30 gün boyunca geri alınabilir durumda kalacaktır. Bu süre içinde 
-              tekrar giriş yaparsanız hesabınız yeniden aktifleştirilir.
+          <View style={[styles.infoCard, { backgroundColor: colors.background.secondary }]}>
+            <Text style={[styles.infoText, { color: colors.text.secondary }]}>
+              ℹ️ Hesabınız 30 gün boyunca geri alınabilir durumda kalacaktır. Bu süre içinde tekrar
+              giriş yaparsanız hesabınız yeniden aktifleştirilir.
             </Text>
           </View>
         </ScrollView>

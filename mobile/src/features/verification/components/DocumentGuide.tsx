@@ -5,7 +5,7 @@
 import React, { memo } from 'react';
 import { StyleSheet, View, Text, Dimensions } from 'react-native';
 import Svg, { Rect, Defs, Mask, G, Path, Line } from 'react-native-svg';
-import { useTheme } from '@contexts';
+import { useColors } from '@contexts';
 import { spacing, typography } from '@theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -28,8 +28,7 @@ interface DocumentGuideProps {
  */
 export const DocumentGuide: React.FC<DocumentGuideProps> = memo(
   ({ type, hint, isCapturing = false }) => {
-    const { theme } = useTheme();
-    const { colors } = theme;
+    const colors = useColors();
 
     // Belge alanı boyutları (ID kart oranı: 85.6mm x 54mm)
     const GUIDE_WIDTH = SCREEN_WIDTH * 0.85;
@@ -78,13 +77,13 @@ export const DocumentGuide: React.FC<DocumentGuideProps> = memo(
             height={GUIDE_HEIGHT}
             rx={BORDER_RADIUS}
             fill="none"
-            stroke={isCapturing ? colors.success : colors.primary}
+            stroke={isCapturing ? colors.status.success : colors.interactive.default}
             strokeWidth={3}
             strokeDasharray={isCapturing ? '' : '10,5'}
           />
 
           {/* Corner markers */}
-          <G stroke={colors.primary} strokeWidth={4} strokeLinecap="round">
+          <G stroke={colors.interactive.default} strokeWidth={4} strokeLinecap="round">
             {/* Top-left corner */}
             <Line x1={GUIDE_X} y1={GUIDE_Y + CORNER_SIZE} x2={GUIDE_X} y2={GUIDE_Y} />
             <Line x1={GUIDE_X} y1={GUIDE_Y} x2={GUIDE_X + CORNER_SIZE} y2={GUIDE_Y} />
@@ -136,7 +135,7 @@ export const DocumentGuide: React.FC<DocumentGuideProps> = memo(
         {/* Hint text */}
         <View style={[styles.hintContainer, { top: GUIDE_Y + GUIDE_HEIGHT + 30 }]}>
           <Text
-            style={[styles.hintText, { color: colors.textInverse }]}
+            style={[styles.hintText, { color: colors.text.inverse }]}
             accessibilityRole="text"
             accessibilityLabel={hint || defaultHint}>
             {hint || defaultHint}
@@ -145,7 +144,7 @@ export const DocumentGuide: React.FC<DocumentGuideProps> = memo(
 
         {/* Document type indicator */}
         <View style={[styles.typeIndicator, { top: GUIDE_Y - 50 }]}>
-          <Text style={[styles.typeText, { color: colors.textInverse }]}>
+          <Text style={[styles.typeText, { color: colors.text.inverse }]}>
             {type === 'front' ? 'ÖN YÜZ' : 'ARKA YÜZ'}
           </Text>
         </View>

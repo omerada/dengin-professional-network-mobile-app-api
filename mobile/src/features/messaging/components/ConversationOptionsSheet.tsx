@@ -5,7 +5,7 @@
 import React, { memo, useCallback, forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Platform, Modal } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import type { ConversationSummary } from '../types';
 
 // BottomSheet'i sadece native platformlarda yükle
@@ -46,15 +46,15 @@ interface OptionItemProps {
 
 const OptionItem: React.FC<OptionItemProps> = memo(
   ({ icon, label, onPress, destructive = false }) => {
-    const { theme } = useTheme();
-    const color = destructive ? theme.colors.status.error : theme.colors.text.primary;
+    const colors = useColors();
+    const color = destructive ? colors.status.error : colors.text.primary;
 
     return (
       <Pressable
         onPress={onPress}
         style={({ pressed }) => [
           styles.optionItem,
-          pressed && { backgroundColor: theme.colors.background.secondary },
+          pressed && { backgroundColor: colors.background.secondary },
         ]}>
         <Icon name={icon} size={22} color={color} />
         <Text style={[styles.optionLabel, { color }]}>{label}</Text>
@@ -69,7 +69,7 @@ export const ConversationOptionsSheet = forwardRef<
   ConversationOptionsSheetRef,
   ConversationOptionsSheetProps
 >(({ conversation, onPin, onMute, onDelete, onBlock }, ref) => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const bottomSheetRef = useRef<any>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -138,10 +138,8 @@ export const ConversationOptionsSheet = forwardRef<
     <>
       {/* Header */}
       {conversation && (
-        <View style={[styles.header, { borderBottomColor: theme.colors.border.light }]}>
-          <Text
-            style={[styles.headerTitle, { color: theme.colors.text.primary }]}
-            numberOfLines={1}>
+        <View style={[styles.header, { borderBottomColor: colors.border.default }]}>
+          <Text style={[styles.headerTitle, { color: colors.text.primary }]} numberOfLines={1}>
             {conversation.name}
           </Text>
         </View>
@@ -173,7 +171,7 @@ export const ConversationOptionsSheet = forwardRef<
     return (
       <Modal visible={isVisible} transparent animationType="fade" onRequestClose={handleClose}>
         <Pressable style={styles.modalOverlay} onPress={handleClose}>
-          <View style={[styles.modalContent, { backgroundColor: theme.colors.background.primary }]}>
+          <View style={[styles.modalContent, { backgroundColor: colors.background.primary }]}>
             {renderContent()}
           </View>
         </Pressable>
@@ -193,8 +191,8 @@ export const ConversationOptionsSheet = forwardRef<
       snapPoints={['35%']}
       enablePanDownToClose
       backdropComponent={renderBackdrop}
-      backgroundStyle={{ backgroundColor: theme.colors.background.primary }}
-      handleIndicatorStyle={{ backgroundColor: theme.colors.text.tertiary }}>
+      backgroundStyle={{ backgroundColor: colors.background.primary }}
+      handleIndicatorStyle={{ backgroundColor: colors.text.secondary }}>
       <BottomSheetView style={styles.content}>{renderContent()}</BottomSheetView>
     </BottomSheet>
   );

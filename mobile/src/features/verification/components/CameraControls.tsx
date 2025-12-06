@@ -4,7 +4,7 @@
 
 import React, { memo, useCallback } from 'react';
 import { StyleSheet, View, TouchableOpacity, Text, ViewStyle } from 'react-native';
-import { useTheme } from '@contexts';
+import { useColors } from '@contexts';
 import { spacing, typography } from '@theme';
 import type { CameraSettings } from '../types';
 
@@ -60,8 +60,7 @@ export const CameraControls: React.FC<CameraControlsProps> = memo(
     showGallery = false,
     style,
   }) => {
-    const { theme } = useTheme();
-    const { colors } = theme;
+    const colors = useColors();
 
     /**
      * Flaş modunu değiştir
@@ -79,7 +78,7 @@ export const CameraControls: React.FC<CameraControlsProps> = memo(
         <View style={styles.leftControls}>
           {showGallery && (
             <TouchableOpacity
-              style={[styles.controlButton, { backgroundColor: colors.surface }]}
+              style={[styles.controlButton, { backgroundColor: colors.background.secondary }]}
               onPress={onSelectFromGallery}
               accessibilityRole="button"
               accessibilityLabel="Galeriden seç">
@@ -98,7 +97,10 @@ export const CameraControls: React.FC<CameraControlsProps> = memo(
             style={[
               styles.controlButton,
               {
-                backgroundColor: settings.flash === 'on' ? colors.primary : colors.surface,
+                backgroundColor:
+                  settings.flash === 'on'
+                    ? colors.interactive.default
+                    : colors.background.secondary,
               },
             ]}
             onPress={handleFlashToggle}
@@ -112,7 +114,7 @@ export const CameraControls: React.FC<CameraControlsProps> = memo(
           {/* Kamera çevirme butonu */}
           {showFlip && onFlipCamera && (
             <TouchableOpacity
-              style={[styles.controlButton, { backgroundColor: colors.surface }]}
+              style={[styles.controlButton, { backgroundColor: colors.background.secondary }]}
               onPress={onFlipCamera}
               accessibilityRole="button"
               accessibilityLabel="Kamerayı çevir">

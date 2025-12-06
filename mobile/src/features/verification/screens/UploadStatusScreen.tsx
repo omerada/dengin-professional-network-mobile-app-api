@@ -13,7 +13,7 @@ import Animated, {
   withTiming,
   useSharedValue,
 } from 'react-native-reanimated';
-import { useTheme } from '@contexts';
+import { useColors } from '@contexts';
 import { spacing, typography } from '@theme';
 import { Button } from '@shared/components';
 import { useVerificationStore } from '../stores';
@@ -29,8 +29,7 @@ type NavigationProp = NativeStackNavigationProp<VerificationStackParamList, 'Upl
  */
 export const UploadStatusScreen: React.FC = memo(() => {
   const navigation = useNavigation<NavigationProp>();
-  const { theme } = useTheme();
-  const { colors } = theme;
+  const colors = useColors();
 
   const {
     data,
@@ -142,10 +141,10 @@ export const UploadStatusScreen: React.FC = memo(() => {
         return (
           <View style={styles.resultContainer}>
             <Animated.Text style={[styles.resultIcon, animatedIconStyle]}>✅</Animated.Text>
-            <Text style={[styles.resultTitle, { color: colors.success }]}>
+            <Text style={[styles.resultTitle, { color: colors.status.success }]}>
               Doğrulama Onaylandı!
             </Text>
-            <Text style={[styles.resultText, { color: colors.textSecondary }]}>
+            <Text style={[styles.resultText, { color: colors.text.secondary }]}>
               Mesleğiniz başarıyla doğrulandı. Profilinizde doğrulanmış rozeti görünecek.
             </Text>
           </View>
@@ -155,8 +154,10 @@ export const UploadStatusScreen: React.FC = memo(() => {
         return (
           <View style={styles.resultContainer}>
             <Text style={styles.resultIcon}>❌</Text>
-            <Text style={[styles.resultTitle, { color: colors.error }]}>Doğrulama Reddedildi</Text>
-            <Text style={[styles.resultText, { color: colors.textSecondary }]}>
+            <Text style={[styles.resultTitle, { color: colors.status.error }]}>
+              Doğrulama Reddedildi
+            </Text>
+            <Text style={[styles.resultText, { color: colors.text.secondary }]}>
               {message || 'Belgeleriniz doğrulanamadı. Lütfen tekrar deneyin.'}
             </Text>
           </View>
@@ -166,8 +167,10 @@ export const UploadStatusScreen: React.FC = memo(() => {
         return (
           <View style={styles.resultContainer}>
             <Text style={styles.resultIcon}>🔍</Text>
-            <Text style={[styles.resultTitle, { color: colors.warning }]}>Manuel İnceleme</Text>
-            <Text style={[styles.resultText, { color: colors.textSecondary }]}>
+            <Text style={[styles.resultTitle, { color: colors.status.warning }]}>
+              Manuel İnceleme
+            </Text>
+            <Text style={[styles.resultText, { color: colors.text.secondary }]}>
               Belgeleriniz manuel olarak incelenecek. {estimatedTime || 'Tahmini süre: 24-48 saat'}
             </Text>
           </View>
@@ -179,13 +182,15 @@ export const UploadStatusScreen: React.FC = memo(() => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
       <View style={styles.content}>
         {/* Yükleme ilerleme göstergesi */}
         {isUploading && (
           <View style={styles.uploadingContainer}>
             <Animated.Text style={[styles.uploadingIcon, animatedIconStyle]}>📤</Animated.Text>
-            <Text style={[styles.uploadingTitle, { color: colors.text }]}>Belgeler Yükleniyor</Text>
+            <Text style={[styles.uploadingTitle, { color: colors.text.primary }]}>
+              Belgeler Yükleniyor
+            </Text>
             <UploadProgress progress={uploadProgress} />
           </View>
         )}
@@ -197,8 +202,10 @@ export const UploadStatusScreen: React.FC = memo(() => {
         {!isUploading && uploadProgress.status === 'failed' && (
           <View style={styles.resultContainer}>
             <Text style={styles.resultIcon}>⚠️</Text>
-            <Text style={[styles.resultTitle, { color: colors.error }]}>Yükleme Başarısız</Text>
-            <Text style={[styles.resultText, { color: colors.textSecondary }]}>
+            <Text style={[styles.resultTitle, { color: colors.status.error }]}>
+              Yükleme Başarısız
+            </Text>
+            <Text style={[styles.resultText, { color: colors.text.secondary }]}>
               Belgeleriniz yüklenirken bir hata oluştu. Lütfen internet bağlantınızı kontrol edip
               tekrar deneyin.
             </Text>
@@ -207,7 +214,7 @@ export const UploadStatusScreen: React.FC = memo(() => {
       </View>
 
       {/* Alt butonlar */}
-      <View style={[styles.footer, { borderTopColor: colors.border }]}>
+      <View style={[styles.footer, { borderTopColor: colors.border.default }]}>
         {uploadProgress.status === 'failed' ? (
           <Button title="Tekrar Dene" onPress={handleRetry} fullWidth />
         ) : uploadProgress.status === 'completed' ? (

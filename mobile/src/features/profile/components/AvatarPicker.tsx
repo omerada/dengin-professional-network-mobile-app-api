@@ -19,7 +19,7 @@ import {
   ImagePickerResponse,
   MediaType,
 } from 'react-native-image-picker';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { spacing, fontSize } from '@theme';
 
 interface AvatarPickerProps {
@@ -61,15 +61,8 @@ interface AvatarPickerProps {
  * Integrates with react-native-image-picker
  */
 export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
-  ({
-    currentAvatarUrl,
-    fullName,
-    onImageSelected,
-    onRemove,
-    isLoading = false,
-    size = 120,
-  }) => {
-    const { theme } = useTheme();
+  ({ currentAvatarUrl, fullName, onImageSelected, onRemove, isLoading = false, size = 120 }) => {
+    const colors = useColors();
     const [previewUri, setPreviewUri] = useState<string | null>(null);
 
     // Generate initials from full name
@@ -91,10 +84,7 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
         }
 
         if (response.errorCode) {
-          Alert.alert(
-            'Hata',
-            response.errorMessage || 'Resim seçilirken bir hata oluştu.',
-          );
+          Alert.alert('Hata', response.errorMessage || 'Resim seçilirken bir hata oluştu.');
           return;
         }
 
@@ -135,26 +125,26 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
 
     // Remove avatar
     const handleRemove = useCallback(() => {
-      Alert.alert(
-        'Fotoğrafı Kaldır',
-        'Profil fotoğrafınızı kaldırmak istediğinize emin misiniz?',
-        [
-          { text: 'İptal', style: 'cancel' },
-          {
-            text: 'Kaldır',
-            style: 'destructive',
-            onPress: () => {
-              setPreviewUri(null);
-              onRemove?.();
-            },
+      Alert.alert('Fotoğrafı Kaldır', 'Profil fotoğrafınızı kaldırmak istediğinize emin misiniz?', [
+        { text: 'İptal', style: 'cancel' },
+        {
+          text: 'Kaldır',
+          style: 'destructive',
+          onPress: () => {
+            setPreviewUri(null);
+            onRemove?.();
           },
-        ],
-      );
+        },
+      ]);
     }, [onRemove]);
 
     // Show options
     const handlePress = useCallback(() => {
-      const options: { text: string; onPress?: () => void; style?: 'cancel' | 'destructive' | 'default' }[] = [
+      const options: {
+        text: string;
+        onPress?: () => void;
+        style?: 'cancel' | 'destructive' | 'default';
+      }[] = [
         { text: 'Fotoğraf Çek', onPress: handleTakePhoto },
         { text: 'Galeriden Seç', onPress: handleChooseFromGallery },
       ];
@@ -175,14 +165,10 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
     return (
       <View style={styles.container}>
         <TouchableOpacity
-          style={[
-            styles.avatarContainer,
-            { width: size, height: size, borderRadius: size / 2 },
-          ]}
+          style={[styles.avatarContainer, { width: size, height: size, borderRadius: size / 2 }]}
           onPress={handlePress}
           disabled={isLoading}
-          activeOpacity={0.8}
-        >
+          activeOpacity={0.8}>
           {displayUri ? (
             <Image
               source={{ uri: displayUri }}
@@ -192,7 +178,7 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
                   width: size,
                   height: size,
                   borderRadius: size / 2,
-                  borderColor: theme.colors.border.light,
+                  borderColor: colors.border.default,
                 },
               ]}
             />
@@ -205,16 +191,14 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
                   width: size,
                   height: size,
                   borderRadius: size / 2,
-                  backgroundColor: theme.colors.primary[100],
+                  backgroundColor: colors.interactive.subtle,
                 },
-              ]}
-            >
+              ]}>
               <Text
                 style={[
                   styles.initials,
-                  { color: theme.colors.primary[600], fontSize: size * 0.32 },
-                ]}
-              >
+                  { color: colors.interactive.default, fontSize: size * 0.32 },
+                ]}>
                 {initials}
               </Text>
             </View>
@@ -225,11 +209,10 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
             style={[
               styles.overlay,
               {
-                backgroundColor: theme.colors.surface.overlay,
+                backgroundColor: colors.surface.overlay,
                 borderRadius: size / 2,
               },
-            ]}
-          >
+            ]}>
             {isLoading ? (
               <ActivityIndicator color="#FFFFFF" size="large" />
             ) : (
@@ -241,7 +224,7 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
           </View>
         </TouchableOpacity>
 
-        <Text style={[styles.hint, { color: theme.colors.text.tertiary }]}>
+        <Text style={[styles.hint, { color: colors.text.secondary }]}>
           Profil fotoğrafı eklemek için dokunun
         </Text>
       </View>
@@ -286,4 +269,3 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
 });
-

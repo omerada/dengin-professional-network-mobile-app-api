@@ -11,7 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { Input, Button } from '@shared/components';
 import { spacing, typography } from '@theme';
 import type { UpdateProfileRequest, MyProfileResponse, Gender } from '../types';
@@ -126,7 +126,7 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
   isLoading = false,
   onCancel,
 }) => {
-  const { theme } = useTheme();
+  const colors = useColors();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -254,8 +254,8 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
       >
         {/* Name */}
         <View style={styles.fieldContainer}>
-          <Text style={[styles.label, { color: theme.colors.text.primary }]}>
-            Ad <Text style={{ color: theme.colors.error.main }}>*</Text>
+          <Text style={[styles.label, { color: colors.text.primary }]}>
+            Ad <Text style={{ color: colors.status.error }}>*</Text>
           </Text>
           <Input
             value={formData.name}
@@ -265,15 +265,15 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
             maxLength={VALIDATION.name.maxLength}
             error={errors.name}
           />
-          <Text style={[styles.charCount, { color: theme.colors.text.tertiary }]}>
+          <Text style={[styles.charCount, { color: colors.text.tertiary }]}>
             {formData.name.length}/{VALIDATION.name.maxLength}
           </Text>
         </View>
 
         {/* Surname */}
         <View style={styles.fieldContainer}>
-          <Text style={[styles.label, { color: theme.colors.text.primary }]}>
-            Soyad <Text style={{ color: theme.colors.error.main }}>*</Text>
+          <Text style={[styles.label, { color: colors.text.primary }]}>
+            Soyad <Text style={{ color: colors.status.error }}>*</Text>
           </Text>
           <Input
             value={formData.surname}
@@ -283,14 +283,14 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
             maxLength={VALIDATION.surname.maxLength}
             error={errors.surname}
           />
-          <Text style={[styles.charCount, { color: theme.colors.text.tertiary }]}>
+          <Text style={[styles.charCount, { color: colors.text.tertiary }]}>
             {formData.surname.length}/{VALIDATION.surname.maxLength}
           </Text>
         </View>
 
-        {/* Bio */}
+        {/* Bio */>
         <View style={styles.fieldContainer}>
-          <Text style={[styles.label, { color: theme.colors.text.primary }]}>
+          <Text style={[styles.label, { color: colors.text.primary }]}>
             Hakkında
           </Text>
           <Input
@@ -303,14 +303,14 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
             error={errors.bio}
             style={styles.bioInput}
           />
-          <Text style={[styles.charCount, { color: theme.colors.text.tertiary }]}>
+          <Text style={[styles.charCount, { color: colors.text.tertiary }]}>
             {formData.bio.length}/{VALIDATION.bio.maxLength}
           </Text>
         </View>
 
         {/* Date of Birth */}
         <View style={styles.fieldContainer}>
-          <Text style={[styles.label, { color: theme.colors.text.primary }]}>
+          <Text style={[styles.label, { color: colors.text.primary }]}>
             Doğum Tarihi
           </Text>
           <Input
@@ -321,14 +321,14 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
             maxLength={10}
             error={errors.dateOfBirth}
           />
-          <Text style={[styles.helperText, { color: theme.colors.text.tertiary }]}>
+          <Text style={[styles.helperText, { color: colors.text.tertiary }]}>
             Örnek: 15/03/1990
           </Text>
         </View>
 
         {/* Gender */}
         <View style={styles.fieldContainer}>
-          <Text style={[styles.label, { color: theme.colors.text.primary }]}>
+          <Text style={[styles.label, { color: colors.text.primary }]}>
             Cinsiyet
           </Text>
           <GenderSelector />

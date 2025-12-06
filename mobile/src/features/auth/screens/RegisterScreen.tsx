@@ -18,7 +18,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { useLocale } from '@contexts/LocaleContext';
 import { Button, Input } from '@shared/components';
 import { useRegister } from '../hooks';
@@ -31,7 +31,7 @@ import { spacing } from '@theme';
  * New user registration form
  */
 export const RegisterScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const { t } = useLocale();
   const navigation = useNavigation<AuthStackNavigationProp>();
   const { register, isLoading, error, isError, reset } = useRegister();
@@ -67,8 +67,7 @@ export const RegisterScreen: React.FC = () => {
   }, [navigation]);
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background.primary }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
       <KeyboardAvoidingView
         style={styles.keyboardAvoid}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
@@ -84,28 +83,24 @@ export const RegisterScreen: React.FC = () => {
               accessibilityRole="button"
               accessibilityLabel="Geri dön"
               style={styles.backButton}>
-              <Text style={{ color: theme.colors.text.primary, fontSize: 24 }}>←</Text>
+              <Text style={{ color: colors.text.primary, fontSize: 24 }}>←</Text>
             </TouchableOpacity>
           </View>
 
           {/* Title */}
           <View style={styles.titleContainer}>
-            <Text style={[styles.title, { color: theme.colors.text.primary }]}>
+            <Text style={[styles.title, { color: colors.text.primary }]}>
               {t('auth.createAccount')}
             </Text>
-            <Text style={[styles.subtitle, { color: theme.colors.text.secondary }]}>
+            <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
               Bilgilerinizi girerek hesabınızı oluşturun
             </Text>
           </View>
 
           {/* Error Message */}
           {isError && error && (
-            <View
-              style={[
-                styles.errorContainer,
-                { backgroundColor: theme.colors.error.background },
-              ]}>
-              <Text style={[styles.errorText, { color: theme.colors.error.main }]}>
+            <View style={[styles.errorContainer, { backgroundColor: colors.status.error }]}>
+              <Text style={[styles.errorText, { color: colors.status.error }]}>
                 {(error as Error).message || 'Kayıt olurken bir hata oluştu'}
               </Text>
             </View>
@@ -264,19 +259,19 @@ export const RegisterScreen: React.FC = () => {
                     value={value}
                     onValueChange={onChange}
                     trackColor={{
-                      false: theme.colors.border.medium,
-                      true: theme.colors.primary[300],
+                      false: colors.border.default,
+                      true: colors.interactive.subtle,
                     }}
-                    thumbColor={value ? theme.colors.primary[500] : theme.colors.neutral[100]}
+                    thumbColor={value ? colors.interactive.default : colors.background.secondary}
                     accessible={true}
                     accessibilityRole="switch"
                     accessibilityLabel="Kullanım koşullarını kabul et"
                     accessibilityState={{ checked: value }}
                   />
                   <View style={styles.termsTextContainer}>
-                    <Text style={[styles.termsText, { color: theme.colors.text.secondary }]}>
+                    <Text style={[styles.termsText, { color: colors.text.secondary }]}>
                       <Text
-                        style={{ color: theme.colors.primary[500] }}
+                        style={{ color: colors.interactive.default }}
                         onPress={() => {
                           /* Open terms */
                         }}>
@@ -284,7 +279,7 @@ export const RegisterScreen: React.FC = () => {
                       </Text>
                       'nı ve{' '}
                       <Text
-                        style={{ color: theme.colors.primary[500] }}
+                        style={{ color: colors.interactive.default }}
                         onPress={() => {
                           /* Open privacy */
                         }}>
@@ -293,7 +288,7 @@ export const RegisterScreen: React.FC = () => {
                       'nı okudum ve kabul ediyorum.
                     </Text>
                     {errors.acceptTerms && (
-                      <Text style={[styles.errorSmall, { color: theme.colors.error.main }]}>
+                      <Text style={[styles.errorSmall, { color: colors.status.error }]}>
                         {errors.acceptTerms.message}
                       </Text>
                     )}
@@ -317,15 +312,13 @@ export const RegisterScreen: React.FC = () => {
 
           {/* Login Link */}
           <View style={styles.loginContainer}>
-            <Text style={{ color: theme.colors.text.secondary }}>
-              Zaten hesabınız var mı?{' '}
-            </Text>
+            <Text style={{ color: colors.text.secondary }}>Zaten hesabınız var mı? </Text>
             <TouchableOpacity
               onPress={() => navigation.navigate('Login')}
               accessible={true}
               accessibilityRole="link"
               accessibilityLabel="Giriş yap">
-              <Text style={{ color: theme.colors.primary[500], fontWeight: '600' }}>
+              <Text style={{ color: colors.interactive.default, fontWeight: '600' }}>
                 {t('auth.login')}
               </Text>
             </TouchableOpacity>

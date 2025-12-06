@@ -6,7 +6,7 @@ import React, { memo, useCallback } from 'react';
 import { StyleSheet, View, Text, ScrollView, SafeAreaView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme } from '@contexts';
+import { useColors } from '@contexts';
 import { spacing, typography } from '@theme';
 import { Button } from '@shared/components';
 import { useVerificationStore } from '../stores';
@@ -20,8 +20,7 @@ type NavigationProp = NativeStackNavigationProp<VerificationStackParamList, 'Ver
  */
 export const VerificationReviewScreen: React.FC = memo(() => {
   const navigation = useNavigation<NavigationProp>();
-  const { theme } = useTheme();
-  const { colors } = theme;
+  const colors = useColors();
 
   const { data, currentStep, setStep, setDocumentFront, setDocumentBack, setSelfie } =
     useVerificationStore();
@@ -90,7 +89,7 @@ export const VerificationReviewScreen: React.FC = memo(() => {
   const isComplete = data.documentFront && data.documentBack && data.selfie;
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -100,8 +99,8 @@ export const VerificationReviewScreen: React.FC = memo(() => {
 
         {/* Başlık */}
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>Belgeleri Kontrol Edin</Text>
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+          <Text style={[styles.title, { color: colors.text.primary }]}>Belgeleri Kontrol Edin</Text>
+          <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
             Yüklemeden önce tüm belgelerin net ve okunaklı olduğundan emin olun.
           </Text>
         </View>
@@ -140,42 +139,44 @@ export const VerificationReviewScreen: React.FC = memo(() => {
         </View>
 
         {/* Kontrol listesi */}
-        <View style={[styles.checklistContainer, { backgroundColor: colors.surfaceVariant }]}>
-          <Text style={[styles.checklistTitle, { color: colors.text }]}>Kontrol Listesi</Text>
+        <View style={[styles.checklistContainer, { backgroundColor: colors.background.secondary }]}>
+          <Text style={[styles.checklistTitle, { color: colors.text.primary }]}>
+            Kontrol Listesi
+          </Text>
 
           <View style={styles.checklistItem}>
             <Text style={styles.checkIcon}>{data.documentFront ? '✅' : '⬜️'}</Text>
-            <Text style={[styles.checkText, { color: colors.textSecondary }]}>
+            <Text style={[styles.checkText, { color: colors.text.secondary }]}>
               Belge ön yüzü net ve okunaklı
             </Text>
           </View>
 
           <View style={styles.checklistItem}>
             <Text style={styles.checkIcon}>{data.documentBack ? '✅' : '⬜️'}</Text>
-            <Text style={[styles.checkText, { color: colors.textSecondary }]}>
+            <Text style={[styles.checkText, { color: colors.text.secondary }]}>
               Belge arka yüzü net ve okunaklı
             </Text>
           </View>
 
           <View style={styles.checklistItem}>
             <Text style={styles.checkIcon}>{data.selfie ? '✅' : '⬜️'}</Text>
-            <Text style={[styles.checkText, { color: colors.textSecondary }]}>
+            <Text style={[styles.checkText, { color: colors.text.secondary }]}>
               Selfie'de yüzünüz net görünüyor
             </Text>
           </View>
         </View>
 
         {/* Uyarı */}
-        <View style={[styles.warningContainer, { backgroundColor: colors.warningLight }]}>
+        <View style={[styles.warningContainer, { backgroundColor: colors.status.warning + '20' }]}>
           <Text style={styles.warningIcon}>⚠️</Text>
-          <Text style={[styles.warningText, { color: colors.warning }]}>
+          <Text style={[styles.warningText, { color: colors.status.warning }]}>
             Belgeleriniz AI tarafından analiz edilecek ve sonuç 2-5 dakika içinde bildirilecektir.
           </Text>
         </View>
       </ScrollView>
 
       {/* Alt butonlar */}
-      <View style={[styles.footer, { borderTopColor: colors.border }]}>
+      <View style={[styles.footer, { borderTopColor: colors.border.default }]}>
         <Button
           title="İptal"
           variant="outline"

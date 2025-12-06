@@ -11,7 +11,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { useNotificationStore } from '../stores';
 
 interface NotificationBadgeProps {
@@ -41,8 +41,8 @@ const SIZES = {
 
 export const NotificationBadge: React.FC<NotificationBadgeProps> = memo(
   ({ size = 'medium', maxCount = 99, showZero = false, animated = true }) => {
-    const { theme } = useTheme();
-    const unreadCount = useNotificationStore((state) => state.unreadCount);
+    const colors = useColors();
+    const unreadCount = useNotificationStore(state => state.unreadCount);
 
     const scale = useSharedValue(1);
     const prevCount = useSharedValue(unreadCount);
@@ -52,7 +52,7 @@ export const NotificationBadge: React.FC<NotificationBadgeProps> = memo(
       if (animated && unreadCount > prevCount.value) {
         scale.value = withSequence(
           withSpring(1.3, { damping: 6, stiffness: 400 }),
-          withSpring(1, { damping: 8, stiffness: 300 })
+          withSpring(1, { damping: 8, stiffness: 300 }),
         );
       }
       prevCount.value = unreadCount;
@@ -81,23 +81,21 @@ export const NotificationBadge: React.FC<NotificationBadgeProps> = memo(
             height: sizeConfig.minSize,
             paddingHorizontal: isLargeNumber ? sizeConfig.padding + 2 : 0,
             borderRadius: sizeConfig.minSize / 2,
-            backgroundColor: theme.colors.error[500],
+            backgroundColor: colors.status.error,
           },
-        ]}
-      >
+        ]}>
         <Text
           style={[
             styles.text,
             {
               fontSize: sizeConfig.fontSize,
             },
-          ]}
-        >
+          ]}>
           {displayCount}
         </Text>
       </Animated.View>
     );
-  }
+  },
 );
 
 NotificationBadge.displayName = 'NotificationBadge';

@@ -4,7 +4,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, AccessibilityInfo } from 'react-native';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { Avatar, Button } from '@shared/components';
 import { spacing, fontSize, borderRadius } from '@theme';
 import { socialApi } from '@features/social/services';
@@ -31,7 +31,7 @@ interface BlockedUserItemProps {
  * Displays a blocked user with avatar, name, and unblock button.
  */
 export const BlockedUserItem = React.memo<BlockedUserItemProps>(({ user, onUnblock, testID }) => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const queryClient = useQueryClient();
   const [isUnblocked, setIsUnblocked] = useState(false);
 
@@ -72,9 +72,9 @@ export const BlockedUserItem = React.memo<BlockedUserItemProps>(({ user, onUnblo
   if (isUnblocked) {
     return (
       <View
-        style={[styles.container, styles.unblocked, { backgroundColor: theme.colors.success[50] }]}
+        style={[styles.container, styles.unblocked, { backgroundColor: colors.status.success }]}
         accessibilityLabel={`${user.fullName} engeli kaldırıldı`}>
-        <Text style={[styles.unblockedText, { color: theme.colors.success[700] }]}>
+        <Text style={[styles.unblockedText, { color: colors.status.success }]}>
           {user.fullName} engeli kaldırıldı
         </Text>
       </View>
@@ -83,7 +83,7 @@ export const BlockedUserItem = React.memo<BlockedUserItemProps>(({ user, onUnblo
 
   return (
     <View
-      style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
       accessibilityRole="listitem"
       accessibilityLabel={`${user.fullName}, ${blockedTimeAgo} engellendi`}
       testID={testID}>
@@ -97,10 +97,10 @@ export const BlockedUserItem = React.memo<BlockedUserItemProps>(({ user, onUnblo
           size="md"
         />
         <View style={styles.textContainer}>
-          <Text style={[styles.name, { color: theme.colors.text.primary }]} numberOfLines={1}>
+          <Text style={[styles.name, { color: colors.text.primary }]} numberOfLines={1}>
             {user.fullName}
           </Text>
-          <Text style={[styles.blockedDate, { color: theme.colors.text.tertiary }]}>
+          <Text style={[styles.blockedDate, { color: colors.text.secondary }]}>
             {blockedTimeAgo} engellendi
           </Text>
         </View>

@@ -3,23 +3,10 @@
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 import React, { memo } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Modal,
-  Pressable,
-  Platform,
-  Linking,
-} from 'react-native';
+import { View, Text, StyleSheet, Modal, Pressable, Platform, Linking } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import Animated, {
-  FadeIn,
-  FadeOut,
-  SlideInDown,
-  SlideOutDown,
-} from 'react-native-reanimated';
-import { useTheme } from '@contexts/ThemeContext';
+import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from 'react-native-reanimated';
+import { useColors } from '@contexts/ThemeContext';
 
 interface PermissionPromptProps {
   visible: boolean;
@@ -30,7 +17,7 @@ interface PermissionPromptProps {
 
 export const PermissionPrompt: React.FC<PermissionPromptProps> = memo(
   ({ visible, onRequestPermission, onDismiss, permissionDenied = false }) => {
-    const { theme } = useTheme();
+    const colors = useColors();
 
     const handleOpenSettings = () => {
       Linking.openSettings();
@@ -43,70 +30,39 @@ export const PermissionPrompt: React.FC<PermissionPromptProps> = memo(
         transparent
         animationType="none"
         statusBarTranslucent
-        onRequestClose={onDismiss}
-      >
+        onRequestClose={onDismiss}>
         <Animated.View
           entering={FadeIn.duration(200)}
           exiting={FadeOut.duration(150)}
-          style={styles.overlay}
-        >
+          style={styles.overlay}>
           <Pressable style={styles.backdrop} onPress={onDismiss} />
 
           <Animated.View
             entering={SlideInDown.springify().damping(15)}
             exiting={SlideOutDown.duration(200)}
-            style={[styles.content, { backgroundColor: theme.colors.surface }]}
-          >
-            <View
-              style={[
-                styles.iconContainer,
-                { backgroundColor: theme.colors.primary[50] },
-              ]}
-            >
-              <Icon
-                name="notifications"
-                size={40}
-                color={theme.colors.primary[500]}
-              />
+            style={[styles.content, { backgroundColor: colors.background.secondary }]}>
+            <View style={[styles.iconContainer, { backgroundColor: colors.interactive.subtle }]}>
+              <Icon name="notifications" size={40} color={colors.interactive.default} />
             </View>
 
-            <Text style={[styles.title, { color: theme.colors.text.primary }]}>
-              {permissionDenied
-                ? 'Bildirimler Kapatıldı'
-                : 'Bildirimleri Aç'}
+            <Text style={[styles.title, { color: colors.text.primary }]}>
+              {permissionDenied ? 'Bildirimler Kapatıldı' : 'Bildirimleri Aç'}
             </Text>
 
-            <Text
-              style={[
-                styles.description,
-                { color: theme.colors.text.secondary },
-              ]}
-            >
+            <Text style={[styles.description, { color: colors.text.secondary }]}>
               {permissionDenied
                 ? 'Bildirim almak için ayarlardan bildirim iznini etkinleştirmeniz gerekiyor.'
                 : 'Mesajlar, beğeniler ve diğer etkileşimlerden anında haberdar olmak için bildirimleri açın.'}
             </Text>
 
             <View style={styles.features}>
-              <FeatureItem
-                icon="chatbubble"
-                text="Yeni mesajlar"
-                theme={theme}
-              />
-              <FeatureItem
-                icon="heart"
-                text="Beğeniler ve yorumlar"
-                theme={theme}
-              />
-              <FeatureItem
-                icon="person-add"
-                text="Yeni takipçiler"
-                theme={theme}
-              />
+              <FeatureItem icon="chatbubble" text="Yeni mesajlar" colors={colors} />
+              <FeatureItem icon="heart" text="Beğeniler ve yorumlar" colors={colors} />
+              <FeatureItem icon="person-add" text="Yeni takipçiler" colors={colors} />
               <FeatureItem
                 icon="checkmark-circle"
                 text="Doğrulama güncellemeleri"
-                theme={theme}
+                colors={colors}
               />
             </View>
 
@@ -114,10 +70,9 @@ export const PermissionPrompt: React.FC<PermissionPromptProps> = memo(
               onPress={permissionDenied ? handleOpenSettings : onRequestPermission}
               style={({ pressed }) => [
                 styles.primaryButton,
-                { backgroundColor: theme.colors.primary[500] },
+                { backgroundColor: colors.interactive.default },
                 pressed && styles.buttonPressed,
-              ]}
-            >
+              ]}>
               <Text style={styles.primaryButtonText}>
                 {permissionDenied ? 'Ayarlara Git' : 'Bildirimleri Aç'}
               </Text>
@@ -125,17 +80,8 @@ export const PermissionPrompt: React.FC<PermissionPromptProps> = memo(
 
             <Pressable
               onPress={onDismiss}
-              style={({ pressed }) => [
-                styles.secondaryButton,
-                pressed && styles.buttonPressed,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.secondaryButtonText,
-                  { color: theme.colors.text.secondary },
-                ]}
-              >
+              style={({ pressed }) => [styles.secondaryButton, pressed && styles.buttonPressed]}>
+              <Text style={[styles.secondaryButtonText, { color: colors.text.secondary }]}>
                 {permissionDenied ? 'Tamam' : 'Şimdi Değil'}
               </Text>
             </Pressable>
@@ -143,26 +89,19 @@ export const PermissionPrompt: React.FC<PermissionPromptProps> = memo(
         </Animated.View>
       </Modal>
     );
-  }
+  },
 );
 
 interface FeatureItemProps {
   icon: string;
   text: string;
-  theme: any;
+  colors: any;
 }
 
-const FeatureItem: React.FC<FeatureItemProps> = memo(({ icon, text, theme }) => (
+const FeatureItem: React.FC<FeatureItemProps> = memo(({ icon, text, colors }) => (
   <View style={styles.featureItem}>
-    <Icon
-      name={icon}
-      size={18}
-      color={theme.colors.primary[500]}
-      style={styles.featureIcon}
-    />
-    <Text style={[styles.featureText, { color: theme.colors.text.primary }]}>
-      {text}
-    </Text>
+    <Icon name={icon} size={18} color={colors.interactive.default} style={styles.featureIcon} />
+    <Text style={[styles.featureText, { color: colors.text.primary }]}>{text}</Text>
   </View>
 ));
 

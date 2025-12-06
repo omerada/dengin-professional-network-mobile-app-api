@@ -5,7 +5,7 @@
 import React, { memo } from 'react';
 import { StyleSheet, View, Text, ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { useTheme } from '@contexts';
+import { useColors } from '@contexts';
 import { spacing, typography } from '@theme';
 import type { UploadProgress as UploadProgressType } from '../types';
 
@@ -29,8 +29,7 @@ interface ProgressBarProps {
 }
 
 const ProgressBar: React.FC<ProgressBarProps> = memo(({ label, progress, isActive }) => {
-  const { theme } = useTheme();
-  const { colors } = theme;
+  const colors = useColors();
 
   const animatedWidth = useAnimatedStyle(() => ({
     width: withSpring(`${progress}%` as unknown as number, {
@@ -46,7 +45,7 @@ const ProgressBar: React.FC<ProgressBarProps> = memo(({ label, progress, isActiv
           style={[
             styles.progressLabel,
             {
-              color: isActive ? colors.text : colors.textSecondary,
+              color: isActive ? colors.text.primary : colors.text.secondary,
               fontWeight: isActive ? '600' : '400',
             },
           ]}>
@@ -55,17 +54,19 @@ const ProgressBar: React.FC<ProgressBarProps> = memo(({ label, progress, isActiv
         <Text
           style={[
             styles.progressValue,
-            { color: isActive ? colors.primary : colors.textSecondary },
+            { color: isActive ? colors.interactive.default : colors.text.secondary },
           ]}>
           {progress}%
         </Text>
       </View>
-      <View style={[styles.progressBarBackground, { backgroundColor: colors.surfaceVariant }]}>
+      <View
+        style={[styles.progressBarBackground, { backgroundColor: colors.background.secondary }]}>
         <Animated.View
           style={[
             styles.progressBarFill,
             {
-              backgroundColor: progress === 100 ? colors.success : colors.primary,
+              backgroundColor:
+                progress === 100 ? colors.status.success : colors.interactive.default,
             },
             animatedWidth,
           ]}
@@ -93,19 +94,18 @@ const STATUS_MESSAGES: Record<UploadProgressType['status'], string> = {
  * Belge yükleme sürecinin detaylı ilerlemesini gösterir
  */
 export const UploadProgress: React.FC<UploadProgressProps> = memo(({ progress, style }) => {
-  const { theme } = useTheme();
-  const { colors } = theme;
+  const colors = useColors();
 
   const getStatusColor = () => {
     switch (progress.status) {
       case 'completed':
-        return colors.success;
+        return colors.status.success;
       case 'failed':
-        return colors.error;
+        return colors.status.error;
       case 'processing':
-        return colors.warning;
+        return colors.status.warning;
       default:
-        return colors.primary;
+        return colors.interactive.default;
     }
   };
 
@@ -122,14 +122,18 @@ export const UploadProgress: React.FC<UploadProgressProps> = memo(({ progress, s
             isUploading && styles.statusDotAnimated,
           ]}
         />
-        <Text style={[styles.statusText, { color: colors.text }]}>
+        <Text style={[styles.statusText, { color: colors.text.primary }]}>
           {STATUS_MESSAGES[progress.status]}
         </Text>
       </View>
 
       {/* Toplam ilerleme */}
       <View style={styles.totalProgress}>
-        <View style={[styles.totalProgressBackground, { backgroundColor: colors.surfaceVariant }]}>
+        <View
+          style={[
+            styles.totalProgressBackground,
+            { backgroundColor: colors.background.secondary },
+          ]}>
           <Animated.View
             style={[
               styles.totalProgressFill,
@@ -138,7 +142,7 @@ export const UploadProgress: React.FC<UploadProgressProps> = memo(({ progress, s
             ]}
           />
         </View>
-        <Text style={[styles.totalProgressText, { color: colors.textSecondary }]}>
+        <Text style={[styles.totalProgressText, { color: colors.text.secondary }]}>
           {progress.total}%
         </Text>
       </View>
@@ -172,11 +176,11 @@ export const UploadProgress: React.FC<UploadProgressProps> = memo(({ progress, s
 
       {/* AI İşlem bilgisi */}
       {progress.status === 'processing' && (
-        <View style={[styles.processingInfo, { backgroundColor: colors.surfaceVariant }]}>
-          <Text style={[styles.processingText, { color: colors.textSecondary }]}>
+        <View style={[styles.processingInfo, { backgroundColor: colors.background.secondary }]}>
+          <Text style={[styles.processingText, { color: colors.text.secondary }]}>
             🤖 Belgeleriniz yapay zeka ile analiz ediliyor...
           </Text>
-          <Text style={[styles.processingSubtext, { color: colors.textSecondary }]}>
+          <Text style={[styles.processingSubtext, { color: colors.text.secondary }]}>
             Bu işlem birkaç dakika sürebilir
           </Text>
         </View>

@@ -17,7 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { useDebounce } from '@hooks/useDebounce';
 import { useStartConversation } from '../hooks';
 import type { UserSummary } from '../types';
@@ -41,7 +41,7 @@ interface UserItemProps {
 }
 
 const UserItem: React.FC<UserItemProps> = ({ user, onPress, isLoading }) => {
-  const { theme } = useTheme();
+  const colors = useColors();
 
   return (
     <Pressable
@@ -49,43 +49,34 @@ const UserItem: React.FC<UserItemProps> = ({ user, onPress, isLoading }) => {
       disabled={isLoading}
       style={({ pressed }) => [
         styles.userItem,
-        pressed && { backgroundColor: theme.colors.background.secondary },
-      ]}
-    >
+        pressed && { backgroundColor: colors.background.secondary },
+      ]}>
       {/* Avatar */}
       {user.avatarUrl ? (
         <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
       ) : (
-        <View
-          style={[
-            styles.avatarPlaceholder,
-            { backgroundColor: theme.colors.primary[100] },
-          ]}
-        >
-          <Icon name="person" size={20} color={theme.colors.primary[500]} />
+        <View style={[styles.avatarPlaceholder, { backgroundColor: colors.interactive.subtle }]}>
+          <Icon name="person" size={20} color={colors.interactive.default} />
         </View>
       )}
 
       {/* Name */}
-      <Text
-        style={[styles.userName, { color: theme.colors.text.primary }]}
-        numberOfLines={1}
-      >
+      <Text style={[styles.userName, { color: colors.text.primary }]} numberOfLines={1}>
         {user.displayName}
       </Text>
 
       {/* Loading or arrow */}
       {isLoading ? (
-        <ActivityIndicator size="small" color={theme.colors.primary[500]} />
+        <ActivityIndicator size="small" color={colors.interactive.default} />
       ) : (
-        <Icon name="chevron-forward" size={20} color={theme.colors.text.tertiary} />
+        <Icon name="chevron-forward" size={20} color={colors.text.tertiary} />
       )}
     </Pressable>
   );
 };
 
 export const NewConversationScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
 
@@ -106,7 +97,7 @@ export const NewConversationScreen: React.FC = () => {
       setIsSearching(true);
       // Simulate search - in real app, this would be an API call
       const filtered = mockUsers.filter(u =>
-        u.displayName.toLowerCase().includes(debouncedSearch.toLowerCase())
+        u.displayName.toLowerCase().includes(debouncedSearch.toLowerCase()),
       );
       setTimeout(() => {
         setSearchResults(filtered);
@@ -118,94 +109,81 @@ export const NewConversationScreen: React.FC = () => {
   }, [debouncedSearch]);
 
   // Handlers
-  const handleUserPress = useCallback(async (user: UserSummary) => {
-    try {
-      setLoadingUserId(user.id);
-      const conversationId = await startConversation(user.id);
-      navigation.replace('Chat', { conversationId });
-    } catch (error) {
-      // Error handled in hook
-    } finally {
-      setLoadingUserId(null);
-    }
-  }, [navigation, startConversation]);
+  const handleUserPress = useCallback(
+    async (user: UserSummary) => {
+      try {
+        setLoadingUserId(user.id);
+        const conversationId = await startConversation(user.id);
+        navigation.replace('Chat', { conversationId });
+      } catch (error) {
+        // Error handled in hook
+      } finally {
+        setLoadingUserId(null);
+      }
+    },
+    [navigation, startConversation],
+  );
 
   const handleBackPress = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
 
   // Render
-  const renderItem = useCallback(({ item }: { item: UserSummary }) => (
-    <UserItem
-      user={item}
-      onPress={handleUserPress}
-      isLoading={loadingUserId === item.id}
-    />
-  ), [handleUserPress, loadingUserId]);
+  const renderItem = useCallback(
+    ({ item }: { item: UserSummary }) => (
+      <UserItem user={item} onPress={handleUserPress} isLoading={loadingUserId === item.id} />
+    ),
+    [handleUserPress, loadingUserId],
+  );
 
   const keyExtractor = useCallback((item: UserSummary) => item.id, []);
 
-  const ListEmptyComponent = useCallback(() => (
-    <View style={styles.emptyContainer}>
-      {isSearching ? (
-        <ActivityIndicator size="large" color={theme.colors.primary[500]} />
-      ) : (
-        <>
-          <Icon
-            name="search-outline"
-            size={48}
-            color={theme.colors.text.tertiary}
-          />
-          <Text style={[styles.emptyText, { color: theme.colors.text.secondary }]}>
-            {searchQuery.trim()
-              ? 'Kullanıcı bulunamadı'
-              : 'Konuşma başlatmak için kullanıcı arayın'}
-          </Text>
-        </>
-      )}
-    </View>
-  ), [isSearching, searchQuery, theme.colors]);
+  const ListEmptyComponent = useCallback(
+    () => (
+      <View style={styles.emptyContainer}>
+        {isSearching ? (
+          <ActivityIndicator size="large" color={colors.interactive.default} />
+        ) : (
+          <>
+            <Icon name="search-outline" size={48} color={colors.text.tertiary} />
+            <Text style={[styles.emptyText, { color: colors.text.secondary }]}>
+              {searchQuery.trim()
+                ? 'Kullanıcı bulunamadı'
+                : 'Konuşma başlatmak için kullanıcı arayın'}
+            </Text>
+          </>
+        )}
+      </View>
+    ),
+    [isSearching, searchQuery, colors],
+  );
 
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: theme.colors.background.primary },
-      ]}
-    >
+    <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
       {/* Header */}
       <View
         style={[
           styles.header,
-          { paddingTop: insets.top, backgroundColor: theme.colors.background.primary },
-        ]}
-      >
+          { paddingTop: insets.top, backgroundColor: colors.background.primary },
+        ]}>
         <Pressable
           onPress={handleBackPress}
           style={styles.backButton}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Icon name="close" size={24} color={theme.colors.text.primary} />
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <Icon name="close" size={24} color={colors.text.primary} />
         </Pressable>
-        <Text style={[styles.title, { color: theme.colors.text.primary }]}>
-          Yeni Konuşma
-        </Text>
+        <Text style={[styles.title, { color: colors.text.primary }]}>Yeni Konuşma</Text>
         <View style={styles.headerSpacer} />
       </View>
 
       {/* Search bar */}
-      <View style={[styles.searchContainer, { backgroundColor: theme.colors.background.secondary }]}>
-        <View
-          style={[
-            styles.searchInputContainer,
-            { backgroundColor: theme.colors.background.primary },
-          ]}
-        >
-          <Icon name="search" size={18} color={theme.colors.text.tertiary} />
+      <View style={[styles.searchContainer, { backgroundColor: colors.background.secondary }]}>
+        <View style={[styles.searchInputContainer, { backgroundColor: colors.background.primary }]}>
+          <Icon name="search" size={18} color={colors.text.tertiary} />
           <TextInput
-            style={[styles.searchInput, { color: theme.colors.text.primary }]}
+            style={[styles.searchInput, { color: colors.text.primary }]}
             placeholder="Kullanıcı ara..."
-            placeholderTextColor={theme.colors.text.tertiary}
+            placeholderTextColor={colors.text.tertiary}
             value={searchQuery}
             onChangeText={setSearchQuery}
             autoFocus
@@ -213,7 +191,7 @@ export const NewConversationScreen: React.FC = () => {
           />
           {searchQuery.length > 0 && (
             <Pressable onPress={() => setSearchQuery('')}>
-              <Icon name="close-circle" size={18} color={theme.colors.text.tertiary} />
+              <Icon name="close-circle" size={18} color={colors.text.tertiary} />
             </Pressable>
           )}
         </View>

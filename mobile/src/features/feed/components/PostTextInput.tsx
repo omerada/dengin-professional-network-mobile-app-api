@@ -3,14 +3,8 @@
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
 import React, { memo, useCallback } from 'react';
-import {
-  View,
-  TextInput,
-  Text,
-  StyleSheet,
-  Image,
-} from 'react-native';
-import { useTheme } from '@contexts/ThemeContext';
+import { View, TextInput, Text, StyleSheet, Image } from 'react-native';
+import { useColors } from '@contexts/ThemeContext';
 import { useAuthStore } from '@features/auth/stores/authStore';
 import { MAX_CONTENT_LENGTH } from '../stores';
 
@@ -21,77 +15,67 @@ interface PostTextInputProps {
   autoFocus?: boolean;
 }
 
-export const PostTextInput: React.FC<PostTextInputProps> = memo(({
-  value,
-  onChangeText,
-  placeholder = 'Ne düşünüyorsunuz?',
-  autoFocus = true,
-}) => {
-  const { theme } = useTheme();
-  const user = useAuthStore((state) => state.user);
+export const PostTextInput: React.FC<PostTextInputProps> = memo(
+  ({ value, onChangeText, placeholder = 'Ne düşünüyorsunuz?', autoFocus = true }) => {
+    const colors = useColors();
+    const user = useAuthStore(state => state.user);
 
-  const remainingChars = MAX_CONTENT_LENGTH - value.length;
-  const isNearLimit = remainingChars <= 50;
-  const isOverLimit = remainingChars < 0;
+    const remainingChars = MAX_CONTENT_LENGTH - value.length;
+    const isNearLimit = remainingChars <= 50;
+    const isOverLimit = remainingChars < 0;
 
-  return (
-    <View style={styles.container}>
-      {/* User avatar */}
-      <View style={styles.avatarContainer}>
-        {user?.avatarUrl ? (
-          <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
-        ) : (
-          <View
-            style={[
-              styles.avatarPlaceholder,
-              { backgroundColor: theme.colors.primary[100] },
-            ]}
-          >
-            <Text style={[styles.avatarText, { color: theme.colors.primary[600] }]}>
-              {user?.firstName?.[0]}{user?.lastName?.[0]}
+    return (
+      <View style={styles.container}>
+        {/* User avatar */}
+        <View style={styles.avatarContainer}>
+          {user?.avatarUrl ? (
+            <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
+          ) : (
+            <View
+              style={[styles.avatarPlaceholder, { backgroundColor: colors.interactive.subtle }]}>
+              <Text style={[styles.avatarText, { color: colors.interactive.default }]}>
+                {user?.firstName?.[0]}
+                {user?.lastName?.[0]}
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* Input area */}
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={[styles.input, { color: colors.text.primary }]}
+            placeholder={placeholder}
+            placeholderTextColor={colors.text.secondary}
+            value={value}
+            onChangeText={onChangeText}
+            multiline
+            maxLength={MAX_CONTENT_LENGTH + 10} // Allow slight overflow for UX
+            autoFocus={autoFocus}
+            textAlignVertical="top"
+          />
+
+          {/* Character counter */}
+          <View style={styles.counterContainer}>
+            <Text
+              style={[
+                styles.counter,
+                {
+                  color: isOverLimit
+                    ? colors.error.main
+                    : isNearLimit
+                      ? colors.warning.main
+                      : colors.text.secondary,
+                },
+              ]}>
+              {remainingChars}
             </Text>
           </View>
-        )}
-      </View>
-
-      {/* Input area */}
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={[
-            styles.input,
-            { color: theme.colors.text.primary },
-          ]}
-          placeholder={placeholder}
-          placeholderTextColor={theme.colors.text.secondary}
-          value={value}
-          onChangeText={onChangeText}
-          multiline
-          maxLength={MAX_CONTENT_LENGTH + 10} // Allow slight overflow for UX
-          autoFocus={autoFocus}
-          textAlignVertical="top"
-        />
-
-        {/* Character counter */}
-        <View style={styles.counterContainer}>
-          <Text
-            style={[
-              styles.counter,
-              {
-                color: isOverLimit
-                  ? theme.colors.error.main
-                  : isNearLimit
-                  ? theme.colors.warning.main
-                  : theme.colors.text.secondary,
-              },
-            ]}
-          >
-            {remainingChars}
-          </Text>
         </View>
       </View>
-    </View>
-  );
-});
+    );
+  },
+);
 
 PostTextInput.displayName = 'PostTextInput';
 

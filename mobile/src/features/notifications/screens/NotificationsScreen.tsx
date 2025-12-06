@@ -4,33 +4,22 @@
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, StyleSheet, Pressable, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { NotificationList } from '../components/NotificationList';
 import { PermissionPrompt } from '../components/PermissionPrompt';
-import {
-  useMarkAllAsRead,
-  useNotificationPermission,
-  useUnreadCount,
-} from '../hooks';
+import { useMarkAllAsRead, useNotificationPermission, useUnreadCount } from '../hooks';
 import type { NotificationResponse, NotificationType } from '../types';
 import type { RootStackParamList } from '@navigation/types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export const NotificationsScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const navigation = useNavigation<NavigationProp>();
   const { markAllAsRead, isPending: isMarkingAllAsRead } = useMarkAllAsRead();
   const { isPermissionGranted, promptForPermission } = useNotificationPermission();
@@ -54,7 +43,7 @@ export const NotificationsScreen: React.FC = () => {
     (notification: NotificationResponse) => {
       const type = notification.type as NotificationType;
       const metadata = notification.metadata;
-      
+
       switch (type) {
         case 'NEW_MESSAGE':
           if (metadata?.conversationId) {
@@ -105,7 +94,7 @@ export const NotificationsScreen: React.FC = () => {
           break;
       }
     },
-    [navigation]
+    [navigation],
   );
 
   // Handle mark all as read
@@ -121,7 +110,7 @@ export const NotificationsScreen: React.FC = () => {
           text: 'Onayla',
           onPress: () => markAllAsRead(),
         },
-      ]
+      ],
     );
   }, [unreadCount, markAllAsRead]);
 
@@ -138,14 +127,11 @@ export const NotificationsScreen: React.FC = () => {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
-      edges={['top']}
-    >
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
+      edges={['top']}>
       {/* Header */}
-      <View style={[styles.header, { borderBottomColor: theme.colors.border }]}>
-        <Text style={[styles.headerTitle, { color: theme.colors.text.primary }]}>
-          Bildirimler
-        </Text>
+      <View style={[styles.header, { borderBottomColor: colors.border.default }]}>
+        <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Bildirimler</Text>
 
         <View style={styles.headerActions}>
           {/* Mark All Read Button */}
@@ -153,19 +139,11 @@ export const NotificationsScreen: React.FC = () => {
             <Pressable
               onPress={handleMarkAllAsRead}
               disabled={isMarkingAllAsRead}
-              style={({ pressed }) => [
-                styles.headerButton,
-                pressed && styles.headerButtonPressed,
-              ]}
-            >
+              style={({ pressed }) => [styles.headerButton, pressed && styles.headerButtonPressed]}>
               {isMarkingAllAsRead ? (
-                <ActivityIndicator size="small" color={theme.colors.primary[500]} />
+                <ActivityIndicator size="small" color={colors.interactive.default} />
               ) : (
-                <Icon
-                  name="checkmark-done"
-                  size={24}
-                  color={theme.colors.primary[500]}
-                />
+                <Icon name="checkmark-done" size={24} color={colors.interactive.default} />
               )}
             </Pressable>
           )}
@@ -173,16 +151,8 @@ export const NotificationsScreen: React.FC = () => {
           {/* Settings Button */}
           <Pressable
             onPress={handleSettingsPress}
-            style={({ pressed }) => [
-              styles.headerButton,
-              pressed && styles.headerButtonPressed,
-            ]}
-          >
-            <Icon
-              name="settings-outline"
-              size={24}
-              color={theme.colors.text.primary}
-            />
+            style={({ pressed }) => [styles.headerButton, pressed && styles.headerButtonPressed]}>
+            <Icon name="settings-outline" size={24} color={colors.text.primary} />
           </Pressable>
         </View>
       </View>

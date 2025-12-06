@@ -4,15 +4,9 @@
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 import React, { memo, useCallback } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  Image,
-} from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import type { NotificationResponse, NotificationType } from '../types';
 
 interface NotificationItemProps {
@@ -36,11 +30,11 @@ const getNotificationIcon = (type: NotificationType): { name: string; color: str
       return { name: 'chatbubble-ellipses', color: '#FF9500' };
     case 'MENTION':
       return { name: 'at', color: '#007AFF' };
-    
+
     // Messaging
     case 'NEW_MESSAGE':
       return { name: 'chatbubble', color: '#007AFF' };
-    
+
     // Verification
     case 'VERIFICATION_APPROVED':
       return { name: 'shield-checkmark', color: '#34C759' };
@@ -48,7 +42,7 @@ const getNotificationIcon = (type: NotificationType): { name: string; color: str
       return { name: 'shield-half', color: '#FF3B30' };
     case 'VERIFICATION_PENDING_REVIEW':
       return { name: 'time', color: '#FF9500' };
-    
+
     // Moderation
     case 'POST_FLAGGED':
       return { name: 'flag', color: '#FF9500' };
@@ -56,7 +50,7 @@ const getNotificationIcon = (type: NotificationType): { name: string; color: str
       return { name: 'trash', color: '#FF3B30' };
     case 'WARNING_ISSUED':
       return { name: 'warning', color: '#FF9500' };
-    
+
     // System
     case 'WELCOME':
       return { name: 'happy', color: '#34C759' };
@@ -66,7 +60,7 @@ const getNotificationIcon = (type: NotificationType): { name: string; color: str
       return { name: 'ban', color: '#FF3B30' };
     case 'ACCOUNT_REACTIVATED':
       return { name: 'checkmark-circle', color: '#34C759' };
-    
+
     default:
       return { name: 'notifications', color: '#8E8E93' };
   }
@@ -87,112 +81,83 @@ const formatRelativeTime = (dateString: string): string => {
   if (diffMins < 60) return `${diffMins}dk önce`;
   if (diffHours < 24) return `${diffHours}sa önce`;
   if (diffDays < 7) return `${diffDays}g önce`;
-  
+
   return date.toLocaleDateString('tr-TR', {
     day: '2-digit',
     month: 'short',
   });
 };
 
-export const NotificationItem: React.FC<NotificationItemProps> = memo(({
-  notification,
-  onPress,
-  onLongPress,
-}) => {
-  const { theme } = useTheme();
+export const NotificationItem: React.FC<NotificationItemProps> = memo(
+  ({ notification, onPress, onLongPress }) => {
+    const colors = useColors();
 
-  const handlePress = useCallback(() => {
-    onPress(notification);
-  }, [notification, onPress]);
+    const handlePress = useCallback(() => {
+      onPress(notification);
+    }, [notification, onPress]);
 
-  const handleLongPress = useCallback(() => {
-    onLongPress?.(notification);
-  }, [notification, onLongPress]);
+    const handleLongPress = useCallback(() => {
+      onLongPress?.(notification);
+    }, [notification, onLongPress]);
 
-  // Backend: read field (boolean)
-  const isUnread = !notification.read;
-  
-  // Backend icon field (derived) veya type'dan hesapla
-  const iconConfig = notification.icon 
-    ? { name: notification.icon, color: notification.color || '#8E8E93' }
-    : getNotificationIcon(notification.type);
-  
-  // Metadata'dan resim URL'i
-  const imageUrl = notification.metadata?.imageUrl || notification.metadata?.actorAvatarUrl;
+    // Backend: read field (boolean)
+    const isUnread = !notification.read;
 
-  // Backend relativeTime field veya hesaplanan
-  const displayTime = notification.relativeTime || formatRelativeTime(notification.createdAt);
+    // Backend icon field (derived) veya type'dan hesapla
+    const iconConfig = notification.icon
+      ? { name: notification.icon, color: notification.color || '#8E8E93' }
+      : getNotificationIcon(notification.type);
 
-  return (
-    <Pressable
-      onPress={handlePress}
-      onLongPress={handleLongPress}
-      style={({ pressed }) => [
-        styles.container,
-        {
-          backgroundColor: isUnread
-            ? theme.colors.primary[50]
-            : pressed
-              ? theme.colors.background.secondary
-              : theme.colors.background.primary,
-        },
-      ]}
-    >
-      {/* Icon or Image */}
-      <View style={styles.iconContainer}>
-        {imageUrl ? (
-          <Image source={{ uri: imageUrl }} style={styles.image} />
-        ) : (
-          <View
-            style={[
-              styles.iconCircle,
-              { backgroundColor: `${iconConfig.color}20` },
-            ]}
-          >
-            <Icon
-              name={iconConfig.name}
-              size={20}
-              color={iconConfig.color}
-            />
-          </View>
+    // Metadata'dan resim URL'i
+    const imageUrl = notification.metadata?.imageUrl || notification.metadata?.actorAvatarUrl;
+
+    // Backend relativeTime field veya hesaplanan
+    const displayTime = notification.relativeTime || formatRelativeTime(notification.createdAt);
+
+    return (
+      <Pressable
+        onPress={handlePress}
+        onLongPress={handleLongPress}
+        style={({ pressed }) => [
+          styles.container,
+          {
+            backgroundColor: isUnread
+              ? colors.interactive.subtle
+              : pressed
+                ? colors.background.secondary
+                : colors.background.primary,
+          },
+        ]}>
+        {/* Icon or Image */}
+        <View style={styles.iconContainer}>
+          {imageUrl ? (
+            <Image source={{ uri: imageUrl }} style={styles.image} />
+          ) : (
+            <View style={[styles.iconCircle, { backgroundColor: `${iconConfig.color}20` }]}>
+              <Icon name={iconConfig.name} size={20} color={iconConfig.color} />
+            </View>
+          )}
+        </View>
+        /* Content */
+        <View style={styles.content}>
+          <Text
+            style={[styles.title, { color: colors.text.primary }, isUnread && styles.titleUnread]}
+            numberOfLines={1}>
+            {notification.title}
+          </Text>
+          <Text style={[styles.body, { color: colors.text.secondary }]} numberOfLines={2}>
+            {notification.body}
+          </Text>
+          <Text style={[styles.time, { color: colors.text.secondary }]}>{displayTime}</Text>
+        </View>
+        {/* Unread indicator */}
+        {isUnread && (
+          <View style={[styles.unreadDot, { backgroundColor: colors.interactive.default }]} />
         )}
-      </View>
-
-      {/* Content */}
-      <View style={styles.content}>
-        <Text
-          style={[
-            styles.title,
-            { color: theme.colors.text.primary },
-            isUnread && styles.titleUnread,
-          ]}
-          numberOfLines={1}
-        >
-          {notification.title}
-        </Text>
-        <Text
-          style={[styles.body, { color: theme.colors.text.secondary }]}
-          numberOfLines={2}
-        >
-          {notification.body}
-        </Text>
-        <Text style={[styles.time, { color: theme.colors.text.tertiary }]}>
-          {displayTime}
-        </Text>
-      </View>
-
-      {/* Unread indicator */}
-      {isUnread && (
-        <View
-          style={[
-            styles.unreadDot,
-            { backgroundColor: theme.colors.primary[500] },
-          ]}
-        />
-      )}
-    </Pressable>
-  );
-});
+      </Pressable>
+    );
+  },
+);
 
 NotificationItem.displayName = 'NotificationItem';
 

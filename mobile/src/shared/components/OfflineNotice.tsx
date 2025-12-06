@@ -1,9 +1,9 @@
 // src/shared/components/OfflineNotice.tsx
-// Offline network notice component
-// Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
+// Meslektaş Design System - Modern Offline Notice Component
+// Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import { Text, StyleSheet, Platform } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -15,10 +15,26 @@ import Animated, {
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 
+/**
+ * Modern OfflineNotice Component
+ *
+ * Features:
+ * - Animated slide in/out
+ * - Network state monitoring
+ * - Offline/online status indication
+ * - Safe area aware
+ * - Accessibility support
+ *
+ * @example
+ * ```tsx
+ * // Place at app root
+ * <OfflineNotice />
+ * ```
+ */
 export const OfflineNotice: React.FC = memo(() => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const insets = useSafeAreaInsets();
   const [isOffline, setIsOffline] = useState(false);
   const [wasOffline, setWasOffline] = useState(false);
@@ -60,12 +76,13 @@ export const OfflineNotice: React.FC = memo(() => {
   }, [isOffline, wasOffline, translateY, opacity]);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: translateY.value }],
     opacity: interpolate(opacity.value, [0, 1], [0, 1], Extrapolation.CLAMP),
+    transform: [{ translateY: translateY.value }],
   }));
 
   if (!isOffline && !wasOffline) return null;
 
+  const backgroundColor = isOffline ? colors.status.error : colors.status.success;
   const accessibilityMessage = isOffline
     ? 'İnternet bağlantısı yok. Bazı özellikler kullanılamayabilir.'
     : 'Bağlantı yeniden kuruldu.';
@@ -76,21 +93,21 @@ export const OfflineNotice: React.FC = memo(() => {
         styles.container,
         animatedStyle,
         {
+          backgroundColor,
           paddingTop: insets.top + 8,
-          backgroundColor: isOffline ? theme.colors.error[500] : theme.colors.success[500],
         },
       ]}
-      accessible={true}
+      accessible
       accessibilityRole="alert"
       accessibilityLabel={accessibilityMessage}
       accessibilityLiveRegion="assertive">
       <Icon
         name={isOffline ? 'cloud-offline' : 'cloud-done'}
         size={18}
-        color="#FFFFFF"
+        color={colors.text.inverse}
         style={styles.icon}
       />
-      <Text style={styles.text}>
+      <Text style={[styles.text, { color: colors.text.inverse }]}>
         {isOffline ? 'İnternet bağlantısı yok' : 'Bağlantı yeniden kuruldu'}
       </Text>
     </Animated.View>
@@ -101,25 +118,25 @@ OfflineNotice.displayName = 'OfflineNotice';
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
+    left: 0,
     paddingBottom: 8,
     paddingHorizontal: 16,
+    position: 'absolute',
+    right: 0,
+    top: 0,
     zIndex: 1000,
     ...Platform.select({
+      android: {
+        elevation: 4,
+      },
       ios: {
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 4,
-      },
-      android: {
-        elevation: 4,
       },
     }),
   },
@@ -127,7 +144,6 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   text: {
-    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
   },

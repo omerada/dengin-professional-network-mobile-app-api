@@ -5,31 +5,20 @@
 import React, { memo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 
 export const EmptyNotifications: React.FC = memo(() => {
-  const { theme } = useTheme();
+  const colors = useColors();
 
   return (
     <View style={styles.container}>
-      <View
-        style={[
-          styles.iconContainer,
-          { backgroundColor: theme.colors.primary[50] },
-        ]}
-      >
-        <Icon
-          name="notifications-outline"
-          size={48}
-          color={theme.colors.primary[500]}
-        />
+      <View style={[styles.iconContainer, { backgroundColor: colors.interactive.subtle }]}>
+        <Icon name="notifications-outline" size={48} color={colors.interactive.default} />
       </View>
 
-      <Text style={[styles.title, { color: theme.colors.text.primary }]}>
-        Bildirim Yok
-      </Text>
+      <Text style={[styles.title, { color: colors.text.primary }]}>Bildirim Yok</Text>
 
-      <Text style={[styles.description, { color: theme.colors.text.secondary }]}>
+      <Text style={[styles.description, { color: colors.text.secondary }]}>
         Henüz hiç bildiriminiz yok. Yeni etkileşimler olduğunda burada göreceksiniz.
       </Text>
     </View>

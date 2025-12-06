@@ -4,7 +4,7 @@
 
 import React, { memo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { spacing, fontSize } from '@theme';
 import { SettingsItem } from './SettingsItem';
 import type { SettingsSectionType } from '../types';
@@ -23,35 +23,27 @@ interface SettingsSectionProps extends SettingsSectionType {
  */
 export const SettingsSection: React.FC<SettingsSectionProps> = memo(
   ({ title, items, loadingStates = {} }) => {
-    const { theme } = useTheme();
+    const colors = useColors();
 
     return (
       <View style={styles.container}>
         {/* Section Title */}
-        <Text style={[styles.title, { color: theme.colors.text.secondary }]}>
-          {title}
-        </Text>
+        <Text style={[styles.title, { color: colors.text.secondary }]}>{title}</Text>
 
         {/* Items */}
         <View
           style={[
             styles.itemsContainer,
             {
-              backgroundColor: theme.colors.background.primary,
-              borderColor: theme.colors.border.light,
+              backgroundColor: colors.background.primary,
+              borderColor: colors.border.default,
             },
-          ]}
-        >
+          ]}>
           {items.map((item, index) => (
             <View key={item.id}>
               <SettingsItem {...item} isLoading={loadingStates[item.id]} />
               {index < items.length - 1 && (
-                <View
-                  style={[
-                    styles.separator,
-                    { backgroundColor: theme.colors.border.light },
-                  ]}
-                />
+                <View style={[styles.separator, { backgroundColor: colors.border.default }]} />
               )}
             </View>
           ))}
@@ -84,4 +76,3 @@ const styles = StyleSheet.create({
     marginLeft: 66, // icon width + padding
   },
 });
-

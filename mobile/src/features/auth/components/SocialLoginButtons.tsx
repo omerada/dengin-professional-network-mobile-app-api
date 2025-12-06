@@ -4,7 +4,7 @@
 
 import React, { memo } from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { spacing, fontSize } from '@theme';
 import { GoogleSignInButton } from './GoogleSignInButton';
 import { AppleSignInButton } from './AppleSignInButton';
@@ -36,30 +36,22 @@ interface SocialLoginButtonsProps {
  */
 export const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = memo(
   ({ onSuccess, onError }) => {
-    const { theme } = useTheme();
+    const colors = useColors();
 
     return (
       <View style={styles.container}>
         {/* Divider */}
         <View style={styles.dividerContainer}>
-          <View
-            style={[styles.divider, { backgroundColor: theme.colors.border.light }]}
-          />
-          <Text style={[styles.dividerText, { color: theme.colors.text.tertiary }]}>
-            veya
-          </Text>
-          <View
-            style={[styles.divider, { backgroundColor: theme.colors.border.light }]}
-          />
+          <View style={[styles.divider, { backgroundColor: colors.border.default }]} />
+          <Text style={[styles.dividerText, { color: colors.text.secondary }]}>veya</Text>
+          <View style={[styles.divider, { backgroundColor: colors.border.default }]} />
         </View>
 
         {/* Social Buttons */}
         <View style={styles.buttons}>
           <GoogleSignInButton onSuccess={onSuccess} onError={onError} />
 
-          {Platform.OS === 'ios' && (
-            <AppleSignInButton onSuccess={onSuccess} onError={onError} />
-          )}
+          {Platform.OS === 'ios' && <AppleSignInButton onSuccess={onSuccess} onError={onError} />}
         </View>
       </View>
     );
@@ -89,4 +81,3 @@ const styles = StyleSheet.create({
 });
 
 SocialLoginButtons.displayName = 'SocialLoginButtons';
-

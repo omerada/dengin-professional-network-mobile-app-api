@@ -3,15 +3,9 @@
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART6.md
 
 import React, { memo, useCallback } from 'react';
-import {
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-  View,
-} from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { spacing, fontSize } from '@theme';
 import { useGoogleSignIn } from '../hooks';
 
@@ -42,7 +36,7 @@ interface GoogleSignInButtonProps {
  */
 export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = memo(
   ({ onSuccess, onError }) => {
-    const { theme } = useTheme();
+    const colors = useColors();
     const googleSignIn = useGoogleSignIn();
 
     const handlePress = useCallback(async () => {
@@ -59,25 +53,22 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = memo(
         style={[
           styles.button,
           {
-            backgroundColor: theme.colors.background.primary,
-            borderColor: theme.colors.border.medium,
+            backgroundColor: colors.background.primary,
+            borderColor: colors.border.default,
           },
         ]}
         onPress={handlePress}
         disabled={googleSignIn.isPending}
-        activeOpacity={0.7}
-      >
+        activeOpacity={0.7}>
         {googleSignIn.isPending ? (
-          <ActivityIndicator color={theme.colors.text.primary} size="small" />
+          <ActivityIndicator color={colors.text.primary} size="small" />
         ) : (
           <>
             {/* Google "G" icon using custom color */}
             <View style={styles.iconContainer}>
               <Text style={styles.googleIcon}>G</Text>
             </View>
-            <Text style={[styles.text, { color: theme.colors.text.primary }]}>
-              Google ile devam et
-            </Text>
+            <Text style={[styles.text, { color: colors.text.primary }]}>Google ile devam et</Text>
           </>
         )}
       </TouchableOpacity>
@@ -113,4 +104,3 @@ const styles = StyleSheet.create({
 });
 
 GoogleSignInButton.displayName = 'GoogleSignInButton';
-

@@ -5,7 +5,7 @@
 import React, { memo } from 'react';
 import { View, Text, Switch, StyleSheet, Pressable } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 
 interface NotificationSettingsToggleProps {
   icon: string;
@@ -18,7 +18,7 @@ interface NotificationSettingsToggleProps {
 
 export const NotificationSettingsToggle: React.FC<NotificationSettingsToggleProps> = memo(
   ({ icon, title, description, value, onValueChange, disabled = false }) => {
-    const { theme } = useTheme();
+    const colors = useColors();
 
     const handlePress = () => {
       if (!disabled) {
@@ -31,28 +31,22 @@ export const NotificationSettingsToggle: React.FC<NotificationSettingsToggleProp
         onPress={handlePress}
         style={({ pressed }) => [
           styles.container,
-          { backgroundColor: theme.colors.surface },
+          { backgroundColor: colors.background.secondary },
           pressed && !disabled && styles.pressed,
           disabled && styles.disabled,
         ]}
-        disabled={disabled}
-      >
+        disabled={disabled}>
         <View
           style={[
             styles.iconContainer,
             {
-              backgroundColor: value
-                ? theme.colors.primary[50]
-                : theme.colors.grey[100],
+              backgroundColor: value ? colors.interactive.subtle : colors.background.tertiary,
             },
-          ]}
-        >
+          ]}>
           <Icon
             name={icon}
             size={20}
-            color={
-              value ? theme.colors.primary[500] : theme.colors.text.secondary
-            }
+            color={value ? colors.interactive.default : colors.text.secondary}
           />
         </View>
 
@@ -60,19 +54,12 @@ export const NotificationSettingsToggle: React.FC<NotificationSettingsToggleProp
           <Text
             style={[
               styles.title,
-              { color: disabled ? theme.colors.text.disabled : theme.colors.text.primary },
-            ]}
-          >
+              { color: disabled ? colors.text.disabled : colors.text.primary },
+            ]}>
             {title}
           </Text>
           {description && (
-            <Text
-              style={[
-                styles.description,
-                { color: theme.colors.text.secondary },
-              ]}
-              numberOfLines={2}
-            >
+            <Text style={[styles.description, { color: colors.text.secondary }]} numberOfLines={2}>
               {description}
             </Text>
           )}
@@ -83,15 +70,15 @@ export const NotificationSettingsToggle: React.FC<NotificationSettingsToggleProp
           onValueChange={onValueChange}
           disabled={disabled}
           trackColor={{
-            false: theme.colors.grey[300],
-            true: theme.colors.primary[200],
+            false: colors.border.default,
+            true: colors.interactive.subtle,
           }}
-          thumbColor={value ? theme.colors.primary[500] : theme.colors.grey[50]}
-          ios_backgroundColor={theme.colors.grey[300]}
+          thumbColor={value ? colors.interactive.default : colors.background.primary}
+          ios_backgroundColor={colors.border.default}
         />
       </Pressable>
     );
-  }
+  },
 );
 
 NotificationSettingsToggle.displayName = 'NotificationSettingsToggle';

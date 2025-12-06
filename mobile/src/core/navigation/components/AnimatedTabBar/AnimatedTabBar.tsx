@@ -112,7 +112,9 @@ const TabButton: React.FC<TabButtonProps> = memo(({ item, focused, onPress, onLo
                 borderColor: colors.background.primary,
               },
             ]}>
-            <Text style={styles.badgeText}>{item.badgeCount > 99 ? '99+' : item.badgeCount}</Text>
+            <Text style={[styles.badgeText, { color: colors.text.inverse }]}>
+              {item.badgeCount > 99 ? '99+' : item.badgeCount}
+            </Text>
           </Animated.View>
         )}
 

@@ -2,9 +2,9 @@
 // Typography bileşeni - Tutarlı metin stilleri
 // Oku: mobile-development-guide/ui/17-DESIGN-SYSTEM.md
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Text, TextProps, TextStyle, AccessibilityRole } from 'react-native';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { fontSize as fontSizes } from '@theme';
 
 /**
@@ -52,7 +52,7 @@ export type TypographyWeight = 'regular' | 'medium' | 'semibold' | 'bold';
 /**
  * Typography props
  */
-interface TypographyProps extends Omit<TextProps, 'style'> {
+export interface TypographyProps extends Omit<TextProps, 'style'> {
   /** Text variant */
   variant?: TypographyVariant;
   /** Text color */
@@ -112,109 +112,112 @@ export const Typography = React.memo<TypographyProps>(
     children,
     ...props
   }) => {
-    const { theme } = useTheme();
+    const colors = useColors();
 
-    // Variant styles
-    const variantStyles: Record<TypographyVariant, TextStyle> = {
-      h1: {
-        fontSize: fontSizes['3xl'],
-        fontWeight: '700',
-        lineHeight: fontSizes['3xl'] * 1.2,
-        letterSpacing: -0.5,
-      },
-      h2: {
-        fontSize: fontSizes['2xl'],
-        fontWeight: '700',
-        lineHeight: fontSizes['2xl'] * 1.2,
-        letterSpacing: -0.3,
-      },
-      h3: {
-        fontSize: fontSizes.xl,
-        fontWeight: '600',
-        lineHeight: fontSizes.xl * 1.3,
-      },
-      h4: {
-        fontSize: fontSizes.lg,
-        fontWeight: '600',
-        lineHeight: fontSizes.lg * 1.3,
-      },
-      h5: {
-        fontSize: fontSizes.md,
-        fontWeight: '600',
-        lineHeight: fontSizes.md * 1.4,
-      },
-      h6: {
-        fontSize: fontSizes.sm,
-        fontWeight: '600',
-        lineHeight: fontSizes.sm * 1.4,
-      },
-      subtitle1: {
-        fontSize: fontSizes.md,
-        fontWeight: '500',
-        lineHeight: fontSizes.md * 1.5,
-        letterSpacing: 0.1,
-      },
-      subtitle2: {
-        fontSize: fontSizes.sm,
-        fontWeight: '500',
-        lineHeight: fontSizes.sm * 1.5,
-        letterSpacing: 0.1,
-      },
-      body1: {
-        fontSize: fontSizes.md,
-        fontWeight: '400',
-        lineHeight: fontSizes.md * 1.5,
-      },
-      body2: {
-        fontSize: fontSizes.sm,
-        fontWeight: '400',
-        lineHeight: fontSizes.sm * 1.5,
-      },
-      caption: {
-        fontSize: fontSizes.xs,
-        fontWeight: '400',
-        lineHeight: fontSizes.xs * 1.4,
-        letterSpacing: 0.2,
-      },
-      overline: {
-        fontSize: fontSizes.xs,
-        fontWeight: '500',
-        lineHeight: fontSizes.xs * 1.4,
-        letterSpacing: 1,
-        textTransform: 'uppercase',
-      },
-      button: {
-        fontSize: fontSizes.sm,
-        fontWeight: '600',
-        lineHeight: fontSizes.sm * 1.4,
-        letterSpacing: 0.5,
-      },
-    };
+    // Variant styles (memoized)
+    const variantStyles = useMemo<Record<TypographyVariant, TextStyle>>(
+      () => ({
+        h1: {
+          fontSize: fontSizes['3xl'],
+          fontWeight: '700',
+          lineHeight: fontSizes['3xl'] * 1.2,
+          letterSpacing: -0.5,
+        },
+        h2: {
+          fontSize: fontSizes['2xl'],
+          fontWeight: '700',
+          lineHeight: fontSizes['2xl'] * 1.2,
+          letterSpacing: -0.3,
+        },
+        h3: {
+          fontSize: fontSizes.xl,
+          fontWeight: '600',
+          lineHeight: fontSizes.xl * 1.3,
+        },
+        h4: {
+          fontSize: fontSizes.lg,
+          fontWeight: '600',
+          lineHeight: fontSizes.lg * 1.3,
+        },
+        h5: {
+          fontSize: fontSizes.md,
+          fontWeight: '600',
+          lineHeight: fontSizes.md * 1.4,
+        },
+        h6: {
+          fontSize: fontSizes.sm,
+          fontWeight: '600',
+          lineHeight: fontSizes.sm * 1.4,
+        },
+        subtitle1: {
+          fontSize: fontSizes.md,
+          fontWeight: '500',
+          lineHeight: fontSizes.md * 1.5,
+          letterSpacing: 0.1,
+        },
+        subtitle2: {
+          fontSize: fontSizes.sm,
+          fontWeight: '500',
+          lineHeight: fontSizes.sm * 1.5,
+          letterSpacing: 0.1,
+        },
+        body1: {
+          fontSize: fontSizes.md,
+          fontWeight: '400',
+          lineHeight: fontSizes.md * 1.5,
+        },
+        body2: {
+          fontSize: fontSizes.sm,
+          fontWeight: '400',
+          lineHeight: fontSizes.sm * 1.5,
+        },
+        caption: {
+          fontSize: fontSizes.xs,
+          fontWeight: '400',
+          lineHeight: fontSizes.xs * 1.4,
+          letterSpacing: 0.2,
+        },
+        overline: {
+          fontSize: fontSizes.xs,
+          fontWeight: '500',
+          lineHeight: fontSizes.xs * 1.4,
+          letterSpacing: 1,
+          textTransform: 'uppercase',
+        },
+        button: {
+          fontSize: fontSizes.sm,
+          fontWeight: '600',
+          lineHeight: fontSizes.sm * 1.4,
+          letterSpacing: 0.5,
+        },
+      }),
+      [],
+    );
 
     // Color mapping
-    const getColor = (): string => {
+    const getColor = useMemo((): string => {
       switch (color) {
         case 'primary':
-          return theme.colors.text.primary;
+          return colors.text.primary;
         case 'secondary':
-          return theme.colors.text.secondary;
+          return colors.text.secondary;
         case 'tertiary':
-          return theme.colors.text.tertiary;
+          return colors.text.tertiary;
         case 'disabled':
-          return theme.colors.text.disabled;
+          return colors.text.disabled;
         case 'error':
-          return theme.colors.error.main;
+          return colors.status.error;
         case 'success':
-          return theme.colors.success.main;
+          return colors.status.success;
         case 'warning':
-          return theme.colors.warning.main;
+          return colors.status.warning;
         case 'info':
-          return theme.colors.info.main;
+          return colors.status.info;
         case 'inherit':
         default:
           return 'inherit' as unknown as string;
       }
-    };
+    }, [color, colors]);
 
     // Weight mapping
     const getWeight = (): TextStyle['fontWeight'] => {
@@ -242,16 +245,19 @@ export const Typography = React.memo<TypographyProps>(
     };
 
     // Combined styles
-    const textStyle: TextStyle = {
-      ...variantStyles[variant],
-      color: color !== 'inherit' ? getColor() : undefined,
-      textAlign: align,
-      fontStyle: italic ? 'italic' : 'normal',
-      textDecorationLine: getTextDecoration(),
-      textTransform: uppercase ? 'uppercase' : variantStyles[variant].textTransform,
-      ...(weight ? { fontWeight: getWeight() } : {}),
-      ...style,
-    };
+    const textStyle = useMemo<TextStyle>(
+      () => ({
+        ...variantStyles[variant],
+        color: color !== 'inherit' ? getColor : undefined,
+        textAlign: align,
+        fontStyle: italic ? 'italic' : 'normal',
+        textDecorationLine: getTextDecoration(),
+        textTransform: uppercase ? 'uppercase' : variantStyles[variant].textTransform,
+        ...(weight ? { fontWeight: getWeight() } : {}),
+        ...style,
+      }),
+      [variantStyles, variant, color, getColor, align, italic, uppercase, weight, style],
+    );
 
     return (
       <Text style={textStyle} accessibilityRole={getAccessibilityRole(variant)} {...props}>

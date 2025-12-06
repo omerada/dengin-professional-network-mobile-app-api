@@ -13,7 +13,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { useTheme } from '@contexts';
+import { useColors } from '@contexts';
 import { spacing, typography } from '@theme';
 import type { CapturedImage } from '../types';
 
@@ -43,8 +43,7 @@ interface ImagePreviewProps {
  */
 export const ImagePreview: React.FC<ImagePreviewProps> = memo(
   ({ image, label, onRetake, loading = false, fullWidth = false, style }) => {
-    const { theme } = useTheme();
-    const { colors } = theme;
+    const colors = useColors();
 
     const imageWidth = fullWidth ? SCREEN_WIDTH - spacing.lg * 2 : 150;
     const imageHeight = imageWidth * 0.63; // ID kart oranı
@@ -57,13 +56,13 @@ export const ImagePreview: React.FC<ImagePreviewProps> = memo(
             {
               width: imageWidth,
               height: imageHeight,
-              backgroundColor: colors.surfaceVariant,
-              borderColor: colors.border,
+              backgroundColor: colors.background.secondary,
+              borderColor: colors.border.default,
             },
             style,
           ]}>
           <Text style={[styles.placeholderIcon]}>📷</Text>
-          <Text style={[styles.placeholderText, { color: colors.textSecondary }]}>{label}</Text>
+          <Text style={[styles.placeholderText, { color: colors.text.secondary }]}>{label}</Text>
         </View>
       );
     }
@@ -79,7 +78,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = memo(
             {
               width: imageWidth,
               height: imageHeight,
-              borderColor: colors.border,
+              borderColor: colors.border.default,
             },
           ]}>
           <Image
@@ -97,19 +96,21 @@ export const ImagePreview: React.FC<ImagePreviewProps> = memo(
           )}
 
           {/* Etiket */}
-          <View style={[styles.labelContainer, { backgroundColor: colors.surface }]}>
-            <Text style={[styles.label, { color: colors.text }]}>{label}</Text>
+          <View style={[styles.labelContainer, { backgroundColor: colors.background.secondary }]}>
+            <Text style={[styles.label, { color: colors.text.primary }]}>{label}</Text>
           </View>
         </View>
 
         {/* Tekrar çek butonu */}
         {onRetake && !loading && (
           <TouchableOpacity
-            style={[styles.retakeButton, { backgroundColor: colors.surfaceVariant }]}
+            style={[styles.retakeButton, { backgroundColor: colors.background.secondary }]}
             onPress={onRetake}
             accessibilityRole="button"
             accessibilityLabel={`${label} tekrar çek`}>
-            <Text style={[styles.retakeText, { color: colors.primary }]}>Tekrar Çek</Text>
+            <Text style={[styles.retakeText, { color: colors.interactive.default }]}>
+              Tekrar Çek
+            </Text>
           </TouchableOpacity>
         )}
       </Animated.View>

@@ -4,18 +4,12 @@
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 import React, { memo, useCallback } from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  RefreshControl,
-  ActivityIndicator,
-  View,
-} from 'react-native';
+import { FlatList, StyleSheet, RefreshControl, ActivityIndicator, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
 import { NotificationItem } from './NotificationItem';
 import { EmptyNotifications } from './EmptyNotifications';
 import { useNotifications, useMarkAsRead, useDeleteNotification } from '../hooks';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import type { NotificationResponse } from '../types';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<NotificationResponse>);
@@ -30,8 +24,8 @@ interface NotificationListProps {
 
 export const NotificationList: React.FC<NotificationListProps> = memo(
   ({ onNotificationPress, unreadOnly = false }) => {
-    const { theme } = useTheme();
-    
+    const colors = useColors();
+
     // Backend page-based pagination hook
     const {
       notifications,
@@ -42,7 +36,7 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
       refetch,
       isRefreshing,
     } = useNotifications({ pageSize: PAGE_SIZE, unreadOnly });
-    
+
     const { markAsRead } = useMarkAsRead();
     const { deleteNotification } = useDeleteNotification();
 
@@ -57,7 +51,7 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
         // Call external handler for navigation
         onNotificationPress?.(notification);
       },
-      [markAsRead, onNotificationPress]
+      [markAsRead, onNotificationPress],
     );
 
     // Handle notification delete (swipe action)
@@ -65,7 +59,7 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
       (notificationId: string) => {
         deleteNotification(notificationId);
       },
-      [deleteNotification]
+      [deleteNotification],
     );
 
     // Handle load more (next page)
@@ -82,14 +76,11 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
         offset: ITEM_HEIGHT * index,
         index,
       }),
-      []
+      [],
     );
 
     // Extract key - backend notificationId
-    const keyExtractor = useCallback(
-      (item: NotificationResponse) => item.notificationId,
-      []
-    );
+    const keyExtractor = useCallback((item: NotificationResponse) => item.notificationId, []);
 
     // Render item
     const renderItem = useCallback(
@@ -97,8 +88,7 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
         <Animated.View
           entering={FadeIn.duration(200)}
           exiting={FadeOut.duration(150)}
-          layout={Layout.springify()}
-        >
+          layout={Layout.springify()}>
           <NotificationItem
             notification={item}
             onPress={handleNotificationPress}
@@ -106,7 +96,7 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
           />
         </Animated.View>
       ),
-      [handleNotificationPress, handleDelete]
+      [handleNotificationPress, handleDelete],
     );
 
     // Render footer (loading indicator for next page)
@@ -115,10 +105,10 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
 
       return (
         <View style={styles.footer}>
-          <ActivityIndicator size="small" color={theme.colors.primary[500]} />
+          <ActivityIndicator size="small" color={colors.interactive.default} />
         </View>
       );
-    }, [isFetchingNextPage, theme.colors.primary]);
+    }, [isFetchingNextPage, colors.interactive.default]);
 
     // Render empty component
     const renderEmpty = useCallback(() => {
@@ -130,7 +120,7 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
     if (isLoading) {
       return (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary[500]} />
+          <ActivityIndicator size="large" color={colors.interactive.default} />
         </View>
       );
     }
@@ -141,15 +131,13 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         getItemLayout={getItemLayout}
-        contentContainerStyle={
-          notifications.length === 0 ? styles.emptyContainer : undefined
-        }
+        contentContainerStyle={notifications.length === 0 ? styles.emptyContainer : undefined}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={refetch}
-            colors={[theme.colors.primary[500]]}
-            tintColor={theme.colors.primary[500]}
+            colors={[colors.interactive.default]}
+            tintColor={colors.interactive.default}
           />
         }
         onEndReached={handleEndReached}
@@ -163,7 +151,7 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
         showsVerticalScrollIndicator={false}
       />
     );
-  }
+  },
 );
 
 NotificationList.displayName = 'NotificationList';

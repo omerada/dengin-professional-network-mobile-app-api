@@ -5,7 +5,7 @@
 import React, { memo, useMemo } from 'react';
 import { StyleSheet, View, Text, ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { useTheme } from '@contexts';
+import { useColors } from '@contexts';
 import { spacing, typography } from '@theme';
 import type { VerificationStep } from '../types';
 
@@ -51,8 +51,7 @@ interface StepDotProps {
 }
 
 const StepDot: React.FC<StepDotProps> = memo(({ step, isCompleted, isCurrent }) => {
-  const { theme } = useTheme();
-  const { colors } = theme;
+  const colors = useColors();
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
@@ -66,9 +65,9 @@ const StepDot: React.FC<StepDotProps> = memo(({ step, isCompleted, isCurrent }) 
   }));
 
   const getBackgroundColor = () => {
-    if (isCompleted) return colors.success;
-    if (isCurrent) return colors.primary;
-    return colors.border;
+    if (isCompleted) return colors.status.success;
+    if (isCurrent) return colors.interactive.default;
+    return colors.border.default;
   };
 
   return (
@@ -85,7 +84,7 @@ const StepDot: React.FC<StepDotProps> = memo(({ step, isCompleted, isCurrent }) 
           style={[
             styles.stepNumber,
             {
-              color: isCompleted || isCurrent ? colors.textInverse : colors.textSecondary,
+              color: isCompleted || isCurrent ? colors.text.inverse : colors.text.secondary,
             },
           ]}>
           {isCompleted ? '✓' : step.shortLabel}
@@ -95,7 +94,7 @@ const StepDot: React.FC<StepDotProps> = memo(({ step, isCompleted, isCurrent }) 
         style={[
           styles.stepLabel,
           {
-            color: isCurrent ? colors.text : colors.textSecondary,
+            color: isCurrent ? colors.text.primary : colors.text.secondary,
             fontWeight: isCurrent ? '600' : '400',
           },
         ]}
@@ -116,11 +115,10 @@ interface StepLineProps {
 }
 
 const StepLine: React.FC<StepLineProps> = memo(({ isCompleted }) => {
-  const { theme } = useTheme();
-  const { colors } = theme;
+  const colors = useColors();
 
   const animatedStyle = useAnimatedStyle(() => ({
-    backgroundColor: withSpring(isCompleted ? colors.success : colors.border, {
+    backgroundColor: withSpring(isCompleted ? colors.status.success : colors.border.default, {
       damping: 20,
       stiffness: 200,
     }),

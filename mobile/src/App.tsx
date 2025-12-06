@@ -7,14 +7,12 @@ import { StatusBar, LogBox } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider, LocaleProvider, useTheme } from '@contexts';
+import { ThemeProvider, LocaleProvider, useTheme, useColors } from '@contexts';
 import { AppNavigator } from '@core/navigation';
 import { useAuthStore } from '@features/auth/stores';
 
 // Ignore specific warnings in development
-LogBox.ignoreLogs([
-  'Non-serializable values were found in the navigation state',
-]);
+LogBox.ignoreLogs(['Non-serializable values were found in the navigation state']);
 
 /**
  * React Query client configuration
@@ -39,7 +37,8 @@ const queryClient = new QueryClient({
  * App Content with theme-aware status bar
  */
 const AppContent: React.FC = () => {
-  const { theme, isDark } = useTheme();
+  const { isDark } = useTheme();
+  const colors = useColors();
   const initialize = useAuthStore(state => state.initialize);
 
   // Initialize auth state on app start
@@ -51,7 +50,7 @@ const AppContent: React.FC = () => {
     <>
       <StatusBar
         barStyle={isDark ? 'light-content' : 'dark-content'}
-        backgroundColor={theme.colors.background.primary}
+        backgroundColor={colors.background.primary}
       />
       <AppNavigator />
     </>

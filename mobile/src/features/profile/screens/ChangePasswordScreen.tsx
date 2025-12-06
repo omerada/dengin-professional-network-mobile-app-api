@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import { Button, Input } from '@shared/components';
 import { spacing, typography } from '@theme';
@@ -73,7 +73,7 @@ const validatePassword = (password: string): { valid: boolean; errors: string[] 
  * Backend: POST /api/auth/change-password
  */
 export const ChangePasswordScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const navigation = useNavigation();
   const toast = useToast();
   const changePassword = useChangePassword();
@@ -144,9 +144,7 @@ export const ChangePasswordScreen: React.FC = () => {
       navigation.goBack();
     } catch (error: any) {
       const errorMessage =
-        error?.response?.data?.message ||
-        error?.message ||
-        'Şifre değiştirme başarısız';
+        error?.response?.data?.message || error?.message || 'Şifre değiştirme başarısız';
 
       if (errorMessage.toLowerCase().includes('current password')) {
         setErrors(prev => ({ ...prev, currentPassword: 'Mevcut şifre yanlış' }));
@@ -154,59 +152,65 @@ export const ChangePasswordScreen: React.FC = () => {
         Alert.alert('Hata', errorMessage);
       }
     }
-  }, [validateForm, currentPassword, newPassword, confirmPassword, changePassword, toast, navigation]);
+  }, [
+    validateForm,
+    currentPassword,
+    newPassword,
+    confirmPassword,
+    changePassword,
+    toast,
+    navigation,
+  ]);
 
   // Password strength indicator
-  const getPasswordStrength = useCallback((password: string): { level: number; text: string; color: string } => {
-    if (!password) {
-      return { level: 0, text: '', color: theme.colors.text.tertiary };
-    }
+  const getPasswordStrength = useCallback(
+    (password: string): { level: number; text: string; color: string } => {
+      if (!password) {
+        return { level: 0, text: '', color: colors.text.tertiary };
+      }
 
-    const validation = validatePassword(password);
-    const passedRules = 5 - validation.errors.length;
+      const validation = validatePassword(password);
+      const passedRules = 5 - validation.errors.length;
 
-    if (passedRules <= 1) {
-      return { level: 1, text: 'Zayıf', color: theme.colors.error.main };
-    }
-    if (passedRules <= 2) {
-      return { level: 2, text: 'Orta', color: theme.colors.warning.main };
-    }
-    if (passedRules <= 4) {
-      return { level: 3, text: 'Güçlü', color: theme.colors.success.main };
-    }
-    return { level: 4, text: 'Çok Güçlü', color: theme.colors.success.dark };
-  }, [theme]);
+      if (passedRules <= 1) {
+        return { level: 1, text: 'Zayıf', color: colors.status.error };
+      }
+      if (passedRules <= 2) {
+        return { level: 2, text: 'Orta', color: colors.status.warning };
+      }
+      if (passedRules <= 4) {
+        return { level: 3, text: 'Güçlü', color: colors.status.success };
+      }
+      return { level: 4, text: 'Çok Güçlü', color: colors.status.success };
+    },
+    [colors],
+  );
 
   const passwordStrength = getPasswordStrength(newPassword);
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
-      edges={['bottom']}
-    >
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
+      edges={['bottom']}>
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
-      >
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
+          showsVerticalScrollIndicator={false}>
           {/* Header Info */}
           <View style={styles.infoCard}>
-            <Text style={[styles.infoText, { color: theme.colors.text.secondary }]}>
-              Güvenliğiniz için düzenli olarak şifrenizi değiştirmenizi öneririz.
-              Yeni şifreniz en az 8 karakter olmalı ve büyük/küçük harf, rakam ve özel karakter içermelidir.
+            <Text style={[styles.infoText, { color: colors.text.secondary }]}>
+              Güvenliğiniz için düzenli olarak şifrenizi değiştirmenizi öneririz. Yeni şifreniz en
+              az 8 karakter olmalı ve büyük/küçük harf, rakam ve özel karakter içermelidir.
             </Text>
           </View>
 
           {/* Current Password */}
           <View style={styles.inputContainer}>
-            <Text style={[styles.label, { color: theme.colors.text.primary }]}>
-              Mevcut Şifre
-            </Text>
+            <Text style={[styles.label, { color: colors.text.primary }]}>Mevcut Şifre</Text>
             <Input
               value={currentPassword}
               onChangeText={text => {
@@ -225,9 +229,7 @@ export const ChangePasswordScreen: React.FC = () => {
 
           {/* New Password */}
           <View style={styles.inputContainer}>
-            <Text style={[styles.label, { color: theme.colors.text.primary }]}>
-              Yeni Şifre
-            </Text>
+            <Text style={[styles.label, { color: colors.text.primary }]}>Yeni Şifre</Text>
             <Input
               value={newPassword}
               onChangeText={text => {
@@ -256,7 +258,7 @@ export const ChangePasswordScreen: React.FC = () => {
                           backgroundColor:
                             level <= passwordStrength.level
                               ? passwordStrength.color
-                              : theme.colors.border.light,
+                              : colors.border.default,
                         },
                       ]}
                     />
@@ -271,9 +273,7 @@ export const ChangePasswordScreen: React.FC = () => {
 
           {/* Confirm Password */}
           <View style={styles.inputContainer}>
-            <Text style={[styles.label, { color: theme.colors.text.primary }]}>
-              Yeni Şifre (Tekrar)
-            </Text>
+            <Text style={[styles.label, { color: colors.text.primary }]}>Yeni Şifre (Tekrar)</Text>
             <Input
               value={confirmPassword}
               onChangeText={text => {
@@ -291,8 +291,8 @@ export const ChangePasswordScreen: React.FC = () => {
           </View>
 
           {/* Password Requirements */}
-          <View style={[styles.requirementsCard, { backgroundColor: theme.colors.background.secondary }]}>
-            <Text style={[styles.requirementsTitle, { color: theme.colors.text.primary }]}>
+          <View style={[styles.requirementsCard, { backgroundColor: colors.background.secondary }]}>
+            <Text style={[styles.requirementsTitle, { color: colors.text.primary }]}>
               Şifre Gereksinimleri:
             </Text>
             <View style={styles.requirementsList}>
@@ -301,35 +301,38 @@ export const ChangePasswordScreen: React.FC = () => {
                 { text: 'Bir büyük harf (A-Z)', valid: /[A-Z]/.test(newPassword) },
                 { text: 'Bir küçük harf (a-z)', valid: /[a-z]/.test(newPassword) },
                 { text: 'Bir rakam (0-9)', valid: /\d/.test(newPassword) },
-                { text: 'Bir özel karakter (!@#$%)', valid: /[!@#$%^&*(),.?":{}|<>]/.test(newPassword) },
+                {
+                  text: 'Bir özel karakter (!@#$%)',
+                  valid: /[!@#$%^&*(),.?":{}|<>]/.test(newPassword),
+                },
               ].map((req, index) => (
                 <View key={index} style={styles.requirementItem}>
                   <Text
                     style={[
                       styles.requirementIcon,
                       {
-                        color: newPassword.length === 0
-                          ? theme.colors.text.tertiary
-                          : req.valid
-                          ? theme.colors.success.main
-                          : theme.colors.error.main,
+                        color:
+                          newPassword.length === 0
+                            ? colors.text.tertiary
+                            : req.valid
+                              ? colors.status.success
+                              : colors.status.error,
                       },
-                    ]}
-                  >
+                    ]}>
                     {newPassword.length === 0 ? '○' : req.valid ? '✓' : '✗'}
                   </Text>
                   <Text
                     style={[
                       styles.requirementText,
                       {
-                        color: newPassword.length === 0
-                          ? theme.colors.text.tertiary
-                          : req.valid
-                          ? theme.colors.text.secondary
-                          : theme.colors.error.main,
+                        color:
+                          newPassword.length === 0
+                            ? colors.text.tertiary
+                            : req.valid
+                              ? colors.text.secondary
+                              : colors.status.error,
                       },
-                    ]}
-                  >
+                    ]}>
                     {req.text}
                   </Text>
                 </View>

@@ -5,7 +5,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { spacing, fontSize, borderRadius } from '@theme';
 import type { ReportReasonInfo } from '../types';
 
@@ -32,17 +32,15 @@ interface ReportReasonItemProps {
  */
 export const ReportReasonItem = React.memo<ReportReasonItemProps>(
   ({ reason, isSelected, onSelect, disabled = false, testID }) => {
-    const { theme } = useTheme();
+    const colors = useColors();
 
     return (
       <TouchableOpacity
         style={[
           styles.container,
           {
-            backgroundColor: isSelected
-              ? theme.colors.primary[50]
-              : theme.colors.background.secondary,
-            borderColor: isSelected ? theme.colors.primary[500] : theme.colors.border.light,
+            backgroundColor: isSelected ? colors.interactive.subtle : colors.background.secondary,
+            borderColor: isSelected ? colors.interactive.default : colors.border.default,
             opacity: disabled ? 0.6 : 1,
           },
         ]}
@@ -57,19 +55,21 @@ export const ReportReasonItem = React.memo<ReportReasonItemProps>(
           <Icon
             name={reason.icon}
             size={24}
-            color={isSelected ? theme.colors.primary[500] : theme.colors.text.secondary}
+            color={isSelected ? colors.interactive.default : colors.text.secondary}
           />
           <Text
             style={[
               styles.label,
               {
-                color: isSelected ? theme.colors.primary[700] : theme.colors.text.primary,
+                color: isSelected ? colors.interactive.pressed : colors.text.primary,
               },
             ]}>
             {reason.label}
           </Text>
         </View>
-        {isSelected && <Icon name="checkmark-circle" size={24} color={theme.colors.primary[500]} />}
+        {isSelected && (
+          <Icon name="checkmark-circle" size={24} color={colors.interactive.default} />
+        )}
       </TouchableOpacity>
     );
   },

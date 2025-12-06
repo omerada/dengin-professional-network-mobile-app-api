@@ -3,18 +3,11 @@
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART5.md
 
 import React, { useCallback, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { Button, Input } from '@shared/components';
 import { spacing, fontSize } from '@theme';
 import { useCreateReport } from '../hooks';
@@ -28,7 +21,7 @@ import type { ReportReason, ReportType } from '../types';
  * Shows a list of report reasons and optional description field.
  */
 export const ReportScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const navigation = useNavigation();
   const route = useRoute();
 
@@ -56,11 +49,9 @@ export const ReportScreen: React.FC = () => {
         description: description.trim() || undefined,
       });
 
-      Alert.alert(
-        'Teşekkürler',
-        'Şikayetiniz alındı. Ekibimiz en kısa sürede inceleyecektir.',
-        [{ text: 'Tamam', onPress: () => navigation.goBack() }],
-      );
+      Alert.alert('Teşekkürler', 'Şikayetiniz alındı. Ekibimiz en kısa sürede inceleyecektir.', [
+        { text: 'Tamam', onPress: () => navigation.goBack() },
+      ]);
     } catch (error) {
       Alert.alert('Hata', 'Şikayet gönderilirken bir hata oluştu');
     }
@@ -68,20 +59,19 @@ export const ReportScreen: React.FC = () => {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
-      edges={['bottom']}
-    >
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
+      edges={['bottom']}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={[styles.title, { color: theme.colors.text.primary }]}>
+        <Text style={[styles.title, { color: colors.text.primary }]}>
           Neden şikayet ediyorsunuz?
         </Text>
 
-        <Text style={[styles.subtitle, { color: theme.colors.text.secondary }]}>
+        <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
           Size en uygun olan nedeni seçin
         </Text>
 
         <View style={styles.reasons}>
-          {REPORT_REASONS.map((reason) => (
+          {REPORT_REASONS.map(reason => (
             <TouchableOpacity
               key={reason.value}
               style={[
@@ -89,23 +79,22 @@ export const ReportScreen: React.FC = () => {
                 {
                   backgroundColor:
                     selectedReason === reason.value
-                      ? theme.colors.primary[50]
-                      : theme.colors.background.secondary,
+                      ? colors.interactive.subtle
+                      : colors.background.secondary,
                   borderColor:
                     selectedReason === reason.value
-                      ? theme.colors.primary[500]
-                      : theme.colors.border.light,
+                      ? colors.interactive.default
+                      : colors.border.default,
                 },
               ]}
-              onPress={() => setSelectedReason(reason.value)}
-            >
+              onPress={() => setSelectedReason(reason.value)}>
               <Icon
                 name={reason.icon}
                 size={24}
                 color={
                   selectedReason === reason.value
-                    ? theme.colors.primary[500]
-                    : theme.colors.text.secondary
+                    ? colors.interactive.default
+                    : colors.text.secondary
                 }
               />
               <Text
@@ -114,18 +103,17 @@ export const ReportScreen: React.FC = () => {
                   {
                     color:
                       selectedReason === reason.value
-                        ? theme.colors.primary[500]
-                        : theme.colors.text.primary,
+                        ? colors.interactive.default
+                        : colors.text.primary,
                   },
-                ]}
-              >
+                ]}>
                 {reason.label}
               </Text>
               {selectedReason === reason.value && (
                 <Icon
                   name="checkmark-circle"
                   size={20}
-                  color={theme.colors.primary[500]}
+                  color={colors.interactive.default}
                   style={styles.checkIcon}
                 />
               )}
@@ -148,7 +136,7 @@ export const ReportScreen: React.FC = () => {
         )}
       </ScrollView>
 
-      <View style={[styles.footer, { borderTopColor: theme.colors.border.light }]}>
+      <View style={[styles.footer, { borderTopColor: colors.border.default }]}>
         <Button
           title="Şikayet Gönder"
           onPress={handleSubmit}
@@ -204,4 +192,3 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
 });
-
