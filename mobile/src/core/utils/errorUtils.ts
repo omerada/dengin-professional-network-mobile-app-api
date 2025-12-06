@@ -157,17 +157,9 @@ const getAxiosErrorMessage = (error: AxiosError<ApiErrorResponse>): string => {
     return ERROR_MESSAGES[data.errorCode];
   }
 
-  // Check for message in response - prioritize backend message even for 5xx errors
-  if (data?.message) {
-    // If message is already in Turkish or user-friendly, use it
-    // Even for 500 errors, show backend message if it's meaningful
-    if (
-      !data.message.includes('Request failed') &&
-      !data.message.includes('Error:') &&
-      data.message !== 'Beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyiniz.'
-    ) {
-      return data.message;
-    }
+  // Check for message in response - Backend'den gelen Türkçe mesajı direkt kullan
+  if (data?.message && typeof data.message === 'string' && data.message.trim()) {
+    return data.message;
   }
 
   // Handle validation errors

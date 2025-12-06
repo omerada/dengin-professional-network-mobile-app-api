@@ -5,9 +5,9 @@
 import { useMutation } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { authApi } from '../services';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { RegisterFormData } from '../types';
 import { getErrorMessage } from '@core/utils/errorUtils';
+import { useAuthStore } from '../stores';
 
 /**
  * Register hook with React Query mutation
@@ -18,6 +18,9 @@ import { getErrorMessage } from '@core/utils/errorUtils';
  * Response: LoginResponse { user, accessToken, refreshToken, tokenType, expiresIn }
  */
 export const useRegister = () => {
+  const setAuth = useAuthStore(state => state.setAuth);
+  const setLastLoginEmail = useAuthStore(state => state.setLastLoginEmail);
+
   const mutation = useMutation({
     mutationFn: async (data: RegisterFormData) => {
       // Backend expects 'name' and 'surname' instead of firstName/lastName
@@ -32,12 +35,17 @@ export const useRegister = () => {
       return response;
     },
 
-    onSuccess: async (data, _variables) => {
-      // Auto-login: Store tokens in AsyncStorage
-      await AsyncStorage.setItem('accessToken', data.accessToken);
-      await AsyncStorage.setItem('refreshToken', data.refreshToken);
-      await AsyncStorage.setItem('user', JSON.stringify(data.user));
-      // Navigation to home will be handled by the app
+    onSuccess: async (data, variables) => {
+      // Auto-login: Set auth state with tokens
+      await setAuth(data.user, {
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+      });
+
+      // Remember email for future logins
+      await setLastLoginEmail(variables.email);
+
+      // Navigation will be handled automatically by App.tsx checking isAuthenticated
     },
 
     onError: (error: Error) => {
