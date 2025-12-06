@@ -60,8 +60,8 @@ export const useMessagingStore = create<MessagingStoreState>()(
       },
 
       // Online users (userId set)
-      onlineUsers: new Set<string>(),
-      setUserOnline: (userId: string, isOnline: boolean) => {
+      onlineUsers: new Set<number>(),
+      setUserOnline: (userId: number, isOnline: boolean) => {
         const { onlineUsers } = get();
         const newOnlineUsers = new Set(onlineUsers);
         if (isOnline) {

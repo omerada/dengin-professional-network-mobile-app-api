@@ -80,6 +80,7 @@ export const ConversationListScreen: React.FC = () => {
         navigation.navigate('Chat', {
           conversationId: conversation.conversationId,
           participant: conversation.participant,
+          conversation: conversation,
         });
       } catch (error) {
         console.error('[ConversationList] Error opening conversation:', error);

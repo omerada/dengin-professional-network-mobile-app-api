@@ -136,8 +136,8 @@ export interface Message {
   messageId: string;
   /** Konuşma UUID */
   conversationId: string;
-  /** Gönderen UUID */
-  senderId: string;
+  /** Gönderen Long ID (number) - Backend User entity ID */
+  senderId: number;
   /** Gönderen adı */
   senderName: string;
   /** Mesaj içeriği */
@@ -299,10 +299,10 @@ export interface WsMessageResponse {
   messageId: string;
   /** Konuşma UUID */
   conversationId: string;
-  /** Gönderen UUID */
-  senderId: string;
-  /** Alıcı UUID */
-  recipientId: string;
+  /** Gönderen Long ID (number) - Backend User entity ID */
+  senderId: number;
+  /** Alıcı Long ID (number) */
+  recipientId: number;
   /** Mesaj içeriği */
   content: string;
   /** Mesaj eki */
@@ -422,8 +422,8 @@ export interface MessagingStoreState {
   clearTypingUsers: (conversationId: string) => void;
 
   // Online users (userId set)
-  onlineUsers: Set<string>;
-  setUserOnline: (userId: string, isOnline: boolean) => void;
+  onlineUsers: Set<number>;
+  setUserOnline: (userId: number, isOnline: boolean) => void;
 
   // Offline message queue
   messageQueue: QueuedMessage[];

@@ -75,6 +75,22 @@ export type MessagingStackParamList = {
       online: boolean;
       lastSeenAt: string | null;
     };
+    conversation?: {
+      conversationId: string;
+      participant: {
+        userId: number;
+        fullName: string;
+        profession: string;
+        profileImageUrl: string | null;
+        verified: boolean;
+        online: boolean;
+        lastSeenAt: string | null;
+      };
+      lastMessage: any;
+      unreadCount: number;
+      updatedAt: string;
+      createdAt: string;
+    };
   };
   NewConversation: undefined;
 };

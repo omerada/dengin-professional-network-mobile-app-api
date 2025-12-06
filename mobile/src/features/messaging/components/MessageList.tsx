@@ -57,7 +57,8 @@ export const MessageList: React.FC<MessageListProps> = memo(
 
     const renderMessage = useCallback(
       ({ item, index }: { item: Message; index: number }) => {
-        const isOwn = item.senderId === currentUserId;
+        // senderId is number, currentUserId is string, convert for comparison
+        const isOwn = item.senderId === Number(currentUserId);
 
         // Önceki mesajla aynı gönderici mi kontrol et
         const previousMessage = messages[index + 1]; // inverted list

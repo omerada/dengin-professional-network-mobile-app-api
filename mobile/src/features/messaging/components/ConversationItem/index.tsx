@@ -74,7 +74,8 @@ export const ConversationItem: React.FC<ConversationItemProps> = memo(
     const conversationTypingUsers = typingUsers[conversation?.conversationId] || [];
     const isTyping = conversationTypingUsers.length > 0;
     const isOnline =
-      conversation?.participant?.online || onlineUsers.has(conversation?.participant?.userId);
+      conversation?.participant?.online || 
+      (conversation?.participant?.userId ? onlineUsers.has(conversation?.participant?.userId) : false);
     const hasUnread = (conversation?.unreadCount || 0) > 0;
 
     // Participant info

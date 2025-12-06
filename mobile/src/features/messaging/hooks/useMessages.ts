@@ -15,7 +15,7 @@ export const MESSAGES_QUERY_KEY = 'messages';
  * Messages list hook with real-time updates
  * Backend MessageListResponse ile uyumlu
  */
-export function useMessages(conversationId: string) {
+export function useMessages(conversationId: string, currentUserId?: string) {
   const queryClient = useQueryClient();
 
   // Subscribe to real-time message events
@@ -27,17 +27,16 @@ export function useMessages(conversationId: string) {
       if (String(data.conversationId) !== conversationId) return;
 
       // Convert WebSocket response to Message type
-      // Backend sends UUID/Long, convert to string
       const newMessage: Message = {
         messageId: String(data.messageId),
         conversationId: String(data.conversationId),
-        senderId: String(data.senderId),
+        senderId: data.senderId, // number (Long from backend)
         senderName: '', // Will be populated from conversation participant
         content: data.content || '',
         attachment: data.attachment || null,
         status: data.status as any,
         read: false,
-        sentByMe: false, // Backend will determine this
+        sentByMe: currentUserId ? data.senderId === Number(currentUserId) : false,
         sentAt: data.sentAt ? String(data.sentAt) : new Date().toISOString(),
         readAt: null,
       };
@@ -48,17 +47,21 @@ export function useMessages(conversationId: string) {
         old => {
           if (!old) return old;
 
-          // Check if message already exists
+          // Check if message already exists (prevent duplicates)
           const exists = old.pages.some(page =>
             page.messages.some(m => m.messageId === newMessage.messageId),
           );
-          if (exists) return old;
+          if (exists) {
+            console.log('[useMessages] Message already exists, skipping duplicate');
+            return old;
+          }
 
           const newPages = [...old.pages];
           if (newPages[0]) {
+            // Add to end of first page (backend sends in ASC order)
             newPages[0] = {
               ...newPages[0],
-              messages: [newMessage, ...newPages[0].messages],
+              messages: [...newPages[0].messages, newMessage],
               totalMessages: newPages[0].totalMessages + 1,
             };
           }
@@ -66,6 +69,12 @@ export function useMessages(conversationId: string) {
           return { ...old, pages: newPages };
         },
       );
+
+      // Invalidate query to trigger UI update
+      queryClient.invalidateQueries({ 
+        queryKey: [MESSAGES_QUERY_KEY, conversationId],
+        refetchType: 'none', // Don't refetch, just use updated cache
+      });
     };
 
     // Handle read receipts
@@ -123,9 +132,11 @@ export function useMessages(conversationId: string) {
     refetchOnWindowFocus: false,
   });
 
-  // Flatten messages from all pages
+  // Flatten messages from all pages and reverse to show newest first
   const messages = useMemo(() => {
-    return query.data?.pages.flatMap(page => page.messages) ?? [];
+    const allMessages = query.data?.pages.flatMap(page => page.messages) ?? [];
+    // Backend sends in ascending order (oldest first), reverse for inverted list (newest first)
+    return allMessages.reverse();
   }, [query.data]);
 
   // Total messages count

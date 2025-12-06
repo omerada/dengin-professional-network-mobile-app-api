@@ -160,9 +160,9 @@ class StompClient {
       if (data.isTyping) {
         // senderId'yi bulmak için conversationId kullanıyoruz
         // Typing notification gönderen kişi recipientId değil, karşı taraf
-        addTypingUser(data.conversationId, data.recipientId);
+        addTypingUser(data.conversationId, String(data.recipientId));
       } else {
-        removeTypingUser(data.conversationId, data.recipientId);
+        removeTypingUser(data.conversationId, String(data.recipientId));
       }
 
       this.notifyHandlers('typing', data);
