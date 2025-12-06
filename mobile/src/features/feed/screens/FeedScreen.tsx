@@ -3,8 +3,9 @@
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, FlatList, RefreshControl, ActivityIndicator, Alert } from 'react-native';
+import { View, RefreshControl, ActivityIndicator, Alert } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import { FlashList, type ContentStyle } from '@shopify/flash-list';
 import { useNavigation } from '@react-navigation/native';
 
 import { useColors } from '@contexts/ThemeContext';
@@ -244,7 +245,7 @@ export const FeedScreen: React.FC = () => {
     <Animated.View
       entering={FadeIn.duration(300)}
       style={[styles.container, { backgroundColor: colors.background.primary }]}>
-      <FlatList
+      <FlashList
         data={posts}
         renderItem={renderPost}
         keyExtractor={keyExtractor}
@@ -262,10 +263,7 @@ export const FeedScreen: React.FC = () => {
           />
         }
         showsVerticalScrollIndicator={false}
-        removeClippedSubviews
-        maxToRenderPerBatch={10}
-        windowSize={10}
-        initialNumToRender={5}
+        estimatedItemSize={400}
       />
 
       <ActionSheet

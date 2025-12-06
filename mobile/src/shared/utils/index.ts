@@ -48,3 +48,34 @@ export {
   useHaptics,
 } from './haptics';
 export type { HapticType } from './haptics';
+
+// Date utilities
+export {
+  formatRelativeTime,
+  formatDate,
+  formatDateTime,
+  formatTime,
+  formatMessageTime,
+} from './dateUtils';
+
+// Number utilities
+export {
+  formatCompactNumber,
+  formatFollowerCount,
+  formatEngagementCount,
+  formatWithSeparators,
+  formatCurrency,
+  formatPercentage,
+  formatFileSize,
+  formatDuration,
+  formatPhoneNumber,
+  formatOrdinal,
+  clamp,
+  lerp,
+  roundTo,
+  isValidNumber,
+} from './numberUtils';
+export type { FormatNumberOptions } from './numberUtils';
+
+// Share utilities
+export { shareContent, sharePost, shareProfile, shareImage } from './share';

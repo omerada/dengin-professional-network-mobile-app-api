@@ -3,7 +3,8 @@
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, FlatList, StyleSheet, ActivityIndicator, RefreshControl, Alert } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, RefreshControl, Alert } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
 import { useAuthStore } from '@features/auth/stores';
@@ -193,7 +194,7 @@ export const CommentsScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
-      <FlatList
+      <FlashList
         data={comments}
         renderItem={renderComment}
         keyExtractor={keyExtractor}
@@ -210,6 +211,7 @@ export const CommentsScreen: React.FC = () => {
         }
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
+        estimatedItemSize={100}
       />
 
       <AddCommentForm

@@ -52,3 +52,26 @@ export {
   useLikeAnimation,
   useCountAnimation,
 } from './useAnimatedValue';
+
+// Lifecycle hooks
+export {
+  usePrevious,
+  useMount,
+  useUnmount,
+  useUpdateEffect,
+  useIsMounted,
+  useFirstRender,
+  useRenderCount,
+} from './useLifecycle';
+
+// Dimension hooks
+export {
+  useDimensions,
+  useWindowSize,
+  useOrientation,
+  useResponsiveValue,
+  useScaledSize,
+  normalize,
+  getResponsiveSpacing,
+} from './useDimensions';
+export type { WindowDimensions, ScreenDimensions } from './useDimensions';

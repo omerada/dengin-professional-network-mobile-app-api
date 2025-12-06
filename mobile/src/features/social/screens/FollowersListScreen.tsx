@@ -3,7 +3,8 @@
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART5.md
 
 import React, { useCallback, useMemo } from 'react';
-import { View, FlatList, StyleSheet, RefreshControl, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, RefreshControl, ActivityIndicator } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
@@ -81,7 +82,7 @@ export const FollowersListScreen: React.FC = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['bottom']}>
-      <FlatList
+      <FlashList
         data={users}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
@@ -98,6 +99,7 @@ export const FollowersListScreen: React.FC = () => {
         }
         ItemSeparatorComponent={ItemSeparatorComponent}
         contentContainerStyle={users.length === 0 && styles.emptyContent}
+        estimatedItemSize={70}
       />
     </SafeAreaView>
   );
