@@ -1,7 +1,10 @@
 // src/shared/types/api.types.ts
 // Oku: mobile-development-guide/core/14-BACKEND-API-REFERENCE.md
 
-import { VerificationStatus, UserRole, BaseEntity } from './common.types';
+import type { VerificationStatus, UserRole, BaseEntity } from './common.types';
+
+// Re-export for compatibility
+export type { VerificationStatus, UserRole, BaseEntity };
 
 // ============================================
 // PAGINATION TYPES - Backend PagedResponse uyumlu
@@ -132,8 +135,8 @@ export type ProfessionCategory =
 export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
-  expiresIn: number; // seconds (86400 = 24 hours)
-  tokenType: 'Bearer';
+  expiresIn?: number; // seconds (86400 = 24 hours)
+  tokenType?: 'Bearer';
 }
 
 /**

@@ -684,7 +684,7 @@ import Animated, {
   withSpring,
   withTiming,
   interpolate,
-  runOnJS,
+  scheduleOnRN,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { BlurView } from "expo-blur";
@@ -729,7 +729,7 @@ export const BottomSheetModal = forwardRef<
   const close = useCallback(() => {
     translateY.value = withTiming(SCREEN_HEIGHT, { duration: 300 }, () => {
       isOpen.value = false;
-      if (onClose) runOnJS(onClose)();
+      if (onClose) scheduleOnRN(onClose)();
     });
   }, [onClose]);
 
@@ -750,7 +750,7 @@ export const BottomSheetModal = forwardRef<
     .onEnd((event) => {
       // Snap to closest point or close
       if (event.translationY > 100 || event.velocityY > 500) {
-        runOnJS(close)();
+        scheduleOnRN(close)();
       } else {
         // Find closest snap point
         let closest = snapPointsPx[0];
@@ -864,7 +864,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  runOnJS,
+  scheduleOnRN,
   interpolate,
   Extrapolate,
 } from "react-native-reanimated";
@@ -901,7 +901,7 @@ export const SwipeBackGesture = memo<SwipeBackGestureProps>(
       .onEnd((event) => {
         if (translateX.value > SWIPE_THRESHOLD || event.velocityX > 500) {
           translateX.value = withSpring(SCREEN_WIDTH, { damping: 20 }, () => {
-            runOnJS(navigation.goBack)();
+            scheduleOnRN(navigation.goBack)();
           });
         } else {
           translateX.value = withSpring(0);

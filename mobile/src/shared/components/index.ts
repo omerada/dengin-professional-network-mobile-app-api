@@ -73,3 +73,33 @@ export type { DividerOrientation, DividerVariant } from './Divider';
 
 export { Screen } from './Screen';
 export type { ScreenPadding, ScreenProps } from './Screen';
+
+// Pressable components
+export { PressableScale, PressableOpacity, PressableHighlight, PressableBounce } from './Pressable';
+export type {
+  PressableScaleProps,
+  PressableOpacityProps,
+  PressableHighlightProps,
+  PressableBounceProps,
+} from './Pressable';
+
+// ListItem components
+export { ListItem, ListItemSeparator, ListItemGroup } from './ListItem';
+export type { ListItemProps, ListItemSize, ListItemGroupProps } from './ListItem';
+export type { SwipeAction as ListItemSwipeAction } from './ListItem';
+
+// Chip components
+export { Chip, ChipGroup } from './Chip';
+export type { ChipProps, ChipGroupProps, ChipVariant, ChipSize, ChipColor } from './Chip';
+
+// ImageViewer component
+export { ImageViewer } from './ImageViewer';
+export type { ImageViewerProps } from './ImageViewer';
+
+// TabBar component
+export { TabBar } from './TabBar';
+export type { TabBarProps, TabItem } from './TabBar';
+
+// SwipeableRow component
+export { SwipeableRow } from './SwipeableRow';
+export type { SwipeableRowProps, SwipeableRowRef, SwipeAction } from './SwipeableRow';

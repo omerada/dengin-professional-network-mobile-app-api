@@ -36,7 +36,6 @@ export interface RemoteMessage {
  */
 class FCMService {
   private token: string | null = null;
-  private listeners: Map<string, (() => void)[]> = new Map();
 
   /**
    * Bildirim izni iste - stub
@@ -180,7 +179,7 @@ class FCMService {
   /**
    * Token yenilenme dinleyicisi kur - stub
    */
-  setupTokenRefreshListener(onRefresh: (token: string) => void): () => void {
+  setupTokenRefreshListener(_onRefresh: (token: string) => void): () => void {
     console.log('[FCM Stub] setupTokenRefreshListener called');
     return () => {
       console.log('[FCM Stub] Token refresh listener removed');
@@ -190,7 +189,7 @@ class FCMService {
   /**
    * Ön plan bildirimi dinleyicisi - stub
    */
-  onForegroundMessage(handler: (message: RemoteMessage) => void): () => void {
+  onForegroundMessage(_handler: (message: RemoteMessage) => void): () => void {
     console.log('[FCM Stub] onForegroundMessage listener added');
     return () => {
       console.log('[FCM Stub] Foreground message listener removed');
@@ -200,7 +199,7 @@ class FCMService {
   /**
    * Arka plan bildirimi tıklama dinleyicisi - stub
    */
-  onNotificationOpenedApp(handler: (message: RemoteMessage) => void): () => void {
+  onNotificationOpenedApp(_handler: (message: RemoteMessage) => void): () => void {
     console.log('[FCM Stub] onNotificationOpenedApp listener added');
     return () => {
       console.log('[FCM Stub] Notification opened listener removed');
@@ -218,7 +217,7 @@ class FCMService {
   /**
    * Arka plan mesaj işleyicisi ayarla - stub
    */
-  setBackgroundMessageHandler(handler: (message: RemoteMessage) => Promise<void>): void {
+  setBackgroundMessageHandler(_handler: (message: RemoteMessage) => Promise<void>): void {
     console.log('[FCM Stub] setBackgroundMessageHandler called');
   }
 

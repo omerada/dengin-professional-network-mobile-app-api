@@ -3,7 +3,7 @@
 // Backend API Reference: mobile-development-guide/core/14-BACKEND-API-REFERENCE.md
 
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, Alert } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated, {
@@ -13,7 +13,7 @@ import Animated, {
   withTiming,
   useSharedValue,
 } from 'react-native-reanimated';
-import { useColors } from '@contexts';
+import { useColors } from '@contexts/ThemeContext';
 import { spacing, typography } from '@theme';
 import { Button } from '@shared/components';
 import { useVerificationStore } from '../stores';
@@ -22,7 +22,7 @@ import { UploadProgress } from '../components';
 import type { VerificationStackParamList } from '@shared/types/navigation.types';
 import type { VerificationResponse } from '../types';
 
-type NavigationProp = NativeStackNavigationProp<VerificationStackParamList, 'UploadStatus'>;
+type NavigationProp = NativeStackNavigationProp<VerificationStackParamList, 'VerificationStatus'>;
 
 /**
  * Yükleme durumu ekranı
@@ -134,7 +134,7 @@ export const UploadStatusScreen: React.FC = memo(() => {
   const renderResult = () => {
     if (!verificationResponse) return null;
 
-    const { status, message, estimatedTime } = verificationResponse;
+    const { status } = verificationResponse;
 
     switch (status) {
       case 'APPROVED':
@@ -158,7 +158,7 @@ export const UploadStatusScreen: React.FC = memo(() => {
               Doğrulama Reddedildi
             </Text>
             <Text style={[styles.resultText, { color: colors.text.secondary }]}>
-              {message || 'Belgeleriniz doğrulanamadı. Lütfen tekrar deneyin.'}
+              Belgeleriniz doğrulanamadı. Lütfen tekrar deneyin.
             </Text>
           </View>
         );
@@ -171,7 +171,7 @@ export const UploadStatusScreen: React.FC = memo(() => {
               Manuel İnceleme
             </Text>
             <Text style={[styles.resultText, { color: colors.text.secondary }]}>
-              Belgeleriniz manuel olarak incelenecek. {estimatedTime || 'Tahmini süre: 24-48 saat'}
+              Belgeleriniz manuel olarak incelenecek. Tahmini süre: 24-48 saat
             </Text>
           </View>
         );

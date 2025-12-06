@@ -67,7 +67,6 @@ jest.mock('react-native-reanimated', () => ({
   withSequence: jest.fn((...vals: any[]) => vals[0]),
   withRepeat: jest.fn((val: any) => val),
   cancelAnimation: jest.fn(),
-  runOnJS: jest.fn((fn: Function) => fn),
   runOnUI: jest.fn((fn: Function) => fn),
   interpolate: jest.fn(),
   interpolateColor: jest.fn(),
@@ -96,7 +95,6 @@ jest.mock('react-native-worklets', () => ({
   default: {},
   useWorklet: jest.fn(),
   createWorklet: jest.fn(),
-  runOnJS: jest.fn((fn: Function) => fn),
   runOnUI: jest.fn((fn: Function) => fn),
 }));
 

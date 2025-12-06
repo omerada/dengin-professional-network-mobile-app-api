@@ -3,7 +3,7 @@
 // Backend: ConversationController, MessageWebSocketController
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, KeyboardAvoidingView, Platform, Alert, StyleSheet } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -22,9 +22,8 @@ import {
 import { useMessages, useSendMessage, useTyping } from '../hooks';
 import { useMessagingStore } from '../stores';
 import { messagingService } from '../services';
-import type { Message, Participant } from '../types';
-import type { MessagingStackParamList } from '@navigation/types';
-import { styles } from './ChatScreen.styles';
+import type { Message, Participant, Conversation, ClientMessage } from '../types';
+import type { MessagingStackParamList } from '@core/navigation/types';
 
 type NavigationProp = NativeStackNavigationProp<MessagingStackParamList, 'Chat'>;
 type ChatRouteProp = RouteProp<MessagingStackParamList, 'Chat'>;
@@ -64,12 +63,16 @@ export const ChatScreen: React.FC = () => {
     markAsRead,
   } = useMessages(conversationId);
 
-  const { sendMessage, isPending: isSending, retryMessage } = useSendMessage(conversationId);
+  const {
+    sendMessage,
+    isPending: isSending,
+    retryMessage: _retryMessage,
+  } = useSendMessage(conversationId);
   const {
     startTyping,
     stopTyping,
     setRecipientId,
-    isTyping: otherUserTyping,
+    isTyping: _otherUserTyping,
   } = useTyping(conversationId);
 
   // Computed
@@ -118,7 +121,11 @@ export const ChatScreen: React.FC = () => {
 
   const handleProfilePress = useCallback(() => {
     if (participant) {
-      navigation.navigate('Profile' as never, { userId: participant.userId } as never);
+      // Profile is in ProfileStack, use type assertion for cross-stack navigation
+      (navigation as any).navigate('ProfileTab', {
+        screen: 'Profile',
+        params: { userId: participant.userId },
+      });
     }
   }, [navigation, participant]);
 
@@ -154,9 +161,9 @@ export const ChatScreen: React.FC = () => {
   );
 
   const handleMessageLongPress = useCallback(
-    (message: Message) => {
+    (message: Message | ClientMessage) => {
       triggerHaptic('medium');
-      setSelectedMessage(message);
+      setSelectedMessage(message as Message);
       messageOptionsRef.current?.open();
     },
     [triggerHaptic],
@@ -183,7 +190,7 @@ export const ChatScreen: React.FC = () => {
     [conversationId, refetch],
   );
 
-  const handleReportMessage = useCallback((message: Message) => {
+  const handleReportMessage = useCallback((_message: Message) => {
     Alert.alert('Mesajı Bildir', 'Bu mesajı bildirmek istediğinize emin misiniz?', [
       { text: 'İptal', style: 'cancel' },
       {
@@ -212,6 +219,20 @@ export const ChatScreen: React.FC = () => {
     lastSeenAt: null,
   };
 
+  // Create a conversation object for ChatHeader
+  const displayConversation: Conversation = {
+    conversationId,
+    participant: displayParticipant,
+    lastMessage: null,
+    unreadCount: 0,
+    updatedAt: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+  };
+
+  // Get typing users for this conversation
+  const { typingUsers } = useMessagingStore();
+  const conversationTypingUsers = typingUsers[conversationId] || [];
+
   return (
     <Animated.View
       entering={FadeIn.duration(300)}
@@ -219,8 +240,7 @@ export const ChatScreen: React.FC = () => {
       {/* Header */}
       <View style={{ paddingTop: insets.top }}>
         <ChatHeader
-          participant={displayParticipant}
-          isTyping={otherUserTyping}
+          conversation={displayConversation}
           onBackPress={handleBackPress}
           onProfilePress={handleProfilePress}
           onOptionsPress={handleOptionsPress}
@@ -235,6 +255,8 @@ export const ChatScreen: React.FC = () => {
         <MessageList
           messages={messages}
           currentUserId={currentUserId}
+          conversationId={conversationId}
+          typingUsers={conversationTypingUsers}
           isLoading={isLoading}
           isFetchingMore={isFetchingNextPage}
           hasMore={!!hasNextPage}

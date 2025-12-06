@@ -3,7 +3,7 @@
 // Backend: ConversationController - GET /api/conversations
 // Oku: backend-development-guide/sprint-planning/26-SPRINT-7-8.md
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -22,7 +22,7 @@ import { useColors } from '@contexts/ThemeContext';
 import { ConversationItem, EmptyConversations } from '../components';
 import { useConversations, useSocket } from '../hooks';
 import type { Conversation } from '../types';
-import type { MessagingStackParamList } from '@navigation/types';
+import type { MessagingStackParamList } from '@core/navigation/types';
 
 type NavigationProp = NativeStackNavigationProp<MessagingStackParamList>;
 
@@ -60,7 +60,6 @@ export const ConversationListScreen: React.FC = () => {
     (conversation: Conversation) => {
       navigation.navigate('Chat', {
         conversationId: conversation.conversationId,
-        participant: conversation.participant,
       });
     },
     [navigation],
@@ -73,10 +72,7 @@ export const ConversationListScreen: React.FC = () => {
         {
           text: 'Profili Görüntüle',
           onPress: () => {
-            navigation.navigate(
-              'Profile' as never,
-              { userId: conversation.participant.userId } as never,
-            );
+            (navigation as any).navigate('Profile', { userId: conversation.participant.userId });
           },
         },
       ]);

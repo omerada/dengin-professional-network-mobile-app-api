@@ -17,7 +17,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
 import { spring } from '@theme/animations';
-import type { ErrorFallbackProps } from '@utils/errorHandling';
+import type { ErrorFallbackProps } from '@shared/utils/errorHandling';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 

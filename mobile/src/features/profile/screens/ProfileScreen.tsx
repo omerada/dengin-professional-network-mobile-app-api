@@ -171,7 +171,7 @@ export const ProfileScreen: React.FC = () => {
         style={[styles.container, { backgroundColor: colors.background.primary }]}
         edges={['top']}>
         <Animated.View entering={FadeIn.duration(300)} style={styles.container}>
-          <Skeleton variant="profile" />
+          <Skeleton variant="rectangular" />
         </Animated.View>
       </SafeAreaView>
     );
@@ -274,7 +274,7 @@ export const ProfileScreen: React.FC = () => {
                   post={post}
                   index={index}
                   onLike={() => {}}
-                  onComment={() => handlePostPress(post.postId)}
+                  onComment={() => handlePostPress(Number(post.postId))}
                   onShare={() => {}}
                   onBookmark={() => {}}
                   onMenuPress={() => {}}

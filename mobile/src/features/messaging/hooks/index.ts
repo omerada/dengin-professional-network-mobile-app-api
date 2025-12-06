@@ -1,13 +1,11 @@
 // src/features/messaging/hooks/index.ts
-export { 
-  useConversations, 
-  useConversation,
-  useConversationsData, 
-  useUnreadCount, 
+export {
+  useConversations,
+  useUnreadCount,
   useTotalUnreadCount,
   CONVERSATIONS_QUERY_KEY,
 } from './useConversations';
-export { useMessages, useMessagesData, useLastMessage, MESSAGES_QUERY_KEY } from './useMessages';
+export { useMessages, useLastMessage, MESSAGES_QUERY_KEY } from './useMessages';
 export { useSendMessage } from './useSendMessage';
 export { useTyping } from './useTyping';
 export { useSocket } from './useSocket';

@@ -4,7 +4,7 @@
 
 import React, { createContext, useContext, useCallback, useMemo, useEffect, useState } from 'react';
 import { useColorScheme, StatusBar, Platform } from 'react-native';
-import Animated, {
+import {
   useSharedValue,
   useAnimatedStyle,
   withTiming,

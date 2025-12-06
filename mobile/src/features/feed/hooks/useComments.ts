@@ -23,8 +23,7 @@ export function useComments(postId: number | undefined, pageSize = 20) {
       return feedService.getComments(postId!, pageParam as number, pageSize);
     },
     initialPageParam: 0,
-    getNextPageParam: (lastPage) => 
-      lastPage.hasNext ? lastPage.page + 1 : undefined,
+    getNextPageParam: lastPage => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     enabled: postId !== undefined && postId > 0,
     staleTime: 1 * 60 * 1000, // 1 dakika
   });
@@ -36,7 +35,7 @@ export function useComments(postId: number | undefined, pageSize = 20) {
 export function useCommentsData(postId: number | undefined) {
   const { data, ...rest } = useComments(postId);
 
-  const comments = data?.pages.flatMap((page) => page.comments) ?? [];
+  const comments = data?.pages.flatMap(page => page.comments) ?? [];
   const totalCount = data?.pages[0]?.totalElements ?? 0;
 
   return {
@@ -60,7 +59,7 @@ export function useAddComment() {
       // Update comments cache - add to first page
       queryClient.setQueryData<InfiniteData<CommentListResponse>>(
         [COMMENTS_QUERY_KEY, postId],
-        (old) => {
+        old => {
           if (!old) return old;
 
           const newPages = [...old.pages];
@@ -73,23 +72,17 @@ export function useAddComment() {
           }
 
           return { ...old, pages: newPages };
-        }
+        },
       );
 
       // Update post comment count
-      queryClient.setQueryData<Post>(
-        [POST_QUERY_KEY, postId],
-        (old) => {
-          if (!old) return old;
-          return { 
-            ...old, 
-            stats: {
-              ...old.stats,
-              commentCount: old.stats.commentCount + 1,
-            },
-          };
-        }
-      );
+      queryClient.setQueryData<Post>([POST_QUERY_KEY, postId], old => {
+        if (!old) return old;
+        return {
+          ...old,
+          commentCount: old.commentCount + 1,
+        };
+      });
 
       // Invalidate to get fresh data
       queryClient.invalidateQueries({ queryKey: [COMMENTS_QUERY_KEY, postId] });
@@ -105,40 +98,34 @@ export function useDeleteComment(postId: number) {
   const queryClient = useQueryClient();
 
   return useMutation<void, Error, string>({
-    mutationFn: (commentId) => feedService.deleteComment(postId, commentId),
+    mutationFn: commentId => feedService.deleteComment(postId, commentId),
 
     onSuccess: (_, commentId) => {
       // Remove from cache
       queryClient.setQueryData<InfiniteData<CommentListResponse>>(
         [COMMENTS_QUERY_KEY, postId],
-        (old) => {
+        old => {
           if (!old) return old;
 
           return {
             ...old,
-            pages: old.pages.map((page) => ({
+            pages: old.pages.map(page => ({
               ...page,
-              comments: page.comments.filter((comment) => comment.id !== commentId),
+              comments: page.comments.filter(comment => comment.id !== commentId),
               totalElements: page.totalElements - 1,
             })),
           };
-        }
+        },
       );
 
       // Update post comment count
-      queryClient.setQueryData<Post>(
-        [POST_QUERY_KEY, postId],
-        (old) => {
-          if (!old) return old;
-          return { 
-            ...old, 
-            stats: {
-              ...old.stats,
-              commentCount: Math.max(0, old.stats.commentCount - 1),
-            },
-          };
-        }
-      );
+      queryClient.setQueryData<Post>([POST_QUERY_KEY, postId], old => {
+        if (!old) return old;
+        return {
+          ...old,
+          commentCount: Math.max(0, old.commentCount - 1),
+        };
+      });
     },
   });
 }
@@ -165,25 +152,25 @@ export function useLikeComment(postId: number) {
 
       queryClient.setQueryData<InfiniteData<CommentListResponse>>(
         [COMMENTS_QUERY_KEY, postId],
-        (old) => {
+        old => {
           if (!old) return old;
 
           return {
             ...old,
-            pages: old.pages.map((page) => ({
+            pages: old.pages.map(page => ({
               ...page,
-              comments: page.comments.map((comment) =>
+              comments: page.comments.map(comment =>
                 comment.id === commentId
                   ? {
                       ...comment,
                       isLiked: !isLiked,
                       likeCount: isLiked ? comment.likeCount - 1 : comment.likeCount + 1,
                     }
-                  : comment
+                  : comment,
               ),
             })),
           };
-        }
+        },
       );
     },
   });

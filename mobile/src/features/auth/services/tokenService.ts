@@ -13,7 +13,7 @@ import { authApi } from './authApi';
 const TOKEN_KEYS = {
   ACCESS_TOKEN: SECURE_KEYS.ACCESS_TOKEN,
   REFRESH_TOKEN: SECURE_KEYS.REFRESH_TOKEN,
-  EXPIRES_AT: 'token_expires_at',
+  EXPIRES_AT: SECURE_KEYS.TOKEN_EXPIRES_AT,
 } as const;
 
 /**
@@ -47,7 +47,8 @@ export const tokenService = {
    */
   saveTokensLegacy: async (tokens: AuthTokens): Promise<boolean> => {
     try {
-      const expiresAt = Date.now() + tokens.expiresIn * 1000;
+      const expiresIn = tokens.expiresIn ?? 86400; // Default 24 hours
+      const expiresAt = Date.now() + expiresIn * 1000;
 
       await Promise.all([
         secureStorage.set(TOKEN_KEYS.ACCESS_TOKEN, tokens.accessToken),

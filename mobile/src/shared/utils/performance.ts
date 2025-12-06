@@ -2,14 +2,14 @@
 // Performance optimization utilities
 // Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
 
-import { useCallback, useMemo, useRef, useEffect } from 'react';
-import { InteractionManager, Platform } from 'react-native';
+import { useCallback, useRef, useEffect } from 'react';
+import { InteractionManager, Platform, Image } from 'react-native';
 
 /**
  * Custom comparison function for React.memo
  * Compares specific keys for shallow equality
  */
-export function createMemoComparator<T extends Record<string, any>>(
+export function createMemoComparator<T extends Record<string, unknown>>(
   keys: (keyof T)[]
 ) {
   return (prevProps: T, nextProps: T): boolean => {
@@ -20,7 +20,7 @@ export function createMemoComparator<T extends Record<string, any>>(
 /**
  * Debounce hook - delays function execution
  */
-export function useDebouncedCallback<T extends (...args: any[]) => any>(
+export function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
   callback: T,
   delay: number
 ): (...args: Parameters<T>) => void {
@@ -49,7 +49,7 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
 /**
  * Throttle hook - limits function execution rate
  */
-export function useThrottledCallback<T extends (...args: any[]) => any>(
+export function useThrottledCallback<T extends (...args: unknown[]) => unknown>(
   callback: T,
   delay: number
 ): (...args: Parameters<T>) => void {
@@ -191,7 +191,7 @@ export interface ListPerformanceMetrics {
 }
 
 export function useListPerformance(): {
-  onViewableItemsChanged: (info: { viewableItems: any[] }) => void;
+  onViewableItemsChanged: (info: { viewableItems: unknown[] }) => void;
   getMetrics: () => ListPerformanceMetrics;
 } {
   const metricsRef = useRef<ListPerformanceMetrics>({
@@ -202,7 +202,7 @@ export function useListPerformance(): {
   });
 
   const onViewableItemsChanged = useCallback(
-    (info: { viewableItems: any[] }) => {
+    (info: { viewableItems: unknown[] }) => {
       metricsRef.current.viewableItems = info.viewableItems.length;
     },
     []
@@ -217,7 +217,6 @@ export function useListPerformance(): {
  * Image preloading utility
  */
 export function preloadImages(urls: string[]): Promise<void[]> {
-  const { Image } = require('react-native');
   return Promise.all(
     urls.map(
       (url) =>

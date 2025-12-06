@@ -7,15 +7,21 @@ import { useNavigation } from '@react-navigation/native';
 import { feedService, mediaUploader } from '../services';
 import { useFeedStore } from '../stores';
 import { FEED_QUERY_KEY } from './useFeed';
-import type { CreatePostDto, CreatePostRequest, Post, UploadProgress, FeedStoreState } from '../types';
+import type {
+  CreatePostDto,
+  CreatePostRequest,
+  Post,
+  UploadProgress,
+  FeedStoreState,
+} from '../types';
 
 /**
  * Post oluşturma hook'u
- * 
+ *
  * İş akışı:
  * 1. Görselleri S3'e yükle (mediaUploader)
  * 2. S3 URL'leri ile backend'e POST /api/posts
- * 
+ *
  * @example
  * const { mutate, isPending } = useCreatePost();
  * mutate({
@@ -43,8 +49,8 @@ export function useCreatePost() {
       // 2. Backend'e post oluştur
       const request: CreatePostRequest = {
         content: data.content,
-        images: imageUrls.length > 0 ? imageUrls : undefined,
-        professionId: data.professionId,
+        images: imageUrls.length > 0 ? imageUrls.map(url => ({ url })) : undefined,
+        professionId: data.professionId!,
       };
 
       return feedService.createPost(request);

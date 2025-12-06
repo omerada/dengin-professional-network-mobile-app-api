@@ -37,13 +37,7 @@ export type NotificationType =
  * Bildirim durumu - Backend NotificationStatus enum ile uyumlu
  * @see NotificationStatus.java
  */
-export type NotificationStatus =
-  | 'PENDING'
-  | 'SENT'
-  | 'DELIVERED'
-  | 'READ'
-  | 'FAILED'
-  | 'EXPIRED';
+export type NotificationStatus = 'PENDING' | 'SENT' | 'DELIVERED' | 'READ' | 'FAILED' | 'EXPIRED';
 
 /**
  * Teslimat kanalları - Backend DeliveryChannel enum ile uyumlu
@@ -268,6 +262,8 @@ export interface NotificationPayload {
   type: NotificationType;
   /** Bildirim ID */
   notificationId?: string;
+  /** Bildirim ID alias */
+  id?: string;
   /** Deep link URL */
   actionUrl?: string;
   /** İlgili kaynak ID'leri */
@@ -276,6 +272,11 @@ export interface NotificationPayload {
   userId?: string;
   commentId?: string;
 }
+
+/**
+ * Bildirim verisi alias - backward compatibility
+ */
+export type NotificationData = NotificationPayload;
 
 // =============================================================================
 // NOTIFICATION CHANNELS (Android)
@@ -354,10 +355,12 @@ export interface NotificationStoreState {
 
   // Actions
   setNotifications: (notifications: NotificationResponse[]) => void;
+  appendNotifications: (notifications: NotificationResponse[]) => void;
   addNotification: (notification: NotificationResponse) => void;
   prependNotification: (notification: NotificationResponse) => void;
   updateNotification: (notificationId: string, updates: Partial<NotificationResponse>) => void;
   markAsRead: (notificationId: string) => void;
+  markMultipleAsRead: (notificationIds: string[]) => void;
   markAllAsRead: () => void;
   removeNotification: (notificationId: string) => void;
   clearAllNotifications: () => void;
@@ -367,6 +370,7 @@ export interface NotificationStoreState {
   setUnreadByType: (unreadByType: Record<string, number>) => void;
   incrementUnreadCount: () => void;
   decrementUnreadCount: () => void;
+  resetUnreadCount: () => void;
   setFcmToken: (token: string | null) => void;
   setPermissionGranted: (granted: boolean) => void;
   setLoading: (loading: boolean) => void;

@@ -3,7 +3,7 @@
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useEffect, useMemo } from 'react';
-import { Dimensions, View, type ViewStyle } from 'react-native';
+import { Dimensions, View, type ViewStyle, type DimensionValue } from 'react-native';
 import Animated, {
   Easing,
   interpolate,
@@ -13,7 +13,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import LinearGradient from 'react-native-linear-gradient';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { useColors } from '@contexts/ThemeContext';
 
@@ -109,20 +109,20 @@ export const Skeleton: React.FC<SkeletonProps> = memo(
           return {
             borderRadius: borderRadius ?? 8,
             height: height ?? 100,
-            width,
+            width: width as DimensionValue,
           };
         case 'rounded':
           return {
             borderRadius: borderRadius ?? 12,
             height: height ?? 48,
-            width,
+            width: width as DimensionValue,
           };
         case 'text':
         default:
           return {
             borderRadius: borderRadius ?? 4,
             height: height ?? 16,
-            width,
+            width: width as DimensionValue,
           };
       }
     }, [variant, width, height, borderRadius]);

@@ -6,14 +6,13 @@ import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import Animated, {
   Easing,
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
-  withDelay,
   withSequence,
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -92,7 +91,7 @@ export const Toast: React.FC<ToastProps> = memo(
       });
       opacity.value = withTiming(0, { duration: 200 });
       scale.value = withTiming(0.9, { duration: 200 }, () => {
-        runOnJS(onHide)(toast.id);
+        scheduleOnRN(() => onHide(toast.id));
       });
     }, [position, translateY, opacity, scale, onHide, toast.id]);
 

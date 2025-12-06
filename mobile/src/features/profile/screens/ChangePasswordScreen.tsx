@@ -11,9 +11,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import { Button, Input } from '@shared/components';
@@ -208,7 +210,6 @@ export const ChangePasswordScreen: React.FC = () => {
             </Text>
           </View>
 
-          {/* Current Password */}
           <View style={styles.inputContainer}>
             <Text style={[styles.label, { color: colors.text.primary }]}>Mevcut Şifre</Text>
             <Input
@@ -222,8 +223,15 @@ export const ChangePasswordScreen: React.FC = () => {
               autoCapitalize="none"
               autoCorrect={false}
               error={errors.currentPassword}
-              rightIcon={showCurrentPassword ? 'eye-off-outline' : 'eye-outline'}
-              onRightIconPress={() => setShowCurrentPassword(!showCurrentPassword)}
+              rightIcon={
+                <Pressable onPress={() => setShowCurrentPassword(!showCurrentPassword)}>
+                  <Icon
+                    name={showCurrentPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={20}
+                    color={colors.text.secondary}
+                  />
+                </Pressable>
+              }
             />
           </View>
 
@@ -241,8 +249,15 @@ export const ChangePasswordScreen: React.FC = () => {
               autoCapitalize="none"
               autoCorrect={false}
               error={errors.newPassword}
-              rightIcon={showNewPassword ? 'eye-off-outline' : 'eye-outline'}
-              onRightIconPress={() => setShowNewPassword(!showNewPassword)}
+              rightIcon={
+                <Pressable onPress={() => setShowNewPassword(!showNewPassword)}>
+                  <Icon
+                    name={showNewPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={20}
+                    color={colors.text.secondary}
+                  />
+                </Pressable>
+              }
             />
 
             {/* Password Strength Indicator */}
@@ -285,8 +300,15 @@ export const ChangePasswordScreen: React.FC = () => {
               autoCapitalize="none"
               autoCorrect={false}
               error={errors.confirmPassword}
-              rightIcon={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
-              onRightIconPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              rightIcon={
+                <Pressable onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                  <Icon
+                    name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={20}
+                    color={colors.text.secondary}
+                  />
+                </Pressable>
+              }
             />
           </View>
 

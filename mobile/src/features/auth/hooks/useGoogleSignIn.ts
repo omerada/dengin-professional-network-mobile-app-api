@@ -25,14 +25,12 @@ import type { AuthResponse } from '../types';
  * ```
  */
 export function useGoogleSignIn() {
-  const setAuth = useAuthStore((state) => state.setAuth);
+  const setAuth = useAuthStore(state => state.setAuth);
 
   return useMutation<AuthResponse, Error>({
     mutationFn: oauth2Service.signInWithGoogle,
     onSuccess: (data: AuthResponse) => {
-      setAuth({
-        isAuthenticated: true,
-        user: data.user,
+      setAuth(data.user, {
         accessToken: data.accessToken,
         refreshToken: data.refreshToken,
       });

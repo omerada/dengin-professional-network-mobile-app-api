@@ -5,13 +5,13 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { View, RefreshControl, ActivityIndicator, Alert } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { FlashList, type ContentStyle } from '@shopify/flash-list';
+import { FlashList } from '@shopify/flash-list';
 import { useNavigation } from '@react-navigation/native';
 
 import { useColors } from '@contexts/ThemeContext';
 import { useFeedPosts, useLikePost, useBookmarkPost, useDeletePost } from '../hooks';
 import { PostCard, FeedHeader, EmptyFeed } from '../components';
-import { ActionSheet, type ActionSheetOption, Skeleton } from '@shared/components';
+import { ActionSheet, type ActionSheetOption, SkeletonPost } from '@shared/components';
 import { sharePost, showShareError } from '@shared/utils/share';
 import { useAuthStore } from '@features/auth/stores';
 import type { Post } from '../types';
@@ -71,10 +71,10 @@ export const FeedScreen: React.FC = () => {
 
   const handleShare = useCallback(
     async (postId: number) => {
-      const post = posts.find(p => p.postId === postId);
+      const post = posts.find(p => p.id === postId);
       if (post) {
         const result = await sharePost({
-          postId: post.postId,
+          postId: post.id,
           content: post.content,
           author: post.author,
         });
@@ -96,7 +96,7 @@ export const FeedScreen: React.FC = () => {
 
   const handleMenuPress = useCallback(
     (postId: number) => {
-      const post = posts.find(p => p.postId === postId);
+      const post = posts.find(p => p.id === postId);
       if (post) {
         setSelectedPost(post);
         setActionSheetVisible(true);
@@ -118,7 +118,7 @@ export const FeedScreen: React.FC = () => {
           text: 'Sil',
           style: 'destructive',
           onPress: () => {
-            deletePost.mutate(selectedPost.postId);
+            deletePost.mutate(selectedPost.id);
           },
         },
       ]);
@@ -129,7 +129,7 @@ export const FeedScreen: React.FC = () => {
     if (selectedPost) {
       // @ts-expect-error - navigation types not fully typed
       navigation.navigate('ReportContent', {
-        contentId: selectedPost.postId,
+        contentId: selectedPost.id,
         contentType: 'POST',
       });
     }
@@ -145,7 +145,7 @@ export const FeedScreen: React.FC = () => {
         id: 'share',
         label: 'Paylaş',
         icon: 'share-outline',
-        onPress: () => handleShare(selectedPost.postId),
+        onPress: () => handleShare(selectedPost.id),
       },
     ];
 
@@ -190,8 +190,8 @@ export const FeedScreen: React.FC = () => {
     [handleLike, handleComment, handleShare, handleBookmark, handleMenuPress],
   );
 
-  // postId: number kullanılır
-  const keyExtractor = useCallback((item: Post) => String(item.postId), []);
+  // id: number kullanılır
+  const keyExtractor = useCallback((item: Post) => String(item.id), []);
 
   const ListHeaderComponent = useMemo(
     () => <FeedHeader onCreatePress={handleCreatePress} />,
@@ -229,7 +229,7 @@ export const FeedScreen: React.FC = () => {
         style={[styles.skeletonContainer, { backgroundColor: colors.background.primary }]}>
         {[0, 1, 2].map(index => (
           <View key={index} style={styles.skeletonItem}>
-            <Skeleton variant="postCard" />
+            <SkeletonPost />
           </View>
         ))}
       </Animated.View>

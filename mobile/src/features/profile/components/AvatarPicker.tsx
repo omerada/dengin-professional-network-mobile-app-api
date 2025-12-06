@@ -209,7 +209,7 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
             style={[
               styles.overlay,
               {
-                backgroundColor: colors.surface.overlay,
+                backgroundColor: colors.background.overlay,
                 borderRadius: size / 2,
               },
             ]}>

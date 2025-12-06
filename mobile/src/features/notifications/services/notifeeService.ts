@@ -116,7 +116,7 @@ class NotifeeService {
     type?: NotificationType;
     imageUrl?: string;
   }): Promise<string> {
-    const { id, title, body, data, type = 'system', imageUrl } = options;
+    const { id, title, body, data, type = 'WELCOME', imageUrl } = options;
 
     // Web: Browser Notification API kullan
     if (!this.isNative) {
@@ -129,7 +129,7 @@ class NotifeeService {
       id,
       title,
       body,
-      data: data as Record<string, string>,
+      data: data as unknown as Record<string, string>,
       android: {
         channelId,
         importance: AndroidImportance.HIGH || 4,
@@ -318,14 +318,22 @@ class NotifeeService {
    * Bildirim türüne göre kanal ID'si
    */
   private getChannelForType(type: NotificationType): string {
-    const channelMap: Record<NotificationType, string> = {
-      message: 'messages',
-      post_like: 'posts',
-      post_comment: 'posts',
-      comment_reply: 'posts',
-      follow: 'social',
-      verification_update: 'verification',
-      system: 'system',
+    const channelMap: Partial<Record<NotificationType, string>> = {
+      NEW_MESSAGE: 'messages',
+      POST_LIKED: 'posts',
+      POST_COMMENTED: 'posts',
+      MENTION: 'posts',
+      NEW_FOLLOWER: 'social',
+      VERIFICATION_APPROVED: 'verification',
+      VERIFICATION_REJECTED: 'verification',
+      VERIFICATION_PENDING_REVIEW: 'verification',
+      WELCOME: 'system',
+      PASSWORD_RESET: 'system',
+      POST_FLAGGED: 'system',
+      CONTENT_REMOVED: 'system',
+      WARNING_ISSUED: 'system',
+      ACCOUNT_SUSPENDED: 'system',
+      ACCOUNT_REACTIVATED: 'system',
     };
 
     return channelMap[type] || 'system';
@@ -338,12 +346,12 @@ class NotifeeService {
     if (!this.isNative) return 0;
 
     switch (type) {
-      case 'message':
+      case 'NEW_MESSAGE':
         return AndroidCategory.MESSAGE || 3;
-      case 'post_like':
-      case 'post_comment':
-      case 'comment_reply':
-      case 'follow':
+      case 'POST_LIKED':
+      case 'POST_COMMENTED':
+      case 'MENTION':
+      case 'NEW_FOLLOWER':
         return AndroidCategory.SOCIAL || 4;
       default:
         return AndroidCategory.STATUS || 5;

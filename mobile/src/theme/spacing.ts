@@ -6,7 +6,7 @@ import type { SpacingKey, BorderRadiusKey, BorderWidthKey, ZIndexKey } from './t
 
 /**
  * Base Spacing Scale
- * 4px grid system
+ * 4px grid system with semantic aliases
  */
 export const spacing: Record<SpacingKey, number> = {
   '0': 0,
@@ -33,6 +33,16 @@ export const spacing: Record<SpacingKey, number> = {
   '24': 96,
   '28': 112,
   '32': 128,
+  // Semantic spacing aliases
+  xs: 4, // 4px  - spacing['1']
+  sm: 8, // 8px  - spacing['2']
+  md: 12, // 12px - spacing['3']
+  lg: 16, // 16px - spacing['4']
+  xl: 24, // 24px - spacing['6']
+  xxl: 32, // 32px - spacing['8']
+  '2xl': 40, // 40px - spacing['10']
+  '3xl': 48, // 48px - spacing['12']
+  '4xl': 64, // 64px - spacing['16']
 } as const;
 
 /**

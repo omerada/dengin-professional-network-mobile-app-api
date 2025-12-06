@@ -11,6 +11,7 @@ import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import { Button, Loading } from '@shared/components';
 import { spacing, typography } from '@theme';
+import { secureStorage, SECURE_KEYS } from '@core/storage';
 import { biometricService } from '../services/biometricService';
 import { useAuthStore } from '../stores';
 
@@ -42,7 +43,7 @@ export const BiometricSetupScreen: React.FC = () => {
   const toast = useToast();
 
   // Auth store
-  const { user, refreshToken } = useAuthStore();
+  const { user } = useAuthStore();
 
   // State
   const [isLoading, setIsLoading] = useState(true);
@@ -82,7 +83,14 @@ export const BiometricSetupScreen: React.FC = () => {
 
   // Handle enable biometric
   const handleEnableBiometric = useCallback(async () => {
-    if (!user?.email || !refreshToken) {
+    if (!user?.email) {
+      Alert.alert('Hata', 'Biyometrik kimlik doğrulama için giriş yapmalısınız.');
+      return;
+    }
+
+    // Get refresh token from secure storage
+    const refreshTokenValue = await secureStorage.get(SECURE_KEYS.REFRESH_TOKEN);
+    if (!refreshTokenValue) {
       Alert.alert('Hata', 'Biyometrik kimlik doğrulama için giriş yapmalısınız.');
       return;
     }
@@ -101,7 +109,7 @@ export const BiometricSetupScreen: React.FC = () => {
       }
 
       // Enable biometric login
-      const enabled = await biometricService.enable(user.email, refreshToken);
+      const enabled = await biometricService.enable(user.email, refreshTokenValue);
 
       if (enabled) {
         setIsEnabled(true);
@@ -115,7 +123,7 @@ export const BiometricSetupScreen: React.FC = () => {
     } finally {
       setIsProcessing(false);
     }
-  }, [user, refreshToken, biometricName, toast]);
+  }, [user, biometricName, toast]);
 
   // Handle disable biometric
   const handleDisableBiometric = useCallback(async () => {
@@ -164,7 +172,7 @@ export const BiometricSetupScreen: React.FC = () => {
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.background.primary }]}
         edges={['bottom']}>
-        <Loading size="large" text="Kontrol ediliyor..." />
+        <Loading size="large" message="Kontrol ediliyor..." />
       </SafeAreaView>
     );
   }

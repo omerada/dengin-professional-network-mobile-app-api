@@ -16,20 +16,15 @@ const UNREAD_COUNT_QUERY_KEY = ['notifications', 'unread-count'];
  */
 export function useUnreadCount() {
   const queryClient = useQueryClient();
-  const storeUnreadCount = useNotificationStore((state) => state.unreadCount);
-  const setUnreadCount = useNotificationStore((state) => state.setUnreadCount);
-  const resetUnreadCount = useNotificationStore((state) => state.resetUnreadCount);
+  const storeUnreadCount = useNotificationStore(state => state.unreadCount);
+  const setUnreadCount = useNotificationStore(state => state.setUnreadCount);
+  const resetUnreadCount = useNotificationStore(state => state.resetUnreadCount);
 
-  const {
-    data,
-    isLoading,
-    refetch,
-    isRefetching,
-  } = useQuery({
+  const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: UNREAD_COUNT_QUERY_KEY,
     queryFn: async () => {
-      const response = await notificationService.getUnreadCount();
-      return response.unreadCount;
+      const count = await notificationService.getUnreadCount();
+      return count;
     },
     staleTime: 1000 * 60, // 1 minute
     refetchInterval: 1000 * 60 * 5, // Refetch every 5 minutes
@@ -63,14 +58,12 @@ export function useUnreadCount() {
 
   // Optimistic increment (for new notification)
   const increment = useCallback(() => {
-    queryClient.setQueryData<number>(UNREAD_COUNT_QUERY_KEY, (old) => (old ?? 0) + 1);
+    queryClient.setQueryData<number>(UNREAD_COUNT_QUERY_KEY, old => (old ?? 0) + 1);
   }, [queryClient]);
 
   // Optimistic decrement (for mark as read)
   const decrement = useCallback(() => {
-    queryClient.setQueryData<number>(UNREAD_COUNT_QUERY_KEY, (old) => 
-      Math.max(0, (old ?? 0) - 1)
-    );
+    queryClient.setQueryData<number>(UNREAD_COUNT_QUERY_KEY, old => Math.max(0, (old ?? 0) - 1));
   }, [queryClient]);
 
   return {

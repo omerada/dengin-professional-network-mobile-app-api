@@ -4,8 +4,8 @@
 
 import React, { memo, useCallback } from 'react';
 import { StyleSheet, View, TouchableOpacity, Text, ViewStyle } from 'react-native';
-import { useColors } from '@contexts';
-import { spacing, typography } from '@theme';
+import { useColors } from '@contexts/ThemeContext';
+import { spacing } from '@theme';
 import type { CameraSettings } from '../types';
 
 /**

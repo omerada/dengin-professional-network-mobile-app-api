@@ -17,7 +17,7 @@ import type {
  * Varsayılan tercihler - backend ile senkronize olacak
  */
 const defaultPreferences: NotificationPreferencesResponse = {
-  userId: '',
+  userId: 0,
   notificationsEnabled: true,
   emailEnabled: false,
   pushEnabled: true,
@@ -25,24 +25,22 @@ const defaultPreferences: NotificationPreferencesResponse = {
   quietHoursEnd: null,
   inQuietHours: false,
   typeSettings: {},
-  availableTypes: [],
+  availableTypes: {},
   updatedAt: new Date().toISOString(),
 };
 
 export const useNotificationStore = create<NotificationStoreState>()(
   persist(
-    (set, get) => ({
+    (set, _get) => ({
       // State
       notifications: [],
       unreadCount: 0,
-      unreadByType: {} as Record<NotificationType, number>,
+      unreadByType: {} as Record<string, number>,
       preferences: defaultPreferences,
       fcmToken: null,
       isPermissionGranted: false,
-      currentPage: 0,
-      totalPages: 0,
-      hasMore: true,
       isLoading: false,
+      error: null,
 
       // Actions
       setNotifications: (notifications: NotificationResponse[]) => {
@@ -51,58 +49,73 @@ export const useNotificationStore = create<NotificationStoreState>()(
       },
 
       appendNotifications: (newNotifications: NotificationResponse[]) => {
-        set((state) => {
+        set(state => {
           // Duplicate check
           const existingIds = new Set(state.notifications.map(n => n.notificationId));
           const uniqueNew = newNotifications.filter(n => !existingIds.has(n.notificationId));
-          
-          return { 
+
+          return {
             notifications: [...state.notifications, ...uniqueNew],
           };
         });
       },
 
       addNotification: (notification: NotificationResponse) => {
-        set((state) => {
+        set(state => {
           // Duplicate check
           const exists = state.notifications.some(
-            n => n.notificationId === notification.notificationId
+            n => n.notificationId === notification.notificationId,
           );
           if (exists) return state;
 
           const notifications = [notification, ...state.notifications];
-          const unreadCount = !notification.read
-            ? state.unreadCount + 1
-            : state.unreadCount;
+          const unreadCount = !notification.read ? state.unreadCount + 1 : state.unreadCount;
 
           return { notifications, unreadCount };
         });
       },
 
+      prependNotification: (notification: NotificationResponse) => {
+        set(state => {
+          const exists = state.notifications.some(
+            n => n.notificationId === notification.notificationId,
+          );
+          if (exists) return state;
+          return { notifications: [notification, ...state.notifications] };
+        });
+      },
+
+      updateNotification: (notificationId: string, updates: Partial<NotificationResponse>) => {
+        set(state => ({
+          notifications: state.notifications.map(n =>
+            n.notificationId === notificationId ? { ...n, ...updates } : n,
+          ),
+        }));
+      },
+
       markAsRead: (notificationId: string) => {
-        set((state) => {
+        set(state => {
           const notifications = state.notifications.map(n =>
             n.notificationId === notificationId
               ? { ...n, read: true, readAt: new Date().toISOString() }
-              : n
+              : n,
           );
 
-          const notification = state.notifications.find(
-            n => n.notificationId === notificationId
-          );
-          const unreadCount = notification && !notification.read
-            ? Math.max(0, state.unreadCount - 1)
-            : state.unreadCount;
+          const notification = state.notifications.find(n => n.notificationId === notificationId);
+          const unreadCount =
+            notification && !notification.read
+              ? Math.max(0, state.unreadCount - 1)
+              : state.unreadCount;
 
           return { notifications, unreadCount };
         });
       },
 
       markMultipleAsRead: (notificationIds: string[]) => {
-        set((state) => {
+        set(state => {
           const idsSet = new Set(notificationIds);
           const readAt = new Date().toISOString();
-          
+
           let decrementCount = 0;
           const notifications = state.notifications.map(n => {
             if (idsSet.has(n.notificationId) && !n.read) {
@@ -112,15 +125,15 @@ export const useNotificationStore = create<NotificationStoreState>()(
             return n;
           });
 
-          return { 
-            notifications, 
-            unreadCount: Math.max(0, state.unreadCount - decrementCount) 
+          return {
+            notifications,
+            unreadCount: Math.max(0, state.unreadCount - decrementCount),
           };
         });
       },
 
       markAllAsRead: () => {
-        set((state) => {
+        set(state => {
           const readAt = new Date().toISOString();
           const notifications = state.notifications.map(n => ({
             ...n,
@@ -133,29 +146,25 @@ export const useNotificationStore = create<NotificationStoreState>()(
       },
 
       removeNotification: (notificationId: string) => {
-        set((state) => {
-          const notification = state.notifications.find(
-            n => n.notificationId === notificationId
-          );
+        set(state => {
+          const notification = state.notifications.find(n => n.notificationId === notificationId);
           const notifications = state.notifications.filter(
-            n => n.notificationId !== notificationId
+            n => n.notificationId !== notificationId,
           );
-          const unreadCount = notification && !notification.read
-            ? Math.max(0, state.unreadCount - 1)
-            : state.unreadCount;
+          const unreadCount =
+            notification && !notification.read
+              ? Math.max(0, state.unreadCount - 1)
+              : state.unreadCount;
 
           return { notifications, unreadCount };
         });
       },
 
       clearAllNotifications: () => {
-        set({ 
-          notifications: [], 
-          unreadCount: 0, 
+        set({
+          notifications: [],
+          unreadCount: 0,
           unreadByType: {},
-          currentPage: 0,
-          totalPages: 0,
-          hasMore: true,
         });
       },
 
@@ -167,10 +176,18 @@ export const useNotificationStore = create<NotificationStoreState>()(
         set({ unreadByType });
       },
 
-      setPreferences: (preferences: Partial<NotificationPreferencesResponse>) => {
-        set((state) => ({
-          preferences: { ...state.preferences, ...preferences },
+      setPreferences: (preferences: NotificationPreferencesResponse) => {
+        set({ preferences });
+      },
+
+      updatePreferences: (updates: Partial<NotificationPreferencesResponse>) => {
+        set(state => ({
+          preferences: state.preferences ? { ...state.preferences, ...updates } : null,
         }));
+      },
+
+      setError: (error: string | null) => {
+        set({ error });
       },
 
       setFcmToken: (token: string | null) => {
@@ -181,20 +198,16 @@ export const useNotificationStore = create<NotificationStoreState>()(
         set({ isPermissionGranted: granted });
       },
 
-      setPagination: (currentPage: number, totalPages: number, hasMore: boolean) => {
-        set({ currentPage, totalPages, hasMore });
-      },
-
       setLoading: (isLoading: boolean) => {
         set({ isLoading });
       },
 
       incrementUnreadCount: () => {
-        set((state) => ({ unreadCount: state.unreadCount + 1 }));
+        set(state => ({ unreadCount: state.unreadCount + 1 }));
       },
 
       decrementUnreadCount: () => {
-        set((state) => ({ unreadCount: Math.max(0, state.unreadCount - 1) }));
+        set(state => ({ unreadCount: Math.max(0, state.unreadCount - 1) }));
       },
 
       resetUnreadCount: () => {
@@ -210,24 +223,22 @@ export const useNotificationStore = create<NotificationStoreState>()(
           preferences: defaultPreferences,
           fcmToken: null,
           isPermissionGranted: false,
-          currentPage: 0,
-          totalPages: 0,
-          hasMore: true,
           isLoading: false,
+          error: null,
         });
       },
     }),
     {
       name: 'notification-storage',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state) => ({
+      partialize: state => ({
         preferences: state.preferences,
         fcmToken: state.fcmToken,
         isPermissionGranted: state.isPermissionGranted,
         // Don't persist notifications - fetch from server
       }),
-    }
-  )
+    },
+  ),
 );
 
 export default useNotificationStore;

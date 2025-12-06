@@ -16,7 +16,7 @@ import { useColors } from '@contexts/ThemeContext';
 import { MessageBubble } from './MessageBubble';
 import { TypingIndicator } from './TypingIndicator';
 import { EmptyChat } from './EmptyChat';
-import type { Message } from '../types';
+import type { Message, ClientMessage } from '../types';
 
 interface MessageListProps {
   messages: Message[];
@@ -29,8 +29,8 @@ interface MessageListProps {
   hasMore?: boolean;
   onLoadMore?: () => void;
   onRefresh?: () => void;
-  onMessageLongPress?: (message: Message) => void;
-  onReplyPress?: (message: Message) => void;
+  onMessageLongPress?: (message: Message | ClientMessage) => void;
+  onReplyPress?: (message: Message | ClientMessage) => void;
   onScrollToBottom?: () => void;
 }
 
@@ -40,7 +40,6 @@ export const MessageList: React.FC<MessageListProps> = memo(
   ({
     messages,
     currentUserId,
-    conversationId,
     typingUsers,
     userName,
     isLoading = false,
@@ -70,14 +69,14 @@ export const MessageList: React.FC<MessageListProps> = memo(
             isOwn={isOwn}
             showAvatar={showAvatar}
             onLongPress={onMessageLongPress}
-            onReplyPress={onReplyPress}
+            onReply={onReplyPress}
           />
         );
       },
       [currentUserId, messages, onMessageLongPress, onReplyPress],
     );
 
-    const keyExtractor = useCallback((item: Message) => item.id, []);
+    const keyExtractor = useCallback((item: Message) => item.messageId, []);
 
     const handleEndReached = useCallback(() => {
       if (hasMore && !isFetchingMore) {
@@ -131,7 +130,7 @@ export const MessageList: React.FC<MessageListProps> = memo(
     }, [isLoading, userName, colors.interactive.default]);
 
     const getItemLayout = useCallback(
-      (_data: Message[] | null | undefined, index: number) => ({
+      (_data: ArrayLike<Message> | null | undefined, index: number) => ({
         length: 60, // Approximate height
         offset: 60 * index,
         index,

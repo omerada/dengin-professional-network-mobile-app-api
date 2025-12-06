@@ -12,7 +12,7 @@ import {
 } from 'react-native-vision-camera';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useColors } from '@contexts';
+import { useColors } from '@contexts/ThemeContext';
 import { spacing, typography } from '@theme';
 import { Button, Loading } from '@shared/components';
 import { useVerificationStore } from '../stores';
@@ -43,7 +43,12 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
   const [isCapturing, setIsCapturing] = useState(false);
   const [settings, setSettings] = useState<CameraSettings>(cameraService.getDefaultSettings());
 
-  const { setDocumentFront, setDocumentBack, setStep, goToNextStep } = useVerificationStore();
+  const {
+    setDocumentFront,
+    setDocumentBack,
+    setStep,
+    goToNextStep: _goToNextStep,
+  } = useVerificationStore();
 
   /**
    * İzin kontrolü
@@ -107,7 +112,10 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
       } else {
         setDocumentFront(capturedImage);
         setStep('document_back');
-        navigation.navigate('DocumentCapture', { side: 'back' });
+        navigation.navigate('DocumentCapture', {
+          documentType: route.params.documentType,
+          side: 'back',
+        });
       }
     } catch (error) {
       console.error('Capture error:', error);
@@ -214,7 +222,7 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
       </SafeAreaView>
 
       {/* Yükleniyor göstergesi */}
-      {isCapturing && <Loading overlay text="İşleniyor..." />}
+      {isCapturing && <Loading fullScreen message="İşleniyor..." />}
     </View>
   );
 });

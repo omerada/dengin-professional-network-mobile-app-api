@@ -51,6 +51,8 @@ export {
   useShakeAnimation,
   useLikeAnimation,
   useCountAnimation,
+  useSharedTransition,
+  useEnterAnimation,
 } from './useAnimatedValue';
 
 // Lifecycle hooks

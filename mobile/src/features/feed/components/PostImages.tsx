@@ -15,7 +15,6 @@ import {
   StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useColors } from '@contexts/ThemeContext';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const IMAGE_GAP = 2;
@@ -26,7 +25,6 @@ interface PostImagesProps {
 }
 
 export const PostImages: React.FC<PostImagesProps> = memo(({ images, postId }) => {
-  const colors = useColors();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -191,12 +189,12 @@ const ImageModal: React.FC<ImageModalProps> = ({ visible, images, initialIndex, 
           })}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
-          renderItem={({ item: imageUrl, index }) => (
+          renderItem={({ item: imageUrl, index: _index }) => (
             <View style={styles.modalImageContainer}>
               <Image source={{ uri: imageUrl }} style={styles.modalImage} resizeMode="contain" />
             </View>
           )}
-          keyExtractor={(item, index) => `modal-image-${index}`}
+          keyExtractor={(_item, index) => `modal-image-${index}`}
         />
 
         {images.length > 1 && (

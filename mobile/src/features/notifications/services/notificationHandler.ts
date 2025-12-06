@@ -64,7 +64,7 @@ class NotificationHandler {
   private setupNotificationOpenedHandler(): void {
     fcmService.onNotificationOpenedApp((remoteMessage: RemoteMessage) => {
       console.log('[NotificationHandler] Notification opened app:', remoteMessage);
-      this.handleNotificationNavigation(remoteMessage.data as NotificationData);
+      this.handleNotificationNavigation(remoteMessage.data as unknown as NotificationData);
     });
   }
 
@@ -81,14 +81,16 @@ class NotificationHandler {
 
         case EventType.PRESS:
           console.log('[NotificationHandler] Notification pressed:', detail.notification?.id);
-          this.handleNotificationNavigation(detail.notification?.data as NotificationData);
+          this.handleNotificationNavigation(
+            detail.notification?.data as unknown as NotificationData,
+          );
           break;
 
         case EventType.ACTION_PRESS:
           console.log('[NotificationHandler] Action pressed:', detail.pressAction?.id);
           this.handleActionPress(
             detail.pressAction?.id,
-            detail.notification?.data as NotificationData,
+            detail.notification?.data as unknown as NotificationData,
           );
           break;
       }
@@ -98,13 +100,15 @@ class NotificationHandler {
     notifeeService.onBackgroundEvent(async ({ type, detail }) => {
       switch (type) {
         case EventType.PRESS:
-          this.handleNotificationNavigation(detail.notification?.data as NotificationData);
+          this.handleNotificationNavigation(
+            detail.notification?.data as unknown as NotificationData,
+          );
           break;
 
         case EventType.ACTION_PRESS:
           this.handleActionPress(
             detail.pressAction?.id,
-            detail.notification?.data as NotificationData,
+            detail.notification?.data as unknown as NotificationData,
           );
           break;
       }
@@ -122,7 +126,7 @@ class NotificationHandler {
         console.log('[NotificationHandler] FCM initial notification:', fcmInitial);
         // Delay navigation until app is ready
         setTimeout(() => {
-          this.handleNotificationNavigation(fcmInitial.data as NotificationData);
+          this.handleNotificationNavigation(fcmInitial.data as unknown as NotificationData);
         }, 1000);
         return;
       }
@@ -132,7 +136,7 @@ class NotificationHandler {
       if (notifeeInitial) {
         console.log('[NotificationHandler] Notifee initial notification:', notifeeInitial);
         setTimeout(() => {
-          this.handleNotificationNavigation(notifeeInitial.data as NotificationData);
+          this.handleNotificationNavigation(notifeeInitial.data as unknown as NotificationData);
         }, 1000);
       }
     } catch (error) {
@@ -155,8 +159,8 @@ class NotificationHandler {
       id: messageId,
       title: notification.title,
       body: notification.body,
-      data: data as NotificationData,
-      type: (data?.type as NotificationType) || 'system',
+      data: data as unknown as NotificationData,
+      type: (data?.type as NotificationType) || 'WELCOME',
       imageUrl: notification.imageUrl || (data?.imageUrl as string),
     });
 
@@ -172,18 +176,23 @@ class NotificationHandler {
 
     if (!notification?.title || !notification?.body) return;
 
-    const notificationData = {
-      id: messageId || Date.now().toString(),
-      type: (data?.type as NotificationType) || 'system',
+    const notificationResponse = {
+      notificationId: messageId || Date.now().toString(),
+      type: (data?.type as NotificationType) || 'WELCOME',
       title: notification.title,
       body: notification.body,
-      data: data as NotificationData,
-      status: 'unread' as const,
+      actionUrl: data?.actionUrl || null,
+      metadata: (data as Record<string, string>) || {},
+      status: 'DELIVERED' as const,
+      deliveredChannels: ['PUSH' as const],
+      read: false,
+      readAt: null,
+      relativeTime: 'Az önce',
       createdAt: sentTime ? new Date(sentTime).toISOString() : new Date().toISOString(),
     };
 
     const store = useNotificationStore.getState();
-    store.addNotification(notificationData);
+    store.addNotification(notificationResponse);
   }
 
   /**
@@ -192,7 +201,7 @@ class NotificationHandler {
   private handleNotificationNavigation(data?: NotificationData): void {
     if (!data) return;
 
-    const { type, id, conversationId, postId, userId } = data;
+    const { type, id: _id, conversationId, postId, userId } = data;
 
     console.log('[NotificationHandler] Navigating for type:', type);
 
@@ -204,44 +213,46 @@ class NotificationHandler {
     }
 
     switch (type) {
-      case 'message':
+      case 'NEW_MESSAGE':
         if (conversationId) {
-          navigationRef.navigate('MessagingTab', {
+          (navigationRef.navigate as any)('MessagingTab', {
             screen: 'Chat',
             params: { conversationId },
           });
         }
         break;
 
-      case 'post_like':
-      case 'post_comment':
-      case 'comment_reply':
+      case 'POST_LIKED':
+      case 'POST_COMMENTED':
+      case 'MENTION':
         if (postId) {
-          navigationRef.navigate('FeedTab', {
+          (navigationRef.navigate as any)('FeedTab', {
             screen: 'PostDetail',
             params: { postId },
           });
         }
         break;
 
-      case 'follow':
+      case 'NEW_FOLLOWER':
         if (userId) {
-          navigationRef.navigate('ProfileTab', {
+          (navigationRef.navigate as any)('ProfileTab', {
             screen: 'Profile',
             params: { userId },
           });
         }
         break;
 
-      case 'verification_update':
-        navigationRef.navigate('Verification', {
+      case 'VERIFICATION_APPROVED':
+      case 'VERIFICATION_REJECTED':
+      case 'VERIFICATION_PENDING_REVIEW':
+        (navigationRef.navigate as any)('Verification', {
           screen: 'UploadStatus',
         });
         break;
 
       default:
         // Navigate to notifications tab
-        navigationRef.navigate('NotificationsTab');
+        (navigationRef.navigate as any)('NotificationsTab');
         break;
     }
   }
@@ -258,7 +269,7 @@ class NotificationHandler {
       case 'reply':
         // Quick reply işlemi
         if (data.conversationId) {
-          navigationRef.navigate('MessagingTab', {
+          (navigationRef.navigate as any)('MessagingTab', {
             screen: 'Chat',
             params: { conversationId: data.conversationId },
           });

@@ -11,9 +11,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
 import { Button, Input } from '@shared/components';
 import { spacing, typography } from '@theme';
@@ -141,7 +143,7 @@ export const AccountDeletionScreen: React.FC = () => {
       <Button
         title={label}
         variant={isSelected ? 'primary' : 'outline'}
-        size="small"
+        size="sm"
         onPress={() => setSelectedReason(isSelected ? null : id)}
         style={styles.reasonButton}
       />
@@ -209,7 +211,7 @@ export const AccountDeletionScreen: React.FC = () => {
                 placeholder="Nedeninizi yazın..."
                 multiline
                 numberOfLines={3}
-                style={styles.customReasonInput}
+                containerStyle={styles.customReasonInput}
               />
             )}
           </View>
@@ -233,8 +235,15 @@ export const AccountDeletionScreen: React.FC = () => {
               autoCapitalize="none"
               autoCorrect={false}
               error={errors.password}
-              rightIcon={showPassword ? 'eye-off-outline' : 'eye-outline'}
-              onRightIconPress={() => setShowPassword(!showPassword)}
+              rightIcon={
+                <Pressable onPress={() => setShowPassword(!showPassword)}>
+                  <Icon
+                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={20}
+                    color={colors.text.secondary}
+                  />
+                </Pressable>
+              }
             />
           </View>
 

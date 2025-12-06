@@ -33,8 +33,8 @@ interface AddCommentFormProps {
 
 export const AddCommentForm: React.FC<AddCommentFormProps> = memo(
   ({
-    postId,
-    parentId,
+    postId: _postId,
+    parentId: _parentId,
     placeholder = 'Yorum yaz...',
     onSubmit,
     isLoading = false,

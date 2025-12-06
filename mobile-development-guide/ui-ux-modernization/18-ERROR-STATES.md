@@ -327,7 +327,7 @@ import Animated, {
   withSpring,
   withTiming,
   withDelay,
-  runOnJS,
+  scheduleOnRN,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHaptic } from "@/shared/hooks/useHaptic";
@@ -370,7 +370,7 @@ export const ErrorToast: React.FC<ErrorToastProps> = memo(
     const dismiss = () => {
       translateY.value = withTiming(-100, { duration: 200 });
       opacity.value = withTiming(0, { duration: 200 }, () => {
-        runOnJS(onDismiss)();
+        scheduleOnRN(onDismiss)();
       });
     };
 

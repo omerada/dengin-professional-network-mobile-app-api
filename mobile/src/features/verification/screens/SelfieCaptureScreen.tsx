@@ -12,7 +12,7 @@ import {
 } from 'react-native-vision-camera';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useColors } from '@contexts';
+import { useColors } from '@contexts/ThemeContext';
 import { spacing, typography } from '@theme';
 import { Button, Loading } from '@shared/components';
 import { useVerificationStore } from '../stores';
@@ -223,7 +223,7 @@ export const SelfieCaptureScreen: React.FC = memo(() => {
       </SafeAreaView>
 
       {/* Yükleniyor göstergesi */}
-      {isCapturing && <Loading overlay text="İşleniyor..." />}
+      {isCapturing && <Loading fullScreen message="İşleniyor..." />}
     </View>
   );
 });

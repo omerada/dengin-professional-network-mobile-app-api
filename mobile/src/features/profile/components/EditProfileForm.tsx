@@ -3,14 +3,7 @@
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-COMPLETION.md
 
 import React, { useState, useCallback, useMemo } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+import { StyleSheet, View, Text, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { useColors } from '@contexts/ThemeContext';
 import { Input, Button } from '@shared/components';
 import { spacing, typography } from '@theme';
@@ -86,7 +79,7 @@ const validateDate = (dateString: string): { valid: boolean; error?: string } =>
   }
 
   const [day, month, year] = parts.map(Number);
-  
+
   if (isNaN(day) || isNaN(month) || isNaN(year)) {
     return { valid: false, error: 'Geçersiz tarih' };
   }
@@ -232,7 +225,7 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
             key={option.value || 'null'}
             title={option.label}
             variant={isSelected ? 'primary' : 'outline'}
-            size="small"
+            size="sm"
             onPress={() => updateField('gender', option.value)}
             style={styles.genderButton}
           />
@@ -245,13 +238,11 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}
-    >
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
         {/* Name */}
         <View style={styles.fieldContainer}>
           <Text style={[styles.label, { color: colors.text.primary }]}>
@@ -288,11 +279,9 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
           </Text>
         </View>
 
-        {/* Bio */>
+        {/* Bio */}
         <View style={styles.fieldContainer}>
-          <Text style={[styles.label, { color: colors.text.primary }]}>
-            Hakkında
-          </Text>
+          <Text style={[styles.label, { color: colors.text.primary }]}>Hakkında</Text>
           <Input
             value={formData.bio}
             onChangeText={text => updateField('bio', text)}
@@ -301,7 +290,7 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
             numberOfLines={4}
             maxLength={VALIDATION.bio.maxLength}
             error={errors.bio}
-            style={styles.bioInput}
+            containerStyle={styles.bioInput}
           />
           <Text style={[styles.charCount, { color: colors.text.tertiary }]}>
             {formData.bio.length}/{VALIDATION.bio.maxLength}
@@ -310,9 +299,7 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
 
         {/* Date of Birth */}
         <View style={styles.fieldContainer}>
-          <Text style={[styles.label, { color: colors.text.primary }]}>
-            Doğum Tarihi
-          </Text>
+          <Text style={[styles.label, { color: colors.text.primary }]}>Doğum Tarihi</Text>
           <Input
             value={formData.dateOfBirth}
             onChangeText={text => updateField('dateOfBirth', text)}
@@ -328,9 +315,7 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
 
         {/* Gender */}
         <View style={styles.fieldContainer}>
-          <Text style={[styles.label, { color: colors.text.primary }]}>
-            Cinsiyet
-          </Text>
+          <Text style={[styles.label, { color: colors.text.primary }]}>Cinsiyet</Text>
           <GenderSelector />
         </View>
 

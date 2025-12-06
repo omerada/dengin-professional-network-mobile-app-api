@@ -5,7 +5,7 @@
 import React, { memo } from 'react';
 import { StyleSheet, View, Text, ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { useColors } from '@contexts';
+import { useColors } from '@contexts/ThemeContext';
 import { spacing, typography } from '@theme';
 import type { UploadProgress as UploadProgressType } from '../types';
 

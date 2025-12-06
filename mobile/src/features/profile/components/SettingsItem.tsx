@@ -26,18 +26,7 @@ interface SettingsItemProps extends SettingsItemType {
  * - Danger (red text for destructive actions)
  */
 export const SettingsItem: React.FC<SettingsItemProps> = memo(
-  ({
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    id,
-    title,
-    subtitle,
-    icon,
-    type,
-    value,
-    onPress,
-    onToggle,
-    isLoading = false,
-  }) => {
+  ({ id: _id, title, subtitle, icon, type, value, onPress, onToggle, isLoading = false }) => {
     const colors = useColors();
 
     const handlePress = useCallback(() => {

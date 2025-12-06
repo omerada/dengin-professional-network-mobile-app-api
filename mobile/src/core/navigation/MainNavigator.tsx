@@ -3,7 +3,7 @@
 // Oku: mobile-development-guide/core/09-NAVIGATION.md
 // Oku: mobile-development-guide/ui-ux-modernization/06-MICRO-INTERACTIONS.md
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
@@ -13,7 +13,6 @@ import {
   NotificationsStackParamList,
   ProfileStackParamList,
 } from '@shared/types';
-import { useColors } from '@contexts/ThemeContext';
 import { AnimatedTabBar, TabItem } from './components/AnimatedTabBar';
 
 // Screens
@@ -125,8 +124,6 @@ const ProfileStackNavigator: React.FC = () => (
  * - Blur background on iOS
  */
 export const MainNavigator: React.FC = () => {
-  const colors = useColors();
-
   // Custom tab bar renderer
   const renderTabBar = useCallback(
     (props: any) => <AnimatedTabBar {...props} tabs={TAB_CONFIG} />,

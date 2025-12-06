@@ -46,6 +46,12 @@ export const shadows: Record<ShadowVariant, ShadowStyle> = {
 
   // 2XL - Maximum elevation
   '2xl': createShadow(25, 50, 0.12, 16),
+
+  // Card - Alias for sm
+  card: createShadow(1, 3, 0.1, 2),
+
+  // Toast - Elevated notification
+  toast: createShadow(6, 10, 0.15, 6),
 } as const;
 
 /**

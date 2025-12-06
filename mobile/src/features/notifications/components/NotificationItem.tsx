@@ -9,7 +9,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
 import type { NotificationResponse, NotificationType } from '../types';
 
-interface NotificationItemProps {
+export interface NotificationItemProps {
   notification: NotificationResponse;
   onPress: (notification: NotificationResponse) => void;
   onLongPress?: (notification: NotificationResponse) => void;

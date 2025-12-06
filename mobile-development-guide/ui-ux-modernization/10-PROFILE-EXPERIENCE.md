@@ -429,7 +429,7 @@ import Animated, {
   withTiming,
   withSpring,
   withDelay,
-  runOnJS,
+  scheduleOnRN,
   Easing,
 } from "react-native-reanimated";
 import { useTheme } from "@theme";
@@ -514,7 +514,7 @@ const AnimatedStatItem = memo<AnimatedStatItemProps>(
             easing: Easing.out(Easing.cubic),
           },
           () => {
-            runOnJS(setCurrentValue)(value);
+            scheduleOnRN(setCurrentValue)(value);
           }
         )
       );
@@ -704,7 +704,7 @@ const TabItem = memo<TabItemProps>(({ tab, isActive, onPress, colors }) => {
     .onFinalize((_, success) => {
       scale.value = withSpring(1);
       if (success) {
-        runOnJS(onPress)();
+        scheduleOnRN(onPress)();
       }
     });
 

@@ -6,6 +6,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { View, StyleSheet, ActivityIndicator, RefreshControl, Alert } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
 import { useAuthStore } from '@features/auth/stores';
 import { useCommentsData, useAddComment, useLikeComment, useDeleteComment } from '../hooks';
@@ -15,10 +16,11 @@ import type { Comment, AddCommentRequest } from '../types';
 import type { FeedStackParamList } from '@shared/types';
 
 type CommentsRouteProp = RouteProp<FeedStackParamList, 'Comments'>;
+type CommentsNavigationProp = NativeStackNavigationProp<FeedStackParamList, 'Comments'>;
 
 export const CommentsScreen: React.FC = () => {
   const colors = useColors();
-  const navigation = useNavigation();
+  const navigation = useNavigation<CommentsNavigationProp>();
   const route = useRoute<CommentsRouteProp>();
   const { postId } = route.params; // postId: number
   const currentUserId = useAuthStore(state => state.user?.id);
@@ -47,9 +49,10 @@ export const CommentsScreen: React.FC = () => {
   const handleAddComment = useCallback(
     (content: string) => {
       if (postId) {
+        // Note: parentId is not supported in AddCommentRequest
+        // Reply functionality would need separate API endpoint
         const request: AddCommentRequest = {
           content,
-          parentId: replyToCommentId ?? undefined,
         };
         addComment.mutate(
           { postId, request },
@@ -61,7 +64,7 @@ export const CommentsScreen: React.FC = () => {
         );
       }
     },
-    [addComment, postId, replyToCommentId],
+    [addComment, postId],
   );
 
   const handleLike = useCallback(
@@ -81,7 +84,7 @@ export const CommentsScreen: React.FC = () => {
 
   const handleAuthorPress = useCallback(
     (userId: number) => {
-      navigation.navigate('UserProfile' as never, { userId } as never);
+      navigation.navigate('UserProfile', { userId });
     },
     [navigation],
   );
@@ -127,13 +130,11 @@ export const CommentsScreen: React.FC = () => {
         label: 'Yorumu Şikayet Et',
         icon: 'flag-outline',
         onPress: () => {
-          navigation.navigate(
-            'Report' as never,
-            {
-              type: 'COMMENT',
-              targetId: selectedComment.id,
-            } as never,
-          );
+          // Report screen is in root navigator, use untyped navigation
+          (navigation as any).navigate('Report', {
+            type: 'COMMENT',
+            targetId: selectedComment.id,
+          });
         },
       });
     }
@@ -210,7 +211,6 @@ export const CommentsScreen: React.FC = () => {
           />
         }
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
         estimatedItemSize={100}
       />
 
@@ -245,9 +245,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  listContent: {
-    flexGrow: 1,
   },
   footer: {
     paddingVertical: 20,

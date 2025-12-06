@@ -32,6 +32,7 @@ export const SECURE_KEYS = {
   REFRESH_TOKEN: 'meslektas_refresh_token',
   USER_CREDENTIALS: 'meslektas_user_credentials',
   BIOMETRIC_KEY: 'meslektas_biometric_key',
+  TOKEN_EXPIRES_AT: 'token_expires_at',
 } as const;
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

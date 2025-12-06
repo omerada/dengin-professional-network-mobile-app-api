@@ -6,7 +6,7 @@ import React, { memo, useCallback } from 'react';
 import { StyleSheet, View, Text, ScrollView, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useColors } from '@contexts';
+import { useColors } from '@contexts/ThemeContext';
 import { spacing, typography } from '@theme';
 import { Button } from '@shared/components';
 import { useVerificationStore } from '../stores';
@@ -58,7 +58,7 @@ export const VerificationIntroScreen: React.FC = memo(() => {
   const handleStart = useCallback(() => {
     reset(); // Önceki verileri temizle
     setStep('document_front');
-    navigation.navigate('DocumentCapture', { side: 'front' });
+    navigation.navigate('DocumentCapture', { documentType: 'diploma', side: 'front' });
   }, [navigation, reset, setStep]);
 
   return (
@@ -144,7 +144,7 @@ export const VerificationIntroScreen: React.FC = memo(() => {
           title="Doğrulamayı Başlat"
           onPress={handleStart}
           fullWidth
-          size="large"
+          size="lg"
           accessibilityLabel="Meslek doğrulama sürecini başlat"
         />
       </View>

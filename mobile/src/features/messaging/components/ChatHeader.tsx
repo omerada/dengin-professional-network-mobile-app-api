@@ -69,12 +69,12 @@ export const ChatHeader: React.FC<ChatHeaderProps> = memo(
     const optionsScale = useSharedValue(1);
 
     // Typing status
-    const conversationTypingUsers = typingUsers[conversation.id] || [];
+    const conversationTypingUsers = typingUsers[conversation.conversationId] || [];
     const isTyping = conversationTypingUsers.length > 0;
 
     // Online status - participant tek obje olarak gelir (1:1 chat)
     const participant = conversation.participant;
-    const isOnline = participant?.online || onlineUsers.has(participant?.id || '');
+    const isOnline = participant?.online || onlineUsers.has(participant?.userId || '');
 
     const getStatusText = useCallback((): string => {
       if (isTyping) {

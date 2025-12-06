@@ -22,14 +22,20 @@ export {
 } from './hooks';
 
 // Store
-export {
-  useProfileStore,
-  selectViewedProfile,
-  selectIsLoadingProfile,
-} from './stores';
+export { useProfileStore, selectViewedProfile, selectIsLoadingProfile } from './stores';
 
-// Components
-export * from './components';
+// Components - export individually to avoid conflicts
+export {
+  ProfileHeader,
+  ParallaxProfileHeader,
+  ProfileActions,
+  ProfileBio,
+  AvatarPicker,
+  SettingsItem,
+  SettingsSection,
+  EditProfileForm,
+} from './components';
+export { ProfileStats } from './components/ProfileStats';
 
 // Screens
 export * from './screens';

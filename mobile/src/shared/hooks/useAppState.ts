@@ -6,8 +6,6 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import { Analytics, AnalyticsEvent } from '@shared/services/analytics';
 
-type AppStateCallback = (state: AppStateStatus) => void;
-
 /**
  * Hook for tracking app state (active, background, inactive)
  */

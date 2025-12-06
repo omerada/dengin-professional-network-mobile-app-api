@@ -78,4 +78,56 @@ export {
 export type { FormatNumberOptions } from './numberUtils';
 
 // Share utilities
-export { shareContent, sharePost, shareProfile, shareImage } from './share';
+export { shareContent, sharePost, shareProfile, copyToClipboard } from './share';
+
+// String utilities
+export {
+  truncate,
+  truncateMiddle,
+  capitalize,
+  capitalizeWords,
+  titleCase,
+  slugify,
+  normalizeWhitespace,
+  isBlank,
+  isNotBlank,
+  getInitials,
+  generateUsername,
+  maskEmail,
+  maskPhone,
+  getHighlightedParts,
+  escapeRegex,
+  removeEmoji,
+  wordCount,
+  charCount,
+  extractHashtags,
+  extractMentions,
+  stripHtml,
+  formatUsername,
+  cleanUsername,
+} from './stringUtils';
+export type { HighlightPart } from './stringUtils';
+
+// Validation utilities
+export {
+  isValidEmail,
+  validateEmail,
+  isValidPhoneNumber,
+  validatePhone,
+  checkPasswordStrength,
+  validatePassword,
+  validatePasswordConfirm,
+  isValidUsername,
+  validateUsername,
+  validateName,
+  validateBio,
+  isValidUrl,
+  validateUrl,
+  validateOtp,
+  required,
+  minLength,
+  maxLength,
+  validate,
+  combineValidators,
+} from './validationUtils';
+export type { ValidationResult, ValidationRule, PasswordStrength } from './validationUtils';

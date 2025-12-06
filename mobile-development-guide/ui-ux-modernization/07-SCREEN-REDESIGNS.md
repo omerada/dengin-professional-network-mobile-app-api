@@ -47,7 +47,7 @@ import Animated, {
   withSequence,
   withSpring,
   withDelay,
-  runOnJS,
+  scheduleOnRN,
   Easing,
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
@@ -92,7 +92,7 @@ export const SplashScreen: React.FC = () => {
 
       // Fade out
       screenOpacity.value = withTiming(0, { duration: 300 }, () => {
-        runOnJS(navigateToMain)();
+        scheduleOnRN(navigateToMain)();
       });
     }, 2000);
 
@@ -949,7 +949,7 @@ import Animated, {
   withSpring,
   interpolate,
   Extrapolate,
-  runOnJS,
+  scheduleOnRN,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -1047,7 +1047,7 @@ export const PostDetailScreen: React.FC<PostDetailScreenProps> = ({
     .activeOffsetX([-20, 20])
     .onEnd((event) => {
       if (event.translationX > 100) {
-        runOnJS(navigation.goBack)();
+        scheduleOnRN(navigation.goBack)();
       }
     });
 

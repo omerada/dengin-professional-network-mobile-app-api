@@ -21,7 +21,7 @@ export function useTyping(conversationId: string) {
   const { user } = useAuthStore();
   const { addTypingUser, removeTypingUser, typingUsers } = useMessagingStore();
 
-  const [typingUserNames, setTypingUserNames] = useState<string[]>([]);
+  const [typingUserNames, _setTypingUserNames] = useState<string[]>([]);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isTypingRef = useRef(false);

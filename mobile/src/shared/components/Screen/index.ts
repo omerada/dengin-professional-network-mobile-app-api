@@ -2,4 +2,4 @@
 // Screen barrel export
 
 export { Screen } from './Screen';
-export type { ScreenPadding } from './Screen';
+export type { ScreenPadding, ScreenProps } from './Screen';

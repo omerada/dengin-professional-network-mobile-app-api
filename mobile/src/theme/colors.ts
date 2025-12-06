@@ -176,6 +176,7 @@ export const lightTheme: ThemeColors = {
     pressed: palette.blue[700],
     disabled: palette.gray[300],
     focus: palette.blue[100],
+    subtle: palette.gray[100],
   },
 
   // Borders
@@ -191,12 +192,16 @@ export const lightTheme: ThemeColors = {
   status: {
     success: palette.green[500],
     successBg: palette.green[50],
+    successBackground: palette.green[50], // Alias
     warning: palette.orange[500],
     warningBg: palette.orange[50],
+    warningBackground: palette.orange[50], // Alias
     error: palette.red[500],
     errorBg: palette.red[50],
+    errorBackground: palette.red[50], // Alias
     info: palette.blue[500],
     infoBg: palette.blue[50],
+    infoBackground: palette.blue[50], // Alias
   },
 
   // Special
@@ -249,6 +254,7 @@ export const darkTheme: ThemeColors = {
     pressed: palette.blue[500],
     disabled: '#30363D',
     focus: 'rgba(0, 102, 255, 0.3)',
+    subtle: '#21262D',
   },
 
   // Borders
@@ -264,12 +270,16 @@ export const darkTheme: ThemeColors = {
   status: {
     success: palette.green[400],
     successBg: 'rgba(0, 200, 83, 0.1)',
+    successBackground: 'rgba(0, 200, 83, 0.1)', // Alias
     warning: palette.orange[400],
     warningBg: 'rgba(255, 149, 0, 0.1)',
+    warningBackground: 'rgba(255, 149, 0, 0.1)', // Alias
     error: palette.red[400],
     errorBg: 'rgba(255, 59, 48, 0.1)',
+    errorBackground: 'rgba(255, 59, 48, 0.1)', // Alias
     info: palette.blue[400],
     infoBg: 'rgba(0, 102, 255, 0.1)',
+    infoBackground: 'rgba(0, 102, 255, 0.1)', // Alias
   },
 
   // Special

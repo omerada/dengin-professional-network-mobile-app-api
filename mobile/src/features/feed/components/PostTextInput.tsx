@@ -2,7 +2,7 @@
 // Post metin girişi komponenti
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import { View, TextInput, Text, StyleSheet, Image } from 'react-native';
 import { useColors } from '@contexts/ThemeContext';
 import { useAuthStore } from '@features/auth/stores/authStore';
@@ -34,8 +34,8 @@ export const PostTextInput: React.FC<PostTextInputProps> = memo(
             <View
               style={[styles.avatarPlaceholder, { backgroundColor: colors.interactive.subtle }]}>
               <Text style={[styles.avatarText, { color: colors.interactive.default }]}>
-                {user?.firstName?.[0]}
-                {user?.lastName?.[0]}
+                {user?.name?.[0]}
+                {user?.surname?.[0]}
               </Text>
             </View>
           )}
@@ -62,9 +62,9 @@ export const PostTextInput: React.FC<PostTextInputProps> = memo(
                 styles.counter,
                 {
                   color: isOverLimit
-                    ? colors.error.main
+                    ? colors.status.error
                     : isNearLimit
-                      ? colors.warning.main
+                      ? colors.status.warning
                       : colors.text.secondary,
                 },
               ]}>

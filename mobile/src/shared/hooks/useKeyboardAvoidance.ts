@@ -2,7 +2,7 @@
 // Keyboard avoidance hook for iOS
 // Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   Keyboard,
   KeyboardEvent,
@@ -35,7 +35,7 @@ export function useKeyboard(): KeyboardState {
 
     const handleKeyboardShow = (event: KeyboardEvent) => {
       const keyboardHeight = event.endCoordinates.height;
-      
+
       setIsVisible(true);
       setHeight(keyboardHeight);
       animatedHeight.value = withTiming(keyboardHeight, {
@@ -49,8 +49,8 @@ export function useKeyboard(): KeyboardState {
           LayoutAnimation.create(
             event.duration || 250,
             LayoutAnimation.Types.keyboard,
-            LayoutAnimation.Properties.opacity
-          )
+            LayoutAnimation.Properties.opacity,
+          ),
         );
       }
     };
@@ -68,8 +68,8 @@ export function useKeyboard(): KeyboardState {
           LayoutAnimation.create(
             event.duration || 250,
             LayoutAnimation.Types.keyboard,
-            LayoutAnimation.Properties.opacity
-          )
+            LayoutAnimation.Properties.opacity,
+          ),
         );
       }
     };
@@ -106,7 +106,7 @@ export function useDismissKeyboardOnTap(): () => void {
 export function useKeyboardScrollAdjustment(
   inputPosition: number,
   inputHeight: number = 50,
-  extraPadding: number = 20
+  extraPadding: number = 20,
 ): number {
   const keyboard = useKeyboard();
   const screenHeight = Dimensions.get('window').height;
@@ -134,16 +134,15 @@ export function useInputFocus(): {
 } {
   const [inputY, setInputY] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
-  const inputRef = useRef<any>(null);
 
   const onFocus = useCallback((event: any) => {
     setIsFocused(true);
-    
+
     // Get input position
     event.target.measure?.(
       (_x: number, _y: number, _width: number, _height: number, _pageX: number, pageY: number) => {
         setInputY(pageY);
-      }
+      },
     );
   }, []);
 
@@ -166,7 +165,7 @@ export function useInputFocus(): {
  */
 export function useKeyboardBottomPadding(basePadding: number = 0): number {
   const keyboard = useKeyboard();
-  
+
   if (Platform.OS === 'android') {
     // Android handles keyboard avoidance differently
     return basePadding;

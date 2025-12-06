@@ -13,7 +13,7 @@ interface CommentCardProps {
   comment: Comment;
   onLike?: (commentId: string, isLiked: boolean) => void;
   onReply?: (commentId: string) => void;
-  onAuthorPress?: (userId: string) => void;
+  onAuthorPress?: (userId: number) => void;
   onMenuPress?: (commentId: string) => void;
   isReply?: boolean;
 }
@@ -55,8 +55,8 @@ export const CommentCard: React.FC<CommentCardProps> = memo(
                 { backgroundColor: colors.interactive.subtle },
               ]}>
               <Text style={[styles.avatarText, { color: colors.interactive.default }]}>
-                {author.firstName[0]}
-                {author.lastName[0]}
+                {author.name[0]}
+                {author.surname[0]}
               </Text>
             </View>
           )}
@@ -67,17 +67,9 @@ export const CommentCard: React.FC<CommentCardProps> = memo(
             <View style={styles.header}>
               <Pressable onPress={handleAuthorPress}>
                 <Text style={[styles.authorName, { color: colors.text.primary }]}>
-                  {author.firstName} {author.lastName}
+                  {author.name} {author.surname}
                 </Text>
               </Pressable>
-              {author.isVerified && (
-                <Icon
-                  name="checkmark-circle"
-                  size={14}
-                  color={colors.interactive.default}
-                  style={styles.verifiedIcon}
-                />
-              )}
             </View>
 
             <Text style={[styles.commentText, { color: colors.text.primary }]}>
@@ -95,18 +87,16 @@ export const CommentCard: React.FC<CommentCardProps> = memo(
                 style={[
                   styles.actionText,
                   {
-                    color: comment.isLiked ? colors.error.main : colors.text.secondary,
+                    color: comment.isLiked ? colors.status.error : colors.text.secondary,
                   },
                 ]}>
-                Beğen{comment.likesCount > 0 && ` · ${comment.likesCount}`}
+                Beğen{comment.likeCount > 0 && ` · ${comment.likeCount}`}
               </Text>
             </Pressable>
 
             {!isReply && (
               <Pressable style={styles.actionButton} onPress={handleReply}>
-                <Text style={[styles.actionText, { color: colors.text.secondary }]}>
-                  Yanıtla{comment.repliesCount > 0 && ` · ${comment.repliesCount}`}
-                </Text>
+                <Text style={[styles.actionText, { color: colors.text.secondary }]}>Yanıtla</Text>
               </Pressable>
             )}
 

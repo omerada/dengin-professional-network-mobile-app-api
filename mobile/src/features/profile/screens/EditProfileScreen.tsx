@@ -3,7 +3,7 @@
 // Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
 // Backend: PUT /api/users/me, POST /api/users/me/avatar
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -44,7 +44,7 @@ export const EditProfileScreen: React.FC = () => {
   const navigation = useNavigation();
 
   // Fetch current profile
-  const { data: profile, isLoading: isLoadingProfile } = useMyProfile();
+  const { data: profile, isLoading: _isLoadingProfile } = useMyProfile();
 
   // Mutations
   const updateProfile = useUpdateProfile();

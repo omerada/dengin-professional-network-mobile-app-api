@@ -2,7 +2,7 @@
 // Error handling utilities with crash reporting
 // Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
 
-import { Alert, Platform } from 'react-native';
+import { Alert } from 'react-native';
 import { Analytics } from '@shared/services/analytics';
 
 /**
@@ -24,7 +24,7 @@ export enum ErrorType {
 export class AppError extends Error {
   type: ErrorType;
   code?: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   isRecoverable: boolean;
 
   constructor(
@@ -32,7 +32,7 @@ export class AppError extends Error {
     type: ErrorType = ErrorType.UNKNOWN,
     options?: {
       code?: string;
-      context?: Record<string, any>;
+      context?: Record<string, unknown>;
       isRecoverable?: boolean;
     },
   ) {
@@ -171,7 +171,7 @@ export function setupGlobalErrorHandler(): void {
 
   ErrorUtils.setGlobalHandler((error: Error, isFatal?: boolean) => {
     // Log to analytics
-    Analytics.logError(error, { source: 'global_handler' }, isFatal);
+    Analytics.logError(error, { source: 'global_handler', isFatal });
 
     // Call original handler
     if (originalHandler) {
@@ -251,7 +251,7 @@ export function withErrorBoundary<P extends object>(
     }
   }
 
-  return ErrorBoundary as React.ComponentType<P>;
+  return ErrorBoundary as unknown as React.ComponentType<P>;
 }
 
 /**

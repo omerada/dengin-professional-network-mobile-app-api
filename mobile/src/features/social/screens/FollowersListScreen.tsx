@@ -4,7 +4,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { View, StyleSheet, RefreshControl, ActivityIndicator } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
+import { FlashList, ContentStyle } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
@@ -29,7 +29,7 @@ export const FollowersListScreen: React.FC = () => {
     useFollowers(userId);
 
   const users = useMemo(() => {
-    return data?.pages.flatMap(page => page.users) || [];
+    return data?.pages.flatMap(page => page.content) || [];
   }, [data]);
 
   const handleEndReached = useCallback(() => {
@@ -98,7 +98,9 @@ export const FollowersListScreen: React.FC = () => {
           />
         }
         ItemSeparatorComponent={ItemSeparatorComponent}
-        contentContainerStyle={users.length === 0 && styles.emptyContent}
+        contentContainerStyle={
+          users.length === 0 ? ({ flexGrow: 1 } as unknown as ContentStyle) : undefined
+        }
         estimatedItemSize={70}
       />
     </SafeAreaView>

@@ -6,13 +6,7 @@
 import { useInfiniteQuery, useQueryClient, InfiniteData } from '@tanstack/react-query';
 import { useEffect, useCallback, useMemo } from 'react';
 import { stompClient } from '../services/socketClient';
-import type { 
-  WsMessageResponse, 
-  WsReadReceipt,
-  MessageListResponse, 
-  Message,
-  ClientMessage,
-} from '../types';
+import type { WsMessageResponse, WsReadReceipt, MessageListResponse, Message } from '../types';
 import { messagingService } from '../services';
 
 export const MESSAGES_QUERY_KEY = 'messages';
@@ -50,12 +44,12 @@ export function useMessages(conversationId: string) {
       // Update cache - add message to beginning of first page
       queryClient.setQueryData<InfiniteData<MessageListResponse>>(
         [MESSAGES_QUERY_KEY, conversationId],
-        (old) => {
+        old => {
           if (!old) return old;
 
           // Check if message already exists
-          const exists = old.pages.some((page) =>
-            page.messages.some((m) => m.messageId === newMessage.messageId)
+          const exists = old.pages.some(page =>
+            page.messages.some(m => m.messageId === newMessage.messageId),
           );
           if (exists) return old;
 
@@ -69,7 +63,7 @@ export function useMessages(conversationId: string) {
           }
 
           return { ...old, pages: newPages };
-        }
+        },
       );
     };
 
@@ -80,14 +74,14 @@ export function useMessages(conversationId: string) {
       // Update message statuses to 'READ'
       queryClient.setQueryData<InfiniteData<MessageListResponse>>(
         [MESSAGES_QUERY_KEY, conversationId],
-        (old) => {
+        old => {
           if (!old) return old;
 
           return {
             ...old,
-            pages: old.pages.map((page) => ({
+            pages: old.pages.map(page => ({
               ...page,
-              messages: page.messages.map((msg) => ({
+              messages: page.messages.map(msg => ({
                 ...msg,
                 status: 'READ' as const,
                 read: true,
@@ -95,7 +89,7 @@ export function useMessages(conversationId: string) {
               })),
             })),
           };
-        }
+        },
       );
     };
 
@@ -111,13 +105,13 @@ export function useMessages(conversationId: string) {
   const query = useInfiniteQuery<MessageListResponse, Error>({
     queryKey: [MESSAGES_QUERY_KEY, conversationId],
     queryFn: async ({ pageParam = 0 }) => {
-      return messagingService.getMessages(conversationId, { 
-        page: pageParam as number, 
-        size: 30 
+      return messagingService.getMessages(conversationId, {
+        page: pageParam as number,
+        size: 30,
       });
     },
     initialPageParam: 0,
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: lastPage => {
       if (lastPage.hasMore) {
         return lastPage.pageNumber + 1;
       }
@@ -130,7 +124,7 @@ export function useMessages(conversationId: string) {
 
   // Flatten messages from all pages
   const messages = useMemo(() => {
-    return query.data?.pages.flatMap((page) => page.messages) ?? [];
+    return query.data?.pages.flatMap(page => page.messages) ?? [];
   }, [query.data]);
 
   // Total messages count
@@ -139,10 +133,10 @@ export function useMessages(conversationId: string) {
   // Mark messages as read when viewing
   const markAsRead = useCallback(() => {
     if (!conversationId) return;
-    
+
     // Use HTTP endpoint
     messagingService.markAsRead(conversationId).catch(console.error);
-    
+
     // Also send via WebSocket if connected
     if (stompClient.isConnected() && messages.length > 0) {
       const lastMessage = messages[0];

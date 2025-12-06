@@ -3,7 +3,7 @@
 // Oku: mobile-development-guide/sprints/23-SPRINT-1-2.md
 // Oku: mobile-development-guide/ui/19-FORMS.md
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -40,7 +40,7 @@ export const RegisterScreen: React.FC = () => {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<RegisterSchemaType>({
+  } = useForm({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       email: '',
@@ -53,6 +53,14 @@ export const RegisterScreen: React.FC = () => {
       acceptTerms: false,
     },
   });
+
+  // Helper to extract error message as string
+  const getErrorMessage = (error: any): string | undefined => {
+    if (!error) return undefined;
+    if (typeof error === 'string') return error;
+    if (error.message && typeof error.message === 'string') return error.message;
+    return undefined;
+  };
 
   const onSubmit = useCallback(
     (data: RegisterSchemaType) => {
@@ -123,7 +131,7 @@ export const RegisterScreen: React.FC = () => {
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
-                      error={errors.firstName?.message}
+                      error={getErrorMessage(errors.firstName)}
                       required
                     />
                   )}
@@ -142,7 +150,7 @@ export const RegisterScreen: React.FC = () => {
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
-                      error={errors.lastName?.message}
+                      error={getErrorMessage(errors.lastName)}
                       required
                     />
                   )}
@@ -165,7 +173,7 @@ export const RegisterScreen: React.FC = () => {
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  error={errors.email?.message}
+                  error={getErrorMessage(errors.email)}
                   required
                 />
               )}
@@ -184,7 +192,7 @@ export const RegisterScreen: React.FC = () => {
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  error={errors.phoneNumber?.message}
+                  error={getErrorMessage(errors.phoneNumber)}
                   hint="Opsiyonel"
                 />
               )}
@@ -202,7 +210,7 @@ export const RegisterScreen: React.FC = () => {
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  error={errors.profession?.message}
+                  error={getErrorMessage(errors.profession)}
                   hint="Opsiyonel"
                 />
               )}
@@ -222,7 +230,7 @@ export const RegisterScreen: React.FC = () => {
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  error={errors.password?.message}
+                  error={getErrorMessage(errors.password)}
                   hint="En az 8 karakter, büyük/küçük harf ve rakam içermeli"
                   required
                 />
@@ -243,7 +251,7 @@ export const RegisterScreen: React.FC = () => {
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  error={errors.confirmPassword?.message}
+                  error={getErrorMessage(errors.confirmPassword)}
                   required
                 />
               )}
@@ -302,7 +310,7 @@ export const RegisterScreen: React.FC = () => {
           <View style={styles.actions}>
             <Button
               title={t('auth.register')}
-              onPress={handleSubmit(onSubmit)}
+              onPress={handleSubmit(onSubmit as any)}
               loading={isLoading}
               disabled={isLoading}
               size="lg"

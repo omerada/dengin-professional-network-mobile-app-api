@@ -5,23 +5,18 @@
 
 import { Platform } from 'react-native';
 import SockJS from 'sockjs-client';
+import type { IMessage, StompSubscription } from '@stomp/stompjs';
 
 // Dynamic import for web compatibility
 let Client: any;
-let IMessage: any;
-let StompSubscription: any;
 
 if (Platform.OS !== 'web') {
   const stomp = require('@stomp/stompjs');
   Client = stomp.Client;
-  IMessage = stomp.IMessage;
-  StompSubscription = stomp.StompSubscription;
 } else {
   // For web, use UMD bundle
   const stomp = require('@stomp/stompjs/bundles/stomp.umd.js');
   Client = stomp.Client;
-  IMessage = stomp.IMessage;
-  StompSubscription = stomp.StompSubscription;
 }
 import { ENV } from '@config/env';
 import { tokenService } from '@features/auth/services';
@@ -61,7 +56,7 @@ const DESTINATIONS = {
  * Manages WebSocket connection using STOMP protocol over SockJS
  */
 class StompClient {
-  private client: Client | null = null;
+  private client: InstanceType<typeof Client> | null = null;
   private status: SocketStatus = SocketStatus.DISCONNECTED;
   private subscriptions: Map<string, StompSubscription> = new Map();
   private eventHandlers: Map<string, Set<SocketEventHandler>> = new Map();

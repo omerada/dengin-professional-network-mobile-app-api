@@ -126,7 +126,7 @@ export const PostCard: React.FC<PostCardProps> = memo(
           heartScale.value = withDelay(600, withSpring(0, { damping: 15 }));
           heartOpacity.value = withDelay(600, withSpring(0));
 
-          runOnJS(handleDoubleTapLike)();
+          scheduleOnRN(handleDoubleTapLike)();
         }
       });
 

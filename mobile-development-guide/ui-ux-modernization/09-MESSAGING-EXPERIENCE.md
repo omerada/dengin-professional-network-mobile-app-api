@@ -615,7 +615,7 @@ import Animated, {
   withSpring,
   withSequence,
   withTiming,
-  runOnJS,
+  scheduleOnRN,
   interpolate,
   Extrapolate,
   FadeIn,
@@ -685,7 +685,7 @@ export const MessageBubble = memo<MessageBubbleProps>(
 
         // Haptic at threshold
         if (clampedX >= SWIPE_THRESHOLD - 5 && replyIconOpacity.value < 1) {
-          runOnJS(triggerHaptic)("impactMedium");
+          scheduleOnRN(triggerHaptic)("impactMedium");
         }
       })
       .onEnd((event) => {
@@ -697,7 +697,7 @@ export const MessageBubble = memo<MessageBubbleProps>(
         replyIconOpacity.value = withTiming(0);
 
         if (shouldTriggerReply) {
-          runOnJS(onReply)();
+          scheduleOnRN(onReply)();
         }
       });
 
@@ -706,8 +706,8 @@ export const MessageBubble = memo<MessageBubbleProps>(
       .minDuration(500)
       .onStart(() => {
         scale.value = withSequence(withSpring(0.95), withSpring(1));
-        runOnJS(triggerHaptic)("impactHeavy");
-        runOnJS(onLongPress)();
+        scheduleOnRN(triggerHaptic)("impactHeavy");
+        scheduleOnRN(onLongPress)();
       });
 
     const gesture = Gesture.Race(panGesture, longPressGesture);
@@ -1067,7 +1067,7 @@ export const ChatInput = memo<ChatInputProps>(
       .onFinalize((_, success) => {
         sendButtonScale.value = withSpring(1);
         if (success) {
-          runOnJS(handleSend)();
+          scheduleOnRN(handleSend)();
         }
       });
 

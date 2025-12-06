@@ -5,14 +5,149 @@
 // Components
 export * from './components';
 
-// Layout components
-export * from './layout';
+// Layout components - explicit exports to avoid conflicts
+export { Container, Row, Column, Spacer } from './layout';
+export type { ContainerSize, ContainerPadding } from './layout';
+export { EnhancedScrollView, AnimatedScrollView, HorizontalScrollView } from './layout';
 
-// Types
-export * from './types';
+// Types - exclude component types that are already exported from ./components
+export {
+  type ApiResponse,
+  type PaginatedResponse,
+  type CursorPaginatedResponse,
+  type ApiError,
+  type LoadingState,
+  type AsyncState,
+  type BaseEntity,
+  type VerificationStatus,
+  type UserRole,
+  type Platform,
+  type ThemeMode,
+  type LanguageCode,
+  type Nullable,
+  type Optional,
+  type DeepPartial,
+  type UUID,
+  isValidUUID,
+  toUUID,
+  toUUIDSafe,
+  type PagedResponse,
+  emptyPagedResponse,
+} from './types';
 
-// Hooks
-export * from './hooks';
+// Hooks - re-export excluding duplicates from utils
+export {
+  useNetworkStatus,
+  useIsOffline,
+  useOnlineEffect,
+  useRetryOnReconnect,
+  useBackHandler,
+  usePreventBack,
+  useDoubleBackToExit,
+  useNavigationBackHandler,
+  useExitConfirmation,
+  useKeyboard,
+  useDismissKeyboardOnTap,
+  useKeyboardScrollAdjustment,
+  useInputFocus,
+  useKeyboardBottomPadding,
+  useAppState,
+  useOnAppForeground,
+  useOnAppBackground,
+  useAppUsageTime,
+  useAppLifecycleAnalytics,
+  useRefreshOnForeground,
+  useAppStatePause,
+  useHaptic,
+  useHapticPress,
+  useHapticLike,
+  useDebounceValue,
+  useDebouncedCallback,
+  useThrottle,
+  useThrottledCallback,
+  useAnimatedValue,
+  useScaleAnimation,
+  useFadeAnimation,
+  useSlideAnimation,
+  usePulseAnimation,
+  useShakeAnimation,
+  useLikeAnimation,
+  useCountAnimation,
+  useSharedTransition,
+  useEnterAnimation,
+  usePrevious,
+  useMount,
+  useUnmount,
+  useUpdateEffect,
+  useIsMounted,
+  useFirstRender,
+  useRenderCount,
+  useDimensions,
+  useWindowSize,
+  useOrientation,
+  useResponsiveValue,
+  useScaledSize,
+  normalize,
+  getResponsiveSpacing,
+} from './hooks';
+export type { WindowDimensions, ScreenDimensions } from './hooks';
+export { useDebounce } from '../hooks/useDebounce';
 
-// Utils
-export * from './utils';
+// Utils - exclude duplicates already exported from hooks
+export {
+  createMemoComparator,
+  runAfterInteractions,
+  useLazyInit,
+  getItemLayout,
+  calculateWindowSize,
+  chunkArray,
+  scheduleIdleTask,
+  cancelIdleTask,
+  measureRenderTime,
+  useListPerformance,
+  preloadImages,
+  getListOptimizations,
+  PlatformOptimizations,
+  ErrorType,
+  AppError,
+  parseApiError,
+  showErrorAlert,
+  setupGlobalErrorHandler,
+  withErrorBoundary,
+  tryCatch,
+  retryWithBackoff,
+  haptic,
+  hapticLight,
+  hapticMedium,
+  hapticHeavy,
+  hapticSelection,
+  hapticSuccess,
+  hapticWarning,
+  hapticError,
+  withHaptic,
+  useHaptics,
+  formatRelativeTime,
+  formatDate,
+  formatDateTime,
+  formatTime,
+  formatMessageTime,
+  formatCompactNumber,
+  formatFollowerCount,
+  formatEngagementCount,
+  formatWithSeparators,
+  formatCurrency,
+  formatPercentage,
+  formatFileSize,
+  formatDuration,
+  formatPhoneNumber,
+  formatOrdinal,
+  clamp,
+  lerp,
+  roundTo,
+  isValidNumber,
+  shareContent,
+  sharePost,
+  shareProfile,
+  copyToClipboard,
+} from './utils';
+export type { ErrorFallbackProps, HapticType, FormatNumberOptions } from './utils';

@@ -7,11 +7,7 @@ import { useEffect, useCallback, useMemo } from 'react';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { notificationService } from '../services';
 import { useNotificationStore } from '../stores';
-import type { 
-  NotificationResponse, 
-  NotificationListResponse,
-  NotificationType 
-} from '../types';
+import type { NotificationResponse, NotificationListResponse, NotificationType } from '../types';
 
 const NOTIFICATIONS_QUERY_KEY = ['notifications'];
 const DEFAULT_PAGE_SIZE = 20;
@@ -27,20 +23,11 @@ interface UseNotificationsOptions {
  */
 export function useNotifications(options: UseNotificationsOptions = {}) {
   const { pageSize = DEFAULT_PAGE_SIZE, unreadOnly = false } = options;
-  
-  const queryClient = useQueryClient();
-  const { 
-    setNotifications, 
-    appendNotifications,
-    setPagination,
-    setUnreadCount,
-    setUnreadByType,
-  } = useNotificationStore();
 
-  const queryKey = useMemo(
-    () => [...NOTIFICATIONS_QUERY_KEY, { unreadOnly }],
-    [unreadOnly]
-  );
+  const queryClient = useQueryClient();
+  const { setNotifications, setUnreadCount, setUnreadByType } = useNotificationStore();
+
+  const queryKey = useMemo(() => [...NOTIFICATIONS_QUERY_KEY, { unreadOnly }], [unreadOnly]);
 
   const {
     data,
@@ -79,7 +66,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
     const firstPage = data?.pages[0];
     return {
       unreadCount: firstPage?.unreadCount ?? 0,
-      unreadByType: firstPage?.unreadByType ?? {} as Record<NotificationType, number>,
+      unreadByType: firstPage?.unreadByType ?? ({} as Record<NotificationType, number>),
       totalElements: firstPage?.totalElements ?? 0,
       totalPages: firstPage?.totalPages ?? 0,
       currentPage: data?.pages[data.pages.length - 1]?.currentPage ?? 0,
@@ -96,12 +83,10 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
   // Sync metadata with store
   useEffect(() => {
     if (data?.pages.length) {
-      const lastPage = data.pages[data.pages.length - 1];
-      setPagination(lastPage.currentPage, lastPage.totalPages, lastPage.hasMore);
       setUnreadCount(metadata.unreadCount);
       setUnreadByType(metadata.unreadByType);
     }
-  }, [data, metadata, setPagination, setUnreadCount, setUnreadByType]);
+  }, [data, metadata, setUnreadCount, setUnreadByType]);
 
   // Invalidate cache
   const invalidate = useCallback(() => {
@@ -109,47 +94,48 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
   }, [queryClient]);
 
   // Add new notification optimistically (for real-time updates)
-  const addNotification = useCallback((notification: NotificationResponse) => {
-    queryClient.setQueryData(queryKey, (oldData: any) => {
-      if (!oldData) return oldData;
+  const addNotification = useCallback(
+    (notification: NotificationResponse) => {
+      queryClient.setQueryData(queryKey, (oldData: any) => {
+        if (!oldData) return oldData;
 
-      const firstPage = oldData.pages[0];
-      return {
-        ...oldData,
-        pages: [
-          {
-            ...firstPage,
-            notifications: [notification, ...firstPage.notifications],
-            totalElements: firstPage.totalElements + 1,
-            unreadCount: !notification.read 
-              ? firstPage.unreadCount + 1 
-              : firstPage.unreadCount,
-          },
-          ...oldData.pages.slice(1),
-        ],
-      };
-    });
-  }, [queryClient, queryKey]);
+        const firstPage = oldData.pages[0];
+        return {
+          ...oldData,
+          pages: [
+            {
+              ...firstPage,
+              notifications: [notification, ...firstPage.notifications],
+              totalElements: firstPage.totalElements + 1,
+              unreadCount: !notification.read ? firstPage.unreadCount + 1 : firstPage.unreadCount,
+            },
+            ...oldData.pages.slice(1),
+          ],
+        };
+      });
+    },
+    [queryClient, queryKey],
+  );
 
   // Update notification in cache (for mark as read)
-  const updateNotificationInCache = useCallback((
-    notificationId: string, 
-    updates: Partial<NotificationResponse>
-  ) => {
-    queryClient.setQueryData(queryKey, (oldData: any) => {
-      if (!oldData) return oldData;
+  const updateNotificationInCache = useCallback(
+    (notificationId: string, updates: Partial<NotificationResponse>) => {
+      queryClient.setQueryData(queryKey, (oldData: any) => {
+        if (!oldData) return oldData;
 
-      return {
-        ...oldData,
-        pages: oldData.pages.map((page: NotificationListResponse) => ({
-          ...page,
-          notifications: page.notifications.map((n: NotificationResponse) =>
-            n.notificationId === notificationId ? { ...n, ...updates } : n
-          ),
-        })),
-      };
-    });
-  }, [queryClient, queryKey]);
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: NotificationListResponse) => ({
+            ...page,
+            notifications: page.notifications.map((n: NotificationResponse) =>
+              n.notificationId === notificationId ? { ...n, ...updates } : n,
+            ),
+          })),
+        };
+      });
+    },
+    [queryClient, queryKey],
+  );
 
   return {
     notifications,

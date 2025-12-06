@@ -23,19 +23,14 @@ export function useDeletePost() {
 
     onSuccess: (_, postId) => {
       // Remove from feed cache
-      queryClient.setQueriesData<InfiniteData<Post[]>>(
-        { queryKey: [FEED_QUERY_KEY] },
-        (old) => {
-          if (!old) return old;
+      queryClient.setQueriesData<InfiniteData<Post[]>>({ queryKey: [FEED_QUERY_KEY] }, old => {
+        if (!old) return old;
 
-          return {
-            ...old,
-            pages: old.pages.map((page) =>
-              page.filter((post) => post.postId !== postId)
-            ),
-          };
-        }
-      );
+        return {
+          ...old,
+          pages: old.pages.map(page => page.filter(post => post.id !== postId)),
+        };
+      });
 
       // Remove single post from cache
       queryClient.removeQueries({ queryKey: [POST_QUERY_KEY, postId] });
@@ -69,7 +64,7 @@ export function useDeletePostWithConfirmation() {
           style: 'destructive',
           onPress: () => deletePost.mutate(postId),
         },
-      ]
+      ],
     );
   };
 

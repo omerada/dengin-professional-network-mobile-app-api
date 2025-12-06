@@ -11,9 +11,9 @@ import {
   withDelay,
   withSequence,
   withRepeat,
-  runOnJS,
   cancelAnimation,
 } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 import { spring, duration } from '@theme/animations';
 import type { SpringPreset } from '@theme/types';
 
@@ -296,7 +296,7 @@ export function useLikeAnimation() {
           withTiming(0, { duration: 200 }, () => {
             opacity.value = 0;
             if (onComplete) {
-              runOnJS(onComplete)();
+              scheduleOnRN(onComplete);
             }
           }),
         ),
@@ -340,6 +340,184 @@ export function useCountAnimation(initialValue: number = 0) {
   return {
     value,
     animateTo,
+  };
+}
+
+/**
+ * useSharedTransition Hook
+ * Creates a shared transition value that can be used for coordinated animations
+ *
+ * @example
+ * const { progress, forward, backward, reset } = useSharedTransition();
+ *
+ * // Use progress for interpolation
+ * const animatedStyle = useAnimatedStyle(() => ({
+ *   opacity: interpolate(progress.value, [0, 1], [0, 1]),
+ *   transform: [{ scale: interpolate(progress.value, [0, 1], [0.8, 1]) }],
+ * }));
+ */
+export function useSharedTransition(config?: {
+  initialValue?: number;
+  springPreset?: SpringPreset;
+  duration?: number;
+  useSpring?: boolean;
+}) {
+  const {
+    initialValue = 0,
+    springPreset = 'gentle',
+    duration: durationMs = duration.normal,
+    useSpring: preferSpring = true,
+  } = config || {};
+
+  const progress = useSharedValue(initialValue);
+
+  const forward = useCallback(
+    (callback?: () => void) => {
+      if (preferSpring) {
+        progress.value = withSpring(1, spring[springPreset], () => {
+          if (callback) scheduleOnRN(callback);
+        });
+      } else {
+        progress.value = withTiming(1, { duration: durationMs }, () => {
+          if (callback) scheduleOnRN(callback);
+        });
+      }
+    },
+    [progress, preferSpring, springPreset, durationMs],
+  );
+
+  const backward = useCallback(
+    (callback?: () => void) => {
+      if (preferSpring) {
+        progress.value = withSpring(0, spring[springPreset], () => {
+          if (callback) scheduleOnRN(callback);
+        });
+      } else {
+        progress.value = withTiming(0, { duration: durationMs }, () => {
+          if (callback) scheduleOnRN(callback);
+        });
+      }
+    },
+    [progress, preferSpring, springPreset, durationMs],
+  );
+
+  const toggle = useCallback(
+    (callback?: () => void) => {
+      const toValue = progress.value === 0 ? 1 : 0;
+      if (preferSpring) {
+        progress.value = withSpring(toValue, spring[springPreset], () => {
+          if (callback) scheduleOnRN(callback);
+        });
+      } else {
+        progress.value = withTiming(toValue, { duration: durationMs }, () => {
+          if (callback) scheduleOnRN(callback);
+        });
+      }
+    },
+    [progress, preferSpring, springPreset, durationMs],
+  );
+
+  const reset = useCallback(() => {
+    progress.value = initialValue;
+  }, [progress, initialValue]);
+
+  const animateTo = useCallback(
+    (value: number, callback?: () => void) => {
+      if (preferSpring) {
+        progress.value = withSpring(value, spring[springPreset], () => {
+          if (callback) scheduleOnRN(callback);
+        });
+      } else {
+        progress.value = withTiming(value, { duration: durationMs }, () => {
+          if (callback) scheduleOnRN(callback);
+        });
+      }
+    },
+    [progress, preferSpring, springPreset, durationMs],
+  );
+
+  return {
+    progress,
+    forward,
+    backward,
+    toggle,
+    reset,
+    animateTo,
+  };
+}
+
+/**
+ * useEnterAnimation Hook
+ * Provides enter animation for mounting components
+ *
+ * @example
+ * const { animatedStyle, enter } = useEnterAnimation();
+ *
+ * useEffect(() => {
+ *   enter();
+ * }, []);
+ */
+export function useEnterAnimation(config?: {
+  type?: 'fade' | 'slideUp' | 'slideDown' | 'scale' | 'fadeSlideUp';
+  delay?: number;
+  springPreset?: SpringPreset;
+}) {
+  const { type = 'fadeSlideUp', delay: delayMs = 0, springPreset = 'gentle' } = config || {};
+
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(type === 'slideDown' ? -20 : 20);
+  const scale = useSharedValue(0.95);
+
+  const enter = useCallback(() => {
+    const doAnimation = () => {
+      opacity.value = withSpring(1, spring[springPreset]);
+
+      if (type === 'slideUp' || type === 'slideDown' || type === 'fadeSlideUp') {
+        translateY.value = withSpring(0, spring[springPreset]);
+      }
+
+      if (type === 'scale') {
+        scale.value = withSpring(1, spring[springPreset]);
+      }
+    };
+
+    if (delayMs > 0) {
+      opacity.value = withDelay(delayMs, withSpring(1, spring[springPreset]));
+      if (type === 'slideUp' || type === 'slideDown' || type === 'fadeSlideUp') {
+        translateY.value = withDelay(delayMs, withSpring(0, spring[springPreset]));
+      }
+      if (type === 'scale') {
+        scale.value = withDelay(delayMs, withSpring(1, spring[springPreset]));
+      }
+    } else {
+      doAnimation();
+    }
+  }, [opacity, translateY, scale, type, delayMs, springPreset]);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    switch (type) {
+      case 'fade':
+        return { opacity: opacity.value };
+      case 'slideUp':
+      case 'slideDown':
+        return { transform: [{ translateY: translateY.value }] };
+      case 'scale':
+        return { opacity: opacity.value, transform: [{ scale: scale.value }] };
+      case 'fadeSlideUp':
+      default:
+        return {
+          opacity: opacity.value,
+          transform: [{ translateY: translateY.value }],
+        };
+    }
+  });
+
+  return {
+    opacity,
+    translateY,
+    scale,
+    animatedStyle,
+    enter,
   };
 }
 

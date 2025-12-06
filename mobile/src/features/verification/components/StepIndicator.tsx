@@ -5,7 +5,7 @@
 import React, { memo, useMemo } from 'react';
 import { StyleSheet, View, Text, ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { useColors } from '@contexts';
+import { useColors } from '@contexts/ThemeContext';
 import { spacing, typography } from '@theme';
 import type { VerificationStep } from '../types';
 

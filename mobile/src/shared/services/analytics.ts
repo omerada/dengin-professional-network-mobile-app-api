@@ -3,8 +3,6 @@
 // Note: Full implementation with expo-firebase-analytics will be done during EAS Build phase
 // Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
 
-import { Platform } from 'react-native';
-
 /**
  * Analytics event names
  */
@@ -110,7 +108,6 @@ export interface UserProperties {
  */
 class AnalyticsService {
   private isEnabled: boolean = true;
-  private userId: string | null = null;
 
   /**
    * Enable or disable analytics collection
@@ -125,10 +122,10 @@ class AnalyticsService {
   /**
    * Set current user ID
    */
-  async setUserId(userId: string | null): Promise<void> {
-    this.userId = userId;
+  async setUserId(id: string | null): Promise<void> {
+    // userId stored elsewhere (auth store)
     if (__DEV__) {
-      console.log(`[Analytics] User ID set: ${userId}`);
+      console.log(`[Analytics] User ID set: ${id}`);
     }
   }
 
@@ -145,7 +142,7 @@ class AnalyticsService {
   /**
    * Log screen view
    */
-  async logScreenView(screenName: AnalyticsScreen | string, screenClass?: string): Promise<void> {
+  async logScreenView(screenName: AnalyticsScreen | string, _screenClass?: string): Promise<void> {
     if (!this.isEnabled) return;
     if (__DEV__) {
       console.log(`[Analytics] Screen: ${screenName}`);
@@ -183,7 +180,7 @@ class AnalyticsService {
   /**
    * Record a non-fatal error
    */
-  recordError(error: Error, jsErrorName?: string): void {
+  recordError(error: Error, _jsErrorName?: string): void {
     if (__DEV__) {
       console.error('[Analytics] Recorded error:', error.message);
     }
@@ -234,6 +231,9 @@ class AnalyticsService {
 
 // Export singleton instance
 export const analyticsService = new AnalyticsService();
+
+// Alias for backward compatibility
+export const Analytics = analyticsService;
 
 /**
  * React hook for screen tracking

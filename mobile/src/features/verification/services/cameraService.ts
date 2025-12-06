@@ -76,8 +76,8 @@ export const cameraService = {
    * Android için özel izin kontrolü
    */
   async checkAndroidPermissions(): Promise<boolean> {
-    if (Platform.OS !== 'android') return true;
     if (Platform.OS === 'web') return false;
+    if (Platform.OS !== 'android') return true;
 
     try {
       const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA, {

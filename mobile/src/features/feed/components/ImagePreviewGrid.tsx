@@ -2,7 +2,7 @@
 // Görsel önizleme grid komponenti
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import { View, Image, StyleSheet, Pressable, ScrollView, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';

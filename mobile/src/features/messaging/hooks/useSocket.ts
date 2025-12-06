@@ -8,7 +8,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { stompClient } from '../services/socketClient';
 import { useAuthStore } from '@features/auth/stores';
 import { useMessagingStore } from '../stores';
-import type { StompConnectionState } from '../types';
 
 /**
  * STOMP WebSocket connection hook
@@ -17,15 +16,15 @@ import type { StompConnectionState } from '../types';
  */
 export function useSocket() {
   const queryClient = useQueryClient();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const { connectionState, setConnectionState } = useMessagingStore();
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+  const { connectionState } = useMessagingStore();
   const [isOnline, setIsOnline] = useState(true);
 
   // Connect/disconnect based on auth state
   useEffect(() => {
     if (isAuthenticated) {
       // Connect STOMP client
-      stompClient.connect().catch((error) => {
+      stompClient.connect().catch(error => {
         console.error('[useSocket] Connection failed:', error);
       });
 
@@ -55,6 +54,7 @@ export function useSocket() {
     } else {
       // Disconnect if not authenticated
       stompClient.disconnect();
+      return undefined;
     }
   }, [isAuthenticated, queryClient]);
 

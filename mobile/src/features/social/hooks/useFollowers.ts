@@ -14,12 +14,11 @@ import type { FollowListResponse } from '../types';
 export function useFollowers(userId: number) {
   return useInfiniteQuery<FollowListResponse, Error>({
     queryKey: ['followers', userId],
-    queryFn: ({ pageParam }) =>
-      socialApi.getFollowers(userId, pageParam as number),
+    queryFn: ({ pageParam }) => socialApi.getFollowers(userId, pageParam as number),
     initialPageParam: 0,
     getNextPageParam: (lastPage: FollowListResponse) => {
-      if (!lastPage.hasMore) return undefined;
-      return lastPage.page + 1;
+      if (!lastPage.hasNext) return undefined;
+      return (lastPage.page ?? 0) + 1;
     },
     enabled: !!userId && userId > 0,
   });
@@ -33,12 +32,11 @@ export function useFollowers(userId: number) {
 export function useFollowing(userId: number) {
   return useInfiniteQuery<FollowListResponse, Error>({
     queryKey: ['following', userId],
-    queryFn: ({ pageParam }) =>
-      socialApi.getFollowing(userId, pageParam as number),
+    queryFn: ({ pageParam }) => socialApi.getFollowing(userId, pageParam as number),
     initialPageParam: 0,
     getNextPageParam: (lastPage: FollowListResponse) => {
-      if (!lastPage.hasMore) return undefined;
-      return lastPage.page + 1;
+      if (!lastPage.hasNext) return undefined;
+      return (lastPage.page ?? 0) + 1;
     },
     enabled: !!userId && userId > 0,
   });

@@ -75,6 +75,7 @@ export interface InteractiveColors {
   pressed: string;
   disabled: string;
   focus: string;
+  subtle: string;
 }
 
 /**
@@ -94,12 +95,16 @@ export interface BorderColors {
 export interface StatusColors {
   success: string;
   successBg: string;
+  successBackground: string; // Alias for successBg
   warning: string;
   warningBg: string;
+  warningBackground: string; // Alias for warningBg
   error: string;
   errorBg: string;
+  errorBackground: string; // Alias for errorBg
   info: string;
   infoBg: string;
+  infoBackground: string; // Alias for infoBg
 }
 
 /**
@@ -150,6 +155,10 @@ export type TypographyVariant =
   | 'bodyLarge'
   | 'body'
   | 'bodySmall'
+  | 'body1' // Alias for bodyLarge
+  | 'body2' // Alias for bodySmall
+  | 'subtitle1' // Alias for labelLarge
+  | 'subtitle2' // Alias for label
   | 'labelLarge'
   | 'label'
   | 'labelSmall'
@@ -167,6 +176,7 @@ export type TypographyStyles = Record<TypographyVariant, TextStyle>;
 
 /**
  * Spacing Keys
+ * Numeric and semantic spacing scale
  */
 export type SpacingKey =
   | '0'
@@ -192,7 +202,17 @@ export type SpacingKey =
   | '20'
   | '24'
   | '28'
-  | '32';
+  | '32'
+  // Semantic spacing keys
+  | 'xs'
+  | 'sm'
+  | 'md'
+  | 'lg'
+  | 'xl'
+  | 'xxl'
+  | '2xl'
+  | '3xl'
+  | '4xl';
 
 /**
  * Border Radius Keys
@@ -217,7 +237,7 @@ export type BorderWidthKey = '0' | 'hairline' | '1' | '2' | '3' | '4';
 /**
  * Shadow Variant Keys
  */
-export type ShadowVariant = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+export type ShadowVariant = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'card' | 'toast';
 
 /**
  * Layered Shadow Variant Keys
@@ -348,7 +368,14 @@ export type HapticType =
   | 'success'
   | 'warning'
   | 'error'
-  | 'selection';
+  | 'selection'
+  // Legacy haptic types for compatibility
+  | 'impactLight'
+  | 'impactMedium'
+  | 'impactHeavy'
+  | 'notificationSuccess'
+  | 'notificationWarning'
+  | 'notificationError';
 
 /**
  * Haptic Feedback Interface

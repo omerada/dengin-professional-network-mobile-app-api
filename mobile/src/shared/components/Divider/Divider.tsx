@@ -119,7 +119,7 @@ export const Divider = memo<DividerProps>(
           <View
             style={[styles.labelContainer, { marginVertical: spacingValue }, style]}
             testID={testID}
-            accessibilityRole="separator">
+            accessible={false}>
             {(labelPosition === 'center' || labelPosition === 'right') && (
               <View
                 style={[
@@ -168,7 +168,7 @@ export const Divider = memo<DividerProps>(
             style,
           ]}
           testID={testID}
-          accessibilityRole="separator"
+          accessible={false}
         />
       );
     }
@@ -186,7 +186,7 @@ export const Divider = memo<DividerProps>(
           style,
         ]}
         testID={testID}
-        accessibilityRole="separator"
+        accessible={false}
       />
     );
   },

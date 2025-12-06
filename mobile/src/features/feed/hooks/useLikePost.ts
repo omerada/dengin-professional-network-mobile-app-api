@@ -2,11 +2,20 @@
 // Post beğenme hook'u (optimistic update)
 // Backend API Reference: mobile-development-guide/core/14-BACKEND-API-REFERENCE.md
 
-import { useMutation, useQueryClient, InfiniteData } from '@tanstack/react-query';
+import { useMutation, useQueryClient, InfiniteData, QueryKey } from '@tanstack/react-query';
 import { feedService } from '../services';
 import { FEED_QUERY_KEY, TRENDING_FEED_KEY } from './useFeed';
 import { POST_QUERY_KEY } from './usePost';
 import type { Post, FeedResponse, LikeResponse } from '../types';
+
+/**
+ * Context type for optimistic updates
+ */
+interface LikeMutationContext {
+  previousFeed: [QueryKey, InfiniteData<FeedResponse> | undefined][];
+  previousTrending: [QueryKey, InfiniteData<FeedResponse> | undefined][];
+  previousPost: Post | undefined;
+}
 
 /**
  * Like post hook - optimistic update destekli
@@ -15,7 +24,12 @@ import type { Post, FeedResponse, LikeResponse } from '../types';
 export function useLikePost() {
   const queryClient = useQueryClient();
 
-  return useMutation<LikeResponse, Error, { postId: number; isLiked: boolean }>({
+  return useMutation<
+    LikeResponse,
+    Error,
+    { postId: number; isLiked: boolean },
+    LikeMutationContext
+  >({
     mutationFn: async ({ postId, isLiked }) => {
       if (isLiked) {
         return feedService.unlikePost(postId);
@@ -23,7 +37,7 @@ export function useLikePost() {
       return feedService.likePost(postId);
     },
 
-    onMutate: async ({ postId, isLiked }) => {
+    onMutate: async ({ postId, isLiked }): Promise<LikeMutationContext> => {
       // Cancel ongoing queries
       await queryClient.cancelQueries({ queryKey: [FEED_QUERY_KEY] });
       await queryClient.cancelQueries({ queryKey: [TRENDING_FEED_KEY] });
@@ -39,7 +53,9 @@ export function useLikePost() {
       const previousPost = queryClient.getQueryData<Post>([POST_QUERY_KEY, postId]);
 
       // Helper function to update posts in feed
-      const updateFeedPosts = (old: InfiniteData<FeedResponse> | undefined) => {
+      const updateFeedPosts = (
+        old: InfiniteData<FeedResponse> | undefined,
+      ): InfiniteData<FeedResponse> | undefined => {
         if (!old) return old;
 
         return {
@@ -47,17 +63,11 @@ export function useLikePost() {
           pages: old.pages.map(page => ({
             ...page,
             content: page.content.map(post =>
-              post.postId === postId
+              post.id === postId
                 ? {
                     ...post,
-                    userInteraction: {
-                      ...post.userInteraction,
-                      isLiked: !isLiked,
-                    },
-                    stats: {
-                      ...post.stats,
-                      likeCount: isLiked ? post.stats.likeCount - 1 : post.stats.likeCount + 1,
-                    },
+                    liked: !isLiked,
+                    likeCount: isLiked ? post.likeCount - 1 : post.likeCount + 1,
                   }
                 : post,
             ),
@@ -81,16 +91,8 @@ export function useLikePost() {
       if (previousPost) {
         queryClient.setQueryData<Post>([POST_QUERY_KEY, postId], {
           ...previousPost,
-          userInteraction: {
-            ...previousPost.userInteraction,
-            isLiked: !isLiked,
-          },
-          stats: {
-            ...previousPost.stats,
-            likeCount: isLiked
-              ? previousPost.stats.likeCount - 1
-              : previousPost.stats.likeCount + 1,
-          },
+          liked: !isLiked,
+          likeCount: isLiked ? previousPost.likeCount - 1 : previousPost.likeCount + 1,
         });
       }
 

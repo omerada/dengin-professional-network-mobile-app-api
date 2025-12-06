@@ -6,7 +6,7 @@ import React, { memo, useCallback } from 'react';
 import { StyleSheet, View, Text, ScrollView, SafeAreaView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useColors } from '@contexts';
+import { useColors } from '@contexts/ThemeContext';
 import { spacing, typography } from '@theme';
 import { Button } from '@shared/components';
 import { useVerificationStore } from '../stores';
@@ -31,7 +31,7 @@ export const VerificationReviewScreen: React.FC = memo(() => {
   const handleRetakeDocumentFront = useCallback(() => {
     setDocumentFront(null as any);
     setStep('document_front');
-    navigation.navigate('DocumentCapture', { side: 'front' });
+    navigation.navigate('DocumentCapture', { documentType: 'DIPLOMA', side: 'front' });
   }, [navigation, setDocumentFront, setStep]);
 
   /**
@@ -40,7 +40,7 @@ export const VerificationReviewScreen: React.FC = memo(() => {
   const handleRetakeDocumentBack = useCallback(() => {
     setDocumentBack(null as any);
     setStep('document_back');
-    navigation.navigate('DocumentCapture', { side: 'back' });
+    navigation.navigate('DocumentCapture', { documentType: 'DIPLOMA', side: 'back' });
   }, [navigation, setDocumentBack, setStep]);
 
   /**
@@ -63,7 +63,7 @@ export const VerificationReviewScreen: React.FC = memo(() => {
     }
 
     setStep('uploading');
-    navigation.navigate('UploadStatus');
+    navigation.navigate('VerificationStatus');
   }, [data, navigation, setStep]);
 
   /**

@@ -547,7 +547,7 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  runOnJS,
+  scheduleOnRN,
 } from "react-native-reanimated";
 import { useHaptic } from "@/shared/hooks/useHaptic";
 import { useTheme } from "@/theme";
@@ -589,8 +589,8 @@ export const HapticSlider: React.FC<HapticSliderProps> = memo(
       const newValue = min + newProgress * (max - min);
       const steppedValue = Math.round(newValue / step) * step;
 
-      runOnJS(triggerStepHaptic)(steppedValue);
-      runOnJS(onValueChange)(steppedValue);
+      scheduleOnRN(triggerStepHaptic)(steppedValue);
+      scheduleOnRN(onValueChange)(steppedValue);
     });
 
     const fillStyle = useAnimatedStyle(() => ({
@@ -663,7 +663,7 @@ import Animated, {
   withSpring,
   withSequence,
   withDelay,
-  runOnJS,
+  scheduleOnRN,
 } from "react-native-reanimated";
 import { useHaptic } from "@/shared/hooks/useHaptic";
 import HeartIcon from "@/assets/icons/heart-filled.svg";
@@ -704,7 +704,7 @@ export const DoubleTapLike: React.FC<DoubleTapLikeProps> = memo(
     const doubleTapGesture = Gesture.Tap()
       .numberOfTaps(2)
       .onEnd(() => {
-        runOnJS(handleDoubleTap)();
+        scheduleOnRN(handleDoubleTap)();
       });
 
     const heartStyle = useAnimatedStyle(() => ({

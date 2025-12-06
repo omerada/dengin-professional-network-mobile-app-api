@@ -6,11 +6,7 @@
 import { useInfiniteQuery, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
 import { stompClient } from '../services/socketClient';
-import type { 
-  WsMessageResponse, 
-  ConversationListResponse, 
-  Conversation 
-} from '../types';
+import type { WsMessageResponse, ConversationListResponse, Conversation } from '../types';
 import { messagingService } from '../services';
 
 export const CONVERSATIONS_QUERY_KEY = 'conversations';
@@ -26,7 +22,7 @@ export function useConversations() {
   // Subscribe to real-time events
   useEffect(() => {
     // Invalidate conversations on new message
-    const handleNewMessage = (data: WsMessageResponse) => {
+    const handleNewMessage = (_data: WsMessageResponse) => {
       queryClient.invalidateQueries({ queryKey: [CONVERSATIONS_QUERY_KEY] });
       queryClient.invalidateQueries({ queryKey: [UNREAD_COUNT_QUERY_KEY] });
     };
@@ -48,13 +44,13 @@ export function useConversations() {
   const query = useInfiniteQuery<ConversationListResponse, Error>({
     queryKey: [CONVERSATIONS_QUERY_KEY],
     queryFn: async ({ pageParam = 0 }) => {
-      return messagingService.getConversations({ 
-        page: pageParam as number, 
-        size: 20 
+      return messagingService.getConversations({
+        page: pageParam as number,
+        size: 20,
       });
     },
     initialPageParam: 0,
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: lastPage => {
       if (lastPage.hasMore) {
         return lastPage.pageNumber + 1;
       }
@@ -65,7 +61,7 @@ export function useConversations() {
 
   // Flatten conversations from all pages
   const conversations = useMemo(() => {
-    return query.data?.pages.flatMap((page) => page.conversations) ?? [];
+    return query.data?.pages.flatMap(page => page.conversations) ?? [];
   }, [query.data]);
 
   // Total count
@@ -98,10 +94,7 @@ export function useTotalUnreadCount() {
   const { conversations } = useConversations();
 
   return useMemo(() => {
-    return conversations.reduce(
-      (sum: number, conv: Conversation) => sum + conv.unreadCount,
-      0
-    );
+    return conversations.reduce((sum: number, conv: Conversation) => sum + conv.unreadCount, 0);
   }, [conversations]);
 }
 

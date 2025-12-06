@@ -41,7 +41,7 @@ export const NotificationSettingsScreen: React.FC = () => {
     togglePush,
     toggleEmail,
     toggleTypeEnabled,
-    setQuietHours,
+    setQuietHours: _setQuietHours,
     isSaving,
     isNotificationsEnabled,
     isPushEnabled,
@@ -130,9 +130,12 @@ export const NotificationSettingsScreen: React.FC = () => {
   // Get toggle value for a notification type
   const getTypeEnabled = useCallback(
     (type: NotificationType): boolean => {
-      return preferences.typeSettings?.[type]?.enabled ?? true;
+      // typeSettings is Record<string, DeliveryChannel[]>
+      const channels = preferences?.typeSettings?.[type];
+      // If channels array exists and has items, type is enabled
+      return channels ? channels.length > 0 : true;
     },
-    [preferences.typeSettings],
+    [preferences?.typeSettings],
   );
 
   // Handle type toggle
@@ -230,7 +233,8 @@ export const NotificationSettingsScreen: React.FC = () => {
           <View style={[styles.quietHoursInfo, { backgroundColor: colors.status.info }]}>
             <Icon name="moon" size={20} color={colors.status.info} style={styles.warningIcon} />
             <Text style={[styles.quietHoursText, { color: colors.status.info }]}>
-              Sessiz saatler aktif ({preferences.quietHoursStart} - {preferences.quietHoursEnd})
+              Sessiz saatler aktif ({preferences?.quietHoursStart ?? 0} -{' '}
+              {preferences?.quietHoursEnd ?? 0})
             </Text>
           </View>
         )}

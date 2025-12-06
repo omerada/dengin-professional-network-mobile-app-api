@@ -7,8 +7,8 @@ import { StyleSheet, Text, ActivityIndicator, Pressable } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing, fontSize } from '@theme';
-import { springPresets } from '@theme/animations';
-import { useHaptic } from '@hooks/useHaptic';
+import { spring } from '@theme/animations';
+import { useHaptic } from '@shared/hooks/useHaptic';
 import { useFollow, useUnfollow } from '../hooks';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -110,10 +110,10 @@ export const FollowButton: React.FC<FollowButtonProps> = memo(
         style={[buttonStyle, animatedStyle]}
         onPress={handlePress}
         onPressIn={() => {
-          scale.value = withSpring(0.95, springPresets.press);
+          scale.value = withSpring(0.95, spring.press);
         }}
         onPressOut={() => {
-          scale.value = withSpring(1, springPresets.press);
+          scale.value = withSpring(1, spring.press);
         }}
         disabled={isLoading}
         accessibilityRole="button"

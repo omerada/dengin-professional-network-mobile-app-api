@@ -3,7 +3,7 @@
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { View, StyleSheet, Pressable, Dimensions } from 'react-native';
+import { StyleSheet, Pressable, Dimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -90,41 +90,41 @@ export const PostCard = memo<PostCardProps>(
     // Navigation handlers
     const handlePress = useCallback(() => {
       buttonPress();
-      navigation.navigate('PostDetail' as never, { postId: post.postId } as never);
-    }, [navigation, post.postId, buttonPress]);
+      (navigation as any).navigate('PostDetail', { postId: post.id });
+    }, [navigation, post.id, buttonPress]);
 
     const handleAuthorPress = useCallback(() => {
       buttonPress();
-      navigation.navigate('UserProfile' as never, { userId: post.author.id } as never);
-    }, [navigation, post.author.id, buttonPress]);
+      (navigation as any).navigate('UserProfile', { userId: post.author.userId });
+    }, [navigation, post.author.userId, buttonPress]);
 
     // Action handlers
     const handleLike = useCallback(() => {
-      onLike?.(post.postId, post.userInteraction.isLiked);
-    }, [onLike, post.postId, post.userInteraction.isLiked]);
+      onLike?.(post.id, post.liked);
+    }, [onLike, post.id, post.liked]);
 
     const handleDoubleTapLike = useCallback(() => {
       // Only trigger if not already liked
-      if (!post.userInteraction.isLiked) {
-        onLike?.(post.postId, false);
+      if (!post.liked) {
+        onLike?.(post.id, false);
       }
-    }, [onLike, post.postId, post.userInteraction.isLiked]);
+    }, [onLike, post.id, post.liked]);
 
     const handleComment = useCallback(() => {
-      onComment?.(post.postId);
-    }, [onComment, post.postId]);
+      onComment?.(post.id);
+    }, [onComment, post.id]);
 
     const handleShare = useCallback(() => {
-      onShare?.(post.postId);
-    }, [onShare, post.postId]);
+      onShare?.(post.id);
+    }, [onShare, post.id]);
 
     const handleBookmark = useCallback(() => {
-      onBookmark?.(post.postId, post.userInteraction.isSaved);
-    }, [onBookmark, post.postId, post.userInteraction.isSaved]);
+      onBookmark?.(post.id, post.userInteraction?.isSaved ?? false);
+    }, [onBookmark, post.id, post.userInteraction?.isSaved]);
 
     const handleMenu = useCallback(() => {
-      onMenuPress?.(post.postId);
-    }, [onMenuPress, post.postId]);
+      onMenuPress?.(post.id);
+    }, [onMenuPress, post.id]);
 
     // Animation handlers
     const handlePressIn = useCallback(() => {
@@ -146,6 +146,9 @@ export const PostCard = memo<PostCardProps>(
     // Check if post has images
     const hasImages = post.images && post.images.length > 0;
 
+    // Map PostImageDto[] to string[] for PostImages component
+    const imageUrls = useMemo(() => post.images?.map(img => img.url) ?? [], [post.images]);
+
     return (
       <AnimatedPressable
         testID={testID}
@@ -155,7 +158,7 @@ export const PostCard = memo<PostCardProps>(
         onPressOut={handlePressOut}
         accessible
         accessibilityRole="button"
-        accessibilityLabel={`${post.author.firstName} ${post.author.lastName} tarafından paylaşılan gönderi`}
+        accessibilityLabel={`${post.author.name} ${post.author.surname} tarafından paylaşılan gönderi`}
         accessibilityHint="Detayları görmek için tıklayın">
         {/* Header */}
         <PostHeader
@@ -170,18 +173,18 @@ export const PostCard = memo<PostCardProps>(
 
         {/* Images with double tap to like */}
         {hasImages && (
-          <DoubleTapLike isLiked={post.userInteraction.isLiked} onDoubleTap={handleDoubleTapLike}>
-            <PostImages images={post.images} postId={post.postId} />
+          <DoubleTapLike isLiked={post.liked} onDoubleTap={handleDoubleTapLike}>
+            <PostImages images={imageUrls} postId={post.id} />
           </DoubleTapLike>
         )}
 
         {/* Actions */}
         <PostActions
-          likesCount={post.stats.likeCount}
-          commentsCount={post.stats.commentCount}
-          sharesCount={post.stats.viewCount}
-          isLiked={post.userInteraction.isLiked}
-          isBookmarked={post.userInteraction.isSaved}
+          likesCount={post.likeCount}
+          commentsCount={post.commentCount}
+          sharesCount={post.stats?.viewCount ?? 0}
+          isLiked={post.liked}
+          isBookmarked={post.userInteraction?.isSaved ?? false}
           onLike={handleLike}
           onComment={handleComment}
           onShare={handleShare}
@@ -194,11 +197,11 @@ export const PostCard = memo<PostCardProps>(
   (prevProps, nextProps) => {
     // Custom comparison for better performance
     return (
-      prevProps.post.postId === nextProps.post.postId &&
-      prevProps.post.stats.likeCount === nextProps.post.stats.likeCount &&
-      prevProps.post.stats.commentCount === nextProps.post.stats.commentCount &&
-      prevProps.post.userInteraction.isLiked === nextProps.post.userInteraction.isLiked &&
-      prevProps.post.userInteraction.isSaved === nextProps.post.userInteraction.isSaved
+      prevProps.post.id === nextProps.post.id &&
+      prevProps.post.likeCount === nextProps.post.likeCount &&
+      prevProps.post.commentCount === nextProps.post.commentCount &&
+      prevProps.post.liked === nextProps.post.liked &&
+      prevProps.post.userInteraction?.isSaved === nextProps.post.userInteraction?.isSaved
     );
   },
 );

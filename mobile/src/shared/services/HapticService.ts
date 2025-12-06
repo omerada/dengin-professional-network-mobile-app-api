@@ -21,6 +21,13 @@ const hapticTypeMap: Record<HapticType, HapticFeedbackTypes> = {
   warning: 'notificationWarning',
   error: 'notificationError',
   selection: 'selection',
+  // Legacy types - map to themselves
+  impactLight: 'impactLight',
+  impactMedium: 'impactMedium',
+  impactHeavy: 'impactHeavy',
+  notificationSuccess: 'notificationSuccess',
+  notificationWarning: 'notificationWarning',
+  notificationError: 'notificationError',
 };
 
 /**

@@ -276,6 +276,41 @@ export const typography: TypographyStyles = {
     letterSpacing: letterSpacing.tight,
     fontVariant: ['tabular-nums'] as TextStyle['fontVariant'],
   } as TextStyle,
+
+  // Aliases for backward compatibility
+  body1: {
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.regular,
+    lineHeight: fontSize.lg * lineHeight.relaxed,
+    letterSpacing: letterSpacing.normal,
+  } as TextStyle,
+
+  body2: {
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.regular,
+    lineHeight: fontSize.sm * lineHeight.relaxed,
+    letterSpacing: letterSpacing.wide,
+  } as TextStyle,
+
+  subtitle1: {
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.base,
+    fontWeight: fontWeight.semibold,
+    lineHeight: fontSize.base * lineHeight.normal,
+    letterSpacing: letterSpacing.wide,
+    textTransform: 'uppercase',
+  } as TextStyle,
+
+  subtitle2: {
+    fontFamily: fontFamily.body,
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.medium,
+    lineHeight: fontSize.sm * lineHeight.normal,
+    letterSpacing: letterSpacing.wide,
+    textTransform: 'uppercase',
+  } as TextStyle,
 } as const;
 
 export type { TypographyVariant };

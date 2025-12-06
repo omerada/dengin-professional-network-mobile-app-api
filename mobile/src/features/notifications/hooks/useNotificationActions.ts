@@ -18,13 +18,12 @@ const UNREAD_COUNT_QUERY_KEY = ['notifications', 'unread-count'];
  */
 export function useMarkAsRead() {
   const queryClient = useQueryClient();
-  const storeMarkAsRead = useNotificationStore((state) => state.markAsRead);
-  const decrementUnreadCount = useNotificationStore((state) => state.decrementUnreadCount);
+  const storeMarkAsRead = useNotificationStore(state => state.markAsRead);
+  const decrementUnreadCount = useNotificationStore(state => state.decrementUnreadCount);
 
   const mutation = useMutation({
-    mutationFn: (notificationId: string) =>
-      notificationService.markAsRead(notificationId),
-    onMutate: async (notificationId) => {
+    mutationFn: (notificationId: string) => notificationService.markAsRead(notificationId),
+    onMutate: async notificationId => {
       // Optimistic update in store
       storeMarkAsRead(notificationId);
       decrementUnreadCount();
@@ -37,15 +36,18 @@ export function useMarkAsRead() {
       // Invalidate to sync with server
       queryClient.invalidateQueries({ queryKey: UNREAD_COUNT_QUERY_KEY });
     },
-    onError: (_error, notificationId) => {
+    onError: (_error, _notificationId) => {
       // Revert on error - re-fetch to sync
       queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
     },
   });
 
-  const markAsRead = useCallback((notificationId: string) => {
-    mutation.mutate(notificationId);
-  }, [mutation]);
+  const markAsRead = useCallback(
+    (notificationId: string) => {
+      mutation.mutate(notificationId);
+    },
+    [mutation],
+  );
 
   return {
     markAsRead,
@@ -60,19 +62,18 @@ export function useMarkAsRead() {
  */
 export function useMarkMultipleAsRead() {
   const queryClient = useQueryClient();
-  const storeMarkMultipleAsRead = useNotificationStore((state) => state.markMultipleAsRead);
+  const storeMarkMultipleAsRead = useNotificationStore(state => state.markMultipleAsRead);
 
   const mutation = useMutation({
-    mutationFn: (request: MarkAsReadRequest) =>
-      notificationService.markMultipleAsRead(request),
-    onMutate: async (request) => {
+    mutationFn: (request: MarkAsReadRequest) => notificationService.markMultipleAsRead(request),
+    onMutate: async request => {
       if (request.notificationIds) {
         storeMarkMultipleAsRead(request.notificationIds);
-        
+
         // Update badge
         const currentBadge = await notifeeService.getBadgeCount();
         await notifeeService.setBadgeCount(
-          Math.max(0, currentBadge - request.notificationIds.length)
+          Math.max(0, currentBadge - request.notificationIds.length),
         );
       }
     },
@@ -82,9 +83,12 @@ export function useMarkMultipleAsRead() {
     },
   });
 
-  const markMultipleAsRead = useCallback((notificationIds: string[]) => {
-    mutation.mutate({ markAll: false, notificationIds });
-  }, [mutation]);
+  const markMultipleAsRead = useCallback(
+    (notificationIds: string[]) => {
+      mutation.mutate({ markAll: false, notificationIds });
+    },
+    [mutation],
+  );
 
   return {
     markMultipleAsRead,
@@ -99,8 +103,8 @@ export function useMarkMultipleAsRead() {
  */
 export function useMarkAllAsRead() {
   const queryClient = useQueryClient();
-  const storeMarkAllAsRead = useNotificationStore((state) => state.markAllAsRead);
-  const resetUnreadCount = useNotificationStore((state) => state.resetUnreadCount);
+  const storeMarkAllAsRead = useNotificationStore(state => state.markAllAsRead);
+  const resetUnreadCount = useNotificationStore(state => state.resetUnreadCount);
 
   const mutation = useMutation({
     mutationFn: () => notificationService.markAllAsRead(),
@@ -139,19 +143,22 @@ export function useMarkAllAsRead() {
  */
 export function useDeleteNotification() {
   const queryClient = useQueryClient();
-  const removeNotification = useNotificationStore((state) => state.removeNotification);
+  const removeNotification = useNotificationStore(state => state.removeNotification);
 
-  const deleteNotification = useCallback(async (notificationId: string) => {
-    // Local store'dan kaldır
-    removeNotification(notificationId);
+  const deleteNotification = useCallback(
+    async (notificationId: string) => {
+      // Local store'dan kaldır
+      removeNotification(notificationId);
 
-    // Displayed notification'ı iptal et
-    await notifeeService.cancelNotification(notificationId);
+      // Displayed notification'ı iptal et
+      await notifeeService.cancelNotification(notificationId);
 
-    // Cache'i güncelle
-    queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
-    queryClient.invalidateQueries({ queryKey: UNREAD_COUNT_QUERY_KEY });
-  }, [removeNotification, queryClient]);
+      // Cache'i güncelle
+      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: UNREAD_COUNT_QUERY_KEY });
+    },
+    [removeNotification, queryClient],
+  );
 
   return {
     deleteNotification,
@@ -163,7 +170,7 @@ export function useDeleteNotification() {
  */
 export function useClearAllNotifications() {
   const queryClient = useQueryClient();
-  const clearAll = useNotificationStore((state) => state.clearAllNotifications);
+  const clearAll = useNotificationStore(state => state.clearAllNotifications);
 
   const clearAllNotifications = useCallback(async () => {
     // Local store'u temizle
@@ -189,15 +196,18 @@ export function useClearAllNotifications() {
 export function useNotificationHandler() {
   const { markAsRead } = useMarkAsRead();
 
-  const handleNotificationPress = useCallback((notification: NotificationResponse) => {
-    // Okunmamışsa okundu olarak işaretle
-    if (!notification.read) {
-      markAsRead(notification.notificationId);
-    }
+  const handleNotificationPress = useCallback(
+    (notification: NotificationResponse) => {
+      // Okunmamışsa okundu olarak işaretle
+      if (!notification.read) {
+        markAsRead(notification.notificationId);
+      }
 
-    // actionUrl varsa navigate et (navigation hook'u ile birlikte kullanılmalı)
-    return notification.actionUrl;
-  }, [markAsRead]);
+      // actionUrl varsa navigate et (navigation hook'u ile birlikte kullanılmalı)
+      return notification.actionUrl;
+    },
+    [markAsRead],
+  );
 
   return {
     handleNotificationPress,

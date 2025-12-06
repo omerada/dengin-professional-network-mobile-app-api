@@ -49,9 +49,7 @@ export function useUpdateProfile() {
       updateUser({
         name: data.name,
         surname: data.surname,
-        bio: data.bio,
-        firstName: data.name,
-        lastName: data.surname,
+        bio: data.bio ?? undefined,
       });
     },
     onError: error => {
@@ -110,7 +108,7 @@ export function useDeleteAvatar() {
     mutationFn: profileApi.deleteAvatar,
     onSuccess: () => {
       // Auth store'daki avatarUrl'i temizle
-      updateUser({ avatarUrl: null });
+      updateUser({ avatarUrl: undefined });
 
       // Profile cache'ini invalidate et
       queryClient.invalidateQueries({ queryKey: profileKeys.me() });

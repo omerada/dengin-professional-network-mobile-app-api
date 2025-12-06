@@ -82,7 +82,7 @@ import Animated, {
   withSequence,
   withTiming,
   interpolate,
-  runOnJS,
+  scheduleOnRN,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Svg, { Path } from "react-native-svg";
@@ -196,7 +196,7 @@ export const HeartAnimation = memo(
             } else {
               triggerUnlike();
             }
-            runOnJS(handlePress)();
+            scheduleOnRN(handlePress)();
           } else {
             scale.value = withSpring(1);
           }
@@ -343,7 +343,7 @@ import Animated, {
   withSequence,
   withTiming,
   withDelay,
-  runOnJS,
+  scheduleOnRN,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Svg, { Path } from "react-native-svg";
@@ -408,7 +408,7 @@ export const DoubleTapLike = memo<DoubleTapLikeProps>(
       .numberOfTaps(2)
       .maxDuration(250)
       .onEnd((event) => {
-        runOnJS(showHeart)(event.x, event.y);
+        scheduleOnRN(showHeart)(event.x, event.y);
       });
 
     // Single tap for child interactions (passthrough)
@@ -686,7 +686,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  runOnJS,
+  scheduleOnRN,
   interpolate,
   Extrapolate,
 } from "react-native-reanimated";
@@ -771,7 +771,7 @@ export const SwipeableRow = memo<SwipeableRowProps>(
           Math.abs(newX) >= SWIPE_THRESHOLD &&
           Math.abs(contextX.value) < SWIPE_THRESHOLD
         ) {
-          runOnJS(triggerHaptic)("impactLight");
+          scheduleOnRN(triggerHaptic)("impactLight");
         }
       })
       .onEnd((event) => {
@@ -786,10 +786,10 @@ export const SwipeableRow = memo<SwipeableRowProps>(
 
         if (shouldSnapToLeft && leftActions.length > 0) {
           translateX.value = withSpring(leftActionsWidth, { damping: 20 });
-          if (onSwipeComplete) runOnJS(onSwipeComplete)("left");
+          if (onSwipeComplete) scheduleOnRN(onSwipeComplete)("left");
         } else if (shouldSnapToRight && rightActions.length > 0) {
           translateX.value = withSpring(-rightActionsWidth, { damping: 20 });
-          if (onSwipeComplete) runOnJS(onSwipeComplete)("right");
+          if (onSwipeComplete) scheduleOnRN(onSwipeComplete)("right");
         } else {
           translateX.value = withSpring(0, { damping: 20 });
         }
@@ -866,7 +866,7 @@ export const SwipeableRow = memo<SwipeableRowProps>(
             >
               <GestureDetector
                 gesture={Gesture.Tap().onEnd(() =>
-                  runOnJS(handleActionPress)(action)
+                  scheduleOnRN(handleActionPress)(action)
                 )}
               >
                 <Animated.View style={styles.actionContent}>
@@ -896,7 +896,7 @@ export const SwipeableRow = memo<SwipeableRowProps>(
             >
               <GestureDetector
                 gesture={Gesture.Tap().onEnd(() =>
-                  runOnJS(handleActionPress)(action)
+                  scheduleOnRN(handleActionPress)(action)
                 )}
               >
                 <Animated.View style={styles.actionContent}>
@@ -970,7 +970,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  runOnJS,
+  scheduleOnRN,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useHaptic } from "@hooks/useHaptic";
@@ -1046,7 +1046,7 @@ export const PressableScale = memo<PressableScaleProps>(
         opacity.value = withSpring(1);
 
         if (success) {
-          runOnJS(handlePress)();
+          scheduleOnRN(handlePress)();
         }
       });
 
@@ -1055,7 +1055,7 @@ export const PressableScale = memo<PressableScaleProps>(
       .enabled(!disabled && !!onLongPress)
       .minDuration(500)
       .onStart(() => {
-        runOnJS(handleLongPress)();
+        scheduleOnRN(handleLongPress)();
       });
 
     const gesture = Gesture.Race(tapGesture, longPressGesture);
@@ -1117,7 +1117,7 @@ import Animated, {
   withSpring,
   interpolate,
   interpolateColor,
-  runOnJS,
+  scheduleOnRN,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useTheme } from "@theme";
@@ -1181,7 +1181,7 @@ export const AnimatedSwitch = memo<AnimatedSwitchProps>(
       .onFinalize((_, success) => {
         scale.value = withSpring(1);
         if (success) {
-          runOnJS(handleToggle)();
+          scheduleOnRN(handleToggle)();
         }
       });
 
@@ -1283,7 +1283,7 @@ import Animated, {
   useSharedValue,
   withSpring,
   interpolate,
-  runOnJS,
+  scheduleOnRN,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -1394,7 +1394,7 @@ const TabItem = memo<TabItemComponentProps>(
       .onFinalize((_, success) => {
         scale.value = withSpring(1, { damping: 15, stiffness: 400 });
         if (success) {
-          runOnJS(onPress)();
+          scheduleOnRN(onPress)();
         }
       });
 

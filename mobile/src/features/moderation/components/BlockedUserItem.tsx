@@ -72,7 +72,11 @@ export const BlockedUserItem = React.memo<BlockedUserItemProps>(({ user, onUnblo
   if (isUnblocked) {
     return (
       <View
-        style={[styles.container, styles.unblocked, { backgroundColor: colors.status.success }]}
+        style={[
+          styles.container,
+          styles.unblocked,
+          { backgroundColor: colors.background.secondary },
+        ]}
         accessibilityLabel={`${user.fullName} engeli kaldırıldı`}>
         <Text style={[styles.unblockedText, { color: colors.status.success }]}>
           {user.fullName} engeli kaldırıldı
@@ -84,7 +88,7 @@ export const BlockedUserItem = React.memo<BlockedUserItemProps>(({ user, onUnblo
   return (
     <View
       style={[styles.container, { backgroundColor: colors.background.primary }]}
-      accessibilityRole="listitem"
+      accessible
       accessibilityLabel={`${user.fullName}, ${blockedTimeAgo} engellendi`}
       testID={testID}>
       <TouchableOpacity
@@ -145,7 +149,7 @@ const styles = StyleSheet.create({
   },
   blockedDate: {
     fontSize: fontSize.sm,
-    marginTop: spacing.xxs,
+    marginTop: spacing.xs,
   },
   unblocked: {
     justifyContent: 'center',

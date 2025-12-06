@@ -4,7 +4,6 @@
 
 import React, { memo, useCallback } from 'react';
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, View } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing, fontSize } from '@theme';
 import { useGoogleSignIn } from '../hooks';

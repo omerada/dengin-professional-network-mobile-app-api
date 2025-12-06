@@ -3,10 +3,10 @@
 // Backend: com.meslektas.messaging.api.dto.*
 // WebSocket: com.meslektas.messaging.infrastructure.websocket.dto.*
 
-import { UUID, isValidUUID, toUUID } from '@shared/types/common.types';
+import { type UUID, isValidUUID, toUUID } from '@shared/types/common.types';
 
 // Re-export UUID utilities for convenience
-export { UUID, isValidUUID, toUUID };
+export { type UUID, isValidUUID, toUUID };
 
 // =============================================================================
 // ENUMS - Backend ile uyumlu
@@ -114,6 +114,18 @@ export interface Conversation {
   updatedAt: string;
   /** Oluşturulma zamanı - ISO 8601 */
   createdAt: string;
+}
+
+/**
+ * Konuşma özeti - UI için genişletilmiş versiyon
+ */
+export interface ConversationSummary extends Conversation {
+  /** Konuşma adı (katılımcı adından türetilir) */
+  name: string;
+  /** Sabitlenmiş mi */
+  isPinned?: boolean;
+  /** Sessiz mi */
+  isMuted?: boolean;
 }
 
 /**

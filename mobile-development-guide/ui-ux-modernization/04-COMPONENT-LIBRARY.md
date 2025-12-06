@@ -126,7 +126,7 @@ export const Button: React.FC<ButtonProps> = memo(
         scale.value = withSpring(1, { damping: 15, stiffness: 500 });
       })
       .onEnd(() => {
-        runOnJS(handlePress)();
+        scheduleOnRN(handlePress)();
       });
 
     const handlePress = useCallback(() => {
@@ -187,7 +187,7 @@ import Animated, {
   withSpring,
   withTiming,
   interpolate,
-  runOnJS,
+  scheduleOnRN,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { LinearGradient } from "expo-linear-gradient";
@@ -351,14 +351,14 @@ export const Button: React.FC<ButtonProps> = memo(
       .onBegin(handlePressIn)
       .onFinalize(handlePressOut)
       .onEnd(() => {
-        runOnJS(handlePress)();
+        scheduleOnRN(handlePress)();
       });
 
     const longPressGesture = Gesture.LongPress()
       .enabled(!disabled && !loading && !!onLongPress)
       .minDuration(500)
       .onStart(() => {
-        runOnJS(handleLongPress)();
+        scheduleOnRN(handleLongPress)();
       });
 
     const composedGesture = Gesture.Race(gesture, longPressGesture);
@@ -522,7 +522,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  runOnJS,
+  scheduleOnRN,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useHaptic } from "@hooks/useHaptic";
@@ -582,14 +582,14 @@ export const Pressable: React.FC<PressableProps> = memo(
         scale.value = withSpring(1, spring.press);
       })
       .onEnd(() => {
-        runOnJS(handlePress)();
+        scheduleOnRN(handlePress)();
       });
 
     const longPressGesture = Gesture.LongPress()
       .enabled(!disabled && !!onLongPress)
       .minDuration(500)
       .onStart(() => {
-        runOnJS(handleLongPress)();
+        scheduleOnRN(handleLongPress)();
       });
 
     const gesture = onLongPress
@@ -1161,7 +1161,7 @@ import Animated, {
   withSpring,
   withDelay,
   withSequence,
-  runOnJS,
+  scheduleOnRN,
   SlideInDown,
   SlideOutDown,
 } from "react-native-reanimated";

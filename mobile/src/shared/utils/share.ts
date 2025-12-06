@@ -45,7 +45,7 @@ export async function shareContent(content: ShareContentOptions): Promise<ShareR
     if (result.action === Share.sharedAction) {
       return {
         success: true,
-        activity: result.activityType,
+        activity: result.activityType || undefined,
       };
     } else if (result.action === Share.dismissedAction) {
       return {

@@ -3,7 +3,7 @@
 // Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
 
 import React, { useMemo, useCallback, useState } from 'react';
-import { StyleSheet, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme, useColors } from '@contexts/ThemeContext';
@@ -22,12 +22,12 @@ import type { SettingsSectionType } from '../types';
  * - Danger Zone (delete account)
  */
 export const SettingsScreen: React.FC = () => {
-  const { toggleTheme, isDarkMode } = useTheme();
+  const { toggleTheme, isDark } = useTheme();
   const colors = useColors();
   const navigation = useNavigation();
 
   // Loading states
-  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
+  const [loadingStates, _setLoadingStates] = useState<Record<string, boolean>>({});
 
   // Handlers
   const handleEditProfile = useCallback(() => {
@@ -140,7 +140,7 @@ export const SettingsScreen: React.FC = () => {
             title: 'Karanlık Mod',
             icon: 'moon-outline',
             type: 'toggle',
-            value: isDarkMode,
+            value: isDark,
             onToggle: toggleTheme,
           },
         ],
@@ -179,7 +179,7 @@ export const SettingsScreen: React.FC = () => {
       },
     ],
     [
-      isDarkMode,
+      isDark,
       toggleTheme,
       handleEditProfile,
       handleChangePassword,

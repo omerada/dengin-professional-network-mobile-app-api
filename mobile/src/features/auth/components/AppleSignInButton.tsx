@@ -3,12 +3,7 @@
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART6.md
 
 import React, { memo, useCallback } from 'react';
-import {
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-} from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@contexts/ThemeContext';
 import { spacing, fontSize } from '@theme';
@@ -43,7 +38,7 @@ interface AppleSignInButtonProps {
  */
 export const AppleSignInButton: React.FC<AppleSignInButtonProps> = memo(
   ({ onSuccess, onError }) => {
-    const { isDarkMode } = useTheme();
+    const { isDark } = useTheme();
     const appleSignIn = useAppleSignIn();
 
     const handlePress = useCallback(async () => {
@@ -56,24 +51,21 @@ export const AppleSignInButton: React.FC<AppleSignInButtonProps> = memo(
     }, [appleSignIn, onSuccess, onError]);
 
     // Apple design guidelines: dark button on light mode, light button on dark mode
-    const buttonBackgroundColor = isDarkMode ? '#FFFFFF' : '#000000';
-    const textColor = isDarkMode ? '#000000' : '#FFFFFF';
+    const buttonBackgroundColor = isDark ? '#FFFFFF' : '#000000';
+    const textColor = isDark ? '#000000' : '#FFFFFF';
 
     return (
       <TouchableOpacity
         style={[styles.button, { backgroundColor: buttonBackgroundColor }]}
         onPress={handlePress}
         disabled={appleSignIn.isPending}
-        activeOpacity={0.7}
-      >
+        activeOpacity={0.7}>
         {appleSignIn.isPending ? (
           <ActivityIndicator color={textColor} size="small" />
         ) : (
           <>
             <Icon name="logo-apple" size={20} color={textColor} style={styles.icon} />
-            <Text style={[styles.text, { color: textColor }]}>
-              Apple ile devam et
-            </Text>
+            <Text style={[styles.text, { color: textColor }]}>Apple ile devam et</Text>
           </>
         )}
       </TouchableOpacity>
@@ -99,4 +91,3 @@ const styles = StyleSheet.create({
 });
 
 AppleSignInButton.displayName = 'AppleSignInButton';
-

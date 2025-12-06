@@ -11,19 +11,34 @@ import { messagingService } from '../services';
 import { MESSAGES_QUERY_KEY } from './useMessages';
 import { CONVERSATIONS_QUERY_KEY } from './useConversations';
 import { useAuthStore } from '@features/auth/stores';
-import type { 
-  Message, 
+import type {
+  Message,
   ClientMessage,
-  MessageListResponse, 
+  MessageListResponse,
   SendMessageRequest,
   WsSendMessageRequest,
   MessageAttachment,
+  SendMessageAttachment,
 } from '../types';
+import { toUUID } from '../types';
 
 interface SendMessageParams {
   content: string;
   recipientId: string;
   attachment?: MessageAttachment;
+}
+
+/**
+ * Convert MessageAttachment to SendMessageAttachment
+ */
+function toSendMessageAttachment(attachment: MessageAttachment): SendMessageAttachment {
+  return {
+    s3Key: '', // S3 key would be set after upload
+    url: attachment.url,
+    contentType: attachment.contentType,
+    fileSize: attachment.fileSize,
+    fileName: attachment.fileName,
+  };
 }
 
 /**
@@ -35,10 +50,15 @@ export function useSendMessage(conversationId: string) {
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
 
-  const mutation = useMutation<Message, Error, SendMessageParams, {
-    previousMessages: InfiniteData<MessageListResponse> | undefined;
-    optimisticMessageId: string;
-  }>({
+  const mutation = useMutation<
+    Message,
+    Error,
+    SendMessageParams,
+    {
+      previousMessages: InfiniteData<MessageListResponse> | undefined;
+      optimisticMessageId: string;
+    }
+  >({
     mutationFn: async ({ content, recipientId, attachment }) => {
       // Validate content
       const trimmedContent = content.trim();
@@ -49,11 +69,11 @@ export function useSendMessage(conversationId: string) {
       // Try WebSocket first (real-time, lower latency)
       if (stompClient.isConnected()) {
         const wsRequest: WsSendMessageRequest = {
-          recipientId,
+          recipientId: toUUID(recipientId),
           content: trimmedContent,
-          attachment,
+          attachment: attachment ? toSendMessageAttachment(attachment) : undefined,
         };
-        
+
         stompClient.sendMessage(wsRequest);
 
         // Return optimistic message (will be replaced by WebSocket response)
@@ -75,13 +95,13 @@ export function useSendMessage(conversationId: string) {
 
       // Fallback to HTTP when WebSocket is not available
       const request: SendMessageRequest = {
-        recipientId,
+        recipientId: toUUID(recipientId),
         content: trimmedContent,
-        attachment,
+        attachment: attachment ? toSendMessageAttachment(attachment) : undefined,
       };
 
       const response = await messagingService.sendMessage(request);
-      
+
       // Convert response to Message type
       return {
         messageId: response.messageId,
@@ -103,9 +123,10 @@ export function useSendMessage(conversationId: string) {
       await queryClient.cancelQueries({ queryKey: [MESSAGES_QUERY_KEY, conversationId] });
 
       // Snapshot previous value for rollback
-      const previousMessages = queryClient.getQueryData<InfiniteData<MessageListResponse>>(
-        [MESSAGES_QUERY_KEY, conversationId]
-      );
+      const previousMessages = queryClient.getQueryData<InfiniteData<MessageListResponse>>([
+        MESSAGES_QUERY_KEY,
+        conversationId,
+      ]);
 
       // Create optimistic message
       const optimisticMessageId = `temp_${Date.now()}`;
@@ -127,7 +148,7 @@ export function useSendMessage(conversationId: string) {
       // Optimistically add message to cache
       queryClient.setQueryData<InfiniteData<MessageListResponse>>(
         [MESSAGES_QUERY_KEY, conversationId],
-        (old) => {
+        old => {
           if (!old) return old;
 
           const newPages = [...old.pages];
@@ -140,7 +161,7 @@ export function useSendMessage(conversationId: string) {
           }
 
           return { ...old, pages: newPages };
-        }
+        },
       );
 
       return { previousMessages, optimisticMessageId };
@@ -150,7 +171,7 @@ export function useSendMessage(conversationId: string) {
       // Replace optimistic message with real one
       queryClient.setQueryData<InfiniteData<MessageListResponse>>(
         [MESSAGES_QUERY_KEY, conversationId],
-        (old) => {
+        old => {
           if (!old) return old;
 
           return {
@@ -159,15 +180,15 @@ export function useSendMessage(conversationId: string) {
               if (index === 0) {
                 return {
                   ...page,
-                  messages: page.messages.map((msg) =>
-                    msg.messageId === context?.optimisticMessageId ? newMessage : msg
+                  messages: page.messages.map(msg =>
+                    msg.messageId === context?.optimisticMessageId ? newMessage : msg,
                   ),
                 };
               }
               return page;
             }),
           };
-        }
+        },
       );
 
       // Update conversations list (for last message preview)
@@ -177,55 +198,55 @@ export function useSendMessage(conversationId: string) {
     onError: (_error, _variables, context) => {
       // Rollback on error
       if (context?.previousMessages) {
-        queryClient.setQueryData(
-          [MESSAGES_QUERY_KEY, conversationId],
-          context.previousMessages
-        );
+        queryClient.setQueryData([MESSAGES_QUERY_KEY, conversationId], context.previousMessages);
       }
 
       // Mark optimistic message as failed
       queryClient.setQueryData<InfiniteData<MessageListResponse>>(
         [MESSAGES_QUERY_KEY, conversationId],
-        (old) => {
+        old => {
           if (!old) return old;
 
           return {
             ...old,
-            pages: old.pages.map((page) => ({
+            pages: old.pages.map(page => ({
               ...page,
-              messages: page.messages.map((msg) =>
+              messages: page.messages.map(msg =>
                 msg.messageId === context?.optimisticMessageId
-                  ? { ...msg, status: 'FAILED' as const } as unknown as Message
-                  : msg
+                  ? ({ ...msg, status: 'FAILED' as const } as unknown as Message)
+                  : msg,
               ),
             })),
           };
-        }
+        },
       );
     },
   });
 
   // Retry failed message
-  const retryMessage = useCallback((messageId: string, content: string, recipientId: string) => {
-    // Remove failed message from cache
-    queryClient.setQueryData<InfiniteData<MessageListResponse>>(
-      [MESSAGES_QUERY_KEY, conversationId],
-      (old) => {
-        if (!old) return old;
+  const retryMessage = useCallback(
+    (messageId: string, content: string, recipientId: string) => {
+      // Remove failed message from cache
+      queryClient.setQueryData<InfiniteData<MessageListResponse>>(
+        [MESSAGES_QUERY_KEY, conversationId],
+        old => {
+          if (!old) return old;
 
-        return {
-          ...old,
-          pages: old.pages.map((page) => ({
-            ...page,
-            messages: page.messages.filter((msg) => msg.messageId !== messageId),
-          })),
-        };
-      }
-    );
+          return {
+            ...old,
+            pages: old.pages.map(page => ({
+              ...page,
+              messages: page.messages.filter(msg => msg.messageId !== messageId),
+            })),
+          };
+        },
+      );
 
-    // Resend
-    mutation.mutate({ content, recipientId });
-  }, [conversationId, queryClient, mutation]);
+      // Resend
+      mutation.mutate({ content, recipientId });
+    },
+    [conversationId, queryClient, mutation],
+  );
 
   return {
     sendMessage: mutation.mutate,

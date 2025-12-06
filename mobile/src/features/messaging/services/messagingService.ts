@@ -7,7 +7,6 @@ import { apiClient } from '@core/api/client';
 import { API_ENDPOINTS } from '@core/api/endpoints';
 import { isValidUUID } from '@shared/types/common.types';
 import type {
-  Conversation,
   ConversationListResponse,
   Message,
   MessageListResponse,
@@ -16,7 +15,6 @@ import type {
   MessageListParams,
   MessageSearchParams,
   PresignedUrlRequest,
-  PresignedUrlResponse,
 } from '../types';
 
 /**

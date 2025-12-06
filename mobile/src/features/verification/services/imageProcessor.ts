@@ -223,7 +223,7 @@ export const imageProcessor = {
   async toBase64(uri: string): Promise<string> {
     try {
       return await FileSystem.readAsStringAsync(uri, {
-        encoding: FileSystem.EncodingType.Base64,
+        encoding: 'base64',
       });
     } catch (error) {
       console.error('Base64 conversion error:', error);

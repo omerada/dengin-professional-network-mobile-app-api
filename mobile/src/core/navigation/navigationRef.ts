@@ -15,10 +15,10 @@ export const navigationRef = createNavigationContainerRef<RootStackParamList>();
  */
 export function navigate<RouteName extends keyof RootStackParamList>(
   name: RouteName,
-  params?: RootStackParamList[RouteName]
+  params?: RootStackParamList[RouteName],
 ) {
   if (navigationRef.isReady()) {
-    navigationRef.navigate(name as never, params as never);
+    (navigationRef as any).navigate(name, params);
   }
 }
 
@@ -34,7 +34,10 @@ export function goBack() {
 /**
  * Navigation state'i sıfırla
  */
-export function reset(index: number, routes: Array<{ name: keyof RootStackParamList; params?: any }>) {
+export function reset(
+  index: number,
+  routes: Array<{ name: keyof RootStackParamList; params?: any }>,
+) {
   if (navigationRef.isReady()) {
     navigationRef.reset({ index, routes });
   }

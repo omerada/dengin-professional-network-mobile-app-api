@@ -233,7 +233,7 @@ export const useHookName = ({
   const trigger = useCallback(() => {
     value.value = withSpring(1, undefined, (finished) => {
       if (finished && onComplete) {
-        runOnJS(onComplete)();
+        scheduleOnRN(onComplete)();
       }
     });
   }, [onComplete]);
@@ -271,7 +271,7 @@ const handlePress = () => {
 
 ```typescript
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { runOnJS } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-reanimated";
 
 const Component = ({ onPress }) => {
   const scale = useSharedValue(1);
@@ -286,7 +286,7 @@ const Component = ({ onPress }) => {
     })
     .onEnd(() => {
       // Switch to JS thread for callbacks
-      runOnJS(onPress)();
+      scheduleOnRN(onPress)();
     });
 
   const animatedStyle = useAnimatedStyle(() => ({

@@ -54,7 +54,7 @@ export function useBlock() {
   const queryClient = useQueryClient();
 
   return useMutation<BlockResponse, Error, number>({
-    mutationFn: socialApi.block,
+    mutationFn: (userId: number) => socialApi.block(userId),
     onSuccess: (_data: BlockResponse, userId: number) => {
       queryClient.invalidateQueries({ queryKey: profileKeys.detail(userId) });
       queryClient.invalidateQueries({ queryKey: ['blocked-users'] });

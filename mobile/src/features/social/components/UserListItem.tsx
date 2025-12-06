@@ -48,7 +48,7 @@ export const UserListItem: React.FC<UserListItemProps> = memo(
     const navigation = useNavigation();
 
     const handlePress = useCallback(() => {
-      navigation.navigate('Profile' as never, { userId: user.id.toString() } as never);
+      (navigation as any).navigate('Profile', { userId: user.id.toString() });
     }, [navigation, user.id]);
 
     return (
@@ -57,10 +57,10 @@ export const UserListItem: React.FC<UserListItemProps> = memo(
         onPress={handlePress}
         activeOpacity={0.7}>
         <Avatar
-          uri={user.avatarUrl}
+          uri={user.avatarUrl ?? undefined}
           name={user.fullName}
           size="lg"
-          showBadge={user.isProfessionVerified}
+          status={user.isProfessionVerified ? 'online' : undefined}
           badgeColor={colors.interactive.default}
         />
 

@@ -467,7 +467,7 @@ import Animated, {
   useSharedValue,
   withTiming,
   withSequence,
-  runOnJS,
+  scheduleOnRN,
   Easing,
 } from "react-native-reanimated";
 import { Canvas, Circle, Group, Paint } from "@shopify/react-native-skia";
@@ -512,7 +512,7 @@ export const ThemeSwitcher = memo<ThemeSwitcherProps>(({ size = 48 }) => {
         },
         () => {
           // Toggle theme when animation reaches midpoint
-          runOnJS(toggleTheme)();
+          scheduleOnRN(toggleTheme)();
 
           // Fade out circle
           circleOpacity.value = withTiming(0, { duration: 200 }, () => {
@@ -627,8 +627,8 @@ export const ThemeToggle = memo<ThemeToggleProps>(({ showLabel = true }) => {
     .onFinalize((_, success) => {
       scale.value = withSpring(1);
       if (success) {
-        runOnJS(triggerHaptic)("selection");
-        runOnJS(toggleTheme)();
+        scheduleOnRN(triggerHaptic)("selection");
+        scheduleOnRN(toggleTheme)();
       }
     });
 

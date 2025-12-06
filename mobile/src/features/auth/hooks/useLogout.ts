@@ -4,7 +4,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useNavigation } from '@react-navigation/native';
 import { useCallback } from 'react';
-import { authApi, tokenService, biometricService } from '../services';
+import { authApi, tokenService } from '../services';
 import { useAuthStore } from '../stores';
 import { RootStackNavigationProp } from '@shared/types';
 

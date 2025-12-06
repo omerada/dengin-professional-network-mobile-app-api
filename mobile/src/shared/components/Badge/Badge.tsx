@@ -3,16 +3,13 @@
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useEffect, useMemo } from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
   withSequence,
   withTiming,
-  interpolate,
-  FadeIn,
-  FadeOut,
   ZoomIn,
   ZoomOut,
 } from 'react-native-reanimated';
@@ -152,6 +149,7 @@ export const Badge: React.FC<BadgeProps> = memo(
 
         return () => clearInterval(interval);
       }
+      return undefined;
     }, [pulse, pulseScale]);
 
     // Animated styles

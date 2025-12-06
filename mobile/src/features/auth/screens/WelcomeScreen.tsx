@@ -3,7 +3,7 @@
 // Oku: mobile-development-guide/sprints/23-SPRINT-1-2.md
 
 import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, Image, SafeAreaView, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, StatusBar } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
 import { useLocale } from '@contexts/LocaleContext';

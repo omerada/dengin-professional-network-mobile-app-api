@@ -18,20 +18,20 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
-import { useDebounce } from '@hooks/useDebounce';
+import { useDebounce } from '@shared/hooks/useDebounce';
 import { useStartConversation } from '../hooks';
 import type { UserSummary } from '../types';
-import type { MessagingStackParamList } from '@navigation/types';
+import type { MessagingStackParamList } from '@core/navigation/types';
 
 type NavigationProp = NativeStackNavigationProp<MessagingStackParamList, 'NewConversation'>;
 
 // Mock data - in real app, this would come from search API
 const mockUsers: UserSummary[] = [
-  { id: '1', displayName: 'Ahmet Yılmaz', avatarUrl: undefined },
-  { id: '2', displayName: 'Mehmet Demir', avatarUrl: undefined },
-  { id: '3', displayName: 'Ayşe Kaya', avatarUrl: undefined },
-  { id: '4', displayName: 'Fatma Öz', avatarUrl: undefined },
-  { id: '5', displayName: 'Ali Arslan', avatarUrl: undefined },
+  { id: '1', displayName: 'Ahmet Yılmaz', avatarUrl: null },
+  { id: '2', displayName: 'Mehmet Demir', avatarUrl: null },
+  { id: '3', displayName: 'Ayşe Kaya', avatarUrl: null },
+  { id: '4', displayName: 'Fatma Öz', avatarUrl: null },
+  { id: '5', displayName: 'Ali Arslan', avatarUrl: null },
 ];
 
 interface UserItemProps {

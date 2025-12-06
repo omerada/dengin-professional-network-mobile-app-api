@@ -4,8 +4,8 @@
 
 import React, { memo } from 'react';
 import { StyleSheet, View, Text, Dimensions } from 'react-native';
-import Svg, { Rect, Defs, Mask, G, Path, Line } from 'react-native-svg';
-import { useColors } from '@contexts';
+import Svg, { Rect, Defs, Mask, G, Line } from 'react-native-svg';
+import { useColors } from '@contexts/ThemeContext';
 import { spacing, typography } from '@theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');

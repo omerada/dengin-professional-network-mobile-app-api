@@ -77,10 +77,10 @@ export const asyncStorage = {
    */
   async setMultiple(items: Partial<Record<StorageKey, unknown>>): Promise<boolean> {
     try {
-      const pairs = Object.entries(items).map(([key, value]) => [
-        key,
-        JSON.stringify(value),
-      ]) as [string, string][];
+      const pairs = Object.entries(items).map(([key, value]) => [key, JSON.stringify(value)]) as [
+        string,
+        string,
+      ][];
 
       await AsyncStorage.multiSet(pairs);
       return true;
@@ -108,7 +108,8 @@ export const asyncStorage = {
    */
   async getAllKeys(): Promise<string[]> {
     try {
-      return await AsyncStorage.getAllKeys();
+      const keys = await AsyncStorage.getAllKeys();
+      return [...keys];
     } catch (error) {
       console.error('[AsyncStorage] Error getting all keys:', error);
       return [];

@@ -121,10 +121,10 @@ export const ReportForm = React.memo<ReportFormProps>(
           {/* Error message */}
           {error && (
             <View
-              style={[styles.errorContainer, { backgroundColor: colors.error.background }]}
+              style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}
               accessibilityRole="alert">
-              <Icon name="alert-circle" size={20} color={colors.error.main} />
-              <Text style={[styles.errorText, { color: colors.error.dark }]}>{error}</Text>
+              <Icon name="alert-circle" size={20} color={colors.status.error} />
+              <Text style={[styles.errorText, { color: colors.status.error }]}>{error}</Text>
             </View>
           )}
 

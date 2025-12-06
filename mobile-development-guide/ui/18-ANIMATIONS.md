@@ -87,7 +87,7 @@ import Animated, {
   useAnimatedStyle,
   useAnimatedGestureHandler,
   withSpring,
-  runOnJS,
+  scheduleOnRN,
 } from "react-native-reanimated";
 import { PanGestureHandler } from "react-native-gesture-handler";
 
@@ -120,9 +120,9 @@ export const SwipeableCard: React.FC<SwipeableCardProps> = ({
       if (Math.abs(event.translationX) > swipeThreshold) {
         // Swipe completed
         if (event.translationX > 0 && onSwipeRight) {
-          runOnJS(onSwipeRight)();
+          scheduleOnRN(onSwipeRight)();
         } else if (event.translationX < 0 && onSwipeLeft) {
-          runOnJS(onSwipeLeft)();
+          scheduleOnRN(onSwipeLeft)();
         }
       } else {
         // Reset position
@@ -172,7 +172,7 @@ import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
   withSpring,
-  runOnJS,
+  scheduleOnRN,
 } from "react-native-reanimated";
 
 interface PullToRefreshProps {
@@ -201,7 +201,7 @@ export const PullToRefresh: React.FC<PullToRefreshProps> = ({
     },
     onEndDrag: () => {
       if (scrollY.value < -threshold && !refreshing.value) {
-        runOnJS(handleRefresh)();
+        scheduleOnRN(handleRefresh)();
       }
     },
   });

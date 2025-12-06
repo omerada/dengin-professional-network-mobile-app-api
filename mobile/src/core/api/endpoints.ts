@@ -21,6 +21,7 @@ export const API_ENDPOINTS = {
     // OAuth2 endpoints - Backend: OAuth2Controller
     OAUTH_GOOGLE: '/api/auth/oauth/google',
     OAUTH_APPLE: '/api/auth/oauth/apple',
+    OAUTH2_CALLBACK: '/api/auth/oauth2/callback',
   },
 
   // User - Backend: /api/users/*

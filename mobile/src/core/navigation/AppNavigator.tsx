@@ -29,7 +29,7 @@ export const navigate = <T extends keyof RootStackParamList>(
   params?: RootStackParamList[T],
 ) => {
   if (navigationRef.isReady()) {
-    navigationRef.navigate(name, params);
+    (navigationRef as any).navigate(name, params);
   }
 };
 

@@ -18,19 +18,18 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  withTiming,
   FadeIn,
   FadeOut,
   SlideInDown,
   SlideOutDown,
-  runOnJS,
 } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing, fontSize } from '@theme';
-import { springPresets } from '@theme/animations';
-import { useHaptic } from '@hooks/useHaptic';
+import { spring as springPresets } from '@theme/animations';
+import { useHaptic } from '@shared/hooks/useHaptic';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -257,7 +256,10 @@ export const BottomSheet: React.FC<BottomSheetProps> = memo(
         if (event.translationY > 100 || event.velocityY > 500) {
           isClosing.value = true;
           translateY.value = withSpring(SCREEN_HEIGHT, springPresets.snappy, () => {
-            runOnJS(handleClose)();
+            'worklet';
+            scheduleOnRN(() => {
+              handleClose();
+            });
           });
         } else {
           translateY.value = withSpring(0, springPresets.bouncy);

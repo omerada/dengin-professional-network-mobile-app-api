@@ -2,8 +2,8 @@
 // Meslektaş Design System - Feed Component Exports
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
-// PostCard modular structure
-export { PostCard } from './PostCard';
+// PostCard modular structure - use explicit path to avoid conflict with PostCard.tsx
+export { PostCard } from './PostCard/index';
 export { PostHeader } from './PostCard/PostHeader';
 export { PostContent } from './PostCard/PostContent';
 export { PostImages } from './PostCard/PostImages';

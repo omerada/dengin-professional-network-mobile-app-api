@@ -4,7 +4,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { verificationApi } from '../services';
-import type { VerificationResponse, VerificationStatus, VerificationEligibilityResponse } from '../types';
+import type { VerificationStatus } from '../types';
 
 /**
  * Query keys
@@ -63,11 +63,14 @@ export function useIsVerified() {
 
   return {
     isVerified: status?.status === 'APPROVED',
-    isPending: status?.status === 'PENDING' || status?.status === 'PROCESSING' || status?.status === 'MANUAL_REVIEW',
+    isPending:
+      status?.status === 'PENDING' ||
+      status?.status === 'PROCESSING' ||
+      status?.status === 'MANUAL_REVIEW',
     isRejected: status?.status === 'REJECTED',
     status: status?.status as VerificationStatus | undefined,
-    attemptCount: status?.attemptCount,
-    maxAttempts: status?.maxAttempts,
+    attemptCount: status?.attemptNumber,
+    maxAttempts: 3, // Default max attempts
     isLoading,
   };
 }

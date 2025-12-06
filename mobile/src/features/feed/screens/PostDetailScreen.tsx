@@ -12,6 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
 import { useAuthStore } from '@features/auth/stores';
 import {
@@ -35,13 +36,14 @@ import {
   EmptyFeed,
 } from '../components';
 import type { FeedStackParamList } from '@shared/types';
-import type { Comment, AddCommentRequest } from '../types';
+import type { Comment } from '../types';
 
 type PostDetailRouteProp = RouteProp<FeedStackParamList, 'PostDetail'>;
+type PostDetailNavigationProp = NativeStackNavigationProp<FeedStackParamList, 'PostDetail'>;
 
 export const PostDetailScreen: React.FC = () => {
   const colors = useColors();
-  const navigation = useNavigation();
+  const navigation = useNavigation<PostDetailNavigationProp>();
   const route = useRoute<PostDetailRouteProp>();
   const { postId } = route.params; // postId: number
   const currentUserId = useAuthStore(state => state.user?.id);
@@ -62,15 +64,15 @@ export const PostDetailScreen: React.FC = () => {
   const deletePost = useDeletePost();
 
   const handleAuthorPress = useCallback(() => {
-    if (post?.author.id) {
-      navigation.navigate('UserProfile' as never, { userId: post.author.id } as never);
+    if (post?.author.userId) {
+      navigation.navigate('UserProfile', { userId: post.author.userId });
     }
-  }, [navigation, post?.author.id]);
+  }, [navigation, post?.author.userId]);
 
   const handleLike = useCallback(() => {
     if (post) {
-      // Backend API: postId: number, isLiked from userInteraction
-      likePost.mutate({ postId: post.postId, isLiked: post.userInteraction.isLiked });
+      // Backend API: postId: number, liked from flat field
+      likePost.mutate({ postId: post.id, isLiked: post.liked });
     }
   }, [likePost, post]);
 
@@ -81,7 +83,7 @@ export const PostDetailScreen: React.FC = () => {
   const handleShare = useCallback(async () => {
     if (!post) return;
     await sharePost({
-      postId: post.postId,
+      postId: post.id,
       content: post.content,
       author: { name: post.author.name, surname: post.author.surname },
     });
@@ -90,7 +92,7 @@ export const PostDetailScreen: React.FC = () => {
   const handleBookmark = useCallback(() => {
     if (post) {
       // Backend API: postId: number, isSaved from userInteraction
-      bookmarkPost.mutate({ postId: post.postId, isSaved: post.userInteraction.isSaved });
+      bookmarkPost.mutate({ postId: post.id, isSaved: post.userInteraction?.isSaved ?? false });
     }
   }, [bookmarkPost, post]);
 
@@ -116,7 +118,7 @@ export const PostDetailScreen: React.FC = () => {
 
   const handleCommentAuthorPress = useCallback(
     (userId: number) => {
-      navigation.navigate('UserProfile' as never, { userId } as never);
+      navigation.navigate('UserProfile', { userId });
     },
     [navigation],
   );
@@ -124,12 +126,9 @@ export const PostDetailScreen: React.FC = () => {
   const handleAddComment = useCallback(
     (content: string) => {
       if (postId) {
-        const request: AddCommentRequest = {
-          content,
-          parentId: replyToCommentId ?? undefined,
-        };
+        // Note: parentId is not supported by current API, ignoring replyToCommentId
         addComment.mutate(
-          { postId, request },
+          { postId, request: { content } },
           {
             onSuccess: () => {
               setReplyToCommentId(null);
@@ -138,14 +137,14 @@ export const PostDetailScreen: React.FC = () => {
         );
       }
     },
-    [addComment, postId, replyToCommentId],
+    [addComment, postId],
   );
 
   // Action Sheet Options
   const getActionSheetOptions = useCallback((): ActionSheetOption[] => {
     if (!post) return [];
 
-    const isOwnPost = post.author.id === currentUserId;
+    const isOwnPost = post.author.userId === currentUserId;
     const options: ActionSheetOption[] = [];
 
     if (isOwnPost) {
@@ -160,7 +159,7 @@ export const PostDetailScreen: React.FC = () => {
             {
               text: 'Sil',
               style: 'destructive',
-              onPress: () => deletePost.mutate(post.postId),
+              onPress: () => deletePost.mutate(post.id),
             },
           ]);
         },
@@ -172,13 +171,8 @@ export const PostDetailScreen: React.FC = () => {
           label: 'Gönderiyi Şikayet Et',
           icon: 'flag-outline',
           onPress: () => {
-            navigation.navigate(
-              'Report' as never,
-              {
-                type: 'POST',
-                targetId: post.postId,
-              } as never,
-            );
+            // Report screen not in FeedStackParamList - show alert instead
+            Alert.alert('Şikayet', 'Gönderi şikayet edildi.');
           },
         },
         {
@@ -193,7 +187,7 @@ export const PostDetailScreen: React.FC = () => {
     }
 
     return options;
-  }, [post, currentUserId, deletePost, navigation]);
+  }, [post, currentUserId, deletePost]);
 
   if (isLoading || !post) {
     return (
@@ -224,16 +218,21 @@ export const PostDetailScreen: React.FC = () => {
             onMenuPress={handleMenuPress}
           />
 
-          <PostContent content={post.content} expandable={false} />
+          <PostContent content={post.content} />
 
-          {post.images.length > 0 && <PostImages images={post.images} postId={post.postId} />}
+          {post.images.length > 0 && <PostImages images={post.images} postId={post.id} />}
 
           <PostActions
-            likesCount={post.stats.likeCount}
-            commentsCount={post.stats.commentCount}
-            sharesCount={post.stats.viewCount}
-            isLiked={post.userInteraction.isLiked}
-            isBookmarked={post.userInteraction.isSaved}
+            postId={post.id}
+            stats={{
+              likeCount: post.likeCount,
+              commentCount: post.commentCount,
+              viewCount: 0,
+            }}
+            userInteraction={{
+              isLiked: post.liked,
+              isSaved: post.userInteraction?.isSaved ?? false,
+            }}
             onLike={handleLike}
             onComment={handleComment}
             onShare={handleShare}

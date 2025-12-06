@@ -102,7 +102,7 @@ export function OptimizedList<T>({
     onScroll: (event) => {
       scrollY.value = event.contentOffset.y;
       if (onScroll) {
-        runOnJS(onScroll)(event.contentOffset.y);
+        scheduleOnRN(onScroll)(event.contentOffset.y);
       }
     },
   });
@@ -625,7 +625,7 @@ export function useOptimizedAnimation(
       cancelAnimation(value);
       value.value = withSpring(toValue, springConfig, (finished) => {
         if (finished && callback) {
-          runOnJS(callback)();
+          scheduleOnRN(callback)();
         }
       });
     },
@@ -638,7 +638,7 @@ export function useOptimizedAnimation(
       cancelAnimation(value);
       value.value = withTiming(toValue, timingConfig, (finished) => {
         if (finished && callback) {
-          runOnJS(callback)();
+          scheduleOnRN(callback)();
         }
       });
     },

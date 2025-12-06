@@ -8,31 +8,25 @@ import SockJS from 'sockjs-client';
 
 // Dynamic import for web compatibility
 let Client: any;
-let IMessage: any;
-let StompSubscription: any;
 
 if (Platform.OS !== 'web') {
   const stomp = require('@stomp/stompjs');
   Client = stomp.Client;
-  IMessage = stomp.IMessage;
-  StompSubscription = stomp.StompSubscription;
 } else {
   // For web, use UMD bundle
   const stomp = require('@stomp/stompjs/bundles/stomp.umd.js');
   Client = stomp.Client;
-  IMessage = stomp.IMessage;
-  StompSubscription = stomp.StompSubscription;
 }
 import { ENV } from '@config/env';
 import { tokenService } from '@features/auth/services';
 import { useMessagingStore } from '../stores';
+import type { IMessage, StompSubscription } from '@stomp/stompjs';
 import type {
   StompConnectionState,
   WsMessageResponse,
   WsTypingNotification,
   WsReadReceipt,
   WsSendMessageRequest,
-  STOMP_ENDPOINTS,
 } from '../types';
 
 /**
@@ -41,7 +35,7 @@ import type {
 type StompEventHandler<T = unknown> = (data: T) => void;
 
 /**
- * Subscription bilgisi
+ * Subscription bilgisi - StompSubscription from @stomp/stompjs
  */
 interface SubscriptionInfo {
   destination: string;
@@ -54,7 +48,7 @@ interface SubscriptionInfo {
  * Spring WebSocket + STOMP protokolüne uyumlu
  */
 class StompClient {
-  private client: Client | null = null;
+  private client: InstanceType<typeof Client> | null = null;
   private connectionState: StompConnectionState = 'DISCONNECTED';
   private subscriptions: Map<string, SubscriptionInfo> = new Map();
   private eventHandlers: Map<string, Set<StompEventHandler>> = new Map();
@@ -80,7 +74,7 @@ class StompClient {
         throw new Error('No access token available');
       }
 
-      const wsUrl = `${ENV.API_URL}/ws`;
+      const wsUrl = `${ENV.API_BASE_URL}/ws`;
 
       this.client = new Client({
         // SockJS kullanarak WebSocket bağlantısı
@@ -92,7 +86,7 @@ class StompClient {
         },
 
         // Debug logging (production'da kapatılmalı)
-        debug: __DEV__ ? str => console.log('[STOMP]', str) : () => {},
+        debug: __DEV__ ? (str: string) => console.log('[STOMP]', str) : () => {},
 
         // Heartbeat ayarları
         heartbeatIncoming: 10000,
@@ -117,7 +111,7 @@ class StompClient {
         },
 
         // STOMP hatası
-        onStompError: frame => {
+        onStompError: (frame: { headers: Record<string, string>; body: string }) => {
           console.error('[STOMP] Error:', frame.headers.message);
           this.setConnectionState('ERROR');
           this.notifyHandlers('error', { message: frame.headers.message });

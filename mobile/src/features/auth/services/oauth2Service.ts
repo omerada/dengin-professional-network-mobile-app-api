@@ -3,9 +3,8 @@
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART6.md
 
 import { apiClient, API_ENDPOINTS } from '@core/api';
-import { Platform } from 'react-native';
-import { storage, STORAGE_KEYS } from '@core/storage';
-import type { AuthResponse } from '../types';
+import { secureStorage, SECURE_KEYS } from '@core/storage';
+import type { User } from '@shared/types';
 import { googleAuth } from './googleAuth';
 import { appleAuth } from './appleAuth';
 
@@ -13,6 +12,12 @@ interface ApiResponse<T> {
   success: boolean;
   message: string;
   data: T;
+}
+
+interface AuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: User;
 }
 
 interface OAuth2TokenRequest {
@@ -115,9 +120,8 @@ export const oauth2Service = {
     const authData = response.data.data;
 
     // Token'ları sakla
-    await storage.setItem(STORAGE_KEYS.ACCESS_TOKEN, authData.accessToken);
-    await storage.setItem(STORAGE_KEYS.REFRESH_TOKEN, authData.refreshToken);
-    await storage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(authData.user));
+    await secureStorage.set(SECURE_KEYS.ACCESS_TOKEN, authData.accessToken);
+    await secureStorage.set(SECURE_KEYS.REFRESH_TOKEN, authData.refreshToken);
 
     return authData;
   },

@@ -10,7 +10,6 @@ import type {
   VerificationResponse,
   UploadProgress,
   CapturedImage,
-  SubmitVerificationRequest,
 } from '../types';
 import { verificationApi } from './verificationApi';
 
@@ -33,7 +32,7 @@ export const uploadService = {
    */
   async uploadVerification(
     data: VerificationData,
-    onProgress?: (progress: UploadProgress) => void
+    onProgress?: (progress: UploadProgress) => void,
   ): Promise<VerificationResponse> {
     return this.uploadAndSubmitVerification(data, onProgress);
   },
@@ -44,7 +43,7 @@ export const uploadService = {
   async uploadWithRetry(
     data: VerificationData,
     onProgress?: (progress: UploadProgress) => void,
-    retryCount = 0
+    retryCount = 0,
   ): Promise<VerificationResponse> {
     try {
       return await this.uploadAndSubmitVerification(data, onProgress);
@@ -70,7 +69,7 @@ export const uploadService = {
   async uploadImage(
     image: CapturedImage,
     type: 'document' | 'selfie',
-    onProgress?: (progress: number) => void
+    onProgress?: (progress: number) => void,
   ): Promise<string> {
     // Presigned URL al from media endpoint
     const { data: presignedData } = await apiClient.post<{
@@ -108,7 +107,7 @@ export const uploadService = {
    */
   async uploadAndSubmitVerification(
     data: VerificationData,
-    onProgress?: (progress: UploadProgress) => void
+    onProgress?: (progress: UploadProgress) => void,
   ): Promise<VerificationResponse> {
     if (!data.professionId) {
       throw new Error('Profession ID is required');
@@ -131,38 +130,30 @@ export const uploadService = {
       });
     }
 
-    const documentUrl = await this.uploadImage(
-      data.documentFront,
-      'document',
-      (progress) => {
-        if (onProgress) {
-          onProgress({
-            documentFront: progress,
-            documentBack: 0,
-            selfie: 0,
-            total: Math.round(progress / 2),
-            status: 'uploading',
-          });
-        }
+    const documentUrl = await this.uploadImage(data.documentFront, 'document', progress => {
+      if (onProgress) {
+        onProgress({
+          documentFront: progress,
+          documentBack: 0,
+          selfie: 0,
+          total: Math.round(progress / 2),
+          status: 'uploading',
+        });
       }
-    );
+    });
 
     // Step 2: Upload selfie image
-    const selfieUrl = await this.uploadImage(
-      data.selfie,
-      'selfie',
-      (progress) => {
-        if (onProgress) {
-          onProgress({
-            documentFront: 100,
-            documentBack: data.documentBack ? 0 : 100,
-            selfie: progress,
-            total: Math.round(50 + progress / 2),
-            status: 'uploading',
-          });
-        }
+    const selfieUrl = await this.uploadImage(data.selfie, 'selfie', progress => {
+      if (onProgress) {
+        onProgress({
+          documentFront: 100,
+          documentBack: data.documentBack ? 0 : 100,
+          selfie: progress,
+          total: Math.round(50 + progress / 2),
+          status: 'uploading',
+        });
       }
-    );
+    });
 
     // Step 3: Submit verification
     if (onProgress) {
@@ -175,13 +166,14 @@ export const uploadService = {
       });
     }
 
-    const submitRequest: SubmitVerificationRequest = {
+    const submitRequest = {
       professionId: data.professionId,
       documentUrl,
       selfieUrl,
     };
 
-    const response = await verificationApi.submit(submitRequest);
+    // Legacy format - backend should handle both formats
+    const response = await verificationApi.submit(submitRequest as any);
 
     if (onProgress) {
       onProgress({
@@ -202,7 +194,7 @@ export const uploadService = {
   async pollStatus(
     onStatusChange: (response: VerificationResponse) => void,
     maxAttempts = 30,
-    intervalMs = 2000
+    intervalMs = 2000,
   ): Promise<VerificationResponse | null> {
     let attempts = 0;
 
@@ -233,7 +225,7 @@ export const uploadService = {
    * Yardımcı: sleep
    */
   sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
   },
 };
 

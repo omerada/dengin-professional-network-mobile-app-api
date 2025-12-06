@@ -13,7 +13,7 @@ import type { AuthStackNavigationProp } from '@shared/types';
 /**
  * Register hook with React Query mutation
  * Handles registration flow
- * 
+ *
  * Backend API: POST /api/auth/register
  * Request: { email, password, name, surname }
  * Response: { id, email, name, surname, createdAt }
@@ -33,7 +33,7 @@ export const useRegister = () => {
       return response;
     },
 
-    onSuccess: (_data, variables) => {
+    onSuccess: (_data, _variables) => {
       // Show success message
       Alert.alert(
         'Kayıt Başarılı',

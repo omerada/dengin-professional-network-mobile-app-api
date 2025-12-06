@@ -12,16 +12,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import {
-  Platform,
-  Pressable,
-  Text,
-  TextInput,
-  UIManager,
-  View,
-  type NativeSyntheticEvent,
-  type TextInputFocusEventData,
-} from 'react-native';
+import { Platform, Pressable, Text, TextInput, UIManager, View } from 'react-native';
 import Animated, {
   interpolate,
   interpolateColor,
@@ -214,7 +205,7 @@ export const Input = memo(
 
       // Focus handler
       const handleFocus = useCallback(
-        (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
+        (e: any) => {
           setIsFocused(true);
           focusProgress.value = withSpring(1, spring.snappy);
           labelPosition.value = withSpring(1, spring.gentle);
@@ -225,7 +216,7 @@ export const Input = memo(
 
       // Blur handler
       const handleBlur = useCallback(
-        (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
+        (e: any) => {
           setIsFocused(false);
           focusProgress.value = withSpring(0, spring.snappy);
           if (!value) {

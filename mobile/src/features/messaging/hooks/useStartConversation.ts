@@ -2,41 +2,57 @@
 // Yeni konuşma başlatma hook'u
 // Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigation } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
 import { messagingService } from '../services';
-import { CONVERSATIONS_QUERY_KEY } from './useConversations';
-import type { Conversation, StartConversationDto } from '../types';
+import type { SendMessageRequest } from '../types';
+import { toUUID } from '@shared/types/common.types';
 
 /**
- * Yeni konuşma başlatma hook'u
+ * Yeni konuşma başlatmak için kullanılan hook
+ * İlk mesaj gönderilerek yeni konuşma oluşturulur
  */
 export function useStartConversation() {
-  const queryClient = useQueryClient();
-  const navigation = useNavigation();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-  return useMutation<Conversation, Error, StartConversationDto>({
-    mutationFn: async (dto) => {
-      // Önce mevcut konuşmayı kontrol et
-      const existing = await messagingService.findConversationWithUser(dto.participantId);
-      if (existing) {
-        return existing;
+  /**
+   * Yeni konuşma başlat - ilk mesaj göndererek
+   * @param recipientId - Alıcının UUID'si
+   * @param initialMessage - İlk mesaj (opsiyonel)
+   * @returns conversationId
+   */
+  const startConversation = useCallback(
+    async (recipientId: string, initialMessage?: string): Promise<string> => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        // İlk mesaj gönderilerek konuşma oluşturulur
+        // Backend otomatik olarak konuşma oluşturur veya mevcut olanı bulur
+        const message = initialMessage || 'Merhaba!';
+        const request: SendMessageRequest = {
+          recipientId: toUUID(recipientId),
+          content: message,
+        };
+
+        const response = await messagingService.sendMessage(request);
+        return response.conversationId;
+      } catch (err) {
+        const error = err instanceof Error ? err : new Error('Konuşma başlatılamadı');
+        setError(error);
+        throw error;
+      } finally {
+        setIsLoading(false);
       }
-
-      // Yoksa yeni oluştur
-      return messagingService.startConversation(dto);
     },
-    onSuccess: (conversation) => {
-      // Konuşma listesini güncelle
-      queryClient.invalidateQueries({ queryKey: [CONVERSATIONS_QUERY_KEY] });
+    [],
+  );
 
-      // Chat ekranına git
-      navigation.navigate('Chat' as never, {
-        conversationId: conversation.id,
-        participantName: conversation.participants[0]?.name,
-      } as never);
-    },
-  });
+  return {
+    startConversation,
+    isLoading,
+    error,
+  };
 }
 
 export default useStartConversation;

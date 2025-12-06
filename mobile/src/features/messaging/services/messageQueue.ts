@@ -5,19 +5,39 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { messagingService } from './messagingService';
 import { socketClient } from './socketClient';
-import type { QueuedMessage, MessageType } from '../types';
+import { toUUID } from '@shared/types/common.types';
+import type { SendMessageAttachment } from '../types';
 
 const QUEUE_STORAGE_KEY = 'messaging_queue';
 const MAX_RETRY_COUNT = 3;
+
+/**
+ * Local queued message type for offline storage
+ * This differs from the store's QueuedMessage to support full message data
+ */
+interface LocalQueuedMessage {
+  /** Unique queue item ID */
+  id: string;
+  /** Recipient user UUID */
+  recipientId: string;
+  /** Message content */
+  content: string;
+  /** Optional attachment */
+  attachment?: SendMessageAttachment;
+  /** Creation timestamp */
+  createdAt: string;
+  /** Number of retry attempts */
+  retryCount: number;
+}
 
 /**
  * Message Queue Class
  * Offline modda mesajları saklar ve bağlantı kurulunca gönderir
  */
 class MessageQueue {
-  private queue: QueuedMessage[] = [];
+  private queue: LocalQueuedMessage[] = [];
   private isProcessing = false;
-  private listeners: Set<(queue: QueuedMessage[]) => void> = new Set();
+  private listeners: Set<(queue: LocalQueuedMessage[]) => void> = new Set();
 
   /**
    * Kuyruğu yükle
@@ -50,19 +70,15 @@ class MessageQueue {
    * Mesajı kuyruğa ekle
    */
   async add(
-    conversationId: string,
+    recipientId: string,
     content: string,
-    type: MessageType = 'text' as MessageType,
-    attachmentIds?: string[],
-    replyToId?: string
-  ): Promise<QueuedMessage> {
-    const message: QueuedMessage = {
+    attachment?: SendMessageAttachment,
+  ): Promise<LocalQueuedMessage> {
+    const message: LocalQueuedMessage = {
       id: `queued_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      conversationId,
+      recipientId,
       content,
-      type,
-      attachmentIds,
-      replyToId,
+      attachment,
       createdAt: new Date().toISOString(),
       retryCount: 0,
     };
@@ -83,7 +99,7 @@ class MessageQueue {
    * Mesajı kuyruktan kaldır
    */
   async remove(messageId: string): Promise<void> {
-    this.queue = this.queue.filter((m) => m.id !== messageId);
+    this.queue = this.queue.filter((m: LocalQueuedMessage) => m.id !== messageId);
     await this.save();
     this.notifyListeners();
   }
@@ -116,11 +132,9 @@ class MessageQueue {
     for (const message of toProcess) {
       try {
         await messagingService.sendMessage({
-          conversationId: message.conversationId,
+          recipientId: toUUID(message.recipientId),
           content: message.content,
-          type: message.type,
-          attachmentIds: message.attachmentIds,
-          replyToId: message.replyToId,
+          attachment: message.attachment,
         });
 
         // Başarıyla gönderildi, kuyruktan kaldır
@@ -143,16 +157,16 @@ class MessageQueue {
   }
 
   /**
-   * Konuşma için bekleyen mesajları getir
+   * Alıcı için bekleyen mesajları getir
    */
-  getForConversation(conversationId: string): QueuedMessage[] {
-    return this.queue.filter((m) => m.conversationId === conversationId);
+  getForRecipient(recipientId: string): LocalQueuedMessage[] {
+    return this.queue.filter((m: LocalQueuedMessage) => m.recipientId === recipientId);
   }
 
   /**
    * Tüm kuyruğu getir
    */
-  getAll(): QueuedMessage[] {
+  getAll(): LocalQueuedMessage[] {
     return [...this.queue];
   }
 
@@ -166,15 +180,15 @@ class MessageQueue {
   /**
    * Başarısız mesajları getir
    */
-  getFailedMessages(): QueuedMessage[] {
-    return this.queue.filter((m) => m.retryCount === -1);
+  getFailedMessages(): LocalQueuedMessage[] {
+    return this.queue.filter((m: LocalQueuedMessage) => m.retryCount === -1);
   }
 
   /**
    * Mesajı yeniden dene
    */
   async retry(messageId: string): Promise<void> {
-    const message = this.queue.find((m) => m.id === messageId);
+    const message = this.queue.find((m: LocalQueuedMessage) => m.id === messageId);
     if (message) {
       message.retryCount = 0;
       await this.save();
@@ -185,7 +199,7 @@ class MessageQueue {
   /**
    * Listener ekle
    */
-  addListener(listener: (queue: QueuedMessage[]) => void): () => void {
+  addListener(listener: (queue: LocalQueuedMessage[]) => void): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
   }
@@ -194,7 +208,7 @@ class MessageQueue {
    * Listener'ları bilgilendir
    */
   private notifyListeners(): void {
-    this.listeners.forEach((listener) => listener([...this.queue]));
+    this.listeners.forEach(listener => listener([...this.queue]));
   }
 }
 

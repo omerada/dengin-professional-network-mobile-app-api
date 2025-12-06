@@ -5,6 +5,15 @@
 import type { User, AuthTokens } from '@shared/types';
 
 /**
+ * Auth response from backend
+ */
+export interface AuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: User;
+}
+
+/**
  * Login form data
  */
 export interface LoginFormData {
@@ -22,7 +31,7 @@ export interface RegisterFormData {
   password: string;
   confirmPassword: string;
   firstName: string; // Mapped to 'name' in API call
-  lastName: string;  // Mapped to 'surname' in API call
+  lastName: string; // Mapped to 'surname' in API call
   phoneNumber?: string;
   profession?: string;
   acceptTerms: boolean;
@@ -69,6 +78,7 @@ export interface AuthState {
  */
 export interface AuthActions {
   setUser: (user: User) => void;
+  setAuth: (user: User, tokens: AuthTokens) => Promise<void>;
   updateUser: (updates: Partial<User>) => void;
   clearUser: () => void;
   setLoading: (loading: boolean) => void;
@@ -76,6 +86,7 @@ export interface AuthActions {
   setLastLoginEmail: (email: string) => void;
   initialize: () => Promise<void>;
   logout: () => Promise<void>;
+  refreshToken: () => Promise<boolean>;
 }
 
 /**

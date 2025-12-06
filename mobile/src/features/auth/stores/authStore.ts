@@ -12,7 +12,7 @@ import type { User } from '@shared/types';
 /**
  * Auth store with persistence
  * Manages user authentication state
- * 
+ *
  * State is persisted to AsyncStorage (non-sensitive data)
  * Tokens are stored in SecureStorage (sensitive data)
  */
@@ -65,6 +65,25 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       /**
+       * Set authenticated user with tokens
+       */
+      setAuth: async (user: User, tokens) => {
+        try {
+          // Store tokens securely
+          await secureStorage.set(SECURE_KEYS.ACCESS_TOKEN, tokens.accessToken);
+          await secureStorage.set(SECURE_KEYS.REFRESH_TOKEN, tokens.refreshToken);
+
+          set({
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } catch (error) {
+          console.error('[AuthStore] setAuth error:', error);
+        }
+      },
+
+      /**
        * Initialize auth state on app start
        * Check for existing tokens and validate
        */
@@ -106,6 +125,28 @@ export const useAuthStore = create<AuthStore>()(
           });
         } catch (error) {
           console.error('[AuthStore] Logout error:', error);
+        }
+      },
+
+      /**
+       * Refresh access token
+       */
+      refreshToken: async () => {
+        try {
+          const refreshTokenValue = await secureStorage.get(SECURE_KEYS.REFRESH_TOKEN);
+          if (!refreshTokenValue) {
+            return false;
+          }
+
+          // TODO: Call refresh token API
+          // const response = await authApi.refreshToken(refreshTokenValue);
+          // await secureStorage.set(SECURE_KEYS.ACCESS_TOKEN, response.accessToken);
+          // await secureStorage.set(SECURE_KEYS.REFRESH_TOKEN, response.refreshToken);
+
+          return true;
+        } catch (error) {
+          console.error('[AuthStore] refreshToken error:', error);
+          return false;
         }
       },
     }),

@@ -7,9 +7,10 @@ import { StatusBar, LogBox } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider, LocaleProvider, useTheme, useColors } from '@contexts';
 import { AppNavigator } from '@core/navigation';
 import { useAuthStore } from '@features/auth/stores';
+import { LocaleProvider } from '@contexts/LocaleContext';
+import { useColors, useTheme, ThemeProvider } from '@contexts/ThemeContext';
 
 // Ignore specific warnings in development
 LogBox.ignoreLogs(['Non-serializable values were found in the navigation state']);

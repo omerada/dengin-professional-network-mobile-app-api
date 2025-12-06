@@ -8,7 +8,15 @@
 
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { feedService } from '../services';
-import type { FeedResponse } from '../types';
+
+/**
+ * Feed list response type (matches feedService response)
+ */
+interface FeedListResponse {
+  posts: import('../types').Post[];
+  hasMore: boolean;
+  lastId?: number;
+}
 
 /**
  * Query keys
@@ -24,18 +32,18 @@ export const TRENDING_FEED_KEY = 'trending-feed';
  * @param limit - Kaç post getirilecek (max 50, default 20)
  */
 export function useFeed(professionFilter?: number, limit = 20) {
-  return useInfiniteQuery<FeedResponse, Error>({
-    queryKey: [FEED_QUERY_KEY, professionFilter, limit],
-    queryFn: async ({ pageParam }) => {
+  return useInfiniteQuery({
+    queryKey: [FEED_QUERY_KEY, professionFilter, limit] as const,
+    queryFn: async ({ pageParam }): Promise<FeedListResponse> => {
       // pageParam = beforeId (son post'un ID'si)
-      return feedService.getFeed(limit, professionFilter, pageParam as number | undefined);
+      return feedService.getFeed(limit, professionFilter, pageParam);
     },
     initialPageParam: undefined as number | undefined,
-    getNextPageParam: lastPage => {
+    getNextPageParam: (lastPage: FeedListResponse) => {
       // Sonraki sayfa için son post'un ID'sini cursor olarak kullan
-      if (lastPage.hasNext && lastPage.content.length > 0) {
-        const lastPost = lastPage.content[lastPage.content.length - 1];
-        return lastPost.postId; // Son post'un ID'si = bir sonraki sayfa için cursor
+      if (lastPage.hasMore && lastPage.posts.length > 0) {
+        const lastPost = lastPage.posts[lastPage.posts.length - 1];
+        return lastPost.id; // Son post'un ID'si = bir sonraki sayfa için cursor
       }
       return undefined;
     },
@@ -49,12 +57,12 @@ export function useFeed(professionFilter?: number, limit = 20) {
  * GET /api/feed/trending
  */
 export function useTrendingFeed(limit = 20) {
-  return useInfiniteQuery<FeedResponse, Error>({
-    queryKey: [TRENDING_FEED_KEY],
-    queryFn: async () => {
+  return useInfiniteQuery({
+    queryKey: [TRENDING_FEED_KEY] as const,
+    queryFn: async (): Promise<FeedListResponse> => {
       return feedService.getTrendingFeed(limit);
     },
-    initialPageParam: 0,
+    initialPageParam: 0 as number,
     getNextPageParam: () => undefined, // Trending has no pagination
     staleTime: 5 * 60 * 1000, // 5 dakika
     gcTime: 15 * 60 * 1000, // 15 dakika
@@ -80,8 +88,8 @@ export function useRefreshFeed() {
 export function useFeedPosts(professionFilter?: number, limit = 20) {
   const { data, ...rest } = useFeed(professionFilter, limit);
 
-  const posts = data?.pages.flatMap(page => page.content) ?? [];
-  const totalCount = data?.pages[0]?.totalElements ?? 0;
+  const posts = data?.pages.flatMap(page => page.posts) ?? [];
+  const totalCount = posts.length;
 
   return {
     posts,

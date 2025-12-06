@@ -17,7 +17,7 @@ export function useMarkAsRead(conversationId?: string) {
 
   const mutation = useMutation({
     mutationFn: async (convId: string) => {
-      await messagingService.markConversationAsRead(convId);
+      await messagingService.markAsRead(convId);
     },
     onSuccess: () => {
       // Konuşma listesindeki unread count'u güncelle
@@ -28,33 +28,39 @@ export function useMarkAsRead(conversationId?: string) {
   /**
    * Okundu olarak işaretle (debounced)
    */
-  const markAsRead = useCallback((convId?: string) => {
-    const targetId = convId || conversationId;
-    if (!targetId) return;
-    
-    // Aynı conversation için tekrar çağrılmasını engelle
-    if (lastMarkedRef.current === targetId) return;
-    
-    lastMarkedRef.current = targetId;
-    mutation.mutate(targetId);
+  const markAsRead = useCallback(
+    (convId?: string) => {
+      const targetId = convId || conversationId;
+      if (!targetId) return;
 
-    // STOMP socket üzerinden de bildir
-    if (stompClient.isConnected()) {
-      stompClient.markAsRead(targetId, []);
-    }
-  }, [conversationId, mutation]);
+      // Aynı conversation için tekrar çağrılmasını engelle
+      if (lastMarkedRef.current === targetId) return;
+
+      lastMarkedRef.current = targetId;
+      mutation.mutate(targetId);
+
+      // STOMP socket üzerinden de bildir
+      if (stompClient.isConnected()) {
+        stompClient.markAsRead(targetId, []);
+      }
+    },
+    [conversationId, mutation],
+  );
 
   /**
    * Belirli mesajları okundu olarak işaretle
    */
-  const markMessagesAsRead = useCallback((messageIds: string[], convId?: string) => {
-    const targetId = convId || conversationId;
-    if (!targetId || messageIds.length === 0) return;
-    
-    if (stompClient.isConnected()) {
-      stompClient.markAsRead(targetId, messageIds);
-    }
-  }, [conversationId]);
+  const markMessagesAsRead = useCallback(
+    (messageIds: string[], convId?: string) => {
+      const targetId = convId || conversationId;
+      if (!targetId || messageIds.length === 0) return;
+
+      if (stompClient.isConnected()) {
+        stompClient.markAsRead(targetId, messageIds);
+      }
+    },
+    [conversationId],
+  );
 
   // Cleanup
   useEffect(() => {

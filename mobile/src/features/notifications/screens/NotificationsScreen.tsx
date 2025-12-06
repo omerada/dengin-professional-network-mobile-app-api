@@ -14,7 +14,7 @@ import { NotificationList } from '../components/NotificationList';
 import { PermissionPrompt } from '../components/PermissionPrompt';
 import { useMarkAllAsRead, useNotificationPermission, useUnreadCount } from '../hooks';
 import type { NotificationResponse, NotificationType } from '../types';
-import type { RootStackParamList } from '@navigation/types';
+import type { RootStackParamList } from '@core/navigation/types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -36,6 +36,7 @@ export const NotificationsScreen: React.FC = () => {
       }, 1000);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [isPermissionGranted]);
 
   // Handle notification press - navigate based on type and actionUrl

@@ -11,7 +11,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { useColors } from '@contexts';
+import { useColors } from '@contexts/ThemeContext';
 
 /**
  * Yakalama butonu props
