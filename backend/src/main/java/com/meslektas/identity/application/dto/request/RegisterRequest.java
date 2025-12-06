@@ -8,20 +8,20 @@ import jakarta.validation.constraints.Size;
  * Request DTO for user registration
  */
 public record RegisterRequest(
-        @NotBlank(message = "Email is required")
-        @Email(message = "Email must be valid")
+        @NotBlank(message = "E-posta adresi gereklidir")
+        @Email(message = "Geçerli bir e-posta adresi giriniz")
         String email,
 
-        @NotBlank(message = "Password is required")
-        @Size(min = 8, max = 100, message = "Password must be between 8 and 100 characters")
+        @NotBlank(message = "Şifre gereklidir")
+        @Size(min = 8, max = 100, message = "Şifre 8 ile 100 karakter arasında olmalıdır")
         String password,
 
-        @NotBlank(message = "Name is required")
-        @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
+        @NotBlank(message = "Ad gereklidir")
+        @Size(min = 2, max = 100, message = "Ad 2 ile 100 karakter arasında olmalıdır")
         String name,
 
-        @NotBlank(message = "Surname is required")
-        @Size(min = 2, max = 100, message = "Surname must be between 2 and 100 characters")
+        @NotBlank(message = "Soyad gereklidir")
+        @Size(min = 2, max = 100, message = "Soyad 2 ile 100 karakter arasında olmalıdır")
         String surname
 ) {
 }

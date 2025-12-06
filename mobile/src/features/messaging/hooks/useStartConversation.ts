@@ -5,7 +5,6 @@
 import { useCallback, useState } from 'react';
 import { messagingService } from '../services';
 import type { SendMessageRequest } from '../types';
-import { toUUID } from '@shared/types/common.types';
 
 /**
  * Yeni konuşma başlatmak için kullanılan hook
@@ -31,7 +30,7 @@ export function useStartConversation() {
         // Backend otomatik olarak konuşma oluşturur veya mevcut olanı bulur
         const message = initialMessage || 'Merhaba!';
         const request: SendMessageRequest = {
-          recipientId: toUUID(recipientId),
+          recipientId: Number(recipientId), // Backend Long (number) bekliyor
           content: message,
         };
 

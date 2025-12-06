@@ -30,7 +30,7 @@ export type ClientMessageStatus = MessageStatus | 'SENDING' | 'FAILED';
  * Kullanıcı özet bilgisi - Yeni konuşma başlatma için
  */
 export interface UserSummary {
-  /** Kullanıcı UUID */
+  /** Kullanıcı ID (string olarak saklanır, ama backend'e number gönderilir) */
   id: string;
   /** Görünen ad (fullName) */
   displayName: string;
@@ -212,22 +212,19 @@ export interface MessageListResponse {
  * Mesaj gönderme isteği - Backend SendMessageRequest ile uyumlu
  *
  * Backend beklentisi:
- * - recipientId: UUID format (required)
+ * - recipientId: Long (number) format (required)
  * - content: String, max 2000 karakter
  * - attachment: AttachmentDto (optional)
  *
- * NOT: recipientId mutlaka UUID formatında olmalı!
- * Validasyon için isValidUUID() veya toUUID() kullanın.
- *
  * @example
  * const request: SendMessageRequest = {
- *   recipientId: toUUID('550e8400-e29b-41d4-a716-446655440000'),
+ *   recipientId: 123,
  *   content: 'Merhaba!',
  * };
  */
 export interface SendMessageRequest {
-  /** Alıcı UUID - Backend UUID tipi bekler */
-  recipientId: UUID;
+  /** Alıcı ID - Backend Long tipi bekler */
+  recipientId: number;
   /** Mesaj içeriği (max 2000 karakter) */
   content: string;
   /** Opsiyonel ek */
@@ -283,12 +280,10 @@ export interface PresignedUrlResponse {
 /**
  * WebSocket mesaj gönderme isteği - Backend WsSendMessageRequest ile uyumlu
  * Destination: /app/chat.send
- *
- * NOT: recipientId mutlaka UUID formatında olmalı!
  */
 export interface WsSendMessageRequest {
-  /** Alıcı UUID - Backend UUID tipi bekler */
-  recipientId: UUID;
+  /** Alıcı ID - Backend Long tipi bekler */
+  recipientId: number;
   /** Mesaj içeriği */
   content: string;
   /** Opsiyonel ek */

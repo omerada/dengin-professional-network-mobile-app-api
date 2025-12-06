@@ -7,8 +7,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 /**
  * Command to send a message to another user.
  * 
@@ -25,7 +23,7 @@ import java.util.UUID;
 public class SendMessageCommand {
 
     @NotNull(message = "Recipient ID is required")
-    private UUID recipientId;
+    private Long recipientId;
 
     @Size(min = 1, max = 2000, message = "Message content must be between 1 and 2000 characters")
     private String content;

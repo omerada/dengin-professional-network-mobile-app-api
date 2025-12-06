@@ -96,16 +96,30 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
   // Add new notification optimistically (for real-time updates)
   const addNotification = useCallback(
     (notification: NotificationResponse) => {
+      // Validate notification has required fields
+      if (!notification?.notificationId) {
+        console.warn('[useNotifications] Cannot add notification without ID', notification);
+        return;
+      }
+
       queryClient.setQueryData(queryKey, (oldData: any) => {
         if (!oldData) return oldData;
 
         const firstPage = oldData.pages[0];
+
+        // Ensure notification has safe defaults
+        const safeNotification: NotificationResponse = {
+          ...notification,
+          metadata: notification.metadata || {},
+          deliveredChannels: notification.deliveredChannels || [],
+        };
+
         return {
           ...oldData,
           pages: [
             {
               ...firstPage,
-              notifications: [notification, ...firstPage.notifications],
+              notifications: [safeNotification, ...firstPage.notifications],
               totalElements: firstPage.totalElements + 1,
               unreadCount: !notification.read ? firstPage.unreadCount + 1 : firstPage.unreadCount,
             },

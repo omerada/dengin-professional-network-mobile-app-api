@@ -12,15 +12,22 @@ import type { UserSummary } from '@features/messaging/types';
 interface UserSearchResponse {
   content: UserSearchDto[];
   totalElements: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
   hasNext: boolean;
+  hasPrevious: boolean;
 }
 
 interface UserSearchDto {
   id: number;
   fullName: string;
-  profileImageUrl: string | null;
-  professionName: string | null;
-  verified: boolean;
+  avatarUrl: string | null;
+  profession: {
+    id: number;
+    name: string;
+  } | null;
+  isProfessionVerified: boolean;
 }
 
 /**
@@ -37,9 +44,11 @@ interface UserSearchParams {
  */
 function mapToUserSummary(dto: UserSearchDto): UserSummary {
   return {
-    id: String(dto.id),
+    id: String(dto.id), // Backend number döndürüyor, string'e çeviriyoruz
     displayName: dto.fullName,
-    avatarUrl: dto.profileImageUrl,
+    avatarUrl: dto.avatarUrl || null,
+    profession: dto.profession?.name,
+    verified: dto.isProfessionVerified,
   };
 }
 
@@ -47,14 +56,17 @@ function mapToUserSummary(dto: UserSearchDto): UserSummary {
  * Search users API
  */
 async function searchUsers(params: UserSearchParams): Promise<UserSummary[]> {
-  const response = await apiClient.get<UserSearchResponse>(API_ENDPOINTS.USER.SEARCH, {
+  const response = await apiClient.get<{ data: UserSearchResponse }>(API_ENDPOINTS.USER.SEARCH, {
     params: {
       q: params.query,
       page: params.page ?? 0,
       size: params.size ?? 20,
     },
   });
-  return response.data.content.map(mapToUserSummary);
+
+  // Backend ApiResponse<PagedResponse<UserResponse>> formatında döndürüyor
+  const pagedData = response.data.data || response.data;
+  return (pagedData.content || []).map(mapToUserSummary);
 }
 
 /**

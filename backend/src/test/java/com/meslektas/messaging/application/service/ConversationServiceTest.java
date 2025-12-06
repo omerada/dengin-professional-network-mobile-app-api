@@ -62,13 +62,11 @@ class ConversationServiceTest {
         private static final Long SENDER_ID = 1L;
         private static final Long RECIPIENT_ID = 2L;
 
-        private UUID recipientUuid;
         private User senderUser;
         private User recipientUser;
 
         @BeforeEach
         void setUp() {
-                recipientUuid = UUID.randomUUID();
                 senderUser = createVerifiedUser(SENDER_ID, "sender@test.com", "Sender", "Test");
                 recipientUser = createVerifiedUser(RECIPIENT_ID, "recipient@test.com", "Recipient", "Test");
         }
@@ -82,7 +80,7 @@ class ConversationServiceTest {
                 void shouldSendMessageSuccessfully() {
                         // Given
                         SendMessageCommand command = SendMessageCommand.builder()
-                                        .recipientId(recipientUuid)
+                                        .recipientId(RECIPIENT_ID)
                                         .content("Merhaba!")
                                         .build();
 
@@ -92,7 +90,6 @@ class ConversationServiceTest {
                         Conversation conversation = Conversation.create(SENDER_ID, RECIPIENT_ID);
 
                         when(userRepository.findById(SENDER_ID)).thenReturn(Optional.of(senderUser));
-                        when(userRepository.findByIdUUID(recipientUuid)).thenReturn(Optional.of(recipientWithId));
                         when(userRepository.findById(RECIPIENT_ID)).thenReturn(Optional.of(recipientWithId));
                         when(blockRepository.existsByBlockerAndBlocked(anyLong(), anyLong())).thenReturn(false);
                         when(conversationRepository.findByParticipants(anyLong(), anyLong()))
@@ -118,7 +115,7 @@ class ConversationServiceTest {
                 void shouldCreateNewConversationWhenNotExists() {
                         // Given
                         SendMessageCommand command = SendMessageCommand.builder()
-                                        .recipientId(recipientUuid)
+                                        .recipientId(RECIPIENT_ID)
                                         .content("İlk mesaj")
                                         .build();
 
@@ -127,7 +124,7 @@ class ConversationServiceTest {
                         Conversation newConversation = Conversation.create(SENDER_ID, RECIPIENT_ID);
 
                         when(userRepository.findById(SENDER_ID)).thenReturn(Optional.of(senderUser));
-                        when(userRepository.findByIdUUID(recipientUuid)).thenReturn(Optional.of(recipientWithId));
+                        when(userRepository.findById(RECIPIENT_ID)).thenReturn(Optional.of(recipientWithId));
                         when(userRepository.findById(RECIPIENT_ID)).thenReturn(Optional.of(recipientWithId));
                         when(blockRepository.existsByBlockerAndBlocked(anyLong(), anyLong())).thenReturn(false);
                         when(conversationRepository.findByParticipants(anyLong(), anyLong()))
@@ -148,7 +145,7 @@ class ConversationServiceTest {
                         // Given
                         User unverifiedSender = createUnverifiedUser(SENDER_ID, "unverified@test.com");
                         SendMessageCommand command = SendMessageCommand.builder()
-                                        .recipientId(recipientUuid)
+                                        .recipientId(RECIPIENT_ID)
                                         .content("Test")
                                         .build();
 
@@ -165,7 +162,7 @@ class ConversationServiceTest {
                 void shouldThrowExceptionWhenBlockedByRecipient() {
                         // Given
                         SendMessageCommand command = SendMessageCommand.builder()
-                                        .recipientId(recipientUuid)
+                                        .recipientId(RECIPIENT_ID)
                                         .content("Test")
                                         .build();
 
@@ -173,7 +170,7 @@ class ConversationServiceTest {
                                         "Test");
 
                         when(userRepository.findById(SENDER_ID)).thenReturn(Optional.of(senderUser));
-                        when(userRepository.findByIdUUID(any(UUID.class))).thenReturn(Optional.of(recipientWithId));
+                        when(userRepository.findById(RECIPIENT_ID)).thenReturn(Optional.of(recipientWithId));
                         when(userRepository.findById(RECIPIENT_ID)).thenReturn(Optional.of(recipientWithId));
                         when(blockRepository.existsByBlockerAndBlocked(SENDER_ID, RECIPIENT_ID)).thenReturn(false);
                         when(blockRepository.existsByBlockerAndBlocked(RECIPIENT_ID, SENDER_ID)).thenReturn(true);
@@ -189,7 +186,7 @@ class ConversationServiceTest {
                 void shouldThrowExceptionWhenSenderBlockedRecipient() {
                         // Given
                         SendMessageCommand command = SendMessageCommand.builder()
-                                        .recipientId(recipientUuid)
+                                        .recipientId(RECIPIENT_ID)
                                         .content("Test")
                                         .build();
 
@@ -197,7 +194,7 @@ class ConversationServiceTest {
                                         "Test");
 
                         when(userRepository.findById(SENDER_ID)).thenReturn(Optional.of(senderUser));
-                        when(userRepository.findByIdUUID(any(UUID.class))).thenReturn(Optional.of(recipientWithId));
+                        when(userRepository.findById(RECIPIENT_ID)).thenReturn(Optional.of(recipientWithId));
                         when(userRepository.findById(RECIPIENT_ID)).thenReturn(Optional.of(recipientWithId));
                         when(blockRepository.existsByBlockerAndBlocked(SENDER_ID, RECIPIENT_ID)).thenReturn(true);
 
@@ -212,12 +209,12 @@ class ConversationServiceTest {
                 void shouldThrowExceptionWhenRecipientNotFound() {
                         // Given
                         SendMessageCommand command = SendMessageCommand.builder()
-                                        .recipientId(recipientUuid)
+                                        .recipientId(RECIPIENT_ID)
                                         .content("Test")
                                         .build();
 
                         when(userRepository.findById(SENDER_ID)).thenReturn(Optional.of(senderUser));
-                        when(userRepository.findByIdUUID(recipientUuid)).thenReturn(Optional.empty());
+                        when(userRepository.findById(RECIPIENT_ID)).thenReturn(Optional.empty());
 
                         // When/Then
                         assertThatThrownBy(() -> conversationService.sendMessage(command, SENDER_ID))

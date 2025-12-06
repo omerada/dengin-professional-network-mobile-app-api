@@ -5,7 +5,6 @@
 
 import { apiClient } from '@core/api/client';
 import { API_ENDPOINTS } from '@core/api/endpoints';
-import { isValidUUID } from '@shared/types/common.types';
 import type {
   ConversationListResponse,
   Message,
@@ -135,11 +134,15 @@ export const messagingService = {
    * NOT: Backend /api/messages endpoint'i bekliyor, conversationId URL'de DEĞİL!
    * Request body: { recipientId, content, attachment? }
    *
-   * @throws Error if recipientId is not a valid UUID format
+   * @throws Error if recipientId is not a valid number
    */
   async sendMessage(request: SendMessageRequest): Promise<SendMessageResponse> {
-    // Validate UUID format before sending
-    if (!isValidUUID(request.recipientId)) {
+    // Validate recipientId is a valid number
+    if (
+      !request.recipientId ||
+      typeof request.recipientId !== 'number' ||
+      request.recipientId <= 0
+    ) {
       throw new Error('Geçersiz alıcı bilgisi');
     }
 

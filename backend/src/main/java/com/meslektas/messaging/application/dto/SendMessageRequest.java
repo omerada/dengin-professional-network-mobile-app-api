@@ -7,8 +7,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 /**
  * Send Message Request DTO
  * 
@@ -23,7 +21,7 @@ import java.util.UUID;
 public class SendMessageRequest {
 
     @NotNull(message = "Recipient ID is required")
-    private UUID recipientId;
+    private Long recipientId;
 
     @Size(max = 2000, message = "Message content cannot exceed 2000 characters")
     private String content;

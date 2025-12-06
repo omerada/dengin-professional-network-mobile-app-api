@@ -198,6 +198,12 @@ export function useNotificationHandler() {
 
   const handleNotificationPress = useCallback(
     (notification: NotificationResponse) => {
+      // Validate notification
+      if (!notification?.notificationId) {
+        console.warn('[useNotificationActions] Invalid notification - missing ID', notification);
+        return null;
+      }
+
       // Okunmamışsa okundu olarak işaretle
       if (!notification.read) {
         markAsRead(notification.notificationId);

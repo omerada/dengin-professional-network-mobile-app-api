@@ -64,7 +64,7 @@ export type NotificationCategory =
  * @see NotificationResponse.java
  */
 export interface NotificationResponse {
-  /** Bildirim UUID */
+  /** Bildirim UUID (zorunlu) */
   notificationId: string;
   /** Bildirim türü */
   type: NotificationType;
@@ -74,11 +74,11 @@ export interface NotificationResponse {
   body: string;
   /** Tıklama URL'i (deep link) */
   actionUrl: string | null;
-  /** Ek meta veriler */
+  /** Ek meta veriler (her zaman object döner, boş olabilir) */
   metadata: Record<string, string>;
   /** Bildirim durumu */
   status: NotificationStatus;
-  /** Teslimat yapılan kanallar */
+  /** Teslimat yapılan kanallar (her zaman array döner, boş olabilir) */
   deliveredChannels: DeliveryChannel[];
   /** Okundu mu */
   read: boolean;

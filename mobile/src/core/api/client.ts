@@ -94,15 +94,7 @@ apiClient.interceptors.request.use(
  */
 apiClient.interceptors.response.use(
   response => {
-    // Check if response contains error fields (backend ApiResponse error format)
-    if (response.data && ('error' in response.data || 'errorCode' in response.data)) {
-      const errorMessage = getErrorMessage(response.data);
-      const error = new Error(errorMessage);
-      (error as any).response = response;
-      (error as any).isApiError = true;
-      (error as any).errorCode = response.data.errorCode;
-      return Promise.reject(error);
-    }
+    // Normal successful response
     return response;
   },
   async error => {

@@ -62,6 +62,12 @@ export const useNotificationStore = create<NotificationStoreState>()(
 
       addNotification: (notification: NotificationResponse) => {
         set(state => {
+          // Validate notification has ID
+          if (!notification?.notificationId) {
+            console.warn('[NotificationStore] Cannot add notification without ID', notification);
+            return state;
+          }
+
           // Duplicate check
           const exists = state.notifications.some(
             n => n.notificationId === notification.notificationId,
@@ -77,6 +83,15 @@ export const useNotificationStore = create<NotificationStoreState>()(
 
       prependNotification: (notification: NotificationResponse) => {
         set(state => {
+          // Validate notification has ID
+          if (!notification?.notificationId) {
+            console.warn(
+              '[NotificationStore] Cannot prepend notification without ID',
+              notification,
+            );
+            return state;
+          }
+
           const exists = state.notifications.some(
             n => n.notificationId === notification.notificationId,
           );

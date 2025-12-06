@@ -25,6 +25,7 @@ import { useRegister } from '../hooks';
 import { registerSchema, RegisterSchemaType } from '../validation';
 import { AuthStackNavigationProp } from '@shared/types';
 import { spacing } from '@theme';
+import { getErrorMessage } from '@core/utils/errorUtils';
 
 /**
  * Register Screen
@@ -104,7 +105,7 @@ export const RegisterScreen: React.FC = () => {
           {isError && error && (
             <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
               <Text style={[styles.errorText, { color: colors.status.error }]}>
-                {(error as Error).message || 'Kayıt olurken bir hata oluştu'}
+                {getErrorMessage(error)}
               </Text>
             </View>
           )}

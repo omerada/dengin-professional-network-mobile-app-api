@@ -69,7 +69,7 @@ export function useSendMessage(conversationId: string) {
       // Try WebSocket first (real-time, lower latency)
       if (stompClient.isConnected()) {
         const wsRequest: WsSendMessageRequest = {
-          recipientId: toUUID(recipientId),
+          recipientId: Number(recipientId), // Backend Long (number) bekliyor
           content: trimmedContent,
           attachment: attachment ? toSendMessageAttachment(attachment) : undefined,
         };
@@ -95,7 +95,7 @@ export function useSendMessage(conversationId: string) {
 
       // Fallback to HTTP when WebSocket is not available
       const request: SendMessageRequest = {
-        recipientId: toUUID(recipientId),
+        recipientId: Number(recipientId), // Backend Long (number) bekliyor
         content: trimmedContent,
         attachment: attachment ? toSendMessageAttachment(attachment) : undefined,
       };

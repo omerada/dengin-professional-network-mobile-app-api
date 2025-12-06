@@ -186,6 +186,42 @@ public class GlobalExceptionHandler {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
         }
 
+        @ExceptionHandler(IllegalStateException.class)
+        public ResponseEntity<ErrorResponse> handleIllegalState(
+                        IllegalStateException ex,
+                        HttpServletRequest request) {
+                log.warn("Illegal state: {}", ex.getMessage());
+
+                ErrorResponse error = ErrorResponse.builder()
+                                .status(HttpStatus.BAD_REQUEST.value())
+                                .error("Bad Request")
+                                .message(ex.getMessage())
+                                .errorCode(VALIDATION_ERROR)
+                                .path(request.getRequestURI())
+                                .timestamp(LocalDateTime.now())
+                                .build();
+
+                return ResponseEntity.badRequest().body(error);
+        }
+
+        @ExceptionHandler(IllegalArgumentException.class)
+        public ResponseEntity<ErrorResponse> handleIllegalArgument(
+                        IllegalArgumentException ex,
+                        HttpServletRequest request) {
+                log.warn("Illegal argument: {}", ex.getMessage());
+
+                ErrorResponse error = ErrorResponse.builder()
+                                .status(HttpStatus.BAD_REQUEST.value())
+                                .error("Bad Request")
+                                .message(ex.getMessage())
+                                .errorCode(VALIDATION_ERROR)
+                                .path(request.getRequestURI())
+                                .timestamp(LocalDateTime.now())
+                                .build();
+
+                return ResponseEntity.badRequest().body(error);
+        }
+
         @ExceptionHandler(RateLimitExceededException.class)
         public ResponseEntity<ErrorResponse> handleRateLimitExceeded(
                         RateLimitExceededException ex,

@@ -12,6 +12,7 @@ import {
   Pressable,
   ActivityIndicator,
   Image,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -98,7 +99,9 @@ export const NewConversationScreen: React.FC = () => {
         const conversationId = await startConversation(user.id);
         navigation.replace('Chat', { conversationId });
       } catch (error) {
-        // Error handled in hook
+        // Show user-friendly error message
+        const errorMessage = error instanceof Error ? error.message : 'Konuşma başlatılamadı';
+        Alert.alert('Hata', errorMessage);
       } finally {
         setLoadingUserId(null);
       }

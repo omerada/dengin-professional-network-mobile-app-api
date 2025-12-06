@@ -31,13 +31,26 @@ class NotificationService {
     size: number = 20,
     unreadOnly: boolean = false,
   ): Promise<NotificationListResponse> {
-    const response = await apiClient.get<NotificationListResponse>(
+    const response = await apiClient.get<{ data: NotificationListResponse }>(
       API_ENDPOINTS.NOTIFICATIONS.LIST,
       {
         params: { page, size, unreadOnly },
       },
     );
-    return response.data;
+    // Backend ApiResponse<NotificationListResponse> format
+    const listResponse = response.data.data || response.data;
+
+    // Ensure all notifications have required fields with fallback
+    if (listResponse.notifications) {
+      listResponse.notifications = listResponse.notifications.map(n => ({
+        ...n,
+        notificationId: n.notificationId || `temp-${Date.now()}-${Math.random()}`,
+        metadata: n.metadata || {},
+        deliveredChannels: n.deliveredChannels || [],
+      }));
+    }
+
+    return listResponse;
   }
 
   /**
@@ -45,10 +58,16 @@ class NotificationService {
    * GET /api/notifications/{notificationId}
    */
   async getNotification(notificationId: string): Promise<NotificationResponse> {
-    const response = await apiClient.get<NotificationResponse>(
+    const response = await apiClient.get<{ data: NotificationResponse }>(
       API_ENDPOINTS.NOTIFICATIONS.BY_ID(notificationId),
     );
-    return response.data;
+    const notification = response.data.data || response.data;
+    return {
+      ...notification,
+      notificationId: notification.notificationId || notificationId,
+      metadata: notification.metadata || {},
+      deliveredChannels: notification.deliveredChannels || [],
+    };
   }
 
   /**
@@ -56,10 +75,11 @@ class NotificationService {
    * GET /api/notifications/unread-count
    */
   async getUnreadCount(): Promise<number> {
-    const response = await apiClient.get<{ unreadCount: number }>(
+    const response = await apiClient.get<{ data: { unreadCount: number } }>(
       API_ENDPOINTS.NOTIFICATIONS.UNREAD_COUNT,
     );
-    return response.data.unreadCount;
+    const result = response.data.data || response.data;
+    return result.unreadCount || 0;
   }
 
   /**
@@ -67,10 +87,16 @@ class NotificationService {
    * POST /api/notifications/{notificationId}/read
    */
   async markAsRead(notificationId: string): Promise<NotificationResponse> {
-    const response = await apiClient.post<NotificationResponse>(
+    const response = await apiClient.post<{ data: NotificationResponse }>(
       API_ENDPOINTS.NOTIFICATIONS.MARK_READ(notificationId),
     );
-    return response.data;
+    const notification = response.data.data || response.data;
+    return {
+      ...notification,
+      notificationId: notification.notificationId || notificationId,
+      metadata: notification.metadata || {},
+      deliveredChannels: notification.deliveredChannels || [],
+    };
   }
 
   /**
@@ -80,11 +106,12 @@ class NotificationService {
    * @param request markAll: true veya notificationIds listesi
    */
   async markMultipleAsRead(request: MarkAsReadRequest): Promise<{ markedAsRead: number }> {
-    const response = await apiClient.post<{ markedAsRead: number }>(
+    const response = await apiClient.post<{ data: { markedAsRead: number } }>(
       API_ENDPOINTS.NOTIFICATIONS.MARK_ALL_READ,
       request,
     );
-    return response.data;
+    const result = response.data.data || response.data;
+    return result;
   }
 
   /**
@@ -101,10 +128,10 @@ class NotificationService {
    * GET /api/notifications/preferences
    */
   async getPreferences(): Promise<NotificationPreferencesResponse> {
-    const response = await apiClient.get<NotificationPreferencesResponse>(
+    const response = await apiClient.get<{ data: NotificationPreferencesResponse }>(
       API_ENDPOINTS.NOTIFICATIONS.SETTINGS,
     );
-    return response.data;
+    return response.data.data || response.data;
   }
 
   /**
@@ -114,11 +141,11 @@ class NotificationService {
   async updatePreferences(
     request: NotificationPreferencesRequest,
   ): Promise<NotificationPreferencesResponse> {
-    const response = await apiClient.put<NotificationPreferencesResponse>(
+    const response = await apiClient.put<{ data: NotificationPreferencesResponse }>(
       API_ENDPOINTS.NOTIFICATIONS.UPDATE_SETTINGS,
       request,
     );
-    return response.data;
+    return response.data.data || response.data;
   }
 
   /**

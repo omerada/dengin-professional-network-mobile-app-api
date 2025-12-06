@@ -237,7 +237,7 @@ public class MessageWebSocketController {
         return WsMessageResponse.builder()
                 .messageId(response.getMessageId())
                 .conversationId(response.getConversationId())
-                .senderId(null) // Would need UUID for sender
+                .senderId(null)
                 .recipientId(request.getRecipientId())
                 .content(request.getContent())
                 .attachment(attachment)

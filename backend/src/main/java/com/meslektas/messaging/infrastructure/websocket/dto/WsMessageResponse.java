@@ -26,10 +26,10 @@ public class WsMessageResponse {
     private UUID conversationId;
 
     @Schema(description = "Sender user ID")
-    private UUID senderId;
+    private Long senderId;
 
     @Schema(description = "Recipient user ID")
-    private UUID recipientId;
+    private Long recipientId;
 
     @Schema(description = "Message content")
     private String content;

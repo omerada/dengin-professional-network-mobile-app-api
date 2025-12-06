@@ -8,8 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 /**
  * WebSocket request for sending a message via STOMP
  */
@@ -21,8 +19,8 @@ import java.util.UUID;
 public class WsSendMessageRequest {
 
     @NotNull(message = "Recipient ID is required")
-    @Schema(description = "UUID of the message recipient")
-    private UUID recipientId;
+    @Schema(description = "ID of the message recipient (Long)")
+    private Long recipientId;
 
     @Size(max = 2000, message = "Message content cannot exceed 2000 characters")
     @Schema(description = "Message text content")

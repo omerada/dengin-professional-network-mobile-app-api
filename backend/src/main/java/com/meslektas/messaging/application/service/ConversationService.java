@@ -78,12 +78,13 @@ public class ConversationService {
                 User sender = userRepository.findById(senderId)
                                 .orElseThrow(() -> new IllegalArgumentException("Sender not found: " + senderId));
 
-                if (!sender.isVerified()) {
-                        throw new IllegalStateException("Only verified users can send messages");
+                // Check email verification (profession verification is not required for messaging)
+                if (!Boolean.TRUE.equals(sender.getIsEmailVerified())) {
+                        throw new IllegalStateException("Email doğrulaması yapılmamış. Mesaj göndermek için e-posta adresinizi doğrulayın.");
                 }
 
                 // Validate recipient exists
-                Long recipientId = findUserIdByUuid(command.getRecipientId());
+                Long recipientId = findUserIdByLong(command.getRecipientId());
                 userRepository.findById(recipientId)
                                 .orElseThrow(() -> new IllegalArgumentException(
                                                 "Recipient not found: " + command.getRecipientId()));
@@ -352,8 +353,8 @@ public class ConversationService {
                                                 "Conversation not found: " + conversationUuid));
         }
 
-        private Long findUserIdByUuid(UUID userUuid) {
-                return userRepository.findByIdUUID(userUuid)
+        private Long findUserIdByLong(Long userUuid) {
+                return userRepository.findById(userUuid)
                                 .map(User::getId)
                                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userUuid));
         }
