@@ -31,7 +31,7 @@ const formatTime = (dateString: string | undefined | null): string => {
   if (!dateString) {
     return '';
   }
-  
+
   try {
     const date = new Date(dateString);
     // Invalid date kontrolü
