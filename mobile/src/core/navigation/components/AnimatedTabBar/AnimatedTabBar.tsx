@@ -3,7 +3,7 @@
 // Oku: mobile-development-guide/ui-ux-modernization/06-MICRO-INTERACTIONS.md
 
 import React, { memo, useCallback, useEffect } from 'react';
-import { View, Text, Pressable, Platform, StyleSheet } from 'react-native';
+import { View, Text, Pressable, Platform } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -140,13 +140,6 @@ TabButton.displayName = 'TabButton';
 // AnimatedTabBar Component
 // ============================================================================
 
-// Blur style extracted for lint compliance
-const blurOverlayStyle = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-  },
-}).overlay;
-
 /**
  * Modern AnimatedTabBar Component
  *
@@ -177,10 +170,13 @@ export const AnimatedTabBar: React.FC<AnimatedTabBarProps> = memo(
     const colors = useColors();
     const insets = useSafeAreaInsets();
 
+    // Calculate proper bottom padding with safe area
+    const bottomPadding = Math.max(insets.bottom, Platform.OS === 'ios' ? 20 : 10);
+
     const containerStyle = [
       styles.container,
       {
-        paddingBottom: Math.max(insets.bottom, Platform.OS === 'android' ? 10 : 20),
+        paddingBottom: bottomPadding,
         borderTopColor: colors.border.default,
         backgroundColor: colors.background.primary,
       },
@@ -188,47 +184,50 @@ export const AnimatedTabBar: React.FC<AnimatedTabBarProps> = memo(
     ];
 
     return (
-      <Animated.View entering={FadeIn.duration(300)} testID={testID}>
-        {/* Background overlay */}
-        <View style={[blurOverlayStyle, { backgroundColor: colors.background.primary }]} />
+      <Animated.View
+        entering={FadeIn.duration(300)}
+        testID={testID}
+        style={{ backgroundColor: colors.background.primary }}>
+        {/* Background overlay - removed absolute positioning */}
+        <View style={{ backgroundColor: colors.background.primary }}>
+          <View style={containerStyle}>
+            {state.routes.map((route, index) => {
+              const tab = tabs.find(t => t.name === route.name);
+              if (!tab) return null;
 
-        <View style={containerStyle}>
-          {state.routes.map((route, index) => {
-            const tab = tabs.find(t => t.name === route.name);
-            if (!tab) return null;
+              const focused = state.index === index;
 
-            const focused = state.index === index;
+              const onPress = () => {
+                const event = navigation.emit({
+                  type: 'tabPress',
+                  target: route.key,
+                  canPreventDefault: true,
+                });
 
-            const onPress = () => {
-              const event = navigation.emit({
-                type: 'tabPress',
-                target: route.key,
-                canPreventDefault: true,
-              });
+                if (!focused && !event.defaultPrevented) {
+                  navigation.navigate(route.name);
+                }
+              };
 
-              if (!focused && !event.defaultPrevented) {
-                navigation.navigate(route.name);
-              }
-            };
+              const onLongPress = () => {
+                navigation.emit({
+                  type: 'tabLongPress',
+                  target: route.key,
+                });
+              };
 
-            const onLongPress = () => {
-              navigation.emit({
-                type: 'tabLongPress',
-                target: route.key,
-              });
-            };
-
-            return (
-              <TabButton
-                key={route.key}
-                item={tab}
-                focused={focused}
-                index={index}
-                onPress={onPress}
-                onLongPress={onLongPress}
-              />
-            );
-          })}
+              return (
+                <TabButton
+                  key={route.key}
+                  item={tab}
+                  focused={focused}
+                  index={index}
+                  onPress={onPress}
+                  onLongPress={onLongPress}
+                />
+              );
+            })}
+          </View>
         </View>
       </Animated.View>
     );

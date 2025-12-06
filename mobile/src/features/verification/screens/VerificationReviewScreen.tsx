@@ -90,7 +90,9 @@ export const VerificationReviewScreen: React.FC = memo(() => {
   const isComplete = data.documentFront && data.documentBack && data.selfie;
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
+      edges={['top', 'bottom', 'left', 'right']}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}

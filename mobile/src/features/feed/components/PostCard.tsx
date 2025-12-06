@@ -3,7 +3,7 @@
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { StyleSheet, Pressable, Dimensions } from 'react-native';
+import { StyleSheet, Pressable } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -20,8 +20,6 @@ import { PostImages } from './PostImages';
 import { PostActions } from './PostActions';
 import { DoubleTapLike } from './DoubleTapLike';
 import type { Post } from '../types';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Create animated pressable
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -214,7 +212,7 @@ PostCard.displayName = 'PostCard';
 
 const styles = StyleSheet.create({
   container: {
-    width: SCREEN_WIDTH,
+    width: '100%',
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E0E0E0',

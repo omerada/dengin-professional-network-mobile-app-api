@@ -13,10 +13,11 @@ import {
   FlatList,
   Text,
   StatusBar,
+  useWindowDimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const IMAGE_GAP = 2;
 
 interface PostImagesProps {
@@ -27,6 +28,7 @@ interface PostImagesProps {
 export const PostImages: React.FC<PostImagesProps> = memo(({ images, postId }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const { width: screenWidth } = useWindowDimensions();
 
   const openImage = useCallback((index: number) => {
     setSelectedIndex(index);
@@ -46,7 +48,7 @@ export const PostImages: React.FC<PostImagesProps> = memo(({ images, postId }) =
         <Pressable onPress={() => openImage(0)}>
           <Image
             source={{ uri: imageUrl }}
-            style={[styles.singleImage, { height: 300 }]}
+            style={[styles.singleImage, { height: 300, width: screenWidth }]}
             resizeMode="cover"
           />
         </Pressable>
@@ -161,6 +163,7 @@ interface ImageModalProps {
 
 const ImageModal: React.FC<ImageModalProps> = ({ visible, images, initialIndex, onClose }) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const { width: screenWidth } = useWindowDimensions();
 
   const onViewableItemsChanged = useCallback(({ viewableItems }: any) => {
     if (viewableItems.length > 0) {
@@ -183,15 +186,19 @@ const ImageModal: React.FC<ImageModalProps> = ({ visible, images, initialIndex, 
           showsHorizontalScrollIndicator={false}
           initialScrollIndex={initialIndex}
           getItemLayout={(_, index) => ({
-            length: SCREEN_WIDTH,
-            offset: SCREEN_WIDTH * index,
+            length: screenWidth,
+            offset: screenWidth * index,
             index,
           })}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
           renderItem={({ item: imageUrl, index: _index }) => (
-            <View style={styles.modalImageContainer}>
-              <Image source={{ uri: imageUrl }} style={styles.modalImage} resizeMode="contain" />
+            <View style={[styles.modalImageContainer, { width: screenWidth }]}>
+              <Image
+                source={{ uri: imageUrl }}
+                style={[styles.modalImage, { width: screenWidth }]}
+                resizeMode="contain"
+              />
             </View>
           )}
           keyExtractor={(_item, index) => `modal-image-${index}`}
@@ -211,11 +218,12 @@ const ImageModal: React.FC<ImageModalProps> = ({ visible, images, initialIndex, 
 
 const styles = StyleSheet.create({
   singleImage: {
-    width: SCREEN_WIDTH,
+    width: '100%',
   },
   twoImages: {
     flexDirection: 'row',
     height: 200,
+    width: '100%',
   },
   twoImageItem: {
     flex: 1,
@@ -227,6 +235,7 @@ const styles = StyleSheet.create({
   threeImages: {
     flexDirection: 'row',
     height: 250,
+    width: '100%',
   },
   threeImageMain: {
     flex: 2,
@@ -249,6 +258,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     height: 250,
+    width: '100%',
   },
   fourImageItem: {
     width: '50%',
@@ -282,13 +292,11 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   modalImageContainer: {
-    width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalImage: {
-    width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT * 0.8,
   },
   pagination: {

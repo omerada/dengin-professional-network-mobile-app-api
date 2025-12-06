@@ -6,6 +6,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { View, RefreshControl, ActivityIndicator, Alert } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { FlatList } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 
 import { useColors } from '@contexts/ThemeContext';
@@ -242,36 +243,38 @@ export const FeedScreen: React.FC = () => {
   }
 
   return (
-    <Animated.View
-      entering={FadeIn.duration(300)}
-      style={[styles.container, { backgroundColor: colors.background.primary }]}>
-      <FlatList
-        data={posts}
-        renderItem={renderPost}
-        keyExtractor={keyExtractor}
-        ListHeaderComponent={ListHeaderComponent}
-        ListEmptyComponent={ListEmptyComponent}
-        ListFooterComponent={ListFooterComponent}
-        onEndReached={handleEndReached}
-        onEndReachedThreshold={0.5}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={refetch}
-            tintColor={colors.interactive.default}
-            colors={[colors.interactive.default]}
-          />
-        }
-        showsVerticalScrollIndicator={false}
-        estimatedItemSize={400}
-      />
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
+      edges={['top']}>
+      <Animated.View entering={FadeIn.duration(300)} style={styles.container}>
+        <FlatList
+          data={posts}
+          renderItem={renderPost}
+          keyExtractor={keyExtractor}
+          ListHeaderComponent={ListHeaderComponent}
+          ListEmptyComponent={ListEmptyComponent}
+          ListFooterComponent={ListFooterComponent}
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={0.5}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={refetch}
+              tintColor={colors.interactive.default}
+              colors={[colors.interactive.default]}
+            />
+          }
+          showsVerticalScrollIndicator={false}
+          estimatedItemSize={400}
+        />
 
-      <ActionSheet
-        visible={actionSheetVisible}
-        onClose={handleCloseActionSheet}
-        options={actionSheetOptions}
-      />
-    </Animated.View>
+        <ActionSheet
+          visible={actionSheetVisible}
+          onClose={handleCloseActionSheet}
+          options={actionSheetOptions}
+        />
+      </Animated.View>
+    </SafeAreaView>
   );
 };
 

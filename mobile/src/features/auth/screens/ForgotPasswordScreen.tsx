@@ -63,7 +63,9 @@ export const ForgotPasswordScreen: React.FC = () => {
   // Success state
   if (isEmailSent) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background.primary }]}
+        edges={['top', 'bottom', 'left', 'right']}>
         <View style={styles.successContent}>
           <View style={[styles.successIcon, { backgroundColor: colors.status.success }]}>
             <Text style={{ fontSize: 40 }}>✉️</Text>
@@ -89,7 +91,9 @@ export const ForgotPasswordScreen: React.FC = () => {
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
+      edges={['top', 'bottom', 'left', 'right']}>
       <KeyboardAvoidingView
         style={styles.keyboardAvoid}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>

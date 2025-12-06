@@ -29,15 +29,11 @@ export const styles = StyleSheet.create({
   container: {
     alignItems: 'flex-start',
     borderTopWidth: StyleSheet.hairlineWidth,
-    bottom: 0,
     flexDirection: 'row',
-    height: TAB_BAR_HEIGHT,
-    left: 0,
-    paddingBottom: Platform.select({ ios: 30, android: 10 }),
+    minHeight: TAB_BAR_HEIGHT,
     paddingHorizontal: spacing['4'],
     paddingTop: spacing['2'],
-    position: 'absolute',
-    right: 0,
+    // paddingBottom will be set dynamically with safe area insets
   },
   dotBadge: {
     borderRadius: 4,

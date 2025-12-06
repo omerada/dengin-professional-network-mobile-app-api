@@ -141,7 +141,9 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
    */
   if (!hasPermission) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background.primary }]}
+        edges={['top', 'bottom', 'left', 'right']}>
         <View style={styles.permissionContainer}>
           <Text style={styles.permissionIcon}>📷</Text>
           <Text style={[styles.permissionTitle, { color: colors.text.primary }]}>
@@ -161,7 +163,9 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
    */
   if (!device) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background.primary }]}
+        edges={['top', 'bottom', 'left', 'right']}>
         <View style={styles.permissionContainer}>
           <Text style={styles.permissionIcon}>⚠️</Text>
           <Text style={[styles.permissionTitle, { color: colors.text.primary }]}>
@@ -194,14 +198,14 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
       <DocumentGuide type={isBackSide ? 'back' : 'front'} isCapturing={isCapturing} />
 
       {/* Üst bilgi çubuğu */}
-      <SafeAreaView style={styles.topBar}>
+      <SafeAreaView style={styles.topBar} edges={['top']}>
         <View style={styles.topBarContent}>
           <Text style={styles.stepText}>{isBackSide ? 'Adım 2/3' : 'Adım 1/3'}</Text>
         </View>
       </SafeAreaView>
 
       {/* Alt kontroller */}
-      <SafeAreaView style={styles.bottomControls}>
+      <SafeAreaView style={styles.bottomControls} edges={['bottom']}>
         <CameraControls
           settings={settings}
           onSettingsChange={handleSettingsChange}

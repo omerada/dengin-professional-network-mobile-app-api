@@ -55,7 +55,9 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = memo(({ error, resetE
   }));
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
+      edges={['top', 'bottom', 'left', 'right']}>
       <View style={styles.content}>
         <Animated.View
           entering={FadeIn.delay(100).duration(400)}

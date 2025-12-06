@@ -30,7 +30,9 @@ export const WelcomeScreen: React.FC = () => {
   }, [navigation]);
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
+      edges={['top', 'bottom', 'left', 'right']}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.background.primary} />
 
       <View style={styles.content}>

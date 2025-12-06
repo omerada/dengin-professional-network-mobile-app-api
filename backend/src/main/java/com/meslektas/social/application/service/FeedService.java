@@ -243,8 +243,10 @@ public class FeedService {
             return 100.0;
         }
 
-        // Same profession
-        if (author.getProfession().getId().equals(currentUser.getProfession().getId())) {
+        // Same profession (null-safe)
+        if (author.getProfession() != null && 
+            currentUser.getProfession() != null && 
+            author.getProfession().getId().equals(currentUser.getProfession().getId())) {
             return 75.0;
         }
 
@@ -281,6 +283,10 @@ public class FeedService {
             User author,
             boolean liked,
             double relevanceScore) {
+        // Null-safe profession extraction
+        Long professionId = author.getProfession() != null ? author.getProfession().getId() : null;
+        String professionName = author.getProfession() != null ? author.getProfession().getName() : null;
+        
         return FeedPostResponse.builder()
                 .id(post.getId())
                 .postId(post.getPostId().getValue())
@@ -288,8 +294,8 @@ public class FeedService {
                         .userId(author.getId())
                         .fullName(author.getFullName())
                         .profileImageUrl(author.getProfileImageUrl())
-                        .professionId(author.getProfession().getId())
-                        .professionName(author.getProfession().getName())
+                        .professionId(professionId)
+                        .professionName(professionName)
                         .verified(author.isVerified())
                         .build())
                 .content(post.getContent().getValue())

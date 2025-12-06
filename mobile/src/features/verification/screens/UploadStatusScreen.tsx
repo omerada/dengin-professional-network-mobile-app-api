@@ -183,7 +183,9 @@ export const UploadStatusScreen: React.FC = memo(() => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
+      edges={['top', 'bottom', 'left', 'right']}>
       <View style={styles.content}>
         {/* Yükleme ilerleme göstergesi */}
         {isUploading && (

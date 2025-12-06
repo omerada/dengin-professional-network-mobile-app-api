@@ -20,9 +20,10 @@ export const PostHeader: React.FC<PostHeaderProps> = memo(
   ({ author, createdAt, onAuthorPress, onMenuPress }) => {
     const colors = useColors();
 
-    // Backend API: name, surname
+    // Backend API: name, surname, professionName
     const fullName = `${author.name} ${author.surname}`;
     const initials = `${author.name[0] || ''}${author.surname[0] || ''}`;
+    const professionDisplay = author.professionName || author.profession || 'Meslektaş';
 
     return (
       <View style={styles.container}>
@@ -54,7 +55,7 @@ export const PostHeader: React.FC<PostHeaderProps> = memo(
             </View>
             <View style={styles.metaRow}>
               <Text style={[styles.profession, { color: colors.text.secondary }]}>
-                {author.profession}
+                {professionDisplay}
               </Text>
               <Text style={[styles.dot, { color: colors.text.secondary }]}>•</Text>
               <Text style={[styles.time, { color: colors.text.secondary }]}>

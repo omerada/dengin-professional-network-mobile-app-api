@@ -14,7 +14,7 @@ import {
   Pressable,
   Alert,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -125,7 +125,9 @@ export const ConversationListScreen: React.FC = () => {
   }, [isLoading, handleNewConversation, colors.interactive.default]);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
+      edges={['top']}>
       {/* Connection indicator */}
       {!isConnected && (
         <View style={[styles.connectionBar, { backgroundColor: colors.status.warning }]}>
@@ -188,7 +190,7 @@ export const ConversationListScreen: React.FC = () => {
         ]}>
         <Icon name="create-outline" size={24} color="#FFFFFF" />
       </Pressable>
-    </View>
+    </SafeAreaView>
   );
 };
 
