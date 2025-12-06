@@ -10,7 +10,7 @@ import type { MessagingStoreState, QueuedMessage, StompConnectionState } from '.
 
 type MessagingStorePersist = (
   config: StateCreator<MessagingStoreState>,
-  options: PersistOptions<MessagingStoreState, Partial<MessagingStoreState>>
+  options: PersistOptions<MessagingStoreState, Partial<MessagingStoreState>>,
 ) => StateCreator<MessagingStoreState>;
 
 /**
@@ -86,7 +86,7 @@ export const useMessagingStore = create<MessagingStoreState>()(
       incrementRetryCount: (tempId: string) => {
         set({
           messageQueue: get().messageQueue.map((m: QueuedMessage) =>
-            m.tempId === tempId ? { ...m, retryCount: m.retryCount + 1 } : m
+            m.tempId === tempId ? { ...m, retryCount: m.retryCount + 1 } : m,
           ),
         });
       },
@@ -124,21 +124,19 @@ export const useMessagingStore = create<MessagingStoreState>()(
         messageQueue: state.messageQueue,
         totalUnreadCount: state.totalUnreadCount,
       }),
-    }
-  )
+    },
+  ),
 );
 
 /**
  * Selectors
  */
-export const selectConnectionState = (state: MessagingStoreState) =>
-  state.connectionState;
+export const selectConnectionState = (state: MessagingStoreState) => state.connectionState;
 
 export const selectIsConnected = (state: MessagingStoreState) =>
   state.connectionState === 'CONNECTED';
 
-export const selectActiveConversation = (state: MessagingStoreState) =>
-  state.activeConversationId;
+export const selectActiveConversation = (state: MessagingStoreState) => state.activeConversationId;
 
 export const selectTypingUsers = (conversationId: string) => (state: MessagingStoreState) =>
   state.typingUsers[conversationId] || [];
@@ -152,13 +150,12 @@ export const selectDraft = (conversationId: string) => (state: MessagingStoreSta
 export const selectHasDraft = (conversationId: string) => (state: MessagingStoreState) =>
   (state.drafts[conversationId]?.length || 0) > 0;
 
-export const selectQueuedMessages = (state: MessagingStoreState) =>
-  state.messageQueue;
+export const selectQueuedMessages = (state: MessagingStoreState) => state.messageQueue;
 
-export const selectQueuedMessagesForRecipient = (recipientId: string) => (state: MessagingStoreState) =>
-  state.messageQueue.filter((m: QueuedMessage) => m.recipientId === recipientId);
+export const selectQueuedMessagesForRecipient =
+  (recipientId: string) => (state: MessagingStoreState) =>
+    state.messageQueue.filter((m: QueuedMessage) => m.recipientId === recipientId);
 
-export const selectTotalUnreadCount = (state: MessagingStoreState) =>
-  state.totalUnreadCount;
+export const selectTotalUnreadCount = (state: MessagingStoreState) => state.totalUnreadCount;
 
 export default useMessagingStore;

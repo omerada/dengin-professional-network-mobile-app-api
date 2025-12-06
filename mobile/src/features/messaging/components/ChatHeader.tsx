@@ -74,7 +74,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = memo(
 
     // Online status - participant tek obje olarak gelir (1:1 chat)
     const participant = conversation.participant;
-    const isOnline = participant?.online || (participant?.userId ? onlineUsers.has(participant.userId) : false);
+    const isOnline =
+      participant?.online || (participant?.userId ? onlineUsers.has(participant.userId) : false);
 
     const getStatusText = useCallback((): string => {
       if (isTyping) {

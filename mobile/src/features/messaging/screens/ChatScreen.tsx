@@ -41,18 +41,25 @@ export const ChatScreen: React.FC = () => {
     conversation?: Conversation;
   };
 
-  const { conversationId, participant: initialParticipant, conversation: initialConversation } = routeParams;
-  
+  const {
+    conversationId,
+    participant: initialParticipant,
+    conversation: initialConversation,
+  } = routeParams;
+
   // Conversation state - header için güncel bilgi
   const [conversation, setConversation] = useState<Conversation | null>(
-    initialConversation || (initialParticipant ? {
-      conversationId,
-      participant: initialParticipant,
-      lastMessage: null,
-      unreadCount: 0,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    } : null)
+    initialConversation ||
+      (initialParticipant
+        ? {
+            conversationId,
+            participant: initialParticipant,
+            lastMessage: null,
+            unreadCount: 0,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          }
+        : null),
   );
 
   const participant = conversation?.participant || initialParticipant;

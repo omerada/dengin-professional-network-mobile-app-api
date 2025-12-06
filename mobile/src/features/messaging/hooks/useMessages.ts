@@ -71,7 +71,7 @@ export function useMessages(conversationId: string, currentUserId?: string) {
       );
 
       // Invalidate query to trigger UI update
-      queryClient.invalidateQueries({ 
+      queryClient.invalidateQueries({
         queryKey: [MESSAGES_QUERY_KEY, conversationId],
         refetchType: 'none', // Don't refetch, just use updated cache
       });
