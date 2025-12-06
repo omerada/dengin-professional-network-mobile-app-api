@@ -11,7 +11,6 @@ import Animated, {
   withSequence,
   withDelay,
   withTiming,
-  runOnJS,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -138,31 +137,33 @@ export const DoubleTapLike = memo<DoubleTapLikeProps>(
       }
     }, [onSingleTap]);
 
-    // Double tap gesture
+    // Double tap gesture - using .runOnJS(true) for modern pattern
     const doubleTapGesture = useMemo(
       () =>
         Gesture.Tap()
           .numberOfTaps(2)
           .enabled(!disabled)
+          .runOnJS(true)
           .onStart(event => {
             tapX.value = event.x;
             tapY.value = event.y;
           })
           .onEnd(() => {
-            runOnJS(showHeart)();
+            showHeart();
           }),
       [disabled, tapX, tapY, showHeart],
     );
 
-    // Single tap gesture
+    // Single tap gesture - using .runOnJS(true) for modern pattern
     const singleTapGesture = useMemo(
       () =>
         Gesture.Tap()
           .numberOfTaps(1)
           .enabled(!disabled && !!onSingleTap)
           .requireExternalGestureToFail(doubleTapGesture)
+          .runOnJS(true)
           .onEnd(() => {
-            runOnJS(handleSingleTap)();
+            handleSingleTap();
           }),
       [disabled, onSingleTap, doubleTapGesture, handleSingleTap],
     );

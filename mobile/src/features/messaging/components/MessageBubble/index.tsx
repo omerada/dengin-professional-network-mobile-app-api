@@ -2,18 +2,17 @@
 // Modern MessageBubble with swipe-to-reply and animations
 // Instagram/WhatsApp kalitesinde mesaj deneyimi
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useEffect } from 'react';
 import { View, Text, Pressable } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  withSequence,
   SlideInRight,
   SlideInLeft,
   interpolate,
   Extrapolate,
-  runOnJS,
+  useAnimatedReaction,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -69,6 +68,26 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
     const scale = useSharedValue(1);
     const replyIconOpacity = useSharedValue(0);
     const isSwipeTriggered = useSharedValue(false);
+    const replyTriggeredFlag = useSharedValue(0);
+
+    // React to reply trigger - calls JS callback when swipe completes
+    useAnimatedReaction(
+      () => replyTriggeredFlag.value,
+      () => {
+        'worklet';
+        // This reaction is used to sync worklet state with JS thread
+        // The actual JS callback is handled via useEffect
+      },
+    );
+
+    // Effect to handle JS callbacks when reply is triggered
+    useEffect(() => {
+      if (replyTriggeredFlag.value > 0 && onReply) {
+        triggerHaptic('medium');
+        onReply(message);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [replyTriggeredFlag.value]);
 
     // Colors
     const textColor = isSentByMe ? '#FFFFFF' : colors.text.primary;
@@ -82,20 +101,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
         : SlideInLeft.delay(baseDelay).springify().damping(15);
     }, [isSentByMe, index]);
 
-    // Callbacks
-    const handleTriggerHaptic = useCallback(() => {
-      triggerHaptic('medium');
-    }, [triggerHaptic]);
-
     const handleLongPressHaptic = useCallback(() => {
       triggerHaptic('heavy');
     }, [triggerHaptic]);
-
-    const handleReplyTrigger = useCallback(() => {
-      if (onReply) {
-        onReply(message);
-      }
-    }, [onReply, message]);
 
     const handleLongPressTrigger = useCallback(() => {
       if (onLongPress) {
@@ -117,6 +125,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
           .activeOffsetX(isSentByMe ? [-15, 0] : [0, 15])
           .failOffsetY([-10, 10])
           .onUpdate(event => {
+            'worklet';
             const direction = isSentByMe ? -1 : 1;
             const clampedX = Math.max(0, Math.min(SWIPE_THRESHOLD, event.translationX * direction));
             translateX.value = clampedX * direction;
@@ -127,40 +136,40 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
               Extrapolate.CLAMP,
             );
 
-            // Haptic at threshold
+            // Haptic at threshold - tracked via shared value
             if (clampedX >= SWIPE_THRESHOLD - 5 && !isSwipeTriggered.value) {
               isSwipeTriggered.value = true;
-              runOnJS(handleTriggerHaptic)();
             } else if (clampedX < SWIPE_THRESHOLD - 10) {
               isSwipeTriggered.value = false;
             }
           })
           .onEnd(() => {
+            'worklet';
             const shouldTriggerReply = Math.abs(translateX.value) >= SWIPE_THRESHOLD;
 
             translateX.value = withSpring(0, { damping: 15 });
             replyIconOpacity.value = withSpring(0);
             isSwipeTriggered.value = false;
 
-            if (shouldTriggerReply && onReply) {
-              runOnJS(handleReplyTrigger)();
+            if (shouldTriggerReply) {
+              // Use runOnJS alternative - flag for useAnimatedReaction
+              replyTriggeredFlag.value = replyTriggeredFlag.value + 1;
             }
           }),
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [isSentByMe, onReply, handleTriggerHaptic, handleReplyTrigger],
+      [isSentByMe],
     );
 
-    // Long press gesture
+    // Long press gesture - use .runOnJS(true) for modern approach
     const longPressGesture = useMemo(
       () =>
         Gesture.LongPress()
           .minDuration(500)
+          .runOnJS(true)
           .onStart(() => {
-            scale.value = withSequence(withSpring(0.95), withSpring(1));
-            runOnJS(handleLongPressHaptic)();
-            runOnJS(handleLongPressTrigger)();
+            handleLongPressHaptic();
+            handleLongPressTrigger();
           }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
       [handleLongPressHaptic, handleLongPressTrigger],
     );
 

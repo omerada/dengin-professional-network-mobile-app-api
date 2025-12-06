@@ -2,7 +2,7 @@
 // Yeni konuşma başlatma ekranı
 // Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -19,20 +19,12 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
 import { useDebounce } from '@shared/hooks/useDebounce';
+import { useUserSearch } from '@features/social/hooks';
 import { useStartConversation } from '../hooks';
 import type { UserSummary } from '../types';
 import type { MessagingStackParamList } from '@core/navigation/types';
 
 type NavigationProp = NativeStackNavigationProp<MessagingStackParamList, 'NewConversation'>;
-
-// Mock data - in real app, this would come from search API
-const mockUsers: UserSummary[] = [
-  { id: '1', displayName: 'Ahmet Yılmaz', avatarUrl: null },
-  { id: '2', displayName: 'Mehmet Demir', avatarUrl: null },
-  { id: '3', displayName: 'Ayşe Kaya', avatarUrl: null },
-  { id: '4', displayName: 'Fatma Öz', avatarUrl: null },
-  { id: '5', displayName: 'Ali Arslan', avatarUrl: null },
-];
 
 interface UserItemProps {
   user: UserSummary;
@@ -82,8 +74,6 @@ export const NewConversationScreen: React.FC = () => {
 
   // State
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<UserSummary[]>(mockUsers);
-  const [isSearching, setIsSearching] = useState(false);
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
 
   const debouncedSearch = useDebounce(searchQuery, 300);
@@ -91,22 +81,15 @@ export const NewConversationScreen: React.FC = () => {
   // Hooks
   const { startConversation } = useStartConversation();
 
-  // Search effect
-  React.useEffect(() => {
-    if (debouncedSearch.trim()) {
-      setIsSearching(true);
-      // Simulate search - in real app, this would be an API call
-      const filtered = mockUsers.filter(u =>
-        u.displayName.toLowerCase().includes(debouncedSearch.toLowerCase()),
-      );
-      setTimeout(() => {
-        setSearchResults(filtered);
-        setIsSearching(false);
-      }, 300);
-    } else {
-      setSearchResults(mockUsers);
-    }
-  }, [debouncedSearch]);
+  // User search with real API
+  const {
+    data: searchResults = [],
+    isLoading: isSearching,
+    isFetching,
+  } = useUserSearch(debouncedSearch, debouncedSearch.length >= 2);
+
+  // Show loading state
+  const showLoading = useMemo(() => isSearching || isFetching, [isSearching, isFetching]);
 
   // Handlers
   const handleUserPress = useCallback(
@@ -141,21 +124,21 @@ export const NewConversationScreen: React.FC = () => {
   const ListEmptyComponent = useCallback(
     () => (
       <View style={styles.emptyContainer}>
-        {isSearching ? (
+        {showLoading ? (
           <ActivityIndicator size="large" color={colors.interactive.default} />
         ) : (
           <>
             <Icon name="search-outline" size={48} color={colors.text.tertiary} />
             <Text style={[styles.emptyText, { color: colors.text.secondary }]}>
-              {searchQuery.trim()
+              {searchQuery.trim().length >= 2
                 ? 'Kullanıcı bulunamadı'
-                : 'Konuşma başlatmak için kullanıcı arayın'}
+                : 'Konuşma başlatmak için en az 2 karakter girin'}
             </Text>
           </>
         )}
       </View>
     ),
-    [isSearching, searchQuery, colors],
+    [showLoading, searchQuery, colors],
   );
 
   return (

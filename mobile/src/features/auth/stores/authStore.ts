@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { AuthStore } from '../types';
 import { secureStorage, SECURE_KEYS } from '@core/storage';
 import type { User } from '@shared/types';
+import { authApi } from '../services/authApi';
 
 /**
  * Auth store with persistence
@@ -138,14 +139,16 @@ export const useAuthStore = create<AuthStore>()(
             return false;
           }
 
-          // TODO: Call refresh token API
-          // const response = await authApi.refreshToken(refreshTokenValue);
-          // await secureStorage.set(SECURE_KEYS.ACCESS_TOKEN, response.accessToken);
-          // await secureStorage.set(SECURE_KEYS.REFRESH_TOKEN, response.refreshToken);
+          // Call refresh token API
+          const response = await authApi.refreshToken(refreshTokenValue);
+          await secureStorage.set(SECURE_KEYS.ACCESS_TOKEN, response.accessToken);
+          await secureStorage.set(SECURE_KEYS.REFRESH_TOKEN, response.refreshToken);
 
           return true;
         } catch (error) {
           console.error('[AuthStore] refreshToken error:', error);
+          // Token refresh failed, logout user
+          await get().logout();
           return false;
         }
       },

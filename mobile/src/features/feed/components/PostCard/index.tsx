@@ -7,7 +7,6 @@ import { Pressable } from 'react-native';
 import Animated, {
   FadeIn,
   Layout,
-  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -90,26 +89,23 @@ export const PostCard: React.FC<PostCardProps> = memo(
     const handleDoubleTapLike = useCallback(() => {
       if (!isLiked) {
         trigger('success');
+        // Animate heart
+        heartScale.value = withSpring(1.2, { damping: 10, stiffness: 300 });
+        heartOpacity.value = 1;
+        // Hide after delay
+        heartScale.value = withDelay(600, withSpring(0, { damping: 15 }));
+        heartOpacity.value = withDelay(600, withSpring(0));
+        // Trigger callback
         onLike?.(postId, isLiked);
       }
-    }, [isLiked, postId, onLike, trigger]);
+    }, [isLiked, postId, onLike, trigger, heartScale, heartOpacity]);
 
-    // Double-tap gesture
+    // Double-tap gesture - using .runOnJS(true) for modern pattern
     const doubleTapGesture = Gesture.Tap()
       .numberOfTaps(2)
+      .runOnJS(true)
       .onEnd(() => {
-        'worklet';
-        if (!isLiked) {
-          // Show heart animation
-          heartScale.value = withSpring(1.2, { damping: 10, stiffness: 300 });
-          heartOpacity.value = 1;
-
-          // Hide after delay
-          heartScale.value = withDelay(600, withSpring(0, { damping: 15 }));
-          heartOpacity.value = withDelay(600, withSpring(0));
-
-          runOnJS(handleDoubleTapLike)();
-        }
+        handleDoubleTapLike();
       });
 
     // Navigation handlers
