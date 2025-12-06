@@ -1,48 +1,38 @@
-// src/features/profile/components/ProfileActions.tsx
-// Profile action buttons (Follow, Message, etc.)
-// Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
+// src/features/profile/components/ProfileActions/index.tsx
+// Meslektaş Design System - Modern ProfileActions Component
+// Oku: mobile-development-guide/ui-ux-modernization/09-PROFILE-REDESIGN.md
 
 import React, { memo, useCallback } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { Alert, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
-import { Button } from '@shared/components';
-import { useFollow, useUnfollow, useBlock, useUnblock } from '@features/social/hooks/useFollow';
-import { spacing } from '@theme';
 
-interface ProfileActionsProps {
-  /**
-   * User ID of the profile being viewed
-   */
-  userId: number;
-  /**
-   * Whether current user is following this user
-   */
-  isFollowing?: boolean;
-  /**
-   * Whether this user is following the current user
-   */
-  isFollowedBy?: boolean;
-  /**
-   * Whether this user is blocked
-   */
-  isBlocked?: boolean;
-  /**
-   * Called when follow state changes
-   */
-  onFollowChange?: (isFollowing: boolean) => void;
-  /**
-   * Called when block state changes
-   */
-  onBlockChange?: (isBlocked: boolean) => void;
-}
+import { Button } from '@shared/components';
+import { useHaptic } from '@shared/hooks/useHaptic';
+import { useFollow, useUnfollow, useBlock, useUnblock } from '@features/social/hooks/useFollow';
+
+import { styles } from './ProfileActions.styles';
+import { getFollowButtonText, type ProfileActionsProps } from './ProfileActions.types';
 
 /**
- * ProfileActions Component
+ * Modern ProfileActions Component
  *
- * Displays action buttons for interacting with other users' profiles:
- * - Follow/Unfollow button
- * - Message button
+ * Features:
+ * - Animated button entrance
+ * - Haptic feedback on actions
+ * - Follow/Unfollow with loading state
+ * - Message navigation
  * - More options menu (report, block)
+ *
+ * @example
+ * ```tsx
+ * <ProfileActions
+ *   userId={123}
+ *   isFollowing={false}
+ *   isFollowedBy={true}
+ *   onFollowChange={(following) => console.log(following)}
+ * />
+ * ```
  */
 export const ProfileActions: React.FC<ProfileActionsProps> = memo(
   ({
@@ -52,8 +42,10 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
     isBlocked = false,
     onFollowChange,
     onBlockChange,
+    testID,
   }) => {
     const navigation = useNavigation();
+    const { trigger } = useHaptic();
 
     // Mutations
     const followMutation = useFollow();
@@ -62,45 +54,50 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
     const unblockMutation = useUnblock();
 
     const isLoading = followMutation.isPending || unfollowMutation.isPending;
-    const isBlockLoading = blockMutation.isPending || unblockMutation.isPending;
 
     // Handle follow/unfollow
-    const handleFollowPress = useCallback(async () => {
+    const handleFollowPress = useCallback(() => {
+      trigger(isFollowing ? 'light' : 'medium');
+
       if (isFollowing) {
         unfollowMutation.mutate(userId, {
           onSuccess: () => {
+            trigger('success');
             onFollowChange?.(false);
           },
           onError: () => {
+            trigger('error');
             Alert.alert('Hata', 'Takipten çıkılamadı. Lütfen tekrar deneyin.');
           },
         });
       } else {
         followMutation.mutate(userId, {
           onSuccess: () => {
+            trigger('success');
             onFollowChange?.(true);
           },
           onError: () => {
+            trigger('error');
             Alert.alert('Hata', 'Takip edilemedi. Lütfen tekrar deneyin.');
           },
         });
       }
-    }, [userId, isFollowing, followMutation, unfollowMutation, onFollowChange]);
+    }, [userId, isFollowing, followMutation, unfollowMutation, onFollowChange, trigger]);
 
     // Handle message button
     const handleMessagePress = useCallback(() => {
-      // Navigate to messaging - create or open conversation
-      navigation.navigate(
-        'Conversation' as never,
-        {
-          userId,
-          isNew: true,
-        } as never,
-      );
-    }, [navigation, userId]);
+      trigger('light');
+      // @ts-expect-error - navigation types not fully typed
+      navigation.navigate('Conversation', {
+        userId,
+        isNew: true,
+      });
+    }, [navigation, userId, trigger]);
 
-    // Handle more options (report, block, etc.)
+    // Handle more options
     const handleMorePress = useCallback(() => {
+      trigger('light');
+
       Alert.alert('Seçenekler', '', [
         {
           text: isBlocked ? 'Engeli Kaldır' : 'Engelle',
@@ -119,13 +116,25 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
                   onPress: () => {
                     if (isBlocked) {
                       unblockMutation.mutate(userId, {
-                        onSuccess: () => onBlockChange?.(false),
-                        onError: () => Alert.alert('Hata', 'Engel kaldırılamadı.'),
+                        onSuccess: () => {
+                          trigger('success');
+                          onBlockChange?.(false);
+                        },
+                        onError: () => {
+                          trigger('error');
+                          Alert.alert('Hata', 'Engel kaldırılamadı.');
+                        },
                       });
                     } else {
                       blockMutation.mutate(userId, {
-                        onSuccess: () => onBlockChange?.(true),
-                        onError: () => Alert.alert('Hata', 'Engellenemedi.'),
+                        onSuccess: () => {
+                          trigger('warning');
+                          onBlockChange?.(true);
+                        },
+                        onError: () => {
+                          trigger('error');
+                          Alert.alert('Hata', 'Engellenemedi.');
+                        },
                       });
                     }
                   },
@@ -137,32 +146,26 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
         {
           text: 'Şikayet Et',
           onPress: () => {
-            navigation.navigate(
-              'Report' as never,
-              {
-                type: 'USER',
-                targetId: userId,
-              } as never,
-            );
+            // @ts-expect-error - navigation types not fully typed
+            navigation.navigate('Report', {
+              type: 'USER',
+              targetId: userId,
+            });
           },
         },
         { text: 'İptal', style: 'cancel' },
       ]);
-    }, [isBlocked, navigation, userId, blockMutation, unblockMutation, onBlockChange]);
-
-    // Get follow button text
-    const getFollowButtonText = () => {
-      if (isFollowing) return 'Takipten Çık';
-      if (isFollowedBy) return 'Seni Takip Ediyor • Takip Et';
-      return 'Takip Et';
-    };
+    }, [isBlocked, navigation, userId, blockMutation, unblockMutation, onBlockChange, trigger]);
 
     return (
-      <View style={styles.container}>
+      <Animated.View
+        entering={FadeInDown.delay(300).duration(400)}
+        style={styles.container}
+        testID={testID}>
         {/* Follow Button */}
-        <View style={styles.primaryButtonContainer}>
+        <View style={styles.primaryButton}>
           <Button
-            title={getFollowButtonText()}
+            title={getFollowButtonText(isFollowing, isFollowedBy)}
             onPress={handleFollowPress}
             variant={isFollowing ? 'outline' : 'primary'}
             size="md"
@@ -172,7 +175,7 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
         </View>
 
         {/* Message Button */}
-        <View style={styles.secondaryButtonContainer}>
+        <View style={styles.messageButton}>
           <Button
             title="Mesaj"
             onPress={handleMessagePress}
@@ -192,29 +195,11 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
           leftIcon="ellipsis-horizontal"
           style={styles.moreButton}
         />
-      </View>
+      </Animated.View>
     );
   },
 );
 
 ProfileActions.displayName = 'ProfileActions';
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    gap: spacing.sm,
-  },
-  primaryButtonContainer: {
-    flex: 2,
-  },
-  secondaryButtonContainer: {
-    flex: 1.5,
-  },
-  moreButton: {
-    width: 44,
-    paddingHorizontal: 0,
-  },
-});
+export default ProfileActions;

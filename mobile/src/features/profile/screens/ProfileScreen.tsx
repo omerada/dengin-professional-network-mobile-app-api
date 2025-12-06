@@ -1,54 +1,41 @@
 // src/features/profile/screens/ProfileScreen.tsx
-// Full profile screen implementation
-// Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
-// Backend: UserController, UserProfileController
+// Modern Profile Screen with Design System integration
+// Oku: mobile-development-guide/ui-ux-modernization/09-PROFILE-REDESIGN.md
 
 import React, { useCallback, useMemo } from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  RefreshControl,
-  Alert,
-  FlatList,
-  Text,
-  ActivityIndicator,
-} from 'react-native';
+import { View, ScrollView, RefreshControl, Alert, Text, ActivityIndicator } from 'react-native';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { useTheme } from '@contexts/ThemeContext';
+
+import { useColors } from '@contexts/ThemeContext';
 import { useAuthStore } from '@features/auth/stores';
 import { useLogout } from '@features/auth/hooks';
 import { useFollow, useUnfollow } from '@features/social/hooks/useFollow';
 import { useUserPosts } from '@features/feed/hooks';
 import { PostCard } from '@features/feed/components';
-import { Button, Loading } from '@shared/components';
-import { spacing } from '@theme';
+import { Button, Loading, Skeleton } from '@shared/components';
 import { ProfileHeader, ProfileStats, ProfileBio, ProfileActions } from '../components';
 import { useMyProfile, useProfile, useProfileStats } from '../hooks';
 import type { ProfileStats as ProfileStatsType } from '../types';
 import type { Post } from '@features/feed/types';
+import { styles } from './ProfileScreen.styles';
 
 interface RouteParams {
   userId?: string;
 }
 
 /**
- * ProfileScreen
+ * ProfileScreen - Modern Instagram-kalitesinde profil deneyimi
  *
- * Displays user profile with:
- * - Header (avatar, name, profession)
- * - Stats (posts, followers, following)
- * - Bio
- * - Actions (for other users: follow, message)
- * - Settings button (for own profile)
- *
- * Handles both:
- * - Own profile (no userId in route)
- * - Other user's profile (userId in route)
+ * Features:
+ * - Animated component entrances
+ * - Pull-to-refresh with haptic feedback
+ * - Skeleton loading states
+ * - Staggered post animations
  */
 export const ProfileScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const navigation = useNavigation();
   const route = useRoute();
   const params = route.params as RouteParams | undefined;
@@ -181,9 +168,11 @@ export const ProfileScreen: React.FC = () => {
   if (isLoading && !profile) {
     return (
       <SafeAreaView
-        style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
+        style={[styles.container, { backgroundColor: colors.background.primary }]}
         edges={['top']}>
-        <Loading message="Profil yükleniyor..." />
+        <Animated.View entering={FadeIn.duration(300)} style={styles.container}>
+          <Skeleton variant="profile" />
+        </Animated.View>
       </SafeAreaView>
     );
   }
@@ -192,7 +181,7 @@ export const ProfileScreen: React.FC = () => {
   if (!profile) {
     return (
       <SafeAreaView
-        style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
+        style={[styles.container, { backgroundColor: colors.background.primary }]}
         edges={['top']}>
         <Loading message="Profil bulunamadı" />
       </SafeAreaView>
@@ -201,7 +190,7 @@ export const ProfileScreen: React.FC = () => {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: theme.colors.background.primary }]}
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top']}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -210,7 +199,7 @@ export const ProfileScreen: React.FC = () => {
           <RefreshControl
             refreshing={isRefetching}
             onRefresh={handleRefresh}
-            tintColor={theme.colors.primary[500]}
+            tintColor={colors.interactive.default}
           />
         }>
         {/* Profile Header */}
@@ -240,7 +229,9 @@ export const ProfileScreen: React.FC = () => {
 
         {/* Own profile actions */}
         {isOwnProfile && (
-          <View style={styles.ownProfileActions}>
+          <Animated.View
+            entering={FadeInDown.delay(350).duration(400)}
+            style={styles.ownProfileActions}>
             <Button
               title="Ayarlar"
               onPress={handleSettingsPress}
@@ -259,31 +250,29 @@ export const ProfileScreen: React.FC = () => {
                 fullWidth
               />
             </View>
-          </View>
+          </Animated.View>
         )}
 
         {/* Posts section */}
-        <View style={styles.postsSection}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text.primary }]}>
-            Gönderiler
-          </Text>
+        <Animated.View entering={FadeInDown.delay(400).duration(400)} style={styles.postsSection}>
+          <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Gönderiler</Text>
           {isLoadingPosts && userPosts.length === 0 ? (
             <View style={styles.postsLoading}>
-              <ActivityIndicator size="small" color={theme.colors.primary[500]} />
+              <ActivityIndicator size="small" color={colors.interactive.default} />
             </View>
           ) : userPosts.length === 0 ? (
             <View style={styles.emptyPosts}>
-              <Text style={[styles.emptyText, { color: theme.colors.text.secondary }]}>
+              <Text style={[styles.emptyText, { color: colors.text.secondary }]}>
                 Henüz gönderi yok
               </Text>
             </View>
           ) : (
             <>
-              {userPosts.map((post: Post) => (
+              {userPosts.map((post: Post, index: number) => (
                 <PostCard
                   key={post.postId}
                   post={post}
-                  onPress={() => handlePostPress(post.postId)}
+                  index={index}
                   onLike={() => {}}
                   onComment={() => handlePostPress(post.postId)}
                   onShare={() => {}}
@@ -292,55 +281,22 @@ export const ProfileScreen: React.FC = () => {
                 />
               ))}
               {hasNextPage && (
-                <Button
-                  title={isFetchingNextPage ? 'Yükleniyor...' : 'Daha Fazla Göster'}
-                  onPress={handleLoadMorePosts}
-                  variant="ghost"
-                  size="sm"
-                  loading={isFetchingNextPage}
-                />
+                <View style={styles.loadMoreButton}>
+                  <Button
+                    title={isFetchingNextPage ? 'Yükleniyor...' : 'Daha Fazla Göster'}
+                    onPress={handleLoadMorePosts}
+                    variant="ghost"
+                    size="sm"
+                    loading={isFetchingNextPage}
+                  />
+                </View>
               )}
             </>
           )}
-        </View>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-  ownProfileActions: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-  },
-  logoutButton: {
-    marginTop: spacing.md,
-  },
-  postsSection: {
-    flex: 1,
-    paddingTop: spacing.lg,
-    paddingHorizontal: spacing.md,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: spacing.md,
-  },
-  postsLoading: {
-    paddingVertical: spacing.xl,
-    alignItems: 'center',
-  },
-  emptyPosts: {
-    paddingVertical: spacing.xl,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 14,
-  },
-});
+export default ProfileScreen;

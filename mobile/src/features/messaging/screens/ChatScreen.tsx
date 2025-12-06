@@ -1,21 +1,16 @@
 // src/features/messaging/screens/ChatScreen.tsx
-// Sohbet ekranı - Backend API ile uyumlu
+// Modern Chat Screen - Instagram/WhatsApp kalitesinde
 // Backend: ConversationController, MessageWebSocketController
-// Oku: backend-development-guide/sprint-planning/26-SPRINT-7-8.md
 
-import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
-import {
-  View,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
-} from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { View, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
-import { useTheme } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
+import { useHaptic } from '@shared/hooks';
 import { useAuthStore } from '@features/auth/stores';
 import {
   ChatHeader,
@@ -24,24 +19,22 @@ import {
   MessageOptionsSheet,
   type MessageOptionsSheetRef,
 } from '../components';
-import {
-  useMessages,
-  useSendMessage,
-  useTyping,
-} from '../hooks';
+import { useMessages, useSendMessage, useTyping } from '../hooks';
 import { useMessagingStore } from '../stores';
 import { messagingService } from '../services';
-import type { Message, Conversation, Participant } from '../types';
+import type { Message, Participant } from '../types';
 import type { MessagingStackParamList } from '@navigation/types';
+import { styles } from './ChatScreen.styles';
 
 type NavigationProp = NativeStackNavigationProp<MessagingStackParamList, 'Chat'>;
 type ChatRouteProp = RouteProp<MessagingStackParamList, 'Chat'>;
 
 export const ChatScreen: React.FC = () => {
-  const { theme } = useTheme();
+  const colors = useColors();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ChatRouteProp>();
+  const { trigger: triggerHaptic } = useHaptic();
 
   // Route params - Backend Conversation yapısıyla uyumlu
   const { conversationId, participant } = route.params as {
@@ -72,7 +65,12 @@ export const ChatScreen: React.FC = () => {
   } = useMessages(conversationId);
 
   const { sendMessage, isPending: isSending, retryMessage } = useSendMessage(conversationId);
-  const { startTyping, stopTyping, setRecipientId, isTyping: otherUserTyping } = useTyping(conversationId);
+  const {
+    startTyping,
+    stopTyping,
+    setRecipientId,
+    isTyping: otherUserTyping,
+  } = useTyping(conversationId);
 
   // Computed
   const currentUserId = user?.id?.toString() || '';
@@ -132,6 +130,8 @@ export const ChatScreen: React.FC = () => {
     const trimmedText = messageText.trim();
     if (!trimmedText || !recipientId) return;
 
+    triggerHaptic('light');
+
     sendMessage({
       content: trimmedText,
       recipientId,
@@ -139,27 +139,32 @@ export const ChatScreen: React.FC = () => {
 
     setMessageText('');
     clearDraft(conversationId);
-  }, [conversationId, messageText, recipientId, sendMessage, clearDraft]);
+  }, [conversationId, messageText, recipientId, sendMessage, clearDraft, triggerHaptic]);
 
-  const handleTextChange = useCallback((text: string) => {
-    setMessageText(text);
-    if (text.length > 0) {
-      startTyping();
-    } else {
-      stopTyping();
-    }
-  }, [startTyping, stopTyping]);
+  const handleTextChange = useCallback(
+    (text: string) => {
+      setMessageText(text);
+      if (text.length > 0) {
+        startTyping();
+      } else {
+        stopTyping();
+      }
+    },
+    [startTyping, stopTyping],
+  );
 
-  const handleMessageLongPress = useCallback((message: Message) => {
-    setSelectedMessage(message);
-    messageOptionsRef.current?.open();
-  }, []);
+  const handleMessageLongPress = useCallback(
+    (message: Message) => {
+      triggerHaptic('medium');
+      setSelectedMessage(message);
+      messageOptionsRef.current?.open();
+    },
+    [triggerHaptic],
+  );
 
-  const handleDeleteMessage = useCallback(async (message: Message) => {
-    Alert.alert(
-      'Mesajı Sil',
-      'Bu mesajı silmek istediğinize emin misiniz?',
-      [
+  const handleDeleteMessage = useCallback(
+    async (message: Message) => {
+      Alert.alert('Mesajı Sil', 'Bu mesajı silmek istediğinize emin misiniz?', [
         { text: 'İptal', style: 'cancel' },
         {
           text: 'Sil',
@@ -173,24 +178,21 @@ export const ChatScreen: React.FC = () => {
             }
           },
         },
-      ]
-    );
-  }, [conversationId, refetch]);
+      ]);
+    },
+    [conversationId, refetch],
+  );
 
   const handleReportMessage = useCallback((message: Message) => {
-    Alert.alert(
-      'Mesajı Bildir',
-      'Bu mesajı bildirmek istediğinize emin misiniz?',
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Bildir',
-          onPress: () => {
-            Alert.alert('Bilgi', 'Mesaj bildirildi');
-          },
+    Alert.alert('Mesajı Bildir', 'Bu mesajı bildirmek istediğinize emin misiniz?', [
+      { text: 'İptal', style: 'cancel' },
+      {
+        text: 'Bildir',
+        onPress: () => {
+          Alert.alert('Bilgi', 'Mesaj bildirildi');
         },
-      ]
-    );
+      },
+    ]);
   }, []);
 
   const handleLoadMore = useCallback(() => {
@@ -211,12 +213,9 @@ export const ChatScreen: React.FC = () => {
   };
 
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: theme.colors.background.primary },
-      ]}
-    >
+    <Animated.View
+      entering={FadeIn.duration(300)}
+      style={[styles.container, { backgroundColor: colors.background.primary }]}>
       {/* Header */}
       <View style={{ paddingTop: insets.top }}>
         <ChatHeader
@@ -232,8 +231,7 @@ export const ChatScreen: React.FC = () => {
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={0}
-      >
+        keyboardVerticalOffset={0}>
         <MessageList
           messages={messages}
           currentUserId={currentUserId}
@@ -264,7 +262,7 @@ export const ChatScreen: React.FC = () => {
         onDelete={handleDeleteMessage}
         onReport={handleReportMessage}
       />
-    </View>
+    </Animated.View>
   );
 };
 
@@ -274,30 +272,6 @@ const styles = StyleSheet.create({
   },
   keyboardView: {
     flex: 1,
-  },
-  replyBar: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(0,0,0,0.1)',
-  },
-  replyContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  replyIndicator: {
-    width: 3,
-    height: '100%',
-    borderRadius: 2,
-    marginRight: 8,
-  },
-  replyTextContainer: {
-    flex: 1,
-  },
-  replyText: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
   },
 });
 
