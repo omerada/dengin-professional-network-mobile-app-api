@@ -3,7 +3,8 @@
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import React, { memo, useCallback, useRef, useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Alert, SafeAreaView, StatusBar } from 'react-native';
+import { StyleSheet, View, Text, Alert, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Camera,
   useCameraDevice,

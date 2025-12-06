@@ -11,6 +11,7 @@ import { AppNavigator } from '@core/navigation';
 import { useAuthStore } from '@features/auth/stores';
 import { LocaleProvider } from '@contexts/LocaleContext';
 import { useColors, useTheme, ThemeProvider } from '@contexts/ThemeContext';
+import { testBackendConnection } from '@core/api';
 
 // Ignore specific warnings in development
 LogBox.ignoreLogs(['Non-serializable values were found in the navigation state']);
@@ -45,6 +46,17 @@ const AppContent: React.FC = () => {
   // Initialize auth state on app start
   useEffect(() => {
     initialize();
+
+    // Test backend connection on startup (dev only)
+    if (__DEV__) {
+      testBackendConnection().then((isReachable: boolean) => {
+        if (isReachable) {
+          console.log('[App] ✅ Backend is reachable');
+        } else {
+          console.error('[App] ❌ Backend NOT reachable - check network configuration');
+        }
+      });
+    }
   }, [initialize]);
 
   return (

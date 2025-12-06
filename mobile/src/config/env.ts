@@ -12,9 +12,11 @@ const expoConfig = Constants.expoConfig?.extra || {};
  * Uses Expo Constants for managed workflow compatibility
  */
 export const ENV = {
+  // IMPORTANT: For Expo Go, .env doesn't work reliably
+  // Using direct IP address for local development
   API_BASE_URL:
-    expoConfig.API_BASE_URL || process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8080',
-  WS_URL: expoConfig.WS_URL || process.env.EXPO_PUBLIC_WS_URL || 'ws://localhost:8080/ws',
+    expoConfig.API_BASE_URL || process.env.EXPO_PUBLIC_API_BASE_URL || 'http://192.168.1.100:8080', // Your host machine IP
+  WS_URL: expoConfig.WS_URL || process.env.EXPO_PUBLIC_WS_URL || 'ws://192.168.1.100:8080/ws',
 
   FIREBASE: {
     apiKey: expoConfig.FIREBASE_API_KEY || process.env.EXPO_PUBLIC_FIREBASE_API_KEY || '',

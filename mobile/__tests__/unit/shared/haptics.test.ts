@@ -14,11 +14,23 @@ import {
   withHaptic,
   useHaptics,
 } from '@shared/utils/haptics';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import * as Haptics from 'expo-haptics';
 
-// Mock react-native-haptic-feedback
-jest.mock('react-native-haptic-feedback', () => ({
-  trigger: jest.fn(),
+// Mock expo-haptics
+jest.mock('expo-haptics', () => ({
+  impactAsync: jest.fn(),
+  notificationAsync: jest.fn(),
+  selectionAsync: jest.fn(),
+  ImpactFeedbackStyle: {
+    Light: 'light',
+    Medium: 'medium',
+    Heavy: 'heavy',
+  },
+  NotificationFeedbackType: {
+    Success: 'success',
+    Warning: 'warning',
+    Error: 'error',
+  },
 }));
 
 describe('Haptics Utils', () => {
@@ -30,32 +42,23 @@ describe('Haptics Utils', () => {
     it('should trigger light haptic by default', () => {
       haptic();
 
-      expect(ReactNativeHapticFeedback.trigger).toHaveBeenCalledWith(
-        'impactLight',
-        expect.any(Object),
-      );
+      expect(Haptics.impactAsync).toHaveBeenCalledWith(Haptics.ImpactFeedbackStyle.Light);
     });
 
     it('should trigger specified haptic type', () => {
       haptic('heavy');
 
-      expect(ReactNativeHapticFeedback.trigger).toHaveBeenCalledWith(
-        'impactHeavy',
-        expect.any(Object),
-      );
+      expect(Haptics.impactAsync).toHaveBeenCalledWith(Haptics.ImpactFeedbackStyle.Heavy);
     });
 
     it('should trigger selection haptic', () => {
       haptic('selection');
 
-      expect(ReactNativeHapticFeedback.trigger).toHaveBeenCalledWith(
-        'selection',
-        expect.any(Object),
-      );
+      expect(Haptics.selectionAsync).toHaveBeenCalled();
     });
 
     it('should handle errors gracefully', () => {
-      (ReactNativeHapticFeedback.trigger as jest.Mock).mockImplementationOnce(() => {
+      (Haptics.impactAsync as jest.Mock).mockImplementationOnce(() => {
         throw new Error('Haptic not available');
       });
 
@@ -68,10 +71,7 @@ describe('Haptics Utils', () => {
     it('should trigger light impact haptic', () => {
       hapticLight();
 
-      expect(ReactNativeHapticFeedback.trigger).toHaveBeenCalledWith(
-        'impactLight',
-        expect.any(Object),
-      );
+      expect(Haptics.impactAsync).toHaveBeenCalledWith(Haptics.ImpactFeedbackStyle.Light);
     });
   });
 
@@ -79,10 +79,7 @@ describe('Haptics Utils', () => {
     it('should trigger medium impact haptic', () => {
       hapticMedium();
 
-      expect(ReactNativeHapticFeedback.trigger).toHaveBeenCalledWith(
-        'impactMedium',
-        expect.any(Object),
-      );
+      expect(Haptics.impactAsync).toHaveBeenCalledWith(Haptics.ImpactFeedbackStyle.Medium);
     });
   });
 
@@ -90,10 +87,7 @@ describe('Haptics Utils', () => {
     it('should trigger heavy impact haptic', () => {
       hapticHeavy();
 
-      expect(ReactNativeHapticFeedback.trigger).toHaveBeenCalledWith(
-        'impactHeavy',
-        expect.any(Object),
-      );
+      expect(Haptics.impactAsync).toHaveBeenCalledWith(Haptics.ImpactFeedbackStyle.Heavy);
     });
   });
 
@@ -101,10 +95,7 @@ describe('Haptics Utils', () => {
     it('should trigger selection haptic', () => {
       hapticSelection();
 
-      expect(ReactNativeHapticFeedback.trigger).toHaveBeenCalledWith(
-        'selection',
-        expect.any(Object),
-      );
+      expect(Haptics.selectionAsync).toHaveBeenCalled();
     });
   });
 
@@ -112,9 +103,8 @@ describe('Haptics Utils', () => {
     it('should trigger success notification haptic', () => {
       hapticSuccess();
 
-      expect(ReactNativeHapticFeedback.trigger).toHaveBeenCalledWith(
-        'notificationSuccess',
-        expect.any(Object),
+      expect(Haptics.notificationAsync).toHaveBeenCalledWith(
+        Haptics.NotificationFeedbackType.Success,
       );
     });
   });
@@ -123,9 +113,8 @@ describe('Haptics Utils', () => {
     it('should trigger warning notification haptic', () => {
       hapticWarning();
 
-      expect(ReactNativeHapticFeedback.trigger).toHaveBeenCalledWith(
-        'notificationWarning',
-        expect.any(Object),
+      expect(Haptics.notificationAsync).toHaveBeenCalledWith(
+        Haptics.NotificationFeedbackType.Warning,
       );
     });
   });
@@ -134,9 +123,8 @@ describe('Haptics Utils', () => {
     it('should trigger error notification haptic', () => {
       hapticError();
 
-      expect(ReactNativeHapticFeedback.trigger).toHaveBeenCalledWith(
-        'notificationError',
-        expect.any(Object),
+      expect(Haptics.notificationAsync).toHaveBeenCalledWith(
+        Haptics.NotificationFeedbackType.Error,
       );
     });
   });
@@ -148,10 +136,7 @@ describe('Haptics Utils', () => {
 
       const result = wrappedHandler('arg1', 'arg2');
 
-      expect(ReactNativeHapticFeedback.trigger).toHaveBeenCalledWith(
-        'impactLight',
-        expect.any(Object),
-      );
+      expect(Haptics.impactAsync).toHaveBeenCalledWith(Haptics.ImpactFeedbackStyle.Light);
       expect(handler).toHaveBeenCalledWith('arg1', 'arg2');
       expect(result).toBe('result');
     });
@@ -162,14 +147,13 @@ describe('Haptics Utils', () => {
 
       wrappedHandler();
 
-      expect(ReactNativeHapticFeedback.trigger).toHaveBeenCalledWith(
-        'notificationSuccess',
-        expect.any(Object),
+      expect(Haptics.notificationAsync).toHaveBeenCalledWith(
+        Haptics.NotificationFeedbackType.Success,
       );
     });
 
     it('should call handler even if haptic fails', () => {
-      (ReactNativeHapticFeedback.trigger as jest.Mock).mockImplementationOnce(() => {
+      (Haptics.impactAsync as jest.Mock).mockImplementationOnce(() => {
         throw new Error('Haptic failed');
       });
 
@@ -201,17 +185,13 @@ describe('Haptics Utils', () => {
       const haptics = useHaptics();
 
       haptics.light();
-      expect(ReactNativeHapticFeedback.trigger).toHaveBeenCalledWith(
-        'impactLight',
-        expect.any(Object),
-      );
+      expect(Haptics.impactAsync).toHaveBeenCalledWith(Haptics.ImpactFeedbackStyle.Light);
 
       jest.clearAllMocks();
 
       haptics.success();
-      expect(ReactNativeHapticFeedback.trigger).toHaveBeenCalledWith(
-        'notificationSuccess',
-        expect.any(Object),
+      expect(Haptics.notificationAsync).toHaveBeenCalledWith(
+        Haptics.NotificationFeedbackType.Success,
       );
     });
   });

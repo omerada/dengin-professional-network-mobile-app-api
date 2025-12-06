@@ -121,9 +121,9 @@ export const ForgotPasswordScreen: React.FC = () => {
 
           {/* Error Message */}
           {isError && error && (
-            <View style={[styles.errorContainer, { backgroundColor: colors.status.error }]}>
+            <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
               <Text style={[styles.errorText, { color: colors.status.error }]}>
-                {(error as Error).message || 'Bir hata oluştu'}
+                {(error as Error).message || 'Şifre sıfırlama isteği gönderilirken bir hata oluştu'}
               </Text>
             </View>
           )}
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   errorContainer: {
     padding: spacing.md,
     borderRadius: 8,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.xl + spacing.md,
   },
   errorText: {
     fontSize: 14,

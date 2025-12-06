@@ -11,7 +11,7 @@ import type { RootStackNavigationProp } from '@shared/types';
 /**
  * Biometric login hook
  * Handles biometric authentication flow
- * 
+ *
  * Flow:
  * 1. User triggers biometric auth
  * 2. Biometric service verifies identity
@@ -28,13 +28,18 @@ export const useBiometricLogin = () => {
   // Check biometric availability on mount
   useEffect(() => {
     const checkBiometric = async () => {
-      const { available } = await biometricService.isAvailable();
-      const isEnabled = await biometricService.isEnabled();
-      setIsBiometricAvailable(available && isEnabled);
+      try {
+        const { available } = await biometricService.isAvailable();
+        const isEnabled = await biometricService.isEnabled();
+        setIsBiometricAvailable(available && isEnabled);
 
-      if (available) {
-        const name = await biometricService.getBiometricName();
-        setBiometricName(name);
+        if (available) {
+          const name = await biometricService.getBiometricName();
+          setBiometricName(name);
+        }
+      } catch (error) {
+        console.warn('[useBiometricLogin] Failed to check biometric availability:', error);
+        setIsBiometricAvailable(false);
       }
     };
 

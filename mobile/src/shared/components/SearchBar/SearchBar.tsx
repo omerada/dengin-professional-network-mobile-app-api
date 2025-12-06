@@ -3,16 +3,7 @@
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback, useRef, useState } from 'react';
-import {
-  View,
-  TextInput,
-  Pressable,
-  Text,
-  ActivityIndicator,
-  LayoutAnimation,
-  Platform,
-  UIManager,
-} from 'react-native';
+import { View, TextInput, Pressable, Text, ActivityIndicator } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -28,11 +19,6 @@ import { useHaptic } from '@shared/hooks/useHaptic';
 import { spring } from '@theme/animations';
 import { styles } from './SearchBar.styles';
 import { SearchBarProps, SEARCH_BAR_SIZES } from './SearchBar.types';
-
-// Enable LayoutAnimation on Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -91,19 +77,13 @@ export const SearchBar: React.FC<SearchBarProps> = memo(
     const handleFocus = useCallback(() => {
       setIsFocused(true);
       focusProgress.value = withSpring(1, spring.snappy);
-      if (showCancelButton) {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      }
-    }, [focusProgress, showCancelButton]);
+    }, [focusProgress]);
 
     // Handle blur
     const handleBlur = useCallback(() => {
       setIsFocused(false);
       focusProgress.value = withSpring(0, spring.snappy);
-      if (showCancelButton) {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      }
-    }, [focusProgress, showCancelButton]);
+    }, [focusProgress]);
 
     // Handle text change
     const handleChangeText = useCallback(

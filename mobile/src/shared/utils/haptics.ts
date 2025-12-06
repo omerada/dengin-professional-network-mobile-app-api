@@ -2,16 +2,7 @@
 // Haptic feedback utility fonksiyonları
 // Oku: mobile-development-guide/ui/17-DESIGN-SYSTEM.md
 
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import type { HapticFeedbackTypes } from 'react-native-haptic-feedback';
-
-/**
- * Haptic feedback options
- */
-const hapticOptions = {
-  enableVibrateFallback: true,
-  ignoreAndroidSystemSettings: false,
-};
+import * as Haptics from 'expo-haptics';
 
 /**
  * Haptic feedback types
@@ -23,24 +14,7 @@ export type HapticType =
   | 'selection'
   | 'success'
   | 'warning'
-  | 'error'
-  | 'rigid'
-  | 'soft';
-
-/**
- * Map custom types to library types
- */
-const hapticTypeMap: Record<HapticType, HapticFeedbackTypes> = {
-  light: 'impactLight',
-  medium: 'impactMedium',
-  heavy: 'impactHeavy',
-  selection: 'selection',
-  success: 'notificationSuccess',
-  warning: 'notificationWarning',
-  error: 'notificationError',
-  rigid: 'rigid',
-  soft: 'soft',
-};
+  | 'error';
 
 /**
  * Trigger haptic feedback
@@ -60,8 +34,31 @@ const hapticTypeMap: Record<HapticType, HapticFeedbackTypes> = {
  */
 export const haptic = (type: HapticType = 'light'): void => {
   try {
-    const feedbackType = hapticTypeMap[type];
-    ReactNativeHapticFeedback.trigger(feedbackType, hapticOptions);
+    switch (type) {
+      case 'light':
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        break;
+      case 'medium':
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        break;
+      case 'heavy':
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+        break;
+      case 'success':
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        break;
+      case 'warning':
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        break;
+      case 'error':
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        break;
+      case 'selection':
+        Haptics.selectionAsync();
+        break;
+      default:
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
   } catch (error) {
     // Silently fail - haptics are optional
     if (__DEV__) {

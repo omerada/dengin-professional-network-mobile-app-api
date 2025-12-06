@@ -12,9 +12,8 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Platform, Pressable, Text, TextInput, UIManager, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import Animated, {
-  interpolate,
   interpolateColor,
   useAnimatedStyle,
   useSharedValue,
@@ -28,11 +27,6 @@ import { spring, duration } from '@theme/animations';
 
 import { styles, getVariantStyles } from './Input.styles';
 import { INPUT_SIZE_CONFIG, type InputProps, type InputRef } from './Input.types';
-
-// Enable LayoutAnimation on Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 // Create animated components
 const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
@@ -102,7 +96,8 @@ export const Input = memo(
 
       // Animation values
       const focusProgress = useSharedValue(0);
-      const labelPosition = useSharedValue(value ? 1 : 0);
+      // labelPosition: 0 = top (label visible above), 1 = inside (label hidden/replaced by placeholder)
+      const labelPosition = useSharedValue(value ? 0 : 0);
       const shakeOffset = useSharedValue(0);
 
       // Get size and variant configs
@@ -119,9 +114,8 @@ export const Input = memo(
 
       // Update label position when value changes
       useEffect(() => {
-        if (value && labelPosition.value === 0) {
-          labelPosition.value = withSpring(1, spring.gentle);
-        }
+        // Always keep label on top
+        labelPosition.value = withSpring(0, spring.gentle);
       }, [value, labelPosition]);
 
       // Shake animation on error
@@ -143,16 +137,10 @@ export const Input = memo(
           return {};
         }
 
-        const translateY = interpolate(
-          labelPosition.value,
-          [0, 1],
-          [
-            sizeConfig.height / 2 - sizeConfig.labelFontSize / 2 - 2,
-            -sizeConfig.labelFontSize / 2 - 4,
-          ],
-        );
-
-        const scale = interpolate(labelPosition.value, [0, 1], [1, 0.85]);
+        // labelPosition: 0 = always show on top (correct position)
+        // We don't animate it anymore, it always stays on top
+        const translateY = 0;
+        const scale = 0.85; // Always small, on top
 
         const colorValue = interpolateColor(
           focusProgress.value,
@@ -208,7 +196,8 @@ export const Input = memo(
         (e: any) => {
           setIsFocused(true);
           focusProgress.value = withSpring(1, spring.snappy);
-          labelPosition.value = withSpring(1, spring.gentle);
+          // Keep label on top when focused
+          labelPosition.value = withSpring(0, spring.gentle);
           onFocus?.(e);
         },
         [onFocus, focusProgress, labelPosition],
@@ -219,9 +208,8 @@ export const Input = memo(
         (e: any) => {
           setIsFocused(false);
           focusProgress.value = withSpring(0, spring.snappy);
-          if (!value) {
-            labelPosition.value = withSpring(0, spring.gentle);
-          }
+          // Keep label on top always
+          labelPosition.value = withSpring(0, spring.gentle);
           onBlur?.(e);
         },
         [value, onBlur, focusProgress, labelPosition],
@@ -258,15 +246,21 @@ export const Input = memo(
         <Animated.View
           style={[styles.container, animatedContainerStyle, containerStyle]}
           testID={testID}>
-          {/* Floating Label */}
+          {/* Floating Label - Always on top */}
           {label && floatingLabel && (
             <AnimatedText
               style={[
                 styles.label,
                 {
+                  position: 'absolute',
                   left: leftIcon
                     ? sizeConfig.paddingX + sizeConfig.iconSize + 8
                     : sizeConfig.paddingX,
+                  top: -2,
+                  backgroundColor:
+                    variant === 'outlined' ? colors.background.primary : 'transparent',
+                  paddingHorizontal: variant === 'outlined' ? 4 : 0,
+                  zIndex: 10,
                 },
                 animatedLabelStyle,
                 labelStyle,
@@ -332,6 +326,7 @@ export const Input = memo(
               editable={!disabled}
               onFocus={handleFocus}
               onBlur={handleBlur}
+              placeholder={props.placeholder}
               placeholderTextColor={colors.text.tertiary}
               selectionColor={colors.interactive.default}
               secureTextEntry={secureTextEntry && !isPasswordVisible}

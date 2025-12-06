@@ -8,13 +8,13 @@ import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   TouchableOpacity,
   Switch,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -107,7 +107,7 @@ export const RegisterScreen: React.FC = () => {
 
           {/* Error Message */}
           {isError && error && (
-            <View style={[styles.errorContainer, { backgroundColor: colors.status.error }]}>
+            <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
               <Text style={[styles.errorText, { color: colors.status.error }]}>
                 {(error as Error).message || 'Kayıt olurken bir hata oluştu'}
               </Text>
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
   errorContainer: {
     padding: spacing.md,
     borderRadius: 8,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.xl + spacing.md,
   },
   errorText: {
     fontSize: 14,

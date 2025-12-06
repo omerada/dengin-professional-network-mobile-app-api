@@ -90,6 +90,7 @@ export const styles = StyleSheet.create({
 
   container: {
     marginBottom: 16,
+    paddingTop: 20, // More space for label on top
   },
 
   content: {

@@ -3,7 +3,8 @@
 // Backend API Reference: mobile-development-guide/core/14-BACKEND-API-REFERENCE.md
 
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import { StyleSheet, View, Text, SafeAreaView } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Animated, {

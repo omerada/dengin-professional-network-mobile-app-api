@@ -3,7 +3,8 @@
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import React, { memo, useCallback } from 'react';
-import { StyleSheet, View, Text, ScrollView, SafeAreaView } from 'react-native';
+import { StyleSheet, View, Text, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';

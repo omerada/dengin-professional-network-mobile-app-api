@@ -2,21 +2,46 @@
 // Oku: mobile-development-guide/core/10-API-CLIENT.md
 
 import axios, { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
+import { Platform } from 'react-native';
 import { ENV } from '@config/env';
 import { APP_CONFIG } from '@config/app';
 import { secureStorage, SECURE_KEYS } from '@core/storage';
+
+/**
+ * Get the correct API base URL for the current platform
+ * Android emulator: localhost -> 10.0.2.2 (or use host machine IP directly)
+ * iOS simulator: localhost works as-is
+ */
+const getApiBaseUrl = (): string => {
+  let baseUrl = ENV.API_BASE_URL;
+
+  // Only convert localhost to 10.0.2.2 on Android
+  // If using direct IP (like 192.168.x.x), no conversion needed
+  if (Platform.OS === 'android' && baseUrl.includes('localhost')) {
+    baseUrl = baseUrl.replace('localhost', '10.0.2.2');
+  }
+
+  if (__DEV__) {
+    console.log('[API] Platform:', Platform.OS);
+    console.log('[API] Original URL:', ENV.API_BASE_URL);
+    console.log('[API] Final URL:', baseUrl);
+  }
+
+  return baseUrl;
+};
 
 /**
  * Create Axios instance with base configuration
  */
 const createApiClient = (): AxiosInstance => {
   const instance = axios.create({
-    baseURL: ENV.API_BASE_URL,
-    timeout: APP_CONFIG.API.TIMEOUT,
+    baseURL: getApiBaseUrl(),
+    timeout: 10000, // 10 seconds - shorter for faster failure detection
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
     },
+    validateStatus: status => status < 500, // Don't throw on 4xx errors
   });
 
   return instance;
@@ -26,6 +51,23 @@ const createApiClient = (): AxiosInstance => {
  * Main API client instance
  */
 export const apiClient = createApiClient();
+
+/**
+ * Test backend connectivity
+ */
+export const testBackendConnection = async (): Promise<boolean> => {
+  try {
+    const response = await axios.get(`${getApiBaseUrl()}/actuator/health`, {
+      timeout: 5000,
+      validateStatus: () => true,
+    });
+    console.log('[API] Backend health check:', response.status);
+    return response.status === 200 || response.status === 404;
+  } catch (error: any) {
+    console.error('[API] Backend health check failed:', error.message);
+    return false;
+  }
+};
 
 /**
  * Request interceptor - adds auth token to requests
@@ -40,8 +82,12 @@ apiClient.interceptors.request.use(
     }
 
     // Log request in development
-    if (ENV.isDevelopment) {
-      console.log(`[API] ${config.method?.toUpperCase()} ${config.url}`);
+    if (__DEV__) {
+      console.log(`[API] Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+      console.log('[API] Headers:', JSON.stringify(config.headers));
+      if (config.data) {
+        console.log('[API] Request Data:', JSON.stringify(config.data).substring(0, 200));
+      }
     }
 
     return config;
@@ -109,13 +155,40 @@ apiClient.interceptors.response.use(
       }
     }
 
-    // Log error in development
-    if (ENV.isDevelopment) {
-      console.error('[API] Response error:', {
-        status: error.response?.status,
-        data: error.response?.data,
-        url: error.config?.url,
-      });
+    // Log error in development with detailed network diagnostics
+    if (__DEV__) {
+      if (!error.response) {
+        // Network error - no response received
+        console.error('[API] Network Error - Backend unreachable:', {
+          message: error.message,
+          url: `${error.config?.baseURL}${error.config?.url}`,
+          method: error.config?.method,
+          code: error.code,
+          timeout: error.config?.timeout,
+        });
+        console.error('[API] Troubleshooting:');
+        console.error('  1. Backend çalışıyor mu? Test: http://localhost:8080/actuator/health');
+        console.error('  2. Android HTTP traffic: usesCleartextTraffic=true (app.json)');
+        console.error('  3. Android emulator: 10.0.2.2 yerine localhost deneyin');
+        console.error('  4. Expo Go kullanıyorsanız: npx expo start --tunnel deneyin');
+        console.error("  5. CORS: Backend'de 10.0.2.2 origin'i eklenmiş mi?");
+
+        // Test backend connection
+        testBackendConnection().then(isReachable => {
+          if (isReachable) {
+            console.error('[API] Backend reachable but request failed - check request format');
+          } else {
+            console.error('[API] Backend NOT reachable - network/firewall issue');
+          }
+        });
+      } else {
+        console.error('[API] Response error:', {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+          url: error.config?.url,
+        });
+      }
     }
 
     return Promise.reject(error);

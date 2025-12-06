@@ -7,9 +7,38 @@ import { Platform } from 'react-native';
 import ReactNativeBiometrics from 'react-native-biometrics';
 import { secureStorage, SECURE_KEYS, asyncStorage, STORAGE_KEYS } from '@core/storage';
 
-const rnBiometrics = new ReactNativeBiometrics({ allowDeviceCredentials: true });
+// Lazy initialization to avoid null errors
+let rnBiometrics: ReactNativeBiometrics | null = null;
+let initializationAttempted = false;
+let isNativeModuleAvailable = false;
 
-/**
+const getRnBiometrics = (): ReactNativeBiometrics | null => {
+  if (rnBiometrics) {
+    return rnBiometrics;
+  }
+
+  if (initializationAttempted) {
+    return null; // Don't retry if already failed
+  }
+
+  try {
+    initializationAttempted = true;
+    const instance = new ReactNativeBiometrics({ allowDeviceCredentials: true });
+
+    // Verify the instance has the required methods
+    if (!instance || typeof instance.isSensorAvailable !== 'function') {
+      // Silent fail - module not available (Expo Go doesn't support native biometrics)
+      return null;
+    }
+
+    isNativeModuleAvailable = true;
+    rnBiometrics = instance;
+    return rnBiometrics;
+  } catch (error) {
+    // Silent fail in production - biometrics require development build
+    return null;
+  }
+}; /**
  * Biometric type names for UI display
  */
 const BIOMETRIC_NAMES: Record<string, string> = {
@@ -24,23 +53,32 @@ const BIOMETRIC_NAMES: Record<string, string> = {
 export const biometricService = {
   /**
    * Check if biometric authentication is available
+   * Returns false gracefully if native module is not available (Expo Go)
    */
   isAvailable: async (): Promise<{ available: boolean; biometryType: string | null }> => {
     try {
-      const { available, biometryType } = await rnBiometrics.isSensorAvailable();
+      const biometrics = getRnBiometrics();
+      if (!biometrics || !isNativeModuleAvailable) {
+        return { available: false, biometryType: null };
+      }
+
+      const result = await biometrics.isSensorAvailable();
+
+      if (!result) {
+        return { available: false, biometryType: null };
+      }
+
       return {
-        available,
-        biometryType: biometryType || null,
+        available: result.available || false,
+        biometryType: result.biometryType || null,
       };
     } catch (error) {
-      console.error('[BiometricService] Error checking availability:', error);
+      // Graceful fallback - biometrics not available
       return { available: false, biometryType: null };
     }
-  },
-
-  /**
+  } /**
    * Get biometric type display name
-   */
+   */,
   getBiometricName: async (): Promise<string> => {
     const { biometryType } = await biometricService.isAvailable();
     if (biometryType && BIOMETRIC_NAMES[biometryType]) {
@@ -55,12 +93,13 @@ export const biometricService = {
   authenticate: async (promptMessage?: string): Promise<{ success: boolean; error?: string }> => {
     try {
       const { available } = await biometricService.isAvailable();
+      const biometrics = getRnBiometrics();
 
-      if (!available) {
+      if (!available || !biometrics) {
         return { success: false, error: 'Biyometrik doğrulama kullanılamıyor' };
       }
 
-      const { success, error } = await rnBiometrics.simplePrompt({
+      const { success, error } = await biometrics.simplePrompt({
         promptMessage: promptMessage || 'Kimliğinizi doğrulayın',
         cancelButtonText: 'İptal',
       });

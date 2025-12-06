@@ -11,7 +11,9 @@
       "bundleIdentifier": "com.meslektas.app"
     },
     "android": {
-      "package": "com.meslektas.app"
+      "package": "com.meslektas.app",
+      "usesCleartextTraffic": true,
+      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE"]
     },
     "web": {
       "bundler": "metro"
