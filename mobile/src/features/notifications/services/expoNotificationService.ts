@@ -261,17 +261,17 @@ class ExpoNotificationService {
    */
   setupNotificationListeners(): void {
     // Received notification listener (when app is in foreground)
-    this.notificationListener = Notifications.addNotificationReceivedListener((notification) => {
+    this.notificationListener = Notifications.addNotificationReceivedListener(notification => {
       console.log('[ExpoNotification] Notification received:', notification);
-      
+
       const data = notification.request.content.data as unknown as NotificationData;
       this.handleNotificationReceived(data);
     });
 
     // Response listener (when user taps notification)
-    this.responseListener = Notifications.addNotificationResponseReceivedListener((response) => {
+    this.responseListener = Notifications.addNotificationResponseReceivedListener(response => {
       console.log('[ExpoNotification] Notification tapped:', response);
-      
+
       const data = response.notification.request.content.data as unknown as NotificationData;
       this.handleNotificationTapped(data);
     });
@@ -294,7 +294,7 @@ class ExpoNotificationService {
   private handleNotificationTapped(data: NotificationData): void {
     // Will be implemented with navigation logic
     console.log('[ExpoNotification] Processing tapped notification:', data);
-    
+
     // Navigation will be handled by NotificationHandler
     // This is just for logging and any pre-navigation logic
   }

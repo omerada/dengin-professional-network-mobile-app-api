@@ -115,15 +115,11 @@ describe('ExpoNotificationService', () => {
     it('should display notification with correct data', async () => {
       (Notifications.scheduleNotificationAsync as jest.Mock).mockResolvedValue('notification-id');
 
-      await expoNotificationService.displayLocalNotification(
-        'Test Title',
-        'Test Body',
-        {
-          type: 'NEW_MESSAGE',
-          conversationId: '123',
-          senderId: '456',
-        },
-      );
+      await expoNotificationService.displayLocalNotification('Test Title', 'Test Body', {
+        type: 'NEW_MESSAGE',
+        conversationId: '123',
+        senderId: '456',
+      });
 
       expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith({
         content: expect.objectContaining({
@@ -183,9 +179,9 @@ describe('ExpoNotificationService', () => {
     it('should throw on registration error', async () => {
       (apiClient.post as jest.Mock).mockRejectedValue(new Error('Network error'));
 
-      await expect(
-        expoNotificationService.registerWithBackend('test-token'),
-      ).rejects.toThrow('Network error');
+      await expect(expoNotificationService.registerWithBackend('test-token')).rejects.toThrow(
+        'Network error',
+      );
     });
   });
 

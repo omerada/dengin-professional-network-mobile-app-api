@@ -12,9 +12,9 @@ import { useNotificationStore } from '../stores';
  */
 export function useNotificationPermission() {
   const [isLoading, setIsLoading] = useState(false);
-  const isPermissionGranted = useNotificationStore((state) => state.isPermissionGranted);
-  const setPermissionGranted = useNotificationStore((state) => state.setPermissionGranted);
-  const setFcmToken = useNotificationStore((state) => state.setFcmToken);
+  const isPermissionGranted = useNotificationStore(state => state.isPermissionGranted);
+  const setPermissionGranted = useNotificationStore(state => state.setPermissionGranted);
+  const setFcmToken = useNotificationStore(state => state.setFcmToken);
 
   /**
    * Check current permission status
@@ -102,7 +102,7 @@ export function useNotificationPermission() {
    */
   useEffect(() => {
     if (isPermissionGranted) {
-      expoNotificationService.getExpoPushToken().then((token) => {
+      expoNotificationService.getExpoPushToken().then(token => {
         if (token) {
           setFcmToken(token);
         }

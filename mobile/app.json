@@ -19,12 +19,7 @@
     "android": {
       "package": "com.meslektas.app",
       "usesCleartextTraffic": true,
-      "permissions": [
-        "INTERNET",
-        "ACCESS_NETWORK_STATE",
-        "RECEIVE_BOOT_COMPLETED",
-        "VIBRATE"
-      ],
+      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE", "RECEIVE_BOOT_COMPLETED", "VIBRATE"],
       "googleServicesFile": "./google-services.json",
       "useNextNotificationsApi": true
     },
@@ -55,4 +50,3 @@
     }
   }
 }
-

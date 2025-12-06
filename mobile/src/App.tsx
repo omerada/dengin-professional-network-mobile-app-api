@@ -68,7 +68,7 @@ const AppContent: React.FC = () => {
   // Initialize notifications when user is authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      notificationHandler.initialize().catch((error) => {
+      notificationHandler.initialize().catch(error => {
         console.error('[App] Failed to initialize notifications:', error);
       });
     }

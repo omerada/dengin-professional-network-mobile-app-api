@@ -22,7 +22,7 @@ class NotificationHandler {
     try {
       // Initialize Expo notification service
       const token = await expoNotificationService.initialize();
-      
+
       if (!token) {
         console.warn('[NotificationHandler] Failed to initialize notifications');
         return;
@@ -190,11 +190,7 @@ class NotificationHandler {
   /**
    * Display local notification
    */
-  async displayNotification(
-    title: string,
-    body: string,
-    data: NotificationData,
-  ): Promise<void> {
+  async displayNotification(title: string, body: string, data: NotificationData): Promise<void> {
     await expoNotificationService.displayLocalNotification(title, body, data);
   }
 
