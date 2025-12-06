@@ -157,6 +157,8 @@ export interface RegisterData {
   password: string;
   name: string;
   surname: string;
+  professionId?: number | null;
+  customProfession?: string;
 }
 
 /**
@@ -173,15 +175,9 @@ export interface AuthResponse {
 
 /**
  * Register response from API
- * Backend: POST /api/auth/register response
+ * Backend: POST /api/auth/register response - Now returns LoginResponse for auto-login
  */
-export interface RegisterResponse {
-  id: number;
-  email: string;
-  name: string;
-  surname: string;
-  createdAt: string;
-}
+export type RegisterResponse = AuthResponse;
 
 /**
  * Refresh token response

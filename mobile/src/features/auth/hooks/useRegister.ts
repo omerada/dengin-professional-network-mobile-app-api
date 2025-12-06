@@ -3,25 +3,21 @@
 // Oku: mobile-development-guide/state/15-REACT-QUERY.md
 
 import { useMutation } from '@tanstack/react-query';
-import { useNavigation } from '@react-navigation/native';
 import { useCallback } from 'react';
-import { Alert } from 'react-native';
 import { authApi } from '../services';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { RegisterFormData } from '../types';
-import type { AuthStackNavigationProp } from '@shared/types';
 import { getErrorMessage } from '@core/utils/errorUtils';
 
 /**
  * Register hook with React Query mutation
- * Handles registration flow
+ * Handles registration flow with auto-login
  *
  * Backend API: POST /api/auth/register
- * Request: { email, password, name, surname }
- * Response: { id, email, name, surname, createdAt }
+ * Request: { email, password, name, surname, professionId?, customProfession? }
+ * Response: LoginResponse { user, accessToken, refreshToken, tokenType, expiresIn }
  */
 export const useRegister = () => {
-  const navigation = useNavigation<AuthStackNavigationProp>();
-
   const mutation = useMutation({
     mutationFn: async (data: RegisterFormData) => {
       // Backend expects 'name' and 'surname' instead of firstName/lastName
@@ -30,22 +26,18 @@ export const useRegister = () => {
         password: data.password,
         name: data.firstName,
         surname: data.lastName,
+        professionId: data.professionId,
+        customProfession: data.customProfession,
       });
       return response;
     },
 
-    onSuccess: (_data, _variables) => {
-      // Show success message
-      Alert.alert(
-        'Kayıt Başarılı',
-        'Hesabınız oluşturuldu. E-posta adresinize gönderilen doğrulama linkine tıklayarak hesabınızı aktifleştirin.',
-        [
-          {
-            text: 'Tamam',
-            onPress: () => navigation.navigate('Login'),
-          },
-        ],
-      );
+    onSuccess: async (data, _variables) => {
+      // Auto-login: Store tokens in AsyncStorage
+      await AsyncStorage.setItem('accessToken', data.accessToken);
+      await AsyncStorage.setItem('refreshToken', data.refreshToken);
+      await AsyncStorage.setItem('user', JSON.stringify(data.user));
+      // Navigation to home will be handled by the app
     },
 
     onError: (error: Error) => {

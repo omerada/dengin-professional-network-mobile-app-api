@@ -7,7 +7,10 @@ import com.meslektas.identity.application.dto.request.RegisterRequest;
 import com.meslektas.identity.application.dto.response.LoginResponse;
 import com.meslektas.identity.application.dto.response.UserResponse;
 import com.meslektas.identity.application.mapper.UserMapper;
+import com.meslektas.identity.domain.model.Profession;
+import com.meslektas.identity.domain.model.ProfessionCategory;
 import com.meslektas.identity.domain.model.User;
+import com.meslektas.identity.domain.repository.ProfessionRepository;
 import com.meslektas.identity.domain.repository.UserRepository;
 import com.meslektas.identity.infrastructure.security.JwtTokenProvider;
 import com.meslektas.notification.domain.service.EmailService;
@@ -43,13 +46,18 @@ import java.util.concurrent.TimeUnit;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final ProfessionRepository professionRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final JwtTokenProvider jwtService; // Alias for token generation
     private final AuthenticationManager authenticationManager;
     private final UserMapper userMapper;
     private final ApplicationEventPublisher eventPublisher;
     private final EmailService emailService;
     private final RedisTemplate<String, String> redisTemplate;
+
+    @Value("${app.jwt.expiration}")
+    private long jwtExpirationMs;
 
     @Value("${app.frontend-url:https://meslektas.com}")
     private String frontendUrl;
@@ -61,9 +69,10 @@ public class AuthService {
      * Register a new user
      * 
      * Business Rule: Email must be unique
+     * Returns LoginResponse with tokens for auto-login after registration
      */
     @Transactional
-    public UserResponse register(RegisterRequest request) {
+    public LoginResponse register(RegisterRequest request) {
         log.info("Registering new user: {}", request.email());
 
         // Business validation
@@ -80,6 +89,35 @@ public class AuthService {
                 request.name(),
                 request.surname());
 
+        // Set profession if provided
+        if (request.professionId() != null) {
+            Profession profession = professionRepository.findById(request.professionId())
+                    .orElseThrow(() -> new BusinessException(
+                            "Geçersiz meslek seçimi",
+                            "INVALID_PROFESSION"));
+            user.selectProfession(profession);
+        } else if (request.customProfession() != null && !request.customProfession().isBlank()) {
+            // Custom profession - validate and find OTHER category profession
+            if (containsProfanity(request.customProfession())) {
+                throw new BusinessException(
+                        "Geçersiz meslek adı",
+                        "INVALID_PROFESSION_NAME");
+            }
+            // Find or create 'OTHER' category profession
+            Profession otherProfession = professionRepository.findByCategory(ProfessionCategory.OTHER)
+                    .stream()
+                    .findFirst()
+                    .orElseGet(() -> {
+                        Profession newProf = Profession.builder()
+                                .name("Diğer")
+                                .category(ProfessionCategory.OTHER)
+                                .requiresVerification(false)
+                                .build();
+                        return professionRepository.save(newProf);
+                    });
+            user.selectProfession(otherProfession);
+        }
+
         // Save
         User savedUser = userRepository.save(user);
 
@@ -92,7 +130,31 @@ public class AuthService {
         // Send verification email
         sendVerificationEmail(savedUser);
 
-        return userMapper.toResponse(savedUser);
+        // Generate tokens for auto-login
+        String accessToken = jwtTokenProvider.generateTokenFromUserId(savedUser.getId(), savedUser.getEmail());
+        String refreshToken = jwtTokenProvider.generateRefreshToken(savedUser.getId(), savedUser.getEmail());
+
+        return LoginResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .tokenType("Bearer")
+                .expiresIn(jwtExpirationMs / 1000)
+                .user(userMapper.toResponse(savedUser))
+                .build();
+    }
+
+    /**
+     * Simple profanity check for custom profession
+     */
+    private boolean containsProfanity(String text) {
+        String[] profanityWords = {"amk", "orospu", "piç", "s1k", "sik", "göt", "yarak", "am", "aq", "mk"};
+        String lowerText = text.toLowerCase();
+        for (String word : profanityWords) {
+            if (lowerText.contains(word)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

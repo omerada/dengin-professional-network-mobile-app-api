@@ -18,7 +18,7 @@ export const MESSAGES_QUERY_KEY = 'messages';
  * Messages list hook with real-time updates
  * Backend MessageListResponse ile uyumlu
  */
-export function useMessages(conversationId: string, currentUserId?: string) {
+export function useMessages(conversationId: string, _currentUserId?: string) {
   const queryClient = useQueryClient();
 
   // Subscribe to real-time message events
@@ -54,7 +54,7 @@ export function useMessages(conversationId: string, currentUserId?: string) {
         };
 
         pushNotificationHandler.handleBackendNotification({
-          title: data.senderName || 'Yeni Mesaj',
+          title: (data as any).senderName || 'Yeni Mesaj',
           body: data.content || 'Yeni bir mesaj aldınız',
           data: notificationData,
           type: 'NEW_MESSAGE',

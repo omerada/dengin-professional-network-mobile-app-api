@@ -8,6 +8,22 @@
 - Maven 3.8+
 - Docker & Docker Compose
 
+### Environment Setup
+
+```bash
+# 1. Copy environment template
+cp .env.example .env
+
+# 2. Edit .env file and configure your values
+# Required variables:
+# - JWT_SECRET
+# - DATABASE_URL, DATABASE_USERNAME, DATABASE_PASSWORD
+# - FIREBASE_PROJECT_ID, FIREBASE_CREDENTIALS_JSON
+# - MAILGUN_API_KEY, MAILGUN_DOMAIN
+
+# See ENV-CONFIGURATION.md for detailed instructions
+```
+
 ### Start Infrastructure
 
 ```bash
@@ -24,11 +40,11 @@ docker-compose ps
 # Build
 mvn clean install
 
-# Run
+# Run (development)
 mvn spring-boot:run
 
-# Or with specific profile
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
+# Run (production)
+mvn spring-boot:run -Dspring-boot.run.profiles=prod
 ```
 
 ### Access
@@ -70,6 +86,38 @@ Strategic Domain-Driven Design (DDD)
 6. **Moderation** - Content Moderation
 
 See `/backend-development-guide` for complete documentation.
+
+## Configuration
+
+### Environment Variables
+
+All sensitive configuration is managed through environment variables:
+
+- **Security:** JWT secrets, API keys
+- **Database:** Connection strings, credentials
+- **AWS:** Access keys, region, S3 buckets
+- **Firebase:** Service account credentials
+- **Email:** Mailgun configuration
+- **OAuth:** Google, Instagram client IDs/secrets
+
+**📖 Documentation:**
+
+- Quick reference: See `.env.example`
+- Detailed guide: See `ENV-CONFIGURATION.md`
+- Deployment summary: See `ENVIRONMENT-DEPLOYMENT-SUMMARY.md`
+
+### Profiles
+
+- **dev** (default): Local development with LocalStack
+- **prod**: Production configuration with real AWS services
+
+```bash
+# Development
+mvn spring-boot:run
+
+# Production
+mvn spring-boot:run -Dspring-boot.run.profiles=prod
+```
 
 ## Tech Stack
 

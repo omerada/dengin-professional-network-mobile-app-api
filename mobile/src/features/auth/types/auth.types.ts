@@ -32,8 +32,8 @@ export interface RegisterFormData {
   confirmPassword: string;
   firstName: string; // Mapped to 'name' in API call
   lastName: string; // Mapped to 'surname' in API call
-  phoneNumber?: string;
-  profession?: string;
+  professionId?: number | null;
+  customProfession?: string;
   acceptTerms: boolean;
 }
 

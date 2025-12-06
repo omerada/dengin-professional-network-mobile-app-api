@@ -48,7 +48,7 @@ export const ChatScreen: React.FC = () => {
   } = routeParams;
 
   // Conversation state - header için güncel bilgi
-  const [conversation, setConversation] = useState<Conversation | null>(
+  const [conversation] = useState<Conversation | null>(
     initialConversation ||
       (initialParticipant
         ? {

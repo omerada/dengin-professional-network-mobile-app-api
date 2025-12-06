@@ -57,17 +57,7 @@ const formatTime = (dateString: string | undefined | null): string => {
  * - Retry button for failed messages
  */
 export const MessageBubble: React.FC<MessageBubbleProps> = memo(
-  ({
-    message,
-    isOwn,
-    showAvatar = false,
-    index = 0,
-    onLongPress,
-    onReply,
-    onImagePress,
-    onRetry,
-    style,
-  }) => {
+  ({ message, isOwn, showAvatar = false, onLongPress, onReply, onImagePress, onRetry, style }) => {
     const colors = useColors();
     const { trigger: triggerHaptic } = useHaptic();
 

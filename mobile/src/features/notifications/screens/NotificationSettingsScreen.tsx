@@ -48,7 +48,7 @@ export const NotificationSettingsScreen: React.FC = () => {
     isEmailEnabled,
     inQuietHours,
   } = useNotificationSettings();
-  const { isPermissionGranted, promptForPermission } = useNotificationPermission();
+  const { isPermissionGranted, requestWithPrompt } = useNotificationPermission();
 
   const isSystemNotificationsDisabled = !isPermissionGranted;
 
@@ -171,8 +171,8 @@ export const NotificationSettingsScreen: React.FC = () => {
 
   // Handle enable notifications (system permission)
   const handleEnableNotifications = useCallback(() => {
-    promptForPermission();
-  }, [promptForPermission]);
+    requestWithPrompt();
+  }, [requestWithPrompt]);
 
   if (isLoading) {
     return (

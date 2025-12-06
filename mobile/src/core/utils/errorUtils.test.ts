@@ -1,7 +1,7 @@
 // Test file for error handling
 // Bu dosya test amaçlıdır, production'da kullanılmaz
 
-import { getErrorMessage, isNetworkError, isAuthError } from './errorUtils';
+import { getErrorMessage, isNetworkError } from './errorUtils';
 import { AxiosError } from 'axios';
 
 // Test 1: Backend 401 error

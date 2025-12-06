@@ -413,6 +413,11 @@ export const getNotificationIcon = (type: NotificationType): string => {
     PASSWORD_RESET: 'key',
     ACCOUNT_SUSPENDED: 'ban',
     ACCOUNT_REACTIVATED: 'checkmark-circle',
+    SYSTEM: 'information-circle',
+    NEW_MATCH: 'people',
+    VERIFICATION_STATUS: 'shield-checkmark',
+    MODERATION_ALERT: 'alert-circle',
+    PROFILE_VIEW: 'eye',
   };
   return icons[type] || 'notifications';
 };
@@ -434,6 +439,11 @@ export const getNotificationColor = (type: NotificationType): string => {
     PASSWORD_RESET: '#6366F1', // Indigo
     ACCOUNT_SUSPENDED: '#EF4444', // Red
     ACCOUNT_REACTIVATED: '#10B981', // Green
+    SYSTEM: '#6B7280', // Gray
+    NEW_MATCH: '#8B5CF6', // Purple
+    VERIFICATION_STATUS: '#10B981', // Green
+    MODERATION_ALERT: '#F59E0B', // Amber
+    PROFILE_VIEW: '#3B82F6', // Blue
   };
   return colors[type] || '#6B7280';
 };
@@ -458,6 +468,11 @@ export const getNotificationCategory = (type: NotificationType): NotificationCat
     PASSWORD_RESET: 'SYSTEM',
     ACCOUNT_SUSPENDED: 'SYSTEM',
     ACCOUNT_REACTIVATED: 'SYSTEM',
+    SYSTEM: 'SYSTEM',
+    NEW_MATCH: 'SOCIAL',
+    VERIFICATION_STATUS: 'VERIFICATION',
+    MODERATION_ALERT: 'MODERATION',
+    PROFILE_VIEW: 'SOCIAL',
   };
   return categories[type] || 'SYSTEM';
 };

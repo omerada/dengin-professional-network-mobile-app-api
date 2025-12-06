@@ -20,7 +20,6 @@ import type {
   MessageAttachment,
   SendMessageAttachment,
 } from '../types';
-import { toUUID } from '../types';
 
 interface SendMessageParams {
   content: string;
@@ -106,7 +105,7 @@ export function useSendMessage(conversationId: string) {
       return {
         messageId: response.messageId,
         conversationId: response.conversationId,
-        senderId: user?.id?.toString() || '',
+        senderId: user?.id || 0,
         senderName: user?.fullName || '',
         content: response.content,
         attachment: null,
@@ -133,7 +132,7 @@ export function useSendMessage(conversationId: string) {
       const optimisticMessage: ClientMessage = {
         messageId: optimisticMessageId,
         conversationId,
-        senderId: user?.id?.toString() || '',
+        senderId: user?.id || 0,
         senderName: user?.fullName || '',
         content,
         attachment: attachment || null,
@@ -225,7 +224,7 @@ export function useSendMessage(conversationId: string) {
 
   // Retry failed message
   const retryMessage = useCallback(
-    (messageId: string, content: string, recipientId: string) => {
+    (messageId: string, content: string, recipientId: number) => {
       // Remove failed message from cache
       queryClient.setQueryData<InfiniteData<MessageListResponse>>(
         [MESSAGES_QUERY_KEY, conversationId],

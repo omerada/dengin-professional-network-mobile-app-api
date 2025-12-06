@@ -7,7 +7,6 @@ import type {
   LoginCredentials,
   RegisterData,
   AuthResponse,
-  RegisterResponse,
   RefreshTokenResponse,
   User,
   OAuth2AuthResponse,
@@ -37,13 +36,13 @@ export const authApi = {
   /**
    * Register new user
    * POST /api/auth/register
-   * Backend returns: ApiResponse<RegisterResponse>
+   * Backend returns: ApiResponse<LoginResponse> - Auto-login after registration
    */
-  register: async (data: RegisterData): Promise<RegisterResponse> => {
+  register: async (data: RegisterData): Promise<AuthResponse> => {
     const response = await apiClient.post<{
       success: boolean;
       message?: string;
-      data: RegisterResponse;
+      data: AuthResponse;
     }>(API_ENDPOINTS.AUTH.REGISTER, data);
     return response.data.data || (response.data as any);
   },

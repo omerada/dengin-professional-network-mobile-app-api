@@ -265,7 +265,6 @@ export const FeedScreen: React.FC = () => {
             />
           }
           showsVerticalScrollIndicator={false}
-          estimatedItemSize={400}
         />
 
         <ActionSheet

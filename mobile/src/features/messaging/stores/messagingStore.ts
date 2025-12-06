@@ -141,8 +141,8 @@ export const selectActiveConversation = (state: MessagingStoreState) => state.ac
 export const selectTypingUsers = (conversationId: string) => (state: MessagingStoreState) =>
   state.typingUsers[conversationId] || [];
 
-export const selectIsUserOnline = (userId: string) => (state: MessagingStoreState) =>
-  state.onlineUsers.has(userId);
+export const selectIsUserOnline = (userId: number | string) => (state: MessagingStoreState) =>
+  state.onlineUsers.has(typeof userId === 'string' ? Number(userId) : userId);
 
 export const selectDraft = (conversationId: string) => (state: MessagingStoreState) =>
   state.drafts[conversationId] || '';

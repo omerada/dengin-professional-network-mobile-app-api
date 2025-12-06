@@ -4,7 +4,6 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks';
 import { useMessagingStore } from '../../stores';
@@ -65,7 +64,7 @@ const getLastMessagePreview = (
  * - Unread badge with bounce
  */
 export const ConversationItem: React.FC<ConversationItemProps> = memo(
-  ({ conversation, onPress, onLongPress, index = 0, style }) => {
+  ({ conversation, onPress, onLongPress, style }) => {
     const colors = useColors();
     const { trigger: triggerHaptic } = useHaptic();
     const { typingUsers, onlineUsers } = useMessagingStore();
