@@ -1,7 +1,7 @@
 // src/features/auth/screens/RegisterScreen.tsx
+// Modern Register Screen - Kayıt ekranı
 // Oku: mobile-development-guide/features/03-AUTH-MODULE.md
-// Oku: mobile-development-guide/sprints/23-SPRINT-1-2.md
-// Oku: mobile-development-guide/ui/19-FORMS.md
+// Oku: mobile-development-guide/ui-ux-modernization/07-SCREEN-REDESIGNS.md
 
 import React, { useCallback } from 'react';
 import {
@@ -13,6 +13,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Switch,
+  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -28,8 +29,13 @@ import { spacing } from '@theme';
 import { getErrorMessage } from '@core/utils/errorUtils';
 
 /**
- * Register Screen
+ * Modern Register Screen
  * New user registration form
+ * Features:
+ * - Phone number is optional
+ * - Clickable Terms & Privacy links
+ * - Modern validation
+ * - Professional UX
  */
 export const RegisterScreen: React.FC = () => {
   const colors = useColors();
@@ -175,7 +181,7 @@ export const RegisterScreen: React.FC = () => {
               )}
             />
 
-            {/* Phone (Optional) */}
+            {/* Phone (Optional - Can be added later) */}
             <Controller
               control={control}
               name="phoneNumber"
@@ -189,7 +195,7 @@ export const RegisterScreen: React.FC = () => {
                   onChangeText={onChange}
                   onBlur={onBlur}
                   error={errors.phoneNumber?.message}
-                  hint="Opsiyonel"
+                  hint="Opsiyonel - Daha sonra profil ayarlarından ekleyebilirsiniz"
                 />
               )}
             />
@@ -274,21 +280,25 @@ export const RegisterScreen: React.FC = () => {
                   />
                   <View style={styles.termsTextContainer}>
                     <Text style={[styles.termsText, { color: colors.text.secondary }]}>
-                      <Text
-                        style={{ color: colors.interactive.default }}
-                        onPress={() => {
-                          /* Open terms */
-                        }}>
-                        Kullanım Koşulları
-                      </Text>
+                      <Pressable onPress={() => navigation.navigate('Terms')}>
+                        <Text
+                          style={{
+                            color: colors.interactive.default,
+                            textDecorationLine: 'underline',
+                          }}>
+                          Kullanım Koşulları
+                        </Text>
+                      </Pressable>
                       'nı ve{' '}
-                      <Text
-                        style={{ color: colors.interactive.default }}
-                        onPress={() => {
-                          /* Open privacy */
-                        }}>
-                        Gizlilik Politikası
-                      </Text>
+                      <Pressable onPress={() => navigation.navigate('Privacy')}>
+                        <Text
+                          style={{
+                            color: colors.interactive.default,
+                            textDecorationLine: 'underline',
+                          }}>
+                          Gizlilik Politikası
+                        </Text>
+                      </Pressable>
                       'nı okudum ve kabul ediyorum.
                     </Text>
                     {errors.acceptTerms && (

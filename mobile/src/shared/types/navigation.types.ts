@@ -19,12 +19,15 @@ export type RootStackParamList = {
  * Auth Stack Parameter List
  */
 export type AuthStackParamList = {
+  Onboarding: undefined;
   Welcome: undefined;
   Login: undefined;
   Register: undefined;
   ForgotPassword: undefined;
   ResetPassword: { token: string };
   VerifyEmail: { email: string };
+  Terms: undefined;
+  Privacy: undefined;
 };
 
 /**
