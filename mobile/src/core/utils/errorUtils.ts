@@ -111,6 +111,14 @@ export const getErrorMessage = (error: unknown): string => {
     return error;
   }
 
+  // Handle React Hook Form FieldError objects
+  if (typeof error === 'object' && 'message' in error) {
+    const msg = (error as any).message;
+    if (typeof msg === 'string' && msg) {
+      return msg;
+    }
+  }
+
   // Handle Error objects
   if (error instanceof Error) {
     // Check if it's an Axios error
@@ -121,14 +129,6 @@ export const getErrorMessage = (error: unknown): string => {
     // Return error message if it looks like a user-friendly message
     if (error.message && !error.message.includes('Request failed')) {
       return error.message;
-    }
-  }
-
-  // Handle objects with message property
-  if (typeof error === 'object' && 'message' in error) {
-    const msg = (error as any).message;
-    if (typeof msg === 'string' && msg) {
-      return msg;
     }
   }
 

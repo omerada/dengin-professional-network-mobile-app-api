@@ -51,6 +51,7 @@ export const LoginScreen: React.FC = () => {
     formState: { errors },
   } = useForm<LoginSchemaType>({
     resolver: zodResolver(loginSchema),
+    mode: 'onTouched', // Validate only after user touches field
     defaultValues: {
       email: '',
       password: '',

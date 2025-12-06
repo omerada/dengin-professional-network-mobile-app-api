@@ -39,6 +39,7 @@ export const ForgotPasswordScreen: React.FC = () => {
     formState: { errors },
   } = useForm<ForgotPasswordSchemaType>({
     resolver: zodResolver(forgotPasswordSchema),
+    mode: 'onTouched', // Validate only after user touches field
     defaultValues: {
       email: '',
     },

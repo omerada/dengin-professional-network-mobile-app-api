@@ -25,7 +25,6 @@ import { useRegister } from '../hooks';
 import { registerSchema, RegisterSchemaType } from '../validation';
 import { AuthStackNavigationProp } from '@shared/types';
 import { spacing } from '@theme';
-import { getErrorMessage as getErrorMsg } from '@core/utils/errorUtils';
 
 /**
  * Register Screen
@@ -55,11 +54,6 @@ export const RegisterScreen: React.FC = () => {
       acceptTerms: false,
     },
   });
-
-  // Helper to extract error message as string
-  const getErrorMessage = (error: any): string | undefined => {
-    return getErrorMsg(error) || undefined;
-  };
 
   const onSubmit = useCallback(
     (data: RegisterSchemaType) => {
@@ -132,7 +126,7 @@ export const RegisterScreen: React.FC = () => {
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
-                      error={getErrorMessage(errors.firstName)}
+                      error={errors.firstName?.message}
                       required
                     />
                   )}
@@ -151,7 +145,7 @@ export const RegisterScreen: React.FC = () => {
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
-                      error={getErrorMessage(errors.lastName)}
+                      error={errors.lastName?.message}
                       required
                     />
                   )}
@@ -174,7 +168,7 @@ export const RegisterScreen: React.FC = () => {
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  error={getErrorMessage(errors.email)}
+                  error={errors.email?.message}
                   required
                 />
               )}
@@ -193,7 +187,7 @@ export const RegisterScreen: React.FC = () => {
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  error={getErrorMessage(errors.phoneNumber)}
+                  error={errors.phoneNumber?.message}
                   hint="Opsiyonel"
                 />
               )}
@@ -211,7 +205,7 @@ export const RegisterScreen: React.FC = () => {
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  error={getErrorMessage(errors.profession)}
+                  error={errors.profession?.message}
                   hint="Opsiyonel"
                 />
               )}
@@ -231,7 +225,7 @@ export const RegisterScreen: React.FC = () => {
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  error={getErrorMessage(errors.password)}
+                  error={errors.password?.message}
                   hint="En az 8 karakter, büyük/küçük harf ve rakam içermeli"
                   required
                 />
@@ -252,7 +246,7 @@ export const RegisterScreen: React.FC = () => {
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  error={getErrorMessage(errors.confirmPassword)}
+                  error={errors.confirmPassword?.message}
                   required
                 />
               )}

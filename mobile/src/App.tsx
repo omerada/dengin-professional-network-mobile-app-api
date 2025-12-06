@@ -12,8 +12,24 @@ import { LocaleProvider } from '@contexts/LocaleContext';
 import { useColors, useTheme, ThemeProvider } from '@contexts/ThemeContext';
 import { useAuthStore } from '@features/auth/stores/authStore';
 
-// Ignore specific warnings in development
-LogBox.ignoreLogs(['Non-serializable values were found in the navigation state']);
+// Disable all LogBox warnings and yellow box notifications
+// Errors will still appear in terminal/console for debugging
+LogBox.ignoreAllLogs(true);
+
+// Also disable console errors/warnings in the app (they still appear in terminal)
+if (__DEV__) {
+  const originalConsoleError = console.error;
+  const originalConsoleWarn = console.warn;
+
+  // Keep logs in terminal but don't show overlay
+  console.error = (...args) => {
+    originalConsoleError(...args);
+  };
+
+  console.warn = (...args) => {
+    originalConsoleWarn(...args);
+  };
+}
 
 /**
  * React Query client configuration
