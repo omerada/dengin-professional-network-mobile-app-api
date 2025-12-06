@@ -11,6 +11,7 @@ import java.util.UUID;
 
 /**
  * WebSocket request for typing indicator
+ * Note: recipientId uses Long (database ID) instead of UUID for compatibility
  */
 @Data
 @Builder
@@ -24,8 +25,8 @@ public class WsTypingNotification {
     private UUID conversationId;
 
     @NotNull(message = "Recipient ID is required")
-    @Schema(description = "Recipient user ID")
-    private UUID recipientId;
+    @Schema(description = "Recipient user ID (Long database ID)")
+    private Long recipientId;
 
     @Schema(description = "Whether user is currently typing")
     private boolean isTyping;

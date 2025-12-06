@@ -5,12 +5,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 /**
  * Participant DTO for conversation view
  * 
  * Shows the other participant in a conversation.
+ * Note: userId uses Long (database ID) for compatibility
  */
 @Getter
 @Builder
@@ -18,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ParticipantDto {
     
-    private UUID userId;
+    private Long userId;
     private String fullName;
     private String profession;
     private String profileImageUrl;

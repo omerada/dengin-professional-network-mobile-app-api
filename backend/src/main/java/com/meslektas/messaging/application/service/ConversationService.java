@@ -395,7 +395,7 @@ public class ConversationService {
                 User otherUser = userRepository.findById(otherParticipantId).orElse(null);
 
                 ParticipantDto participant = otherUser != null ? ParticipantDto.builder()
-                                .userId(null) // Will be set from user entity when UUID field is added
+                                .userId(otherUser.getId())
                                 .fullName(otherUser.getFullName())
                                 .profession(otherUser.getProfession() != null ? otherUser.getProfession().getName()
                                                 : null)

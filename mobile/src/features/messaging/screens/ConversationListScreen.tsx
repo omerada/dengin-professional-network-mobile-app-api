@@ -58,9 +58,33 @@ export const ConversationListScreen: React.FC = () => {
   // Handlers
   const handleConversationPress = useCallback(
     (conversation: Conversation) => {
-      navigation.navigate('Chat', {
-        conversationId: conversation.conversationId,
-      });
+      try {
+        if (!conversation) {
+          console.error('[ConversationList] Conversation is null/undefined');
+          Alert.alert('Hata', 'Konuşma bilgisi bulunamadı');
+          return;
+        }
+
+        if (!conversation.conversationId) {
+          console.error('[ConversationList] Missing conversationId');
+          Alert.alert('Hata', 'Konuşma ID bulunamadı');
+          return;
+        }
+
+        if (!conversation.participant) {
+          console.error('[ConversationList] Missing participant');
+          Alert.alert('Hata', 'Katılımcı bilgisi bulunamadı');
+          return;
+        }
+
+        navigation.navigate('Chat', {
+          conversationId: conversation.conversationId,
+          participant: conversation.participant,
+        });
+      } catch (error) {
+        console.error('[ConversationList] Error opening conversation:', error);
+        Alert.alert('Hata', 'Konuşma açılırken bir hata oluştu');
+      }
     },
     [navigation],
   );
@@ -92,13 +116,20 @@ export const ConversationListScreen: React.FC = () => {
 
   // Render functions
   const renderItem = useCallback(
-    ({ item }: { item: Conversation }) => (
-      <ConversationItem
-        conversation={item}
-        onPress={handleConversationPress}
-        onLongPress={handleConversationLongPress}
-      />
-    ),
+    ({ item }: { item: Conversation }) => {
+      if (!item) {
+        console.error('[ConversationList] renderItem: item is null/undefined');
+        return null;
+      }
+
+      return (
+        <ConversationItem
+          conversation={item}
+          onPress={handleConversationPress}
+          onLongPress={handleConversationLongPress}
+        />
+      );
+    },
     [handleConversationPress, handleConversationLongPress],
   );
 

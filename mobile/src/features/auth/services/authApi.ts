@@ -11,6 +11,7 @@ import type {
   RefreshTokenResponse,
   User,
   OAuth2AuthResponse,
+  ApiResponse,
 } from '@shared/types';
 
 /**
@@ -53,7 +54,7 @@ export const authApi = {
    * Header: Refresh-Token: {refreshToken}
    */
   refreshToken: async (refreshToken: string): Promise<RefreshTokenResponse> => {
-    const response = await apiClient.post<RefreshTokenResponse>(
+    const response = await apiClient.post<ApiResponse<RefreshTokenResponse>>(
       API_ENDPOINTS.AUTH.REFRESH_TOKEN,
       null,
       {
@@ -62,7 +63,8 @@ export const authApi = {
         },
       },
     );
-    return response.data;
+    // Backend returns ApiResponse<LoginResponse> format
+    return response.data.data || response.data;
   },
 
   /**

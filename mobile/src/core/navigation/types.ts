@@ -64,7 +64,18 @@ export type FeedStackParamList = {
  */
 export type MessagingStackParamList = {
   ConversationList: undefined;
-  Chat: { conversationId: string };
+  Chat: {
+    conversationId: string;
+    participant?: {
+      userId: number;
+      fullName: string;
+      profession: string;
+      profileImageUrl: string | null;
+      verified: boolean;
+      online: boolean;
+      lastSeenAt: string | null;
+    };
+  };
   NewConversation: undefined;
 };
 

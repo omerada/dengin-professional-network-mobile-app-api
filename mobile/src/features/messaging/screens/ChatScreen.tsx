@@ -35,10 +35,22 @@ export const ChatScreen: React.FC = () => {
   const { trigger: triggerHaptic } = useHaptic();
 
   // Route params - Backend Conversation yapısıyla uyumlu
-  const { conversationId, participant } = route.params as {
+  const routeParams = route.params as {
     conversationId: string;
     participant?: Participant;
   };
+
+  const { conversationId, participant } = routeParams;
+
+  // Validate required params
+  useEffect(() => {
+    if (!conversationId) {
+      console.error('[ChatScreen] Missing conversationId, navigating back');
+      Alert.alert('Hata', 'Konuşma ID bulunamadı', [
+        { text: 'Tamam', onPress: () => navigation.goBack() },
+      ]);
+    }
+  }, [conversationId, navigation]);
 
   // State
   const [messageText, setMessageText] = useState('');
@@ -76,7 +88,7 @@ export const ChatScreen: React.FC = () => {
 
   // Computed
   const currentUserId = user?.id?.toString() || '';
-  const recipientId = participant?.userId || '';
+  const recipientId = participant?.userId || 0;
 
   // Set recipient for typing
   useEffect(() => {

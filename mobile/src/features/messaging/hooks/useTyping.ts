@@ -25,7 +25,7 @@ export function useTyping(conversationId: string) {
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isTypingRef = useRef(false);
-  const recipientIdRef = useRef<string | null>(null);
+  const recipientIdRef = useRef<number | null>(null);
 
   // Get typing users for this conversation
   const conversationTypingUsers = useMemo(
@@ -39,16 +39,16 @@ export function useTyping(conversationId: string) {
       if (data.conversationId !== conversationId) return;
       // Ignore own typing - recipientId is who the notification was sent TO
       // We receive typing from the other person
-      if (data.recipientId === user?.id?.toString()) {
+      if (data.recipientId === user?.id) {
         // This is a typing notification FOR us, FROM the other person
         // The sender is not the recipientId
         return;
       }
 
       if (data.isTyping) {
-        addTypingUser(conversationId, data.recipientId);
+        addTypingUser(conversationId, data.recipientId.toString());
       } else {
-        removeTypingUser(conversationId, data.recipientId);
+        removeTypingUser(conversationId, data.recipientId.toString());
       }
     };
 
@@ -62,7 +62,7 @@ export function useTyping(conversationId: string) {
   /**
    * Set recipient ID for typing notifications
    */
-  const setRecipientId = useCallback((id: string) => {
+  const setRecipientId = useCallback((id: number) => {
     recipientIdRef.current = id;
   }, []);
 

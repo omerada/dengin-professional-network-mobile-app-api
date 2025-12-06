@@ -68,9 +68,61 @@ export const testBackendConnection = async (): Promise<boolean> => {
 
 /**
  * Request interceptor - adds auth token to requests
+ * Checks token expiry and refreshes if needed BEFORE request
  */
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
+    // Skip token check for refresh endpoint itself
+    if (config.url?.includes('/auth/refresh')) {
+      return config;
+    }
+
+    // Check if token is expired or expiring soon
+    const expiresAt = await secureStorage.get(SECURE_KEYS.TOKEN_EXPIRES_AT);
+    const now = Date.now();
+    const safetyMargin = 60 * 1000; // 1 minute
+
+    if (expiresAt && parseInt(expiresAt, 10) - now < safetyMargin) {
+      // Token expired or expiring soon - refresh proactively
+      try {
+        const refreshToken = await secureStorage.get(SECURE_KEYS.REFRESH_TOKEN);
+
+        if (refreshToken) {
+          const response = await axios.post(`${ENV.API_BASE_URL}/api/auth/refresh`, null, {
+            headers: {
+              'Refresh-Token': refreshToken,
+            },
+          });
+
+          const responseData = response.data.data || response.data;
+          const { accessToken, refreshToken: newRefreshToken, expiresIn } = responseData;
+
+          // Save new tokens
+          const newExpiresAt = Date.now() + expiresIn * 1000;
+          await Promise.all([
+            secureStorage.set(SECURE_KEYS.ACCESS_TOKEN, accessToken),
+            secureStorage.set(SECURE_KEYS.REFRESH_TOKEN, newRefreshToken),
+            secureStorage.set(SECURE_KEYS.TOKEN_EXPIRES_AT, newExpiresAt.toString()),
+          ]);
+
+          // Use new token for this request
+          if (config.headers) {
+            config.headers.Authorization = `Bearer ${accessToken}`;
+          }
+
+          return config;
+        }
+      } catch (refreshError) {
+        // Refresh failed - clear tokens
+        await Promise.all([
+          secureStorage.remove(SECURE_KEYS.ACCESS_TOKEN),
+          secureStorage.remove(SECURE_KEYS.REFRESH_TOKEN),
+          secureStorage.remove(SECURE_KEYS.TOKEN_EXPIRES_AT),
+        ]);
+        throw refreshError;
+      }
+    }
+
     // Get access token from secure storage
     const accessToken = await secureStorage.get(SECURE_KEYS.ACCESS_TOKEN);
 
@@ -123,11 +175,15 @@ apiClient.interceptors.response.use(
 
           // Backend returns ApiResponse<LoginResponse> format
           const responseData = response.data.data || response.data;
-          const { accessToken, refreshToken: newRefreshToken } = responseData;
+          const { accessToken, refreshToken: newRefreshToken, expiresIn } = responseData;
 
-          // Save new tokens
-          await secureStorage.set(SECURE_KEYS.ACCESS_TOKEN, accessToken);
-          await secureStorage.set(SECURE_KEYS.REFRESH_TOKEN, newRefreshToken);
+          // Save new tokens with expiry time
+          const newExpiresAt = Date.now() + (expiresIn || 3600) * 1000;
+          await Promise.all([
+            secureStorage.set(SECURE_KEYS.ACCESS_TOKEN, accessToken),
+            secureStorage.set(SECURE_KEYS.REFRESH_TOKEN, newRefreshToken),
+            secureStorage.set(SECURE_KEYS.TOKEN_EXPIRES_AT, newExpiresAt.toString()),
+          ]);
 
           // Retry original request with new token
           if (originalRequest.headers) {

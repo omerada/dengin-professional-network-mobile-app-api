@@ -9,6 +9,7 @@ import type { AuthStore } from '../types';
 import { secureStorage, SECURE_KEYS } from '@core/storage';
 import type { User } from '@shared/types';
 import { authApi } from '../services/authApi';
+import { tokenService } from '../services/tokenService';
 
 /**
  * Auth store with persistence
@@ -100,7 +101,27 @@ export const useAuthStore = create<AuthStore>()(
             return;
           }
 
-          // Token exists, user is authenticated
+          // Check if token is expired or expiring soon
+          const expiresAt = await secureStorage.get(SECURE_KEYS.TOKEN_EXPIRES_AT);
+          const now = Date.now();
+          const safetyMargin = 60 * 1000; // 1 minute
+
+          if (expiresAt && parseInt(expiresAt, 10) - now < safetyMargin) {
+            // Token expired or expiring soon - try to refresh
+            try {
+              await tokenService.refreshAccessToken();
+            } catch (refreshError) {
+              // Refresh failed - logout user
+              console.error('[AuthStore] Token refresh failed on init:', refreshError);
+              await secureStorage.remove(SECURE_KEYS.ACCESS_TOKEN);
+              await secureStorage.remove(SECURE_KEYS.REFRESH_TOKEN);
+              await secureStorage.remove(SECURE_KEYS.TOKEN_EXPIRES_AT);
+              set({ isLoading: false, isAuthenticated: false, user: null });
+              return;
+            }
+          }
+
+          // Token exists and is valid, user is authenticated
           // User data will be loaded from persisted state
           set({ isLoading: false, isAuthenticated: true });
         } catch (error) {
@@ -115,8 +136,11 @@ export const useAuthStore = create<AuthStore>()(
       logout: async () => {
         try {
           // Clear secure storage
-          await secureStorage.remove(SECURE_KEYS.ACCESS_TOKEN);
-          await secureStorage.remove(SECURE_KEYS.REFRESH_TOKEN);
+          await Promise.all([
+            secureStorage.remove(SECURE_KEYS.ACCESS_TOKEN),
+            secureStorage.remove(SECURE_KEYS.REFRESH_TOKEN),
+            secureStorage.remove(SECURE_KEYS.TOKEN_EXPIRES_AT),
+          ]);
 
           // Clear state
           set({

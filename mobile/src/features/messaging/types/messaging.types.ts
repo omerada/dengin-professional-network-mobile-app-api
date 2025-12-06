@@ -51,8 +51,8 @@ export interface UserSummary {
  * @see ConversationDto.participant
  */
 export interface Participant {
-  /** UUID format */
-  userId: string;
+  /** Long ID (number) - Backend database ID */
+  userId: number;
   /** Tam ad (firstName + lastName) */
   fullName: string;
   /** Meslek/Unvan */
@@ -321,8 +321,8 @@ export interface WsMessageResponse {
 export interface WsTypingNotification {
   /** Konuşma UUID */
   conversationId: string;
-  /** Yazıyor bildirimi gönderilen kullanıcı UUID */
-  recipientId: string;
+  /** Yazıyor bildirimi gönderilen kullanıcı ID (Long number) */
+  recipientId: number;
   /** Yazıyor mu? */
   isTyping: boolean;
 }

@@ -3,7 +3,7 @@
 // Oku: mobile-development-guide/sprints/23-SPRINT-1-2.md
 
 import { useEffect } from 'react';
-import { StatusBar, LogBox } from 'react-native';
+import { StatusBar, LogBox, ErrorUtils } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -11,6 +11,25 @@ import { AppNavigator } from '@core/navigation';
 import { LocaleProvider } from '@contexts/LocaleContext';
 import { useColors, useTheme, ThemeProvider } from '@contexts/ThemeContext';
 import { useAuthStore } from '@features/auth/stores/authStore';
+
+// Global error handler
+if (ErrorUtils) {
+  const originalErrorHandler = ErrorUtils.getGlobalHandler();
+
+  ErrorUtils.setGlobalHandler((error, isFatal) => {
+    console.error('🔴 GLOBAL ERROR CAUGHT:', {
+      message: error.message,
+      name: error.name,
+      stack: error.stack,
+      isFatal,
+    });
+
+    // Call original handler
+    if (originalErrorHandler) {
+      originalErrorHandler(error, isFatal);
+    }
+  });
+}
 
 // Disable all LogBox warnings and yellow box notifications
 // Errors will still appear in terminal/console for debugging

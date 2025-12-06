@@ -73,7 +73,7 @@ export const ConversationAvatar: React.FC<ConversationAvatarProps> = memo(
         ) : (
           <View style={[styles.avatarPlaceholder, dynamicStyles.avatarPlaceholder]}>
             <Text style={[styles.avatarText, dynamicStyles.avatarText]}>
-              {fullName.charAt(0).toUpperCase()}
+              {fullName?.charAt(0)?.toUpperCase() || '?'}
             </Text>
           </View>
         )}

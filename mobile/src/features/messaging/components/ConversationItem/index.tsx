@@ -3,14 +3,8 @@
 // Instagram DM kalitesinde konuşma listesi öğesi
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import Animated, {
-  FadeInDown,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks';
 import { useMessagingStore } from '../../stores';
@@ -22,8 +16,12 @@ import type { ConversationItemProps } from './ConversationItem.types';
 /**
  * Zaman formatlama (göreli)
  */
-const formatRelativeTime = (dateString: string): string => {
+const formatRelativeTime = (dateString: string | undefined | null): string => {
+  if (!dateString) return '';
+
   const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '';
+
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffMins = Math.floor(diffMs / 60000);
@@ -45,14 +43,14 @@ const formatRelativeTime = (dateString: string): string => {
  * Son mesaj önizlemesi
  */
 const getLastMessagePreview = (
-  lastMessage: { content: string; hasAttachment: boolean } | null,
+  lastMessage: { content: string; hasAttachment: boolean } | null | undefined,
   isTyping: boolean,
 ): string => {
   if (isTyping) return 'yazıyor...';
   if (!lastMessage) return 'Henüz mesaj yok';
   if (lastMessage.hasAttachment) return '📷 Fotoğraf';
 
-  const content = lastMessage.content;
+  const content = lastMessage?.content || '';
   return content.length > 40 ? `${content.slice(0, 40)}...` : content;
 };
 
@@ -72,72 +70,34 @@ export const ConversationItem: React.FC<ConversationItemProps> = memo(
     const { trigger: triggerHaptic } = useHaptic();
     const { typingUsers, onlineUsers } = useMessagingStore();
 
-    // Animation values
-    const scale = useSharedValue(1);
-    const pressed = useSharedValue(false);
-
     // Typing and online status
-    const conversationTypingUsers = typingUsers[conversation.conversationId] || [];
+    const conversationTypingUsers = typingUsers[conversation?.conversationId] || [];
     const isTyping = conversationTypingUsers.length > 0;
     const isOnline =
-      conversation.participant.online || onlineUsers.has(conversation.participant.userId);
-    const hasUnread = conversation.unreadCount > 0;
+      conversation?.participant?.online || onlineUsers.has(conversation?.participant?.userId);
+    const hasUnread = (conversation?.unreadCount || 0) > 0;
 
     // Participant info
-    const { participant, lastMessage } = conversation;
+    const { participant, lastMessage } = conversation || {};
 
     // Callbacks
     const handlePress = useCallback(() => {
-      triggerHaptic('selection');
-      onPress(conversation);
+      try {
+        triggerHaptic('selection');
+        onPress(conversation);
+      } catch (error) {
+        console.error('[ConversationItem] Error in handlePress:', error);
+      }
     }, [conversation, onPress, triggerHaptic]);
 
     const handleLongPress = useCallback(() => {
-      triggerHaptic('medium');
-      onLongPress?.(conversation);
+      try {
+        triggerHaptic('medium');
+        onLongPress?.(conversation);
+      } catch (error) {
+        console.error('[ConversationItem] Error in handleLongPress:', error);
+      }
     }, [conversation, onLongPress, triggerHaptic]);
-
-    // Tap gesture
-    const tapGesture = useMemo(
-      () =>
-        Gesture.Tap()
-          .onBegin(() => {
-            scale.value = withSpring(0.98, { damping: 15 });
-            pressed.value = true;
-          })
-          .onFinalize(() => {
-            scale.value = withSpring(1, { damping: 15 });
-            pressed.value = false;
-          })
-          .onEnd(() => {
-            handlePress();
-          }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [handlePress],
-    );
-
-    // Long press gesture
-    const longPressGesture = useMemo(
-      () =>
-        Gesture.LongPress()
-          .minDuration(500)
-          .onStart(() => {
-            handleLongPress();
-          }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [handleLongPress],
-    );
-
-    const composedGesture = useMemo(
-      () => Gesture.Race(tapGesture, longPressGesture),
-      [tapGesture, longPressGesture],
-    );
-
-    // Animated styles
-    const containerAnimatedStyle = useAnimatedStyle(() => ({
-      backgroundColor: pressed.value ? colors.background.secondary : colors.background.primary,
-      transform: [{ scale: scale.value }],
-    }));
 
     // Dynamic text styles
     const dynamicStyles = useMemo(
@@ -159,66 +119,74 @@ export const ConversationItem: React.FC<ConversationItemProps> = memo(
       [colors, isTyping, hasUnread],
     );
 
-    // Entry animation
-    const enteringAnimation = FadeInDown.delay(Math.min(index * 50, 500))
-      .springify()
-      .damping(15);
+    if (!conversation) {
+      console.error('[ConversationItem] conversation is null/undefined');
+      return null;
+    }
 
     return (
-      <Animated.View entering={enteringAnimation}>
-        <GestureDetector gesture={composedGesture}>
-          <Animated.View style={[styles.container, containerAnimatedStyle, style]}>
-            {/* Avatar */}
-            <ConversationAvatar
-              profileImageUrl={participant.profileImageUrl}
-              fullName={participant.fullName}
-              isOnline={isOnline}
-              verified={participant.verified}
-            />
+      <Pressable
+        onPress={handlePress}
+        onLongPress={handleLongPress}
+        style={({ pressed }) => [
+          styles.container,
+          {
+            backgroundColor: pressed ? colors.background.secondary : colors.background.primary,
+            opacity: pressed ? 0.9 : 1,
+          },
+          style,
+        ]}>
+        {/* Avatar */}
+        <ConversationAvatar
+          profileImageUrl={participant?.profileImageUrl}
+          fullName={participant?.fullName || 'Kullanıcı'}
+          isOnline={isOnline || false}
+          verified={participant?.verified || false}
+        />
 
-            {/* Content */}
-            <View style={styles.content}>
-              {/* Header: Name + Time */}
-              <View style={styles.header}>
-                <View style={styles.nameContainer}>
-                  <Text
-                    style={[styles.name, dynamicStyles.name, hasUnread && styles.nameBold]}
-                    numberOfLines={1}>
-                    {participant.fullName}
-                  </Text>
-                </View>
-                <Text style={[styles.time, dynamicStyles.time]}>
-                  {formatRelativeTime(lastMessage?.sentAt || conversation.updatedAt)}
-                </Text>
-              </View>
-
-              {/* SubHeader: Profession */}
-              <View style={styles.subHeader}>
-                <Text style={[styles.profession, dynamicStyles.profession]} numberOfLines={1}>
-                  {participant.profession}
-                </Text>
-              </View>
-
-              {/* Footer: Preview + Badge */}
-              <View style={styles.footer}>
-                <Text
-                  style={[
-                    styles.preview,
-                    dynamicStyles.preview,
-                    isTyping && styles.previewTyping,
-                    hasUnread && styles.previewBold,
-                  ]}
-                  numberOfLines={1}>
-                  {lastMessage?.sentByMe && !isTyping && 'Sen: '}
-                  {getLastMessagePreview(lastMessage, isTyping)}
-                </Text>
-
-                {hasUnread && <UnreadBadge count={conversation.unreadCount} />}
-              </View>
+        {/* Content */}
+        <View style={styles.content}>
+          {/* Header: Name + Time */}
+          <View style={styles.header}>
+            <View style={styles.nameContainer}>
+              <Text
+                style={[styles.name, dynamicStyles.name, hasUnread && styles.nameBold]}
+                numberOfLines={1}>
+                {participant?.fullName || 'Kullanıcı'}
+              </Text>
             </View>
-          </Animated.View>
-        </GestureDetector>
-      </Animated.View>
+            <Text style={[styles.time, dynamicStyles.time]}>
+              {formatRelativeTime(
+                lastMessage?.sentAt || conversation?.updatedAt || new Date().toISOString(),
+              )}
+            </Text>
+          </View>
+
+          {/* SubHeader: Profession */}
+          <View style={styles.subHeader}>
+            <Text style={[styles.profession, dynamicStyles.profession]} numberOfLines={1}>
+              {participant?.profession || 'Meslek belirtilmemiş'}
+            </Text>
+          </View>
+
+          {/* Footer: Preview + Badge */}
+          <View style={styles.footer}>
+            <Text
+              style={[
+                styles.preview,
+                dynamicStyles.preview,
+                isTyping && styles.previewTyping,
+                hasUnread && styles.previewBold,
+              ]}
+              numberOfLines={1}>
+              {lastMessage?.sentByMe && !isTyping && 'Sen: '}
+              {getLastMessagePreview(lastMessage, isTyping)}
+            </Text>
+
+            {hasUnread && <UnreadBadge count={conversation.unreadCount} />}
+          </View>
+        </View>
+      </Pressable>
     );
   },
 );

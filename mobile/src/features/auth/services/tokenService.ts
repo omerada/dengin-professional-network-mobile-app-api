@@ -131,6 +131,28 @@ export const tokenService = {
   },
 
   /**
+   * Ensure valid token - refresh if expired/expiring
+   * Call this before critical operations (WebSocket connect, etc.)
+   */
+  ensureValidToken: async (): Promise<string> => {
+    // Check if token exists
+    const accessToken = await tokenService.getAccessToken();
+    if (!accessToken) {
+      throw new Error('Oturum bilgisi bulunamadı');
+    }
+
+    // Check if expired or expiring soon
+    const isExpired = await tokenService.isTokenExpired();
+
+    if (isExpired) {
+      // Refresh and return new token
+      return await tokenService.refreshAccessToken();
+    }
+
+    return accessToken;
+  },
+
+  /**
    * Clear all tokens
    */
   clearTokens: async (): Promise<boolean> => {

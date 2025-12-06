@@ -8,8 +8,6 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  SlideInRight,
-  SlideInLeft,
   interpolate,
   Extrapolate,
   useAnimatedReaction,
@@ -106,13 +104,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
     const textColor = isSentByMe ? '#FFFFFF' : colors.text.primary;
     const metaColor = isSentByMe ? 'rgba(255,255,255,0.7)' : colors.text.tertiary;
 
-    // Entry animation
-    const enteringAnimation = useMemo(() => {
-      const baseDelay = Math.min(index * 30, 300);
-      return isSentByMe
-        ? SlideInRight.delay(baseDelay).springify().damping(15)
-        : SlideInLeft.delay(baseDelay).springify().damping(15);
-    }, [isSentByMe, index]);
+    // Entry animation disabled for better performance
 
     const handleLongPressHaptic = useCallback(() => {
       triggerHaptic('heavy');
@@ -210,8 +202,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
     const isFailed = message.status === 'FAILED';
 
     return (
-      <Animated.View
-        entering={enteringAnimation}
+      <View
         style={[styles.container, isSentByMe ? styles.ownContainer : styles.otherContainer, style]}>
         {/* Avatar placeholder for alignment */}
         {!isSentByMe && !showAvatar && <View style={styles.avatarPlaceholder} />}
@@ -272,7 +263,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
             )}
           </Animated.View>
         </GestureDetector>
-      </Animated.View>
+      </View>
     );
   },
 );
