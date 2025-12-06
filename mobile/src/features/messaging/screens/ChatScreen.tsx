@@ -3,9 +3,9 @@
 // Backend: ConversationController, MessageWebSocketController
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, KeyboardAvoidingView, Platform, Alert, StyleSheet } from 'react-native';
+import { KeyboardAvoidingView, Platform, Alert, StyleSheet } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
@@ -30,7 +30,6 @@ type ChatRouteProp = RouteProp<MessagingStackParamList, 'Chat'>;
 
 export const ChatScreen: React.FC = () => {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ChatRouteProp>();
   const { trigger: triggerHaptic } = useHaptic();
@@ -234,62 +233,63 @@ export const ChatScreen: React.FC = () => {
   const conversationTypingUsers = typingUsers[conversationId] || [];
 
   return (
-    <Animated.View
-      entering={FadeIn.duration(300)}
-      style={[styles.container, { backgroundColor: colors.background.primary }]}>
-      {/* Header */}
-      <View style={{ paddingTop: insets.top }}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
+      edges={['top', 'bottom']}>
+      <Animated.View entering={FadeIn.duration(300)} style={styles.content}>
+        {/* Header */}
         <ChatHeader
           conversation={displayConversation}
           onBackPress={handleBackPress}
           onProfilePress={handleProfilePress}
           onOptionsPress={handleOptionsPress}
         />
-      </View>
 
-      {/* Messages */}
-      <KeyboardAvoidingView
-        style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={0}>
-        <MessageList
-          messages={messages}
-          currentUserId={currentUserId}
-          conversationId={conversationId}
-          typingUsers={conversationTypingUsers}
-          isLoading={isLoading}
-          isFetchingMore={isFetchingNextPage}
-          hasMore={!!hasNextPage}
-          onLoadMore={handleLoadMore}
-          onRefresh={refetch}
-          onMessageLongPress={handleMessageLongPress}
-        />
+        {/* Messages */}
+        <KeyboardAvoidingView
+          style={styles.keyboardView}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          keyboardVerticalOffset={0}>
+          <MessageList
+            messages={messages}
+            currentUserId={currentUserId}
+            conversationId={conversationId}
+            typingUsers={conversationTypingUsers}
+            isLoading={isLoading}
+            isFetchingMore={isFetchingNextPage}
+            hasMore={!!hasNextPage}
+            onLoadMore={handleLoadMore}
+            onRefresh={refetch}
+            onMessageLongPress={handleMessageLongPress}
+          />
 
-        {/* Input */}
-        <View style={{ paddingBottom: insets.bottom }}>
+          {/* Input */}
           <MessageInput
             value={messageText}
             onChangeText={handleTextChange}
             onSend={handleSend}
             disabled={isSending || !recipientId}
           />
-        </View>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
 
-      {/* Message options sheet */}
-      <MessageOptionsSheet
-        ref={messageOptionsRef}
-        message={selectedMessage}
-        isOwn={selectedMessage?.senderId === currentUserId}
-        onDelete={handleDeleteMessage}
-        onReport={handleReportMessage}
-      />
-    </Animated.View>
+        {/* Message options sheet */}
+        <MessageOptionsSheet
+          ref={messageOptionsRef}
+          message={selectedMessage}
+          isOwn={selectedMessage?.senderId === currentUserId}
+          onDelete={handleDeleteMessage}
+          onReport={handleReportMessage}
+        />
+      </Animated.View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  content: {
     flex: 1,
   },
   keyboardView: {

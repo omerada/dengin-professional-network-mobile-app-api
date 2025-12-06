@@ -1,6 +1,7 @@
 package com.meslektas.notification.api;
 
 import com.meslektas.common.api.ApiResponse;
+import com.meslektas.identity.infrastructure.security.UserDetailsImpl;
 import com.meslektas.notification.application.dto.*;
 import com.meslektas.notification.application.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -185,6 +186,10 @@ public class NotificationController {
      * Extract user ID from authentication.
      */
     private Long getUserId(Authentication authentication) {
-        return Long.parseLong(authentication.getName());
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof UserDetailsImpl userDetails) {
+            return userDetails.getId();
+        }
+        throw new IllegalStateException("Kullanıcı ID'si bulunamadı");
     }
 }

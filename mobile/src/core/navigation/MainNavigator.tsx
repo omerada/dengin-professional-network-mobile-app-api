@@ -89,6 +89,11 @@ const MessagingStackNavigator: React.FC = () => (
   <MessagingStack.Navigator screenOptions={{ headerShown: false }}>
     <MessagingStack.Screen name="ConversationList" component={ConversationListScreen} />
     <MessagingStack.Screen name="Chat" component={ChatScreen} />
+    <MessagingStack.Screen
+      name="NewConversation"
+      component={require('@features/messaging/screens/NewConversationScreen').NewConversationScreen}
+      options={{ presentation: 'modal' }}
+    />
   </MessagingStack.Navigator>
 );
 
@@ -97,6 +102,13 @@ const NotificationsStack = createNativeStackNavigator<NotificationsStackParamLis
 const NotificationsStackNavigator: React.FC = () => (
   <NotificationsStack.Navigator screenOptions={{ headerShown: false }}>
     <NotificationsStack.Screen name="Notifications" component={NotificationsScreen} />
+    <NotificationsStack.Screen
+      name="NotificationSettings"
+      component={
+        require('@features/notifications/screens/NotificationSettingsScreen')
+          .NotificationSettingsScreen
+      }
+    />
   </NotificationsStack.Navigator>
 );
 

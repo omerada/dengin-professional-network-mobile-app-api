@@ -73,8 +73,15 @@ class StompClient {
           Authorization: `Bearer ${token}`,
         },
 
-        // Debug logging (production'da kapatılmalı)
-        debug: __DEV__ ? (str: string) => console.log('[STOMP]', str) : () => {},
+        // Debug logging - production'da tamamen kapalı
+        debug: __DEV__
+          ? (str: string) => {
+              // Sadece kritik olayları logla
+              if (str.includes('ERROR') || str.includes('CONNECT') || str.includes('DISCONNECT')) {
+                console.log('[STOMP]', str);
+              }
+            }
+          : () => {},
 
         // Heartbeat ayarları
         heartbeatIncoming: 10000,

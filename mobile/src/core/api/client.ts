@@ -22,12 +22,7 @@ const getApiBaseUrl = (): string => {
     baseUrl = baseUrl.replace('localhost', '10.0.2.2');
   }
 
-  if (__DEV__) {
-    console.log('[API] Platform:', Platform.OS);
-    console.log('[API] Original URL:', ENV.API_BASE_URL);
-    console.log('[API] Final URL:', baseUrl);
-  }
-
+  // API URL configured for platform
   return baseUrl;
 };
 
@@ -62,10 +57,11 @@ export const testBackendConnection = async (): Promise<boolean> => {
       timeout: 5000,
       validateStatus: () => true,
     });
-    console.log('[API] Backend health check:', response.status);
     return response.status === 200 || response.status === 404;
   } catch (error: any) {
-    console.error('[API] Backend health check failed:', error.message);
+    if (__DEV__) {
+      console.error('[API] Backend unreachable:', error.message);
+    }
     return false;
   }
 };
@@ -82,19 +78,13 @@ apiClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
 
-    // Log request in development
-    if (__DEV__) {
-      console.log(`[API] Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
-      console.log('[API] Headers:', JSON.stringify(config.headers));
-      if (config.data) {
-        console.log('[API] Request Data:', JSON.stringify(config.data).substring(0, 200));
-      }
-    }
-
     return config;
   },
   error => {
-    console.error('[API] Request error:', error);
+    // Only log critical request configuration errors in dev
+    if (__DEV__ && error.message) {
+      console.error('[API] Request setup failed:', error.message);
+    }
     return Promise.reject(error);
   },
 );
@@ -158,26 +148,20 @@ apiClient.interceptors.response.use(
         // Refresh failed - clear tokens and redirect to login
         await secureStorage.remove(SECURE_KEYS.ACCESS_TOKEN);
         await secureStorage.remove(SECURE_KEYS.REFRESH_TOKEN);
-
-        // Emit logout event for navigation
-        // This will be handled by auth store
-        console.error('[API] Token refresh failed:', refreshError);
+        // Auth store will handle logout redirect
       }
     }
 
-    // Log error in development with detailed network diagnostics
+    // Only log unexpected errors (network failures, 5xx errors)
+    // Skip logging for expected errors (4xx) to reduce noise
     if (__DEV__) {
-      if (!error.response) {
-        // Network error - no response received
-        console.error('[API] Network Error:', {
+      const status = error.response?.status;
+      const isUnexpectedError = !error.response || (status && status >= 500);
+
+      if (isUnexpectedError) {
+        console.error('[API] Unexpected error:', {
           message: getErrorMessage(error),
-          url: `${error.config?.baseURL}${error.config?.url}`,
-          method: error.config?.method,
-        });
-      } else {
-        console.error('[API] Response error:', {
-          message: getErrorMessage(error),
-          status: error.response?.status,
+          status: status || 'Network Error',
           url: error.config?.url,
         });
       }

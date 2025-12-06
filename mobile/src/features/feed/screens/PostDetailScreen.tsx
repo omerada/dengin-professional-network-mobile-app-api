@@ -11,6 +11,7 @@ import {
   RefreshControl,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
@@ -191,14 +192,18 @@ export const PostDetailScreen: React.FC = () => {
 
   if (isLoading || !post) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: colors.background.primary }]}>
+      <SafeAreaView
+        style={[styles.loadingContainer, { backgroundColor: colors.background.primary }]}
+        edges={['bottom']}>
         <ActivityIndicator size="large" color={colors.interactive.default} />
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
+      edges={['bottom']}>
       <ScrollView
         style={styles.scrollView}
         refreshControl={
@@ -285,7 +290,7 @@ export const PostDetailScreen: React.FC = () => {
         options={getActionSheetOptions()}
         title="Gönderi Seçenekleri"
       />
-    </View>
+    </SafeAreaView>
   );
 };
 

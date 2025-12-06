@@ -84,7 +84,7 @@ const FilterButton: React.FC<FilterButtonProps> = memo(({ option, isActive, onPr
       accessibilityLabel={option.label}>
       <Icon
         name={option.icon}
-        size={16}
+        size={18}
         color={isActive ? colors.text.inverse : colors.text.secondary}
       />
       <Text
@@ -146,19 +146,21 @@ export const FeedHeader: React.FC<FeedHeaderProps> = memo(({ onCreatePress }) =>
           borderBottomColor: colors.border.default,
         },
       ]}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filters}>
-        {FILTER_OPTIONS.map(option => (
-          <FilterButton
-            key={option.key}
-            option={option}
-            isActive={filter === option.key}
-            onPress={() => setFilter(option.key)}
-          />
-        ))}
-      </ScrollView>
+      <View style={styles.filtersContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filters}>
+          {FILTER_OPTIONS.map(option => (
+            <FilterButton
+              key={option.key}
+              option={option}
+              isActive={filter === option.key}
+              onPress={() => setFilter(option.key)}
+            />
+          ))}
+        </ScrollView>
+      </View>
 
       {onCreatePress && (
         <AnimatedPressable
@@ -170,7 +172,7 @@ export const FeedHeader: React.FC<FeedHeaderProps> = memo(({ onCreatePress }) =>
           onPress={handleCreatePress}
           accessibilityLabel="Yeni gönderi oluştur"
           accessibilityRole="button">
-          <Icon name="add" size={24} color={colors.text.inverse} />
+          <Icon name="add" size={26} color={colors.text.inverse} />
         </AnimatedPressable>
       )}
     </View>
@@ -189,32 +191,40 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     flexDirection: 'row',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 14,
+  },
+  filtersContainer: {
+    flex: 1,
+    marginRight: 10,
   },
   createButton: {
     alignItems: 'center',
-    borderRadius: 20,
-    height: 40,
+    borderRadius: 22,
+    elevation: 2,
+    height: 44,
     justifyContent: 'center',
-    marginLeft: 12,
-    width: 40,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    width: 44,
   },
   filterButton: {
     alignItems: 'center',
-    borderRadius: 20,
+    borderRadius: 18,
     flexDirection: 'row',
-    marginRight: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    marginRight: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
   },
   filterLabel: {
-    fontSize: 13,
-    fontWeight: '500',
+    fontSize: 14,
+    fontWeight: '600',
     marginLeft: 6,
   },
   filters: {
-    flex: 1,
     flexDirection: 'row',
+    paddingVertical: 2,
   },
 });
 

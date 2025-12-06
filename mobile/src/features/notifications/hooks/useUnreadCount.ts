@@ -20,15 +20,23 @@ export function useUnreadCount() {
   const setUnreadCount = useNotificationStore(state => state.setUnreadCount);
   const resetUnreadCount = useNotificationStore(state => state.resetUnreadCount);
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
+  const { data, isLoading, refetch, isRefetching, error } = useQuery({
     queryKey: UNREAD_COUNT_QUERY_KEY,
     queryFn: async () => {
-      const count = await notificationService.getUnreadCount();
-      return count;
+      try {
+        const count = await notificationService.getUnreadCount();
+        return count ?? 0;
+      } catch (error) {
+        console.error('[Notifications] Failed to fetch unread count:', error);
+        return 0;
+      }
     },
+    initialData: 0,
     staleTime: 1000 * 60, // 1 minute
     refetchInterval: 1000 * 60 * 5, // Refetch every 5 minutes
     refetchOnWindowFocus: true,
+    retry: 2,
+    retryDelay: 1000,
   });
 
   // Use server count if available, otherwise use store count

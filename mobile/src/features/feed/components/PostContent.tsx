@@ -33,45 +33,34 @@ export const PostContent: React.FC<PostContentProps> = memo(
       setIsExpanded(prev => !prev);
     }, []);
 
-    // Parse hashtags and mentions
-    const renderContent = useCallback(() => {
-      const words = content.split(/(\s+)/);
-
-      return words.map((word, index) => {
-        // Hashtag
-        if (word.startsWith('#')) {
-          return (
-            <Text key={index} style={[styles.hashtag, { color: colors.interactive.default }]}>
-              {word}
-            </Text>
-          );
-        }
-
-        // Mention
-        if (word.startsWith('@')) {
-          return (
-            <Text key={index} style={[styles.mention, { color: colors.interactive.default }]}>
-              {word}
-            </Text>
-          );
-        }
-
-        // Regular text
-        return (
-          <Text key={index} style={{ color: colors.text.primary }}>
-            {word}
-          </Text>
-        );
-      });
-    }, [content, colors]);
-
     return (
       <View style={styles.container}>
         <Text
           style={[styles.content, { color: colors.text.primary }]}
           numberOfLines={isExpanded ? undefined : maxLines}
           onTextLayout={!isExpanded && expandable ? handleTextLayout : undefined}>
-          {renderContent()}
+          {content.split(/(\s+)/).map((word, index) => {
+            // Hashtag
+            if (word.startsWith('#')) {
+              return (
+                <Text key={index} style={[styles.hashtag, { color: colors.interactive.default }]}>
+                  {word}
+                </Text>
+              );
+            }
+
+            // Mention
+            if (word.startsWith('@')) {
+              return (
+                <Text key={index} style={[styles.mention, { color: colors.interactive.default }]}>
+                  {word}
+                </Text>
+              );
+            }
+
+            // Regular text - tüm text node'ları Text içinde olmalı
+            return <Text key={index}>{word}</Text>;
+          })}
         </Text>
 
         {shouldShowMore && expandable && (

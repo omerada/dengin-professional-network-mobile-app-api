@@ -43,6 +43,12 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
     // Handle notification press
     const handleNotificationPress = useCallback(
       (notification: NotificationResponse) => {
+        // Validate notification has ID
+        if (!notification.notificationId) {
+          console.warn('[Notifications] Notification missing ID, skipping');
+          return;
+        }
+
         // Mark as read if unread
         if (!notification.read) {
           markAsRead(notification.notificationId);
@@ -56,7 +62,11 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
 
     // Handle notification delete (swipe action)
     const handleDelete = useCallback(
-      (notificationId: string) => {
+      (notificationId: string | undefined) => {
+        if (!notificationId) {
+          console.warn('[Notifications] Cannot delete notification without ID');
+          return;
+        }
         deleteNotification(notificationId);
       },
       [deleteNotification],
@@ -79,8 +89,11 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
       [],
     );
 
-    // Extract key - backend notificationId
-    const keyExtractor = useCallback((item: NotificationResponse) => item.notificationId, []);
+    // Extract key - backend notificationId with fallback
+    const keyExtractor = useCallback(
+      (item: NotificationResponse) => item.notificationId ?? `temp-${Date.now()}-${Math.random()}`,
+      [],
+    );
 
     // Render item
     const renderItem = useCallback(

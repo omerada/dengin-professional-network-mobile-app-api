@@ -57,8 +57,7 @@ class StompClient {
    */
   async connect(config?: Partial<SocketConfig>): Promise<void> {
     if (this.client?.connected) {
-      console.log('[STOMP] Already connected');
-      return;
+      return; // Already connected, skip
     }
 
     this.status = SocketStatus.CONNECTING;
@@ -88,10 +87,15 @@ class StompClient {
       // Reconnection settings
       reconnectDelay: config?.reconnectDelay ?? 5000,
 
-      // Debug logging (only in development)
+      // Debug logging disabled in production
       debug:
-        config?.debug !== false && __DEV__
-          ? (str: string) => console.log('[STOMP]', str)
+        __DEV__ && config?.debug !== false
+          ? (str: string) => {
+              // Only log connection state changes and errors
+              if (str.includes('ERROR') || str.includes('CONNECT') || str.includes('DISCONNECT')) {
+                console.log('[STOMP]', str);
+              }
+            }
           : () => {},
 
       // Connection lifecycle callbacks
@@ -124,7 +128,6 @@ class StompClient {
   // ========== Connection Handlers ==========
 
   private handleConnect(): void {
-    console.log('[STOMP] Connected');
     this.status = SocketStatus.CONNECTED;
     this.reconnectAttempts = 0;
 
@@ -138,7 +141,6 @@ class StompClient {
   }
 
   private handleDisconnect(): void {
-    console.log('[STOMP] Disconnected');
     this.status = SocketStatus.DISCONNECTED;
     this.emit('disconnect', { reason: 'server' });
   }
@@ -150,7 +152,6 @@ class StompClient {
   }
 
   private handleWebSocketClose(): void {
-    console.log('[STOMP] WebSocket closed');
     if (this.status !== SocketStatus.DISCONNECTED) {
       this.status = SocketStatus.RECONNECTING;
       this.reconnectAttempts++;
@@ -199,7 +200,9 @@ class StompClient {
 
   private subscribe(destination: string, callback: (message: IMessage) => void): void {
     if (!this.client?.connected) {
-      console.warn('[STOMP] Cannot subscribe, not connected');
+      if (__DEV__) {
+        console.warn('[STOMP] Cannot subscribe, not connected');
+      }
       return;
     }
 

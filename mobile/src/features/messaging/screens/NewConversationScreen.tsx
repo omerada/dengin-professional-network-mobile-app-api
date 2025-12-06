@@ -13,7 +13,7 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -69,7 +69,6 @@ const UserItem: React.FC<UserItemProps> = ({ user, onPress, isLoading }) => {
 
 export const NewConversationScreen: React.FC = () => {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
 
   // State
@@ -142,13 +141,11 @@ export const NewConversationScreen: React.FC = () => {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
+      edges={['top', 'bottom']}>
       {/* Header */}
-      <View
-        style={[
-          styles.header,
-          { paddingTop: insets.top, backgroundColor: colors.background.primary },
-        ]}>
+      <View style={[styles.header, { backgroundColor: colors.background.primary }]}>
         <Pressable
           onPress={handleBackPress}
           style={styles.backButton}
@@ -193,7 +190,7 @@ export const NewConversationScreen: React.FC = () => {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 

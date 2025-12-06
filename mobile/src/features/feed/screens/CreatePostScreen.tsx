@@ -14,6 +14,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
@@ -138,79 +139,84 @@ export const CreatePostScreen: React.FC = () => {
   }, [draftImages.length, addDraftImage]);
 
   return (
-    <KeyboardAvoidingView
+    <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={88}>
-      <ScrollView
-        style={styles.scrollView}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}>
-        {/* Text Input */}
-        <PostTextInput
-          value={draftContent}
-          onChangeText={setDraftContent}
-          placeholder="Ne düşünüyorsunuz?"
-          autoFocus
-        />
-
-        {/* Image Preview */}
-        {draftImages.length > 0 && (
-          <ImagePreviewGrid
-            images={draftImages}
-            onRemove={removeDraftImage}
-            onAdd={handlePickImages}
-            maxImages={5}
+      edges={['top', 'bottom']}>
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 20}>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}>
+          {/* Text Input */}
+          <PostTextInput
+            value={draftContent}
+            onChangeText={setDraftContent}
+            placeholder="Ne düşünüyorsunuz?"
+            autoFocus
           />
-        )}
 
-        {/* Upload Progress */}
-        {uploadProgress && (
-          <View style={styles.progressContainer}>
-            <Text style={[styles.progressText, { color: colors.text.secondary }]}>
-              Görsel yükleniyor ({uploadProgress.imageIndex + 1}/{uploadProgress.totalImages})...
-            </Text>
-            <View style={[styles.progressBar, { backgroundColor: colors.background.secondary }]}>
-              <View
-                style={[
-                  styles.progressFill,
-                  {
-                    backgroundColor: colors.interactive.default,
-                    width: `${uploadProgress.progress}%`,
-                  },
-                ]}
-              />
+          {/* Image Preview */}
+          {draftImages.length > 0 && (
+            <ImagePreviewGrid
+              images={draftImages}
+              onRemove={removeDraftImage}
+              onAdd={handlePickImages}
+              maxImages={5}
+            />
+          )}
+
+          {/* Upload Progress */}
+          {uploadProgress && (
+            <View style={styles.progressContainer}>
+              <Text style={[styles.progressText, { color: colors.text.secondary }]}>
+                Görsel yükleniyor ({uploadProgress.imageIndex + 1}/{uploadProgress.totalImages})...
+              </Text>
+              <View style={[styles.progressBar, { backgroundColor: colors.background.secondary }]}>
+                <View
+                  style={[
+                    styles.progressFill,
+                    {
+                      backgroundColor: colors.interactive.default,
+                      width: `${uploadProgress.progress}%`,
+                    },
+                  ]}
+                />
+              </View>
             </View>
-          </View>
-        )}
-      </ScrollView>
+          )}
+        </ScrollView>
 
-      {/* Bottom Toolbar */}
-      <View
-        style={[
-          styles.toolbar,
-          {
-            backgroundColor: colors.background.primary,
-            borderTopColor: colors.border.default,
-          },
-        ]}>
-        <Pressable style={styles.toolbarButton} onPress={handlePickImages} disabled={isPosting}>
-          <Icon name="images-outline" size={24} color={colors.interactive.default} />
-          <Text style={[styles.toolbarLabel, { color: colors.interactive.default }]}>Galeri</Text>
-        </Pressable>
+        {/* Bottom Toolbar */}
+        <View
+          style={[
+            styles.toolbar,
+            {
+              backgroundColor: colors.background.primary,
+              borderTopColor: colors.border.default,
+            },
+          ]}>
+          <Pressable style={styles.toolbarButton} onPress={handlePickImages} disabled={isPosting}>
+            <Icon name="images-outline" size={24} color={colors.interactive.default} />
+            <Text style={[styles.toolbarLabel, { color: colors.interactive.default }]}>Galeri</Text>
+          </Pressable>
 
-        <Pressable style={styles.toolbarButton} onPress={handleTakePhoto} disabled={isPosting}>
-          <Icon name="camera-outline" size={24} color={colors.interactive.default} />
-          <Text style={[styles.toolbarLabel, { color: colors.interactive.default }]}>Kamera</Text>
-        </Pressable>
+          <Pressable style={styles.toolbarButton} onPress={handleTakePhoto} disabled={isPosting}>
+            <Icon name="camera-outline" size={24} color={colors.interactive.default} />
+            <Text style={[styles.toolbarLabel, { color: colors.interactive.default }]}>Kamera</Text>
+          </Pressable>
 
-        <View style={styles.toolbarSpacer} />
+          <View style={styles.toolbarSpacer} />
 
-        <Text style={[styles.imageCount, { color: colors.text.secondary }]}>
-          {draftImages.length}/5 görsel
-        </Text>
-      </View>
-    </KeyboardAvoidingView>
+          <Text style={[styles.imageCount, { color: colors.text.secondary }]}>
+            {draftImages.length}/5 görsel
+          </Text>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -218,8 +224,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  keyboardView: {
+    flex: 1,
+  },
   scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 16,
   },
   headerButton: {
     padding: 8,

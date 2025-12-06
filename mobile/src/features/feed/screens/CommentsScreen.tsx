@@ -5,6 +5,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { View, StyleSheet, ActivityIndicator, RefreshControl, Alert } from 'react-native';
 import { FlatList } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
@@ -187,14 +188,18 @@ export const CommentsScreen: React.FC = () => {
 
   if (isLoading && comments.length === 0) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: colors.background.primary }]}>
+      <SafeAreaView
+        style={[styles.loadingContainer, { backgroundColor: colors.background.primary }]}
+        edges={['bottom']}>
         <ActivityIndicator size="large" color={colors.interactive.default} />
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background.primary }]}
+      edges={['bottom']}>
       <FlatList
         data={comments}
         renderItem={renderComment}
@@ -233,7 +238,7 @@ export const CommentsScreen: React.FC = () => {
         options={getActionSheetOptions()}
         title="Yorum Seçenekleri"
       />
-    </View>
+    </SafeAreaView>
   );
 };
 

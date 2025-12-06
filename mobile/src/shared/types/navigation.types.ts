@@ -54,7 +54,7 @@ export type FeedStackParamList = {
 export type MessagingStackParamList = {
   ConversationList: undefined;
   Chat: { conversationId: string; participantName?: string };
-  NewChat: undefined;
+  NewConversation: undefined;
 };
 
 /**
