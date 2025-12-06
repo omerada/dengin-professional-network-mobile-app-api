@@ -40,6 +40,13 @@ const queryClient = new QueryClient({
 const AppContent: React.FC = () => {
   const { isDark } = useTheme();
   const colors = useColors();
+  const initialize = useAuthStore(state => state.initialize);
+
+  // Initialize auth state on app start
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
   return (
     <>
       <StatusBar
