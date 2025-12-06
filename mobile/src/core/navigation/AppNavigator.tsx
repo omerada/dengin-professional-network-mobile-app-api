@@ -83,6 +83,8 @@ export const AppNavigator: React.FC = () => {
         screenOptions={{
           headerShown: false,
           animation: 'fade',
+          gestureEnabled: true,
+          fullScreenGestureEnabled: true,
         }}>
         {isAuthenticated ? (
           <>

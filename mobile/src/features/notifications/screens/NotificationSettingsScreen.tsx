@@ -192,8 +192,19 @@ export const NotificationSettingsScreen: React.FC = () => {
       <View style={[styles.header, { borderBottomColor: colors.border.default }]}>
         <Pressable
           onPress={() => navigation.goBack()}
-          style={({ pressed }) => [styles.backButton, pressed && styles.buttonPressed]}>
-          <Icon name="arrow-back" size={24} color={colors.text.primary} />
+          style={styles.backButton}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+          <View
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: 28,
+              backgroundColor: colors.background.secondary,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <Icon name="chevron-back" size={32} color={colors.text.primary} />
+          </View>
         </Pressable>
 
         <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Bildirim Ayarları</Text>
@@ -327,13 +338,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
+    marginTop: 8,
+    paddingLeft: 8,
   },
   backButton: {
-    width: 40,
-    height: 40,
     justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: -8,
+    alignItems: 'flex-start',
   },
   buttonPressed: {
     opacity: 0.7,
@@ -345,12 +355,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   headerSpacer: {
-    width: 40,
+    width: 56,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
+    paddingTop: 16,
     paddingBottom: 32,
   },
   permissionWarning: {

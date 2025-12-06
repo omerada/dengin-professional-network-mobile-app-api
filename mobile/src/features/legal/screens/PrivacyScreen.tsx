@@ -170,8 +170,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: 0,
+    paddingLeft: spacing.sm,
+    paddingRight: spacing.md,
     paddingVertical: spacing.md,
+    paddingTop: spacing.lg,
   },
   headerTitle: {
     fontSize: 18,

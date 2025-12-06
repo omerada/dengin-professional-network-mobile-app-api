@@ -232,6 +232,8 @@ const styles = StyleSheet.create({
   header: {
     height: 56,
     justifyContent: 'center',
+    marginTop: spacing.sm,
+    marginLeft: -spacing.xl,
   },
   backButton: {
     justifyContent: 'center',

@@ -113,14 +113,15 @@ export const LoginScreen: React.FC = () => {
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
               <View
                 style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: 28,
+                  width: 48,
+                  height: 48,
+                  borderRadius: 24,
                   backgroundColor: colors.background.secondary,
                   justifyContent: 'center',
                   alignItems: 'center',
+                  left: -8,
                 }}>
-                <Icon name="chevron-left" size={32} color={colors.text.primary} />
+                <Icon name="chevron-left" size={28} color={colors.text.primary} />
               </View>
             </TouchableOpacity>
           </View>
@@ -278,6 +279,8 @@ const styles = StyleSheet.create({
     height: 56,
     justifyContent: 'center',
     marginBottom: spacing.lg,
+    marginTop: spacing.sm,
+    marginLeft: spacing.xs,
   },
   backButton: {
     justifyContent: 'center',

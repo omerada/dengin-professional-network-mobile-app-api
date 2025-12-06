@@ -32,6 +32,8 @@ export const AuthNavigator: React.FC = () => {
         headerShown: false,
         animation: 'slide_from_right',
         gestureEnabled: true,
+        fullScreenGestureEnabled: true,
+        gestureDirection: 'horizontal',
       }}>
       <Stack.Screen
         name="Onboarding"

@@ -350,7 +350,10 @@ export const Input = memo(
             {/* Password Toggle */}
             {secureTextEntry && (
               <Pressable
-                onPress={togglePasswordVisibility}
+                onPress={e => {
+                  e?.stopPropagation?.();
+                  togglePasswordVisibility();
+                }}
                 style={styles.passwordToggle}
                 hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                 accessible

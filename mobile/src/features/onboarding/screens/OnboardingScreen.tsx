@@ -219,9 +219,11 @@ export const OnboardingScreen: React.FC = () => {
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
         bounces={false}
-        decelerationRate="fast"
+        decelerationRate={0.92}
         snapToInterval={width}
         snapToAlignment="center"
+        disableIntervalMomentum={true}
+        disableScrollViewPanResponder={false}
       />
 
       {/* Controls */}

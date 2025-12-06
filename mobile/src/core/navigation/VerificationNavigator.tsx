@@ -27,6 +27,8 @@ export const VerificationNavigator: React.FC = () => {
       screenOptions={{
         headerShown: true,
         animation: 'slide_from_right',
+        gestureEnabled: true,
+        fullScreenGestureEnabled: true,
         headerStyle: {
           backgroundColor: colors.background.primary,
         },

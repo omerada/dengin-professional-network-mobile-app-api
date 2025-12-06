@@ -152,8 +152,18 @@ export const NewConversationScreen: React.FC = () => {
         <Pressable
           onPress={handleBackPress}
           style={styles.backButton}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Icon name="close" size={24} color={colors.text.primary} />
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+          <View
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: colors.background.secondary,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <Icon name="chevron-back" size={24} color={colors.text.primary} />
+          </View>
         </Pressable>
         <Text style={[styles.title, { color: colors.text.primary }]}>Yeni Konuşma</Text>
         <View style={styles.headerSpacer} />
@@ -210,7 +220,8 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(0,0,0,0.1)',
   },
   backButton: {
-    padding: 4,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
   },
   title: {
     flex: 1,
@@ -219,7 +230,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   headerSpacer: {
-    width: 32,
+    width: 40,
   },
   searchContainer: {
     paddingHorizontal: 16,

@@ -71,13 +71,19 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 // Feed Stack
 const FeedStack = createNativeStackNavigator<FeedStackParamList>();
 const FeedStackNavigator: React.FC = () => (
-  <FeedStack.Navigator screenOptions={{ headerShown: false }}>
+  <FeedStack.Navigator
+    screenOptions={{
+      headerShown: false,
+      gestureEnabled: true,
+      fullScreenGestureEnabled: true,
+      animation: 'slide_from_right',
+    }}>
     <FeedStack.Screen name="Feed" component={FeedScreen} />
     <FeedStack.Screen name="PostDetail" component={PostDetailScreen} />
     <FeedStack.Screen
       name="CreatePost"
       component={CreatePostScreen}
-      options={{ presentation: 'modal' }}
+      options={{ presentation: 'modal', gestureEnabled: true }}
     />
     <FeedStack.Screen name="Comments" component={CommentsScreen} />
   </FeedStack.Navigator>
@@ -86,13 +92,19 @@ const FeedStackNavigator: React.FC = () => (
 // Messaging Stack
 const MessagingStack = createNativeStackNavigator<MessagingStackParamList>();
 const MessagingStackNavigator: React.FC = () => (
-  <MessagingStack.Navigator screenOptions={{ headerShown: false }}>
+  <MessagingStack.Navigator
+    screenOptions={{
+      headerShown: false,
+      gestureEnabled: true,
+      fullScreenGestureEnabled: true,
+      animation: 'slide_from_right',
+    }}>
     <MessagingStack.Screen name="ConversationList" component={ConversationListScreen} />
     <MessagingStack.Screen name="Chat" component={ChatScreen} />
     <MessagingStack.Screen
       name="NewConversation"
       component={require('@features/messaging/screens/NewConversationScreen').NewConversationScreen}
-      options={{ presentation: 'modal' }}
+      options={{ presentation: 'modal', gestureEnabled: true }}
     />
   </MessagingStack.Navigator>
 );
@@ -100,7 +112,13 @@ const MessagingStackNavigator: React.FC = () => (
 // Notifications Stack
 const NotificationsStack = createNativeStackNavigator<NotificationsStackParamList>();
 const NotificationsStackNavigator: React.FC = () => (
-  <NotificationsStack.Navigator screenOptions={{ headerShown: false }}>
+  <NotificationsStack.Navigator
+    screenOptions={{
+      headerShown: false,
+      gestureEnabled: true,
+      fullScreenGestureEnabled: true,
+      animation: 'slide_from_right',
+    }}>
     <NotificationsStack.Screen name="Notifications" component={NotificationsScreen} />
     <NotificationsStack.Screen
       name="NotificationSettings"
@@ -115,7 +133,13 @@ const NotificationsStackNavigator: React.FC = () => (
 // Profile Stack
 const ProfileStack = createNativeStackNavigator<ProfileStackParamList>();
 const ProfileStackNavigator: React.FC = () => (
-  <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
+  <ProfileStack.Navigator
+    screenOptions={{
+      headerShown: false,
+      gestureEnabled: true,
+      fullScreenGestureEnabled: true,
+      animation: 'slide_from_right',
+    }}>
     <ProfileStack.Screen name="Profile" component={ProfileScreen} />
     <ProfileStack.Screen name="EditProfile" component={EditProfileScreen} />
     <ProfileStack.Screen name="Settings" component={SettingsScreen} />

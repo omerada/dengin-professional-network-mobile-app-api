@@ -133,10 +133,20 @@ export const ChatHeader: React.FC<ChatHeaderProps> = memo(
         <AnimatedPressable
           onPress={handleBackPress}
           style={[styles.backButton, backAnimatedStyle]}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           accessibilityLabel="Geri"
           accessibilityRole="button">
-          <Icon name="arrow-back" size={24} color={colors.text.primary} />
+          <View
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: colors.background.secondary,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <Icon name="chevron-back" size={24} color={colors.text.primary} />
+          </View>
         </AnimatedPressable>
 
         {/* Profile */}
@@ -230,7 +240,8 @@ const styles = StyleSheet.create({
     width: 40,
   },
   backButton: {
-    padding: 8,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
   },
   container: {
     alignItems: 'center',

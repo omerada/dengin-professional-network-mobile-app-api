@@ -213,7 +213,12 @@ export const ProfessionSelector: React.FC<ProfessionSelectorProps> = ({
             borderColor: error ? colors.status.error : colors.border.default,
           },
         ]}
-        onPress={() => setModalVisible(true)}
+        onPress={() => {
+          if (!modalVisible) {
+            setModalVisible(true);
+          }
+        }}
+        disabled={modalVisible}
         activeOpacity={0.7}>
         <Text
           style={[

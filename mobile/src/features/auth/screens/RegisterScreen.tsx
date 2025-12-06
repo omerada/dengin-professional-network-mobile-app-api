@@ -12,7 +12,6 @@ import {
   Platform,
   ScrollView,
   TouchableOpacity,
-  Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
@@ -96,8 +95,9 @@ export const RegisterScreen: React.FC = () => {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
+          keyboardShouldPersistTaps="always"
           keyboardDismissMode="on-drag"
+          nestedScrollEnabled={true}
           showsVerticalScrollIndicator={false}>
           {/* Header */}
           <View style={styles.header}>
@@ -110,23 +110,23 @@ export const RegisterScreen: React.FC = () => {
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
               <View
                 style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: 28,
+                  width: 48,
+                  height: 48,
+                  borderRadius: 24,
                   backgroundColor: colors.background.secondary,
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}>
-                <Icon name="chevron-left" size={32} color={colors.text.primary} />
+                <Icon name="chevron-left" size={28} color={colors.text.primary} />
               </View>
             </TouchableOpacity>
-          </View>
-
-          {/* Title */}
-          <View style={styles.titleContainer}>
-            <Text style={[styles.title, { color: colors.text.primary }]}>
+            <Text style={[styles.headerTitle, { color: colors.text.primary }]}>
               {t('auth.createAccount')}
             </Text>
+          </View>
+
+          {/* Subtitle */}
+          <View style={styles.subtitleContainer}>
             <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
               Bilgilerinizi girerek hesabınızı oluşturun
             </Text>
@@ -281,7 +281,7 @@ export const RegisterScreen: React.FC = () => {
               control={control}
               name="acceptTerms"
               render={({ field: { onChange, value } }) => (
-                <Pressable
+                <View
                   style={[
                     styles.termsContainer,
                     {
@@ -291,19 +291,15 @@ export const RegisterScreen: React.FC = () => {
                       borderWidth: 1,
                       borderColor: errors.acceptTerms ? colors.status.error : colors.border.default,
                     },
-                  ]}
-                  onPress={e => {
-                    // Check if press is on links
-                    const target = e.target as any;
-                    if (!target?.onPress) {
-                      onChange(!value);
-                    }
-                  }}
-                  accessible={true}
-                  accessibilityRole="checkbox"
-                  accessibilityLabel="Kullanım koşullarını kabul et"
-                  accessibilityState={{ checked: value }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  ]}>
+                  <TouchableOpacity
+                    style={{ flexDirection: 'row', alignItems: 'center' }}
+                    onPress={() => onChange(!value)}
+                    activeOpacity={0.7}
+                    accessible={true}
+                    accessibilityRole="checkbox"
+                    accessibilityLabel="Kullanım koşullarını kabul et"
+                    accessibilityState={{ checked: value }}>
                     <View
                       style={{
                         width: 48,
@@ -332,19 +328,25 @@ export const RegisterScreen: React.FC = () => {
                       <Text style={[styles.termsText, { color: colors.text.secondary }]}>
                         <Text
                           style={[styles.link, { color: colors.interactive.default }]}
-                          onPress={handleTermsPress}>
+                          onPress={e => {
+                            e.stopPropagation();
+                            handleTermsPress();
+                          }}>
                           Kullanım Koşulları
                         </Text>{' '}
                         ve{' '}
                         <Text
                           style={[styles.link, { color: colors.interactive.default }]}
-                          onPress={handlePrivacyPress}>
+                          onPress={e => {
+                            e.stopPropagation();
+                            handlePrivacyPress();
+                          }}>
                           Gizlilik Politikası
                         </Text>{' '}
                         'nı okudum ve kabul ediyorum.
                       </Text>
                     </View>
-                  </View>
+                  </TouchableOpacity>
                   {errors.acceptTerms && (
                     <Text
                       style={[
@@ -354,7 +356,7 @@ export const RegisterScreen: React.FC = () => {
                       {errors.acceptTerms.message}
                     </Text>
                   )}
-                </Pressable>
+                </View>
               )}
             />
           </View>
@@ -394,10 +396,6 @@ const styles = StyleSheet.create({
   actions: {
     marginBottom: spacing.xl,
   },
-  backButton: {
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
   backButtonText: {
     fontSize: 32,
     fontWeight: '300',
@@ -426,8 +424,23 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.xs,
   },
   header: {
-    height: 56,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: spacing.sm,
+    marginBottom: spacing.md,
+    marginLeft: spacing.xs,
+  },
+  backButton: {
     justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginLeft: spacing.md,
+  },
+  subtitleContainer: {
+    marginBottom: spacing.xl,
   },
   keyboardAvoid: {
     flex: 1,

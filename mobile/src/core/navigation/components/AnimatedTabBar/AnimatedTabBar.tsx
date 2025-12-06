@@ -40,10 +40,10 @@ const TabButton: React.FC<TabButtonProps> = memo(({ item, focused, onPress, onLo
     focusProgress.value = withSpring(focused ? 1 : 0, spring.snappy);
 
     if (focused) {
-      // Subtle bounce when focused
+      // Very subtle bounce when focused - reduced animation
       scale.value = withSequence(
-        withSpring(1.1, { damping: 8, stiffness: 400 }),
-        withSpring(1, { damping: 12, stiffness: 200 }),
+        withSpring(1.05, { damping: 10, stiffness: 300 }),
+        withSpring(1, { damping: 15, stiffness: 250 }),
       );
     }
   }, [focused, focusProgress, scale]);
@@ -51,7 +51,7 @@ const TabButton: React.FC<TabButtonProps> = memo(({ item, focused, onPress, onLo
   // Handle press
   const handlePress = useCallback(() => {
     trigger('selection');
-    scale.value = withSequence(withSpring(0.85, spring.press), withSpring(1, spring.snappy));
+    scale.value = withSequence(withSpring(0.92, spring.press), withSpring(1, spring.snappy));
     onPress();
   }, [onPress, trigger, scale]);
 
