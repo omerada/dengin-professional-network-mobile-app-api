@@ -19,7 +19,7 @@ import { useColors } from '@contexts/ThemeContext';
 import { Button, Input } from '@shared/components';
 import { spacing, fontSize } from '@theme';
 import { AvatarPicker } from '../components';
-import { useMyProfile, useUpdateProfile, useUploadAvatar, useDeleteAvatar } from '../hooks';
+import { useMyProfile, useUpdateProfile, useUploadAvatarWithPresignedUrl, useDeleteAvatar } from '../hooks';
 import type { UpdateProfileRequest, Gender } from '../types';
 
 type GenderOption = { label: string; value: Gender };
@@ -48,7 +48,7 @@ export const EditProfileScreen: React.FC = () => {
 
   // Mutations
   const updateProfile = useUpdateProfile();
-  const uploadAvatar = useUploadAvatar();
+  const { mutate: uploadAvatar, isPending: isUploadingAvatar, uploadProgress } = useUploadAvatarWithPresignedUrl();
   const deleteAvatar = useDeleteAvatar();
 
   // Form state
@@ -85,15 +85,21 @@ export const EditProfileScreen: React.FC = () => {
     }
   }, [name, surname, bio, dateOfBirth, gender, profile]);
 
-  // Handle avatar selection
+  // Handle avatar selection (presigned URL flow)
   const handleAvatarSelected = useCallback(
-    async (uri: string) => {
-      try {
-        await uploadAvatar.mutateAsync(uri);
-        Alert.alert('Başarılı', 'Profil fotoğrafınız güncellendi.');
-      } catch (error) {
-        Alert.alert('Hata', 'Fotoğraf yüklenirken bir hata oluştu.');
-      }
+    (uri: string) => {
+      uploadAvatar(
+        { imageUri: uri },
+        {
+          onSuccess: () => {
+            Alert.alert('Başarılı', 'Profil fotoğrafınız güncellendi.');
+          },
+          onError: (error) => {
+            console.error('[EditProfileScreen] Avatar upload error:', error);
+            Alert.alert('Hata', error.message || 'Fotoğraf yüklenirken bir hata oluştu.');
+          },
+        },
+      );
     },
     [uploadAvatar],
   );
@@ -146,7 +152,7 @@ export const EditProfileScreen: React.FC = () => {
   }, []);
 
   const isLoading = updateProfile.isPending;
-  const isAvatarLoading = uploadAvatar.isPending || deleteAvatar.isPending;
+  const isAvatarLoading = isUploadingAvatar || deleteAvatar.isPending;
 
   return (
     <SafeAreaView

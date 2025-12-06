@@ -78,13 +78,14 @@ export const profileApi = {
   },
 
   /**
-   * POST /api/users/me/avatar
-   * Avatar fotoğrafı yükle (multipart/form-data)
-   *
-   * Backend: UserController.uploadAvatar()
-   * Note: Max 5MB, JPEG/PNG/WebP accepted
+   * POST /api/users/me/avatar (DEPRECATED - multipart upload)
+   * 
+   * @deprecated Use uploadAvatarWithPresignedUrl() instead (presigned URL pattern)
+   * This method will be removed in future versions.
    */
   uploadAvatar: async (imageUri: string): Promise<AvatarUploadResponse> => {
+    console.warn('DEPRECATED: uploadAvatar with multipart. Use uploadAvatarWithPresignedUrl instead.');
+    
     const formData = new FormData();
 
     // React Native'de dosya ekleme
@@ -108,6 +109,91 @@ export const profileApi = {
       },
     );
     return response.data.data;
+  },
+
+  /**
+   * Upload avatar using presigned URL pattern (Production-Ready)
+   * 
+   * Flow:
+   * 1. Request presigned URL from backend
+   * 2. Upload image directly to S3 using presigned URL
+   * 3. Confirm upload with backend (validates S3 upload)
+   * 4. Backend returns updated user profile with CloudFront URL
+   * 
+   * Benefits:
+   * - No file passing through backend (bandwidth optimization)
+   * - Direct S3 upload (faster)
+   * - CloudFront CDN for image serving
+   * - Production-ready security (IAM roles, presigned URLs)
+   * 
+   * Backend: ProfileImageController
+   * - POST /api/users/me/avatar/presigned-url
+   * - POST /api/users/me/avatar/confirm
+   * 
+   * @param imageUri Local image URI from camera/gallery
+   * @param onProgress Progress callback (0-100)
+   * @returns Updated user profile with CloudFront avatar URL
+   */
+  uploadAvatarWithPresignedUrl: async (
+    imageUri: string,
+    onProgress?: (progress: number) => void,
+  ): Promise<MyProfileResponse> => {
+    try {
+      // Step 1: Determine content type
+      const filename = imageUri.split('/').pop() || 'avatar.jpg';
+      const match = /\.(\w+)$/.exec(filename);
+      const extension = match ? match[1].toLowerCase() : 'jpg';
+      const contentType = `image/${extension === 'jpg' ? 'jpeg' : extension}`;
+
+      onProgress?.(10);
+
+      // Step 2: Request presigned URL from backend
+      const presignedResponse = await apiClient.post<
+        ApiResponse<{
+          url: string;
+          key: string;
+          expiresIn: number;
+          contentType: string;
+          maxFileSize: number;
+        }>
+      >('/api/users/me/avatar/presigned-url', { contentType });
+
+      const { url: presignedUrl, key: s3Key } = presignedResponse.data.data;
+
+      onProgress?.(30);
+
+      // Step 3: Read image file as blob
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+
+      onProgress?.(50);
+
+      // Step 4: Upload directly to S3 via presigned URL (PUT request)
+      await fetch(presignedUrl, {
+        method: 'PUT',
+        body: blob,
+        headers: {
+          'Content-Type': contentType,
+        },
+      });
+
+      onProgress?.(80);
+
+      // Step 5: Confirm upload with backend (validates S3 upload)
+      const confirmResponse = await apiClient.post<ApiResponse<MyProfileResponse>>(
+        '/api/users/me/avatar/confirm',
+        { key: s3Key },
+      );
+
+      onProgress?.(100);
+
+      return confirmResponse.data.data;
+    } catch (error: any) {
+      console.error('[profileApi.uploadAvatarWithPresignedUrl] Error:', error);
+      throw new Error(
+        error.response?.data?.message || 'Avatar yükleme başarısız. Lütfen tekrar deneyin.',
+      );
+    }
   },
 
   /**

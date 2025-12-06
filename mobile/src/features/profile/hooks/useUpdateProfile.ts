@@ -2,6 +2,7 @@
 // React Query mutation hooks for profile updates
 // Oku: mobile-development-guide/state/15-REACT-QUERY.md
 
+import React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { profileApi } from '../services';
 import { profileKeys } from './useProfile';
@@ -59,20 +60,9 @@ export function useUpdateProfile() {
 }
 
 /**
- * Hook: Avatar yükleme
- *
- * Backend: POST /api/users/me/avatar
- *
- * @returns Mutation for uploading avatar
- *
- * @example
- * ```tsx
- * const { mutate: uploadAvatar, isPending } = useUploadAvatar();
- *
- * uploadAvatar(imageUri, {
- *   onSuccess: (data) => console.log('Avatar URL:', data.avatarUrl),
- * });
- * ```
+ * Hook: Avatar yükleme (DEPRECATED - multipart upload)
+ * 
+ * @deprecated Use useUploadAvatarWithPresignedUrl() instead
  */
 export function useUploadAvatar() {
   const queryClient = useQueryClient();
@@ -91,6 +81,72 @@ export function useUploadAvatar() {
       console.error('[useUploadAvatar] Error:', error);
     },
   });
+}
+
+/**
+ * Hook: Avatar yükleme (Presigned URL Pattern) - Production-Ready
+ *
+ * Backend: 
+ * - POST /api/users/me/avatar/presigned-url (Step 1)
+ * - POST /api/users/me/avatar/confirm (Step 2)
+ *
+ * Flow:
+ * 1. Request presigned URL from backend
+ * 2. Upload image directly to S3 using presigned URL
+ * 3. Confirm upload with backend (validates S3 upload)
+ * 4. Backend returns updated user profile with CloudFront URL
+ *
+ * @returns Mutation for uploading avatar with progress tracking
+ *
+ * @example
+ * ```tsx
+ * const { mutate: uploadAvatar, isPending, progress } = useUploadAvatarWithPresignedUrl();
+ *
+ * uploadAvatar(imageUri, {
+ *   onSuccess: (data) => console.log('Avatar URL:', data.avatarUrl),
+ *   onError: (error) => console.error(error),
+ * });
+ * ```
+ */
+export function useUploadAvatarWithPresignedUrl() {
+  const queryClient = useQueryClient();
+  const updateUser = useAuthStore(state => state.updateUser);
+  const [uploadProgress, setUploadProgress] = React.useState(0);
+
+  const mutation = useMutation<
+    MyProfileResponse,
+    Error,
+    { imageUri: string; onProgress?: (progress: number) => void }
+  >({
+    mutationFn: async ({ imageUri, onProgress }) => {
+      const internalProgress = (progress: number) => {
+        setUploadProgress(progress);
+        onProgress?.(progress);
+      };
+
+      return profileApi.uploadAvatarWithPresignedUrl(imageUri, internalProgress);
+    },
+    onSuccess: data => {
+      // Auth store'daki user'ı güncelle
+      updateUser({ avatarUrl: data.avatarUrl });
+
+      // Profile cache'ini güncelle
+      queryClient.setQueryData(profileKeys.me(), data);
+      queryClient.invalidateQueries({ queryKey: profileKeys.me() });
+
+      // Progress'i sıfırla
+      setUploadProgress(0);
+    },
+    onError: error => {
+      console.error('[useUploadAvatarWithPresignedUrl] Error:', error);
+      setUploadProgress(0);
+    },
+  });
+
+  return {
+    ...mutation,
+    uploadProgress,
+  };
 }
 
 /**

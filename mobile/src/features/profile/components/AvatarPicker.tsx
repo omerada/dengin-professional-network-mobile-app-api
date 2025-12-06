@@ -13,12 +13,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {
-  launchImageLibrary,
-  launchCamera,
-  ImagePickerResponse,
-  MediaType,
-} from 'react-native-image-picker';
+import * as ImagePicker from 'expo-image-picker';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing, fontSize } from '@theme';
 
@@ -76,52 +71,67 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
 
     const displayUri = previewUri || currentAvatarUrl;
 
-    // Handle image picker response
-    const handlePickerResponse = useCallback(
-      (response: ImagePickerResponse) => {
-        if (response.didCancel) {
-          return;
-        }
-
-        if (response.errorCode) {
-          Alert.alert('Hata', response.errorMessage || 'Resim seçilirken bir hata oluştu.');
-          return;
-        }
-
-        const asset = response.assets?.[0];
-        if (asset?.uri) {
-          setPreviewUri(asset.uri);
-          onImageSelected(asset.uri);
-        }
-      },
-      [onImageSelected],
-    );
-
     // Open camera
-    const handleTakePhoto = useCallback(() => {
-      const options = {
-        mediaType: 'photo' as MediaType,
-        maxWidth: 800,
-        maxHeight: 800,
-        quality: 0.8 as const,
-        cameraType: 'front' as const,
-      };
+    const handleTakePhoto = useCallback(async () => {
+      try {
+        // Request camera permission
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        
+        if (status !== 'granted') {
+          Alert.alert(
+            'İzin Gerekli',
+            'Fotoğraf çekmek için kamera iznine ihtiyacımız var.'
+          );
+          return;
+        }
 
-      launchCamera(options, handlePickerResponse);
-    }, [handlePickerResponse]);
+        // Launch camera
+        const result = await ImagePicker.launchCameraAsync({
+          allowsEditing: true,
+          quality: 0.8,
+        });
+
+        if (!result.canceled && result.assets[0]) {
+          const uri = result.assets[0].uri;
+          setPreviewUri(uri);
+          onImageSelected(uri);
+        }
+      } catch (error) {
+        console.error('[AvatarPicker] Camera error:', error);
+        Alert.alert('Hata', 'Kamera açılırken bir hata oluştu.');
+      }
+    }, [onImageSelected]);
 
     // Open gallery
-    const handleChooseFromGallery = useCallback(() => {
-      const options = {
-        mediaType: 'photo' as MediaType,
-        maxWidth: 800,
-        maxHeight: 800,
-        quality: 0.8 as const,
-        selectionLimit: 1,
-      };
+    const handleChooseFromGallery = useCallback(async () => {
+      try {
+        // Request media library permission
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        
+        if (status !== 'granted') {
+          Alert.alert(
+            'İzin Gerekli',
+            'Galeriden fotoğraf seçmek için medya kütüphanesi iznine ihtiyacımız var.'
+          );
+          return;
+        }
 
-      launchImageLibrary(options, handlePickerResponse);
-    }, [handlePickerResponse]);
+        // Launch image library
+        const result = await ImagePicker.launchImageLibraryAsync({
+          allowsEditing: true,
+          quality: 0.8,
+        });
+
+        if (!result.canceled && result.assets[0]) {
+          const uri = result.assets[0].uri;
+          setPreviewUri(uri);
+          onImageSelected(uri);
+        }
+      } catch (error) {
+        console.error('[AvatarPicker] Gallery error:', error);
+        Alert.alert('Hata', 'Galeri açılırken bir hata oluştu.');
+      }
+    }, [onImageSelected]);
 
     // Remove avatar
     const handleRemove = useCallback(() => {

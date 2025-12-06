@@ -180,6 +180,12 @@ aws:
   endpoint: http://localhost:4566 # LocalStack
   s3:
     bucket: meslektas-dev
+    profile-images:
+      folder: users # S3 folder for profile images: users/{userId}/avatar-{uuid}.jpg
+    presigned-url:
+      expiration: 300 # 5 minutes
+  cloudfront:
+    domain: ${AWS_CLOUDFRONT_DOMAIN:} # Leave empty for dev (uses S3 direct URLs)
   rekognition:
     endpoint: http://localhost:4566 # LocalStack
     bucket-name: meslektas-verifications
@@ -239,7 +245,13 @@ aws:
   secret-key: ${AWS_SECRET_ACCESS_KEY}
   region: ${AWS_REGION:eu-central-1}
   s3:
-    bucket: ${AWS_S3_BUCKET}
+    bucket: ${AWS_S3_BUCKET:meslektas-prod}
+    profile-images:
+      folder: users # S3 folder for profile images: users/{userId}/avatar-{uuid}.jpg
+    presigned-url:
+      expiration: 300 # 5 minutes
+  cloudfront:
+    domain: ${AWS_CLOUDFRONT_DOMAIN:daw1sj0p0yrom.cloudfront.net} # CloudFront distribution domain
   rekognition:
     bucket-name: ${AWS_REKOGNITION_BUCKET:meslektas-verifications}
 

@@ -5,6 +5,7 @@ export { useMyProfile, useProfile, useProfileStats, profileKeys } from './usePro
 export {
   useUpdateProfile,
   useUploadAvatar,
+  useUploadAvatarWithPresignedUrl,
   useDeleteAvatar,
   useChangePassword,
   useDeleteAccount,

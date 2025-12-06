@@ -294,10 +294,15 @@ public class UserService {
     }
 
     /**
-     * Upload user avatar
+     * Upload user avatar (DEPRECATED - kept for backward compatibility)
+     * 
+     * @deprecated Use ProfileImageController with presigned URLs instead.
+     * This method will be removed in future versions.
      */
+    @Deprecated
     @Transactional
     public UserResponse uploadAvatar(Long userId, MultipartFile file) {
+        log.warn("DEPRECATED: uploadAvatar with MultipartFile. Use presigned URL pattern instead.");
         log.info("Uploading avatar for user: {}", userId);
 
         User user = userRepository.findById(userId)
@@ -325,6 +330,44 @@ public class UserService {
         User updatedUser = userRepository.save(user);
 
         log.info("Avatar uploaded successfully for user: {}", userId);
+
+        return userMapper.toResponse(updatedUser);
+    }
+
+    /**
+     * Update avatar URL (used by presigned URL flow)
+     * 
+     * This method is called after mobile uploads image directly to S3.
+     * Backend validates the upload and updates user profile with CloudFront URL.
+     * 
+     * @param userId      User ID
+     * @param avatarUrl   CloudFront URL from ProfileImageS3Service
+     * @return Updated user profile
+     */
+    @Transactional
+    public UserResponse updateAvatarUrl(Long userId, String avatarUrl) {
+        log.info("Updating avatar URL for user: {} with URL: {}", userId, avatarUrl);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        // Delete old avatar if exists (cleanup from S3)
+        if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
+            try {
+                // Extract S3 key and delete via ProfileImageS3Service
+                storageService.delete(user.getAvatarUrl());
+                log.info("Old avatar deleted: {}", user.getAvatarUrl());
+            } catch (Exception e) {
+                log.warn("Failed to delete old avatar: {}", e.getMessage());
+                // Continue even if deletion fails
+            }
+        }
+
+        // Update user avatar with new CloudFront URL
+        user.updateAvatar(avatarUrl);
+        User updatedUser = userRepository.save(user);
+
+        log.info("Avatar URL updated successfully for user: {}", userId);
 
         return userMapper.toResponse(updatedUser);
     }
