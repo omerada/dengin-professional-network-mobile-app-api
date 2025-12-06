@@ -36,7 +36,7 @@ export function useMessages(conversationId: string, currentUserId?: string) {
         attachment: data.attachment || null,
         status: data.status as any,
         read: false,
-        sentByMe: currentUserId ? data.senderId === Number(currentUserId) : false,
+        sentByMe: data.sentByMe, // Backend tarafından hesaplanmış değer
         sentAt: data.sentAt ? String(data.sentAt) : new Date().toISOString(),
         readAt: null,
       };

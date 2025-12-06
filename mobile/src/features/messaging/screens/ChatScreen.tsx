@@ -274,8 +274,8 @@ export const ChatScreen: React.FC = () => {
       edges={['top', 'bottom']}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={0}>
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
         <Animated.View entering={FadeIn.duration(300)} style={styles.content}>
           {/* Header */}
           <ChatHeader

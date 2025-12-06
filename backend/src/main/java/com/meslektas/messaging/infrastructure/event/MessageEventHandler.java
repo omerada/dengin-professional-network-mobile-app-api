@@ -61,6 +61,7 @@ public class MessageEventHandler {
                     .recipientId(event.getRecipientId())
                     .content(event.getMessagePreview())
                     .status("SENT")
+                    .sentByMe(false) // Alıcı için her zaman false
                     .sentAt(event.getOccurredOn().atZone(java.time.ZoneId.systemDefault()).toInstant())
                     .build();
 

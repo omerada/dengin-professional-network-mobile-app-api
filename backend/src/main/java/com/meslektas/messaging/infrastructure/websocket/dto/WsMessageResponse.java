@@ -39,6 +39,9 @@ public class WsMessageResponse {
 
     @Schema(description = "Message status (SENT, DELIVERED, READ)")
     private String status;
+    
+    @Schema(description = "Whether the message was sent by the current user")
+    private boolean sentByMe;
 
     @Schema(description = "When the message was sent")
     private Instant sentAt;

@@ -237,11 +237,12 @@ public class MessageWebSocketController {
         return WsMessageResponse.builder()
                 .messageId(response.getMessageId())
                 .conversationId(response.getConversationId())
-                .senderId(null)
+                .senderId(senderId) // Current user's ID
                 .recipientId(request.getRecipientId())
                 .content(request.getContent())
                 .attachment(attachment)
                 .status(response.getStatus())
+                .sentByMe(true) // Gönderen için her zaman true
                 .sentAt(response.getSentAt())
                 .build();
     }

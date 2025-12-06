@@ -309,6 +309,8 @@ export interface WsMessageResponse {
   attachment: MessageAttachment | null;
   /** Mesaj durumu */
   status: MessageStatus;
+  /** Benim gönderdiğim mi? - Backend tarafından hesaplanır */
+  sentByMe: boolean;
   /** Gönderim zamanı - ISO 8601 */
   sentAt: string;
 }
