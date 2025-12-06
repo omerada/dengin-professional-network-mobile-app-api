@@ -47,8 +47,8 @@ export const TermsScreen: React.FC = () => {
           2. Hesap Oluşturma
         </Text>
         <Text style={[styles.paragraph, { color: colors.text.secondary }]}>
-          Meslektaş&apos;ta hesap oluşturmak için 18 yaşında veya daha büyük olmalısınız. Hesabınızın
-          güvenliğinden siz sorumlusunuz ve şifrenizi gizli tutmalısınız.
+          Meslektaş&apos;ta hesap oluşturmak için 18 yaşında veya daha büyük olmalısınız.
+          Hesabınızın güvenliğinden siz sorumlusunuz ve şifrenizi gizli tutmalısınız.
         </Text>
 
         <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>
@@ -78,8 +78,8 @@ export const TermsScreen: React.FC = () => {
 
         <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>6. Fikri Mülkiyet</Text>
         <Text style={[styles.paragraph, { color: colors.text.secondary }]}>
-          Platform üzerindeki tüm içerik, tasarım, logo ve markalar Meslektaş&apos;ın mülkiyetindedir.
-          İzinsiz kullanım yasaktır.
+          Platform üzerindeki tüm içerik, tasarım, logo ve markalar Meslektaş&apos;ın
+          mülkiyetindedir. İzinsiz kullanım yasaktır.
         </Text>
 
         <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>7. Hesap İptali</Text>
