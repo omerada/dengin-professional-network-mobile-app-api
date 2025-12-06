@@ -78,10 +78,10 @@ public class ConversationService {
                 User sender = userRepository.findById(senderId)
                                 .orElseThrow(() -> new IllegalArgumentException("Sender not found: " + senderId));
 
-                // Check email verification (profession verification is not required for messaging)
+               /* // Check email verification (profession verification is not required for messaging)
                 if (!Boolean.TRUE.equals(sender.getIsEmailVerified())) {
                         throw new IllegalStateException("Email doğrulaması yapılmamış. Mesaj göndermek için e-posta adresinizi doğrulayın.");
-                }
+                }*/
 
                 // Validate recipient exists
                 Long recipientId = findUserIdByLong(command.getRecipientId());
@@ -248,8 +248,26 @@ public class ConversationService {
 
                 List<MessageDto> messageDtos;
                 if (start < allMessages.size()) {
+                        UUID conversationUuid = conversation.getConversationId().getValue();
                         messageDtos = allMessages.subList(start, end).stream()
-                                        .map(m -> mapToMessageDto(m, userId))
+                                        .map(m -> {
+                                                MessageDto dto = mapToMessageDto(m, userId);
+                                                // Set conversationId from parent conversation
+                                                return MessageDto.builder()
+                                                        .messageId(dto.getMessageId())
+                                                        .conversationId(conversationUuid)
+                                                        .senderId(dto.getSenderId())
+                                                        .senderName(dto.getSenderName())
+                                                        .senderProfileImageUrl(dto.getSenderProfileImageUrl())
+                                                        .content(dto.getContent())
+                                                        .attachment(dto.getAttachment())
+                                                        .status(dto.getStatus())
+                                                        .read(dto.isRead())
+                                                        .sentByMe(dto.isSentByMe())
+                                                        .sentAt(dto.getSentAt())
+                                                        .readAt(dto.getReadAt())
+                                                        .build();
+                                        })
                                         .collect(Collectors.toList());
                 } else {
                         messageDtos = List.of();
@@ -432,7 +450,7 @@ public class ConversationService {
 
                 return MessageDto.builder()
                                 .messageId(message.getMessageId().getValue())
-                                .conversationId(message.getConversationId().getValue())
+                                .conversationId(null) // ConversationId will be set from parent conversation context
                                 .senderId(null) // Will be set from user entity when UUID field is added
                                 .senderName(sender != null ? sender.getFullName() : "Unknown")
                                 .senderProfileImageUrl(sender != null ? sender.getProfileImageUrl() : null)

@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -57,8 +58,8 @@ public class Notification extends AggregateRoot {
     private NotificationContent content;
 
     @Column(name = "metadata", columnDefinition = "jsonb")
-    @Convert(converter = NotificationMetadataConverter.class)
-    private NotificationMetadata metadata;
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    private Map<String, String> metadata;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -100,7 +101,7 @@ public class Notification extends AggregateRoot {
         notification.recipientId = recipientId;
         notification.type = type;
         notification.content = content;
-        notification.metadata = metadata != null ? metadata : NotificationMetadata.empty();
+        notification.metadata = metadata != null ? metadata.getData() : new java.util.HashMap<>();
         notification.status = NotificationStatus.PENDING;
         notification.createdAt = LocalDateTime.now();
         notification.updatedAt = notification.createdAt;
@@ -135,7 +136,7 @@ public class Notification extends AggregateRoot {
         notification.recipientId = recipientId;
         notification.type = type;
         notification.content = content;
-        notification.metadata = metadata;
+        notification.metadata = metadata != null ? metadata.getData() : new java.util.HashMap<>();
         notification.status = status;
         notification.deliveredChannels = deliveredChannels != null ? EnumSet.copyOf(deliveredChannels)
                 : EnumSet.noneOf(DeliveryChannel.class);

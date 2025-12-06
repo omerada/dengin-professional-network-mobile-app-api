@@ -88,6 +88,12 @@ public class Message extends BaseEntity {
     @PostLoad
     private void initTransientFields() {
         this.content = MessageContent.of(this.contentText);
+        // Initialize ConversationId from conversationIdLong
+        if (this.conversationIdLong != null) {
+            // ConversationId needs to be loaded from Conversation entity
+            // For now, set to null and let service layer handle it
+            this.conversationId = null;
+        }
         // Set deletedAt based on which party deleted first
         if (deletedBySenderAt != null || deletedByRecipientAt != null) {
             this.deletedAt = deletedBySenderAt != null ? deletedBySenderAt : deletedByRecipientAt;

@@ -51,7 +51,7 @@ export const ConversationListScreen: React.FC = () => {
     ? conversations.filter(
         c =>
           c.participant.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          c.participant.profession.toLowerCase().includes(searchQuery.toLowerCase()),
+          (c.participant.profession?.toLowerCase() ?? '').includes(searchQuery.toLowerCase()),
       )
     : conversations;
 

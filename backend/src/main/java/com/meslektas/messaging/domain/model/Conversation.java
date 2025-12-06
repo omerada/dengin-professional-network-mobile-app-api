@@ -46,7 +46,7 @@ public class Conversation {
     private Long id;
 
     @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "conversation_uuid"))
+    @AttributeOverride(name = "value", column = @Column(name = "conversation_id"))
     private ConversationId conversationId;
 
     @Column(name = "participant1_id", nullable = false)

@@ -108,7 +108,7 @@ public interface SpringDataNotificationRepository extends JpaRepository<Notifica
                 AND n.type = :type
                 AND n.status != 'READ'
                 AND n.createdAt > :since
-                AND CAST(n.metadata AS string) LIKE CONCAT('%', :referenceKey, '%')
+                AND CAST(n.metadata AS text) LIKE CONCAT('%', :referenceKey, '%')
             """)
     boolean existsSimilarNotification(
             @Param("recipientId") Long recipientId,

@@ -47,9 +47,10 @@ public class RedisConfig {
         template.setKeySerializer(new StringRedisSerializer());
         template.setHashKeySerializer(new StringRedisSerializer());
         
-        // Use JSON serializer for values
+        // Use JSON serializer for values with JSR310 support
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.findAndRegisterModules(); // Register all available modules including JSR310
         objectMapper.activateDefaultTyping(
             LaissezFaireSubTypeValidator.instance,
             ObjectMapper.DefaultTyping.NON_FINAL,
@@ -63,7 +64,7 @@ public class RedisConfig {
         template.setHashValueSerializer(jsonSerializer);
         
         template.afterPropertiesSet();
-        log.info("Redis template configured successfully");
+        log.info("Redis template configured successfully with JSR310 support");
         
         return template;
     }

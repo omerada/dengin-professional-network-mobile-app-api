@@ -318,7 +318,7 @@ public class NotificationService {
                 .title(notification.getContent().getTitle())
                 .body(notification.getContent().getBody())
                 .actionUrl(notification.getContent().getActionUrl())
-                .metadata(notification.getMetadata().getData())
+                .metadata(notification.getMetadata())
                 .status(notification.getStatus())
                 .deliveredChannels(notification.getDeliveredChannels())
                 .read(notification.isRead())
