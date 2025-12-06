@@ -78,10 +78,10 @@ public class ConversationService {
                 User sender = userRepository.findById(senderId)
                                 .orElseThrow(() -> new IllegalArgumentException("Sender not found: " + senderId));
 
-               /* // Check email verification (profession verification is not required for messaging)
+                // Check email verification (profession verification is not required for messaging)
                 if (!Boolean.TRUE.equals(sender.getIsEmailVerified())) {
                         throw new IllegalStateException("Email doğrulaması yapılmamış. Mesaj göndermek için e-posta adresinizi doğrulayın.");
-                }*/
+                }
 
                 // Validate recipient exists
                 Long recipientId = findUserIdByLong(command.getRecipientId());
