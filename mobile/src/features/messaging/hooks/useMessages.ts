@@ -24,20 +24,21 @@ export function useMessages(conversationId: string) {
 
     // Handle new message received
     const handleNewMessage = (data: WsMessageResponse) => {
-      if (data.conversationId !== conversationId) return;
+      if (String(data.conversationId) !== conversationId) return;
 
       // Convert WebSocket response to Message type
+      // Backend sends UUID/Long, convert to string
       const newMessage: Message = {
-        messageId: data.messageId,
-        conversationId: data.conversationId,
-        senderId: data.senderId,
+        messageId: String(data.messageId),
+        conversationId: String(data.conversationId),
+        senderId: String(data.senderId),
         senderName: '', // Will be populated from conversation participant
-        content: data.content,
-        attachment: data.attachment,
-        status: data.status,
+        content: data.content || '',
+        attachment: data.attachment || null,
+        status: data.status as any,
         read: false,
         sentByMe: false, // Backend will determine this
-        sentAt: data.sentAt,
+        sentAt: data.sentAt ? String(data.sentAt) : new Date().toISOString(),
         readAt: null,
       };
 
@@ -69,7 +70,7 @@ export function useMessages(conversationId: string) {
 
     // Handle read receipts
     const handleReadReceipt = (data: WsReadReceipt) => {
-      if (data.conversationId !== conversationId) return;
+      if (String(data.conversationId) !== conversationId) return;
 
       // Update message statuses to 'READ'
       queryClient.setQueryData<InfiniteData<MessageListResponse>>(
@@ -85,7 +86,7 @@ export function useMessages(conversationId: string) {
                 ...msg,
                 status: 'READ' as const,
                 read: true,
-                readAt: data.readAt,
+                readAt: data.readAt ? String(data.readAt) : null,
               })),
             })),
           };

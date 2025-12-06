@@ -25,14 +25,27 @@ import type { MessageBubbleProps } from './MessageBubble.types';
 import type { ClientMessageStatus } from '../../types';
 
 /**
- * Zaman formatlama
+ * Zaman formatlama - Güvenli parse
  */
-const formatTime = (dateString: string): string => {
-  const date = new Date(dateString);
-  return date.toLocaleTimeString('tr-TR', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+const formatTime = (dateString: string | undefined | null): string => {
+  if (!dateString) {
+    return '';
+  }
+  
+  try {
+    const date = new Date(dateString);
+    // Invalid date kontrolü
+    if (isNaN(date.getTime())) {
+      return '';
+    }
+    return date.toLocaleTimeString('tr-TR', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } catch (error) {
+    console.warn('[MessageBubble] Failed to format time:', dateString, error);
+    return '';
+  }
 };
 
 /**
@@ -238,8 +251,12 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
 
             {/* Meta info (time + status) */}
             <View style={styles.meta}>
-              <Text style={[styles.time, { color: metaColor }]}>{formatTime(message.sentAt)}</Text>
-              {isSentByMe && (
+              {message.sentAt && (
+                <Text style={[styles.time, { color: metaColor }]}>
+                  {formatTime(message.sentAt)}
+                </Text>
+              )}
+              {isSentByMe && message.status && (
                 <View style={styles.statusContainer}>
                   <MessageStatusIcon status={message.status as ClientMessageStatus} />
                 </View>
