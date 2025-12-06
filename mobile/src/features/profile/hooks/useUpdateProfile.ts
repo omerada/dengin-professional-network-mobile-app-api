@@ -61,7 +61,7 @@ export function useUpdateProfile() {
 
 /**
  * Hook: Avatar yükleme (DEPRECATED - multipart upload)
- * 
+ *
  * @deprecated Use useUploadAvatarWithPresignedUrl() instead
  */
 export function useUploadAvatar() {
@@ -86,7 +86,7 @@ export function useUploadAvatar() {
 /**
  * Hook: Avatar yükleme (Presigned URL Pattern) - Production-Ready
  *
- * Backend: 
+ * Backend:
  * - POST /api/users/me/avatar/presigned-url (Step 1)
  * - POST /api/users/me/avatar/confirm (Step 2)
  *
@@ -128,7 +128,7 @@ export function useUploadAvatarWithPresignedUrl() {
     },
     onSuccess: data => {
       // Auth store'daki user'ı güncelle
-      updateUser({ avatarUrl: data.avatarUrl });
+      updateUser({ avatarUrl: data.avatarUrl ?? undefined });
 
       // Profile cache'ini güncelle
       queryClient.setQueryData(profileKeys.me(), data);

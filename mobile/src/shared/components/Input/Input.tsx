@@ -21,6 +21,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
+import Icon from 'react-native-vector-icons/Feather';
 
 import { useColors } from '@contexts/ThemeContext';
 import { spring, duration } from '@theme/animations';
@@ -351,44 +352,15 @@ export const Input = memo(
               <Pressable
                 onPress={togglePasswordVisibility}
                 style={styles.passwordToggle}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                 accessible
                 accessibilityRole="button"
                 accessibilityLabel={isPasswordVisible ? 'Şifreyi gizle' : 'Şifreyi göster'}>
-                <View
-                  style={{ width: 24, height: 24, justifyContent: 'center', alignItems: 'center' }}>
-                  {isPasswordVisible ? (
-                    <View
-                      style={{
-                        width: 18,
-                        height: 18,
-                        borderRadius: 9,
-                        borderWidth: 2,
-                        borderColor: colors.text.secondary,
-                        backgroundColor: 'transparent',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}>
-                      <View
-                        style={{
-                          width: 6,
-                          height: 6,
-                          borderRadius: 3,
-                          backgroundColor: colors.text.secondary,
-                        }}
-                      />
-                    </View>
-                  ) : (
-                    <View
-                      style={{
-                        width: 18,
-                        height: 18,
-                        borderRadius: 9,
-                        backgroundColor: colors.text.secondary,
-                      }}
-                    />
-                  )}
-                </View>
+                {isPasswordVisible ? (
+                  <Icon name="eye" size={22} color={colors.text.secondary} />
+                ) : (
+                  <Icon name="eye-off" size={22} color={colors.text.secondary} />
+                )}
               </Pressable>
             )}
 

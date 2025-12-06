@@ -6,6 +6,7 @@
 import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, StatusBar, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
@@ -74,18 +75,19 @@ export const WelcomeScreen: React.FC = () => {
           {/* Feature Badges */}
           <View style={styles.featuresRow}>
             <View style={[styles.featureBadge, { backgroundColor: colors.background.secondary }]}>
+              <Icon name="shield" size={16} color={colors.text.secondary} />
+              <Text style={[styles.featureBadgeText, { color: colors.text.primary }]}>Güvenli</Text>
+            </View>
+            <View style={[styles.featureBadge, { backgroundColor: colors.background.secondary }]}>
+              <Icon name="check-circle" size={16} color={colors.text.secondary} />
               <Text style={[styles.featureBadgeText, { color: colors.text.primary }]}>
-                🔒 Güvenli
+                Doğrulanmış
               </Text>
             </View>
             <View style={[styles.featureBadge, { backgroundColor: colors.background.secondary }]}>
+              <Icon name="zap" size={16} color={colors.text.secondary} />
               <Text style={[styles.featureBadgeText, { color: colors.text.primary }]}>
-                ✓ Doğrulanmış
-              </Text>
-            </View>
-            <View style={[styles.featureBadge, { backgroundColor: colors.background.secondary }]}>
-              <Text style={[styles.featureBadgeText, { color: colors.text.primary }]}>
-                🚀 Profesyonel
+                Profesyonel
               </Text>
             </View>
           </View>

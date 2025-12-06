@@ -5,6 +5,7 @@ import React from 'react';
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Feather';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing } from '@theme';
 
@@ -34,7 +35,7 @@ export const TermsScreen: React.FC = () => {
               justifyContent: 'center',
               alignItems: 'center',
             }}>
-            <Text style={[styles.backButtonText, { color: colors.text.primary }]}>←</Text>
+            <Icon name="chevron-left" size={32} color={colors.text.primary} />
           </View>
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Kullanım Koşulları</Text>

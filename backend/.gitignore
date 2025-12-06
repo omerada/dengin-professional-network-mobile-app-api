@@ -28,5 +28,5 @@ uploads/
 *.db
 
 # Environment
-.env
-.env.local
+#.env
+#.env.local

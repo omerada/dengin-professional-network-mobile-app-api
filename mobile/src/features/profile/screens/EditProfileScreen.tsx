@@ -19,7 +19,12 @@ import { useColors } from '@contexts/ThemeContext';
 import { Button, Input } from '@shared/components';
 import { spacing, fontSize } from '@theme';
 import { AvatarPicker } from '../components';
-import { useMyProfile, useUpdateProfile, useUploadAvatarWithPresignedUrl, useDeleteAvatar } from '../hooks';
+import {
+  useMyProfile,
+  useUpdateProfile,
+  useUploadAvatarWithPresignedUrl,
+  useDeleteAvatar,
+} from '../hooks';
 import type { UpdateProfileRequest, Gender } from '../types';
 
 type GenderOption = { label: string; value: Gender };
@@ -48,7 +53,7 @@ export const EditProfileScreen: React.FC = () => {
 
   // Mutations
   const updateProfile = useUpdateProfile();
-  const { mutate: uploadAvatar, isPending: isUploadingAvatar, uploadProgress } = useUploadAvatarWithPresignedUrl();
+  const { mutate: uploadAvatar, isPending: isUploadingAvatar } = useUploadAvatarWithPresignedUrl();
   const deleteAvatar = useDeleteAvatar();
 
   // Form state
@@ -94,7 +99,7 @@ export const EditProfileScreen: React.FC = () => {
           onSuccess: () => {
             Alert.alert('Başarılı', 'Profil fotoğrafınız güncellendi.');
           },
-          onError: (error) => {
+          onError: error => {
             console.error('[EditProfileScreen] Avatar upload error:', error);
             Alert.alert('Hata', error.message || 'Fotoğraf yüklenirken bir hata oluştu.');
           },

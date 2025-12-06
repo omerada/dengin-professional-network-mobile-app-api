@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -118,10 +119,12 @@ export const ForgotPasswordScreen: React.FC = () => {
       edges={['top', 'bottom', 'left', 'right']}>
       <KeyboardAvoidingView
         style={styles.keyboardAvoid}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}>
           {/* Header */}
           <View style={styles.header}>
@@ -141,9 +144,7 @@ export const ForgotPasswordScreen: React.FC = () => {
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}>
-                <Text style={{ color: colors.text.primary, fontSize: 32, fontWeight: '300' }}>
-                  ←
-                </Text>
+                <Icon name="chevron-left" size={32} color={colors.text.primary} />
               </View>
             </TouchableOpacity>
           </View>
