@@ -1,141 +1,272 @@
 // src/features/feed/components/PostActions.tsx
-// Post aksiyonları komponenti
-// Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
+// Meslektaş Design System - Modern Post Actions Component
+// Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
-import React, { memo, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  Animated,
-} from 'react-native';
+import React, { memo, useCallback, useMemo } from 'react';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withSequence,
+  interpolate,
+  interpolateColor,
+} from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@contexts/ThemeContext';
+import { useHaptic } from '@shared/hooks/useHaptic';
+import { spring } from '@theme/animations';
+
+// ============================================================================
+// Types
+// ============================================================================
 
 interface PostActionsProps {
+  /** Number of likes on the post */
   likesCount: number;
+  /** Number of comments on the post */
   commentsCount: number;
+  /** Number of shares/views on the post */
   sharesCount: number;
+  /** Whether the current user has liked the post */
   isLiked: boolean;
+  /** Whether the current user has bookmarked the post */
   isBookmarked: boolean;
+  /** Callback when like button is pressed */
   onLike: () => void;
+  /** Callback when comment button is pressed */
   onComment: () => void;
+  /** Callback when share button is pressed */
   onShare: () => void;
+  /** Callback when bookmark button is pressed */
   onBookmark: () => void;
+  /** Test ID for testing */
+  testID?: string;
 }
 
-export const PostActions: React.FC<PostActionsProps> = memo(({
-  likesCount,
-  commentsCount,
-  sharesCount,
-  isLiked,
-  isBookmarked,
-  onLike,
-  onComment,
-  onShare,
-  onBookmark,
-}) => {
-  const { theme } = useTheme();
-  const likeScale = useRef(new Animated.Value(1)).current;
+// Create animated pressable
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-  const handleLike = () => {
-    // Bounce animation
-    Animated.sequence([
-      Animated.timing(likeScale, {
-        toValue: 1.3,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(likeScale, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
+// ============================================================================
+// Action Button Component
+// ============================================================================
 
-    onLike();
-  };
+interface ActionButtonProps {
+  icon: string;
+  activeIcon?: string;
+  isActive?: boolean;
+  count?: number;
+  activeColor: string;
+  inactiveColor: string;
+  onPress: () => void;
+  hapticType?: 'light' | 'heavy';
+  accessibilityLabel: string;
+  testID?: string;
+}
 
-  const formatCount = (count: number): string => {
-    if (count >= 1000000) {
-      return `${(count / 1000000).toFixed(1)}M`;
-    }
-    if (count >= 1000) {
-      return `${(count / 1000).toFixed(1)}K`;
-    }
-    return count.toString();
-  };
+const ActionButton = memo<ActionButtonProps>(
+  ({
+    icon,
+    activeIcon,
+    isActive = false,
+    count,
+    activeColor,
+    inactiveColor,
+    onPress,
+    hapticType = 'light',
+    accessibilityLabel,
+    testID,
+  }) => {
+    const { trigger } = useHaptic();
+    const scale = useSharedValue(1);
+    const iconScale = useSharedValue(1);
 
-  return (
-    <View style={styles.container}>
-      {/* Like */}
-      <Pressable style={styles.action} onPress={handleLike}>
-        <Animated.View style={{ transform: [{ scale: likeScale }] }}>
-          <Icon
-            name={isLiked ? 'heart' : 'heart-outline'}
-            size={24}
-            color={isLiked ? theme.colors.error.main : theme.colors.text.secondary}
-          />
+    const handlePressIn = useCallback(() => {
+      scale.value = withSpring(0.92, spring.press);
+    }, [scale]);
+
+    const handlePressOut = useCallback(() => {
+      scale.value = withSpring(1, spring.press);
+    }, [scale]);
+
+    const handlePress = useCallback(() => {
+      // Haptic feedback - heavy for like (Instagram style)
+      trigger(hapticType);
+
+      // Bounce animation for icon
+      iconScale.value = withSequence(
+        withSpring(1.4, { damping: 8, stiffness: 400 }),
+        withSpring(1, { damping: 10, stiffness: 300 }),
+      );
+
+      onPress();
+    }, [trigger, hapticType, iconScale, onPress]);
+
+    const containerAnimatedStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: scale.value }],
+    }));
+
+    const iconAnimatedStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: iconScale.value }],
+    }));
+
+    const currentIcon = isActive && activeIcon ? activeIcon : icon;
+    const currentColor = isActive ? activeColor : inactiveColor;
+
+    return (
+      <AnimatedPressable
+        testID={testID}
+        style={[styles.action, containerAnimatedStyle]}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        onPress={handlePress}
+        accessible
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        accessibilityState={{ selected: isActive }}>
+        <Animated.View style={iconAnimatedStyle}>
+          <Icon name={currentIcon} size={24} color={currentColor} />
         </Animated.View>
-        {likesCount > 0 && (
-          <Text
-            style={[
-              styles.actionCount,
-              {
-                color: isLiked ? theme.colors.error.main : theme.colors.text.secondary,
-              },
-            ]}
-          >
-            {formatCount(likesCount)}
-          </Text>
+        {count !== undefined && count > 0 && (
+          <Text style={[styles.actionCount, { color: currentColor }]}>{formatCount(count)}</Text>
         )}
-      </Pressable>
+      </AnimatedPressable>
+    );
+  },
+);
 
-      {/* Comment */}
-      <Pressable style={styles.action} onPress={onComment}>
-        <Icon
-          name="chatbubble-outline"
-          size={22}
-          color={theme.colors.text.secondary}
+ActionButton.displayName = 'ActionButton';
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+const formatCount = (count: number): string => {
+  if (count >= 1000000) {
+    return `${(count / 1000000).toFixed(1)}M`;
+  }
+  if (count >= 1000) {
+    return `${(count / 1000).toFixed(1)}K`;
+  }
+  return count.toString();
+};
+
+// ============================================================================
+// PostActions Component
+// ============================================================================
+
+/**
+ * Modern Post Actions Component
+ *
+ * Features:
+ * - Spring-based animations using Reanimated 3
+ * - Haptic feedback for all interactions
+ * - Heavy haptic for like action (Instagram style)
+ * - Animated icon transitions
+ * - Full accessibility support
+ *
+ * @example
+ * ```tsx
+ * <PostActions
+ *   likesCount={42}
+ *   commentsCount={5}
+ *   sharesCount={3}
+ *   isLiked={false}
+ *   isBookmarked={true}
+ *   onLike={() => handleLike()}
+ *   onComment={() => handleComment()}
+ *   onShare={() => handleShare()}
+ *   onBookmark={() => handleBookmark()}
+ * />
+ * ```
+ */
+export const PostActions = memo<PostActionsProps>(
+  ({
+    likesCount,
+    commentsCount,
+    sharesCount,
+    isLiked,
+    isBookmarked,
+    onLike,
+    onComment,
+    onShare,
+    onBookmark,
+    testID,
+  }) => {
+    const { colors } = useTheme();
+
+    // Memoized colors
+    const likeActiveColor = colors.status.error;
+    const bookmarkActiveColor = colors.interactive.default;
+    const inactiveColor = colors.text.secondary;
+
+    return (
+      <View style={styles.container} testID={testID}>
+        {/* Like Button */}
+        <ActionButton
+          icon="heart-outline"
+          activeIcon="heart"
+          isActive={isLiked}
+          count={likesCount}
+          activeColor={likeActiveColor}
+          inactiveColor={inactiveColor}
+          onPress={onLike}
+          hapticType="heavy"
+          accessibilityLabel={
+            isLiked ? `Beğeniyi kaldır. ${likesCount} beğeni` : `Beğen. ${likesCount} beğeni`
+          }
+          testID={testID ? `${testID}-like` : undefined}
         />
-        {commentsCount > 0 && (
-          <Text style={[styles.actionCount, { color: theme.colors.text.secondary }]}>
-            {formatCount(commentsCount)}
-          </Text>
-        )}
-      </Pressable>
 
-      {/* Share */}
-      <Pressable style={styles.action} onPress={onShare}>
-        <Icon
-          name="share-outline"
-          size={22}
-          color={theme.colors.text.secondary}
+        {/* Comment Button */}
+        <ActionButton
+          icon="chatbubble-outline"
+          count={commentsCount}
+          activeColor={inactiveColor}
+          inactiveColor={inactiveColor}
+          onPress={onComment}
+          hapticType="light"
+          accessibilityLabel={`Yorum yap. ${commentsCount} yorum`}
+          testID={testID ? `${testID}-comment` : undefined}
         />
-        {sharesCount > 0 && (
-          <Text style={[styles.actionCount, { color: theme.colors.text.secondary }]}>
-            {formatCount(sharesCount)}
-          </Text>
-        )}
-      </Pressable>
 
-      {/* Spacer */}
-      <View style={styles.spacer} />
-
-      {/* Bookmark */}
-      <Pressable style={styles.action} onPress={onBookmark}>
-        <Icon
-          name={isBookmarked ? 'bookmark' : 'bookmark-outline'}
-          size={22}
-          color={isBookmarked ? theme.colors.primary[500] : theme.colors.text.secondary}
+        {/* Share Button */}
+        <ActionButton
+          icon="share-outline"
+          count={sharesCount}
+          activeColor={inactiveColor}
+          inactiveColor={inactiveColor}
+          onPress={onShare}
+          hapticType="light"
+          accessibilityLabel={`Paylaş. ${sharesCount} görüntülenme`}
+          testID={testID ? `${testID}-share` : undefined}
         />
-      </Pressable>
-    </View>
-  );
-});
+
+        {/* Spacer */}
+        <View style={styles.spacer} />
+
+        {/* Bookmark Button */}
+        <ActionButton
+          icon="bookmark-outline"
+          activeIcon="bookmark"
+          isActive={isBookmarked}
+          activeColor={bookmarkActiveColor}
+          inactiveColor={inactiveColor}
+          onPress={onBookmark}
+          hapticType="light"
+          accessibilityLabel={isBookmarked ? 'Kayıtlılardan kaldır' : 'Kaydet'}
+          testID={testID ? `${testID}-bookmark` : undefined}
+        />
+      </View>
+    );
+  },
+);
 
 PostActions.displayName = 'PostActions';
+
+// ============================================================================
+// Styles
+// ============================================================================
 
 const styles = StyleSheet.create({
   container: {
@@ -149,6 +280,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 24,
     paddingVertical: 8,
+    minHeight: 44, // Touch target
+    minWidth: 44, // Touch target
   },
   actionCount: {
     marginLeft: 6,

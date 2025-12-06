@@ -1,2 +1,4 @@
 // src/shared/components/Loading/index.ts
-export { Loading, LoadingOverlay } from './Loading';
+// Oku: mobile-development-guide/ui-ux-modernization/17-LOADING-STATES.md
+
+export { Loading, LoadingOverlay, Spinner, DotsLoading } from './Loading';
