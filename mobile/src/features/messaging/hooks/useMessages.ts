@@ -5,8 +5,11 @@
 
 import { useInfiniteQuery, useQueryClient, InfiniteData } from '@tanstack/react-query';
 import { useEffect, useCallback, useMemo } from 'react';
+import { AppState } from 'react-native';
 import { stompClient } from '../services/socketClient';
+import { pushNotificationHandler } from '@features/notifications/services';
 import type { WsMessageResponse, WsReadReceipt, MessageListResponse, Message } from '../types';
+import type { NotificationData } from '@features/notifications/types';
 import { messagingService } from '../services';
 
 export const MESSAGES_QUERY_KEY = 'messages';
@@ -40,6 +43,23 @@ export function useMessages(conversationId: string, currentUserId?: string) {
         sentAt: data.sentAt ? String(data.sentAt) : new Date().toISOString(),
         readAt: null,
       };
+
+      // Show notification if app is in background and message is from another user
+      if (!data.sentByMe && AppState.currentState !== 'active') {
+        const notificationData: NotificationData = {
+          type: 'NEW_MESSAGE',
+          conversationId: String(data.conversationId),
+          senderId: String(data.senderId),
+          messageId: String(data.messageId),
+        };
+
+        pushNotificationHandler.handleBackendNotification({
+          title: data.senderName || 'Yeni Mesaj',
+          body: data.content || 'Yeni bir mesaj aldınız',
+          data: notificationData,
+          type: 'NEW_MESSAGE',
+        });
+      }
 
       // Update cache - add message to beginning of first page
       queryClient.setQueryData<InfiniteData<MessageListResponse>>(

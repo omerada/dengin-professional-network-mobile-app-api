@@ -41,8 +41,7 @@ class FCMService {
    * Bildirim izni iste - stub
    */
   async requestPermission(): Promise<boolean> {
-    console.log('[FCM Stub] requestPermission called');
-    // Gerçek implementasyonda expo-notifications kullanılacak
+    // Development stub - production will use expo-notifications
     return true;
   }
 
@@ -50,7 +49,7 @@ class FCMService {
    * İzin durumunu kontrol et - stub
    */
   async checkPermission(): Promise<boolean> {
-    console.log('[FCM Stub] checkPermission called');
+    // Development stub - production will use expo-notifications
     return true;
   }
 
@@ -76,7 +75,6 @@ class FCMService {
       const token = `expo-push-token-${deviceId}`;
       this.token = token;
       await AsyncStorage.setItem(FCM_TOKEN_KEY, token);
-      console.log('[FCM Stub] Token generated:', token.substring(0, 20) + '...');
 
       return token;
     } catch (error) {
@@ -115,7 +113,6 @@ class FCMService {
       request,
     );
 
-    console.log('[FCM Stub] Device registered successfully');
     return response.data;
   }
 
@@ -127,7 +124,6 @@ class FCMService {
     const request: UnregisterDeviceRequest = { token };
 
     await apiClient.post(API_ENDPOINTS.NOTIFICATIONS.UNREGISTER_DEVICE, request);
-    console.log('[FCM Stub] Device unregistered successfully');
   }
 
   /**
@@ -136,7 +132,6 @@ class FCMService {
    */
   async unregisterAllDevices(): Promise<void> {
     await apiClient.post(API_ENDPOINTS.NOTIFICATIONS.UNREGISTER_ALL_DEVICES);
-    console.log('[FCM Stub] All devices unregistered');
   }
 
   /**
@@ -180,9 +175,8 @@ class FCMService {
    * Token yenilenme dinleyicisi kur - stub
    */
   setupTokenRefreshListener(_onRefresh: (token: string) => void): () => void {
-    console.log('[FCM Stub] setupTokenRefreshListener called');
     return () => {
-      console.log('[FCM Stub] Token refresh listener removed');
+      // Stub cleanup
     };
   }
 
@@ -190,9 +184,8 @@ class FCMService {
    * Ön plan bildirimi dinleyicisi - stub
    */
   onForegroundMessage(_handler: (message: RemoteMessage) => void): () => void {
-    console.log('[FCM Stub] onForegroundMessage listener added');
     return () => {
-      console.log('[FCM Stub] Foreground message listener removed');
+      // Stub cleanup
     };
   }
 
@@ -200,9 +193,8 @@ class FCMService {
    * Arka plan bildirimi tıklama dinleyicisi - stub
    */
   onNotificationOpenedApp(_handler: (message: RemoteMessage) => void): () => void {
-    console.log('[FCM Stub] onNotificationOpenedApp listener added');
     return () => {
-      console.log('[FCM Stub] Notification opened listener removed');
+      // Stub cleanup
     };
   }
 
@@ -210,7 +202,6 @@ class FCMService {
    * Uygulama kapalıyken açılan bildirim - stub
    */
   async getInitialNotification(): Promise<RemoteMessage | null> {
-    console.log('[FCM Stub] getInitialNotification called');
     return null;
   }
 
@@ -218,21 +209,23 @@ class FCMService {
    * Arka plan mesaj işleyicisi ayarla - stub
    */
   setBackgroundMessageHandler(_handler: (message: RemoteMessage) => Promise<void>): void {
-    console.log('[FCM Stub] setBackgroundMessageHandler called');
+    // Stub - production will use expo-notifications
   }
 
   /**
    * Belirli bir konuya abone ol - stub
    */
   async subscribeToTopic(topic: string): Promise<void> {
-    console.log(`[FCM Stub] subscribeToTopic: ${topic}`);
+    // Stub - production will use expo-notifications
+    void topic;
   }
 
   /**
    * Belirli bir konudan aboneliği kaldır - stub
    */
   async unsubscribeFromTopic(topic: string): Promise<void> {
-    console.log(`[FCM Stub] unsubscribeFromTopic: ${topic}`);
+    // Stub - production will use expo-notifications
+    void topic;
   }
 
   /**
@@ -242,7 +235,6 @@ class FCMService {
     try {
       await AsyncStorage.removeItem(FCM_TOKEN_KEY);
       this.token = null;
-      console.log('[FCM Stub] Token cleared');
     } catch (error) {
       console.error('[FCM Stub] Error clearing token:', error);
     }

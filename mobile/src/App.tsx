@@ -3,7 +3,7 @@
 // Oku: mobile-development-guide/sprints/23-SPRINT-1-2.md
 
 import { useEffect } from 'react';
-import { StatusBar, LogBox, ErrorUtils } from 'react-native';
+import { StatusBar, LogBox } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -11,25 +11,7 @@ import { AppNavigator } from '@core/navigation';
 import { LocaleProvider } from '@contexts/LocaleContext';
 import { useColors, useTheme, ThemeProvider } from '@contexts/ThemeContext';
 import { useAuthStore } from '@features/auth/stores/authStore';
-
-// Global error handler
-if (ErrorUtils) {
-  const originalErrorHandler = ErrorUtils.getGlobalHandler();
-
-  ErrorUtils.setGlobalHandler((error, isFatal) => {
-    console.error('🔴 GLOBAL ERROR CAUGHT:', {
-      message: error.message,
-      name: error.name,
-      stack: error.stack,
-      isFatal,
-    });
-
-    // Call original handler
-    if (originalErrorHandler) {
-      originalErrorHandler(error, isFatal);
-    }
-  });
-}
+import { notificationHandler } from '@features/notifications/services/notificationHandler.production';
 
 // Disable all LogBox warnings and yellow box notifications
 // Errors will still appear in terminal/console for debugging
@@ -76,11 +58,28 @@ const AppContent: React.FC = () => {
   const { isDark } = useTheme();
   const colors = useColors();
   const initialize = useAuthStore(state => state.initialize);
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
 
   // Initialize auth state on app start
   useEffect(() => {
     initialize();
   }, [initialize]);
+
+  // Initialize notifications when user is authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      notificationHandler.initialize().catch((error) => {
+        console.error('[App] Failed to initialize notifications:', error);
+      });
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (isAuthenticated) {
+        notificationHandler.cleanup();
+      }
+    };
+  }, [isAuthenticated]);
 
   return (
     <>

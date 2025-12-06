@@ -19,19 +19,25 @@ export type NotificationType =
   | 'MENTION'
   // Messaging
   | 'NEW_MESSAGE'
+  | 'NEW_MATCH'
   // Verification
   | 'VERIFICATION_APPROVED'
   | 'VERIFICATION_REJECTED'
   | 'VERIFICATION_PENDING_REVIEW'
+  | 'VERIFICATION_STATUS'
   // Moderation
   | 'POST_FLAGGED'
   | 'CONTENT_REMOVED'
   | 'WARNING_ISSUED'
+  | 'MODERATION_ALERT'
+  // Profile
+  | 'PROFILE_VIEW'
   // System
   | 'WELCOME'
   | 'PASSWORD_RESET'
   | 'ACCOUNT_SUSPENDED'
-  | 'ACCOUNT_REACTIVATED';
+  | 'ACCOUNT_REACTIVATED'
+  | 'SYSTEM';
 
 /**
  * Bildirim durumu - Backend NotificationStatus enum ile uyumlu
@@ -271,6 +277,11 @@ export interface NotificationPayload {
   postId?: string;
   userId?: string;
   commentId?: string;
+  /** Additional IDs for different notification types */
+  senderId?: string;
+  messageId?: string;
+  matchId?: string;
+  viewerId?: string;
 }
 
 /**
