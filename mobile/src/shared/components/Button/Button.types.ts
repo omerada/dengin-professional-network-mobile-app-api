@@ -104,9 +104,9 @@ export interface ButtonVariantStyles {
  * Size configurations for all button sizes
  */
 export const BUTTON_SIZE_CONFIG: Record<ButtonSize, ButtonSizeConfig> = {
-  xs: { height: 28, paddingX: 10, fontSize: 12, iconSize: 14, borderRadius: 14 },
-  sm: { height: 36, paddingX: 14, fontSize: 14, iconSize: 16, borderRadius: 18 },
-  md: { height: 44, paddingX: 18, fontSize: 16, iconSize: 20, borderRadius: 22 },
-  lg: { height: 52, paddingX: 24, fontSize: 18, iconSize: 22, borderRadius: 26 },
-  xl: { height: 60, paddingX: 32, fontSize: 20, iconSize: 24, borderRadius: 30 },
+  xs: { height: 28, paddingX: 10, fontSize: 12, iconSize: 14, borderRadius: 10 },
+  sm: { height: 36, paddingX: 14, fontSize: 14, iconSize: 16, borderRadius: 12 },
+  md: { height: 44, paddingX: 18, fontSize: 16, iconSize: 20, borderRadius: 14 },
+  lg: { height: 52, paddingX: 24, fontSize: 18, iconSize: 22, borderRadius: 16 },
+  xl: { height: 60, paddingX: 32, fontSize: 20, iconSize: 24, borderRadius: 18 },
 } as const;

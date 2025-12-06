@@ -24,14 +24,13 @@ import type { FeedFilter } from '../types';
 interface FilterOption {
   key: FeedFilter;
   label: string;
-  icon: string;
 }
 
 const FILTER_OPTIONS: FilterOption[] = [
-  { key: 'all', label: 'Tümü', icon: 'grid-outline' },
-  { key: 'following', label: 'Takip', icon: 'people-outline' },
-  { key: 'popular', label: 'Popüler', icon: 'flame-outline' },
-  { key: 'nearby', label: 'Yakın', icon: 'location-outline' },
+  { key: 'all', label: 'Tümü' },
+  { key: 'following', label: 'Takip Ettiklerim' },
+  { key: 'popular', label: 'Popüler' },
+  { key: 'nearby', label: 'Yakınımdakiler' },
 ];
 
 interface FeedHeaderProps {
@@ -61,7 +60,7 @@ const FilterButton: React.FC<FilterButtonProps> = memo(({ option, isActive, onPr
 
   const handlePress = useCallback(() => {
     trigger('selection');
-    scale.value = withSequence(withSpring(0.9, spring.press), withSpring(1, spring.snappy));
+    scale.value = withSequence(withSpring(0.95, spring.press), withSpring(1, spring.snappy));
     onPress();
   }, [onPress, trigger, scale]);
 
@@ -74,7 +73,9 @@ const FilterButton: React.FC<FilterButtonProps> = memo(({ option, isActive, onPr
       style={[
         styles.filterButton,
         {
-          backgroundColor: isActive ? colors.interactive.default : colors.background.secondary,
+          backgroundColor: isActive ? colors.interactive.default : 'transparent',
+          borderWidth: isActive ? 0 : 1,
+          borderColor: colors.border.default,
         },
         animatedStyle,
       ]}
@@ -82,11 +83,6 @@ const FilterButton: React.FC<FilterButtonProps> = memo(({ option, isActive, onPr
       accessibilityRole="tab"
       accessibilityState={{ selected: isActive }}
       accessibilityLabel={option.label}>
-      <Icon
-        name={option.icon}
-        size={18}
-        color={isActive ? colors.text.inverse : colors.text.secondary}
-      />
       <Text
         style={[
           styles.filterLabel,
@@ -172,7 +168,7 @@ export const FeedHeader: React.FC<FeedHeaderProps> = memo(({ onCreatePress }) =>
           onPress={handleCreatePress}
           accessibilityLabel="Yeni gönderi oluştur"
           accessibilityRole="button">
-          <Icon name="add" size={26} color={colors.text.inverse} />
+          <Icon name="add" size={24} color={colors.text.inverse} />
         </AnimatedPressable>
       )}
     </View>
@@ -191,36 +187,35 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     flexDirection: 'row',
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 12,
   },
   filtersContainer: {
     flex: 1,
-    marginRight: 10,
+    marginRight: 12,
   },
   createButton: {
     alignItems: 'center',
-    borderRadius: 22,
-    elevation: 2,
-    height: 44,
+    borderRadius: 12,
+    elevation: 0,
+    height: 40,
     justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    width: 44,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    width: 40,
   },
   filterButton: {
     alignItems: 'center',
-    borderRadius: 18,
+    borderRadius: 20,
     flexDirection: 'row',
-    marginRight: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
+    marginRight: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
   filterLabel: {
     fontSize: 14,
     fontWeight: '600',
-    marginLeft: 6,
   },
   filters: {
     flexDirection: 'row',

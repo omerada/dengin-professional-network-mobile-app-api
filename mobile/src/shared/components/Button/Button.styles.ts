@@ -35,7 +35,7 @@ export const getVariantStyles = (
         backgroundColor: 'transparent',
         textColor: colors.interactive.default,
         borderColor: colors.interactive.default,
-        borderWidth: 1.5,
+        borderWidth: 2,
       };
 
     case 'ghost':

@@ -341,12 +341,13 @@ export const Input = memo(
             {secureTextEntry && (
               <Pressable
                 onPress={togglePasswordVisibility}
-                style={styles.clearButton}
+                style={styles.passwordToggle}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 accessible
                 accessibilityRole="button"
                 accessibilityLabel={isPasswordVisible ? 'Şifreyi gizle' : 'Şifreyi göster'}>
-                <Text style={{ color: colors.text.secondary, fontSize: sizeConfig.iconSize }}>
-                  {isPasswordVisible ? '👁️' : '👁️‍🗨️'}
+                <Text style={{ color: colors.text.secondary, fontSize: 20 }}>
+                  {isPasswordVisible ? '👁' : '🔒'}
                 </Text>
               </Pressable>
             )}
@@ -399,7 +400,5 @@ export const Input = memo(
     },
   ),
 );
-
-Input.displayName = 'Input';
 
 Input.displayName = 'Input';

@@ -12,7 +12,7 @@ import { useColors } from '@contexts/ThemeContext';
 import { useLocale } from '@contexts/LocaleContext';
 import { Button } from '@shared/components';
 import { AuthStackNavigationProp } from '@shared/types';
-import { spacing, borderRadius } from '@theme';
+import { spacing } from '@theme';
 
 /**
  * Modern Welcome Screen
@@ -54,8 +54,8 @@ export const WelcomeScreen: React.FC = () => {
       />
 
       <View style={styles.content}>
-        {/* Logo/Brand Area */}
-        <Animated.View entering={FadeIn.duration(800)} style={styles.brandContainer}>
+        {/* Hero Logo Area */}
+        <Animated.View entering={FadeIn.duration(800)} style={styles.heroContainer}>
           <View
             style={[
               styles.logoPlaceholder,
@@ -70,25 +70,32 @@ export const WelcomeScreen: React.FC = () => {
           <Text style={[styles.tagline, { color: colors.text.secondary }]}>
             Profesyoneller için güvenli sosyal ağ
           </Text>
+
+          {/* Feature Badges */}
+          <View style={styles.featuresRow}>
+            <View style={[styles.featureBadge, { backgroundColor: colors.background.secondary }]}>
+              <Text style={[styles.featureBadgeText, { color: colors.text.primary }]}>
+                🔒 Güvenli
+              </Text>
+            </View>
+            <View style={[styles.featureBadge, { backgroundColor: colors.background.secondary }]}>
+              <Text style={[styles.featureBadgeText, { color: colors.text.primary }]}>
+                ✓ Doğrulanmış
+              </Text>
+            </View>
+            <View style={[styles.featureBadge, { backgroundColor: colors.background.secondary }]}>
+              <Text style={[styles.featureBadgeText, { color: colors.text.primary }]}>
+                🚀 Profesyonel
+              </Text>
+            </View>
+          </View>
         </Animated.View>
 
-        {/* Features List */}
-        <Animated.View
-          entering={FadeInDown.delay(200).springify()}
-          style={styles.featuresContainer}>
-          <FeatureItem icon="✓" text="AI destekli kimlik doğrulama" colors={colors} delay={300} />
-          <FeatureItem icon="🔒" text="Güvenli ve şifreli iletişim" colors={colors} delay={400} />
-          <FeatureItem
-            icon="👥"
-            text="Doğrulanmış profesyoneller topluluğu"
-            colors={colors}
-            delay={500}
-          />
-          <FeatureItem icon="🚀" text="Kariyerinizi geliştirin" colors={colors} delay={600} />
-        </Animated.View>
+        {/* Spacer */}
+        <View style={styles.spacer} />
 
         {/* Action Buttons */}
-        <Animated.View entering={FadeInDown.delay(700).springify()} style={styles.actionsContainer}>
+        <Animated.View entering={FadeInDown.delay(400).springify()} style={styles.actionsContainer}>
           <Button
             title={t('auth.login')}
             onPress={handleLogin}
@@ -145,27 +152,6 @@ export const WelcomeScreen: React.FC = () => {
   );
 };
 
-/**
- * Feature item component with animation
- */
-interface FeatureItemProps {
-  icon: string;
-  text: string;
-  colors: ReturnType<typeof useColors>;
-  delay: number;
-}
-
-const FeatureItem: React.FC<FeatureItemProps> = React.memo(({ icon, text, colors, delay }) => (
-  <Animated.View entering={FadeInDown.delay(delay).springify()} style={styles.featureItem}>
-    <View style={[styles.featureIconContainer, { backgroundColor: colors.background.secondary }]}>
-      <Text style={styles.featureIcon}>{icon}</Text>
-    </View>
-    <Text style={[styles.featureText, { color: colors.text.secondary }]}>{text}</Text>
-  </Animated.View>
-));
-
-FeatureItem.displayName = 'FeatureItem';
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -173,66 +159,66 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: spacing.xl,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    paddingTop: spacing['4xl'],
     paddingBottom: spacing['2xl'],
   },
-  brandContainer: {
+  heroContainer: {
     alignItems: 'center',
-    marginBottom: spacing['4xl'],
+    flex: 1,
+    justifyContent: 'center',
   },
   logoPlaceholder: {
-    width: 96,
-    height: 96,
-    borderRadius: borderRadius['2xl'],
+    width: 120,
+    height: 120,
+    borderRadius: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: spacing.xl,
+    marginBottom: spacing['2xl'],
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 8,
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 6,
   },
   logoText: {
-    fontSize: 48,
-    fontWeight: 'bold',
+    fontSize: 56,
+    fontWeight: '800',
+    letterSpacing: -2,
   },
   appName: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    marginBottom: spacing.sm,
-    letterSpacing: -0.5,
+    fontSize: 40,
+    fontWeight: '800',
+    marginBottom: spacing.md,
+    letterSpacing: -1,
   },
   tagline: {
     fontSize: 17,
     textAlign: 'center',
     lineHeight: 24,
+    fontWeight: '500',
+    opacity: 0.8,
+    marginBottom: spacing.xl,
   },
-  featuresContainer: {
-    marginBottom: spacing['4xl'],
-    gap: spacing.md,
-  },
-  featureItem: {
+  featuresRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-  },
-  featureIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: borderRadius.full,
+    gap: spacing.sm,
     justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: spacing.md,
+    flexWrap: 'wrap',
   },
-  featureIcon: {
-    fontSize: 20,
+  featureBadge: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: 20,
   },
-  featureText: {
-    fontSize: 15,
-    flex: 1,
-    lineHeight: 22,
+  featureBadgeText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  spacer: {
+    flex: 0.5,
   },
   actionsContainer: {
-    marginBottom: spacing.xl,
+    marginBottom: spacing.lg,
   },
   buttonSpacer: {
     height: spacing.md,

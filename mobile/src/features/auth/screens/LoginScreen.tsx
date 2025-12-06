@@ -106,9 +106,31 @@ export const LoginScreen: React.FC = () => {
               accessible={true}
               accessibilityRole="button"
               accessibilityLabel="Geri dön"
-              style={styles.backButton}>
-              <Text style={{ color: colors.text.primary, fontSize: 24 }}>←</Text>
+              style={styles.backButton}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <Text
+                style={{
+                  color: colors.text.primary,
+                  fontSize: 32,
+                  fontWeight: '300',
+                  lineHeight: 32,
+                }}>
+                ←
+              </Text>
             </TouchableOpacity>
+          </View>
+
+          {/* Logo */}
+          <View style={styles.logoContainer}>
+            <View
+              style={[
+                styles.logoPlaceholder,
+                {
+                  backgroundColor: colors.interactive.subtle,
+                },
+              ]}>
+              <Text style={[styles.logoText, { color: colors.interactive.default }]}>M</Text>
+            </View>
           </View>
 
           {/* Title */}
@@ -250,14 +272,33 @@ const styles = StyleSheet.create({
   header: {
     height: 56,
     justifyContent: 'center',
+    marginBottom: spacing.lg,
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: 48,
+    height: 48,
     justifyContent: 'center',
+    alignItems: 'flex-start',
+    paddingLeft: 0,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: spacing.xl,
+  },
+  logoPlaceholder: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoText: {
+    fontSize: 40,
+    fontWeight: '700',
+    letterSpacing: -1,
   },
   titleContainer: {
-    marginBottom: spacing['3xl'],
+    marginBottom: spacing['2xl'],
   },
   title: {
     fontSize: 28,

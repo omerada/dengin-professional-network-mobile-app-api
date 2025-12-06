@@ -44,7 +44,7 @@ const translations: Record<LanguageCode, TranslationStrings> = {
       phone: 'Telefon',
       profession: 'Meslek',
       biometric: 'Biyometrik ile Giriş',
-      welcomeBack: 'Tekrar Hoş Geldiniz',
+      welcomeBack: 'Hoş Geldiniz',
       createAccount: 'Hesap Oluşturun',
     },
     feed: {

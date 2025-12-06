@@ -161,6 +161,7 @@ export const ProfessionSelector: React.FC<ProfessionSelectorProps> = ({
   const handleProfessionSelect = useCallback(
     (profession: ProfessionResponse) => {
       if (profession.category === 'OTHER') {
+        setModalVisible(false);
         setShowCustomInput(true);
         onSelect(profession.id, '');
       } else {
@@ -204,7 +205,7 @@ export const ProfessionSelector: React.FC<ProfessionSelectorProps> = ({
   return (
     <View style={styles.container}>
       <Text style={[styles.label, { color: colors.text.primary }]}>
-        Meslek <Text style={{ color: colors.text.tertiary }}>(Opsiyonel)</Text>
+        Meslek <Text style={{ color: colors.status.error }}>*</Text>
       </Text>
 
       {/* Selection Button */}

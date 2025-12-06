@@ -88,6 +88,14 @@ export const styles = StyleSheet.create({
     width: 24,
   },
 
+  passwordToggle: {
+    alignItems: 'center',
+    height: 32,
+    justifyContent: 'center',
+    width: 32,
+    marginLeft: 4,
+  },
+
   container: {
     marginBottom: 16,
     paddingTop: 24, // More space for larger label

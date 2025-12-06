@@ -21,7 +21,10 @@ export const PrivacyScreen: React.FC = () => {
       edges={['top', 'bottom', 'left', 'right']}>
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: colors.border.default }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
           <Text style={[styles.backButtonText, { color: colors.text.primary }]}>←</Text>
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colors.text.primary }]}>
@@ -136,12 +139,16 @@ export const PrivacyScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   backButton: {
-    height: 40,
+    height: 48,
+    width: 48,
     justifyContent: 'center',
-    width: 40,
+    alignItems: 'flex-start',
+    paddingLeft: 0,
   },
   backButtonText: {
-    fontSize: 24,
+    fontSize: 32,
+    fontWeight: '300',
+    lineHeight: 32,
   },
   container: {
     flex: 1,

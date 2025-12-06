@@ -52,7 +52,10 @@ export const registerSchema = z
       .min(1, 'Soyad gerekli')
       .min(2, 'Soyad en az 2 karakter olmalı')
       .max(50, 'Soyad en fazla 50 karakter olabilir'),
-    professionId: z.number().nullable().optional(),
+    professionId: z.number({
+      required_error: 'Meslek seçimi zorunludur',
+      invalid_type_error: 'Meslek seçimi zorunludur',
+    }),
     customProfession: z.string().max(100, 'Meslek en fazla 100 karakter olabilir').optional(),
     acceptTerms: z.boolean().refine(val => val === true, {
       message: 'Kullanım koşullarını kabul etmeniz gerekli',

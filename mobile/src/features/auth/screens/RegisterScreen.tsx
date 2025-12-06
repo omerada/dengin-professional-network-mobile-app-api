@@ -58,7 +58,7 @@ export const RegisterScreen: React.FC = () => {
       confirmPassword: '',
       firstName: '',
       lastName: '',
-      professionId: null,
+      professionId: undefined,
       customProfession: '',
       acceptTerms: false,
     },
@@ -102,7 +102,8 @@ export const RegisterScreen: React.FC = () => {
               accessible={true}
               accessibilityRole="button"
               accessibilityLabel="Geri dön"
-              style={styles.backButton}>
+              style={styles.backButton}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <Text style={[styles.backButtonText, { color: colors.text.primary }]}>←</Text>
             </TouchableOpacity>
           </View>
@@ -204,7 +205,9 @@ export const RegisterScreen: React.FC = () => {
                       value={value}
                       customValue={customValue}
                       onSelect={(professionId: number | null, customText?: string) => {
-                        setValue('professionId', professionId, { shouldValidate: true });
+                        if (professionId !== null) {
+                          setValue('professionId', professionId, { shouldValidate: true });
+                        }
                         setValue('customProfession', customText || '');
                       }}
                       error={errors.professionId?.message || errors.customProfession?.message}
@@ -260,41 +263,55 @@ export const RegisterScreen: React.FC = () => {
               control={control}
               name="acceptTerms"
               render={({ field: { onChange, value } }) => (
-                <View style={styles.termsContainer}>
-                  <Switch
-                    value={value}
-                    onValueChange={onChange}
-                    trackColor={{
-                      false: colors.border.default,
-                      true: colors.interactive.subtle,
-                    }}
-                    thumbColor={value ? colors.interactive.default : colors.background.secondary}
-                    accessible={true}
-                    accessibilityRole="switch"
-                    accessibilityLabel="Kullanım koşullarını kabul et"
-                    accessibilityState={{ checked: value }}
-                  />
-                  <View style={styles.termsTextContainer}>
-                    <Text style={[styles.termsText, { color: colors.text.secondary }]}>
-                      <TouchableOpacity onPress={handleTermsPress} activeOpacity={0.7}>
-                        <Text style={[styles.link, { color: colors.interactive.default }]}>
+                <View
+                  style={[
+                    styles.termsContainer,
+                    {
+                      backgroundColor: colors.background.secondary,
+                      borderRadius: 12,
+                      padding: spacing.md,
+                    },
+                  ]}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Switch
+                      value={value}
+                      onValueChange={onChange}
+                      trackColor={{
+                        false: colors.border.default,
+                        true: colors.interactive.subtle,
+                      }}
+                      thumbColor={value ? colors.interactive.default : colors.background.primary}
+                      accessible={true}
+                      accessibilityRole="switch"
+                      accessibilityLabel="Kullanım koşullarını kabul et"
+                      accessibilityState={{ checked: value }}
+                    />
+                    <View style={styles.termsTextContainer}>
+                      <Text style={[styles.termsText, { color: colors.text.secondary }]}>
+                        <Text
+                          style={[styles.link, { color: colors.interactive.default }]}
+                          onPress={handleTermsPress}>
                           Kullanım Koşulları
-                        </Text>
-                      </TouchableOpacity>{' '}
-                      nı ve{' '}
-                      <TouchableOpacity onPress={handlePrivacyPress} activeOpacity={0.7}>
-                        <Text style={[styles.link, { color: colors.interactive.default }]}>
+                        </Text>{' '}
+                        ve{' '}
+                        <Text
+                          style={[styles.link, { color: colors.interactive.default }]}
+                          onPress={handlePrivacyPress}>
                           Gizlilik Politikası
-                        </Text>
-                      </TouchableOpacity>{' '}
-                      nı okudum ve kabul ediyorum.
-                    </Text>
-                    {errors.acceptTerms && (
-                      <Text style={[styles.errorSmall, { color: colors.status.error }]}>
-                        {errors.acceptTerms.message}
+                        </Text>{' '}
+                        'nı okudum ve kabul ediyorum.
                       </Text>
-                    )}
+                    </View>
                   </View>
+                  {errors.acceptTerms && (
+                    <Text
+                      style={[
+                        styles.errorSmall,
+                        { color: colors.status.error, marginTop: spacing.xs, marginLeft: 44 },
+                      ]}>
+                      {errors.acceptTerms.message}
+                    </Text>
+                  )}
                 </View>
               )}
             />
@@ -336,12 +353,16 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
   },
   backButton: {
-    height: 40,
+    height: 48,
     justifyContent: 'center',
-    width: 40,
+    width: 48,
+    alignItems: 'flex-start',
+    paddingLeft: 0,
   },
   backButtonText: {
-    fontSize: 24,
+    fontSize: 32,
+    fontWeight: '300',
+    lineHeight: 32,
   },
   container: {
     flex: 1,
@@ -360,11 +381,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   form: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
   halfInput: {
     flex: 1,
-    marginHorizontal: spacing.sm,
+    marginHorizontal: spacing.xs,
   },
   header: {
     height: 56,
@@ -387,24 +408,24 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    marginHorizontal: -spacing.sm,
+    marginHorizontal: -spacing.xs,
+    marginBottom: spacing.sm,
   },
   scrollContent: {
     flexGrow: 1,
     paddingBottom: spacing.xl,
-    paddingHorizontal: spacing.xl,
+    paddingHorizontal: spacing.lg,
   },
   subtitle: {
     fontSize: 16,
   },
   termsContainer: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
-    marginTop: spacing.sm,
+    marginTop: spacing.md,
+    marginBottom: spacing.sm,
   },
   termsText: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 13,
+    lineHeight: 18,
   },
   termsTextContainer: {
     flex: 1,

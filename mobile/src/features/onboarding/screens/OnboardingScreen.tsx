@@ -44,34 +44,27 @@ interface OnboardingSlide {
 const slides: OnboardingSlide[] = [
   {
     id: '1',
-    title: 'Hoş Geldiniz',
+    title: 'Profesyonel İletişim Platformu',
     description:
-      "Meslektaş'a hoş geldiniz! Profesyoneller için tasarlanmış güvenli sosyal ağ platformu.",
-    emoji: '👋',
-    gradient: ['#667eea', '#764ba2'] as const,
+      'Doğrulanmış profesyonellerle güvenli bir ortamda iletişim kurun, bilgi paylaşın ve kariyer fırsatlarını keşfedin.',
+    emoji: '👔',
+    gradient: ['#1a1a2e', '#16213e'] as const,
   },
   {
     id: '2',
-    title: 'Doğrulanmış Topluluk',
+    title: 'Güvenilir Kimlik Doğrulama',
     description:
-      'AI destekli kimlik doğrulama sistemi ile sadece gerçek profesyonellerle bağlantı kurun.',
-    emoji: '✓',
-    gradient: ['#f093fb', '#f5576c'] as const,
+      'Yapay zeka destekli kimlik doğrulama sistemi ile sadece gerçek meslektaşlarınızla bağlantı kurun.',
+    emoji: '🛡️',
+    gradient: ['#16213e', '#0f3460'] as const,
   },
   {
     id: '3',
-    title: 'Güvenli İletişim',
-    description: 'Meslektaşlarınızla güvenli ve profesyonel bir ortamda iletişim kurun.',
-    emoji: '💬',
-    gradient: ['#4facfe', '#00f2fe'] as const,
-  },
-  {
-    id: '4',
-    title: 'Profesyonel Ağ',
+    title: 'Sektörel Ağınızı Genişletin',
     description:
-      'Sektörünüzdeki profesyonellerle değerli bağlantılar oluşturun ve kariyerinizi geliştirin.',
-    emoji: '🌟',
-    gradient: ['#43e97b', '#38f9d7'] as const,
+      'Alanınızdaki profesyonellerle tanışın, deneyim paylaşın ve kariyerinizi ileriye taşıyın.',
+    emoji: '🤝',
+    gradient: ['#0f3460', '#1a1a2e'] as const,
   },
 ];
 
@@ -107,7 +100,9 @@ const Slide = memo<SlideProps>(({ slide, index, scrollX }) => {
       <LinearGradient colors={[...slide.gradient]} style={StyleSheet.absoluteFillObject} />
 
       <Animated.View style={[styles.slideContent, animatedStyle, { paddingTop: insets.top + 80 }]}>
-        <Text style={styles.emoji}>{slide.emoji}</Text>
+        <View style={styles.iconContainer}>
+          <Text style={styles.emoji}>{slide.emoji}</Text>
+        </View>
         <Text style={styles.title}>{slide.title}</Text>
         <Text style={styles.description}>{slide.description}</Text>
       </Animated.View>
@@ -225,6 +220,8 @@ export const OnboardingScreen: React.FC = () => {
         viewabilityConfig={viewabilityConfig}
         bounces={false}
         decelerationRate="fast"
+        snapToInterval={width}
+        snapToAlignment="center"
       />
 
       {/* Controls */}
@@ -272,9 +269,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width,
   },
+  iconContainer: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderRadius: 32,
+    height: 96,
+    justifyContent: 'center',
+    marginBottom: spacing['2xl'],
+    width: 96,
+  },
   emoji: {
-    fontSize: 80,
-    marginBottom: spacing.xl,
+    fontSize: 48,
   },
   slideContent: {
     alignItems: 'center',
@@ -284,16 +289,17 @@ const styles = StyleSheet.create({
   },
   title: {
     color: COLORS.white,
-    fontSize: 32,
-    fontWeight: '700',
+    fontSize: 28,
+    fontWeight: '600',
+    letterSpacing: -0.5,
     marginBottom: spacing.lg,
     textAlign: 'center',
   },
   description: {
     color: COLORS.whiteTransparent85,
-    fontSize: 17,
-    lineHeight: 26,
-    paddingHorizontal: spacing.md,
+    fontSize: 16,
+    lineHeight: 24,
+    paddingHorizontal: spacing.xl,
     textAlign: 'center',
   },
   controls: {
@@ -322,31 +328,31 @@ const styles = StyleSheet.create({
   },
   skipButton: {
     paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.lg,
   },
   skipText: {
     color: COLORS.whiteTransparent70,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
   },
   nextButton: {
     backgroundColor: COLORS.whiteTransparent20,
-    borderRadius: 24,
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.md,
+    borderRadius: 28,
+    paddingHorizontal: spacing['2xl'],
+    paddingVertical: spacing.lg,
   },
   nextText: {
     color: COLORS.white,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
   },
   startButton: {
     alignItems: 'center',
     backgroundColor: COLORS.primaryBlue,
-    borderRadius: 12,
+    borderRadius: 16,
     flex: 1,
     justifyContent: 'center',
-    paddingVertical: spacing.lg,
+    paddingVertical: spacing.xl,
   },
   startButtonText: {
     color: COLORS.white,
