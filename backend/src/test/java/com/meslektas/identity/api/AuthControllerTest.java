@@ -78,13 +78,21 @@ class AuthControllerTest {
                     "test@example.com",
                     "SecurePass123!",
                     "Ahmet",
-                    "Yılmaz");
+                    "Yılmaz",
+                    1L,
+                    null);
 
-            UserResponse expectedResponse = UserResponse.builder()
+            UserResponse userResponse = UserResponse.builder()
                     .id(1L)
                     .email("test@example.com")
                     .name("Ahmet")
                     .surname("Yılmaz")
+                    .build();
+                    
+            LoginResponse expectedResponse = LoginResponse.builder()
+                    .user(userResponse)
+                    .accessToken("mock.jwt.token")
+                    .refreshToken("mock.refresh.token")
                     .build();
 
             when(authService.register(any(RegisterRequest.class))).thenReturn(expectedResponse);

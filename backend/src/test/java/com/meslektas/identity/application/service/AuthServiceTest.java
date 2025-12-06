@@ -99,7 +99,9 @@ class AuthServiceTest {
                 "test@example.com",
                 "SecurePass123!",
                 "Ahmet",
-                "Yılmaz");
+                "Yılmaz",
+                1L,
+                null);
 
         validLoginRequest = new LoginRequest(
                 "test@example.com",
@@ -145,14 +147,17 @@ class AuthServiceTest {
                 return user;
             });
             when(userMapper.toResponse(any(User.class))).thenReturn(testUserResponse);
+            when(jwtTokenProvider.generateTokenFromUserId(anyLong(), anyString())).thenReturn("mock.jwt.token");
+            when(jwtTokenProvider.generateRefreshToken(anyLong(), anyString())).thenReturn("mock.refresh.token");
 
             // When
-            UserResponse result = authService.register(validRegisterRequest);
+            LoginResponse result = authService.register(validRegisterRequest);
 
             // Then
             assertThat(result).isNotNull();
-            assertThat(result.getEmail()).isEqualTo("test@example.com");
-            assertThat(result.getName()).isEqualTo("Ahmet");
+            assertThat(result.getUser().getEmail()).isEqualTo("test@example.com");
+            assertThat(result.getUser().getName()).isEqualTo("Ahmet");
+            assertThat(result.getAccessToken()).isNotNull();
 
             // Verify interactions
             verify(userRepository).existsByEmail("test@example.com");

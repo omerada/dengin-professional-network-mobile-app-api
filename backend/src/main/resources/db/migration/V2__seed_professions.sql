@@ -48,7 +48,7 @@ INSERT INTO professions (name, category, requires_verification, description) VAL
 ('Pazarlama Uzmanı', 'BUSINESS', FALSE, 'Pazarlama ve satış alanında uzman'),
 
 -- OTHER (Diğer)
-('Diğer Meslek', 'OTHER', FALSE, 'Belirli bir meslek kategorisi olmayan kullanıcılar');
+('Genel Kullanıcı', 'OTHER', FALSE, 'Belirli bir meslek kategorisi olmayan kullanıcılar');
 
 -- Create indexes for faster lookups
 CREATE INDEX idx_professions_name_trgm ON professions USING gin (name gin_trgm_ops);
