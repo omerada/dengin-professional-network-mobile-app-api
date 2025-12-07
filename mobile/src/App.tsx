@@ -10,6 +10,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppNavigator } from '@core/navigation';
 import { LocaleProvider } from '@contexts/LocaleContext';
 import { useColors, useTheme, ThemeProvider } from '@contexts/ThemeContext';
+import { ToastProvider } from '@contexts/ToastContext';
 import { useAuthStore } from '@features/auth/stores/authStore';
 import { notificationHandler } from '@features/notifications/services/notificationHandler.production';
 
@@ -104,9 +105,11 @@ const App: React.FC = () => {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>
-            <LocaleProvider>
-              <AppContent />
-            </LocaleProvider>
+            <ToastProvider>
+              <LocaleProvider>
+                <AppContent />
+              </LocaleProvider>
+            </ToastProvider>
           </ThemeProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

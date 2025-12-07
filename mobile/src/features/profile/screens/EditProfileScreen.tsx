@@ -4,18 +4,11 @@
 // Backend: PUT /api/users/me, POST /api/users/me/avatar
 
 import React, { useState, useCallback, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
 import { Button, Input } from '@shared/components';
 import { spacing, fontSize } from '@theme';
 import { AvatarPicker } from '../components';
@@ -47,6 +40,7 @@ const GENDER_OPTIONS: GenderOption[] = [
 export const EditProfileScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation();
+  const toast = useToast();
 
   // Fetch current profile
   const { data: profile, isLoading: _isLoadingProfile } = useMyProfile();
@@ -97,27 +91,27 @@ export const EditProfileScreen: React.FC = () => {
         { imageUri: uri },
         {
           onSuccess: () => {
-            Alert.alert('Başarılı', 'Profil fotoğrafınız güncellendi.');
+            toast.success('Profil fotoğrafınız güncellendi', 'Başarılı');
           },
           onError: error => {
             console.error('[EditProfileScreen] Avatar upload error:', error);
-            Alert.alert('Hata', error.message || 'Fotoğraf yüklenirken bir hata oluştu.');
+            toast.error(error.message || 'Fotoğraf yüklenirken bir hata oluştu', 'Yükleme Hatası');
           },
         },
       );
     },
-    [uploadAvatar],
+    [uploadAvatar, toast],
   );
 
   // Handle avatar removal
   const handleAvatarRemove = useCallback(async () => {
     try {
       await deleteAvatar.mutateAsync();
-      Alert.alert('Başarılı', 'Profil fotoğrafınız kaldırıldı.');
+      toast.success('Profil fotoğrafınız kaldırıldı', 'Başarılı');
     } catch (error) {
-      Alert.alert('Hata', 'Fotoğraf kaldırılırken bir hata oluştu.');
+      toast.error('Fotoğraf kaldırılırken bir hata oluştu', 'Hata');
     }
-  }, [deleteAvatar]);
+  }, [deleteAvatar, toast]);
 
   // Handle save
   const handleSave = useCallback(async () => {
@@ -125,11 +119,11 @@ export const EditProfileScreen: React.FC = () => {
 
     // Validation
     if (!name.trim()) {
-      Alert.alert('Hata', 'Ad alanı boş bırakılamaz.');
+      toast.error('Ad alanı boş bırakılamaz', 'Geçersiz Bilgi');
       return;
     }
     if (!surname.trim()) {
-      Alert.alert('Hata', 'Soyad alanı boş bırakılamaz.');
+      toast.error('Soyad alanı boş bırakılamaz', 'Geçersiz Bilgi');
       return;
     }
 
@@ -143,13 +137,24 @@ export const EditProfileScreen: React.FC = () => {
 
     try {
       await updateProfile.mutateAsync(updateData);
-      Alert.alert('Başarılı', 'Profiliniz güncellendi.', [
-        { text: 'Tamam', onPress: () => navigation.goBack() },
-      ]);
+      toast.success('Profiliniz başarıyla güncellendi', 'Başarılı');
+      // Small delay to show toast before navigation
+      setTimeout(() => navigation.goBack(), 500);
     } catch (error) {
-      Alert.alert('Hata', 'Profil güncellenirken bir hata oluştu.');
+      toast.error('Profil güncellenirken bir hata oluştu', 'Güncelleme Hatası');
     }
-  }, [hasChanges, name, surname, bio, dateOfBirth, gender, profile, updateProfile, navigation]);
+  }, [
+    hasChanges,
+    name,
+    surname,
+    bio,
+    dateOfBirth,
+    gender,
+    profile,
+    updateProfile,
+    navigation,
+    toast,
+  ]);
 
   // Gender selector
   const handleGenderSelect = useCallback((selectedGender: Gender) => {

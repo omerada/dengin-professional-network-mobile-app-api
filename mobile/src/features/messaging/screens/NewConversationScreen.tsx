@@ -12,13 +12,13 @@ import {
   Pressable,
   ActivityIndicator,
   Image,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
 import { useDebounce } from '@shared/hooks/useDebounce';
 import { useUserSearch } from '@features/social/hooks';
 import { useStartConversation } from '../hooks';
@@ -72,6 +72,7 @@ const UserItem: React.FC<UserItemProps> = ({ user, onPress, isLoading }) => {
 export const NewConversationScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation<NavigationProp>();
+  const toast = useToast();
 
   // State
   const [searchQuery, setSearchQuery] = useState('');
@@ -100,14 +101,14 @@ export const NewConversationScreen: React.FC = () => {
         const conversationId = await startConversation(user.id);
         navigation.replace('Chat', { conversationId });
       } catch (error) {
-        // Show backend error message
+        // Show backend error message with modern toast
         const errorMessage = getErrorMessage(error);
-        Alert.alert('Hata', errorMessage);
+        toast.error(errorMessage, 'Konuşma Başlatılamadı');
       } finally {
         setLoadingUserId(null);
       }
     },
-    [navigation, startConversation],
+    [navigation, startConversation, toast],
   );
 
   const handleBackPress = useCallback(() => {

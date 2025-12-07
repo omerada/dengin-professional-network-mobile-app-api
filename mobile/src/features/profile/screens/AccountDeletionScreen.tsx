@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
 import { Button, Input } from '@shared/components';
 import { spacing, typography } from '@theme';
 import { useDeleteAccount } from '../hooks';
@@ -54,6 +55,7 @@ const DELETION_REASONS = [
 export const AccountDeletionScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation();
+  const toast = useToast();
   const deleteAccount = useDeleteAccount();
 
   // Form state
@@ -127,7 +129,7 @@ export const AccountDeletionScreen: React.FC = () => {
               if (errorMessage.toLowerCase().includes('password')) {
                 setErrors(prev => ({ ...prev, password: 'Şifre yanlış' }));
               } else {
-                Alert.alert('Hata', errorMessage);
+                toast.error(errorMessage, 'Hesap Silinemedi');
               }
             }
           },
