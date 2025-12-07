@@ -27,6 +27,7 @@ import { useAuthStore } from '../stores';
 import { loginSchema, LoginSchemaType } from '../validation';
 import { AuthStackNavigationProp } from '@shared/types';
 import { spacing } from '@theme';
+import { getErrorMessage } from '@core/utils/errorUtils';
 
 /**
  * Modern Login Screen
@@ -112,15 +113,10 @@ export const LoginScreen: React.FC = () => {
               style={styles.backButton}
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
               <View
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 24,
-                  backgroundColor: colors.background.secondary,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  left: -8,
-                }}>
+                style={[
+                  styles.backButtonCircle,
+                  { backgroundColor: colors.background.secondary, marginLeft: -8 },
+                ]}>
                 <Icon name="chevron-left" size={28} color={colors.text.primary} />
               </View>
             </TouchableOpacity>
@@ -153,7 +149,7 @@ export const LoginScreen: React.FC = () => {
           {isError && error && (
             <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
               <Text style={[styles.errorText, { color: colors.status.error }]}>
-                {(error as Error).message || 'Giriş yapılırken bir hata oluştu'}
+                {getErrorMessage(error)}
               </Text>
             </View>
           )}
@@ -285,6 +281,13 @@ const styles = StyleSheet.create({
   backButton: {
     justifyContent: 'center',
     alignItems: 'flex-start',
+  },
+  backButtonCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   heroSection: {
     alignItems: 'center',

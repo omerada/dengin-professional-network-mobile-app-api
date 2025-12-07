@@ -21,6 +21,7 @@ import { useToast } from '@contexts/ToastContext';
 import { Button, Input } from '@shared/components';
 import { spacing, typography } from '@theme';
 import { useChangePassword } from '../hooks';
+import { getErrorMessage } from '@core/utils/errorUtils';
 import type { ChangePasswordRequest } from '../types';
 
 /**
@@ -145,8 +146,7 @@ export const ChangePasswordScreen: React.FC = () => {
       toast.success('Şifreniz başarıyla değiştirildi', 'Başarılı');
       navigation.goBack();
     } catch (error: any) {
-      const errorMessage =
-        error?.response?.data?.message || error?.message || 'Şifre değiştirme başarısız';
+      const errorMessage = getErrorMessage(error);
 
       if (errorMessage.toLowerCase().includes('current password')) {
         setErrors(prev => ({ ...prev, currentPassword: 'Mevcut şifre yanlış' }));

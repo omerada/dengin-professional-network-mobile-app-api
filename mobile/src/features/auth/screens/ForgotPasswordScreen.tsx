@@ -25,7 +25,8 @@ import { Button, Input } from '@shared/components';
 import { useForgotPassword } from '../hooks';
 import { forgotPasswordSchema, ForgotPasswordSchemaType } from '../validation';
 import { AuthStackNavigationProp } from '@shared/types';
-import { spacing, borderRadius } from '@theme';
+import { spacing } from '@theme';
+import { getErrorMessage } from '@core/utils/errorUtils';
 
 /**
  * Modern Forgot Password Screen
@@ -163,7 +164,7 @@ export const ForgotPasswordScreen: React.FC = () => {
           {isError && error && (
             <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
               <Text style={[styles.errorText, { color: colors.status.error }]}>
-                {(error as Error).message || 'Şifre sıfırlama isteği gönderilirken bir hata oluştu'}
+                {getErrorMessage(error)}
               </Text>
             </View>
           )}
@@ -279,7 +280,7 @@ const styles = StyleSheet.create({
   successIcon: {
     width: 120,
     height: 120,
-    borderRadius: borderRadius.full,
+    borderRadius: 60,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: spacing.xl,

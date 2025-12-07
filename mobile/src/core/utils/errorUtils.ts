@@ -98,6 +98,18 @@ const STATUS_MESSAGES: Record<number, string> = {
 };
 
 /**
+ * Network error to Turkish message mapping
+ */
+const NETWORK_ERROR_DETAILS: Record<string, string> = {
+  ECONNREFUSED: 'Sunucuya bağlanılamıyor. Backend çalışıyor mu kontrol edin.',
+  ECONNABORTED: 'Bağlantı kesildi',
+  ETIMEDOUT: 'Bağlantı zaman aşımına uğradı',
+  ENETUNREACH: 'Ağa ulaşılamıyor. İnternet bağlantınızı kontrol edin.',
+  ENOTFOUND: 'Sunucu adresi bulunamadı',
+  'Network Error': 'İnternet bağlantınızı kontrol edin veya sunucu çalışmıyor olabilir',
+};
+
+/**
  * Extract user-friendly error message from error object
  */
 export const getErrorMessage = (error: unknown): string => {
@@ -111,24 +123,32 @@ export const getErrorMessage = (error: unknown): string => {
     return error;
   }
 
-  // Handle React Hook Form FieldError objects
-  if (typeof error === 'object' && 'message' in error) {
-    const msg = (error as any).message;
-    if (typeof msg === 'string' && msg) {
-      return msg;
-    }
-  }
-
-  // Handle Error objects
+  // Handle Error objects - CHECK AXIOS FIRST!
   if (error instanceof Error) {
-    // Check if it's an Axios error
+    // Check if it's an Axios error - PRIORITY CHECK
     if ('isAxiosError' in error && error.isAxiosError) {
       return getAxiosErrorMessage(error as AxiosError<ApiErrorResponse>);
     }
 
     // Return error message if it looks like a user-friendly message
-    if (error.message && !error.message.includes('Request failed')) {
+    // Exclude Axios generic messages
+    if (
+      error.message &&
+      !error.message.includes('Request failed') &&
+      !error.message.includes('status code')
+    ) {
       return error.message;
+    }
+  }
+
+  // Handle React Hook Form FieldError objects
+  if (typeof error === 'object' && 'message' in error) {
+    const msg = (error as any).message;
+    if (typeof msg === 'string' && msg) {
+      // Don't return if it looks like an axios error message
+      if (!msg.includes('Request failed') && !msg.includes('status code')) {
+        return msg;
+      }
     }
   }
 
@@ -141,12 +161,26 @@ export const getErrorMessage = (error: unknown): string => {
 const getAxiosErrorMessage = (error: AxiosError<ApiErrorResponse>): string => {
   // Network error (no response)
   if (!error.response) {
+    // Check for specific network error codes
+    if (error.code && NETWORK_ERROR_DETAILS[error.code]) {
+      return NETWORK_ERROR_DETAILS[error.code];
+    }
+
+    // Check for timeout
     if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
       return ERROR_MESSAGES.NETWORK_TIMEOUT;
     }
+
+    // Check for connection refused (backend not running)
     if (error.code === 'ECONNREFUSED') {
-      return ERROR_MESSAGES.NETWORK_CONNECTION_REFUSED;
+      return NETWORK_ERROR_DETAILS.ECONNREFUSED;
     }
+
+    // Generic network error with helpful message
+    if (error.message.includes('Network Error')) {
+      return NETWORK_ERROR_DETAILS['Network Error'];
+    }
+
     return ERROR_MESSAGES.NETWORK_ERROR;
   }
 

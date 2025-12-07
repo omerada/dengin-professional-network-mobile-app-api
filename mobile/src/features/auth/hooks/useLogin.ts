@@ -55,13 +55,17 @@ export const useLogin = () => {
         // Navigate to main app using helper function
         resetNavigation(0, [{ name: 'Main' }]);
       } catch (error) {
-        console.error('[useLogin] Error in onSuccess:', getErrorMessage(error));
+        // Log critical errors only
+        if (__DEV__) {
+          console.error('[useLogin] Error in onSuccess:', getErrorMessage(error));
+        }
         throw error;
       }
     },
 
-    onError: (error: Error) => {
-      console.error('[useLogin] Login error:', getErrorMessage(error));
+    onError: () => {
+      // Errors are already handled by UI, no need to log
+      // User will see the error message displayed in LoginScreen
     },
   });
 

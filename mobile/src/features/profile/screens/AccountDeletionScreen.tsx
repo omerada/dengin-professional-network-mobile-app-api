@@ -20,6 +20,7 @@ import { useColors } from '@contexts/ThemeContext';
 import { Button, Input } from '@shared/components';
 import { spacing, typography } from '@theme';
 import { useDeleteAccount } from '../hooks';
+import { getErrorMessage } from '@core/utils/errorUtils';
 import type { DeleteAccountRequest } from '../types';
 
 /**
@@ -121,8 +122,7 @@ export const AccountDeletionScreen: React.FC = () => {
               await deleteAccount.mutateAsync(request);
               // User will be logged out automatically by the hook
             } catch (error: any) {
-              const errorMessage =
-                error?.response?.data?.message || error?.message || 'Hesap silme işlemi başarısız';
+              const errorMessage = getErrorMessage(error);
 
               if (errorMessage.toLowerCase().includes('password')) {
                 setErrors(prev => ({ ...prev, password: 'Şifre yanlış' }));

@@ -109,14 +109,7 @@ export const RegisterScreen: React.FC = () => {
               style={styles.backButton}
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
               <View
-                style={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: 24,
-                  backgroundColor: colors.background.secondary,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
+                style={[styles.backButtonCircle, { backgroundColor: colors.background.secondary }]}>
                 <Icon name="chevron-left" size={28} color={colors.text.primary} />
               </View>
             </TouchableOpacity>
@@ -433,6 +426,13 @@ const styles = StyleSheet.create({
   backButton: {
     justifyContent: 'center',
     alignItems: 'flex-start',
+  },
+  backButtonCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerTitle: {
     fontSize: 24,
