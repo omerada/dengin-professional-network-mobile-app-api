@@ -186,14 +186,15 @@ const getAxiosErrorMessage = (error: AxiosError<ApiErrorResponse>): string => {
 
   const { data, status } = error.response;
 
-  // Check for errorCode in response
-  if (data?.errorCode && ERROR_MESSAGES[data.errorCode]) {
-    return ERROR_MESSAGES[data.errorCode];
-  }
-
-  // Check for message in response - Backend'den gelen Türkçe mesajı direkt kullan
+  // PRIORITY 1: Check for message in response - Backend'den gelen Türkçe mesajı direkt kullan
+  // Backend spesifik bir mesaj gönderiyorsa, bu her zaman errorCode mapping'den önceliklidir
   if (data?.message && typeof data.message === 'string' && data.message.trim()) {
     return data.message;
+  }
+
+  // PRIORITY 2: Check for errorCode in response
+  if (data?.errorCode && ERROR_MESSAGES[data.errorCode]) {
+    return ERROR_MESSAGES[data.errorCode];
   }
 
   // Handle validation errors
