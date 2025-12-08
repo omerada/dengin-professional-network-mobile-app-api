@@ -46,6 +46,7 @@ export type VerificationStackParamList = {
 export type MainTabParamList = {
   FeedTab: NavigatorScreenParams<FeedStackParamList>;
   MessagingTab: NavigatorScreenParams<MessagingStackParamList>;
+  CreatePostTab: undefined;
   NotificationsTab: NavigatorScreenParams<NotificationStackParamList>;
   ProfileTab: NavigatorScreenParams<ProfileStackParamList>;
 };

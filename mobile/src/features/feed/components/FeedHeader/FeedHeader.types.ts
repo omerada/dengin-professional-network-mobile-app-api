@@ -3,6 +3,7 @@
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import type { FeedFilter } from '../../types';
+import type { ProfessionCategory } from './professionConfig';
 
 /**
  * Filter option interface
@@ -17,11 +18,25 @@ export interface FilterOption {
 }
 
 /**
+ * Profession info for FeedHeader
+ */
+export interface ProfessionInfo {
+  /** Profession name (e.g. "Doktor", "Avukat") */
+  name: string;
+  /** Profession category */
+  category: ProfessionCategory;
+}
+
+/**
  * FeedHeader component props
  */
 export interface FeedHeaderProps {
   /** Callback when create button is pressed */
   onCreatePress?: () => void;
+  /** Profession info (for profession icon) */
+  profession?: ProfessionInfo;
+  /** Callback when profession icon is pressed */
+  onProfessionPress?: () => void;
   /** Test ID */
   testID?: string;
 }

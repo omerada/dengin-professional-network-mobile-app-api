@@ -1,0 +1,619 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExpertCard Snapshot matches snapshot for non-verified expert 1`] = `
+<View
+  style={{}}
+>
+  <View
+    accessibilityHint="Profili görüntülemek için dokun"
+    accessibilityLabel="Dr. Ayşe Yılmaz, Kardiyolog"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "borderRadius": 12,
+          "borderWidth": 1,
+          "height": 140,
+          "marginRight": 12,
+          "padding": 12,
+          "width": 120,
+        },
+        {
+          "backgroundColor": "#FFFFFF",
+          "borderColor": "#D1D5DB",
+        },
+      ]
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 30,
+            "height": 60,
+            "justifyContent": "center",
+            "marginBottom": 8,
+            "width": 60,
+          },
+          {
+            "backgroundColor": "#E5E7EB",
+          },
+        ]
+      }
+    >
+      <Text
+        color="#9CA3AF"
+        size={28}
+      >
+        person
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "marginBottom": 4,
+          "width": "100%",
+        }
+      }
+    >
+      <Text
+        numberOfLines={2}
+        style={
+          [
+            {
+              "fontSize": 14,
+              "fontWeight": "600",
+              "numberOfLines": 2,
+              "textAlign": "center",
+            },
+            {
+              "color": "#1F2937",
+            },
+          ]
+        }
+      >
+        Dr. Ayşe Yılmaz
+      </Text>
+    </View>
+    <Text
+      numberOfLines={1}
+      style={
+        [
+          {
+            "fontSize": 12,
+            "marginBottom": 8,
+            "numberOfLines": 1,
+            "textAlign": "center",
+          },
+          {
+            "color": "#6B7280",
+          },
+        ]
+      }
+    >
+      Kardiyolog
+    </Text>
+    <View
+      accessibilityHint="Dr. Ayşe Yılmaz adlı uzmanı takip etmek için dokun"
+      accessibilityLabel="Takip et"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 8,
+            "height": 32,
+            "justifyContent": "center",
+            "width": "100%",
+          },
+          {
+            "backgroundColor": "#0066FF",
+          },
+        ]
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "fontSize": 12,
+              "fontWeight": "600",
+            },
+            {
+              "color": "#FFFFFF",
+            },
+          ]
+        }
+      >
+        Takip Et
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`ExpertCard Snapshot matches snapshot when following 1`] = `
+<View
+  style={{}}
+>
+  <View
+    accessibilityHint="Profili görüntülemek için dokun"
+    accessibilityLabel="Dr. Ayşe Yılmaz, Kardiyolog"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "borderRadius": 12,
+          "borderWidth": 1,
+          "height": 140,
+          "marginRight": 12,
+          "padding": 12,
+          "width": 120,
+        },
+        {
+          "backgroundColor": "#FFFFFF",
+          "borderColor": "#D1D5DB",
+        },
+      ]
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 30,
+            "height": 60,
+            "justifyContent": "center",
+            "marginBottom": 8,
+            "width": 60,
+          },
+          {
+            "backgroundColor": "#E5E7EB",
+          },
+        ]
+      }
+    >
+      <Text
+        color="#9CA3AF"
+        size={28}
+      >
+        person
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "marginBottom": 4,
+          "width": "100%",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "justifyContent": "center",
+          }
+        }
+      >
+        <Text
+          numberOfLines={2}
+          style={
+            [
+              {
+                "fontSize": 14,
+                "fontWeight": "600",
+                "numberOfLines": 2,
+                "textAlign": "center",
+              },
+              {
+                "color": "#1F2937",
+              },
+            ]
+          }
+        >
+          Dr. Ayşe Yılmaz
+        </Text>
+        <Text
+          color="#10B981"
+          size={14}
+          style={
+            {
+              "marginLeft": 3,
+            }
+          }
+        >
+          checkmark-circle
+        </Text>
+      </View>
+    </View>
+    <Text
+      numberOfLines={1}
+      style={
+        [
+          {
+            "fontSize": 12,
+            "marginBottom": 8,
+            "numberOfLines": 1,
+            "textAlign": "center",
+          },
+          {
+            "color": "#6B7280",
+          },
+        ]
+      }
+    >
+      Kardiyolog
+    </Text>
+    <View
+      accessibilityHint="Dr. Ayşe Yılmaz adlı uzmanı takipten çıkarmak için dokun"
+      accessibilityLabel="Takipten çık"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 8,
+            "height": 32,
+            "justifyContent": "center",
+            "width": "100%",
+          },
+          {
+            "backgroundColor": "#F3F4F6",
+          },
+        ]
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "fontSize": 12,
+              "fontWeight": "600",
+            },
+            {
+              "color": "#6B7280",
+            },
+          ]
+        }
+      >
+        Takiptesin
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`ExpertCard Snapshot matches snapshot when not following 1`] = `
+<View
+  style={{}}
+>
+  <View
+    accessibilityHint="Profili görüntülemek için dokun"
+    accessibilityLabel="Dr. Ayşe Yılmaz, Kardiyolog"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "alignItems": "center",
+          "borderRadius": 12,
+          "borderWidth": 1,
+          "height": 140,
+          "marginRight": 12,
+          "padding": 12,
+          "width": 120,
+        },
+        {
+          "backgroundColor": "#FFFFFF",
+          "borderColor": "#D1D5DB",
+        },
+      ]
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 30,
+            "height": 60,
+            "justifyContent": "center",
+            "marginBottom": 8,
+            "width": 60,
+          },
+          {
+            "backgroundColor": "#E5E7EB",
+          },
+        ]
+      }
+    >
+      <Text
+        color="#9CA3AF"
+        size={28}
+      >
+        person
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "marginBottom": 4,
+          "width": "100%",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "justifyContent": "center",
+          }
+        }
+      >
+        <Text
+          numberOfLines={2}
+          style={
+            [
+              {
+                "fontSize": 14,
+                "fontWeight": "600",
+                "numberOfLines": 2,
+                "textAlign": "center",
+              },
+              {
+                "color": "#1F2937",
+              },
+            ]
+          }
+        >
+          Dr. Ayşe Yılmaz
+        </Text>
+        <Text
+          color="#10B981"
+          size={14}
+          style={
+            {
+              "marginLeft": 3,
+            }
+          }
+        >
+          checkmark-circle
+        </Text>
+      </View>
+    </View>
+    <Text
+      numberOfLines={1}
+      style={
+        [
+          {
+            "fontSize": 12,
+            "marginBottom": 8,
+            "numberOfLines": 1,
+            "textAlign": "center",
+          },
+          {
+            "color": "#6B7280",
+          },
+        ]
+      }
+    >
+      Kardiyolog
+    </Text>
+    <View
+      accessibilityHint="Dr. Ayşe Yılmaz adlı uzmanı takip etmek için dokun"
+      accessibilityLabel="Takip et"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 8,
+            "height": 32,
+            "justifyContent": "center",
+            "width": "100%",
+          },
+          {
+            "backgroundColor": "#0066FF",
+          },
+        ]
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "fontSize": 12,
+              "fontWeight": "600",
+            },
+            {
+              "color": "#FFFFFF",
+            },
+          ]
+        }
+      >
+        Takip Et
+      </Text>
+    </View>
+  </View>
+</View>
+`;

@@ -8,6 +8,8 @@ import { spacing } from '@theme';
 export const TAB_BAR_HEIGHT = Platform.select({ ios: 84, android: 68 }) ?? 68;
 export const TAB_ICON_SIZE = 26;
 export const TAB_BADGE_SIZE = 18;
+export const CENTER_FAB_SIZE = 56;
+export const CENTER_FAB_ICON_SIZE = 32;
 
 export const styles = StyleSheet.create({
   badgeContainer: {
@@ -60,5 +62,29 @@ export const styles = StyleSheet.create({
     flex: 1,
     gap: 4,
     justifyContent: 'center',
+  },
+  centerFabContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    marginTop: -20,
+  },
+  centerFabButton: {
+    alignItems: 'center',
+    borderRadius: CENTER_FAB_SIZE / 2,
+    elevation: 8,
+    height: CENTER_FAB_SIZE,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    width: CENTER_FAB_SIZE,
+  },
+  centerFabLabel: {
+    fontSize: 9,
+    fontWeight: '600',
+    marginTop: 4,
+    textAlign: 'center',
   },
 });

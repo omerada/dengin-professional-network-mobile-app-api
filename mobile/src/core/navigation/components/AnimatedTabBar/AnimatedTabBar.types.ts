@@ -23,6 +23,8 @@ export interface TabItem {
   showDot?: boolean;
   /** Accessibility label */
   accessibilityLabel: string;
+  /** Whether this tab is center FAB (Floating Action Button) */
+  isCenterFab?: boolean;
 }
 
 /**

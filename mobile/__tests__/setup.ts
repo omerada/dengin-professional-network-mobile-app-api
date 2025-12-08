@@ -25,10 +25,75 @@ jest.mock('zustand/middleware/immer', () => ({
 // Mock ThemeContext to avoid async loading issues
 jest.mock('../src/contexts/ThemeContext', () => {
   const React = require('react');
-  const { light } = require('../src/theme');
+
+  // Manual light theme colors for testing (to avoid circular dependency issues)
+  const mockColors = {
+    background: {
+      primary: '#FFFFFF',
+      secondary: '#FAFBFC',
+      tertiary: '#F4F5F7',
+      elevated: '#FFFFFF',
+      overlay: 'rgba(9, 30, 66, 0.54)',
+    },
+    text: {
+      primary: '#172B4D',
+      secondary: '#6B778C',
+      tertiary: '#A5ADBA',
+      disabled: '#C1C7D0',
+      inverse: '#FFFFFF',
+      link: '#0066FF',
+      error: '#FF3B30',
+      success: '#00C853',
+    },
+    interactive: {
+      default: '#0066FF',
+      hover: '#0052CC',
+      pressed: '#0043A8',
+      disabled: '#DFE1E6',
+      focus: '#B3D4FF',
+      subtle: '#F4F5F7',
+    },
+    border: {
+      subtle: '#EBECF0',
+      default: '#DFE1E6',
+      strong: '#C1C7D0',
+      focus: '#0066FF',
+      error: '#FF3B30',
+    },
+    status: {
+      success: '#00C853',
+      successBg: '#E8F5E9',
+      successBackground: '#E8F5E9',
+      warning: '#FF9500',
+      warningBg: '#FFF8E1',
+      warningBackground: '#FFF8E1',
+      error: '#FF3B30',
+      errorBg: '#FFEBEE',
+      errorBackground: '#FFEBEE',
+      info: '#0066FF',
+      infoBg: '#E3F2FD',
+      infoBackground: '#E3F2FD',
+    },
+    special: {
+      verified: '#0066FF',
+      premium: '#FFD700',
+      online: '#00C853',
+      offline: '#C1C7D0',
+    },
+    gradient: {
+      primary: ['#0066FF', '#00C853'] as const,
+      premium: ['#FFD700', '#FF9500'] as const,
+      hero: ['#0066FF', '#3385FF'] as const,
+      dark: ['rgba(0,0,0,0.8)', 'transparent'] as const,
+      light: ['rgba(255,255,255,0.9)', 'transparent'] as const,
+    },
+  };
 
   const mockThemeValue = {
-    theme: light,
+    theme: {
+      colors: mockColors,
+      isDark: false,
+    },
     themeMode: 'light' as const,
     setThemeMode: jest.fn(),
     toggleTheme: jest.fn(),
@@ -38,20 +103,25 @@ jest.mock('../src/contexts/ThemeContext', () => {
   return {
     ThemeProvider: ({ children }: { children: React.ReactNode }) => children,
     useTheme: () => mockThemeValue,
+    useColors: () => mockColors,
   };
 });
 
-// Mock react-native-config
-jest.mock('react-native-config', () => ({
-  Config: {
-    API_BASE_URL: 'https://api.test.com',
-    ENV: 'test',
-  },
-  default: {
-    API_BASE_URL: 'https://api.test.com',
-    ENV: 'test',
-  },
-}));
+// Mock react-native-config (optional dependency)
+jest.mock(
+  'react-native-config',
+  () => ({
+    Config: {
+      API_BASE_URL: 'https://api.test.com',
+      ENV: 'test',
+    },
+    default: {
+      API_BASE_URL: 'https://api.test.com',
+      ENV: 'test',
+    },
+  }),
+  { virtual: true },
+);
 
 // Mock react-native-reanimated
 jest.mock('react-native-reanimated', () => ({
@@ -78,10 +148,35 @@ jest.mock('react-native-reanimated', () => ({
   ScrollView: require('react-native').ScrollView,
   FlatList: require('react-native').FlatList,
   Layout: {},
-  FadeIn: {},
-  FadeOut: {},
-  SlideInRight: {},
-  SlideOutRight: {},
+  FadeIn: {
+    duration: jest.fn().mockReturnThis(),
+    delay: jest.fn().mockReturnThis(),
+    springify: jest.fn().mockReturnThis(),
+    damping: jest.fn().mockReturnThis(),
+    withInitialValues: jest.fn().mockReturnThis(),
+  },
+  FadeOut: {
+    duration: jest.fn().mockReturnThis(),
+    delay: jest.fn().mockReturnThis(),
+  },
+  FadeInDown: {
+    duration: jest.fn().mockReturnThis(),
+    delay: jest.fn().mockReturnThis(),
+    springify: jest.fn().mockReturnThis(),
+  },
+  SlideInUp: {
+    duration: jest.fn().mockReturnThis(),
+    delay: jest.fn().mockReturnThis(),
+    springify: jest.fn().mockReturnThis(),
+  },
+  SlideInRight: {
+    duration: jest.fn().mockReturnThis(),
+    delay: jest.fn().mockReturnThis(),
+  },
+  SlideOutRight: {
+    duration: jest.fn().mockReturnThis(),
+    delay: jest.fn().mockReturnThis(),
+  },
   default: {
     call: jest.fn(),
     createAnimatedComponent: (component: any) => component,
@@ -198,31 +293,35 @@ jest.mock('@react-native-async-storage/async-storage', () => {
   };
 });
 
-// Mock @react-native-firebase/messaging
-jest.mock('@react-native-firebase/messaging', () => ({
-  __esModule: true,
-  default: () => ({
-    getToken: jest.fn().mockResolvedValue('mock-fcm-token'),
-    onMessage: jest.fn().mockReturnValue(jest.fn()),
-    onNotificationOpenedApp: jest.fn().mockReturnValue(jest.fn()),
-    getInitialNotification: jest.fn().mockResolvedValue(null),
-    subscribeToTopic: jest.fn().mockResolvedValue(undefined),
-    unsubscribeFromTopic: jest.fn().mockResolvedValue(undefined),
-    requestPermission: jest.fn().mockResolvedValue(1),
-    hasPermission: jest.fn().mockResolvedValue(1),
-    setBackgroundMessageHandler: jest.fn(),
-    onTokenRefresh: jest.fn().mockReturnValue(jest.fn()),
-    deleteToken: jest.fn().mockResolvedValue(undefined),
-  }),
-  FirebaseMessagingTypes: {
-    AuthorizationStatus: {
-      NOT_DETERMINED: -1,
-      DENIED: 0,
-      AUTHORIZED: 1,
-      PROVISIONAL: 2,
+// Mock @react-native-firebase/messaging (optional dependency)
+jest.mock(
+  '@react-native-firebase/messaging',
+  () => ({
+    __esModule: true,
+    default: () => ({
+      getToken: jest.fn().mockResolvedValue('mock-fcm-token'),
+      onMessage: jest.fn().mockReturnValue(jest.fn()),
+      onNotificationOpenedApp: jest.fn().mockReturnValue(jest.fn()),
+      getInitialNotification: jest.fn().mockResolvedValue(null),
+      subscribeToTopic: jest.fn().mockResolvedValue(undefined),
+      unsubscribeFromTopic: jest.fn().mockResolvedValue(undefined),
+      requestPermission: jest.fn().mockResolvedValue(1),
+      hasPermission: jest.fn().mockResolvedValue(1),
+      setBackgroundMessageHandler: jest.fn(),
+      onTokenRefresh: jest.fn().mockReturnValue(jest.fn()),
+      deleteToken: jest.fn().mockResolvedValue(undefined),
+    }),
+    FirebaseMessagingTypes: {
+      AuthorizationStatus: {
+        NOT_DETERMINED: -1,
+        DENIED: 0,
+        AUTHORIZED: 1,
+        PROVISIONAL: 2,
+      },
     },
-  },
-}));
+  }),
+  { virtual: true },
+);
 
 // Note: @react-native-firebase/analytics and @react-native-firebase/crashlytics
 // are mocked via moduleNameMapper in jest.config.js

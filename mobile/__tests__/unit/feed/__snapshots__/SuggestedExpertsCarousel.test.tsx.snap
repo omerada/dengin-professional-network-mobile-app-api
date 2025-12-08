@@ -1,0 +1,1728 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SuggestedExpertsCarousel Snapshot matches snapshot 1`] = `
+<View
+  entering={
+    {
+      "damping": [MockFunction],
+      "delay": [MockFunction],
+      "duration": [MockFunction] {
+        "calls": [
+          [
+            400,
+          ],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": [Circular],
+          },
+        ],
+      },
+      "springify": [MockFunction],
+      "withInitialValues": [MockFunction],
+    }
+  }
+  style={
+    {
+      "marginVertical": 16,
+    }
+  }
+  testID="suggested-experts-carousel"
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "marginBottom": 12,
+        "paddingHorizontal": 16,
+      }
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "fontSize": 16,
+            "fontWeight": "700",
+          },
+          {
+            "color": "#1F2937",
+          },
+        ]
+      }
+    >
+      Takip Edebileceğin Uzmanlar
+    </Text>
+  </View>
+  <RCTScrollView
+    accessibilityLabel="Önerilen uzmanlar listesi"
+    accessibilityRole="list"
+    contentContainerStyle={
+      {
+        "paddingRight": 16,
+      }
+    }
+    decelerationRate="fast"
+    horizontal={true}
+    showsHorizontalScrollIndicator={false}
+    snapToInterval={132}
+    style={
+      {
+        "paddingLeft": 16,
+      }
+    }
+  >
+    <View>
+      <View
+        style={{}}
+      >
+        <View
+          accessibilityHint="Profili görüntülemek için dokun"
+          accessibilityLabel="Dr. Ayşe Yılmaz, Kardiyolog"
+          accessibilityRole="button"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 12,
+                "borderWidth": 1,
+                "height": 140,
+                "marginRight": 12,
+                "padding": 12,
+                "width": 120,
+              },
+              {
+                "backgroundColor": "#FFFFFF",
+                "borderColor": "#D1D5DB",
+              },
+            ]
+          }
+          testID="expert-card-101"
+        >
+          <View
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 30,
+                  "height": 60,
+                  "justifyContent": "center",
+                  "marginBottom": 8,
+                  "width": 60,
+                },
+                {
+                  "backgroundColor": "#E5E7EB",
+                },
+              ]
+            }
+          >
+            <Text
+              color="#9CA3AF"
+              size={28}
+            >
+              person
+            </Text>
+          </View>
+          <View
+            style={
+              {
+                "marginBottom": 4,
+                "width": "100%",
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            >
+              <Text
+                numberOfLines={2}
+                style={
+                  [
+                    {
+                      "fontSize": 14,
+                      "fontWeight": "600",
+                      "numberOfLines": 2,
+                      "textAlign": "center",
+                    },
+                    {
+                      "color": "#1F2937",
+                    },
+                  ]
+                }
+              >
+                Dr. Ayşe Yılmaz
+              </Text>
+              <Text
+                color="#10B981"
+                size={14}
+                style={
+                  {
+                    "marginLeft": 3,
+                  }
+                }
+              >
+                checkmark-circle
+              </Text>
+            </View>
+          </View>
+          <Text
+            numberOfLines={1}
+            style={
+              [
+                {
+                  "fontSize": 12,
+                  "marginBottom": 8,
+                  "numberOfLines": 1,
+                  "textAlign": "center",
+                },
+                {
+                  "color": "#6B7280",
+                },
+              ]
+            }
+          >
+            Kardiyolog
+          </Text>
+          <View
+            accessibilityHint="Dr. Ayşe Yılmaz adlı uzmanı takip etmek için dokun"
+            accessibilityLabel="Takip et"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 8,
+                  "height": 32,
+                  "justifyContent": "center",
+                  "width": "100%",
+                },
+                {
+                  "backgroundColor": "#0066FF",
+                },
+              ]
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "600",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              Takip Et
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View
+        style={{}}
+      >
+        <View
+          accessibilityHint="Profili görüntülemek için dokun"
+          accessibilityLabel="Av. Mehmet Demir, İş Hukuku Avukatı"
+          accessibilityRole="button"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 12,
+                "borderWidth": 1,
+                "height": 140,
+                "marginRight": 12,
+                "padding": 12,
+                "width": 120,
+              },
+              {
+                "backgroundColor": "#FFFFFF",
+                "borderColor": "#D1D5DB",
+              },
+            ]
+          }
+          testID="expert-card-102"
+        >
+          <View
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 30,
+                  "height": 60,
+                  "justifyContent": "center",
+                  "marginBottom": 8,
+                  "width": 60,
+                },
+                {
+                  "backgroundColor": "#E5E7EB",
+                },
+              ]
+            }
+          >
+            <Text
+              color="#9CA3AF"
+              size={28}
+            >
+              person
+            </Text>
+          </View>
+          <View
+            style={
+              {
+                "marginBottom": 4,
+                "width": "100%",
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            >
+              <Text
+                numberOfLines={2}
+                style={
+                  [
+                    {
+                      "fontSize": 14,
+                      "fontWeight": "600",
+                      "numberOfLines": 2,
+                      "textAlign": "center",
+                    },
+                    {
+                      "color": "#1F2937",
+                    },
+                  ]
+                }
+              >
+                Av. Mehmet Demir
+              </Text>
+              <Text
+                color="#10B981"
+                size={14}
+                style={
+                  {
+                    "marginLeft": 3,
+                  }
+                }
+              >
+                checkmark-circle
+              </Text>
+            </View>
+          </View>
+          <Text
+            numberOfLines={1}
+            style={
+              [
+                {
+                  "fontSize": 12,
+                  "marginBottom": 8,
+                  "numberOfLines": 1,
+                  "textAlign": "center",
+                },
+                {
+                  "color": "#6B7280",
+                },
+              ]
+            }
+          >
+            İş Hukuku Avukatı
+          </Text>
+          <View
+            accessibilityHint="Av. Mehmet Demir adlı uzmanı takip etmek için dokun"
+            accessibilityLabel="Takip et"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 8,
+                  "height": 32,
+                  "justifyContent": "center",
+                  "width": "100%",
+                },
+                {
+                  "backgroundColor": "#0066FF",
+                },
+              ]
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "600",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              Takip Et
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View
+        style={{}}
+      >
+        <View
+          accessibilityHint="Profili görüntülemek için dokun"
+          accessibilityLabel="Mimar Can Öztürk, Mimarlık"
+          accessibilityRole="button"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 12,
+                "borderWidth": 1,
+                "height": 140,
+                "marginRight": 12,
+                "padding": 12,
+                "width": 120,
+              },
+              {
+                "backgroundColor": "#FFFFFF",
+                "borderColor": "#D1D5DB",
+              },
+            ]
+          }
+          testID="expert-card-103"
+        >
+          <View
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 30,
+                  "height": 60,
+                  "justifyContent": "center",
+                  "marginBottom": 8,
+                  "width": 60,
+                },
+                {
+                  "backgroundColor": "#E5E7EB",
+                },
+              ]
+            }
+          >
+            <Text
+              color="#9CA3AF"
+              size={28}
+            >
+              person
+            </Text>
+          </View>
+          <View
+            style={
+              {
+                "marginBottom": 4,
+                "width": "100%",
+              }
+            }
+          >
+            <Text
+              numberOfLines={2}
+              style={
+                [
+                  {
+                    "fontSize": 14,
+                    "fontWeight": "600",
+                    "numberOfLines": 2,
+                    "textAlign": "center",
+                  },
+                  {
+                    "color": "#1F2937",
+                  },
+                ]
+              }
+            >
+              Mimar Can Öztürk
+            </Text>
+          </View>
+          <Text
+            numberOfLines={1}
+            style={
+              [
+                {
+                  "fontSize": 12,
+                  "marginBottom": 8,
+                  "numberOfLines": 1,
+                  "textAlign": "center",
+                },
+                {
+                  "color": "#6B7280",
+                },
+              ]
+            }
+          >
+            Mimarlık
+          </Text>
+          <View
+            accessibilityHint="Mimar Can Öztürk adlı uzmanı takip etmek için dokun"
+            accessibilityLabel="Takip et"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 8,
+                  "height": 32,
+                  "justifyContent": "center",
+                  "width": "100%",
+                },
+                {
+                  "backgroundColor": "#0066FF",
+                },
+              ]
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "600",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              Takip Et
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View
+        style={{}}
+      >
+        <View
+          accessibilityHint="Profili görüntülemek için dokun"
+          accessibilityLabel="Prof. Dr. Zeynep Kaya, Psikiyatrist"
+          accessibilityRole="button"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 12,
+                "borderWidth": 1,
+                "height": 140,
+                "marginRight": 12,
+                "padding": 12,
+                "width": 120,
+              },
+              {
+                "backgroundColor": "#FFFFFF",
+                "borderColor": "#D1D5DB",
+              },
+            ]
+          }
+          testID="expert-card-104"
+        >
+          <View
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 30,
+                  "height": 60,
+                  "justifyContent": "center",
+                  "marginBottom": 8,
+                  "width": 60,
+                },
+                {
+                  "backgroundColor": "#E5E7EB",
+                },
+              ]
+            }
+          >
+            <Text
+              color="#9CA3AF"
+              size={28}
+            >
+              person
+            </Text>
+          </View>
+          <View
+            style={
+              {
+                "marginBottom": 4,
+                "width": "100%",
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            >
+              <Text
+                numberOfLines={2}
+                style={
+                  [
+                    {
+                      "fontSize": 14,
+                      "fontWeight": "600",
+                      "numberOfLines": 2,
+                      "textAlign": "center",
+                    },
+                    {
+                      "color": "#1F2937",
+                    },
+                  ]
+                }
+              >
+                Prof. Dr. Zeynep Kaya
+              </Text>
+              <Text
+                color="#10B981"
+                size={14}
+                style={
+                  {
+                    "marginLeft": 3,
+                  }
+                }
+              >
+                checkmark-circle
+              </Text>
+            </View>
+          </View>
+          <Text
+            numberOfLines={1}
+            style={
+              [
+                {
+                  "fontSize": 12,
+                  "marginBottom": 8,
+                  "numberOfLines": 1,
+                  "textAlign": "center",
+                },
+                {
+                  "color": "#6B7280",
+                },
+              ]
+            }
+          >
+            Psikiyatrist
+          </Text>
+          <View
+            accessibilityHint="Prof. Dr. Zeynep Kaya adlı uzmanı takip etmek için dokun"
+            accessibilityLabel="Takip et"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 8,
+                  "height": 32,
+                  "justifyContent": "center",
+                  "width": "100%",
+                },
+                {
+                  "backgroundColor": "#0066FF",
+                },
+              ]
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "600",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              Takip Et
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View
+        style={{}}
+      >
+        <View
+          accessibilityHint="Profili görüntülemek için dokun"
+          accessibilityLabel="Müh. Ali Şahin, Yazılım Mühendisi"
+          accessibilityRole="button"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 12,
+                "borderWidth": 1,
+                "height": 140,
+                "marginRight": 12,
+                "padding": 12,
+                "width": 120,
+              },
+              {
+                "backgroundColor": "#FFFFFF",
+                "borderColor": "#D1D5DB",
+              },
+            ]
+          }
+          testID="expert-card-105"
+        >
+          <View
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 30,
+                  "height": 60,
+                  "justifyContent": "center",
+                  "marginBottom": 8,
+                  "width": 60,
+                },
+                {
+                  "backgroundColor": "#E5E7EB",
+                },
+              ]
+            }
+          >
+            <Text
+              color="#9CA3AF"
+              size={28}
+            >
+              person
+            </Text>
+          </View>
+          <View
+            style={
+              {
+                "marginBottom": 4,
+                "width": "100%",
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            >
+              <Text
+                numberOfLines={2}
+                style={
+                  [
+                    {
+                      "fontSize": 14,
+                      "fontWeight": "600",
+                      "numberOfLines": 2,
+                      "textAlign": "center",
+                    },
+                    {
+                      "color": "#1F2937",
+                    },
+                  ]
+                }
+              >
+                Müh. Ali Şahin
+              </Text>
+              <Text
+                color="#10B981"
+                size={14}
+                style={
+                  {
+                    "marginLeft": 3,
+                  }
+                }
+              >
+                checkmark-circle
+              </Text>
+            </View>
+          </View>
+          <Text
+            numberOfLines={1}
+            style={
+              [
+                {
+                  "fontSize": 12,
+                  "marginBottom": 8,
+                  "numberOfLines": 1,
+                  "textAlign": "center",
+                },
+                {
+                  "color": "#6B7280",
+                },
+              ]
+            }
+          >
+            Yazılım Mühendisi
+          </Text>
+          <View
+            accessibilityHint="Müh. Ali Şahin adlı uzmanı takip etmek için dokun"
+            accessibilityLabel="Takip et"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 8,
+                  "height": 32,
+                  "justifyContent": "center",
+                  "width": "100%",
+                },
+                {
+                  "backgroundColor": "#0066FF",
+                },
+              ]
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "600",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              Takip Et
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View
+        style={{}}
+      >
+        <View
+          accessibilityHint="Profili görüntülemek için dokun"
+          accessibilityLabel="Doç. Dr. Fatma Arslan, Dermatolog"
+          accessibilityRole="button"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 12,
+                "borderWidth": 1,
+                "height": 140,
+                "marginRight": 12,
+                "padding": 12,
+                "width": 120,
+              },
+              {
+                "backgroundColor": "#FFFFFF",
+                "borderColor": "#D1D5DB",
+              },
+            ]
+          }
+          testID="expert-card-106"
+        >
+          <View
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 30,
+                  "height": 60,
+                  "justifyContent": "center",
+                  "marginBottom": 8,
+                  "width": 60,
+                },
+                {
+                  "backgroundColor": "#E5E7EB",
+                },
+              ]
+            }
+          >
+            <Text
+              color="#9CA3AF"
+              size={28}
+            >
+              person
+            </Text>
+          </View>
+          <View
+            style={
+              {
+                "marginBottom": 4,
+                "width": "100%",
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            >
+              <Text
+                numberOfLines={2}
+                style={
+                  [
+                    {
+                      "fontSize": 14,
+                      "fontWeight": "600",
+                      "numberOfLines": 2,
+                      "textAlign": "center",
+                    },
+                    {
+                      "color": "#1F2937",
+                    },
+                  ]
+                }
+              >
+                Doç. Dr. Fatma Arslan
+              </Text>
+              <Text
+                color="#10B981"
+                size={14}
+                style={
+                  {
+                    "marginLeft": 3,
+                  }
+                }
+              >
+                checkmark-circle
+              </Text>
+            </View>
+          </View>
+          <Text
+            numberOfLines={1}
+            style={
+              [
+                {
+                  "fontSize": 12,
+                  "marginBottom": 8,
+                  "numberOfLines": 1,
+                  "textAlign": "center",
+                },
+                {
+                  "color": "#6B7280",
+                },
+              ]
+            }
+          >
+            Dermatolog
+          </Text>
+          <View
+            accessibilityHint="Doç. Dr. Fatma Arslan adlı uzmanı takip etmek için dokun"
+            accessibilityLabel="Takip et"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 8,
+                  "height": 32,
+                  "justifyContent": "center",
+                  "width": "100%",
+                },
+                {
+                  "backgroundColor": "#0066FF",
+                },
+              ]
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "600",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              Takip Et
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View
+        style={{}}
+      >
+        <View
+          accessibilityHint="Profili görüntülemek için dokun"
+          accessibilityLabel="Av. Hakan Çelik, Ceza Avukatı"
+          accessibilityRole="button"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 12,
+                "borderWidth": 1,
+                "height": 140,
+                "marginRight": 12,
+                "padding": 12,
+                "width": 120,
+              },
+              {
+                "backgroundColor": "#FFFFFF",
+                "borderColor": "#D1D5DB",
+              },
+            ]
+          }
+          testID="expert-card-107"
+        >
+          <View
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 30,
+                  "height": 60,
+                  "justifyContent": "center",
+                  "marginBottom": 8,
+                  "width": 60,
+                },
+                {
+                  "backgroundColor": "#E5E7EB",
+                },
+              ]
+            }
+          >
+            <Text
+              color="#9CA3AF"
+              size={28}
+            >
+              person
+            </Text>
+          </View>
+          <View
+            style={
+              {
+                "marginBottom": 4,
+                "width": "100%",
+              }
+            }
+          >
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                  "justifyContent": "center",
+                }
+              }
+            >
+              <Text
+                numberOfLines={2}
+                style={
+                  [
+                    {
+                      "fontSize": 14,
+                      "fontWeight": "600",
+                      "numberOfLines": 2,
+                      "textAlign": "center",
+                    },
+                    {
+                      "color": "#1F2937",
+                    },
+                  ]
+                }
+              >
+                Av. Hakan Çelik
+              </Text>
+              <Text
+                color="#10B981"
+                size={14}
+                style={
+                  {
+                    "marginLeft": 3,
+                  }
+                }
+              >
+                checkmark-circle
+              </Text>
+            </View>
+          </View>
+          <Text
+            numberOfLines={1}
+            style={
+              [
+                {
+                  "fontSize": 12,
+                  "marginBottom": 8,
+                  "numberOfLines": 1,
+                  "textAlign": "center",
+                },
+                {
+                  "color": "#6B7280",
+                },
+              ]
+            }
+          >
+            Ceza Avukatı
+          </Text>
+          <View
+            accessibilityHint="Av. Hakan Çelik adlı uzmanı takip etmek için dokun"
+            accessibilityLabel="Takip et"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 8,
+                  "height": 32,
+                  "justifyContent": "center",
+                  "width": "100%",
+                },
+                {
+                  "backgroundColor": "#0066FF",
+                },
+              ]
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "600",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              Takip Et
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View
+        style={{}}
+      >
+        <View
+          accessibilityHint="Profili görüntülemek için dokun"
+          accessibilityLabel="Eczacı Selin Yurt, Klinik Eczacı"
+          accessibilityRole="button"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 12,
+                "borderWidth": 1,
+                "height": 140,
+                "marginRight": 12,
+                "padding": 12,
+                "width": 120,
+              },
+              {
+                "backgroundColor": "#FFFFFF",
+                "borderColor": "#D1D5DB",
+              },
+            ]
+          }
+          testID="expert-card-108"
+        >
+          <View
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 30,
+                  "height": 60,
+                  "justifyContent": "center",
+                  "marginBottom": 8,
+                  "width": 60,
+                },
+                {
+                  "backgroundColor": "#E5E7EB",
+                },
+              ]
+            }
+          >
+            <Text
+              color="#9CA3AF"
+              size={28}
+            >
+              person
+            </Text>
+          </View>
+          <View
+            style={
+              {
+                "marginBottom": 4,
+                "width": "100%",
+              }
+            }
+          >
+            <Text
+              numberOfLines={2}
+              style={
+                [
+                  {
+                    "fontSize": 14,
+                    "fontWeight": "600",
+                    "numberOfLines": 2,
+                    "textAlign": "center",
+                  },
+                  {
+                    "color": "#1F2937",
+                  },
+                ]
+              }
+            >
+              Eczacı Selin Yurt
+            </Text>
+          </View>
+          <Text
+            numberOfLines={1}
+            style={
+              [
+                {
+                  "fontSize": 12,
+                  "marginBottom": 8,
+                  "numberOfLines": 1,
+                  "textAlign": "center",
+                },
+                {
+                  "color": "#6B7280",
+                },
+              ]
+            }
+          >
+            Klinik Eczacı
+          </Text>
+          <View
+            accessibilityHint="Eczacı Selin Yurt adlı uzmanı takip etmek için dokun"
+            accessibilityLabel="Takip et"
+            accessibilityRole="button"
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": undefined,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              [
+                {
+                  "alignItems": "center",
+                  "borderRadius": 8,
+                  "height": 32,
+                  "justifyContent": "center",
+                  "width": "100%",
+                },
+                {
+                  "backgroundColor": "#0066FF",
+                },
+              ]
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 12,
+                    "fontWeight": "600",
+                  },
+                  {
+                    "color": "#FFFFFF",
+                  },
+                ]
+              }
+            >
+              Takip Et
+            </Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  </RCTScrollView>
+</View>
+`;

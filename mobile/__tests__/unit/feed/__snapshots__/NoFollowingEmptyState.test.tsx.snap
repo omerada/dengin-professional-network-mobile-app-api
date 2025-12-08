@@ -1,0 +1,3440 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NoFollowingEmptyState Snapshot matches snapshot 1`] = `
+<View
+  entering={
+    {
+      "damping": [MockFunction],
+      "delay": [MockFunction],
+      "duration": [MockFunction] {
+        "calls": [
+          [
+            400,
+          ],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": [Circular],
+          },
+        ],
+      },
+      "springify": [MockFunction],
+      "withInitialValues": [MockFunction],
+    }
+  }
+  style={
+    {
+      "alignItems": "center",
+      "flex": 1,
+      "justifyContent": "center",
+      "paddingHorizontal": 24,
+      "paddingVertical": 40,
+    }
+  }
+  testID="no-following-empty-state"
+>
+  <View
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              450,
+            ],
+            [
+              500,
+            ],
+            [
+              550,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      {
+        "marginBottom": 24,
+      }
+    }
+  >
+    <Text
+      color="#0066FF"
+      size={80}
+    >
+      people-outline
+    </Text>
+  </View>
+  <Text
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              450,
+            ],
+            [
+              500,
+            ],
+            [
+              550,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      [
+        {
+          "fontSize": 22,
+          "fontWeight": "700",
+          "marginBottom": 12,
+          "textAlign": "center",
+        },
+        {
+          "color": "#1F2937",
+        },
+      ]
+    }
+  >
+    Henüz Kimseyi Takip Etmiyorsun
+  </Text>
+  <Text
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              450,
+            ],
+            [
+              500,
+            ],
+            [
+              550,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      [
+        {
+          "fontSize": 15,
+          "lineHeight": 22,
+          "marginBottom": 32,
+          "paddingHorizontal": 8,
+          "textAlign": "center",
+        },
+        {
+          "color": "#6B7280",
+        },
+      ]
+    }
+  >
+    Uzmanları keşfet, ilgi alanlarına göre kişileri takip et
+  </Text>
+  <View
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              450,
+            ],
+            [
+              500,
+            ],
+            [
+              550,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      {
+        "marginBottom": 24,
+        "width": "100%",
+      }
+    }
+  >
+    <View
+      entering={
+        {
+          "delay": [MockFunction] {
+            "calls": [
+              [
+                100,
+              ],
+              [
+                200,
+              ],
+              [
+                300,
+              ],
+              [
+                400,
+              ],
+              [
+                450,
+              ],
+              [
+                500,
+              ],
+              [
+                550,
+              ],
+              [
+                600,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "duration": [MockFunction] {
+            "calls": [
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "springify": [MockFunction],
+        }
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "marginBottom": 8,
+              "padding": 12,
+            },
+            {
+              "backgroundColor": "#FFFFFF",
+              "borderColor": "#D1D5DB",
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 24,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 48,
+              },
+              {
+                "backgroundColor": "#E5E7EB",
+              },
+            ]
+          }
+        >
+          <Text
+            color="#9CA3AF"
+            size={24}
+          >
+            person
+          </Text>
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 15,
+                    "fontWeight": "600",
+                    "marginBottom": 2,
+                  },
+                  {
+                    "color": "#1F2937",
+                  },
+                ]
+              }
+            >
+              Dr. Ayşe Yılmaz
+            </Text>
+            <Text
+              color="#10B981"
+              size={16}
+              style={
+                {
+                  "marginLeft": 4,
+                }
+              }
+            >
+              checkmark-circle
+            </Text>
+          </View>
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 13,
+                },
+                {
+                  "color": "#6B7280",
+                },
+              ]
+            }
+          >
+            Kardiyolog
+          </Text>
+        </View>
+        <View
+          accessibilityHint="Dr. Ayşe Yılmaz adlı uzmanı takip etmek için dokun"
+          accessibilityLabel="Dr. Ayşe Yılmaz takip et"
+          accessibilityRole="button"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            [
+              {
+                "borderRadius": 8,
+                "paddingHorizontal": 16,
+                "paddingVertical": 8,
+              },
+              {
+                "backgroundColor": "#0066FF",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                },
+                {
+                  "color": "#FFFFFF",
+                },
+              ]
+            }
+          >
+            Takip Et
+          </Text>
+        </View>
+      </View>
+    </View>
+    <View
+      entering={
+        {
+          "delay": [MockFunction] {
+            "calls": [
+              [
+                100,
+              ],
+              [
+                200,
+              ],
+              [
+                300,
+              ],
+              [
+                400,
+              ],
+              [
+                450,
+              ],
+              [
+                500,
+              ],
+              [
+                550,
+              ],
+              [
+                600,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "duration": [MockFunction] {
+            "calls": [
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "springify": [MockFunction],
+        }
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "marginBottom": 8,
+              "padding": 12,
+            },
+            {
+              "backgroundColor": "#FFFFFF",
+              "borderColor": "#D1D5DB",
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 24,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 48,
+              },
+              {
+                "backgroundColor": "#E5E7EB",
+              },
+            ]
+          }
+        >
+          <Text
+            color="#9CA3AF"
+            size={24}
+          >
+            person
+          </Text>
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 15,
+                    "fontWeight": "600",
+                    "marginBottom": 2,
+                  },
+                  {
+                    "color": "#1F2937",
+                  },
+                ]
+              }
+            >
+              Av. Mehmet Demir
+            </Text>
+            <Text
+              color="#10B981"
+              size={16}
+              style={
+                {
+                  "marginLeft": 4,
+                }
+              }
+            >
+              checkmark-circle
+            </Text>
+          </View>
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 13,
+                },
+                {
+                  "color": "#6B7280",
+                },
+              ]
+            }
+          >
+            İş Hukuku Avukatı
+          </Text>
+        </View>
+        <View
+          accessibilityHint="Av. Mehmet Demir adlı uzmanı takip etmek için dokun"
+          accessibilityLabel="Av. Mehmet Demir takip et"
+          accessibilityRole="button"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            [
+              {
+                "borderRadius": 8,
+                "paddingHorizontal": 16,
+                "paddingVertical": 8,
+              },
+              {
+                "backgroundColor": "#0066FF",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                },
+                {
+                  "color": "#FFFFFF",
+                },
+              ]
+            }
+          >
+            Takip Et
+          </Text>
+        </View>
+      </View>
+    </View>
+    <View
+      entering={
+        {
+          "delay": [MockFunction] {
+            "calls": [
+              [
+                100,
+              ],
+              [
+                200,
+              ],
+              [
+                300,
+              ],
+              [
+                400,
+              ],
+              [
+                450,
+              ],
+              [
+                500,
+              ],
+              [
+                550,
+              ],
+              [
+                600,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "duration": [MockFunction] {
+            "calls": [
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "springify": [MockFunction],
+        }
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "marginBottom": 8,
+              "padding": 12,
+            },
+            {
+              "backgroundColor": "#FFFFFF",
+              "borderColor": "#D1D5DB",
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 24,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 48,
+              },
+              {
+                "backgroundColor": "#E5E7EB",
+              },
+            ]
+          }
+        >
+          <Text
+            color="#9CA3AF"
+            size={24}
+          >
+            person
+          </Text>
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 15,
+                    "fontWeight": "600",
+                    "marginBottom": 2,
+                  },
+                  {
+                    "color": "#1F2937",
+                  },
+                ]
+              }
+            >
+              Mimar Can Öztürk
+            </Text>
+          </View>
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 13,
+                },
+                {
+                  "color": "#6B7280",
+                },
+              ]
+            }
+          >
+            Mimarlık
+          </Text>
+        </View>
+        <View
+          accessibilityHint="Mimar Can Öztürk adlı uzmanı takip etmek için dokun"
+          accessibilityLabel="Mimar Can Öztürk takip et"
+          accessibilityRole="button"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            [
+              {
+                "borderRadius": 8,
+                "paddingHorizontal": 16,
+                "paddingVertical": 8,
+              },
+              {
+                "backgroundColor": "#0066FF",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                },
+                {
+                  "color": "#FFFFFF",
+                },
+              ]
+            }
+          >
+            Takip Et
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+  <View
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              450,
+            ],
+            [
+              500,
+            ],
+            [
+              550,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      {
+        "gap": 12,
+        "width": "100%",
+      }
+    }
+  >
+    <View
+      accessibilityHint="Keşfet ekranına git"
+      accessibilityLabel="Uzmanları keşfet"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 12,
+            "height": 52,
+            "justifyContent": "center",
+            "width": "100%",
+          },
+          {
+            "backgroundColor": "#0066FF",
+          },
+        ]
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "fontSize": 16,
+              "fontWeight": "600",
+            },
+            {
+              "color": "#FFFFFF",
+            },
+          ]
+        }
+      >
+        Uzmanları Keşfet
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`NoFollowingEmptyState Snapshot matches snapshot with secondary button 1`] = `
+<View
+  entering={
+    {
+      "damping": [MockFunction],
+      "delay": [MockFunction],
+      "duration": [MockFunction] {
+        "calls": [
+          [
+            400,
+          ],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": [Circular],
+          },
+        ],
+      },
+      "springify": [MockFunction],
+      "withInitialValues": [MockFunction],
+    }
+  }
+  style={
+    {
+      "alignItems": "center",
+      "flex": 1,
+      "justifyContent": "center",
+      "paddingHorizontal": 24,
+      "paddingVertical": 40,
+    }
+  }
+  testID="no-following-empty-state"
+>
+  <View
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              450,
+            ],
+            [
+              500,
+            ],
+            [
+              550,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      {
+        "marginBottom": 24,
+      }
+    }
+  >
+    <Text
+      color="#0066FF"
+      size={80}
+    >
+      people-outline
+    </Text>
+  </View>
+  <Text
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              450,
+            ],
+            [
+              500,
+            ],
+            [
+              550,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      [
+        {
+          "fontSize": 22,
+          "fontWeight": "700",
+          "marginBottom": 12,
+          "textAlign": "center",
+        },
+        {
+          "color": "#1F2937",
+        },
+      ]
+    }
+  >
+    Henüz Kimseyi Takip Etmiyorsun
+  </Text>
+  <Text
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              450,
+            ],
+            [
+              500,
+            ],
+            [
+              550,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      [
+        {
+          "fontSize": 15,
+          "lineHeight": 22,
+          "marginBottom": 32,
+          "paddingHorizontal": 8,
+          "textAlign": "center",
+        },
+        {
+          "color": "#6B7280",
+        },
+      ]
+    }
+  >
+    Uzmanları keşfet, ilgi alanlarına göre kişileri takip et
+  </Text>
+  <View
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              450,
+            ],
+            [
+              500,
+            ],
+            [
+              550,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      {
+        "marginBottom": 24,
+        "width": "100%",
+      }
+    }
+  >
+    <View
+      entering={
+        {
+          "delay": [MockFunction] {
+            "calls": [
+              [
+                100,
+              ],
+              [
+                200,
+              ],
+              [
+                300,
+              ],
+              [
+                400,
+              ],
+              [
+                450,
+              ],
+              [
+                500,
+              ],
+              [
+                550,
+              ],
+              [
+                600,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "duration": [MockFunction] {
+            "calls": [
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "springify": [MockFunction],
+        }
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "marginBottom": 8,
+              "padding": 12,
+            },
+            {
+              "backgroundColor": "#FFFFFF",
+              "borderColor": "#D1D5DB",
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 24,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 48,
+              },
+              {
+                "backgroundColor": "#E5E7EB",
+              },
+            ]
+          }
+        >
+          <Text
+            color="#9CA3AF"
+            size={24}
+          >
+            person
+          </Text>
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 15,
+                    "fontWeight": "600",
+                    "marginBottom": 2,
+                  },
+                  {
+                    "color": "#1F2937",
+                  },
+                ]
+              }
+            >
+              Dr. Ayşe Yılmaz
+            </Text>
+            <Text
+              color="#10B981"
+              size={16}
+              style={
+                {
+                  "marginLeft": 4,
+                }
+              }
+            >
+              checkmark-circle
+            </Text>
+          </View>
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 13,
+                },
+                {
+                  "color": "#6B7280",
+                },
+              ]
+            }
+          >
+            Kardiyolog
+          </Text>
+        </View>
+        <View
+          accessibilityHint="Dr. Ayşe Yılmaz adlı uzmanı takip etmek için dokun"
+          accessibilityLabel="Dr. Ayşe Yılmaz takip et"
+          accessibilityRole="button"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            [
+              {
+                "borderRadius": 8,
+                "paddingHorizontal": 16,
+                "paddingVertical": 8,
+              },
+              {
+                "backgroundColor": "#0066FF",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                },
+                {
+                  "color": "#FFFFFF",
+                },
+              ]
+            }
+          >
+            Takip Et
+          </Text>
+        </View>
+      </View>
+    </View>
+    <View
+      entering={
+        {
+          "delay": [MockFunction] {
+            "calls": [
+              [
+                100,
+              ],
+              [
+                200,
+              ],
+              [
+                300,
+              ],
+              [
+                400,
+              ],
+              [
+                450,
+              ],
+              [
+                500,
+              ],
+              [
+                550,
+              ],
+              [
+                600,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "duration": [MockFunction] {
+            "calls": [
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "springify": [MockFunction],
+        }
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "marginBottom": 8,
+              "padding": 12,
+            },
+            {
+              "backgroundColor": "#FFFFFF",
+              "borderColor": "#D1D5DB",
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 24,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 48,
+              },
+              {
+                "backgroundColor": "#E5E7EB",
+              },
+            ]
+          }
+        >
+          <Text
+            color="#9CA3AF"
+            size={24}
+          >
+            person
+          </Text>
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 15,
+                    "fontWeight": "600",
+                    "marginBottom": 2,
+                  },
+                  {
+                    "color": "#1F2937",
+                  },
+                ]
+              }
+            >
+              Av. Mehmet Demir
+            </Text>
+            <Text
+              color="#10B981"
+              size={16}
+              style={
+                {
+                  "marginLeft": 4,
+                }
+              }
+            >
+              checkmark-circle
+            </Text>
+          </View>
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 13,
+                },
+                {
+                  "color": "#6B7280",
+                },
+              ]
+            }
+          >
+            İş Hukuku Avukatı
+          </Text>
+        </View>
+        <View
+          accessibilityHint="Av. Mehmet Demir adlı uzmanı takip etmek için dokun"
+          accessibilityLabel="Av. Mehmet Demir takip et"
+          accessibilityRole="button"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            [
+              {
+                "borderRadius": 8,
+                "paddingHorizontal": 16,
+                "paddingVertical": 8,
+              },
+              {
+                "backgroundColor": "#0066FF",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                },
+                {
+                  "color": "#FFFFFF",
+                },
+              ]
+            }
+          >
+            Takip Et
+          </Text>
+        </View>
+      </View>
+    </View>
+    <View
+      entering={
+        {
+          "delay": [MockFunction] {
+            "calls": [
+              [
+                100,
+              ],
+              [
+                200,
+              ],
+              [
+                300,
+              ],
+              [
+                400,
+              ],
+              [
+                450,
+              ],
+              [
+                500,
+              ],
+              [
+                550,
+              ],
+              [
+                600,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "duration": [MockFunction] {
+            "calls": [
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+              [
+                400,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "springify": [MockFunction],
+        }
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "alignItems": "center",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "flexDirection": "row",
+              "marginBottom": 8,
+              "padding": 12,
+            },
+            {
+              "backgroundColor": "#FFFFFF",
+              "borderColor": "#D1D5DB",
+            },
+          ]
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 24,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 48,
+              },
+              {
+                "backgroundColor": "#E5E7EB",
+              },
+            ]
+          }
+        >
+          <Text
+            color="#9CA3AF"
+            size={24}
+          >
+            person
+          </Text>
+        </View>
+        <View
+          style={
+            {
+              "flex": 1,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "flexDirection": "row",
+              }
+            }
+          >
+            <Text
+              style={
+                [
+                  {
+                    "fontSize": 15,
+                    "fontWeight": "600",
+                    "marginBottom": 2,
+                  },
+                  {
+                    "color": "#1F2937",
+                  },
+                ]
+              }
+            >
+              Mimar Can Öztürk
+            </Text>
+          </View>
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 13,
+                },
+                {
+                  "color": "#6B7280",
+                },
+              ]
+            }
+          >
+            Mimarlık
+          </Text>
+        </View>
+        <View
+          accessibilityHint="Mimar Can Öztürk adlı uzmanı takip etmek için dokun"
+          accessibilityLabel="Mimar Can Öztürk takip et"
+          accessibilityRole="button"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            [
+              {
+                "borderRadius": 8,
+                "paddingHorizontal": 16,
+                "paddingVertical": 8,
+              },
+              {
+                "backgroundColor": "#0066FF",
+              },
+            ]
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "fontSize": 13,
+                  "fontWeight": "600",
+                },
+                {
+                  "color": "#FFFFFF",
+                },
+              ]
+            }
+          >
+            Takip Et
+          </Text>
+        </View>
+      </View>
+    </View>
+  </View>
+  <View
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              450,
+            ],
+            [
+              500,
+            ],
+            [
+              550,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      {
+        "gap": 12,
+        "width": "100%",
+      }
+    }
+  >
+    <View
+      accessibilityHint="Keşfet ekranına git"
+      accessibilityLabel="Uzmanları keşfet"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 12,
+            "height": 52,
+            "justifyContent": "center",
+            "width": "100%",
+          },
+          {
+            "backgroundColor": "#0066FF",
+          },
+        ]
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "fontSize": 16,
+              "fontWeight": "600",
+            },
+            {
+              "color": "#FFFFFF",
+            },
+          ]
+        }
+      >
+        Uzmanları Keşfet
+      </Text>
+    </View>
+    <View
+      accessibilityHint="Önerilen uzmanlar ekranına git"
+      accessibilityLabel="Tüm önerileri gör"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 12,
+            "borderWidth": 1.5,
+            "height": 48,
+            "justifyContent": "center",
+            "width": "100%",
+          },
+          {
+            "borderColor": "#D1D5DB",
+          },
+        ]
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "fontSize": 15,
+              "fontWeight": "600",
+            },
+            {
+              "color": "#1F2937",
+            },
+          ]
+        }
+      >
+        Tüm Önerileri Gör
+      </Text>
+    </View>
+  </View>
+</View>
+`;

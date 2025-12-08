@@ -1,0 +1,1607 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AITrendInsightCard Snapshot matches snapshot 1`] = `
+<View
+  entering={
+    {
+      "damping": [MockFunction],
+      "delay": [MockFunction] {
+        "calls": [
+          [
+            100,
+          ],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": [Circular],
+          },
+        ],
+      },
+      "duration": [MockFunction] {
+        "calls": [
+          [
+            400,
+          ],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": [Circular],
+          },
+        ],
+      },
+      "springify": [MockFunction],
+      "withInitialValues": [MockFunction],
+    }
+  }
+  style={
+    [
+      {
+        "borderRadius": 12,
+        "borderWidth": 1,
+        "marginHorizontal": 16,
+        "marginVertical": 8,
+        "padding": 16,
+      },
+      {
+        "backgroundColor": "#FFFFFF",
+        "borderColor": "#E5E7EB",
+      },
+    ]
+  }
+  testID="ai-trend-insight-card"
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "marginBottom": 12,
+      }
+    }
+  >
+    <Text
+      color="#0066FF"
+      size={28}
+      style={
+        {
+          "marginRight": 8,
+        }
+      }
+    >
+      bulb-outline
+    </Text>
+    <Text
+      style={
+        [
+          {
+            "flex": 1,
+            "fontSize": 16,
+            "fontWeight": "600",
+          },
+          {
+            "color": "#1F2937",
+          },
+        ]
+      }
+    >
+      Bu Hafta MEDICAL'de Trend
+    </Text>
+  </View>
+  <View
+    style={
+      {
+        "marginBottom": 12,
+      }
+    }
+  >
+    <View
+      entering={
+        {
+          "delay": [MockFunction] {
+            "calls": [
+              [
+                100,
+              ],
+              [
+                150,
+              ],
+              [
+                200,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "duration": [MockFunction] {
+            "calls": [
+              [
+                300,
+              ],
+              [
+                300,
+              ],
+              [
+                300,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "springify": [MockFunction],
+        }
+      }
+    >
+      <View
+        accessibilityLabel="1. Telemedicine 2025 Trends"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "borderRadius": 8,
+            "flexDirection": "row",
+            "paddingVertical": 8,
+          }
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "fontSize": 14,
+                "fontWeight": "600",
+                "marginRight": 8,
+                "width": 24,
+              },
+              {
+                "color": "#0066FF",
+              },
+            ]
+          }
+        >
+          1
+          .
+        </Text>
+        <Text
+          numberOfLines={2}
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 14,
+                "lineHeight": 20,
+              },
+              {
+                "color": "#1F2937",
+              },
+            ]
+          }
+        >
+          Telemedicine 2025 Trends
+        </Text>
+      </View>
+    </View>
+    <View
+      entering={
+        {
+          "delay": [MockFunction] {
+            "calls": [
+              [
+                100,
+              ],
+              [
+                150,
+              ],
+              [
+                200,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "duration": [MockFunction] {
+            "calls": [
+              [
+                300,
+              ],
+              [
+                300,
+              ],
+              [
+                300,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "springify": [MockFunction],
+        }
+      }
+    >
+      <View
+        accessibilityLabel="2. AI Diagnosis Systems"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "borderRadius": 8,
+            "flexDirection": "row",
+            "paddingVertical": 8,
+          }
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "fontSize": 14,
+                "fontWeight": "600",
+                "marginRight": 8,
+                "width": 24,
+              },
+              {
+                "color": "#0066FF",
+              },
+            ]
+          }
+        >
+          2
+          .
+        </Text>
+        <Text
+          numberOfLines={2}
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 14,
+                "lineHeight": 20,
+              },
+              {
+                "color": "#1F2937",
+              },
+            ]
+          }
+        >
+          AI Diagnosis Systems
+        </Text>
+      </View>
+    </View>
+    <View
+      entering={
+        {
+          "delay": [MockFunction] {
+            "calls": [
+              [
+                100,
+              ],
+              [
+                150,
+              ],
+              [
+                200,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "duration": [MockFunction] {
+            "calls": [
+              [
+                300,
+              ],
+              [
+                300,
+              ],
+              [
+                300,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "springify": [MockFunction],
+        }
+      }
+    >
+      <View
+        accessibilityLabel="3. Patient Data Privacy Laws"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "borderRadius": 8,
+            "flexDirection": "row",
+            "paddingVertical": 8,
+          }
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "fontSize": 14,
+                "fontWeight": "600",
+                "marginRight": 8,
+                "width": 24,
+              },
+              {
+                "color": "#0066FF",
+              },
+            ]
+          }
+        >
+          3
+          .
+        </Text>
+        <Text
+          numberOfLines={2}
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 14,
+                "lineHeight": 20,
+              },
+              {
+                "color": "#1F2937",
+              },
+            ]
+          }
+        >
+          Patient Data Privacy Laws
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`AITrendInsightCard Snapshot matches snapshot with onMorePress 1`] = `
+<View
+  entering={
+    {
+      "damping": [MockFunction],
+      "delay": [MockFunction] {
+        "calls": [
+          [
+            100,
+          ],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": [Circular],
+          },
+        ],
+      },
+      "duration": [MockFunction] {
+        "calls": [
+          [
+            400,
+          ],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": [Circular],
+          },
+        ],
+      },
+      "springify": [MockFunction],
+      "withInitialValues": [MockFunction],
+    }
+  }
+  style={
+    [
+      {
+        "borderRadius": 12,
+        "borderWidth": 1,
+        "marginHorizontal": 16,
+        "marginVertical": 8,
+        "padding": 16,
+      },
+      {
+        "backgroundColor": "#FFFFFF",
+        "borderColor": "#E5E7EB",
+      },
+    ]
+  }
+  testID="ai-trend-insight-card"
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "marginBottom": 12,
+      }
+    }
+  >
+    <Text
+      color="#0066FF"
+      size={28}
+      style={
+        {
+          "marginRight": 8,
+        }
+      }
+    >
+      bulb-outline
+    </Text>
+    <Text
+      style={
+        [
+          {
+            "flex": 1,
+            "fontSize": 16,
+            "fontWeight": "600",
+          },
+          {
+            "color": "#1F2937",
+          },
+        ]
+      }
+    >
+      Bu Hafta MEDICAL'de Trend
+    </Text>
+  </View>
+  <View
+    style={
+      {
+        "marginBottom": 12,
+      }
+    }
+  >
+    <View
+      entering={
+        {
+          "delay": [MockFunction] {
+            "calls": [
+              [
+                100,
+              ],
+              [
+                150,
+              ],
+              [
+                200,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "duration": [MockFunction] {
+            "calls": [
+              [
+                300,
+              ],
+              [
+                300,
+              ],
+              [
+                300,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "springify": [MockFunction],
+        }
+      }
+    >
+      <View
+        accessibilityLabel="1. Telemedicine 2025 Trends"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "borderRadius": 8,
+            "flexDirection": "row",
+            "paddingVertical": 8,
+          }
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "fontSize": 14,
+                "fontWeight": "600",
+                "marginRight": 8,
+                "width": 24,
+              },
+              {
+                "color": "#0066FF",
+              },
+            ]
+          }
+        >
+          1
+          .
+        </Text>
+        <Text
+          numberOfLines={2}
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 14,
+                "lineHeight": 20,
+              },
+              {
+                "color": "#1F2937",
+              },
+            ]
+          }
+        >
+          Telemedicine 2025 Trends
+        </Text>
+      </View>
+    </View>
+    <View
+      entering={
+        {
+          "delay": [MockFunction] {
+            "calls": [
+              [
+                100,
+              ],
+              [
+                150,
+              ],
+              [
+                200,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "duration": [MockFunction] {
+            "calls": [
+              [
+                300,
+              ],
+              [
+                300,
+              ],
+              [
+                300,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "springify": [MockFunction],
+        }
+      }
+    >
+      <View
+        accessibilityLabel="2. AI Diagnosis Systems"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "borderRadius": 8,
+            "flexDirection": "row",
+            "paddingVertical": 8,
+          }
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "fontSize": 14,
+                "fontWeight": "600",
+                "marginRight": 8,
+                "width": 24,
+              },
+              {
+                "color": "#0066FF",
+              },
+            ]
+          }
+        >
+          2
+          .
+        </Text>
+        <Text
+          numberOfLines={2}
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 14,
+                "lineHeight": 20,
+              },
+              {
+                "color": "#1F2937",
+              },
+            ]
+          }
+        >
+          AI Diagnosis Systems
+        </Text>
+      </View>
+    </View>
+    <View
+      entering={
+        {
+          "delay": [MockFunction] {
+            "calls": [
+              [
+                100,
+              ],
+              [
+                150,
+              ],
+              [
+                200,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "duration": [MockFunction] {
+            "calls": [
+              [
+                300,
+              ],
+              [
+                300,
+              ],
+              [
+                300,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "springify": [MockFunction],
+        }
+      }
+    >
+      <View
+        accessibilityLabel="3. Patient Data Privacy Laws"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "borderRadius": 8,
+            "flexDirection": "row",
+            "paddingVertical": 8,
+          }
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "fontSize": 14,
+                "fontWeight": "600",
+                "marginRight": 8,
+                "width": 24,
+              },
+              {
+                "color": "#0066FF",
+              },
+            ]
+          }
+        >
+          3
+          .
+        </Text>
+        <Text
+          numberOfLines={2}
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 14,
+                "lineHeight": 20,
+              },
+              {
+                "color": "#1F2937",
+              },
+            ]
+          }
+        >
+          Patient Data Privacy Laws
+        </Text>
+      </View>
+    </View>
+  </View>
+  <View
+    accessibilityLabel="Daha fazla trend gör"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "alignSelf": "flex-start",
+        "paddingVertical": 4,
+      }
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "fontSize": 14,
+            "fontWeight": "500",
+          },
+          {
+            "color": "#0066FF",
+          },
+        ]
+      }
+    >
+      Daha Fazla Gör →
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`AITrendInsightCard Snapshot matches snapshot without profession 1`] = `
+<View
+  entering={
+    {
+      "damping": [MockFunction],
+      "delay": [MockFunction] {
+        "calls": [
+          [
+            100,
+          ],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": [Circular],
+          },
+        ],
+      },
+      "duration": [MockFunction] {
+        "calls": [
+          [
+            400,
+          ],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": [Circular],
+          },
+        ],
+      },
+      "springify": [MockFunction],
+      "withInitialValues": [MockFunction],
+    }
+  }
+  style={
+    [
+      {
+        "borderRadius": 12,
+        "borderWidth": 1,
+        "marginHorizontal": 16,
+        "marginVertical": 8,
+        "padding": 16,
+      },
+      {
+        "backgroundColor": "#FFFFFF",
+        "borderColor": "#E5E7EB",
+      },
+    ]
+  }
+  testID="ai-trend-insight-card"
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "flexDirection": "row",
+        "marginBottom": 12,
+      }
+    }
+  >
+    <Text
+      color="#0066FF"
+      size={28}
+      style={
+        {
+          "marginRight": 8,
+        }
+      }
+    >
+      bulb-outline
+    </Text>
+    <Text
+      style={
+        [
+          {
+            "flex": 1,
+            "fontSize": 16,
+            "fontWeight": "600",
+          },
+          {
+            "color": "#1F2937",
+          },
+        ]
+      }
+    >
+      Bu Haftanın Trendleri
+    </Text>
+  </View>
+  <View
+    style={
+      {
+        "marginBottom": 12,
+      }
+    }
+  >
+    <View
+      entering={
+        {
+          "delay": [MockFunction] {
+            "calls": [
+              [
+                100,
+              ],
+              [
+                150,
+              ],
+              [
+                200,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "duration": [MockFunction] {
+            "calls": [
+              [
+                300,
+              ],
+              [
+                300,
+              ],
+              [
+                300,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "springify": [MockFunction],
+        }
+      }
+    >
+      <View
+        accessibilityLabel="1. Remote Work Culture"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "borderRadius": 8,
+            "flexDirection": "row",
+            "paddingVertical": 8,
+          }
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "fontSize": 14,
+                "fontWeight": "600",
+                "marginRight": 8,
+                "width": 24,
+              },
+              {
+                "color": "#0066FF",
+              },
+            ]
+          }
+        >
+          1
+          .
+        </Text>
+        <Text
+          numberOfLines={2}
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 14,
+                "lineHeight": 20,
+              },
+              {
+                "color": "#1F2937",
+              },
+            ]
+          }
+        >
+          Remote Work Culture
+        </Text>
+      </View>
+    </View>
+    <View
+      entering={
+        {
+          "delay": [MockFunction] {
+            "calls": [
+              [
+                100,
+              ],
+              [
+                150,
+              ],
+              [
+                200,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "duration": [MockFunction] {
+            "calls": [
+              [
+                300,
+              ],
+              [
+                300,
+              ],
+              [
+                300,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "springify": [MockFunction],
+        }
+      }
+    >
+      <View
+        accessibilityLabel="2. AI Art Generation Debate"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "borderRadius": 8,
+            "flexDirection": "row",
+            "paddingVertical": 8,
+          }
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "fontSize": 14,
+                "fontWeight": "600",
+                "marginRight": 8,
+                "width": 24,
+              },
+              {
+                "color": "#0066FF",
+              },
+            ]
+          }
+        >
+          2
+          .
+        </Text>
+        <Text
+          numberOfLines={2}
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 14,
+                "lineHeight": 20,
+              },
+              {
+                "color": "#1F2937",
+              },
+            ]
+          }
+        >
+          AI Art Generation Debate
+        </Text>
+      </View>
+    </View>
+    <View
+      entering={
+        {
+          "delay": [MockFunction] {
+            "calls": [
+              [
+                100,
+              ],
+              [
+                150,
+              ],
+              [
+                200,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "duration": [MockFunction] {
+            "calls": [
+              [
+                300,
+              ],
+              [
+                300,
+              ],
+              [
+                300,
+              ],
+            ],
+            "results": [
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+              {
+                "type": "return",
+                "value": [Circular],
+              },
+            ],
+          },
+          "springify": [MockFunction],
+        }
+      }
+    >
+      <View
+        accessibilityLabel="3. Hybrid Teaching Methods"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "borderRadius": 8,
+            "flexDirection": "row",
+            "paddingVertical": 8,
+          }
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "fontSize": 14,
+                "fontWeight": "600",
+                "marginRight": 8,
+                "width": 24,
+              },
+              {
+                "color": "#0066FF",
+              },
+            ]
+          }
+        >
+          3
+          .
+        </Text>
+        <Text
+          numberOfLines={2}
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 14,
+                "lineHeight": 20,
+              },
+              {
+                "color": "#1F2937",
+              },
+            ]
+          }
+        >
+          Hybrid Teaching Methods
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
+`;

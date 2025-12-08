@@ -18,7 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
 import { spring } from '@theme/animations';
-import { styles, TAB_ICON_SIZE } from './AnimatedTabBar.styles';
+import { styles, TAB_ICON_SIZE, CENTER_FAB_ICON_SIZE } from './AnimatedTabBar.styles';
 import type { AnimatedTabBarProps, TabButtonProps } from './AnimatedTabBar.types';
 
 // ============================================================================
@@ -31,6 +31,9 @@ const TabButton: React.FC<TabButtonProps> = memo(({ item, focused, onPress, onLo
   const colors = useColors();
   const { trigger } = useHaptic();
 
+  // Determine if this is the center FAB
+  const isCenterFab = item.isCenterFab ?? false;
+
   // Animation values
   const scale = useSharedValue(1);
   const focusProgress = useSharedValue(focused ? 1 : 0);
@@ -39,14 +42,14 @@ const TabButton: React.FC<TabButtonProps> = memo(({ item, focused, onPress, onLo
   useEffect(() => {
     focusProgress.value = withSpring(focused ? 1 : 0, spring.snappy);
 
-    if (focused) {
-      // Very subtle bounce when focused - reduced animation
+    if (focused && !isCenterFab) {
+      // Very subtle bounce when focused - reduced animation (normal tabs only)
       scale.value = withSequence(
         withSpring(1.05, { damping: 10, stiffness: 300 }),
         withSpring(1, { damping: 15, stiffness: 250 }),
       );
     }
-  }, [focused, focusProgress, scale]);
+  }, [focused, focusProgress, scale, isCenterFab]);
 
   // Handle press
   const handlePress = useCallback(() => {
@@ -85,6 +88,37 @@ const TabButton: React.FC<TabButtonProps> = memo(({ item, focused, onPress, onLo
 
   const iconColor = focused ? colors.interactive.default : colors.text.tertiary;
 
+  // Center FAB rendering (elevated button)
+  if (isCenterFab) {
+    const fabContainerStyle = useAnimatedStyle(() => ({
+      transform: [{ scale: scale.value }],
+    }));
+
+    return (
+      <View style={styles.centerFabContainer}>
+        <AnimatedPressable
+          style={[
+            styles.centerFabButton,
+            fabContainerStyle,
+            { backgroundColor: colors.interactive.default },
+          ]}
+          onPress={handlePress}
+          onLongPress={handleLongPress}
+          accessibilityRole="button"
+          accessibilityLabel={item.accessibilityLabel}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <Icon name={item.icon} size={CENTER_FAB_ICON_SIZE} color={colors.text.inverse} />
+        </AnimatedPressable>
+        {item.label && (
+          <Text style={[styles.centerFabLabel, { color: colors.text.secondary }]}>
+            {item.label}
+          </Text>
+        )}
+      </View>
+    );
+  }
+
+  // Normal tab button rendering
   return (
     <AnimatedPressable
       style={[styles.tabButton, containerStyle]}

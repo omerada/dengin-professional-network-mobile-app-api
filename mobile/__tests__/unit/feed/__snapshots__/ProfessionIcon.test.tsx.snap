@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProfessionIcon Snapshot matches snapshot for pressable icon 1`] = `
+<View
+  accessibilityLabel="Doktor detaylarını gör"
+  accessibilityRole="button"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    {
+      "alignItems": "center",
+      "height": 40,
+      "justifyContent": "center",
+      "marginRight": 12,
+      "width": 40,
+    }
+  }
+  testID="profession-icon"
+>
+  <Text
+    color="#4CAF50"
+    size={24}
+    style={{}}
+  >
+    medical
+  </Text>
+</View>
+`;
+
+exports[`ProfessionIcon Snapshot matches snapshot for static icon 1`] = `
+<Text
+  accessibilityLabel="Doktor meslek simgesi"
+  accessibilityRole="image"
+  color="#4CAF50"
+  size={24}
+  style={{}}
+  testID="test-icon"
+>
+  medical
+</Text>
+`;

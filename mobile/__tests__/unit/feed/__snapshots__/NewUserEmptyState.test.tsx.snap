@@ -1,0 +1,2853 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NewUserEmptyState Snapshot matches snapshot with new user 1`] = `
+<View
+  entering={
+    {
+      "damping": [MockFunction],
+      "delay": [MockFunction],
+      "duration": [MockFunction] {
+        "calls": [
+          [
+            400,
+          ],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": [Circular],
+          },
+        ],
+      },
+      "springify": [MockFunction],
+      "withInitialValues": [MockFunction],
+    }
+  }
+  style={
+    {
+      "alignItems": "center",
+      "flex": 1,
+      "justifyContent": "center",
+      "paddingHorizontal": 24,
+      "paddingVertical": 40,
+    }
+  }
+  testID="new-user-empty-state"
+>
+  <View
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              500,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      {
+        "marginBottom": 24,
+      }
+    }
+  >
+    <Text
+      color="#0066FF"
+      size={80}
+    >
+      rocket-outline
+    </Text>
+  </View>
+  <Text
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              500,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      [
+        {
+          "fontSize": 24,
+          "fontWeight": "700",
+          "marginBottom": 12,
+          "textAlign": "center",
+        },
+        {
+          "color": "#1F2937",
+        },
+      ]
+    }
+  >
+    Hoş Geldin, 
+    Ahmet
+    ! 👋
+  </Text>
+  <Text
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              500,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      [
+        {
+          "fontSize": 16,
+          "lineHeight": 24,
+          "marginBottom": 32,
+          "paddingHorizontal": 16,
+          "textAlign": "center",
+        },
+        {
+          "color": "#6B7280",
+        },
+      ]
+    }
+  >
+    Meslektaş topluluğuna katılmak için birkaç adım kaldı
+  </Text>
+  <View
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              500,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      {
+        "marginBottom": 24,
+        "width": "100%",
+      }
+    }
+  >
+    <View
+      accessibilityHint="Profil fotoğrafı ekle için dokun"
+      accessibilityLabel="Profil fotoğrafı ekle, tamamlanmadı, 10 XP"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 12,
+            "flexDirection": "row",
+            "marginBottom": 8,
+            "paddingHorizontal": 16,
+            "paddingVertical": 12,
+          },
+          {
+            "backgroundColor": "#F3F4F6",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flex": 1,
+            "flexDirection": "row",
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 12,
+                "height": 24,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 24,
+              },
+              [
+                {
+                  "borderWidth": 2,
+                },
+                {
+                  "borderColor": "#D1D5DB",
+                },
+              ],
+            ]
+          }
+        />
+        <Text
+          color="#6B7280"
+          size={20}
+          style={
+            {
+              "marginRight": 12,
+            }
+          }
+        >
+          image-outline
+        </Text>
+        <Text
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 15,
+                "fontWeight": "500",
+              },
+              {
+                "color": "#6B7280",
+              },
+            ]
+          }
+        >
+          Profil fotoğrafı ekle
+        </Text>
+      </View>
+      <View
+        style={
+          [
+            {
+              "borderRadius": 12,
+              "marginLeft": 8,
+              "paddingHorizontal": 10,
+              "paddingVertical": 4,
+            },
+            {
+              "backgroundColor": "#E5E7EB",
+            },
+          ]
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "700",
+              },
+              {
+                "color": "#9CA3AF",
+              },
+            ]
+          }
+        >
+          +
+          10
+           XP
+        </Text>
+      </View>
+    </View>
+    <View
+      accessibilityHint="Bio yaz için dokun"
+      accessibilityLabel="Bio yaz, tamamlanmadı, 10 XP"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 12,
+            "flexDirection": "row",
+            "marginBottom": 8,
+            "paddingHorizontal": 16,
+            "paddingVertical": 12,
+          },
+          {
+            "backgroundColor": "#F3F4F6",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flex": 1,
+            "flexDirection": "row",
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 12,
+                "height": 24,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 24,
+              },
+              [
+                {
+                  "borderWidth": 2,
+                },
+                {
+                  "borderColor": "#D1D5DB",
+                },
+              ],
+            ]
+          }
+        />
+        <Text
+          color="#6B7280"
+          size={20}
+          style={
+            {
+              "marginRight": 12,
+            }
+          }
+        >
+          create-outline
+        </Text>
+        <Text
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 15,
+                "fontWeight": "500",
+              },
+              {
+                "color": "#6B7280",
+              },
+            ]
+          }
+        >
+          Bio yaz
+        </Text>
+      </View>
+      <View
+        style={
+          [
+            {
+              "borderRadius": 12,
+              "marginLeft": 8,
+              "paddingHorizontal": 10,
+              "paddingVertical": 4,
+            },
+            {
+              "backgroundColor": "#E5E7EB",
+            },
+          ]
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "700",
+              },
+              {
+                "color": "#9CA3AF",
+              },
+            ]
+          }
+        >
+          +
+          10
+           XP
+        </Text>
+      </View>
+    </View>
+    <View
+      accessibilityHint="5 kişiyi takip et için dokun"
+      accessibilityLabel="5 kişiyi takip et, tamamlanmadı, 20 XP"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 12,
+            "flexDirection": "row",
+            "marginBottom": 8,
+            "paddingHorizontal": 16,
+            "paddingVertical": 12,
+          },
+          {
+            "backgroundColor": "#F3F4F6",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flex": 1,
+            "flexDirection": "row",
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 12,
+                "height": 24,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 24,
+              },
+              [
+                {
+                  "borderWidth": 2,
+                },
+                {
+                  "borderColor": "#D1D5DB",
+                },
+              ],
+            ]
+          }
+        />
+        <Text
+          color="#6B7280"
+          size={20}
+          style={
+            {
+              "marginRight": 12,
+            }
+          }
+        >
+          people-outline
+        </Text>
+        <Text
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 15,
+                "fontWeight": "500",
+              },
+              {
+                "color": "#6B7280",
+              },
+            ]
+          }
+        >
+          5 kişiyi takip et
+        </Text>
+      </View>
+      <View
+        style={
+          [
+            {
+              "borderRadius": 12,
+              "marginLeft": 8,
+              "paddingHorizontal": 10,
+              "paddingVertical": 4,
+            },
+            {
+              "backgroundColor": "#E5E7EB",
+            },
+          ]
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "700",
+              },
+              {
+                "color": "#9CA3AF",
+              },
+            ]
+          }
+        >
+          +
+          20
+           XP
+        </Text>
+      </View>
+    </View>
+    <View
+      accessibilityHint="İlk gönderiyi paylaş için dokun"
+      accessibilityLabel="İlk gönderiyi paylaş, tamamlanmadı, 30 XP"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 12,
+            "flexDirection": "row",
+            "marginBottom": 8,
+            "paddingHorizontal": 16,
+            "paddingVertical": 12,
+          },
+          {
+            "backgroundColor": "#F3F4F6",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flex": 1,
+            "flexDirection": "row",
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 12,
+                "height": 24,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 24,
+              },
+              [
+                {
+                  "borderWidth": 2,
+                },
+                {
+                  "borderColor": "#D1D5DB",
+                },
+              ],
+            ]
+          }
+        />
+        <Text
+          color="#6B7280"
+          size={20}
+          style={
+            {
+              "marginRight": 12,
+            }
+          }
+        >
+          add-circle-outline
+        </Text>
+        <Text
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 15,
+                "fontWeight": "500",
+              },
+              {
+                "color": "#6B7280",
+              },
+            ]
+          }
+        >
+          İlk gönderiyi paylaş
+        </Text>
+      </View>
+      <View
+        style={
+          [
+            {
+              "borderRadius": 12,
+              "marginLeft": 8,
+              "paddingHorizontal": 10,
+              "paddingVertical": 4,
+            },
+            {
+              "backgroundColor": "#E5E7EB",
+            },
+          ]
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "700",
+              },
+              {
+                "color": "#9CA3AF",
+              },
+            ]
+          }
+        >
+          +
+          30
+           XP
+        </Text>
+      </View>
+    </View>
+  </View>
+  <View
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              500,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      {
+        "marginBottom": 24,
+        "width": "100%",
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+          "marginBottom": 8,
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "fontSize": 14,
+              "fontWeight": "600",
+            },
+            {
+              "color": "#6B7280",
+            },
+          ]
+        }
+      >
+        İlerleme
+      </Text>
+      <Text
+        style={
+          [
+            {
+              "fontSize": 14,
+              "fontWeight": "700",
+            },
+            {
+              "color": "#0066FF",
+            },
+          ]
+        }
+      >
+        0
+        % • 
+        0
+         XP
+      </Text>
+    </View>
+    <View
+      style={
+        [
+          {
+            "borderRadius": 4,
+            "height": 8,
+            "overflow": "hidden",
+          },
+          {
+            "backgroundColor": "#E5E7EB",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "borderRadius": 4,
+              "height": "100%",
+            },
+            {
+              "backgroundColor": "#0066FF",
+              "width": "0%",
+            },
+          ]
+        }
+      />
+    </View>
+  </View>
+  <View
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              500,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      {
+        "width": "100%",
+      }
+    }
+  >
+    <View
+      accessibilityHint="Profil düzenleme ekranına git"
+      accessibilityLabel="Profilimi tamamla"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 12,
+            "height": 52,
+            "justifyContent": "center",
+            "width": "100%",
+          },
+          {
+            "backgroundColor": "#0066FF",
+          },
+        ]
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "fontSize": 16,
+              "fontWeight": "600",
+            },
+            {
+              "color": "#FFFFFF",
+            },
+          ]
+        }
+      >
+        Profilimi Tamamla
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`NewUserEmptyState Snapshot matches snapshot with partial completion 1`] = `
+<View
+  entering={
+    {
+      "damping": [MockFunction],
+      "delay": [MockFunction],
+      "duration": [MockFunction] {
+        "calls": [
+          [
+            400,
+          ],
+        ],
+        "results": [
+          {
+            "type": "return",
+            "value": [Circular],
+          },
+        ],
+      },
+      "springify": [MockFunction],
+      "withInitialValues": [MockFunction],
+    }
+  }
+  style={
+    {
+      "alignItems": "center",
+      "flex": 1,
+      "justifyContent": "center",
+      "paddingHorizontal": 24,
+      "paddingVertical": 40,
+    }
+  }
+  testID="new-user-empty-state"
+>
+  <View
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              500,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      {
+        "marginBottom": 24,
+      }
+    }
+  >
+    <Text
+      color="#0066FF"
+      size={80}
+    >
+      rocket-outline
+    </Text>
+  </View>
+  <Text
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              500,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      [
+        {
+          "fontSize": 24,
+          "fontWeight": "700",
+          "marginBottom": 12,
+          "textAlign": "center",
+        },
+        {
+          "color": "#1F2937",
+        },
+      ]
+    }
+  >
+    Hoş Geldin, 
+    Ahmet
+    ! 👋
+  </Text>
+  <Text
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              500,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      [
+        {
+          "fontSize": 16,
+          "lineHeight": 24,
+          "marginBottom": 32,
+          "paddingHorizontal": 16,
+          "textAlign": "center",
+        },
+        {
+          "color": "#6B7280",
+        },
+      ]
+    }
+  >
+    Meslektaş topluluğuna katılmak için birkaç adım kaldı
+  </Text>
+  <View
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              500,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      {
+        "marginBottom": 24,
+        "width": "100%",
+      }
+    }
+  >
+    <View
+      accessibilityHint="Profil fotoğrafı ekle için dokun"
+      accessibilityLabel="Profil fotoğrafı ekle, tamamlandı, 10 XP"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 12,
+            "flexDirection": "row",
+            "marginBottom": 8,
+            "paddingHorizontal": 16,
+            "paddingVertical": 12,
+          },
+          {
+            "backgroundColor": "#ECFDF5",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flex": 1,
+            "flexDirection": "row",
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 12,
+                "height": 24,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 24,
+              },
+              {
+                "backgroundColor": "#10B981",
+              },
+            ]
+          }
+        >
+          <Text
+            color="#FFFFFF"
+            size={16}
+          >
+            checkmark
+          </Text>
+        </View>
+        <Text
+          color="#10B981"
+          size={20}
+          style={
+            {
+              "marginRight": 12,
+            }
+          }
+        >
+          image-outline
+        </Text>
+        <Text
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 15,
+                "fontWeight": "500",
+              },
+              {
+                "color": "#1F2937",
+              },
+            ]
+          }
+        >
+          Profil fotoğrafı ekle
+        </Text>
+      </View>
+      <View
+        style={
+          [
+            {
+              "borderRadius": 12,
+              "marginLeft": 8,
+              "paddingHorizontal": 10,
+              "paddingVertical": 4,
+            },
+            {
+              "backgroundColor": "#10B981",
+            },
+          ]
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "700",
+              },
+              {
+                "color": "#FFFFFF",
+              },
+            ]
+          }
+        >
+          +
+          10
+           XP
+        </Text>
+      </View>
+    </View>
+    <View
+      accessibilityHint="Bio yaz için dokun"
+      accessibilityLabel="Bio yaz, tamamlandı, 10 XP"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 12,
+            "flexDirection": "row",
+            "marginBottom": 8,
+            "paddingHorizontal": 16,
+            "paddingVertical": 12,
+          },
+          {
+            "backgroundColor": "#ECFDF5",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flex": 1,
+            "flexDirection": "row",
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 12,
+                "height": 24,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 24,
+              },
+              {
+                "backgroundColor": "#10B981",
+              },
+            ]
+          }
+        >
+          <Text
+            color="#FFFFFF"
+            size={16}
+          >
+            checkmark
+          </Text>
+        </View>
+        <Text
+          color="#10B981"
+          size={20}
+          style={
+            {
+              "marginRight": 12,
+            }
+          }
+        >
+          create-outline
+        </Text>
+        <Text
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 15,
+                "fontWeight": "500",
+              },
+              {
+                "color": "#1F2937",
+              },
+            ]
+          }
+        >
+          Bio yaz
+        </Text>
+      </View>
+      <View
+        style={
+          [
+            {
+              "borderRadius": 12,
+              "marginLeft": 8,
+              "paddingHorizontal": 10,
+              "paddingVertical": 4,
+            },
+            {
+              "backgroundColor": "#10B981",
+            },
+          ]
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "700",
+              },
+              {
+                "color": "#FFFFFF",
+              },
+            ]
+          }
+        >
+          +
+          10
+           XP
+        </Text>
+      </View>
+    </View>
+    <View
+      accessibilityHint="5 kişiyi takip et için dokun"
+      accessibilityLabel="5 kişiyi takip et, tamamlanmadı, 20 XP"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 12,
+            "flexDirection": "row",
+            "marginBottom": 8,
+            "paddingHorizontal": 16,
+            "paddingVertical": 12,
+          },
+          {
+            "backgroundColor": "#F3F4F6",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flex": 1,
+            "flexDirection": "row",
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 12,
+                "height": 24,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 24,
+              },
+              [
+                {
+                  "borderWidth": 2,
+                },
+                {
+                  "borderColor": "#D1D5DB",
+                },
+              ],
+            ]
+          }
+        />
+        <Text
+          color="#6B7280"
+          size={20}
+          style={
+            {
+              "marginRight": 12,
+            }
+          }
+        >
+          people-outline
+        </Text>
+        <Text
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 15,
+                "fontWeight": "500",
+              },
+              {
+                "color": "#6B7280",
+              },
+            ]
+          }
+        >
+          5 kişiyi takip et
+        </Text>
+      </View>
+      <View
+        style={
+          [
+            {
+              "borderRadius": 12,
+              "marginLeft": 8,
+              "paddingHorizontal": 10,
+              "paddingVertical": 4,
+            },
+            {
+              "backgroundColor": "#E5E7EB",
+            },
+          ]
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "700",
+              },
+              {
+                "color": "#9CA3AF",
+              },
+            ]
+          }
+        >
+          +
+          20
+           XP
+        </Text>
+      </View>
+    </View>
+    <View
+      accessibilityHint="İlk gönderiyi paylaş için dokun"
+      accessibilityLabel="İlk gönderiyi paylaş, tamamlanmadı, 30 XP"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 12,
+            "flexDirection": "row",
+            "marginBottom": 8,
+            "paddingHorizontal": 16,
+            "paddingVertical": 12,
+          },
+          {
+            "backgroundColor": "#F3F4F6",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flex": 1,
+            "flexDirection": "row",
+          }
+        }
+      >
+        <View
+          style={
+            [
+              {
+                "alignItems": "center",
+                "borderRadius": 12,
+                "height": 24,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 24,
+              },
+              [
+                {
+                  "borderWidth": 2,
+                },
+                {
+                  "borderColor": "#D1D5DB",
+                },
+              ],
+            ]
+          }
+        />
+        <Text
+          color="#6B7280"
+          size={20}
+          style={
+            {
+              "marginRight": 12,
+            }
+          }
+        >
+          add-circle-outline
+        </Text>
+        <Text
+          style={
+            [
+              {
+                "flex": 1,
+                "fontSize": 15,
+                "fontWeight": "500",
+              },
+              {
+                "color": "#6B7280",
+              },
+            ]
+          }
+        >
+          İlk gönderiyi paylaş
+        </Text>
+      </View>
+      <View
+        style={
+          [
+            {
+              "borderRadius": 12,
+              "marginLeft": 8,
+              "paddingHorizontal": 10,
+              "paddingVertical": 4,
+            },
+            {
+              "backgroundColor": "#E5E7EB",
+            },
+          ]
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "fontSize": 12,
+                "fontWeight": "700",
+              },
+              {
+                "color": "#9CA3AF",
+              },
+            ]
+          }
+        >
+          +
+          30
+           XP
+        </Text>
+      </View>
+    </View>
+  </View>
+  <View
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              500,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      {
+        "marginBottom": 24,
+        "width": "100%",
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "flexDirection": "row",
+          "justifyContent": "space-between",
+          "marginBottom": 8,
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "fontSize": 14,
+              "fontWeight": "600",
+            },
+            {
+              "color": "#6B7280",
+            },
+          ]
+        }
+      >
+        İlerleme
+      </Text>
+      <Text
+        style={
+          [
+            {
+              "fontSize": 14,
+              "fontWeight": "700",
+            },
+            {
+              "color": "#0066FF",
+            },
+          ]
+        }
+      >
+        50
+        % • 
+        20
+         XP
+      </Text>
+    </View>
+    <View
+      style={
+        [
+          {
+            "borderRadius": 4,
+            "height": 8,
+            "overflow": "hidden",
+          },
+          {
+            "backgroundColor": "#E5E7EB",
+          },
+        ]
+      }
+    >
+      <View
+        style={
+          [
+            {
+              "borderRadius": 4,
+              "height": "100%",
+            },
+            {
+              "backgroundColor": "#0066FF",
+              "width": "50%",
+            },
+          ]
+        }
+      />
+    </View>
+  </View>
+  <View
+    entering={
+      {
+        "delay": [MockFunction] {
+          "calls": [
+            [
+              100,
+            ],
+            [
+              200,
+            ],
+            [
+              300,
+            ],
+            [
+              400,
+            ],
+            [
+              500,
+            ],
+            [
+              600,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "duration": [MockFunction] {
+          "calls": [
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+            [
+              400,
+            ],
+          ],
+          "results": [
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+            {
+              "type": "return",
+              "value": [Circular],
+            },
+          ],
+        },
+        "springify": [MockFunction],
+      }
+    }
+    style={
+      {
+        "width": "100%",
+      }
+    }
+  >
+    <View
+      accessibilityHint="Profil düzenleme ekranına git"
+      accessibilityLabel="Profilimi tamamla"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        [
+          {
+            "alignItems": "center",
+            "borderRadius": 12,
+            "height": 52,
+            "justifyContent": "center",
+            "width": "100%",
+          },
+          {
+            "backgroundColor": "#0066FF",
+          },
+        ]
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "fontSize": 16,
+              "fontWeight": "600",
+            },
+            {
+              "color": "#FFFFFF",
+            },
+          ]
+        }
+      >
+        Profilimi Tamamla
+      </Text>
+    </View>
+  </View>
+</View>
+`;

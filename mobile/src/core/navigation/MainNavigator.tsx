@@ -47,11 +47,19 @@ const TAB_CONFIG: TabItem[] = [
     accessibilityLabel: 'Mesajlar sekmesi',
   },
   {
+    name: 'CreatePostTab',
+    label: 'Oluştur',
+    icon: 'add-circle',
+    focusedIcon: 'add-circle',
+    accessibilityLabel: 'Gönderi oluştur',
+    isCenterFab: true,
+  },
+  {
     name: 'NotificationsTab',
     label: 'Bildirimler',
-    icon: 'notifications-outline',
-    focusedIcon: 'notifications',
-    accessibilityLabel: 'Bildirimler sekmesi',
+    icon: 'trophy-outline',
+    focusedIcon: 'trophy',
+    accessibilityLabel: 'Etkinlik sekmesi',
   },
   {
     name: 'ProfileTab',
@@ -174,6 +182,18 @@ export const MainNavigator: React.FC = () => {
       }}>
       <Tab.Screen name="FeedTab" component={FeedStackNavigator} />
       <Tab.Screen name="MessagingTab" component={MessagingStackNavigator} />
+      <Tab.Screen
+        name="CreatePostTab"
+        component={FeedStackNavigator}
+        listeners={({ navigation }) => ({
+          tabPress: e => {
+            e.preventDefault();
+            navigation.navigate('FeedTab', {
+              screen: 'CreatePost',
+            } as never);
+          },
+        })}
+      />
       <Tab.Screen name="NotificationsTab" component={NotificationsStackNavigator} />
       <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} />
     </Tab.Navigator>
