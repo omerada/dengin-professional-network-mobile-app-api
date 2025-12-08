@@ -60,14 +60,9 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(users));
     }
 
-    @GetMapping("/{id}")
-    @Operation(summary = "Get user by ID", description = "Get public profile of any user by ID")
-    public ResponseEntity<ApiResponse<UserResponse>> getUserById(
-            @PathVariable Long id
-    ) {
-        UserResponse user = userService.getUserById(id);
-        return ResponseEntity.ok(ApiResponse.success(user));
-    }
+    // Removed: Duplicate endpoint - use UserProfileController.getUserProfile() instead
+    // @GetMapping("/{id}") conflicts with UserProfileController.getUserProfile()
+    // Use GET /api/users/{userId} from UserProfileController for user profiles
 
     @PutMapping("/me")
     @Operation(summary = "Update profile", description = "Update current user's profile information")

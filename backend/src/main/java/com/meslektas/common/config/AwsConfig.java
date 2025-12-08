@@ -49,7 +49,8 @@ public class AwsConfig {
 
         var builder = S3Client.builder()
                 .region(Region.of(region))
-                .credentialsProvider(credentialsProvider);
+                .credentialsProvider(credentialsProvider)
+                .forcePathStyle(true); // Use path-style URLs for LocalStack compatibility
 
         // Use LocalStack endpoint for development
         if (endpoint != null && !endpoint.isEmpty()) {
@@ -70,7 +71,12 @@ public class AwsConfig {
 
         var builder = S3Presigner.builder()
                 .region(Region.of(region))
-                .credentialsProvider(credentialsProvider);
+                .credentialsProvider(credentialsProvider)
+                .serviceConfiguration(
+                    software.amazon.awssdk.services.s3.S3Configuration.builder()
+                        .pathStyleAccessEnabled(true) // Use path-style URLs for LocalStack
+                        .build()
+                );
 
         // Use LocalStack endpoint for development
         if (endpoint != null && !endpoint.isEmpty()) {

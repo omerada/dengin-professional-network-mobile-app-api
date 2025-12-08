@@ -48,16 +48,17 @@ services:
       - "4510-4559:4510-4559" # External services port range
     environment:
       - SERVICES=s3,rekognition,ses
-      - DEBUG=1
-      - DATA_DIR=/tmp/localstack/data
-      - DOCKER_HOST=unix:///var/run/docker.sock
+      - DEBUG=0
+      - DATA_DIR=/var/lib/localstack
       - AWS_DEFAULT_REGION=eu-central-1
       - AWS_ACCESS_KEY_ID=test
       - AWS_SECRET_ACCESS_KEY=test
+      - HOSTNAME_EXTERNAL=192.168.1.102  # For mobile/external access
+      - PERSISTENCE=1  # Enable data persistence
     volumes:
-      - localstack_data:/tmp/localstack
-      - ./docker/localstack:/docker-entrypoint-initaws.d
-      - /var/run/docker.sock:/var/run/docker.sock
+      - localstack_data:/var/lib/localstack
+      - ./docker/localstack:/etc/localstack/init/ready.d
+      # Docker socket removed for Windows compatibility
     networks:
       - meslektas-network
 

@@ -169,13 +169,30 @@ export const profileApi = {
       onProgress?.(50);
 
       // Step 4: Upload directly to S3 via presigned URL (PUT request)
-      await fetch(presignedUrl, {
+      console.log('[profileApi] Uploading to S3:', {
+        url: presignedUrl,
+        contentType,
+        blobSize: blob.size,
+      });
+
+      const uploadResponse = await fetch(presignedUrl, {
         method: 'PUT',
         body: blob,
         headers: {
           'Content-Type': contentType,
         },
       });
+
+      console.log('[profileApi] S3 Upload response:', {
+        status: uploadResponse.status,
+        statusText: uploadResponse.statusText,
+      });
+
+      if (!uploadResponse.ok) {
+        const errorText = await uploadResponse.text();
+        console.error('[profileApi] S3 Upload failed:', errorText);
+        throw new Error(`S3 upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
+      }
 
       onProgress?.(80);
 
