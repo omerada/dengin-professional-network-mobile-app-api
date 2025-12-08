@@ -431,12 +431,20 @@ FeedScreen (Ana Container)
 │       └── ListFooterComponent
 │           └── LoadingSpinner (Infinite scroll)
 └── TabBar (Bottom Navigation - Global)
-    ├── Home
-    ├── Discover
-    ├── Create
-    ├── Messages
-    └── Profile
+    ├── Ana Sayfa (home-outline/home)
+    ├── Mesajlar (chatbubble-outline/chatbubble)
+    ├── Bildirimler (notifications-outline/notifications)
+    └── Profil (person-outline/person)
 ```
+
+**Bottom Tab Navigation Özellikleri:**
+
+- **Ana Sayfa:** Feed ekranı - gönderileri görüntüleme
+- **Mesajlar:** Mesajlaşma ekranı - direkt mesajlar
+- **Bildirimler:** Bildirim merkezi - beğeni, yorum, takip bildirimleri
+- **Profil:** Kullanıcı profili - ayarlar, kaydedilenler, gönderiler
+
+**NOT:** Profil erişimi bottom tab'dan sağlandığı için header'da profil avatarına gerek yoktur. Bu, header'ı daha minimal ve odaklı tutar.
 
 ### Anasayfa Bölümleri Detayı
 
@@ -449,23 +457,24 @@ FeedScreen (Ana Container)
 **Yapı:**
 
 ```
-┌─────────────────────────────────────────────┐
-│ [Meslek İkonu]  [Tümü|Takip|Popüler]  [🔔][👤] │
-└─────────────────────────────────────────────┘
+┌──────────────────────────────────────┐
+│ [Meslek İkonu]  Ana Sayfa      [🔔] │
+└──────────────────────────────────────┘
 ```
 
-**Özellik:** Sol tarafta kullanıcının mesleğine özel dinamik ikon gösterilir.
+**Özellik:**
+
+- Sol: Kullanıcının mesleğine özel dinamik ikon
+- Orta: "Ana Sayfa" başlığı - basit ve net
+- Sağ: Bildirim ikonu (varsa okunmamış sayısı badge ile)
 
 **İmplementasyon:**
 
 ```typescript
 // FeedHeader Component
 interface FeedHeaderProps {
-  activeFilter: "all" | "following" | "popular";
-  onFilterChange: (filter: FeedFilter) => void;
   unreadNotifications: number;
   onNotificationPress: () => void;
-  onAvatarPress: () => void;
   userProfession?: Profession; // Kullanıcının mesleği
 }
 
@@ -483,11 +492,8 @@ const PROFESSION_ICONS: Record<ProfessionCategory, string> = {
 
 // FeedHeader Implementation
 export const FeedHeader: React.FC<FeedHeaderProps> = ({
-  activeFilter,
-  onFilterChange,
   unreadNotifications,
   onNotificationPress,
-  onAvatarPress,
   userProfession,
 }) => {
   const { colors } = useTheme();
@@ -523,34 +529,24 @@ export const FeedHeader: React.FC<FeedHeaderProps> = ({
           style={styles.professionIconContainer}
         >
           <Icon name={professionIcon} size={28} color={iconColor} />
-          {userProfession && (
-            <Text
-              style={[styles.professionLabel, { color: colors.text.secondary }]}
-            >
-              {userProfession.name}
-            </Text>
-          )}
         </Pressable>
       </View>
 
-      {/* Orta: Filter Tabs */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.filterContainer}
-        contentContainerStyle={styles.filterContent}
-      >
-        {FILTER_OPTIONS.map((option) => (
-          <FilterButton
-            key={option.key}
-            option={option}
-            isActive={activeFilter === option.key}
-            onPress={() => onFilterChange(option.key)}
-          />
-        ))}
-      </ScrollView>
+      {/* Orta: Ana Sayfa Başlığı */}
+      <View style={styles.centerSection}>
+        <Text style={[styles.headerTitle, { color: colors.text.primary }]}>
+          Ana Sayfa
+        </Text>
+        {userProfession && (
+          <Text
+            style={[styles.professionSubtitle, { color: colors.text.tertiary }]}
+          >
+            {userProfession.name}
+          </Text>
+        )}
+      </View>
 
-      {/* Sağ: Bildirim + Avatar */}
+      {/* Sağ: Bildirim İkonu */}
       <View style={styles.rightSection}>
         <Pressable onPress={onNotificationPress} style={styles.iconButton}>
           <Icon
@@ -571,10 +567,6 @@ export const FeedHeader: React.FC<FeedHeaderProps> = ({
               </Text>
             </View>
           )}
-        </Pressable>
-
-        <Pressable onPress={onAvatarPress}>
-          <Avatar size="sm" uri={user?.avatarUrl} name={user?.name} />
         </Pressable>
       </View>
     </Animated.View>
@@ -610,28 +602,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   professionIconContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    padding: 8,
   },
-  professionLabel: {
-    fontSize: 13,
-    fontWeight: "500",
-    maxWidth: 80,
-  },
-  filterContainer: {
+  centerSection: {
     flex: 1,
-    marginHorizontal: 12,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  filterContent: {
-    gap: 8,
+  headerTitle: {
+    fontSize: 17,
+    fontWeight: "600",
+    letterSpacing: -0.4,
+  },
+  professionSubtitle: {
+    fontSize: 11,
+    fontWeight: "400",
+    marginTop: 2,
   },
   rightSection: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
   },
   iconButton: {
     position: "relative",
@@ -656,13 +646,37 @@ const styles = StyleSheet.create({
 });
 ```
 
+**Header Tasarımı:**
+
+- **Sol:** Meslek ikonu - renkli, tıklanabilir, meslek kimliği
+- **Orta:** "Ana Sayfa" başlığı + alt satırda meslek adı (opsiyonel)
+- **Sağ:** Bildirim ikonu (okunmamış sayısı badge ile gösterilir)
+
+**Avantajları:**
+
+✅ **Minimal ve Temiz:** Sadece gerekli elementler (meslek ikonu, başlık, bildirim)  
+✅ **Odak:** Kullanıcı nerede olduğunu anında bilir  
+✅ **Bottom Tab Uyumu:** Profil erişimi bottom navigation'dan sağlanır (4. tab)  
+✅ **Mobil UX:** Maksimum içerik alanı, minimum distraction  
+✅ **Bildirim Odaklı:** Önemli bildirimler header'da badge ile belirgin görüntülenir
+
+**NOT:** Filtre seçenekleri (Tümü/Takip/Popüler) artık header'da değil, feed içinde ayrı bir filter bar olarak gösterilecek:
+
+```typescript
+// Feed Filter Bar (Header'ın hemen altında)
+<View style={styles.filterBar}>
+  <FilterChip label="Tümü" isActive={filter === 'all'} onPress={...} />
+  <FilterChip label="Takip Ettiklerim" isActive={filter === 'following'} onPress={...} />
+  <FilterChip label="Popüler" isActive={filter === 'popular'} onPress={...} />
+</View>
+```
+
 **Meslek İkonu Özellikleri:**
 
 - **Dinamik:** Kullanıcının mesleğine göre otomatik değişir
 - **Renkli:** Her meslek kategorisinin kendine özel rengi vardır
 - **Tıklanabilir:** İkona tıklayarak meslek detayları görülebilir
-- **Etiketli:** İkon yanında kısaltılmış meslek adı gösterilir
-- **Responsive:** Uzun meslek isimleri otomatik kısaltılır (max 80px)
+- **Subtitle:** Ortada meslek adı alt başlık olarak gösterilir
 
 **Meslek İkon Haritası:**
 
@@ -683,6 +697,21 @@ const styles = StyleSheet.create({
 2. **Meslek Değişikliği:** İkona tıklayarak meslek bilgilerini görüntüleyebilir
 3. **Görsel Tanıma:** Renk ve ikon sayesinde hangi meslek topluluğunda olduğunu anında bilir
 4. **Çoklu Meslek:** Kullanıcı birden fazla mesleğe sahipse, aktif meslek ikonu gösterilir
+5. **Bildirim Badge:**
+   - Okunmamış bildirim yoksa: `notifications-outline` ikonu (boş)
+   - Okunmamış bildirim varsa: `notifications` ikonu (dolu) + kırmızı badge
+   - Badge üzerinde sayı: 1-9 arası direkt sayı, 9+'dan fazla ise "9+"
+   - Badge rengi: `colors.error.main` (#FF3B30) - dikkat çekici kırmızı
+   - Badge konumu: İkon'un sağ üst köşesi (position: absolute)
+
+**Bildirim Badge Görselleştirme:**
+
+```
+Bildirim Yok:        Bildirim Var (3):      Bildirim Çok (10+):
+┌──────┐            ┌──────┐ ❸             ┌──────┐ 9⁺
+│  🔔  │            │  🔔  │               │  🔔  │
+└──────┘            └──────┘               └──────┘
+```
 
 #### 2. Verification Prompt Card (Conditional)
 
@@ -1451,6 +1480,9 @@ export const FeedScreen: React.FC = () => {
   const user = useAuthStore((state) => state.user);
   const isVerified = user?.isVerified ?? false;
 
+  // Notifications state (backend'den gelecek)
+  const unreadNotifications = 3; // TODO: useNotifications hook'undan gelecek
+
   // Feed data
   const professionFilter =
     activeFilter === "all" ? undefined : user?.professionId;
@@ -1578,8 +1610,11 @@ export const FeedScreen: React.FC = () => {
       style={{ flex: 1, backgroundColor: colors.background.default }}
     >
       <FeedHeader
-        activeFilter={activeFilter}
-        onFilterChange={setActiveFilter}
+        unreadNotifications={unreadNotifications}
+        onNotificationPress={() =>
+          navigation.navigate("NotificationsTab" as never)
+        }
+        userProfession={user?.profession}
       />
 
       <FlashList
