@@ -40,8 +40,11 @@ export interface AISeedTrendCard {
 }
 
 /**
- * Mock trending topics for different professions
- * TODO: Replace with real AI API call when backend ready
+ * Static trending topics for different professions
+ * Used as seed content when user's following list has no posts
+ *
+ * Note: This is intentionally static (not from backend API) as it serves
+ * as inspirational content for empty states, not dynamic trends.
  */
 export const MOCK_PROFESSION_TRENDS: Record<string, AISeedTrendCard[]> = {
   MEDICAL: [

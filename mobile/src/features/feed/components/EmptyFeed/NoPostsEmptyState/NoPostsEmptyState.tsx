@@ -69,14 +69,11 @@ export const NoPostsEmptyState: React.FC<NoPostsEmptyStateProps> = memo(
     }, [onCreatePost, trigger]);
 
     // Handle trend card press
-    const handleTrendPress = useCallback(
-      (trendId: string) => {
-        trigger('light');
-        // TODO: Navigate to trend details or search
-        console.log(`Trend pressed: ${trendId}`);
-      },
-      [trigger],
-    );
+    const handleTrendPress = useCallback(() => {
+      trigger('light');
+      // Navigate to explore trends (same action as main CTA)
+      onExploreTrends();
+    }, [trigger, onExploreTrends]);
 
     return (
       <Animated.View entering={FadeIn.duration(400)} style={styles.container} testID={testID}>
@@ -119,7 +116,7 @@ export const NoPostsEmptyState: React.FC<NoPostsEmptyStateProps> = memo(
                     backgroundColor: colors.background.elevated,
                   },
                 ]}
-                onPress={() => handleTrendPress(trend.id)}
+                onPress={handleTrendPress}
                 accessibilityRole="button"
                 accessibilityLabel={`${trend.title}, ${trend.category} kategorisi`}
                 accessibilityHint="Trend detaylarını görmek için dokun">

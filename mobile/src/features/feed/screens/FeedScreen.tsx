@@ -19,6 +19,7 @@ import { SuggestedExpertsCarousel } from '../components/SuggestedExpertsCarousel
 import { ActionSheet, type ActionSheetOption } from '@shared/components';
 import { sharePost, showShareError } from '@shared/utils/share';
 import { useAuthStore } from '@features/auth/stores';
+import { useFollow, useUnfollow } from '@features/social/hooks';
 import type { Post } from '../types';
 
 /**
@@ -49,6 +50,10 @@ export const FeedScreen: React.FC = memo(() => {
   // Action sheet state
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [actionSheetVisible, setActionSheetVisible] = useState(false);
+
+  // Follow/Unfollow mutations
+  const followMutation = useFollow();
+  const unfollowMutation = useUnfollow();
 
   // Feed data with infinite scroll
   const {
@@ -257,8 +262,11 @@ export const FeedScreen: React.FC = memo(() => {
               navigation.navigate('UserProfile', { userId: expertId });
             }}
             onFollowToggle={(expertId, isFollowing) => {
-              console.log('Follow toggle:', expertId, isFollowing);
-              // TODO: Implement follow/unfollow mutation
+              if (isFollowing) {
+                unfollowMutation.mutate(expertId);
+              } else {
+                followMutation.mutate(expertId);
+              }
             }}
           />
         )}

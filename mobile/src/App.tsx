@@ -2,6 +2,7 @@
 // Oku: mobile-development-guide/architecture/01-MOBILE-ARCHITECTURE.md
 // Oku: mobile-development-guide/sprints/23-SPRINT-1-2.md
 
+import 'react-native-gesture-handler';
 import { useEffect } from 'react';
 import { StatusBar, LogBox } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
