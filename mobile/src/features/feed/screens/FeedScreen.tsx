@@ -308,7 +308,7 @@ export const FeedScreen: React.FC = memo(() => {
         )}
         {/* Always show AI trend insights */}
         <AITrendInsightCard
-          profession={user?.profession?.name || 'OTHER'}
+          professionCategory={user?.profession?.category}
           onTrendPress={trend => console.log('Trend pressed:', trend)}
           onMorePress={() => console.log('More trends pressed')}
         />

@@ -99,4 +99,15 @@ public interface JpaUserRepository extends JpaRepository<User, Long>, UserReposi
            "LOWER(u.surname) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(CONCAT(u.name, ' ', u.surname)) LIKE LOWER(CONCAT('%', :query, '%')))")
     Page<User> searchByNameContaining(@Param("query") String query, Pageable pageable);
+    
+    /**
+     * Find active users not in excluded list
+     * Used for user suggestions - returns up to 100 candidates
+     * 
+     * @param excludedIds List of user IDs to exclude
+     * @return List of active users not in excluded list
+     */
+    @Override
+    @Query("SELECT u FROM User u WHERE u.status = 'ACTIVE' AND u.id NOT IN :excludedIds ORDER BY RAND()")
+    List<User> findActiveUsersNotIn(@Param("excludedIds") List<Long> excludedIds);
 }

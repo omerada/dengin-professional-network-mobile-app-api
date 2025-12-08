@@ -196,6 +196,16 @@ export const API_ENDPOINTS = {
     // GET /api/sanctions/remaining-time - Get remaining suspension time
     REMAINING_TIME: '/api/sanctions/remaining-time',
   },
+
+  // Trends - Backend: /api/trends/*
+  // Backend: com.meslektas.social.api.TrendController
+  // OpenRouter AI integration for profession-specific trends
+  TRENDS: '/api/trends',
+
+  // User Suggestions - Backend: /api/users/suggested
+  // Backend: com.meslektas.social.api.SuggestionController
+  // Algorithm-based user recommendations
+  USER_SUGGESTIONS: '/api/users/suggested',
 } as const;
 
 /**

@@ -113,4 +113,13 @@ public interface UserRepository {
      * @return Page of matching users
      */
     Page<User> searchByNameContaining(String query, Pageable pageable);
+    
+    /**
+     * Find active users not in excluded list
+     * Used for user suggestions
+     * 
+     * @param excludedIds List of user IDs to exclude
+     * @return List of active users not in excluded list
+     */
+    List<User> findActiveUsersNotIn(List<Long> excludedIds);
 }

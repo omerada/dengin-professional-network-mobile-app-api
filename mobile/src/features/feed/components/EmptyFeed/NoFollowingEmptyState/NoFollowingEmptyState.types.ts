@@ -26,6 +26,7 @@ export interface NoFollowingEmptyStateProps {
 
 /**
  * Suggested expert preview (for quick follow without navigating)
+ * Backend: SuggestedUserResponse.java
  */
 export interface SuggestedExpertPreview {
   id: number;
@@ -35,34 +36,3 @@ export interface SuggestedExpertPreview {
   isVerified: boolean;
   isFollowing: boolean;
 }
-
-/**
- * Mock suggested experts for preview (3 experts)
- * TODO: Replace with real API call when backend ready
- */
-export const MOCK_SUGGESTED_EXPERTS: SuggestedExpertPreview[] = [
-  {
-    id: 1,
-    fullName: 'Dr. Ayşe Yılmaz',
-    profession: 'Kardiyolog',
-    avatarUrl: null,
-    isVerified: true,
-    isFollowing: false,
-  },
-  {
-    id: 2,
-    fullName: 'Av. Mehmet Demir',
-    profession: 'İş Hukuku Avukatı',
-    avatarUrl: null,
-    isVerified: true,
-    isFollowing: false,
-  },
-  {
-    id: 3,
-    fullName: 'Mimar Can Öztürk',
-    profession: 'Mimarlık',
-    avatarUrl: null,
-    isVerified: false,
-    isFollowing: false,
-  },
-];

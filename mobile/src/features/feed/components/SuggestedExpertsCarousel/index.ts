@@ -6,4 +6,3 @@ export type {
   ExpertCardProps,
   SuggestedExpert,
 } from './SuggestedExpertsCarousel.types';
-export { MOCK_SUGGESTED_EXPERTS } from './mockExperts';

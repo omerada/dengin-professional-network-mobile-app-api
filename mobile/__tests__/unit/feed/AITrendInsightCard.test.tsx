@@ -3,34 +3,66 @@
 // Oku: mobile-development-guide/testing/21-TESTING-STRATEGY.md
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AITrendInsightCard } from '@features/feed/components/AITrendInsightCard';
-import {
-  getTrendsByProfession,
-  MOCK_TRENDS,
-} from '@features/feed/components/AITrendInsightCard/mockTrends';
 import { useHaptic } from '@shared/hooks/useHaptic';
+import * as trendService from '@features/feed/services/trendService';
 
 // Mock dependencies
 jest.mock('@shared/hooks/useHaptic');
+jest.mock('@features/feed/services/trendService');
 jest.mock('@contexts/ThemeContext', () => ({
   useColors: () => ({
     interactive: {
       default: '#0066FF',
     },
     background: {
-      card: '#FFFFFF',
+      elevated: '#FFFFFF',
     },
     border: {
       default: '#E5E7EB',
     },
     text: {
       primary: '#1F2937',
+      tertiary: '#9CA3AF',
     },
   }),
 }));
 
 const mockUseHaptic = useHaptic as jest.MockedFunction<typeof useHaptic>;
+const mockGetTrendsByProfession = trendService.getTrendsByProfession as jest.MockedFunction<
+  typeof trendService.getTrendsByProfession
+>;
+
+// Mock trends data
+const MOCK_TRENDS = [
+  {
+    id: 'trend_1',
+    title: 'Telemedicine ve Uzaktan Hasta Takibi 2025',
+    professionCategory: 'MEDICAL' as const,
+  },
+  {
+    id: 'trend_2',
+    title: 'Yapay Zeka Destekli Tanı Sistemleri',
+    professionCategory: 'MEDICAL' as const,
+  },
+  {
+    id: 'trend_3',
+    title: 'Kişiselleştirilmiş Tedavi Yaklaşımları',
+    professionCategory: 'MEDICAL' as const,
+  },
+];
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { retry: false },
+  },
+});
+
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
 
 describe('AITrendInsightCard', () => {
   const mockOnTrendPress = jest.fn();
@@ -43,20 +75,24 @@ describe('AITrendInsightCard', () => {
       trigger: mockTrigger,
       isSupported: true,
     });
+    mockGetTrendsByProfession.mockResolvedValue(MOCK_TRENDS);
   });
 
   describe('Rendering', () => {
-    it('renders correctly with all elements', () => {
+    it('renders correctly with all elements', async () => {
       const { getByText } = render(
         <AITrendInsightCard
-          profession="MEDICAL"
+          professionCategory="MEDICAL"
           onTrendPress={mockOnTrendPress}
           onMorePress={mockOnMorePress}
         />,
+        { wrapper },
       );
 
-      // Title with profession
-      expect(getByText("Bu Hafta MEDICAL'de Trend")).toBeTruthy();
+      // Wait for data to load
+      await waitFor(() => {
+        expect(getByText("Bu Hafta Sağlık'de Trend")).toBeTruthy();
+      });
 
       // Trend items (numbered 1, 2, 3)
       expect(getByText('1.')).toBeTruthy();
@@ -67,15 +103,18 @@ describe('AITrendInsightCard', () => {
       expect(getByText('Daha Fazla Gör →')).toBeTruthy();
     });
 
-    it('renders default title when no profession provided', () => {
-      const { getByText } = render(<AITrendInsightCard onTrendPress={mockOnTrendPress} />);
+    it('does not render when no profession category provided', () => {
+      const { queryByText } = render(<AITrendInsightCard onTrendPress={mockOnTrendPress} />, {
+        wrapper,
+      });
 
-      expect(getByText('Bu Haftanın Trendleri')).toBeTruthy();
+      expect(queryByText('Bu Haftanın Trendleri')).toBeNull();
     });
 
-    it('renders 3 trend items maximum', () => {
+    it('renders 3 trend items maximum', async () => {
       const { getAllByRole } = render(
-        <AITrendInsightCard profession="LEGAL" onTrendPress={mockOnTrendPress} />,
+        <AITrendInsightCard professionCategory="LEGAL" onTrendPress={mockOnTrendPress} />,
+        { wrapper },
       );
 
       const buttons = getAllByRole('button');

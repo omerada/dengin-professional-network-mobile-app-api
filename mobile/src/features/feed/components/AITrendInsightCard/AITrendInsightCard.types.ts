@@ -2,16 +2,19 @@
 // Type definitions for AITrendInsightCard
 // Oku: MOBILE-APP-HOME-SCREEN.md Lines 797-810
 
-import type { TrendItem } from './mockTrends';
+import type { ProfessionCategory } from '@shared/types';
 
 /**
  * AITrendInsightCard component props
  */
 export interface AITrendInsightCardProps {
   /**
-   * User's profession name (for profession-based trends)
+   * Profession category for AI trends
+   * Values: MEDICAL, LEGAL, ENGINEERING, EDUCATION, SERVICE, CREATIVE, BUSINESS, OTHER
+   *
+   * Replaces: profession (string) with professionCategory (ProfessionCategory enum)
    */
-  profession?: string;
+  professionCategory?: ProfessionCategory;
 
   /**
    * Callback when a trend item is pressed
@@ -28,6 +31,3 @@ export interface AITrendInsightCardProps {
    */
   testID?: string;
 }
-
-// Re-export TrendItem for convenience
-export type { TrendItem };

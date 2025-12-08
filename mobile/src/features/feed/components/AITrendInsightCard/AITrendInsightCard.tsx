@@ -4,14 +4,14 @@
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, ActivityIndicator } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
+import { useAITrends } from '../../hooks/useAITrends';
 
-import { getTrendsByProfession } from './mockTrends';
 import { styles } from './AITrendInsightCard.styles';
 import type { AITrendInsightCardProps } from './AITrendInsightCard.types';
 
@@ -21,39 +21,66 @@ import type { AITrendInsightCardProps } from './AITrendInsightCard.types';
  * Displays AI-powered trending topics based on user's profession.
  *
  * Features:
+ * - OpenRouter AI-generated trends (Turkish)
+ * - Backend integration with TrendController
  * - Profession-based trend filtering
- * - Mock data (future: backend AI service)
  * - 3 trending topics maximum
  * - Stagger animation for trend items
  * - Haptic feedback on interactions
- * - "Daha Fazla Gör" button
+ * - Loading and error states
+ *
+ * Backend:
+ * - Endpoint: GET /api/trends/profession/{category}
+ * - AI Model: OpenRouter (gpt-4o-mini)
+ * - Cache: 1 hour per profession
+ * - Fallback: Static Turkish trends
+ *
+ * Replaces: mockTrends.ts (getTrendsByProfession)
  *
  * Design Spec: MOBILE-APP-HOME-SCREEN.md Lines 797-810
  *
  * @example
  * ```tsx
  * <AITrendInsightCard
- *   profession={user?.profession?.name}
+ *   professionCategory="MEDICAL"
  *   onTrendPress={(id) => navigateToTrend(id)}
  *   onMorePress={() => navigateToTrends()}
  * />
  * ```
  */
 export const AITrendInsightCard: React.FC<AITrendInsightCardProps> = memo(
-  ({ profession, onTrendPress, onMorePress, testID = 'ai-trend-insight-card' }) => {
+  ({ professionCategory, onTrendPress, onMorePress, testID = 'ai-trend-insight-card' }) => {
     const colors = useColors();
     const { trigger } = useHaptic();
 
-    // Get trends based on profession
-    const trends = useMemo(() => getTrendsByProfession(profession), [profession]);
+    // Fetch AI trends from backend
+    const { data: trends, isLoading, isError } = useAITrends(professionCategory);
+
+    // Get profession name for title
+    const professionName = useMemo(() => {
+      if (!professionCategory) return null;
+
+      const categoryNames: Record<string, string> = {
+        MEDICAL: 'Sağlık',
+        LEGAL: 'Hukuk',
+        ENGINEERING: 'Mühendislik',
+        EDUCATION: 'Eğitim',
+        SERVICE: 'Hizmet',
+        CREATIVE: 'Sanat',
+        BUSINESS: 'İş',
+        OTHER: 'Genel',
+      };
+
+      return categoryNames[professionCategory] || professionCategory;
+    }, [professionCategory]);
 
     // Title with profession name
     const cardTitle = useMemo(() => {
-      if (profession) {
-        return `Bu Hafta ${profession}'de Trend`;
+      if (professionName) {
+        return `Bu Hafta ${professionName}'de Trend`;
       }
       return 'Bu Haftanın Trendleri';
-    }, [profession]);
+    }, [professionName]);
 
     // Handle trend item press
     const handleTrendPress = useCallback(
@@ -69,6 +96,39 @@ export const AITrendInsightCard: React.FC<AITrendInsightCardProps> = memo(
       trigger('light');
       onMorePress?.();
     }, [onMorePress, trigger]);
+
+    // Don't render if no profession category
+    if (!professionCategory) {
+      return null;
+    }
+
+    // Loading state
+    if (isLoading) {
+      return (
+        <Animated.View
+          entering={FadeIn.duration(400).delay(100)}
+          style={[
+            styles.container,
+            {
+              backgroundColor: colors.background.elevated,
+              borderColor: colors.border.default,
+            },
+          ]}
+          testID={`${testID}-loading`}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color={colors.interactive.default} />
+            <Text style={[styles.loadingText, { color: colors.text.tertiary }]}>
+              AI trendleri yükleniyor...
+            </Text>
+          </View>
+        </Animated.View>
+      );
+    }
+
+    // Error state - hide card silently
+    if (isError || !trends || trends.length === 0) {
+      return null;
+    }
 
     return (
       <Animated.View

@@ -115,8 +115,19 @@ mailgun:
 # Firebase (Push Notifications)
 firebase:
   enabled: ${FIREBASE_ENABLED:true}
-  project-id: ${FIREBASE_PROJECT_ID}
-  credentials-json: ${FIREBASE_CREDENTIALS_JSON}
+  project-id: ${FIREBASE_PROJECT_ID:meslektas-dev}
+  credentials-json: ${FIREBASE_CREDENTIALS_JSON:not-configured}
+
+# OpenRouter AI Configuration
+openrouter:
+  api-key: ${OPENROUTER_API_KEY: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}
+  base-url: ${OPENROUTER_BASE_URL:https://openrouter.ai/api/v1/chat/completions}
+  model: ${OPENROUTER_MODEL:qwen/qwen3-32b}
+  max-tokens: ${OPENROUTER_MAX_TOKENS:4000}
+  timeout: ${OPENROUTER_TIMEOUT:30}
+  temperature: ${OPENROUTER_TEMPERATURE:0.7}
+  cache-enabled: ${OPENROUTER_CACHE_ENABLED:true}
+  cache-ttl-minutes: ${OPENROUTER_CACHE_TTL_MINUTES:60}
 
 ---
 # Development Profile

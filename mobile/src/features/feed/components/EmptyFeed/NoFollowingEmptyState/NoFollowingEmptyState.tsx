@@ -3,20 +3,20 @@
 // Oku: MOBILE-APP-HOME-SCREEN.md Lines 1607-1632
 // Oku: mobile-development-guide/sprints/30-SPRINT-HOME-SCREEN-COMPLETION.md Lines 376-410
 
-import React, { memo, useCallback, useState } from 'react';
-import { View, Text, Pressable } from 'react-native';
+import React, { memo, useCallback, useState, useMemo } from 'react';
+import { View, Text, Pressable, ActivityIndicator } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSuggestedUsers } from '../../../hooks/useSuggestedUsers';
 
 import { styles } from './NoFollowingEmptyState.styles';
 import type {
   NoFollowingEmptyStateProps,
   SuggestedExpertPreview,
 } from './NoFollowingEmptyState.types';
-import { MOCK_SUGGESTED_EXPERTS } from './NoFollowingEmptyState.types';
 
 /**
  * NoFollowingEmptyState Component
@@ -24,12 +24,17 @@ import { MOCK_SUGGESTED_EXPERTS } from './NoFollowingEmptyState.types';
  * Displays suggested experts preview when user follows nobody.
  *
  * Features:
+ * - Backend API integration (GET /api/users/suggested?limit=3)
+ * - Algorithm-based suggestions
  * - Conditional rendering (user.followingCount === 0)
  * - 3 suggested expert preview cards
  * - Quick follow/unfollow action
  * - CTA buttons: "Keşfet" (primary), "Tüm Önerileri Gör" (secondary)
  * - Haptic feedback on interactions
  * - Stagger animations (FadeIn + FadeInDown)
+ * - Loading state
+ *
+ * Replaces: MOCK_SUGGESTED_EXPERTS from types file
  *
  * Design Spec: MOBILE-APP-HOME-SCREEN.md Lines 1607-1632
  *
@@ -56,8 +61,31 @@ export const NoFollowingEmptyState: React.FC<NoFollowingEmptyStateProps> = memo(
     const colors = useColors();
     const { trigger } = useHaptic();
 
+    // Fetch suggested users from backend API (only 3 for preview)
+    const { data: suggestedUsers, isLoading } = useSuggestedUsers(3);
+
+    // Map backend response to component format
+    const fetchedExperts = useMemo<SuggestedExpertPreview[]>(() => {
+      if (!suggestedUsers) return [];
+      return suggestedUsers.map(user => ({
+        id: user.id,
+        fullName: user.fullName,
+        profession: user.profession || 'Profesyonel',
+        avatarUrl: user.avatarUrl,
+        isVerified: user.isVerified,
+        isFollowing: user.isFollowing,
+      }));
+    }, [suggestedUsers]);
+
     // Local state for follow/unfollow (optimistic update)
-    const [experts, setExperts] = useState<SuggestedExpertPreview[]>(MOCK_SUGGESTED_EXPERTS);
+    const [experts, setExperts] = useState<SuggestedExpertPreview[]>([]);
+
+    // Update experts when fetched data changes
+    React.useEffect(() => {
+      if (fetchedExperts.length > 0 && experts.length === 0) {
+        setExperts(fetchedExperts);
+      }
+    }, [fetchedExperts, experts.length]);
 
     // Handle follow/unfollow toggle
     const handleFollowToggle = useCallback(
@@ -84,6 +112,25 @@ export const NoFollowingEmptyState: React.FC<NoFollowingEmptyStateProps> = memo(
       trigger('light');
       onShowAllSuggestions?.();
     }, [onShowAllSuggestions, trigger]);
+
+    // Show loading state while fetching
+    if (isLoading) {
+      return (
+        <Animated.View
+          entering={FadeIn.duration(400)}
+          style={styles.container}
+          testID={`${testID}-loading`}>
+          <View style={[styles.iconContainer, { paddingVertical: 48 }]}>
+            <ActivityIndicator size="large" color={colors.interactive.default} />
+          </View>
+        </Animated.View>
+      );
+    }
+
+    // Don't show if no experts available
+    if (experts.length === 0) {
+      return null;
+    }
 
     return (
       <Animated.View entering={FadeIn.duration(400)} style={styles.container} testID={testID}>
