@@ -54,12 +54,13 @@ Kullanıcının uygulamayı açtığı ilk andan itibaren **değerli, güvenilir
 
 ### Referans Uygulamalar
 
-| Özellik      | Instagram  | LinkedIn | Happen     | Meslektaş Hedefi                                            |
-| ------------ | ---------- | -------- | ---------- | ----------------------------------------------------------- |
-| Feed UX      | ⭐⭐⭐⭐⭐ | ⭐⭐⭐   | ⭐⭐⭐⭐   | Instagram seviyesi smooth scroll + LinkedIn profesyonelliği |
-| Onboarding   | ⭐⭐⭐⭐   | ⭐⭐⭐   | ⭐⭐⭐⭐⭐ | Happen seviyesi engaging + AI personalization               |
-| Empty States | ⭐⭐⭐     | ⭐⭐     | ⭐⭐⭐⭐⭐ | Happen seviyesi motivating + value-driven                   |
-| Animations   | ⭐⭐⭐⭐⭐ | ⭐⭐     | ⭐⭐⭐⭐   | Instagram seviyesi fluid + professional polish              |
+| Özellik               | Instagram  | LinkedIn | TikTok     | Meslektaş Hedefi                                            |
+| --------------------- | ---------- | -------- | ---------- | ----------------------------------------------------------- |
+| Feed UX               | ⭐⭐⭐⭐⭐ | ⭐⭐⭐   | ⭐⭐⭐⭐⭐ | Instagram seviyesi smooth scroll + LinkedIn profesyonelliği |
+| Bottom Tab Navigation | ⭐⭐⭐⭐   | ⭐⭐     | ⭐⭐⭐⭐⭐ | TikTok tarzı merkez FAB + Instagram'ın simetrik layout'u    |
+| Onboarding            | ⭐⭐⭐⭐   | ⭐⭐⭐   | ⭐⭐⭐⭐   | Gamification + AI personalization                           |
+| Empty States          | ⭐⭐⭐     | ⭐⭐     | ⭐⭐⭐⭐   | Motivating + value-driven + action-oriented                 |
+| Animations            | ⭐⭐⭐⭐⭐ | ⭐⭐     | ⭐⭐⭐⭐⭐ | Instagram + TikTok seviyesi fluid + professional polish     |
 
 ---
 
@@ -430,21 +431,63 @@ FeedScreen (Ana Container)
 │       │   └── EmptyFeed
 │       └── ListFooterComponent
 │           └── LoadingSpinner (Infinite scroll)
-└── TabBar (Bottom Navigation - Global)
+└── TabBar (Bottom Navigation - Global - Modern 5 Tab Design)
     ├── Ana Sayfa (home-outline/home)
     ├── Mesajlar (chatbubble-outline/chatbubble)
-    ├── Bildirimler (notifications-outline/notifications)
+    ├── ✨ Gönderi Oluştur (add-circle - Elevated/Prominent)
+    ├── Etkinlik (trophy-outline/trophy)
     └── Profil (person-outline/person)
 ```
 
-**Bottom Tab Navigation Özellikleri:**
+**Bottom Tab Navigation - Modern Tasarım:**
 
-- **Ana Sayfa:** Feed ekranı - gönderileri görüntüleme
-- **Mesajlar:** Mesajlaşma ekranı - direkt mesajlar
-- **Bildirimler:** Bildirim merkezi - beğeni, yorum, takip bildirimleri
-- **Profil:** Kullanıcı profili - ayarlar, kaydedilenler, gönderiler
+```
+┌────────────────────────────────────────────────────────────┐
+│  [🏠]     [💬]        [➕]        [🏆]     [👤]          │
+│  Ana     Mesaj      OLUŞTUR    Etkinlik  Profil           │
+└────────────────────────────────────────────────────────────┘
+           ↑              ↑               ↑
+        Sol Grup      Merkez (Öne Çıkan)  Sağ Grup
+```
 
-**NOT:** Profil erişimi bottom tab'dan sağlandığı için header'da profil avatarına gerek yoktur. Bu, header'ı daha minimal ve odaklı tutar.
+**Tab Özellikleri:**
+
+1. **Ana Sayfa** (`home-outline/home`)
+   - Feed ekranı - gönderileri görüntüleme
+   - Konum: Sol grup - 1. pozisyon
+2. **Mesajlar** (`chatbubble-outline/chatbubble`)
+   - Mesajlaşma ekranı - direkt mesajlar
+   - Konum: Sol grup - 2. pozisyon
+   - Badge: Okunmamış mesaj sayısı
+3. **Gönderi Oluştur** (`add-circle`) ⭐ **MERKEZ - ÖNE ÇIKAN**
+   - Yeni gönderi oluşturma modal'ı
+   - Konum: TAM MERKEZ - 3. pozisyon
+   - Tasarım: Elevated, büyük, renkli (Primary color)
+   - Boyut: Diğer iconlardan %40 daha büyük
+   - Davranış: Modal açar (presentation: 'modal')
+   - Label: "Oluştur" veya label yok (sadece ikon)
+4. **Etkinlik** (`trophy-outline/trophy`) 🆕
+   - Challenge ekranı - yarışmalar, görevler, liderlik tablosu
+   - Konum: Sağ grup - 4. pozisyon
+   - İçerik: Weekly challenges, achievements, leaderboard
+   - Badge: Yeni challenge veya ödül bildirimi
+5. **Profil** (`person-outline/person`)
+   - Kullanıcı profili - ayarlar, kaydedilenler, gönderiler
+   - Konum: Sağ grup - 5. pozisyon
+
+**Tasarım Prensipleri:**
+
+✅ **Simetrik Denge:** 2 ikon sol + 1 merkez + 2 ikon sağ = balanced layout  
+✅ **Merkez Vurgusu:** Gönderi oluştur butonu öne çıkar (büyük, elevated, renkli)  
+✅ **Kolay Erişim:** En sık kullanılan aksiyonlar başparmaklarla erişilebilir  
+✅ **Modern Estetik:** Instagram/TikTok tarzı merkez FAB (Floating Action Button)  
+✅ **Minimal Bildirim:** Sadece header'da bildirim, tab bar temiz kalır
+
+**NOT:**
+
+- Bildirimler header'da badge ile gösterildiği için bottom tab'da bildirim sekmesine gerek yoktur
+- Profil erişimi bottom tab'dan sağlandığı için header'da profil avatarına gerek yoktur
+- Gönderi oluştur butonu merkezdedir ve diğerlerinden görsel olarak ayrışır
 
 ### Anasayfa Bölümleri Detayı
 
@@ -751,6 +794,93 @@ Bildirim Yok:        Bildirim Var (3):      Bildirim Çok (10+):
 │ [Daha Fazla Gör] ──────────────────► │
 └──────────────────────────────────────┘
 ```
+
+#### 4. Activity Tab - Etkinlik ve Challenge Ekranı 🏆
+
+**Görünürlük:** Bottom Tab Navigation - 4. tab (Etkinlik)  
+**Konum:** Ayrı ekran (CreatePost ile Profil arasında)  
+**Hedef:** Kullanıcıları oyunlaştırma ile engage etme, topluluk aktivitesini artırma
+
+**Etkinlik Ekranı İçeriği:**
+
+```
+┌──────────────────────────────────────────────────┐
+│  🏆 Etkinlik                        [Ayarlar]    │
+├──────────────────────────────────────────────────┤
+│                                                  │
+│  📊 Haftalık İlerleme                            │
+│  ▓▓▓▓▓▓▓▓▓▓░░░░░░  60% (3/5 görev)             │
+│                                                  │
+│  🔥 Aktif Challenge'lar                          │
+│  ┌────────────────────────────────────────────┐ │
+│  │ 📝 İlk 3 Gönderi                           │ │
+│  │ Bu hafta 3 gönderi paylaş                  │ │
+│  │ ⭐ 50 puan                                  │ │
+│  │ ▓▓▓▓▓▓░░░░ 2/3                             │ │
+│  └────────────────────────────────────────────┘ │
+│                                                  │
+│  ┌────────────────────────────────────────────┐ │
+│  │ 💬 Yorum Kralı                             │ │
+│  │ 10 gönderiye yorum yap                     │ │
+│  │ ⭐ 100 puan                                 │ │
+│  │ ▓▓▓▓░░░░░░ 4/10                            │ │
+│  └────────────────────────────────────────────┘ │
+│                                                  │
+│  🏅 Liderlik Tablosu (Bu Hafta)                  │
+│  ┌────────────────────────────────────────────┐ │
+│  │ 🥇 1. Ahmet D. (Doktor)        1,250 puan  │ │
+│  │ 🥈 2. Ayşe K. (Avukat)         1,120 puan  │ │
+│  │ 🥉 3. Mehmet Y. (Mühendis)     1,050 puan  │ │
+│  │ ...                                        │ │
+│  │ 🔹 47. Sen                       340 puan  │ │
+│  └────────────────────────────────────────────┘ │
+│                                                  │
+│  🎁 Ödüller                                      │
+│  ┌────────────────────────────────────────────┐ │
+│  │ ✅ İlk Gönderi Badge              (Kazanıldı)│ │
+│  │ ✅ 10 Beğeni Alındı               (Kazanıldı)│ │
+│  │ ⏳ Haftalık Aktif (4/7 gün)                │ │
+│  │ 🔒 100 Takipçi                             │ │
+│  └────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────┘
+```
+
+**Challenge Tipleri:**
+
+1. **Günlük Görevler:**
+
+   - İlk giriş (10 puan)
+   - 1 gönderi paylaş (20 puan)
+   - 3 yorum yap (30 puan)
+
+2. **Haftalık Challenge'lar:**
+
+   - 5 gönderi paylaş (100 puan)
+   - 20 yorum yap (150 puan)
+   - 10 yeni takipçi kazan (200 puan)
+
+3. **Milestone Ödülleri:**
+   - İlk 100 beğeni - "Popüler" rozeti
+   - İlk 50 takipçi - "Influencer" rozeti
+   - 7 gün aktif kullanım - "Sadık Kullanıcı" rozeti
+
+**Backend Integration:**
+
+```
+GET  /api/challenges                - Aktif challenge listesi
+GET  /api/challenges/{id}           - Challenge detayı
+POST /api/challenges/{id}/claim     - Ödül talep et
+GET  /api/leaderboard/weekly        - Haftalık liderlik
+GET  /api/achievements              - Kullanıcı başarımları
+```
+
+**UX Faydaları:**
+
+✅ **Gamification:** Kullanıcıları engage eder ve uygulamaya bağlar  
+✅ **Social Proof:** Liderlik tablosu rekabet hissi yaratır  
+✅ **Progress Tracking:** Görsel progress bar'lar motivasyon artırır  
+✅ **Rewards System:** Badge ve ödüller kullanıcı sadakatini artırır  
+✅ **Community Building:** Topluluk içi aktiviteyi teşvik eder
 
 ---
 
@@ -1114,6 +1244,312 @@ const styles = StyleSheet.create({
   },
 });
 ```
+
+---
+
+### Bottom Tab Navigation Component
+
+**Modern 5 Tab Design - Merkez FAB (Floating Action Button) ile**
+
+```typescript
+// src/core/navigation/components/AnimatedTabBar/AnimatedTabBar.tsx
+
+import React, { useCallback } from "react";
+import { View, Pressable, Text, StyleSheet, Platform } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  withSpring,
+  interpolate,
+} from "react-native-reanimated";
+import Icon from "react-native-vector-icons/Ionicons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTheme } from "@theme";
+import { useHaptic } from "@hooks/useHaptic";
+
+interface TabItem {
+  name: string;
+  label: string;
+  icon: string;
+  focusedIcon: string;
+  accessibilityLabel: string;
+  badge?: number; // Badge sayısı (mesajlar için)
+}
+
+interface AnimatedTabBarProps {
+  state: any;
+  descriptors: any;
+  navigation: any;
+}
+
+const TABS: TabItem[] = [
+  {
+    name: "FeedTab",
+    label: "Ana Sayfa",
+    icon: "home-outline",
+    focusedIcon: "home",
+    accessibilityLabel: "Ana sayfa sekmesi",
+  },
+  {
+    name: "MessagingTab",
+    label: "Mesajlar",
+    icon: "chatbubble-outline",
+    focusedIcon: "chatbubble",
+    accessibilityLabel: "Mesajlar sekmesi",
+    badge: 3, // TODO: Backend'den gelecek
+  },
+  {
+    name: "CreateTab",
+    label: "", // Merkez butonu label'sız
+    icon: "add-circle",
+    focusedIcon: "add-circle",
+    accessibilityLabel: "Gönderi oluştur",
+  },
+  {
+    name: "ActivityTab",
+    label: "Etkinlik",
+    icon: "trophy-outline",
+    focusedIcon: "trophy",
+    accessibilityLabel: "Etkinlik sekmesi",
+  },
+  {
+    name: "ProfileTab",
+    label: "Profil",
+    icon: "person-outline",
+    focusedIcon: "person",
+    accessibilityLabel: "Profil sekmesi",
+  },
+];
+
+export const AnimatedTabBar: React.FC<AnimatedTabBarProps> = ({
+  state,
+  descriptors,
+  navigation,
+}) => {
+  const { colors } = useTheme();
+  const { triggerHaptic } = useHaptic();
+  const insets = useSafeAreaInsets();
+
+  const handleTabPress = useCallback(
+    (route: any, index: number, isFocused: boolean) => {
+      triggerHaptic("light");
+
+      // Merkez buton (Create) - modal aç
+      if (index === 2) {
+        navigation.navigate("CreatePost");
+        return;
+      }
+
+      const event = navigation.emit({
+        type: "tabPress",
+        target: route.key,
+        canPreventDefault: true,
+      });
+
+      if (!isFocused && !event.defaultPrevented) {
+        navigation.navigate(route.name);
+      }
+    },
+    [navigation, triggerHaptic]
+  );
+
+  return (
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.background.paper,
+          borderTopColor: colors.border.light,
+          paddingBottom: insets.bottom,
+        },
+      ]}
+    >
+      {state.routes.map((route: any, index: number) => {
+        const isFocused = state.index === index;
+        const tab = TABS[index];
+        const isCreateButton = index === 2; // Merkez buton
+
+        return (
+          <Pressable
+            key={route.key}
+            accessibilityRole="button"
+            accessibilityState={isFocused ? { selected: true } : {}}
+            accessibilityLabel={tab.accessibilityLabel}
+            onPress={() => handleTabPress(route, index, isFocused)}
+            style={[styles.tab, isCreateButton && styles.createTab]}
+          >
+            {/* Merkez Buton - Özel Tasarım */}
+            {isCreateButton ? (
+              <View
+                style={[
+                  styles.createButton,
+                  { backgroundColor: colors.primary.main },
+                ]}
+              >
+                <Icon name={tab.icon} size={32} color="#FFFFFF" />
+              </View>
+            ) : (
+              <>
+                {/* Normal Tab */}
+                <View style={styles.iconContainer}>
+                  <Icon
+                    name={isFocused ? tab.focusedIcon : tab.icon}
+                    size={24}
+                    color={
+                      isFocused ? colors.primary.main : colors.text.tertiary
+                    }
+                  />
+                  {/* Badge (Mesajlar için) */}
+                  {tab.badge && tab.badge > 0 && (
+                    <View
+                      style={[
+                        styles.badge,
+                        { backgroundColor: colors.error.main },
+                      ]}
+                    >
+                      <Text style={styles.badgeText}>
+                        {tab.badge > 9 ? "9+" : tab.badge}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Label */}
+                {tab.label && (
+                  <Text
+                    style={[
+                      styles.label,
+                      {
+                        color: isFocused
+                          ? colors.primary.main
+                          : colors.text.tertiary,
+                      },
+                    ]}
+                  >
+                    {tab.label}
+                  </Text>
+                )}
+              </>
+            )}
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    borderTopWidth: 1,
+    paddingTop: 8,
+    paddingHorizontal: 8,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
+  },
+  tab: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+  },
+  createTab: {
+    marginTop: -20, // Yukarı kaydırma efekti
+  },
+  iconContainer: {
+    position: "relative",
+  },
+  badge: {
+    position: "absolute",
+    top: -4,
+    right: -8,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "700",
+  },
+  label: {
+    fontSize: 11,
+    fontWeight: "500",
+    marginTop: 2,
+  },
+  createButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#0066FF",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 12,
+      },
+    }),
+  },
+});
+```
+
+**Bottom Tab Navigation Özellikleri:**
+
+1. **5 Tab Yapısı:**
+
+   - 2 tab sol (Ana Sayfa, Mesajlar)
+   - 1 tab merkez (Gönderi Oluştur - elevated)
+   - 2 tab sağ (Etkinlik, Profil)
+
+2. **Merkez FAB (Floating Action Button):**
+
+   - Boyut: 56x56px (diğer iconların ~2 katı)
+   - Renk: Primary color (#0066FF)
+   - Shadow: Prominent shadow (iOS + Android elevation)
+   - Position: Yukarı kaydırılmış (marginTop: -20px)
+   - Davranış: Modal açar (CreatePost screen)
+
+3. **Badge Sistemi:**
+
+   - Mesajlar tabında okunmamış mesaj sayısı
+   - Kırmızı badge (error.main color)
+   - 1-9 arası direkt, 10+ için "9+"
+   - Konum: İkon'un sağ üst köşesi
+
+4. **Aktif/Pasif Durumlar:**
+
+   - Aktif: Dolu ikon + primary color + bold label
+   - Pasif: Outline ikon + tertiary color + normal label
+   - Merkez buton: Her zaman vurgulu (primary color)
+
+5. **Platform Optimizasyonları:**
+   - iOS: Native blur effect, shadow
+   - Android: Elevation 8
+   - Safe Area: Bottom inset support
+
+**UX Avantajları:**
+
+✅ **Thumbs-Friendly:** En önemli aksiyonlar merkez ve yan taraflarda  
+✅ **Visual Hierarchy:** Merkez buton açıkça öne çıkar  
+✅ **Modern Estetik:** Instagram/TikTok/Twitter tarzı FAB tasarımı  
+✅ **Bilgi Dengesi:** Badge'ler bilgilendirici ama dikkat dağıtmıyor  
+✅ **Temiz Navigasyon:** Bildirimler header'da, tab bar sadece ana navigasyon
 
 ---
 
@@ -2089,8 +2525,9 @@ useMutation({
 1. ✅ **FeedScreen skeleton oluştur**
 2. ✅ **Backend API entegrasyonu** - useFeed hook
 3. ✅ **PostCard component** - temel gönderi kartı
-4. ✅ **FeedHeader component** - filtre ve navigasyon
-5. ✅ **Loading states** - skeleton ve spinner
+4. ✅ **FeedHeader component** - meslek ikonu, bildirim
+5. ⏳ **Bottom Tab Navigation** - 5 tab modern tasarım (merkez FAB)
+6. ✅ **Loading states** - skeleton ve spinner
 
 #### Faz 2: Etkileşimler (Öncelik: 🟡 Orta)
 
@@ -2099,20 +2536,25 @@ useMutation({
 3. ⏳ **Infinite scroll** - cursor-based pagination
 4. ⏳ **Double tap to like** - gesture handling
 5. ⏳ **Haptic feedback** - tüm etkileşimlere
+6. ⏳ **CreatePost modal** - gönderi oluşturma (merkez FAB)
 
-#### Faz 3: Empty States (Öncelik: 🟢 Normal)
+#### Faz 3: Empty States & Activity (Öncelik: 🟢 Normal)
 
 1. ⏳ **EmptyFeed component** - 3 varyant
 2. ⏳ **Onboarding checklist** - yeni kullanıcı
 3. ⏳ **AI seed content** - meslek bazlı içerik
 4. ⏳ **Suggested experts** - carousel component
+5. ⏳ **Activity/Challenge ekranı** - gamification sistemi
+6. ⏳ **Leaderboard component** - haftalık sıralama
 
-#### Faz 4: Polish (Öncelik: 🔵 Düşük)
+#### Faz 4: Polish & Advanced Features (Öncelik: 🔵 Düşük)
 
 1. ⏳ **Animations refinement** - 60 FPS garantisi
 2. ⏳ **Dark mode** - tema desteği
 3. ⏳ **Accessibility** - screen reader desteği
 4. ⏳ **Performance monitoring** - metrics toplama
+5. ⏳ **Badge notifications** - real-time updates (WebSocket)
+6. ⏳ **Challenge push notifications** - yeni görev bildirimleri
 
 ### Kritik Geliştirme Kuralları
 
