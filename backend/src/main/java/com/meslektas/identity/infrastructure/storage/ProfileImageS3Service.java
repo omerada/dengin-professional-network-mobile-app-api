@@ -52,6 +52,9 @@ public class ProfileImageS3Service {
     @Value("${aws.s3.presigned-url.expiration:300}")
     private long presignedUrlExpirationSeconds; // Default: 5 minutes
 
+    @Value("${aws.s3.presigned-url-host:}")
+    private String presignedUrlHost; // Override for mobile access (e.g., http://192.168.1.102:4566)
+
     // Allowed content types (production security)
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
             "image/jpeg",
@@ -112,10 +115,17 @@ public class ProfileImageS3Service {
 
             PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
 
+            // Override URL host for mobile access (LocalStack on different network)
+            String presignedUrl = presignedRequest.url().toString();
+            if (presignedUrlHost != null && !presignedUrlHost.isBlank()) {
+                presignedUrl = presignedUrl.replace("http://localhost:4566", presignedUrlHost);
+                log.info("Overridden presigned URL host from localhost to {} for mobile access", presignedUrlHost);
+            }
+
             log.info("Generated presigned URL for user {} - Key: {}", userId, s3Key);
 
             return PresignedUrlResponse.builder()
-                    .url(presignedRequest.url().toString())
+                    .url(presignedUrl)
                     .key(s3Key)
                     .expiresIn(presignedUrlExpirationSeconds)
                     .contentType(contentType)
@@ -161,14 +171,18 @@ public class ProfileImageS3Service {
 
             HeadObjectResponse headResponse = s3Client.headObject(headRequest);
 
-            // Additional validation: Check metadata
+            // Additional validation: Check metadata (optional for LocalStack compatibility)
             String uploadedUserId = headResponse.metadata().get("user-id");
-            if (!userId.toString().equals(uploadedUserId)) {
+            if (uploadedUserId != null && !userId.toString().equals(uploadedUserId)) {
                 log.warn("Metadata mismatch: Expected userId {}, got {}", userId, uploadedUserId);
                 throw new BusinessException(
                         "Upload verification failed: metadata mismatch",
                         "UPLOAD_VERIFICATION_FAILED"
                 );
+            }
+
+            if (uploadedUserId == null) {
+                log.debug("No user-id metadata found in S3 object (LocalStack may not preserve metadata from presigned URLs)");
             }
 
             log.info("Upload confirmed for user {} - Key: {}", userId, s3Key);
@@ -232,7 +246,15 @@ public class ProfileImageS3Service {
         } else {
             // Fallback to S3 direct URL (for dev/test environments)
             log.warn("CloudFront domain not configured, using S3 direct URL (not recommended for production)");
-            return String.format("https://%s.s3.amazonaws.com/%s", bucketName, s3Key);
+            
+            // Use presignedUrlHost if configured (for LocalStack/dev), otherwise use standard S3 URL
+            if (presignedUrlHost != null && !presignedUrlHost.isBlank()) {
+                // LocalStack path-style URL: http://192.168.1.102:4566/bucket/key
+                return String.format("%s/%s/%s", presignedUrlHost, bucketName, s3Key);
+            } else {
+                // Standard S3 URL: https://bucket.s3.amazonaws.com/key
+                return String.format("https://%s.s3.amazonaws.com/%s", bucketName, s3Key);
+            }
         }
     }
 

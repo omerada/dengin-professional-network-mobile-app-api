@@ -196,6 +196,7 @@ aws:
     presigned-url:
       expiration: 300 # 5 minutes
     presigned-url-expiration: ${AWS_S3_PRESIGNED_URL_EXPIRATION:15}
+    presigned-url-host: ${AWS_S3_PRESIGNED_URL_HOST:} # Override for mobile access
   cloudfront:
     domain: ${AWS_CLOUDFRONT_DOMAIN:} # Leave empty for dev (uses S3 direct URLs)
   rekognition:

@@ -4,11 +4,18 @@
 // Backend: PUT /api/users/me, POST /api/users/me/avatar
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
-import { useToast } from '@contexts/ToastContext';
 import { Button, Input } from '@shared/components';
 import { spacing, fontSize } from '@theme';
 import { AvatarPicker } from '../components';
@@ -40,10 +47,9 @@ const GENDER_OPTIONS: GenderOption[] = [
 export const EditProfileScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation();
-  const toast = useToast();
 
   // Fetch current profile
-  const { data: profile, isLoading: _isLoadingProfile } = useMyProfile();
+  const { data: profile, isLoading: _isLoadingProfile, refetch } = useMyProfile();
 
   // Mutations
   const updateProfile = useUpdateProfile();
@@ -56,6 +62,10 @@ export const EditProfileScreen: React.FC = () => {
   const [bio, setBio] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [gender, setGender] = useState<Gender | null>(null);
+  
+  // Avatar state - pending upload
+  const [pendingAvatarUri, setPendingAvatarUri] = useState<string | null>(null);
+  const [shouldDeleteAvatar, setShouldDeleteAvatar] = useState(false);
 
   // Track changes for save button
   const [hasChanges, setHasChanges] = useState(false);
@@ -63,6 +73,11 @@ export const EditProfileScreen: React.FC = () => {
   // Initialize form with profile data
   useEffect(() => {
     if (profile) {
+      console.log('[EditProfileScreen] Profile data:', {
+        avatarUrl: profile.avatarUrl,
+        name: profile.name,
+        surname: profile.surname,
+      });
       setName(profile.name || '');
       setSurname(profile.surname || '');
       setBio(profile.bio || '');
@@ -79,39 +94,27 @@ export const EditProfileScreen: React.FC = () => {
         surname !== (profile.surname || '') ||
         bio !== (profile.bio || '') ||
         dateOfBirth !== (profile.dateOfBirth || '') ||
-        gender !== (profile.gender || null);
+        gender !== (profile.gender || null) ||
+        pendingAvatarUri !== null ||
+        shouldDeleteAvatar;
       setHasChanges(changed);
     }
-  }, [name, surname, bio, dateOfBirth, gender, profile]);
+  }, [name, surname, bio, dateOfBirth, gender, profile, pendingAvatarUri, shouldDeleteAvatar]);
 
-  // Handle avatar selection (presigned URL flow)
+  // Handle avatar selection (just set pending, don't upload yet)
   const handleAvatarSelected = useCallback(
     (uri: string) => {
-      uploadAvatar(
-        { imageUri: uri },
-        {
-          onSuccess: () => {
-            toast.success('Profil fotoğrafınız güncellendi', 'Başarılı');
-          },
-          onError: error => {
-            console.error('[EditProfileScreen] Avatar upload error:', error);
-            toast.error(error.message || 'Fotoğraf yüklenirken bir hata oluştu', 'Yükleme Hatası');
-          },
-        },
-      );
+      setPendingAvatarUri(uri);
+      setShouldDeleteAvatar(false); // Cancel any pending delete
     },
-    [uploadAvatar, toast],
+    [],
   );
 
-  // Handle avatar removal
-  const handleAvatarRemove = useCallback(async () => {
-    try {
-      await deleteAvatar.mutateAsync();
-      toast.success('Profil fotoğrafınız kaldırıldı', 'Başarılı');
-    } catch (error) {
-      toast.error('Fotoğraf kaldırılırken bir hata oluştu', 'Hata');
-    }
-  }, [deleteAvatar, toast]);
+  // Handle avatar removal (just mark for deletion, don't delete yet)
+  const handleAvatarRemove = useCallback(() => {
+    setPendingAvatarUri(null);
+    setShouldDeleteAvatar(true);
+  }, []);
 
   // Handle save
   const handleSave = useCallback(async () => {
@@ -119,29 +122,56 @@ export const EditProfileScreen: React.FC = () => {
 
     // Validation
     if (!name.trim()) {
-      toast.error('Ad alanı boş bırakılamaz', 'Geçersiz Bilgi');
+      Alert.alert('Hata', 'Ad alanı boş bırakılamaz.');
       return;
     }
     if (!surname.trim()) {
-      toast.error('Soyad alanı boş bırakılamaz', 'Geçersiz Bilgi');
+      Alert.alert('Hata', 'Soyad alanı boş bırakılamaz.');
       return;
     }
 
-    const updateData: UpdateProfileRequest = {};
-
-    if (name !== profile?.name) updateData.name = name.trim();
-    if (surname !== profile?.surname) updateData.surname = surname.trim();
-    if (bio !== (profile?.bio || '')) updateData.bio = bio.trim();
-    if (dateOfBirth !== (profile?.dateOfBirth || '')) updateData.dateOfBirth = dateOfBirth;
-    if (gender !== (profile?.gender || null) && gender) updateData.gender = gender;
-
     try {
-      await updateProfile.mutateAsync(updateData);
-      toast.success('Profiliniz başarıyla güncellendi', 'Başarılı');
-      // Small delay to show toast before navigation
-      setTimeout(() => navigation.goBack(), 500);
-    } catch (error) {
-      toast.error('Profil güncellenirken bir hata oluştu', 'Güncelleme Hatası');
+      // Step 1: Handle avatar changes first if any
+      if (shouldDeleteAvatar) {
+        await deleteAvatar.mutateAsync();
+      } else if (pendingAvatarUri) {
+        await new Promise<void>((resolve, reject) => {
+          uploadAvatar(
+            { imageUri: pendingAvatarUri },
+            {
+              onSuccess: () => resolve(),
+              onError: error => reject(error),
+            },
+          );
+        });
+      }
+
+      // Step 2: Update profile data if there are field changes
+      const updateData: UpdateProfileRequest = {};
+      if (name !== profile?.name) updateData.name = name.trim();
+      if (surname !== profile?.surname) updateData.surname = surname.trim();
+      if (bio !== (profile?.bio || '')) updateData.bio = bio.trim();
+      if (dateOfBirth !== (profile?.dateOfBirth || '')) updateData.dateOfBirth = dateOfBirth;
+      if (gender !== (profile?.gender || null) && gender) updateData.gender = gender;
+
+      if (Object.keys(updateData).length > 0) {
+        await updateProfile.mutateAsync(updateData);
+      }
+
+      // Success
+      Alert.alert('Başarılı', 'Profiliniz güncellendi.', [
+        { text: 'Tamam', onPress: () => navigation.goBack() },
+      ]);
+      
+      // Clear pending states
+      setPendingAvatarUri(null);
+      setShouldDeleteAvatar(false);
+      
+      // Refetch to update UI
+      refetch();
+    } catch (error: any) {
+      console.error('[EditProfileScreen] Save error:', error);
+      Alert.alert('Hata', error.message || 'Profil güncellenirken bir hata oluştu.');
     }
   }, [
     hasChanges,
@@ -153,7 +183,11 @@ export const EditProfileScreen: React.FC = () => {
     profile,
     updateProfile,
     navigation,
-    toast,
+    shouldDeleteAvatar,
+    pendingAvatarUri,
+    deleteAvatar,
+    uploadAvatar,
+    refetch,
   ]);
 
   // Gender selector
@@ -161,8 +195,7 @@ export const EditProfileScreen: React.FC = () => {
     setGender(prev => (prev === selectedGender ? null : selectedGender));
   }, []);
 
-  const isLoading = updateProfile.isPending;
-  const isAvatarLoading = isUploadingAvatar || deleteAvatar.isPending;
+  const isLoading = updateProfile.isPending || isUploadingAvatar || deleteAvatar.isPending;
 
   return (
     <SafeAreaView
@@ -177,11 +210,11 @@ export const EditProfileScreen: React.FC = () => {
           keyboardShouldPersistTaps="handled">
           {/* Avatar Picker */}
           <AvatarPicker
-            currentAvatarUrl={profile?.avatarUrl ?? null}
+            currentAvatarUrl={pendingAvatarUri || (shouldDeleteAvatar ? null : profile?.avatarUrl ?? null)}
             fullName={profile?.fullName || 'Kullanıcı'}
             onImageSelected={handleAvatarSelected}
-            onRemove={profile?.avatarUrl ? handleAvatarRemove : undefined}
-            isLoading={isAvatarLoading}
+            onRemove={(profile?.avatarUrl || pendingAvatarUri) && !shouldDeleteAvatar ? handleAvatarRemove : undefined}
+            isLoading={false}
           />
 
           {/* Form Fields */}
