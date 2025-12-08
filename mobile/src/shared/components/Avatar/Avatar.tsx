@@ -27,7 +27,6 @@ import {
 
 // Create animated components
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 /**
  * Modern Avatar Component
@@ -183,12 +182,11 @@ export const Avatar: React.FC<AvatarProps> = memo(
 
       if (imageSource) {
         return (
-          <AnimatedImage
-            source={imageSource}
-            style={styles.image}
-            resizeMode="cover"
+          <Animated.View
             entering={animated ? FadeIn.duration(300) : undefined}
-          />
+            style={styles.image}>
+            <Image source={imageSource} style={styles.image} resizeMode="cover" />
+          </Animated.View>
         );
       }
 

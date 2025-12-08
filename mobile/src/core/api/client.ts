@@ -10,19 +10,38 @@ import { getErrorMessage } from '@core/utils/errorUtils';
 
 /**
  * Get the correct API base URL for the current platform
- * Android emulator: localhost -> 10.0.2.2 (or use host machine IP directly)
- * iOS simulator: localhost works as-is
+ *
+ * Platform-specific handling:
+ * - Android Emulator: localhost -> 10.0.2.2 (emulator's host loopback)
+ * - iOS Simulator: localhost works as-is
+ * - Real Device: Use your machine's local network IP (set via EXPO_PUBLIC_API_BASE_URL)
+ *
+ * For real device testing:
+ * 1. Find your machine's IP: ipconfig (Windows) or ifconfig (Mac/Linux)
+ * 2. Set environment variable: EXPO_PUBLIC_API_BASE_URL=http://192.168.x.x:8080
+ * 3. Or update app.json extra.API_BASE_URL
  */
 const getApiBaseUrl = (): string => {
   let baseUrl = ENV.API_BASE_URL;
 
-  // Only convert localhost to 10.0.2.2 on Android
-  // If using direct IP (like 192.168.x.x), no conversion needed
+  // Platform-specific URL conversion
   if (Platform.OS === 'android' && baseUrl.includes('localhost')) {
+    // Android emulator cannot access localhost directly
+    // 10.0.2.2 is the special IP to reach host machine from Android emulator
     baseUrl = baseUrl.replace('localhost', '10.0.2.2');
+
+    if (__DEV__) {
+      console.log('[API] Android emulator detected, using 10.0.2.2 for localhost');
+    }
+  } else if (Platform.OS === 'ios' && baseUrl.includes('localhost')) {
+    // iOS simulator can use localhost directly
+    if (__DEV__) {
+      console.log('[API] iOS simulator using localhost');
+    }
+  } else if (__DEV__) {
+    console.log(`[API] Using base URL: ${baseUrl}`);
   }
 
-  // API URL configured for platform
   return baseUrl;
 };
 

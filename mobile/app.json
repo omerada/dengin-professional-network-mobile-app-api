@@ -37,7 +37,10 @@
     "extra": {
       "eas": {
         "projectId": "your-expo-project-id"
-      }
+      },
+      "_comment": "Optional API configuration - set your machine's IP for real device testing",
+      "API_BASE_URL": "",
+      "WS_URL": ""
     }
   }
 }

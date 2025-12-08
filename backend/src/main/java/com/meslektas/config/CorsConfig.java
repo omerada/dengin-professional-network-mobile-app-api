@@ -33,7 +33,14 @@ public class CorsConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(allowedOrigins);
+        
+        // Use allowedOriginPatterns instead of allowedOrigins for wildcard support
+        if (allowedOrigins.size() == 1 && "*".equals(allowedOrigins.get(0))) {
+            configuration.addAllowedOriginPattern("*");
+        } else {
+            configuration.setAllowedOrigins(allowedOrigins);
+        }
+        
         configuration.setAllowedMethods(allowedMethods);
         configuration.setAllowedHeaders(List.of(allowedHeaders));
         configuration.setAllowCredentials(allowCredentials);

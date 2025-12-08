@@ -15,23 +15,12 @@ import { ToastProvider } from '@contexts/ToastContext';
 import { useAuthStore } from '@features/auth/stores/authStore';
 import { notificationHandler } from '@features/notifications/services/notificationHandler.production';
 
-// Disable all LogBox warnings and yellow box notifications
-// Errors will still appear in terminal/console for debugging
-LogBox.ignoreAllLogs(true);
+// Disable warnings in production but keep errors visible in development
+LogBox.ignoreAllLogs(!__DEV__);
 
-// Also disable console errors/warnings in the app (they still appear in terminal)
+// Keep console logs but make them less intrusive in development
 if (__DEV__) {
-  const originalConsoleError = console.error;
-  const originalConsoleWarn = console.warn;
-
-  // Keep logs in terminal but don't show overlay
-  console.error = (...args) => {
-    originalConsoleError(...args);
-  };
-
-  console.warn = (...args) => {
-    originalConsoleWarn(...args);
-  };
+  console.log('[App] Running in development mode');
 }
 
 /**

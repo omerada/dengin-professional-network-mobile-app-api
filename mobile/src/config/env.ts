@@ -11,12 +11,33 @@ const expoConfig = Constants.expoConfig?.extra || {};
  * Provides type-safe access to environment variables
  * Uses Expo Constants for managed workflow compatibility
  */
+// Helper function to get the current machine's local IP (for development)
+const getDevApiUrl = (): string => {
+  // Try to get from environment first
+  if (expoConfig.API_BASE_URL || process.env.EXPO_PUBLIC_API_BASE_URL) {
+    return expoConfig.API_BASE_URL || process.env.EXPO_PUBLIC_API_BASE_URL || '';
+  }
+
+  // For development: Use localhost which will be converted to proper IP by apiClient
+  // Android emulator: 10.0.2.2 (handled in client.ts)
+  // iOS simulator: localhost works as-is
+  // Real device: Set EXPO_PUBLIC_API_BASE_URL environment variable
+  return 'http://localhost:8080';
+};
+
+const getDevWsUrl = (): string => {
+  if (expoConfig.WS_URL || process.env.EXPO_PUBLIC_WS_URL) {
+    return expoConfig.WS_URL || process.env.EXPO_PUBLIC_WS_URL || '';
+  }
+  return 'ws://localhost:8080/ws';
+};
+
 export const ENV = {
   // IMPORTANT: For Expo Go, .env doesn't work reliably
-  // Using direct IP address for local development
-  API_BASE_URL:
-    expoConfig.API_BASE_URL || process.env.EXPO_PUBLIC_API_BASE_URL || 'http://192.168.1.102:8080', // Your host machine IP
-  WS_URL: expoConfig.WS_URL || process.env.EXPO_PUBLIC_WS_URL || 'ws://192.168.1.102:8080/ws',
+  // Using localhost as default - will be converted to appropriate IP by apiClient
+  // For real device testing, set EXPO_PUBLIC_API_BASE_URL to your machine's IP
+  API_BASE_URL: getDevApiUrl(),
+  WS_URL: getDevWsUrl(),
 
   FIREBASE: {
     apiKey: expoConfig.FIREBASE_API_KEY || process.env.EXPO_PUBLIC_FIREBASE_API_KEY || '',

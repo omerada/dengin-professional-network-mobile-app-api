@@ -5,25 +5,13 @@ import { registerRootComponent } from 'expo';
 import { LogBox } from 'react-native';
 import App from './src/App';
 
-// Disable all console warnings and error overlays on device
-// Logs still appear in terminal for debugging
-LogBox.ignoreAllLogs(true);
+// Disable LogBox warnings but allow error overlays for debugging
+LogBox.ignoreAllLogs(__DEV__ ? false : true);
 
-// Disable error overlay in development
+// In development, show errors but log them
 if (__DEV__) {
-  // Disable React Native's red screen overlay
-  const ErrorUtils = global.ErrorUtils;
-  if (ErrorUtils) {
-    const originalHandler = ErrorUtils.getGlobalHandler();
-    ErrorUtils.setGlobalHandler((error, isFatal) => {
-      // Log to console (appears in terminal)
-      console.error('Error caught:', error);
-      // Call original handler without showing overlay
-      if (originalHandler) {
-        originalHandler(error, isFatal);
-      }
-    });
-  }
+  // Keep error overlay enabled in development
+  console.log('[index.js] Running in development mode with error overlay enabled');
 }
 
 // registerRootComponent calls AppRegistry.registerComponent('main', () => App);
