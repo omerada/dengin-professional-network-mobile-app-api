@@ -5,3 +5,4 @@ export { AppleSignInButton } from './AppleSignInButton';
 export { SocialLoginButtons } from './SocialLoginButtons';
 export { ProfessionSelector } from './ProfessionSelector';
 export { SectorSelector } from './SectorSelector'; // Sprint 1: Sector-based community
+export { StepIndicator } from './StepIndicator'; // Multi-step registration

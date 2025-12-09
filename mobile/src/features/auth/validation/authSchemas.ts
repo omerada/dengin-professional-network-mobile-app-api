@@ -31,8 +31,8 @@ export const loginSchema = z.object({
  * Register form validation schema
  * Updated for Sprint 1: Sector-based community structure
  *
- * Note: Both profession and sector fields supported for backward compatibility
- * During migration period, prefer sectorId over professionId
+ * Note: professionId is optional for OTHER sector
+ * When OTHER sector selected, customProfession is required
  */
 export const registerSchema = z
   .object({
@@ -56,14 +56,19 @@ export const registerSchema = z
       .min(1, 'Soyad gerekli')
       .min(2, 'Soyad en az 2 karakter olmalı')
       .max(50, 'Soyad en fazla 50 karakter olabilir'),
-    // Sector field (new - Sprint 1)
+    // Sector field (required)
     sectorId: z.number({
       required_error: 'Sektör seçimi zorunludur',
       invalid_type_error: 'Sektör seçimi zorunludur',
     }),
-    // Profession fields (deprecated - kept for backward compatibility)
-    professionId: z.number().optional(),
-    customProfession: z.string().max(100, 'Meslek en fazla 100 karakter olabilir').optional(),
+    // Profession field (optional - for non-OTHER sectors)
+    professionId: z.number().optional().nullable(),
+    // Custom profession (required for OTHER sector)
+    customProfession: z
+      .string()
+      .max(100, 'Meslek en fazla 100 karakter olabilir')
+      .optional()
+      .or(z.literal('')),
     acceptTerms: z.boolean().refine(val => val === true, {
       message: 'Kullanım koşullarını kabul etmeniz gerekli',
     }),
@@ -71,7 +76,20 @@ export const registerSchema = z
   .refine(data => data.password === data.confirmPassword, {
     message: 'Şifreler eşleşmiyor',
     path: ['confirmPassword'],
-  });
+  })
+  .refine(
+    data => {
+      // Either professionId or customProfession must be provided
+      if (!data.professionId && (!data.customProfession || data.customProfession.trim() === '')) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: 'Meslek seçimi veya meslek girişi zorunludur',
+      path: ['customProfession'],
+    },
+  );
 
 /**
  * Forgot password form validation schema

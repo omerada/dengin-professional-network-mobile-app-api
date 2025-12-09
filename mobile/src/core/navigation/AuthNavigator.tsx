@@ -9,7 +9,8 @@ import { AuthStackParamList } from '@shared/types';
 // Auth Screens
 import { WelcomeScreen } from '@features/auth/screens/WelcomeScreen';
 import { LoginScreen } from '@features/auth/screens/LoginScreen';
-import { RegisterScreen } from '@features/auth/screens/RegisterScreen';
+// import { RegisterScreen } from '@features/auth/screens/RegisterScreen'; // Old single-step version
+import { RegisterScreenMultiStep } from '@features/auth/screens/RegisterScreenMultiStep';
 import { ForgotPasswordScreen } from '@features/auth/screens/ForgotPasswordScreen';
 
 // Onboarding
@@ -45,7 +46,7 @@ export const AuthNavigator: React.FC = () => {
       />
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Register" component={RegisterScreen} />
+      <Stack.Screen name="Register" component={RegisterScreenMultiStep} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
       <Stack.Screen
         name="Terms"

@@ -94,7 +94,7 @@ export const SectorSelector: React.FC<SectorSelectorProps> = ({
   );
 
   const displayText = useMemo(() => {
-    return selectedSector?.name || 'Sektörünüzü seçin';
+    return selectedSector?.name || 'Alanınızı seçin';
   }, [selectedSector]);
 
   const getSectorIcon = (code: string) => {
@@ -191,7 +191,7 @@ export const SectorSelector: React.FC<SectorSelectorProps> = ({
       {/* Label */}
       <View style={styles.labelContainer}>
         <Text style={[styles.label, { color: colors.text.primary }]}>
-          Sektör <Text style={{ color: colors.status.error }}>*</Text>
+          Hangi alanda çalışıyorsunuz? <Text style={{ color: colors.status.error }}>*</Text>
         </Text>
       </View>
 
@@ -234,7 +234,7 @@ export const SectorSelector: React.FC<SectorSelectorProps> = ({
       {/* Hint */}
       {!error && (
         <Text style={[styles.hint, { color: colors.text.tertiary }]}>
-          Hangi sektörde çalışıyorsunuz?
+          Örneğin: Sağlık, Eğitim, Teknoloji, Hukuk...
         </Text>
       )}
 
@@ -250,7 +250,9 @@ export const SectorSelector: React.FC<SectorSelectorProps> = ({
             onPress={e => e.stopPropagation()}>
             {/* Modal Header */}
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text.primary }]}>Sektör Seçin</Text>
+              <Text style={[styles.modalTitle, { color: colors.text.primary }]}>
+                Çalışma Alanınızı Seçin
+              </Text>
               <TouchableOpacity
                 onPress={() => setModalVisible(false)}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
@@ -270,7 +272,7 @@ export const SectorSelector: React.FC<SectorSelectorProps> = ({
               <Icon name="search" size={20} color={colors.text.tertiary} />
               <TextInput
                 style={[styles.searchInput, { color: colors.text.primary }]}
-                placeholder="Sektör ara..."
+                placeholder="Alan ara..."
                 placeholderTextColor={colors.text.tertiary}
                 value={searchQuery}
                 onChangeText={setSearchQuery}

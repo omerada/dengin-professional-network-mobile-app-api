@@ -6,6 +6,16 @@ import { apiClient } from './client';
 import type { Sector, ProfessionGroup, SectorStats } from '@shared/types/api.types';
 
 /**
+ * Backend ApiResponse wrapper type
+ */
+interface ApiResponse<T> {
+  success: boolean;
+  message?: string;
+  data: T;
+  timestamp: string;
+}
+
+/**
  * Sector API Service
  *
  * Backend endpoints:
@@ -17,6 +27,7 @@ import type { Sector, ProfessionGroup, SectorStats } from '@shared/types/api.typ
  * - GET /api/sectors/stats - Get sector statistics
  *
  * All endpoints are public (no authentication required)
+ * Backend wraps responses in ApiResponse<T> { success, data, timestamp }
  *
  * @since Sprint 1
  */
@@ -32,8 +43,8 @@ export const sectorApi = {
    * // sectors = [{ id: 1, code: 'MEDICAL', name: 'Sağlık', ... }, ...]
    */
   getAllActiveSectors: async (): Promise<Sector[]> => {
-    const response = await apiClient.get<Sector[]>('/api/sectors');
-    return response.data;
+    const response = await apiClient.get<ApiResponse<Sector[]>>('/api/sectors');
+    return response.data.data; // Unwrap ApiResponse
   },
 
   /**
@@ -49,8 +60,8 @@ export const sectorApi = {
    * // sector = { id: 1, code: 'MEDICAL', name: 'Sağlık', memberCount: 150, ... }
    */
   getSectorById: async (id: number): Promise<Sector> => {
-    const response = await apiClient.get<Sector>(`/api/sectors/${id}`);
-    return response.data;
+    const response = await apiClient.get<ApiResponse<Sector>>(`/api/sectors/${id}`);
+    return response.data.data; // Unwrap ApiResponse
   },
 
   /**
@@ -66,8 +77,10 @@ export const sectorApi = {
    * // sector = { id: 1, code: 'MEDICAL', name: 'Sağlık', ... }
    */
   getSectorByCode: async (code: string): Promise<Sector> => {
-    const response = await apiClient.get<Sector>(`/api/sectors/code/${code.toUpperCase()}`);
-    return response.data;
+    const response = await apiClient.get<ApiResponse<Sector>>(
+      `/api/sectors/code/${code.toUpperCase()}`,
+    );
+    return response.data.data; // Unwrap ApiResponse
   },
 
   /**
@@ -82,10 +95,10 @@ export const sectorApi = {
    * // sectors = [{ id: 1, code: 'MEDICAL', name: 'Sağlık', ... }]
    */
   searchSectors: async (query: string): Promise<Sector[]> => {
-    const response = await apiClient.get<Sector[]>('/api/sectors/search', {
+    const response = await apiClient.get<ApiResponse<Sector[]>>('/api/sectors/search', {
       params: { q: query },
     });
-    return response.data;
+    return response.data.data; // Unwrap ApiResponse
   },
 
   /**
@@ -100,10 +113,10 @@ export const sectorApi = {
    * // Returns top 5 sectors by member count
    */
   getMostPopular: async (limit: number = 10): Promise<Sector[]> => {
-    const response = await apiClient.get<Sector[]>('/api/sectors/popular', {
+    const response = await apiClient.get<ApiResponse<Sector[]>>('/api/sectors/popular', {
       params: { limit },
     });
-    return response.data;
+    return response.data.data; // Unwrap ApiResponse
   },
 
   /**
@@ -117,8 +130,8 @@ export const sectorApi = {
    * // stats = { totalSectors: 8, activeSectors: 8 }
    */
   getStatistics: async (): Promise<SectorStats> => {
-    const response = await apiClient.get<SectorStats>('/api/sectors/stats');
-    return response.data;
+    const response = await apiClient.get<ApiResponse<SectorStats>>('/api/sectors/stats');
+    return response.data.data; // Unwrap ApiResponse
   },
 };
 
@@ -141,10 +154,10 @@ export const professionGroupApi = {
    */
   getBySector: async (sectorId: number): Promise<ProfessionGroup[]> => {
     // TODO: Implement in Sprint 3
-    const response = await apiClient.get<ProfessionGroup[]>('/api/profession-groups', {
+    const response = await apiClient.get<ApiResponse<ProfessionGroup[]>>('/api/profession-groups', {
       params: { sectorId },
     });
-    return response.data;
+    return response.data.data; // Unwrap ApiResponse
   },
 
   /**
@@ -155,7 +168,9 @@ export const professionGroupApi = {
    */
   getById: async (id: number): Promise<ProfessionGroup> => {
     // TODO: Implement in Sprint 3
-    const response = await apiClient.get<ProfessionGroup>(`/api/profession-groups/${id}`);
-    return response.data;
+    const response = await apiClient.get<ApiResponse<ProfessionGroup>>(
+      `/api/profession-groups/${id}`,
+    );
+    return response.data.data; // Unwrap ApiResponse
   },
 };

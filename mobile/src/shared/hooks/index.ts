@@ -17,6 +17,19 @@ export {
   isGeneralSector,
   sectorKeys,
 } from './useSectors';
+
+// Profession hooks
+export {
+  useProfessions,
+  useProfession,
+  useProfessionsByCategory,
+  useSearchProfessions,
+  useVerificationRequiredProfessions,
+  useProfessionStats,
+  requiresVerification,
+  professionKeys,
+} from './useProfessions';
+
 export {
   useNetworkStatus,
   useIsOffline,

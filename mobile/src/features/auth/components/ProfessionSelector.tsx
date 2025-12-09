@@ -1,6 +1,6 @@
 // src/features/auth/components/ProfessionSelector.tsx
-// Smart Profession Dropdown Selector
-// Backend ile %100 uyumlu meslek seçici
+// Smart Profession Dropdown Selector - Backend API integrated
+// Uses backend /api/professions endpoints
 
 import React, { useState, useCallback, useMemo } from 'react';
 import {
@@ -14,128 +14,68 @@ import {
   ActivityIndicator,
   Pressable,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/Feather';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing } from '@theme';
-import { PROFESSIONS, type Profession } from '../constants/professions';
+import { useProfessionsByCategory, useSearchProfessions } from '@shared/hooks';
+import type { Profession } from '@shared/types/api.types';
 
 const MODAL_OVERLAY_COLOR = 'rgba(0, 0, 0, 0.5)';
 
 interface ProfessionSelectorProps {
-  value?: number | null; // Selected profession ID
-  customValue?: string; // Custom profession text if "OTHER" selected
-  onSelect: (professionId: number | null, customText?: string) => void;
+  /** Selected profession ID */
+  value?: number | null;
+  /** Callback when profession is selected */
+  onSelect: (professionId: number | null) => void;
+  /** Currently selected sector code (to filter professions) */
+  sectorCode?: string | null;
+  /** Error message */
   error?: string;
+  /** Show description in dropdown */
+  showDescription?: boolean;
 }
-
-const PROFANITY_WORDS = [
-  'amk',
-  'aq',
-  'mk',
-  'amq',
-  'a.q',
-  'm.k',
-  'a.q.',
-  'am',
-  'amcık',
-  'amına',
-  'amın',
-  'amı',
-  'amını',
-  'amına koyayım',
-  'amına koyim',
-  'sik',
-  's1k',
-  's!k',
-  'siik',
-  'siktir',
-  'siktirgit',
-  'sikerim',
-  'sikeyim',
-  'sikti',
-  'sikiyor',
-  'göt',
-  'got',
-  'götün',
-  'götüne',
-  'götünü',
-  'götveren',
-  'götlek',
-  'göt herif',
-  'yarak',
-  'yarrak',
-  'yrk',
-  'yrrk',
-  'yarrağ',
-  'yarrağı',
-  'yarrağın',
-  'yarram',
-  'piç',
-  'piq',
-  'pıc',
-  'pıç',
-  'puç',
-  'orospu',
-  'oç',
-  'orospunun',
-  'orospucocugu',
-  'orospucocu',
-  'orosbu',
-  'orospular',
-  'pezevenk',
-  'pezo',
-  'gerizekalı',
-  'geri zekalı',
-  'salak',
-  'aptal',
-  'mall',
-  'mal',
-  'dangalak',
-  'dangoz',
-  'şerefsiz',
-  'şrfsz',
-  'şrfsiz',
-  'yavşak',
-  'yavsak',
-  'puşt',
-  'pust',
-  'pustt',
-  'ibne',
-  'ibn*',
-  'ibine',
-  'kahpe',
-  'kahbe',
-  'kaltak',
-  'kaltag',
-];
-
-const containsProfanity = (text: string): boolean => {
-  const lowerText = text.toLowerCase();
-  return PROFANITY_WORDS.some(word => lowerText.includes(word));
-};
 
 /**
  * Smart Profession Selector Component
- * - Dropdown list from backend professions
- * - "Diğer" option for custom profession
- * - Profanity filter
- * - Shows verification requirement badge
+ *
+ * Features:
+ * - Fetches professions from backend based on sector
+ * - Real-time search with backend query
+ * - Shows verification badge for professions requiring verification
+ * - Disabled state when no sector selected
+ * - Clean card-based design
+ *
+ * @example
+ * <ProfessionSelector
+ *   value={professionId}
+ *   sectorCode={selectedSectorCode}
+ *   onSelect={(id) => setValue('professionId', id)}
+ *   error={errors.professionId?.message}
+ * />
  */
 export const ProfessionSelector: React.FC<ProfessionSelectorProps> = ({
   value,
-  customValue,
   onSelect,
+  sectorCode,
   error,
+  showDescription = false,
 }) => {
   const colors = useColors();
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [customText, setCustomText] = useState(customValue || '');
-  const [customError, setCustomError] = useState('');
-  const [showCustomInput, setShowCustomInput] = useState(false);
 
-  // Use hardcoded professions
-  const professions = PROFESSIONS;
-  const isLoading = false;
+  // Fetch professions by sector category
+  const {
+    data: professions,
+    isLoading,
+    isError,
+  } = useProfessionsByCategory(sectorCode || '', !!sectorCode);
+
+  // Search professions
+  const { data: searchResults } = useSearchProfessions(searchQuery, searchQuery.length > 0);
+
+  // Determine which list to show
+  const displayProfessions = searchQuery.length > 0 ? searchResults : professions;
 
   // Find selected profession
   const selectedProfession = useMemo(() => {
@@ -143,83 +83,98 @@ export const ProfessionSelector: React.FC<ProfessionSelectorProps> = ({
     return professions.find(p => p.id === value);
   }, [value, professions]);
 
-  // Filter professions based on search
-  const filteredProfessions = useMemo(() => {
-    if (!professions) return [];
-    if (!searchQuery) return professions;
-    const query = searchQuery.toLowerCase();
-    return professions.filter(p => p.name.toLowerCase().includes(query));
-  }, [professions, searchQuery]);
-
-  // Check if selected profession is "OTHER" category
-  const isOtherCategory = selectedProfession?.category === 'OTHER';
-
   const handleProfessionSelect = useCallback(
     (profession: Profession) => {
-      if (profession.category === 'OTHER') {
-        setModalVisible(false);
-        setShowCustomInput(true);
-        onSelect(profession.id, '');
-      } else {
-        setShowCustomInput(false);
-        setCustomText('');
-        setCustomError('');
-        onSelect(profession.id);
-        setModalVisible(false);
-      }
+      onSelect(profession.id);
+      setModalVisible(false);
       setSearchQuery('');
     },
     [onSelect],
   );
 
-  const handleCustomTextChange = useCallback((text: string) => {
-    setCustomText(text);
-    if (containsProfanity(text)) {
-      setCustomError('Geçersiz meslek adı. Lütfen uygun bir meslek giriniz.');
-    } else if (text.length > 100) {
-      setCustomError('Meslek adı en fazla 100 karakter olabilir.');
-    } else {
-      setCustomError('');
-    }
-  }, []);
-
-  const handleCustomTextConfirm = useCallback(() => {
-    if (!customError && customText.trim()) {
-      onSelect(selectedProfession?.id || null, customText.trim());
-      setModalVisible(false);
-      setShowCustomInput(false);
-    }
-  }, [customError, customText, onSelect, selectedProfession]);
-
   const displayText = useMemo(() => {
-    if (isOtherCategory && customValue) {
-      return customValue;
-    }
     return selectedProfession?.name || 'Mesleğinizi seçin';
-  }, [selectedProfession, isOtherCategory, customValue]);
+  }, [selectedProfession]);
+
+  const isDisabled = !sectorCode;
+
+  // Render profession item
+  const renderProfessionItem = ({ item }: { item: Profession }) => {
+    const isSelected = item.id === value;
+
+    return (
+      <TouchableOpacity
+        style={[
+          styles.professionItem,
+          {
+            backgroundColor: isSelected ? colors.interactive.subtle : colors.background.primary,
+            borderColor: isSelected ? colors.interactive.default : colors.border.default,
+          },
+        ]}
+        onPress={() => handleProfessionSelect(item)}
+        activeOpacity={0.7}>
+        <View style={styles.professionContent}>
+          <Text
+            style={[
+              styles.professionName,
+              {
+                color: isSelected ? colors.interactive.default : colors.text.primary,
+                fontWeight: isSelected ? '600' : '500',
+              },
+            ]}>
+            {item.name}
+          </Text>
+
+          {item.requiresVerification && (
+            <View style={[styles.verificationBadge, { backgroundColor: colors.status.warningBg }]}>
+              <Icon name="shield" size={12} color={colors.status.warning} />
+              <Text style={[styles.badgeText, { color: colors.status.warning }]}>Doğrulama</Text>
+            </View>
+          )}
+
+          {showDescription && item.description && (
+            <Text
+              style={[styles.professionDescription, { color: colors.text.secondary }]}
+              numberOfLines={2}>
+              {item.description}
+            </Text>
+          )}
+        </View>
+
+        {/* Check icon */}
+        {isSelected && <Icon name="check-circle" size={24} color={colors.interactive.default} />}
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.label, { color: colors.text.primary }]}>
-        Meslek <Text style={{ color: colors.status.error }}>*</Text>
-      </Text>
+      {/* Label */}
+      <View style={styles.labelContainer}>
+        <Text style={[styles.label, { color: colors.text.primary }]}>
+          Mesleğiniz nedir? {!isDisabled && <Text style={{ color: colors.status.error }}>*</Text>}
+        </Text>
+      </View>
 
-      {/* Selection Button */}
+      {/* Selector Button */}
       <TouchableOpacity
         style={[
           styles.selector,
           {
-            backgroundColor: colors.background.secondary,
+            backgroundColor: isDisabled ? colors.background.tertiary : colors.background.secondary,
             borderColor: error ? colors.status.error : colors.border.default,
+            opacity: isDisabled ? 0.6 : 1,
           },
         ]}
-        onPress={() => {
-          if (!modalVisible) {
-            setModalVisible(true);
-          }
-        }}
-        disabled={modalVisible}
+        onPress={() => !isDisabled && setModalVisible(true)}
+        disabled={isDisabled}
         activeOpacity={0.7}>
+        {selectedProfession && (
+          <View
+            style={[styles.selectedIconContainer, { backgroundColor: colors.background.tertiary }]}>
+            <Icon name="briefcase" size={20} color={colors.interactive.default} />
+          </View>
+        )}
         <Text
           style={[
             styles.selectorText,
@@ -229,133 +184,115 @@ export const ProfessionSelector: React.FC<ProfessionSelectorProps> = ({
           ]}>
           {displayText}
         </Text>
-        <Text style={[styles.arrow, { color: colors.text.tertiary }]}>▼</Text>
+        <Icon name="chevron-down" size={20} color={colors.text.secondary} />
       </TouchableOpacity>
 
-      {/* Verification Badge */}
-      {selectedProfession?.requiresVerification && !isOtherCategory && (
-        <View style={[styles.badge, { backgroundColor: colors.interactive.subtle }]}>
-          <Text style={[styles.badgeText, { color: colors.interactive.default }]}>
-            ✓ Doğrulama gerektirir
+      {/* Error Message */}
+      {error && <Text style={[styles.errorText, { color: colors.status.error }]}>{error}</Text>}
+
+      {/* Hint */}
+      {!error && isDisabled && (
+        <Text style={[styles.hint, { color: colors.text.tertiary }]}>
+          Önce çalışma alanınızı seçin
+        </Text>
+      )}
+      {!error && !isDisabled && (
+        <Text style={[styles.hint, { color: colors.text.tertiary }]}>
+          Sektörünüzdeki mesleğinizi seçin
+        </Text>
+      )}
+
+      {/* Verification badge */}
+      {selectedProfession?.requiresVerification && (
+        <View style={[styles.infoBox, { backgroundColor: colors.status.infoBg }]}>
+          <Icon name="info" size={16} color={colors.status.info} />
+          <Text style={[styles.infoText, { color: colors.status.info }]}>
+            Bu meslek için doğrulama gereklidir
           </Text>
         </View>
       )}
-
-      {/* Custom Input for OTHER category */}
-      {isOtherCategory && showCustomInput && (
-        <View style={styles.customInputContainer}>
-          <TextInput
-            style={[
-              styles.customInput,
-              {
-                backgroundColor: colors.background.secondary,
-                borderColor: customError ? colors.status.error : colors.border.default,
-                color: colors.text.primary,
-              },
-            ]}
-            value={customText}
-            onChangeText={handleCustomTextChange}
-            placeholder="Mesleğinizi yazın"
-            placeholderTextColor={colors.text.tertiary}
-            maxLength={100}
-            autoFocus
-          />
-          {customError && (
-            <Text style={[styles.errorText, { color: colors.status.error }]}>{customError}</Text>
-          )}
-          <TouchableOpacity
-            style={[
-              styles.confirmButton,
-              { backgroundColor: colors.interactive.default },
-              (customError || !customText.trim()) && styles.confirmButtonDisabled,
-            ]}
-            onPress={handleCustomTextConfirm}
-            disabled={!customText.trim() || !!customError}>
-            <Text style={[styles.confirmButtonText, { color: colors.text.inverse }]}>Tamam</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {error && <Text style={[styles.errorText, { color: colors.status.error }]}>{error}</Text>}
 
       {/* Modal */}
       <Modal
         visible={modalVisible}
         transparent
-        animationType="slide"
+        animationType="fade"
         onRequestClose={() => setModalVisible(false)}>
         <Pressable style={styles.modalOverlay} onPress={() => setModalVisible(false)}>
           <Pressable
             style={[styles.modalContent, { backgroundColor: colors.background.primary }]}
             onPress={e => e.stopPropagation()}>
-            {/* Header */}
-            <View style={[styles.modalHeader, { borderBottomColor: colors.border.default }]}>
-              <Text style={[styles.modalTitle, { color: colors.text.primary }]}>Meslek Seçin</Text>
-              <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Text style={[styles.closeButton, { color: colors.text.secondary }]}>✕</Text>
+            {/* Modal Header */}
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: colors.text.primary }]}>
+                Mesleğinizi Seçin
+              </Text>
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Icon name="x" size={24} color={colors.text.secondary} />
               </TouchableOpacity>
             </View>
 
-            {/* Search */}
-            <View style={styles.searchContainer}>
+            {/* Search Input */}
+            <View
+              style={[
+                styles.searchContainer,
+                {
+                  backgroundColor: colors.background.secondary,
+                  borderColor: colors.border.default,
+                },
+              ]}>
+              <Icon name="search" size={20} color={colors.text.tertiary} />
               <TextInput
-                style={[
-                  styles.searchInput,
-                  {
-                    backgroundColor: colors.background.secondary,
-                    borderColor: colors.border.default,
-                    color: colors.text.primary,
-                  },
-                ]}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
+                style={[styles.searchInput, { color: colors.text.primary }]}
                 placeholder="Meslek ara..."
                 placeholderTextColor={colors.text.tertiary}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                autoCapitalize="none"
+                autoCorrect={false}
               />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery('')}>
+                  <Icon name="x-circle" size={20} color={colors.text.tertiary} />
+                </TouchableOpacity>
+              )}
             </View>
 
-            {/* List */}
+            {/* Profession List */}
             {isLoading ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color={colors.interactive.default} />
+                <Text style={[styles.loadingText, { color: colors.text.secondary }]}>
+                  Meslekler yükleniyor...
+                </Text>
+              </View>
+            ) : isError ? (
+              <View style={styles.errorContainer}>
+                <Icon name="alert-circle" size={48} color={colors.status.error} />
+                <Text style={[styles.errorTitle, { color: colors.text.primary }]}>
+                  Meslekler yüklenemedi
+                </Text>
+                <Text style={[styles.errorMessage, { color: colors.text.secondary }]}>
+                  Lütfen tekrar deneyin
+                </Text>
               </View>
             ) : (
               <FlatList
-                data={filteredProfessions}
+                data={displayProfessions}
+                renderItem={renderProfessionItem}
                 keyExtractor={item => item.id.toString()}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={[
-                      styles.professionItem,
-                      {
-                        backgroundColor:
-                          item.id === value ? colors.interactive.subtle : colors.background.primary,
-                      },
-                    ]}
-                    onPress={() => handleProfessionSelect(item)}>
-                    <View style={styles.professionInfo}>
-                      <Text style={[styles.professionName, { color: colors.text.primary }]}>
-                        {item.name}
-                      </Text>
-                      {item.requiresVerification && (
-                        <View
-                          style={[
-                            styles.verificationBadge,
-                            { backgroundColor: colors.status.infoBg },
-                          ]}>
-                          <Text
-                            style={[styles.verificationBadgeText, { color: colors.status.info }]}>
-                            Doğrulama
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                  </TouchableOpacity>
-                )}
+                contentContainerStyle={styles.listContent}
+                showsVerticalScrollIndicator={true}
                 ListEmptyComponent={
-                  <View style={styles.emptyContainer}>
-                    <Text style={[styles.emptyText, { color: colors.text.secondary }]}>
+                  <View style={styles.emptyState}>
+                    <Icon name="search" size={48} color={colors.text.tertiary} />
+                    <Text style={[styles.emptyTitle, { color: colors.text.primary }]}>
                       Meslek bulunamadı
+                    </Text>
+                    <Text style={[styles.emptyMessage, { color: colors.text.secondary }]}>
+                      Farklı anahtar kelimeler deneyin
                     </Text>
                   </View>
                 }
@@ -369,140 +306,169 @@ export const ProfessionSelector: React.FC<ProfessionSelectorProps> = ({
 };
 
 const styles = StyleSheet.create({
-  arrow: {
-    fontSize: 12,
-  },
-  badge: {
-    alignSelf: 'flex-start',
-    borderRadius: 12,
-    marginTop: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  closeButton: {
-    fontSize: 24,
-  },
-  confirmButton: {
-    alignItems: 'center',
-    borderRadius: 8,
-    marginTop: spacing.sm,
-    paddingVertical: spacing.md,
-  },
-  confirmButtonDisabled: {
-    opacity: 0.5,
-  },
-  confirmButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
   container: {
     marginBottom: spacing.md,
   },
-  customInput: {
-    borderRadius: 8,
-    borderWidth: 1,
-    fontSize: 16,
-    marginTop: spacing.xs,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-  },
-  customInputContainer: {
-    marginTop: spacing.sm,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingVertical: spacing['2xl'],
-  },
-  emptyText: {
-    fontSize: 15,
-  },
-  errorText: {
-    fontSize: 12,
-    marginTop: spacing.xs,
+  labelContainer: {
+    marginBottom: spacing.xs,
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
-    marginBottom: spacing.xs,
-  },
-  loadingContainer: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-  },
-  modalContent: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    flex: 1,
-    marginTop: '20%',
-  },
-  modalHeader: {
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-  },
-  modalOverlay: {
-    backgroundColor: MODAL_OVERLAY_COLOR,
-    flex: 1,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  professionInfo: {
-    alignItems: 'center',
-    flexDirection: 'row',
-  },
-  professionItem: {
-    borderRadius: 8,
-    marginHorizontal: spacing.md,
-    marginVertical: 4,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-  },
-  professionName: {
-    flex: 1,
-    fontSize: 15,
-  },
-  searchContainer: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  searchInput: {
-    borderRadius: 8,
-    borderWidth: 1,
-    fontSize: 15,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
   },
   selector: {
-    alignItems: 'center',
-    borderRadius: 8,
-    borderWidth: 1,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
+    borderRadius: 12,
+    borderWidth: 1,
+    minHeight: 56,
+  },
+  selectedIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: spacing.sm,
   },
   selectorText: {
     flex: 1,
     fontSize: 16,
   },
-  verificationBadge: {
-    borderRadius: 8,
-    marginLeft: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
+  errorText: {
+    fontSize: 12,
+    marginTop: spacing.xs,
   },
-  verificationBadgeText: {
+  hint: {
+    fontSize: 12,
+    marginTop: spacing.xs,
+  },
+  infoBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.sm,
+    borderRadius: 8,
+    marginTop: spacing.sm,
+  },
+  infoText: {
+    fontSize: 13,
+    marginLeft: spacing.xs,
+    flex: 1,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: MODAL_OVERLAY_COLOR,
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: spacing.xl,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.md,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    marginLeft: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  listContent: {
+    paddingHorizontal: spacing.lg,
+    paddingBottom: spacing.md,
+  },
+  professionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.md,
+    borderRadius: 12,
+    marginBottom: spacing.sm,
+    borderWidth: 1,
+  },
+  professionContent: {
+    flex: 1,
+  },
+  professionName: {
+    fontSize: 16,
+    marginBottom: spacing.xs,
+  },
+  professionDescription: {
+    fontSize: 13,
+    marginTop: spacing.xs,
+  },
+  verificationBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+    borderRadius: 12,
+    marginTop: spacing.xs,
+  },
+  badgeText: {
     fontSize: 11,
     fontWeight: '600',
+    marginLeft: 4,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: spacing['2xl'],
+  },
+  loadingText: {
+    fontSize: 14,
+    marginTop: spacing.md,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: spacing['2xl'],
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: spacing.md,
+  },
+  errorMessage: {
+    fontSize: 14,
+    marginTop: spacing.xs,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: spacing['2xl'],
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: spacing.md,
+  },
+  emptyMessage: {
+    fontSize: 14,
+    marginTop: spacing.xs,
   },
 });
