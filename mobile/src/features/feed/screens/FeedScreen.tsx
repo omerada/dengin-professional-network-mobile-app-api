@@ -298,15 +298,15 @@ export const FeedScreen: React.FC = memo(() => {
       <>
         <FeedHeader
           onCreatePress={handleCreatePress}
-          profession={
-            user?.profession
+          sector={
+            user?.sector
               ? {
-                  name: user.profession.name,
-                  category: user.profession.category,
+                  name: user.sector.name,
+                  code: user.sector.code,
                 }
               : undefined
           }
-          onProfessionPress={() => console.log('Profession detail pressed')}
+          onSectorPress={() => console.log('Sector detail pressed')}
         />
         {/* Show verification prompt for unverified users */}
         {user?.verificationStatus !== 'APPROVED' && (
@@ -316,7 +316,7 @@ export const FeedScreen: React.FC = memo(() => {
         )}
         {/* Always show AI trend insights */}
         <AITrendInsightCard
-          professionCategory={user?.profession?.category}
+          professionCategory={user?.sector?.code}
           onTrendPress={trend => console.log('Trend pressed:', trend)}
           onMorePress={() => console.log('More trends pressed')}
         />
@@ -386,7 +386,6 @@ export const FeedScreen: React.FC = memo(() => {
           data={posts}
           renderItem={renderPost}
           keyExtractor={keyExtractor}
-          estimatedItemSize={400}
           // Performance optimizations
           removeClippedSubviews
           // Scroll behavior

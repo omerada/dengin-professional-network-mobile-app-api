@@ -4,6 +4,7 @@ import com.meslektas.common.config.RateLimitingFilter;
 import com.meslektas.identity.infrastructure.security.JwtAuthenticationFilter;
 import com.meslektas.identity.infrastructure.security.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -41,6 +42,9 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final RateLimitingFilter rateLimitingFilter;
     private final CorsConfigurationSource corsConfigurationSource;
+    
+    @Value("${spring.profiles.active:dev}")
+    private String activeProfile;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -57,20 +61,26 @@ public class SecurityConfig {
                 )
                 
                 // Authorization rules
-                .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
-                        .requestMatchers("/api/auth/**", "/api/v1/auth/**").permitAll()
+                .authorizeHttpRequests(auth -> {
+                    // Public endpoints (all environments)
+                    auth.requestMatchers("/api/auth/**", "/api/v1/auth/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
                         .requestMatchers("/error").permitAll()
-                        .requestMatchers("/ws/**", "/ws-raw/**").permitAll()
-                        
-                        // Public read-only profession endpoints
-                        .requestMatchers(HttpMethod.GET, "/api/professions/**", "/api/v1/professions/**").permitAll()
-                        
-                        // All other endpoints require authentication
-                        .anyRequest().authenticated()
-                )
+                        .requestMatchers("/ws/**", "/ws-raw/**").permitAll();
+                    
+                    // Public read-only endpoints
+                    auth.requestMatchers(HttpMethod.GET, "/api/professions/**", "/api/v1/professions/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/sectors/**", "/api/v1/sectors/**").permitAll();
+                    
+                    // Dev environment: Make more endpoints public for testing
+                    if ("dev".equals(activeProfile)) {
+                        auth.requestMatchers(HttpMethod.GET, "/api/**").permitAll();
+                    }
+                    
+                    // All other endpoints require authentication
+                    auth.anyRequest().authenticated();
+                })
                 
                 // Add Rate Limiting filter before JWT
                 .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)

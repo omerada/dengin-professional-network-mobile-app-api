@@ -38,9 +38,9 @@
       "eas": {
         "projectId": "your-expo-project-id"
       },
-      "_comment": "Optional API configuration - set your machine's IP for real device testing",
-      "API_BASE_URL": "",
-      "WS_URL": ""
+      "_comment": "API configuration - using local network IP for both emulator and real device",
+      "API_BASE_URL": "http://192.168.1.101:8080",
+      "WS_URL": "ws://192.168.1.101:8080/ws"
     }
   }
 }

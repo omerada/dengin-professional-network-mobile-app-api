@@ -194,6 +194,9 @@ export interface Sector {
 
   /** Number of users in this sector */
   memberCount: number;
+
+  /** @deprecated Use memberCount instead */
+  userCount?: number;
 }
 
 /**

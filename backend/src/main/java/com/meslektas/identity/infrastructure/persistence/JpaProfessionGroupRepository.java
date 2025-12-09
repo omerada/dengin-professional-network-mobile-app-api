@@ -85,8 +85,10 @@ public interface JpaProfessionGroupRepository extends JpaRepository<ProfessionGr
      * Find most popular profession groups in sector
      * Based on number of users
      * 
+     * Note: Using Pageable for limit functionality since JPQL doesn't support LIMIT directly
+     * 
      * @param sectorId sector ID
-     * @param limit maximum results
+     * @param pageable pagination info (use PageRequest.of(0, limit) for top N results)
      * @return list of popular profession groups
      */
     @Query("""
@@ -97,5 +99,5 @@ public interface JpaProfessionGroupRepository extends JpaRepository<ProfessionGr
         """)
     List<ProfessionGroup> findMostPopularInSector(
             @Param("sectorId") Long sectorId,
-            @Param("limit") int limit);
+            org.springframework.data.domain.Pageable pageable);
 }

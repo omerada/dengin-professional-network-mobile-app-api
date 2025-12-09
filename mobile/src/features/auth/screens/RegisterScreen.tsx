@@ -21,7 +21,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useColors } from '@contexts/ThemeContext';
 import { useLocale } from '@contexts/LocaleContext';
 import { Button, Input } from '@shared/components';
-import { ProfessionSelector, SectorSelector } from '../components';
+import { SectorSelector } from '../components';
 import { useRegister } from '../hooks';
 import { registerSchema, RegisterSchemaType } from '../validation';
 import { AuthStackNavigationProp } from '@shared/types';
@@ -218,8 +218,8 @@ export const RegisterScreen: React.FC = () => {
               )}
             />
 
-            {/* Profession Selector - Deprecated, kept for backward compatibility */}
-            {/* Will be removed in future sprint */}
+            {/* Profession selection moved to Profile settings - Sprint 1 update */}
+            {/* Users will select their specific profession after registration */}
 
             {/* Password */}
             <Controller

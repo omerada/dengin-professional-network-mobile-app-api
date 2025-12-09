@@ -28,7 +28,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
  * Modern FeedHeader Component
  *
  * Features:
- * - Profession icon (left side, dynamic & colorful)
+ * - Sector icon (left side, dynamic & colorful) - Updated from profession to sector (Sprint 1)
  * - Horizontal scrollable filter chips
  * - Animated filter selection
  * - Spring-based button animations
@@ -37,14 +37,17 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
  * @example
  * ```tsx
  * <FeedHeader
- *   profession={{ name: 'Doktor', category: 'MEDICAL' }}
- *   onProfessionPress={() => navigation.navigate('ProfessionDetail')}
+ *   sector={{ name: 'Sağlık', code: 'MEDICAL' }}
+ *   onSectorPress={() => navigation.navigate('SectorDetail')}
  *   onCreatePress={() => navigation.navigate('CreatePost')}
  * />
  * ```
  */
 export const FeedHeader: React.FC<FeedHeaderProps> = memo(
-  ({ profession, onProfessionPress, onCreatePress, testID }) => {
+  ({ sector, profession, onSectorPress, onProfessionPress, onCreatePress, testID }) => {
+    // Backward compatibility: use profession if sector not provided
+    const displaySector = sector || profession;
+    const handleSectorPress = onSectorPress || onProfessionPress;
     const colors = useColors();
     const { trigger } = useHaptic();
 
@@ -131,13 +134,13 @@ export const FeedHeader: React.FC<FeedHeaderProps> = memo(
           },
         ]}
         testID={testID}>
-        {/* Profession icon */}
-        {profession && (
+        {/* Sector icon - Updated from profession icon (Sprint 1) */}
+        {displaySector && (
           <ProfessionIcon
-            category={profession.category}
-            name={profession.name}
-            onPress={onProfessionPress}
-            testID={`${testID}-profession-icon`}
+            category={displaySector.code as any}
+            name={displaySector.name}
+            onPress={handleSectorPress}
+            testID={`${testID}-sector-icon`}
           />
         )}
 
@@ -170,5 +173,5 @@ export const FeedHeader: React.FC<FeedHeaderProps> = memo(
 
 FeedHeader.displayName = 'FeedHeader';
 
-export type { FeedHeaderProps, ProfessionInfo } from './FeedHeader.types';
+export type { FeedHeaderProps, SectorInfo, ProfessionInfo } from './FeedHeader.types';
 export default FeedHeader;

@@ -13,7 +13,6 @@ import {
   TextInput,
   ActivityIndicator,
   Pressable,
-  ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { useColors } from '@contexts/ThemeContext';
@@ -113,8 +112,10 @@ export const SectorSelector: React.FC<SectorSelectorProps> = ({
         style={[
           styles.sectorItem,
           {
-            backgroundColor: isSelected ? colors.primary + '15' : colors.background.secondary,
-            borderColor: isSelected ? colors.primary : colors.border.default,
+            backgroundColor: isSelected
+              ? colors.interactive.default + '15'
+              : colors.background.secondary,
+            borderColor: isSelected ? colors.interactive.default : colors.border.default,
           },
         ]}
         onPress={() => handleSectorSelect(item)}
@@ -124,7 +125,7 @@ export const SectorSelector: React.FC<SectorSelectorProps> = ({
           style={[
             styles.iconContainer,
             {
-              backgroundColor: isSelected ? colors.primary : colors.background.tertiary,
+              backgroundColor: isSelected ? colors.interactive.default : colors.background.tertiary,
             },
           ]}>
           <Icon
@@ -141,7 +142,7 @@ export const SectorSelector: React.FC<SectorSelectorProps> = ({
               style={[
                 styles.sectorName,
                 {
-                  color: isSelected ? colors.primary : colors.text.primary,
+                  color: isSelected ? colors.interactive.default : colors.text.primary,
                   fontWeight: isSelected ? '600' : '500',
                 },
               ]}>
@@ -174,7 +175,12 @@ export const SectorSelector: React.FC<SectorSelectorProps> = ({
 
         {/* Check icon */}
         {isSelected && (
-          <Icon name="check-circle" size={24} color={colors.primary} style={styles.checkIcon} />
+          <Icon
+            name="check-circle"
+            size={24}
+            color={colors.interactive.default}
+            style={styles.checkIcon}
+          />
         )}
       </TouchableOpacity>
     );
@@ -203,7 +209,11 @@ export const SectorSelector: React.FC<SectorSelectorProps> = ({
         {selectedSector && (
           <View
             style={[styles.selectedIconContainer, { backgroundColor: colors.background.tertiary }]}>
-            <Icon name={getSectorIcon(selectedSector.code)} size={20} color={colors.primary} />
+            <Icon
+              name={getSectorIcon(selectedSector.code)}
+              size={20}
+              color={colors.interactive.default}
+            />
           </View>
         )}
         <Text
@@ -277,7 +287,7 @@ export const SectorSelector: React.FC<SectorSelectorProps> = ({
             {/* Sector List */}
             {isLoading ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={colors.primary} />
+                <ActivityIndicator size="large" color={colors.interactive.default} />
                 <Text style={[styles.loadingText, { color: colors.text.secondary }]}>
                   Sektörler yükleniyor...
                 </Text>
