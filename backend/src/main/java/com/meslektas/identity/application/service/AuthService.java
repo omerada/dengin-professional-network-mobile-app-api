@@ -141,8 +141,15 @@ public class AuthService {
 
         log.info("User registered successfully: {}", savedUser.getEmail());
 
-        // Send verification email
-        sendVerificationEmail(savedUser);
+        // Send verification email (non-blocking - failure won't affect registration)
+        try {
+            sendVerificationEmail(savedUser);
+        } catch (Exception e) {
+            // Log error but don't fail registration
+            // User can request verification email resend later
+            log.error("Failed to send verification email during registration for: {}. User registration succeeded.", 
+                    savedUser.getEmail(), e);
+        }
 
         // Generate tokens for auto-login
         String accessToken = jwtTokenProvider.generateTokenFromUserId(savedUser.getId(), savedUser.getEmail());
@@ -320,26 +327,39 @@ public class AuthService {
 
     /**
      * Send verification email to user
+     * 
+     * Error Handling:
+     * - Mailgun configuration errors (404, 401) are logged but not retried
+     * - Network errors are retried with exponential backoff
+     * - Failures don't affect user registration - email can be resent later
      */
     private void sendVerificationEmail(User user) {
-        // Generate verification token
-        String token = java.util.UUID.randomUUID().toString();
+        try {
+            // Generate verification token
+            String token = java.util.UUID.randomUUID().toString();
 
-        // Store in Redis
-        String redisKey = EMAIL_VERIFICATION_PREFIX + token;
-        redisTemplate.opsForValue().set(
-                redisKey,
-                user.getId().toString(),
-                VERIFICATION_TOKEN_TTL_HOURS,
-                TimeUnit.HOURS);
+            // Store in Redis
+            String redisKey = EMAIL_VERIFICATION_PREFIX + token;
+            redisTemplate.opsForValue().set(
+                    redisKey,
+                    user.getId().toString(),
+                    VERIFICATION_TOKEN_TTL_HOURS,
+                    TimeUnit.HOURS);
 
-        // Build verification link
-        String verificationLink = frontendUrl + "/verify-email?token=" + token;
+            // Build verification link
+            String verificationLink = frontendUrl + "/verify-email?token=" + token;
 
-        // Send email
-        emailService.sendVerificationEmail(user.getEmail(), user.getName(), verificationLink);
+            // Send email (async, may fail silently)
+            emailService.sendVerificationEmail(user.getEmail(), user.getName(), verificationLink);
 
-        log.info("Verification email sent to: {}", user.getEmail());
+            log.info("✉️ Verification email queued for: {}", user.getEmail());
+        } catch (Exception e) {
+            // Log error but don't propagate - this is non-critical
+            // User can request verification email resend via /api/auth/resend-verification
+            log.error("❌ Failed to queue verification email for: {}. Error: {}", 
+                    user.getEmail(), e.getMessage());
+            log.debug("Verification email error details:", e);
+        }
     }
 
     /**

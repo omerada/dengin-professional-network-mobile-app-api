@@ -1,6 +1,6 @@
 // src/features/auth/screens/RegisterScreenMultiStep.tsx
 // Multi-Step Registration Screen - Production Ready
-// 4-step registration flow with smooth UX
+// 3-step registration flow with smooth UX and success animations
 
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import {
@@ -17,8 +17,10 @@ import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
 import { Button, Input } from '@shared/components';
+import { StepSuccess } from '@shared/components/StepSuccess';
 import { SectorSelector, ProfessionSelector, StepIndicator } from '../components';
 import { useRegister } from '../hooks';
 import { useRegistrationStore } from '../stores';
@@ -60,6 +62,10 @@ export const RegisterScreenMultiStep: React.FC = () => {
 
   // Zustand store for persistent form data
   const { formData, currentStep, updateField, setStep, getSubmitData } = useRegistrationStore();
+
+  // Step success animation state
+  const [showStepSuccess, setShowStepSuccess] = useState(false);
+  const [pendingStep, setPendingStep] = useState<number | null>(null);
 
   const {
     control,
@@ -148,11 +154,25 @@ export const RegisterScreenMultiStep: React.FC = () => {
       return;
     }
 
-    console.log('[RegisterScreen] ✅ Step validation passed, moving to next step');
+    console.log('[RegisterScreen] ✅ Step validation passed');
+
+    // Show success animation for step completion
     if (currentStep < TOTAL_STEPS) {
-      setStep(currentStep + 1);
+      setPendingStep(currentStep + 1);
+      setShowStepSuccess(true);
     }
-  }, [currentStep, validateStep, formData, setStep]);
+  }, [currentStep, validateStep, formData]);
+
+  /**
+   * Handle step success animation completion
+   */
+  const handleStepSuccessComplete = useCallback(() => {
+    setShowStepSuccess(false);
+    if (pendingStep !== null) {
+      setStep(pendingStep);
+      setPendingStep(null);
+    }
+  }, [pendingStep, setStep]);
 
   /**
    * Go to previous step
@@ -219,7 +239,11 @@ export const RegisterScreenMultiStep: React.FC = () => {
     switch (currentStep) {
       case Step.PERSONAL_INFO:
         return (
-          <View style={styles.stepContent}>
+          <Animated.View
+            key="step-1"
+            entering={FadeIn.duration(300)}
+            exiting={FadeOut.duration(200)}
+            style={styles.stepContent}>
             {/* Step Header */}
             <View style={styles.stepHeader}>
               <Text style={[styles.stepTitle, { color: colors.text.primary }]}>Tanışalım!</Text>
@@ -299,12 +323,16 @@ export const RegisterScreenMultiStep: React.FC = () => {
                 )}
               />
             </View>
-          </View>
+          </Animated.View>
         );
 
       case Step.PROFESSIONAL_INFO:
         return (
-          <View style={styles.stepContent}>
+          <Animated.View
+            key="step-2"
+            entering={FadeIn.duration(300)}
+            exiting={FadeOut.duration(200)}
+            style={styles.stepContent}>
             {/* Step Header */}
             <View style={styles.stepHeader}>
               <Text style={[styles.stepTitle, { color: colors.text.primary }]}>Mesleğiniz</Text>
@@ -399,12 +427,16 @@ export const RegisterScreenMultiStep: React.FC = () => {
                 />
               )}
             </View>
-          </View>
+          </Animated.View>
         );
 
       case Step.ACCOUNT_INFO:
         return (
-          <View style={styles.stepContent}>
+          <Animated.View
+            key="step-3"
+            entering={FadeIn.duration(300)}
+            exiting={FadeOut.duration(200)}
+            style={styles.stepContent}>
             {/* Step Header */}
             <View style={styles.stepHeader}>
               <Text style={[styles.stepTitle, { color: colors.text.primary }]}>
@@ -567,8 +599,10 @@ export const RegisterScreenMultiStep: React.FC = () => {
                 )}
               </View>
             </View>
-          </View>
+          </Animated.View>
         );
+      default:
+        return null;
     }
   };
 
@@ -649,6 +683,9 @@ export const RegisterScreenMultiStep: React.FC = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Step Success Animation Overlay */}
+      {showStepSuccess && <StepSuccess onComplete={handleStepSuccessComplete} duration={1200} />}
     </SafeAreaView>
   );
 };

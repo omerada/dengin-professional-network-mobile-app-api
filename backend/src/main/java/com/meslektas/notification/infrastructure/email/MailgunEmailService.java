@@ -66,9 +66,13 @@ public class MailgunEmailService implements EmailService {
                 .build();
 
         if (isConfigured()) {
-            log.info("Mailgun email service initialized for domain: {}", domain);
+            log.info("✉️ Mailgun email service initialized");
+            log.info("  📍 Base URL: {}", baseUrl);
+            log.info("  🌐 Domain: {}", domain);
+            log.info("  📧 Sender: {} <{}>", senderName, senderEmail);
+            log.info("  🔗 Full API endpoint: {}/{}/messages", baseUrl, domain);
         } else {
-            log.warn("Mailgun not fully configured, emails will be logged only");
+            log.warn("⚠️ Mailgun not fully configured, emails will be logged only");
         }
     }
 
@@ -114,9 +118,22 @@ public class MailgunEmailService implements EmailService {
             String htmlBody = templateRenderer.renderVerificationEmail(recipientName, verificationLink);
 
             sendEmailWithRetry(recipientEmail, recipientName, subject, htmlBody);
-            log.info("Verification email sent to: {}", recipientEmail);
+            log.info("✅ Verification email sent successfully to: {}", recipientEmail);
+        } catch (IOException e) {
+            // Log detailed error for debugging
+            log.error("❌ Failed to send verification email to: {}. Reason: {}", 
+                    recipientEmail, e.getMessage());
+            log.debug("Verification email error stacktrace:", e);
+            
+            // Check if it's a configuration issue
+            if (e.getMessage() != null && e.getMessage().contains("404")) {
+                log.error("⚠️ CONFIGURATION ERROR: Mailgun domain '{}' may not exist or API endpoint is wrong. "
+                        + "Please verify Mailgun settings in application.yml", domain);
+            } else if (e.getMessage() != null && e.getMessage().contains("sandbox restriction")) {
+                log.info("💡 TIP: For development, consider setting MAILGUN_ENABLED=false in .env to skip email sending.");
+            }
         } catch (Exception e) {
-            log.error("Failed to send verification email to: {}", recipientEmail, e);
+            log.error("❌ Unexpected error sending verification email to: {}", recipientEmail, e);
         }
     }
 
@@ -237,7 +254,11 @@ public class MailgunEmailService implements EmailService {
 
                 RequestBody formBody = formBuilder.build();
 
+                // Build correct Mailgun API URL
+                // Format: https://api.eu.mailgun.net/v3/{domain}/messages
                 String url = baseUrl + "/" + domain + "/messages";
+                
+                log.debug("Mailgun API URL: {}", url);
 
                 Request request = new Request.Builder()
                         .url(url)
@@ -256,6 +277,29 @@ public class MailgunEmailService implements EmailService {
                         Thread.sleep(waitTime);
                     } else {
                         String responseBody = response.body() != null ? response.body().string() : "No body";
+                        
+                        // Special handling for 404 - likely configuration error
+                        if (response.code() == 404) {
+                            log.error("❌ Mailgun 404 Error - Check configuration! Domain: {}, URL: {}, Response: {}", 
+                                    domain, url, responseBody);
+                            log.error("⚠️ Verify: 1) Mailgun domain is correct, 2) API endpoint is valid, 3) Domain is verified in Mailgun dashboard");
+                            throw new IOException("Mailgun configuration error (404): Domain or endpoint not found. Check logs for details.");
+                        }
+                        
+                        // Special handling for 403 - sandbox domain restriction
+                        if (response.code() == 403) {
+                            if (responseBody.contains("Free accounts are for test purposes only")) {
+                                log.warn("⚠️ Mailgun Sandbox Limitation: Free accounts can only send to authorized recipients.");
+                                log.warn("📧 To fix: 1) Add recipient to authorized recipients in Mailgun dashboard, OR");
+                                log.warn("💳 2) Upgrade to paid Mailgun account, OR");
+                                log.warn("🔧 3) Set MAILGUN_ENABLED=false in .env for development");
+                                log.warn("📝 Recipient: {}, Domain: {}", recipientEmail, domain);
+                                throw new IOException("Mailgun sandbox restriction: Recipient not authorized. See logs for details.");
+                            }
+                            log.error("❌ Mailgun 403 Forbidden: {}", responseBody);
+                            throw new IOException("Mailgun access denied (403): " + responseBody);
+                        }
+                        
                         log.warn("Mailgun returned error: status={}, body={}", response.code(), responseBody);
 
                         // Don't retry on client errors (4xx except 429)

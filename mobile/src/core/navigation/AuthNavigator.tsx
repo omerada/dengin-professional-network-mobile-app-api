@@ -11,6 +11,7 @@ import { WelcomeScreen } from '@features/auth/screens/WelcomeScreen';
 import { LoginScreen } from '@features/auth/screens/LoginScreen';
 // import { RegisterScreen } from '@features/auth/screens/RegisterScreen'; // Old single-step version
 import { RegisterScreenMultiStep } from '@features/auth/screens/RegisterScreenMultiStep';
+import { WelcomeSuccessScreen } from '@features/auth/screens/WelcomeSuccessScreen';
 import { ForgotPasswordScreen } from '@features/auth/screens/ForgotPasswordScreen';
 
 // Onboarding
@@ -23,7 +24,7 @@ const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 /**
  * Auth Navigator - handles authentication flow
- * Includes: Onboarding, Welcome, Login, Register, Forgot Password, Legal
+ * Includes: Onboarding, Welcome, Login, Register, Welcome Success, Forgot Password, Legal
  */
 export const AuthNavigator: React.FC = () => {
   return (
@@ -47,6 +48,14 @@ export const AuthNavigator: React.FC = () => {
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreenMultiStep} />
+      <Stack.Screen
+        name="WelcomeSuccess"
+        component={WelcomeSuccessScreen}
+        options={{
+          animation: 'fade',
+          gestureEnabled: false,
+        }}
+      />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
       <Stack.Screen
         name="Terms"

@@ -4,22 +4,27 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { useCallback } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { authApi } from '../services';
 import type { RegisterFormData } from '../types';
 import { getErrorMessage } from '@core/utils/errorUtils';
 import { useAuthStore } from '../stores';
+import { useRegistrationStore } from '../stores/registrationStore';
 
 /**
  * Register hook with React Query mutation
- * Handles registration flow with auto-login
+ * Handles registration flow with auto-login and welcome screen
  *
  * Backend API: POST /api/auth/register
  * Request: { email, password, name, surname, professionId?, customProfession? }
  * Response: LoginResponse { user, accessToken, refreshToken, tokenType, expiresIn }
  */
 export const useRegister = () => {
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const setAuth = useAuthStore(state => state.setAuth);
   const setLastLoginEmail = useAuthStore(state => state.setLastLoginEmail);
+  const resetRegistration = useRegistrationStore(state => state.reset);
 
   const mutation = useMutation({
     mutationFn: async (data: RegisterFormData) => {
@@ -38,16 +43,29 @@ export const useRegister = () => {
     },
 
     onSuccess: async (data, variables) => {
-      // Auto-login: Set auth state with tokens
-      await setAuth(data.user, {
-        accessToken: data.accessToken,
-        refreshToken: data.refreshToken,
-      });
+      console.log('[useRegister] ✅ Registration successful');
+      console.log('[useRegister] User data:', data.user);
+
+      // Store tokens temporarily in auth store WITHOUT triggering isAuthenticated
+      // This allows WelcomeSuccess screen to access user data and tokens
+      // User will manually continue, then setAuth will be called
+      console.log('[useRegister] 💾 Storing tokens temporarily');
+      const tempStore = useAuthStore.getState() as any;
+      tempStore.user = data.user;
+      tempStore.tempAccessToken = data.accessToken;
+      tempStore.tempRefreshToken = data.refreshToken;
+
+      // Navigate to WelcomeSuccess - user will manually continue from there
+      console.log('[useRegister] 🎉 Navigating to WelcomeSuccess screen');
+      navigation.navigate('WelcomeSuccess');
 
       // Remember email for future logins
       await setLastLoginEmail(variables.email);
 
-      // Navigation will be handled automatically by App.tsx checking isAuthenticated
+      // Clear registration form data
+      resetRegistration();
+
+      console.log('[useRegister] ✅ Registration flow completed - waiting for user to continue');
     },
 
     onError: (error: Error) => {

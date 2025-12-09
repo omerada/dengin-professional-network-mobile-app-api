@@ -17,6 +17,8 @@ export { Loading, LoadingOverlay, Spinner, DotsLoading } from './Loading';
 export { ErrorFallback } from './ErrorFallback';
 export { OfflineNotice } from './OfflineNotice';
 export { PullToRefresh, useRefreshControl } from './PullToRefresh';
+export { StepSuccess } from './StepSuccess';
+export type { StepSuccessProps } from './StepSuccess';
 
 // Display components
 export { Avatar } from './Avatar';
