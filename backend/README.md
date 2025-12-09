@@ -85,7 +85,17 @@ Strategic Domain-Driven Design (DDD)
 5. **Notification** - Multi-channel Notifications
 6. **Moderation** - Content Moderation
 
-See `/backend-development-guide` for complete documentation.
+### 📖 Documentation
+
+**AI Agent Development Guide:** [`.ai/README.md`](.ai/README.md)
+
+Comprehensive guide optimized for AI agents with:
+
+- Architecture overview & bounded contexts
+- Development principles & patterns
+- API reference & common pitfalls
+- Context-specific guides (Identity, Verification, Social, etc.)
+- [Quick Start Guide](.ai/QUICK-START.md) - Fast implementation patterns
 
 ## Configuration
 
