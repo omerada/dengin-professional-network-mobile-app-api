@@ -2,7 +2,7 @@
 // Multi-Step Registration Screen - Production Ready
 // 4-step registration flow with smooth UX
 
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import {
   View,
   Text,
@@ -21,6 +21,7 @@ import { useColors } from '@contexts/ThemeContext';
 import { Button, Input } from '@shared/components';
 import { SectorSelector, ProfessionSelector, StepIndicator } from '../components';
 import { useRegister } from '../hooks';
+import { useRegistrationStore } from '../stores';
 import { registerSchema, RegisterSchemaType } from '../validation';
 import { AuthStackNavigationProp } from '@shared/types';
 import { spacing } from '@theme';
@@ -56,36 +57,36 @@ export const RegisterScreenMultiStep: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation<AuthStackNavigationProp>();
   const { register, isLoading, error, isError } = useRegister();
-  const [currentStep, setCurrentStep] = useState<Step>(Step.PERSONAL_INFO);
-  const [passwordVisible, setPasswordVisible] = useState(false);
-  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+
+  // Zustand store for persistent form data
+  const { formData, currentStep, updateField, setStep, getSubmitData } = useRegistrationStore();
 
   const {
     control,
-    handleSubmit,
     formState: { errors },
     setValue,
-    watch,
     trigger,
-    getValues,
   } = useForm<RegisterSchemaType>({
     resolver: zodResolver(registerSchema),
     mode: 'onTouched',
-    defaultValues: {
-      email: '',
-      password: '',
-      confirmPassword: '',
-      firstName: '',
-      lastName: '',
-      sectorId: undefined,
-      professionId: undefined,
-      customProfession: '',
-      acceptTerms: false,
-    },
   });
 
+  // CRITICAL: Sync store data to form for validation
+  useEffect(() => {
+    console.log('[RegisterScreen] Syncing store to form for validation');
+    setValue('firstName', formData.firstName);
+    setValue('lastName', formData.lastName);
+    setValue('email', formData.email);
+    setValue('password', formData.password);
+    setValue('confirmPassword', formData.confirmPassword);
+    setValue('sectorId', formData.sectorId as any);
+    setValue('professionId', formData.professionId as any);
+    setValue('customProfession', formData.customProfession);
+    setValue('acceptTerms', formData.acceptTerms);
+  }, [formData, setValue]);
+
   // Watch values for conditional rendering
-  const sectorId = watch('sectorId');
+  const sectorId = formData.sectorId;
 
   // Get sector name for conditional logic
   const { data: sectors } = useSectors();
@@ -137,15 +138,7 @@ export const RegisterScreenMultiStep: React.FC = () => {
   const handleNext = useCallback(async () => {
     console.log('========================================');
     console.log('[RegisterScreen] 📍 HANDLE NEXT - Step:', currentStep);
-
-    // Log current form values before validation
-    const currentValues = getValues();
-    console.log('[RegisterScreen] Current form values before next step:');
-    console.log('  - firstName:', currentValues.firstName);
-    console.log('  - lastName:', currentValues.lastName);
-    console.log('  - sectorId:', currentValues.sectorId);
-    console.log('  - professionId:', currentValues.professionId);
-    console.log('  - email:', currentValues.email);
+    console.log('[RegisterScreen] Store data:', formData);
     console.log('========================================');
 
     const isValid = await validateStep(currentStep);
@@ -157,46 +150,36 @@ export const RegisterScreenMultiStep: React.FC = () => {
 
     console.log('[RegisterScreen] ✅ Step validation passed, moving to next step');
     if (currentStep < TOTAL_STEPS) {
-      setCurrentStep(prev => (prev + 1) as Step);
+      setStep(currentStep + 1);
     }
-  }, [currentStep, validateStep, getValues]);
+  }, [currentStep, validateStep, formData, setStep]);
 
   /**
    * Go to previous step
    */
   const handleBack = useCallback(() => {
     if (currentStep > Step.PERSONAL_INFO) {
-      setCurrentStep(prev => (prev - 1) as Step);
+      setStep(currentStep - 1);
     } else {
       navigation.goBack();
     }
-  }, [currentStep, navigation]);
+  }, [currentStep, navigation, setStep]);
 
   /**
    * Final submit - Register user
    */
-  const onSubmit = useCallback(
-    (data: RegisterSchemaType) => {
-      console.log('========================================');
-      console.log('[RegisterScreen] 🚀 SUBMIT CALLED');
-      console.log('[RegisterScreen] Form Data:', {
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        sectorId: data.sectorId,
-        professionId: data.professionId,
-        customProfession: data.customProfession,
-        acceptTerms: data.acceptTerms,
-      });
-      console.log('[RegisterScreen] Form Errors:', errors);
-      console.log('[RegisterScreen] Calling register API...');
-      console.log('========================================');
-
-      // Submit registration (reset form only after successful registration in useRegister hook)
-      register(data);
-    },
-    [register, errors],
-  );
+  const onSubmit = useCallback(() => {
+    console.log('========================================');
+    console.log('[RegisterScreen] 🚀 SUBMIT CALLED');
+    const submitData = getSubmitData();
+    console.log('[RegisterScreen] Submit Data:', submitData);
+    console.log('========================================');
+    register({
+      ...submitData,
+      sectorId: submitData.sectorId!,
+      professionId: submitData.professionId || undefined,
+    });
+  }, [register, getSubmitData]);
 
   /**
    * Handle submit with validation check
@@ -205,74 +188,21 @@ export const RegisterScreenMultiStep: React.FC = () => {
     console.log('========================================');
     console.log('[RegisterScreen] 🎯 SUBMIT BUTTON CLICKED');
     console.log('[RegisterScreen] Current step:', currentStep);
+    console.log('[RegisterScreen] 📋 STORE DATA:', formData);
     console.log('========================================');
-
-    // Log all form values before validation (use getValues for reliability)
-    const allValues = getValues();
-    console.log('[RegisterScreen] 📋 ALL FORM VALUES:');
-    console.log('  - firstName:', allValues.firstName, `(type: ${typeof allValues.firstName})`);
-    console.log('  - lastName:', allValues.lastName, `(type: ${typeof allValues.lastName})`);
-    console.log('  - email:', allValues.email, `(type: ${typeof allValues.email})`);
-    console.log(
-      '  - password:',
-      allValues.password ? '***' : 'EMPTY',
-      `(length: ${allValues.password?.length || 0})`,
-    );
-    console.log(
-      '  - confirmPassword:',
-      allValues.confirmPassword ? '***' : 'EMPTY',
-      `(length: ${allValues.confirmPassword?.length || 0})`,
-    );
-    console.log('  - sectorId:', allValues.sectorId, `(type: ${typeof allValues.sectorId})`);
-    console.log(
-      '  - professionId:',
-      allValues.professionId,
-      `(type: ${typeof allValues.professionId})`,
-    );
-    console.log(
-      '  - customProfession:',
-      allValues.customProfession,
-      `(type: ${typeof allValues.customProfession})`,
-    );
-    console.log(
-      '  - acceptTerms:',
-      allValues.acceptTerms,
-      `(type: ${typeof allValues.acceptTerms})`,
-    );
-    console.log('========================================');
-
-    console.log('[RegisterScreen] 🔍 Triggering validation...');
 
     const isValid = await trigger();
     console.log('[RegisterScreen] Validation result:', isValid);
 
     if (!isValid) {
-      console.log('========================================');
       console.log('[RegisterScreen] ❌ VALIDATION FAILED');
-      console.log('[RegisterScreen] Errors object:', JSON.stringify(errors, null, 2));
-      console.log('[RegisterScreen] Form state errors:', Object.keys(errors));
-
-      // Log each error field with details
-      Object.keys(errors).forEach(key => {
-        const error = errors[key as keyof typeof errors];
-        console.log(`[RegisterScreen] ❌ Error in ${key}:`, error);
-      });
-
-      // Check if firstName and lastName exist in form
-      if (!allValues.firstName || !allValues.lastName) {
-        console.log('[RegisterScreen] ⚠️ CRITICAL: firstName or lastName is missing!');
-        console.log('[RegisterScreen] This suggests data was lost during step navigation');
-      }
-      console.log('========================================');
+      console.log('[RegisterScreen] Errors:', errors);
       return;
     }
 
-    console.log('========================================');
     console.log('[RegisterScreen] ✅ VALIDATION PASSED');
-    console.log('[RegisterScreen] Calling handleSubmit(onSubmit)...');
-    console.log('========================================');
-    handleSubmit(onSubmit)();
-  }, [currentStep, trigger, errors, handleSubmit, onSubmit, getValues]);
+    onSubmit();
+  }, [currentStep, formData, trigger, errors, onSubmit]);
 
   const handleTermsPress = useCallback(() => {
     navigation.navigate('Terms');
@@ -298,19 +228,40 @@ export const RegisterScreenMultiStep: React.FC = () => {
               </Text>
             </View>
 
+            {/* Error Message */}
+            {isError && error && (
+              <View
+                style={[
+                  styles.errorContainer,
+                  {
+                    backgroundColor: colors.status.errorBg,
+                    marginTop: spacing.xs,
+                    marginBottom: spacing.xl,
+                  },
+                ]}>
+                <Icon name="alert-circle" size={20} color={colors.status.error} />
+                <Text style={[styles.errorText, { color: colors.status.error }]}>
+                  {getErrorMessage(error)}
+                </Text>
+              </View>
+            )}
+
             {/* Form Fields */}
             <View style={styles.stepForm}>
               <Controller
                 control={control}
                 name="firstName"
-                render={({ field: { onChange, onBlur, value } }) => (
+                render={({ field: { onChange, onBlur } }) => (
                   <Input
                     label="Adınız"
                     placeholder="Adınızı girin"
                     autoCapitalize="words"
                     autoComplete="given-name"
-                    value={value}
-                    onChangeText={onChange}
+                    value={formData.firstName}
+                    onChangeText={text => {
+                      onChange(text);
+                      updateField('firstName', text);
+                    }}
                     onBlur={onBlur}
                     error={errors.firstName?.message}
                     required
@@ -327,14 +278,17 @@ export const RegisterScreenMultiStep: React.FC = () => {
               <Controller
                 control={control}
                 name="lastName"
-                render={({ field: { onChange, onBlur, value } }) => (
+                render={({ field: { onChange, onBlur } }) => (
                   <Input
                     label="Soyadınız"
                     placeholder="Soyadınızı girin"
                     autoCapitalize="words"
                     autoComplete="family-name"
-                    value={value}
-                    onChangeText={onChange}
+                    value={formData.lastName}
+                    onChangeText={text => {
+                      onChange(text);
+                      updateField('lastName', text);
+                    }}
                     onBlur={onBlur}
                     error={errors.lastName?.message}
                     required
@@ -359,20 +313,41 @@ export const RegisterScreenMultiStep: React.FC = () => {
               </Text>
             </View>
 
+            {/* Error Message */}
+            {isError && error && (
+              <View
+                style={[
+                  styles.errorContainer,
+                  {
+                    backgroundColor: colors.status.errorBg,
+                    marginTop: spacing.xs,
+                    marginBottom: spacing.xl,
+                  },
+                ]}>
+                <Icon name="alert-circle" size={20} color={colors.status.error} />
+                <Text style={[styles.errorText, { color: colors.status.error }]}>
+                  {getErrorMessage(error)}
+                </Text>
+              </View>
+            )}
+
             {/* Form Fields */}
             <View style={styles.stepForm}>
               <Controller
                 control={control}
                 name="sectorId"
-                render={({ field: { value } }) => (
+                render={() => (
                   <SectorSelector
-                    value={value}
+                    value={formData.sectorId}
                     onSelect={(sectorId: number | null) => {
                       if (sectorId !== null) {
                         setValue('sectorId', sectorId, { shouldValidate: true });
+                        updateField('sectorId', sectorId);
                         // Reset profession when sector changes
                         setValue('professionId', null as any);
                         setValue('customProfession', '');
+                        updateField('professionId', null);
+                        updateField('customProfession', '');
                       }
                     }}
                     error={errors.sectorId?.message}
@@ -386,13 +361,16 @@ export const RegisterScreenMultiStep: React.FC = () => {
                 <Controller
                   control={control}
                   name="customProfession"
-                  render={({ field: { onChange, onBlur, value } }) => (
+                  render={({ field: { onChange, onBlur } }) => (
                     <Input
                       label="Mesleğiniz"
                       placeholder="Mesleğinizi yazın"
                       autoCapitalize="words"
-                      value={value}
-                      onChangeText={onChange}
+                      value={formData.customProfession}
+                      onChangeText={text => {
+                        onChange(text);
+                        updateField('customProfession', text);
+                      }}
                       onBlur={onBlur}
                       error={errors.customProfession?.message}
                       hint="Örneğin: Grafik Tasarımcı, Emlakçı, vb."
@@ -404,13 +382,14 @@ export const RegisterScreenMultiStep: React.FC = () => {
                 <Controller
                   control={control}
                   name="professionId"
-                  render={({ field: { value } }) => (
+                  render={() => (
                     <ProfessionSelector
-                      value={value}
+                      value={formData.professionId}
                       sectorCode={selectedSectorCode}
                       onSelect={(professionId: number | null) => {
                         if (professionId !== null) {
                           setValue('professionId', professionId, { shouldValidate: true });
+                          updateField('professionId', professionId);
                         }
                       }}
                       error={errors.professionId?.message}
@@ -436,12 +415,30 @@ export const RegisterScreenMultiStep: React.FC = () => {
               </Text>
             </View>
 
+            {/* Error Message */}
+            {isError && error && (
+              <View
+                style={[
+                  styles.errorContainer,
+                  {
+                    backgroundColor: colors.status.errorBg,
+                    marginTop: spacing.xs,
+                    marginBottom: spacing.xl,
+                  },
+                ]}>
+                <Icon name="alert-circle" size={20} color={colors.status.error} />
+                <Text style={[styles.errorText, { color: colors.status.error }]}>
+                  {getErrorMessage(error)}
+                </Text>
+              </View>
+            )}
+
             {/* Form Fields */}
             <View style={styles.stepForm}>
               <Controller
                 control={control}
                 name="email"
-                render={({ field: { onChange, onBlur, value } }) => (
+                render={({ field: { onChange, onBlur } }) => (
                   <Input
                     label="E-posta Adresi"
                     placeholder="ornek@email.com"
@@ -449,8 +446,11 @@ export const RegisterScreenMultiStep: React.FC = () => {
                     autoCapitalize="none"
                     autoComplete="email"
                     autoCorrect={false}
-                    value={value}
-                    onChangeText={onChange}
+                    value={formData.email}
+                    onChangeText={text => {
+                      onChange(text);
+                      updateField('email', text);
+                    }}
                     onBlur={onBlur}
                     error={errors.email?.message}
                     required
@@ -464,21 +464,22 @@ export const RegisterScreenMultiStep: React.FC = () => {
               <Controller
                 control={control}
                 name="password"
-                render={({ field: { onChange, onBlur, value } }) => (
+                render={({ field: { onChange, onBlur } }) => (
                   <Input
                     label="Şifre"
                     placeholder="••••••••"
-                    secureTextEntry={!passwordVisible}
+                    secureTextEntry
                     autoCapitalize="none"
                     autoComplete="new-password"
-                    value={value}
-                    onChangeText={onChange}
+                    value={formData.password}
+                    onChangeText={text => {
+                      onChange(text);
+                      updateField('password', text);
+                    }}
                     onBlur={onBlur}
                     error={errors.password?.message}
                     hint="En az 8 karakter, büyük/küçük harf ve rakam içermeli"
                     required
-                    isPasswordVisible={passwordVisible}
-                    onPasswordVisibilityToggle={() => setPasswordVisible(!passwordVisible)}
                     returnKeyType="next"
                     leftIcon={<Icon name="lock" size={20} color={colors.text.tertiary} />}
                   />
@@ -488,22 +489,21 @@ export const RegisterScreenMultiStep: React.FC = () => {
               <Controller
                 control={control}
                 name="confirmPassword"
-                render={({ field: { onChange, onBlur, value } }) => (
+                render={({ field: { onChange, onBlur } }) => (
                   <Input
                     label="Şifre Tekrar"
                     placeholder="••••••••"
-                    secureTextEntry={!confirmPasswordVisible}
+                    secureTextEntry
                     autoCapitalize="none"
                     autoComplete="new-password"
-                    value={value}
-                    onChangeText={onChange}
+                    value={formData.confirmPassword}
+                    onChangeText={text => {
+                      onChange(text);
+                      updateField('confirmPassword', text);
+                    }}
                     onBlur={onBlur}
                     error={errors.confirmPassword?.message}
                     required
-                    isPasswordVisible={confirmPasswordVisible}
-                    onPasswordVisibilityToggle={() =>
-                      setConfirmPasswordVisible(!confirmPasswordVisible)
-                    }
                     returnKeyType="done"
                     onSubmitEditing={handleFinalSubmit}
                     leftIcon={<Icon name="lock" size={20} color={colors.text.tertiary} />}
@@ -516,16 +516,20 @@ export const RegisterScreenMultiStep: React.FC = () => {
                 <Controller
                   control={control}
                   name="acceptTerms"
-                  render={({ field: { onChange, value } }) => (
+                  render={({ field: { onChange } }) => (
                     <TouchableOpacity
                       style={styles.checkboxRow}
-                      onPress={() => onChange(!value)}
+                      onPress={() => {
+                        const newValue = !formData.acceptTerms;
+                        onChange(newValue);
+                        updateField('acceptTerms', newValue);
+                      }}
                       activeOpacity={0.7}>
                       <View
                         style={[
                           styles.checkbox,
                           {
-                            backgroundColor: value
+                            backgroundColor: formData.acceptTerms
                               ? colors.interactive.default
                               : colors.background.secondary,
                             borderColor: errors.acceptTerms
@@ -533,7 +537,9 @@ export const RegisterScreenMultiStep: React.FC = () => {
                               : colors.border.default,
                           },
                         ]}>
-                        {value && <Icon name="check" size={16} color={colors.text.inverse} />}
+                        {formData.acceptTerms && (
+                          <Icon name="check" size={16} color={colors.text.inverse} />
+                        )}
                       </View>
                       <View style={styles.termsTextContainer}>
                         <Text style={[styles.termsText, { color: colors.text.secondary }]}>
@@ -592,7 +598,6 @@ export const RegisterScreenMultiStep: React.FC = () => {
                 <Icon name="chevron-left" size={28} color={colors.text.primary} />
               </View>
             </TouchableOpacity>
-            <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Hesap Oluştur</Text>
           </View>
 
           {/* Step Indicator */}
@@ -602,16 +607,6 @@ export const RegisterScreenMultiStep: React.FC = () => {
             icons={['user', 'briefcase', 'lock']}
             labels={['Bilgiler', 'Meslek', 'Hesap']}
           />
-
-          {/* Error Message */}
-          {isError && error && (
-            <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
-              <Icon name="alert-circle" size={20} color={colors.status.error} />
-              <Text style={[styles.errorText, { color: colors.status.error }]}>
-                {getErrorMessage(error)}
-              </Text>
-            </View>
-          )}
 
           {/* Step Content */}
           {renderStepContent()}
