@@ -24,11 +24,13 @@ export const useRegister = () => {
   const mutation = useMutation({
     mutationFn: async (data: RegisterFormData) => {
       // Backend expects 'name' and 'surname' instead of firstName/lastName
+      // Sprint 1: Send sectorId for sector-based community structure
       const response = await authApi.register({
         email: data.email,
         password: data.password,
         name: data.firstName,
         surname: data.lastName,
+        sectorId: data.sectorId,
         professionId: data.professionId,
         customProfession: data.customProfession,
       });

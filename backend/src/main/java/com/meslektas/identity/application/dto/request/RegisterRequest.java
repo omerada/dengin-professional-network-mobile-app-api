@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 
 /**
  * Request DTO for user registration
+ * Sprint 1: Added sectorId for sector-based community structure
  */
 public record RegisterRequest(
         @NotBlank(message = "E-posta adresi gereklidir")
@@ -24,6 +25,10 @@ public record RegisterRequest(
         @Size(min = 2, max = 100, message = "Soyad 2 ile 100 karakter arasında olmalıdır")
         String surname,
 
+        // Sprint 1: Sector-based community structure
+        Long sectorId,
+
+        // Deprecated: Kept for backward compatibility
         Long professionId,
 
         @Size(max = 100, message = "Özel meslek adı en fazla 100 karakter olabilir")

@@ -57,7 +57,8 @@ public class User extends AggregateRoot {
     @Column(name = "gender", length = 20)
     private String gender;
 
-    // Profession
+    // Profession (DEPRECATED - kept for backward compatibility)
+    // Use sector instead for new features
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "profession_id")
     private Profession profession;
@@ -68,6 +69,16 @@ public class User extends AggregateRoot {
 
     @Column(name = "profession_verified_at")
     private LocalDateTime professionVerifiedAt;
+
+    // Sector (NEW - Sprint 1: Sector-based community)
+    /**
+     * User's primary sector
+     * Determines which sector feed and community user belongs to
+     * Required for posting and accessing sector-based features
+     */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "sector_id")
+    private Sector sector;
 
     // Profile Status
     @Column(name = "is_profile_complete", nullable = false)
@@ -215,8 +226,12 @@ public class User extends AggregateRoot {
     /**
      * Select profession (BR-003: Profession-based access)
      * 
+     * DEPRECATED: Use selectSector() instead
+     * Kept for backward compatibility during migration
+     * 
      * Business Rule: Verified profession cannot be changed
      */
+    @Deprecated(since = "Sprint 1", forRemoval = false)
     public void selectProfession(Profession profession) {
         if (Boolean.TRUE.equals(this.isProfessionVerified) && this.profession != null) {
             if (!this.profession.isGeneralCategory()) {
@@ -230,7 +245,105 @@ public class User extends AggregateRoot {
         this.isProfessionVerified = false;
         this.professionVerifiedAt = null;
 
+        // Auto-update sector from profession for backward compatibility
+        if (profession != null) {
+            this.sector = Sector.fromProfessionCategory(profession.getCategory());
+        }
+
         checkProfileCompleteness();
+    }
+
+    /**
+     * Select sector (NEW - Sprint 1)
+     * 
+     * Users select a primary sector during onboarding
+     * Sector determines which community feed and channels user can access
+     * 
+     * Business Rules:
+     * - Sector cannot be null
+     * - Once selected, can be changed only if no profession verified
+     * - Auto-clears old profession if sector changes
+     * 
+     * @param sector the sector to select
+     */
+    public void selectSector(Sector sector) {
+        if (sector == null) {
+            throw new BusinessException(
+                    "Sektör seçimi zorunludur",
+                    "SECTOR_REQUIRED");
+        }
+
+        // Check if user has verified profession in different sector
+        if (this.sector != null && !this.sector.equals(sector)) {
+            if (Boolean.TRUE.equals(this.isProfessionVerified)) {
+                throw new BusinessException(
+                        "Doğrulanmış mesleğiniz olduğu için sektör değiştiremezsiniz",
+                        "SECTOR_CHANGE_NOT_ALLOWED_VERIFIED");
+            }
+            // Clear old profession when changing sectors
+            this.profession = null;
+            this.isProfessionVerified = false;
+            this.professionVerifiedAt = null;
+        }
+
+        this.sector = sector;
+        checkProfileCompleteness();
+
+        registerEvent(new com.meslektas.identity.domain.event.SectorSelectedEvent(
+                this.getId(),
+                sector.getId(),
+                sector.getCode()));
+    }
+
+    /**
+     * Get user's sector (with fallback to profession category)
+     * 
+     * During migration period, if sector is null, derive from profession
+     * 
+     * @return user's sector, or null if neither sector nor profession is set
+     */
+    public Sector getSector() {
+        if (sector != null) {
+            return sector;
+        }
+
+        // Fallback for migration period
+        if (profession != null) {
+            return Sector.fromProfessionCategory(profession.getCategory());
+        }
+
+        return null;
+    }
+
+    /**
+     * Get sector code safely
+     * 
+     * @return sector code or null
+     */
+    public String getSectorCode() {
+        Sector userSector = getSector();
+        return userSector != null ? userSector.getCode() : null;
+    }
+
+    /**
+     * Check if user belongs to a specific sector
+     * 
+     * @param sectorCode sector code to check
+     * @return true if user's sector matches
+     */
+    public boolean isInSector(String sectorCode) {
+        Sector userSector = getSector();
+        return userSector != null && userSector.getCode().equals(sectorCode);
+    }
+
+    /**
+     * Check if user can post
+     * User must have a sector selected to post
+     * 
+     * @return true if user can post
+     */
+    public boolean canPost() {
+        return getSector() != null && isActive();
     }
 
     /**

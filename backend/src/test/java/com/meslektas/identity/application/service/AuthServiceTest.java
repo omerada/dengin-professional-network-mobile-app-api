@@ -6,9 +6,12 @@ import com.meslektas.identity.application.dto.request.RegisterRequest;
 import com.meslektas.identity.application.dto.response.LoginResponse;
 import com.meslektas.identity.application.dto.response.UserResponse;
 import com.meslektas.identity.domain.model.OAuthProvider;
+import com.meslektas.identity.domain.model.Profession;
 import com.meslektas.identity.application.mapper.UserMapper;
 import com.meslektas.identity.domain.model.User;
 import com.meslektas.identity.domain.model.UserStatus;
+import com.meslektas.identity.domain.repository.ProfessionRepository;
+import com.meslektas.identity.domain.repository.SectorRepository;
 import com.meslektas.identity.domain.repository.UserRepository;
 import com.meslektas.identity.infrastructure.security.JwtTokenProvider;
 import com.meslektas.notification.domain.service.EmailService;
@@ -59,6 +62,12 @@ class AuthServiceTest {
     private UserRepository userRepository;
 
     @Mock
+    private ProfessionRepository professionRepository;
+
+    @Mock
+    private SectorRepository sectorRepository;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @Mock
@@ -95,12 +104,20 @@ class AuthServiceTest {
         // Setup Redis mock
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         
+        // Setup Profession mock for backward compatibility tests
+        Profession mockProfession = Profession.builder()
+                .name("Yazılım Geliştirici")
+                .build();
+        ReflectionTestUtils.setField(mockProfession, "id", 1L);
+        when(professionRepository.findById(1L)).thenReturn(java.util.Optional.of(mockProfession));
+        
         validRegisterRequest = new RegisterRequest(
                 "test@example.com",
                 "SecurePass123!",
                 "Ahmet",
                 "Yılmaz",
-                1L,
+                null,  // sectorId - Sprint 1
+                1L,    // professionId - backward compatibility
                 null);
 
         validLoginRequest = new LoginRequest(

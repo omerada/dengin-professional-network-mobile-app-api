@@ -25,6 +25,7 @@ export interface LoginFormData {
 /**
  * Register form data
  * Note: Backend expects 'name' and 'surname'
+ * Sprint 1: Added sectorId for sector-based community structure
  */
 export interface RegisterFormData {
   email: string;
@@ -32,6 +33,9 @@ export interface RegisterFormData {
   confirmPassword: string;
   firstName: string; // Mapped to 'name' in API call
   lastName: string; // Mapped to 'surname' in API call
+  // Sprint 1: Sector-based community structure
+  sectorId?: number | null;
+  // Deprecated: Kept for backward compatibility
   professionId?: number | null;
   customProfession?: string;
   acceptTerms: boolean;

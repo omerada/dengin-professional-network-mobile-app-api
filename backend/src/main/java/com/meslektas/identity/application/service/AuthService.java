@@ -9,8 +9,10 @@ import com.meslektas.identity.application.dto.response.UserResponse;
 import com.meslektas.identity.application.mapper.UserMapper;
 import com.meslektas.identity.domain.model.Profession;
 import com.meslektas.identity.domain.model.ProfessionCategory;
+import com.meslektas.identity.domain.model.Sector;
 import com.meslektas.identity.domain.model.User;
 import com.meslektas.identity.domain.repository.ProfessionRepository;
+import com.meslektas.identity.domain.repository.SectorRepository;
 import com.meslektas.identity.domain.repository.UserRepository;
 import com.meslektas.identity.infrastructure.security.JwtTokenProvider;
 import com.meslektas.notification.domain.service.EmailService;
@@ -47,6 +49,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final ProfessionRepository professionRepository;
+    private final SectorRepository sectorRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtTokenProvider jwtService; // Alias for token generation
@@ -70,6 +73,7 @@ public class AuthService {
      * 
      * Business Rule: Email must be unique
      * Returns LoginResponse with tokens for auto-login after registration
+     * Sprint 1: Added sector-based community structure support
      */
     @Transactional
     public LoginResponse register(RegisterRequest request) {
@@ -89,13 +93,23 @@ public class AuthService {
                 request.name(),
                 request.surname());
 
-        // Set profession if provided
-        if (request.professionId() != null) {
+        // Sprint 1: Set sector if provided (new community structure)
+        if (request.sectorId() != null) {
+            Sector sector = sectorRepository.findById(request.sectorId())
+                    .orElseThrow(() -> new BusinessException(
+                            "Geçersiz sektör seçimi",
+                            "INVALID_SECTOR"));
+            user.selectSector(sector);
+            log.info("User registered with sector: {} ({})", sector.getName(), sector.getCode());
+        }
+        // Backward compatibility: profession still works
+        else if (request.professionId() != null) {
             Profession profession = professionRepository.findById(request.professionId())
                     .orElseThrow(() -> new BusinessException(
                             "Geçersiz meslek seçimi",
                             "INVALID_PROFESSION"));
             user.selectProfession(profession);
+            log.info("User registered with profession (deprecated): {}", profession.getName());
         } else if (request.customProfession() != null && !request.customProfession().isBlank()) {
             // Custom profession - validate and find OTHER category profession
             if (containsProfanity(request.customProfession())) {

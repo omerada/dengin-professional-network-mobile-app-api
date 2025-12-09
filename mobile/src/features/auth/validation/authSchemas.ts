@@ -29,6 +29,10 @@ export const loginSchema = z.object({
 
 /**
  * Register form validation schema
+ * Updated for Sprint 1: Sector-based community structure
+ *
+ * Note: Both profession and sector fields supported for backward compatibility
+ * During migration period, prefer sectorId over professionId
  */
 export const registerSchema = z
   .object({
@@ -52,10 +56,13 @@ export const registerSchema = z
       .min(1, 'Soyad gerekli')
       .min(2, 'Soyad en az 2 karakter olmalı')
       .max(50, 'Soyad en fazla 50 karakter olabilir'),
-    professionId: z.number({
-      required_error: 'Meslek seçimi zorunludur',
-      invalid_type_error: 'Meslek seçimi zorunludur',
+    // Sector field (new - Sprint 1)
+    sectorId: z.number({
+      required_error: 'Sektör seçimi zorunludur',
+      invalid_type_error: 'Sektör seçimi zorunludur',
     }),
+    // Profession fields (deprecated - kept for backward compatibility)
+    professionId: z.number().optional(),
     customProfession: z.string().max(100, 'Meslek en fazla 100 karakter olabilir').optional(),
     acceptTerms: z.boolean().refine(val => val === true, {
       message: 'Kullanım koşullarını kabul etmeniz gerekli',

@@ -21,7 +21,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useColors } from '@contexts/ThemeContext';
 import { useLocale } from '@contexts/LocaleContext';
 import { Button, Input } from '@shared/components';
-import { ProfessionSelector } from '../components';
+import { ProfessionSelector, SectorSelector } from '../components';
 import { useRegister } from '../hooks';
 import { registerSchema, RegisterSchemaType } from '../validation';
 import { AuthStackNavigationProp } from '@shared/types';
@@ -59,7 +59,8 @@ export const RegisterScreen: React.FC = () => {
       confirmPassword: '',
       firstName: '',
       lastName: '',
-      professionId: undefined,
+      sectorId: undefined, // Sprint 1: Sector field
+      professionId: undefined, // Deprecated
       customProfession: '',
       acceptTerms: false,
     },
@@ -199,30 +200,26 @@ export const RegisterScreen: React.FC = () => {
               )}
             />
 
-            {/* Profession Selector */}
+            {/* Sector Selector - Sprint 1 */}
             <Controller
               control={control}
-              name="professionId"
+              name="sectorId"
               render={({ field: { value } }) => (
-                <Controller
-                  control={control}
-                  name="customProfession"
-                  render={({ field: { value: customValue } }) => (
-                    <ProfessionSelector
-                      value={value}
-                      customValue={customValue}
-                      onSelect={(professionId: number | null, customText?: string) => {
-                        if (professionId !== null) {
-                          setValue('professionId', professionId, { shouldValidate: true });
-                        }
-                        setValue('customProfession', customText || '');
-                      }}
-                      error={errors.professionId?.message || errors.customProfession?.message}
-                    />
-                  )}
+                <SectorSelector
+                  value={value}
+                  onSelect={(sectorId: number | null) => {
+                    if (sectorId !== null) {
+                      setValue('sectorId', sectorId, { shouldValidate: true });
+                    }
+                  }}
+                  error={errors.sectorId?.message}
+                  showDescription={false}
                 />
               )}
             />
+
+            {/* Profession Selector - Deprecated, kept for backward compatibility */}
+            {/* Will be removed in future sprint */}
 
             {/* Password */}
             <Controller

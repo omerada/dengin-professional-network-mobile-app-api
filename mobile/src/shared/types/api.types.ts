@@ -80,9 +80,25 @@ export interface User {
   bio?: string;
   avatarUrl?: string;
   verificationStatus: BackendVerificationStatus;
+
+  // Legacy profession fields (deprecated, use sector instead)
+  /** @deprecated Use sectorId instead */
   professionId?: number;
+  /** @deprecated Use sectorName instead */
   professionName?: string;
+  /** @deprecated Use sector object instead */
   profession?: Profession;
+
+  // New sector fields (Sprint 1)
+  /** User's primary sector ID */
+  sectorId?: number;
+  /** User's primary sector code */
+  sectorCode?: SectorCode;
+  /** User's primary sector name */
+  sectorName?: string;
+  /** Full sector object (if included) */
+  sector?: Sector;
+
   stats?: UserStats;
   createdAt: string;
   updatedAt: string;
@@ -104,6 +120,7 @@ export interface UserStats {
 
 /**
  * Profession entity
+ * @deprecated Use Sector and ProfessionGroup instead (Sprint 1)
  */
 export interface Profession {
   id: number;
@@ -117,6 +134,7 @@ export interface Profession {
 /**
  * Profession category enum - Backend ProfessionCategory.java ile %100 uyumlu
  * @see backend/src/main/java/com/meslektas/identity/domain/model/ProfessionCategory.java
+ * @deprecated Use Sector codes instead (Sprint 1)
  */
 export type ProfessionCategory =
   | 'MEDICAL' // Sağlık
@@ -127,6 +145,109 @@ export type ProfessionCategory =
   | 'CREATIVE' // Yaratıcı Sektör
   | 'BUSINESS' // İş Dünyası
   | 'OTHER'; // Diğer
+
+// ============================================
+// SECTOR TYPES (Sprint 1 - New Community Structure)
+// ============================================
+
+/**
+ * Sector code type - Top-level professional category
+ * Backend: Sector.code field
+ * @since Sprint 1
+ */
+export type SectorCode =
+  | 'MEDICAL' // Sağlık
+  | 'LEGAL' // Hukuk
+  | 'ENGINEERING' // Mühendislik
+  | 'EDUCATION' // Eğitim
+  | 'SERVICE' // Hizmet
+  | 'CREATIVE' // Yaratıcı
+  | 'BUSINESS' // İş Dünyası
+  | 'OTHER'; // Diğer
+
+/**
+ * Sector entity - Top-level professional category
+ * Backend: SectorResponse DTO
+ * @since Sprint 1
+ */
+export interface Sector {
+  /** Sector ID */
+  id: number;
+
+  /** Unique sector code (MEDICAL, LEGAL, etc.) */
+  code: SectorCode;
+
+  /** Display name in Turkish */
+  name: string;
+
+  /** Sector description */
+  description?: string | null;
+
+  /** Icon URL */
+  iconUrl?: string | null;
+
+  /** Display order in UI (lower = higher priority) */
+  displayOrder: number;
+
+  /** Whether sector is active */
+  isActive: boolean;
+
+  /** Number of users in this sector */
+  memberCount: number;
+}
+
+/**
+ * Profession Group - Specific profession within a sector
+ * Backend: ProfessionGroupResponse DTO
+ * @since Sprint 1
+ */
+export interface ProfessionGroup {
+  /** Profession group ID */
+  id: number;
+
+  /** Parent sector ID */
+  sectorId: number;
+
+  /** Parent sector code */
+  sectorCode: SectorCode;
+
+  /** Parent sector name */
+  sectorName: string;
+
+  /** Profession group name (e.g., Doktor, Avukat) */
+  name: string;
+
+  /** Description */
+  description?: string | null;
+
+  /** Whether this profession requires verification */
+  requiresVerification: boolean;
+
+  /** Icon URL */
+  iconUrl?: string | null;
+
+  /** Display order within sector */
+  displayOrder: number;
+
+  /** Whether profession group is active */
+  isActive: boolean;
+
+  /** Number of verified members */
+  memberCount: number;
+}
+
+/**
+ * Sector statistics
+ * Backend: SectorStatsResponse DTO
+ * @since Sprint 1
+ */
+export interface SectorStats {
+  /** Total number of sectors */
+  totalSectors: number;
+
+  /** Number of active sectors */
+  activeSectors: number;
+}
 
 /**
  * Authentication tokens
@@ -151,12 +272,16 @@ export interface LoginCredentials {
 /**
  * Registration data
  * Backend: POST /api/auth/register request
+ * Sprint 1: Added sectorId for sector-based community structure
  */
 export interface RegisterData {
   email: string;
   password: string;
   name: string;
   surname: string;
+  // Sprint 1: Sector-based community structure
+  sectorId?: number | null;
+  // Deprecated: Kept for backward compatibility
   professionId?: number | null;
   customProfession?: string;
 }

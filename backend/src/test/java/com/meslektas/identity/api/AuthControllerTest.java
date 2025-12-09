@@ -79,7 +79,8 @@ class AuthControllerTest {
                     "SecurePass123!",
                     "Ahmet",
                     "Yılmaz",
-                    1L,
+                    null,  // sectorId - Sprint 1
+                    1L,    // professionId - backward compatibility
                     null);
 
             UserResponse userResponse = UserResponse.builder()

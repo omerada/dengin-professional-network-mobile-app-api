@@ -4,6 +4,19 @@
 
 // Existing hooks
 export { useDebounce } from '../../hooks/useDebounce';
+
+// Sector hooks (Sprint 1)
+export {
+  useSectors,
+  useSector,
+  useSectorByCode,
+  useSearchSectors,
+  usePopularSectors,
+  useSectorStats,
+  isProfessionalSector,
+  isGeneralSector,
+  sectorKeys,
+} from './useSectors';
 export {
   useNetworkStatus,
   useIsOffline,
