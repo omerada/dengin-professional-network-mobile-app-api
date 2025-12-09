@@ -67,6 +67,7 @@ export const RegisterScreenMultiStep: React.FC = () => {
     setValue,
     watch,
     trigger,
+    getValues,
   } = useForm<RegisterSchemaType>({
     resolver: zodResolver(registerSchema),
     mode: 'onTouched',
@@ -134,16 +135,31 @@ export const RegisterScreenMultiStep: React.FC = () => {
    * Go to next step
    */
   const handleNext = useCallback(async () => {
+    console.log('========================================');
+    console.log('[RegisterScreen] 📍 HANDLE NEXT - Step:', currentStep);
+
+    // Log current form values before validation
+    const currentValues = getValues();
+    console.log('[RegisterScreen] Current form values before next step:');
+    console.log('  - firstName:', currentValues.firstName);
+    console.log('  - lastName:', currentValues.lastName);
+    console.log('  - sectorId:', currentValues.sectorId);
+    console.log('  - professionId:', currentValues.professionId);
+    console.log('  - email:', currentValues.email);
+    console.log('========================================');
+
     const isValid = await validateStep(currentStep);
 
     if (!isValid) {
+      console.log('[RegisterScreen] ❌ Step validation failed');
       return;
     }
 
+    console.log('[RegisterScreen] ✅ Step validation passed, moving to next step');
     if (currentStep < TOTAL_STEPS) {
       setCurrentStep(prev => (prev + 1) as Step);
     }
-  }, [currentStep, validateStep]);
+  }, [currentStep, validateStep, getValues]);
 
   /**
    * Go to previous step
@@ -186,21 +202,77 @@ export const RegisterScreenMultiStep: React.FC = () => {
    * Handle submit with validation check
    */
   const handleFinalSubmit = useCallback(async () => {
-    console.log('[RegisterScreen] 🎯 Submit button clicked');
+    console.log('========================================');
+    console.log('[RegisterScreen] 🎯 SUBMIT BUTTON CLICKED');
     console.log('[RegisterScreen] Current step:', currentStep);
-    console.log('[RegisterScreen] Triggering validation...');
+    console.log('========================================');
+
+    // Log all form values before validation (use getValues for reliability)
+    const allValues = getValues();
+    console.log('[RegisterScreen] 📋 ALL FORM VALUES:');
+    console.log('  - firstName:', allValues.firstName, `(type: ${typeof allValues.firstName})`);
+    console.log('  - lastName:', allValues.lastName, `(type: ${typeof allValues.lastName})`);
+    console.log('  - email:', allValues.email, `(type: ${typeof allValues.email})`);
+    console.log(
+      '  - password:',
+      allValues.password ? '***' : 'EMPTY',
+      `(length: ${allValues.password?.length || 0})`,
+    );
+    console.log(
+      '  - confirmPassword:',
+      allValues.confirmPassword ? '***' : 'EMPTY',
+      `(length: ${allValues.confirmPassword?.length || 0})`,
+    );
+    console.log('  - sectorId:', allValues.sectorId, `(type: ${typeof allValues.sectorId})`);
+    console.log(
+      '  - professionId:',
+      allValues.professionId,
+      `(type: ${typeof allValues.professionId})`,
+    );
+    console.log(
+      '  - customProfession:',
+      allValues.customProfession,
+      `(type: ${typeof allValues.customProfession})`,
+    );
+    console.log(
+      '  - acceptTerms:',
+      allValues.acceptTerms,
+      `(type: ${typeof allValues.acceptTerms})`,
+    );
+    console.log('========================================');
+
+    console.log('[RegisterScreen] 🔍 Triggering validation...');
 
     const isValid = await trigger();
     console.log('[RegisterScreen] Validation result:', isValid);
 
     if (!isValid) {
-      console.log('[RegisterScreen] ❌ Validation failed, errors:', errors);
+      console.log('========================================');
+      console.log('[RegisterScreen] ❌ VALIDATION FAILED');
+      console.log('[RegisterScreen] Errors object:', JSON.stringify(errors, null, 2));
+      console.log('[RegisterScreen] Form state errors:', Object.keys(errors));
+
+      // Log each error field with details
+      Object.keys(errors).forEach(key => {
+        const error = errors[key as keyof typeof errors];
+        console.log(`[RegisterScreen] ❌ Error in ${key}:`, error);
+      });
+
+      // Check if firstName and lastName exist in form
+      if (!allValues.firstName || !allValues.lastName) {
+        console.log('[RegisterScreen] ⚠️ CRITICAL: firstName or lastName is missing!');
+        console.log('[RegisterScreen] This suggests data was lost during step navigation');
+      }
+      console.log('========================================');
       return;
     }
 
-    console.log('[RegisterScreen] ✅ Validation passed, calling handleSubmit(onSubmit)');
+    console.log('========================================');
+    console.log('[RegisterScreen] ✅ VALIDATION PASSED');
+    console.log('[RegisterScreen] Calling handleSubmit(onSubmit)...');
+    console.log('========================================');
     handleSubmit(onSubmit)();
-  }, [currentStep, trigger, errors, handleSubmit, onSubmit]);
+  }, [currentStep, trigger, errors, handleSubmit, onSubmit, getValues]);
 
   const handleTermsPress = useCallback(() => {
     navigation.navigate('Terms');
@@ -218,15 +290,8 @@ export const RegisterScreenMultiStep: React.FC = () => {
       case Step.PERSONAL_INFO:
         return (
           <View style={styles.stepContent}>
-            {/* Step Header with Icon */}
+            {/* Step Header */}
             <View style={styles.stepHeader}>
-              <View
-                style={[
-                  styles.stepIconContainer,
-                  { backgroundColor: colors.interactive.default + '15' },
-                ]}>
-                <Icon name="user" size={32} color={colors.interactive.default} />
-              </View>
               <Text style={[styles.stepTitle, { color: colors.text.primary }]}>Tanışalım!</Text>
               <Text style={[styles.stepSubtitle, { color: colors.text.secondary }]}>
                 Önce sizi tanıyalım
@@ -250,6 +315,10 @@ export const RegisterScreenMultiStep: React.FC = () => {
                     error={errors.firstName?.message}
                     required
                     autoFocus
+                    returnKeyType="next"
+                    onSubmitEditing={() => {
+                      // Focus next field (lastName) - handled by React Hook Form
+                    }}
                     leftIcon={<Icon name="user" size={20} color={colors.text.tertiary} />}
                   />
                 )}
@@ -269,6 +338,8 @@ export const RegisterScreenMultiStep: React.FC = () => {
                     onBlur={onBlur}
                     error={errors.lastName?.message}
                     required
+                    returnKeyType="done"
+                    onSubmitEditing={handleNext}
                     leftIcon={<Icon name="user" size={20} color={colors.text.tertiary} />}
                   />
                 )}
@@ -280,20 +351,11 @@ export const RegisterScreenMultiStep: React.FC = () => {
       case Step.PROFESSIONAL_INFO:
         return (
           <View style={styles.stepContent}>
-            {/* Step Header with Icon */}
+            {/* Step Header */}
             <View style={styles.stepHeader}>
-              <View
-                style={[
-                  styles.stepIconContainer,
-                  { backgroundColor: colors.interactive.default + '15' },
-                ]}>
-                <Icon name="briefcase" size={32} color={colors.interactive.default} />
-              </View>
-              <Text style={[styles.stepTitle, { color: colors.text.primary }]}>
-                Profesyonel Bilgiler
-              </Text>
+              <Text style={[styles.stepTitle, { color: colors.text.primary }]}>Mesleğiniz</Text>
               <Text style={[styles.stepSubtitle, { color: colors.text.secondary }]}>
-                Size uygun içerikler gösterebilmemiz için
+                Hangi sektörde çalışıyorsunuz?
               </Text>
             </View>
 
@@ -364,15 +426,8 @@ export const RegisterScreenMultiStep: React.FC = () => {
       case Step.ACCOUNT_INFO:
         return (
           <View style={styles.stepContent}>
-            {/* Step Header with Icon */}
+            {/* Step Header */}
             <View style={styles.stepHeader}>
-              <View
-                style={[
-                  styles.stepIconContainer,
-                  { backgroundColor: colors.interactive.default + '15' },
-                ]}>
-                <Icon name="shield" size={32} color={colors.interactive.default} />
-              </View>
               <Text style={[styles.stepTitle, { color: colors.text.primary }]}>
                 Hesabınızı Oluşturun
               </Text>
@@ -400,6 +455,7 @@ export const RegisterScreenMultiStep: React.FC = () => {
                     error={errors.email?.message}
                     required
                     autoFocus
+                    returnKeyType="next"
                     leftIcon={<Icon name="mail" size={20} color={colors.text.tertiary} />}
                   />
                 )}
@@ -423,6 +479,7 @@ export const RegisterScreenMultiStep: React.FC = () => {
                     required
                     isPasswordVisible={passwordVisible}
                     onPasswordVisibilityToggle={() => setPasswordVisible(!passwordVisible)}
+                    returnKeyType="next"
                     leftIcon={<Icon name="lock" size={20} color={colors.text.tertiary} />}
                   />
                 )}
@@ -447,6 +504,8 @@ export const RegisterScreenMultiStep: React.FC = () => {
                     onPasswordVisibilityToggle={() =>
                       setConfirmPasswordVisible(!confirmPasswordVisible)
                     }
+                    returnKeyType="done"
+                    onSubmitEditing={handleFinalSubmit}
                     leftIcon={<Icon name="lock" size={20} color={colors.text.tertiary} />}
                   />
                 )}
@@ -652,25 +711,19 @@ const styles = StyleSheet.create({
   stepHeader: {
     alignItems: 'center',
     marginBottom: spacing.xl,
-  },
-  stepIconContainer: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.md,
+    paddingHorizontal: spacing.md,
   },
   stepTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: spacing.xs,
+    marginBottom: spacing.sm,
     textAlign: 'center',
+    letterSpacing: -0.5,
   },
   stepSubtitle: {
     fontSize: 16,
     textAlign: 'center',
-    paddingHorizontal: spacing.lg,
+    lineHeight: 22,
   },
   stepForm: {
     gap: spacing.md,

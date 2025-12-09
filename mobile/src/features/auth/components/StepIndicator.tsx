@@ -82,21 +82,6 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
                 />
               </View>
 
-              {/* Label below icon */}
-              {labels && labels[index] && (
-                <Text
-                  style={[
-                    styles.label,
-                    {
-                      color: isActive ? colors.text.primary : colors.text.tertiary,
-                      fontWeight: isActive ? '700' : '500',
-                    },
-                  ]}
-                  numberOfLines={1}>
-                  {labels[index]}
-                </Text>
-              )}
-
               {/* Connector Line */}
               {stepNumber < totalSteps && (
                 <View
@@ -115,23 +100,30 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
         })}
       </View>
 
-      {/* Progress Bar */}
-      <View style={[styles.progressBarContainer, { backgroundColor: colors.background.tertiary }]}>
-        <View
-          style={[
-            styles.progressBar,
-            {
-              backgroundColor: colors.interactive.default,
-              width: `${(currentStep / totalSteps) * 100}%`,
-            },
-          ]}
-        />
-      </View>
+      {/* Labels */}
+      {labels && labels.length === totalSteps && (
+        <View style={styles.labelsContainer}>
+          {labels.map((label, index) => {
+            const stepNumber = index + 1;
+            const isActive = stepNumber === currentStep;
 
-      {/* Progress Text */}
-      <Text style={[styles.progressText, { color: colors.text.secondary }]}>
-        Adım {currentStep} / {totalSteps}
-      </Text>
+            return (
+              <Text
+                key={stepNumber}
+                style={[
+                  styles.label,
+                  {
+                    color: isActive ? colors.text.primary : colors.text.tertiary,
+                    fontWeight: isActive ? '700' : '500',
+                  },
+                ]}
+                numberOfLines={1}>
+                {label}
+              </Text>
+            );
+          })}
+        </View>
+      )}
     </View>
   );
 };
@@ -171,24 +163,15 @@ const styles = StyleSheet.create({
     height: 3,
     zIndex: -1,
   },
+  labelsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: spacing.sm,
+  },
   label: {
     fontSize: 13,
     textAlign: 'center',
     marginTop: spacing.xs,
-  },
-  progressBarContainer: {
-    height: 6,
-    borderRadius: 3,
-    overflow: 'hidden',
-    marginBottom: spacing.sm,
-  },
-  progressBar: {
-    height: '100%',
-    borderRadius: 3,
-  },
-  progressText: {
-    fontSize: 14,
-    fontWeight: '600',
-    textAlign: 'center',
+    flex: 1,
   },
 });
