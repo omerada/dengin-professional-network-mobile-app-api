@@ -46,6 +46,7 @@ export const FeedScreen: React.FC = memo(() => {
   const navigation = useNavigation();
   const { medium } = useHaptic();
   const currentUserId = useAuthStore(state => state.user?.id);
+  const user = useAuthStore(state => state.user);
 
   // Action sheet state
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
@@ -74,10 +75,6 @@ export const FeedScreen: React.FC = memo(() => {
   // ============================================================================
   // Handlers
   // ============================================================================
-
-  const handleCreatePress = useCallback(() => {
-    navigation.navigate('CreatePost' as never);
-  }, [navigation]);
 
   /**
    * Handle like post with optimistic update
@@ -292,8 +289,6 @@ export const FeedScreen: React.FC = memo(() => {
    * List header - feed header with new home screen components
    */
   const ListHeaderComponent = useMemo(() => {
-    const user = useAuthStore.getState().user;
-
     return (
       <>
         <FeedHeader
@@ -321,7 +316,7 @@ export const FeedScreen: React.FC = memo(() => {
         />
       </>
     );
-  }, [handleCreatePress, navigation]);
+  }, [user, navigation]);
 
   /**
    * Empty state component
@@ -334,13 +329,11 @@ export const FeedScreen: React.FC = memo(() => {
     return (
       <EmptyFeed
         title="Henüz gönderi yok"
-        message="İlk gönderiyi paylaşan siz olun!"
-        actionLabel="Gönderi Oluştur"
-        onAction={handleCreatePress}
+        message="Takip ettiğin kişilerin gönderilerini burada göreceksin."
         icon="newspaper-outline"
       />
     );
-  }, [isLoading, posts.length, handleCreatePress]);
+  }, [isLoading, posts.length]);
 
   /**
    * Footer component - loading more indicator
