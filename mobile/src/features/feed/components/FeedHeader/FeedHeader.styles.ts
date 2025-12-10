@@ -4,9 +4,6 @@
 
 import { StyleSheet } from 'react-native';
 
-// Color constants
-const WHITE = '#FFFFFF';
-
 /**
  * FeedHeader styles - Alphabetically sorted
  */
@@ -17,19 +14,6 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 16,
     paddingVertical: 12,
-  },
-
-  createButton: {
-    alignItems: 'center',
-    borderRadius: 20,
-    height: 40,
-    justifyContent: 'center',
-    marginLeft: 12,
-    width: 40,
-  },
-
-  createIcon: {
-    color: WHITE,
   },
 
   filterButton: {

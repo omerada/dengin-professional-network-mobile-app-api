@@ -297,7 +297,6 @@ export const FeedScreen: React.FC = memo(() => {
     return (
       <>
         <FeedHeader
-          onCreatePress={handleCreatePress}
           sector={
             user?.sector
               ? {

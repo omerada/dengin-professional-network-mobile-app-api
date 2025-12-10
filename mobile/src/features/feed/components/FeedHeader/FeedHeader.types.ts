@@ -37,8 +37,6 @@ export type ProfessionInfo = SectorInfo;
  * FeedHeader component props
  */
 export interface FeedHeaderProps {
-  /** Callback when create button is pressed */
-  onCreatePress?: () => void;
   /** Sector info (for sector icon) - Updated from profession to sector (Sprint 1) */
   sector?: SectorInfo;
   /** Callback when sector icon is pressed */

@@ -10,7 +10,6 @@ import {
   MainTabParamList,
   FeedStackParamList,
   MessagingStackParamList,
-  NotificationsStackParamList,
   ProfileStackParamList,
 } from '@shared/types';
 import { AnimatedTabBar, TabItem } from './components/AnimatedTabBar';
@@ -22,7 +21,6 @@ import { CreatePostScreen } from '@features/feed/screens/CreatePostScreen';
 import { CommentsScreen } from '@features/feed/screens/CommentsScreen';
 import { ConversationListScreen } from '@features/messaging/screens/ConversationListScreen';
 import { ChatScreen } from '@features/messaging/screens/ChatScreen';
-import { NotificationsScreen } from '@features/notifications/screens/NotificationsScreen';
 import { ProfileScreen } from '@features/profile/screens/ProfileScreen';
 import { EditProfileScreen } from '@features/profile/screens/EditProfileScreen';
 import { SettingsScreen } from '@features/profile/screens/SettingsScreen';
@@ -48,18 +46,11 @@ const TAB_CONFIG: TabItem[] = [
   },
   {
     name: 'CreatePostTab',
-    label: 'Oluştur',
+    label: '', // No label for center FAB
     icon: 'add-circle',
     focusedIcon: 'add-circle',
     accessibilityLabel: 'Gönderi oluştur',
-    isCenterFab: true,
-  },
-  {
-    name: 'NotificationsTab',
-    label: 'Bildirimler',
-    icon: 'trophy-outline',
-    focusedIcon: 'trophy',
-    accessibilityLabel: 'Etkinlik sekmesi',
+    isCenterFab: true, // Elevated center button
   },
   {
     name: 'ProfileTab',
@@ -115,27 +106,6 @@ const MessagingStackNavigator: React.FC = () => (
       options={{ presentation: 'modal', gestureEnabled: true }}
     />
   </MessagingStack.Navigator>
-);
-
-// Notifications Stack
-const NotificationsStack = createNativeStackNavigator<NotificationsStackParamList>();
-const NotificationsStackNavigator: React.FC = () => (
-  <NotificationsStack.Navigator
-    screenOptions={{
-      headerShown: false,
-      gestureEnabled: true,
-      fullScreenGestureEnabled: true,
-      animation: 'slide_from_right',
-    }}>
-    <NotificationsStack.Screen name="Notifications" component={NotificationsScreen} />
-    <NotificationsStack.Screen
-      name="NotificationSettings"
-      component={
-        require('@features/notifications/screens/NotificationSettingsScreen')
-          .NotificationSettingsScreen
-      }
-    />
-  </NotificationsStack.Navigator>
 );
 
 // Profile Stack
@@ -194,7 +164,6 @@ export const MainNavigator: React.FC = () => {
           },
         })}
       />
-      <Tab.Screen name="NotificationsTab" component={NotificationsStackNavigator} />
       <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} />
     </Tab.Navigator>
   );

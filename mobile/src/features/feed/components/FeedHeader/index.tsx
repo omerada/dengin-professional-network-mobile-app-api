@@ -4,25 +4,17 @@
 
 import React, { memo, useCallback } from 'react';
 import { Pressable, ScrollView, Text } from 'react-native';
-import Animated, {
-  FadeIn,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
-import { spring } from '@theme/animations';
 import { useFeedStore } from '../../stores';
 import type { FeedFilter } from '../../types';
 
 import { styles } from './FeedHeader.styles';
 import { FILTER_OPTIONS, type FeedHeaderProps, type FilterOption } from './FeedHeader.types';
 import { ProfessionIcon } from './ProfessionIcon';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 /**
  * Modern FeedHeader Component
@@ -44,7 +36,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
  * ```
  */
 export const FeedHeader: React.FC<FeedHeaderProps> = memo(
-  ({ sector, profession, onSectorPress, onProfessionPress, onCreatePress, testID }) => {
+  ({ sector, profession, onSectorPress, onProfessionPress, testID }) => {
     // Backward compatibility: use profession if sector not provided
     const displaySector = sector || profession;
     const handleSectorPress = onSectorPress || onProfessionPress;
@@ -54,13 +46,6 @@ export const FeedHeader: React.FC<FeedHeaderProps> = memo(
     // Store state
     const filter = useFeedStore(state => state.filter);
     const setFilter = useFeedStore(state => state.setFilter);
-
-    // Create button animation
-    const createScale = useSharedValue(1);
-
-    const createAnimatedStyle = useAnimatedStyle(() => ({
-      transform: [{ scale: createScale.value }],
-    }));
 
     // Handle filter press
     const handleFilterPress = useCallback(
@@ -72,16 +57,6 @@ export const FeedHeader: React.FC<FeedHeaderProps> = memo(
       },
       [filter, setFilter, trigger],
     );
-
-    // Handle create press
-    const handleCreatePress = useCallback(() => {
-      trigger('light');
-      createScale.value = withSpring(0.9, spring.press);
-      setTimeout(() => {
-        createScale.value = withSpring(1, spring.snappy);
-      }, 100);
-      onCreatePress?.();
-    }, [onCreatePress, trigger, createScale]);
 
     // Render filter chip
     const renderFilterChip = useCallback(
@@ -151,21 +126,6 @@ export const FeedHeader: React.FC<FeedHeaderProps> = memo(
           contentContainerStyle={styles.filters}>
           {FILTER_OPTIONS.map((option, index) => renderFilterChip(option, index))}
         </ScrollView>
-
-        {/* Create button */}
-        {onCreatePress && (
-          <AnimatedPressable
-            style={[
-              styles.createButton,
-              { backgroundColor: colors.interactive.default },
-              createAnimatedStyle,
-            ]}
-            onPress={handleCreatePress}
-            accessibilityRole="button"
-            accessibilityLabel="Yeni gönderi oluştur">
-            <Icon name="add" size={24} color={colors.text.inverse} />
-          </AnimatedPressable>
-        )}
       </Animated.View>
     );
   },
