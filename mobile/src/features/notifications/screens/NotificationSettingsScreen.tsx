@@ -221,16 +221,9 @@ export const NotificationSettingsScreen: React.FC = () => {
           <Pressable
             onPress={handleEnableNotifications}
             style={[styles.permissionWarning, { backgroundColor: colors.status.warning }]}>
-            <Icon
-              name="warning"
-              size={24}
-              color="#FFFFFF"
-              style={styles.warningIcon}
-            />
+            <Icon name="warning" size={24} color="#FFFFFF" style={styles.warningIcon} />
             <View style={styles.warningContent}>
-              <Text style={[styles.warningTitle, { color: '#FFFFFF' }]}>
-                Bildirimler Kapalı
-              </Text>
+              <Text style={[styles.warningTitle, { color: '#FFFFFF' }]}>Bildirimler Kapalı</Text>
               <Text style={[styles.warningText, { color: '#FFFFFF' }]}>
                 Bildirimleri almak için cihaz ayarlarından izin vermeniz gerekiyor.
               </Text>
