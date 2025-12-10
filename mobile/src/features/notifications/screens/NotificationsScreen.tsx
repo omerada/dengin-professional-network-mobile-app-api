@@ -47,9 +47,13 @@ export const NotificationsScreen: React.FC = memo(() => {
 
   const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
 
-  // Check permission on mount
+  // Check permission on mount - Disabled in development (Expo Go)
+  // Expo Go'da FCM çalışmadığı için izin popup'ı gösterilmiyor
+  // Production EAS Build'de otomatik çalışacak
   useEffect(() => {
-    if (!isPermissionGranted) {
+    // Only show permission prompt in production builds
+    // __DEV__ is false in production/preview builds
+    if (!isPermissionGranted && !__DEV__) {
       const timer = setTimeout(() => {
         setShowPermissionPrompt(true);
       }, 1000);

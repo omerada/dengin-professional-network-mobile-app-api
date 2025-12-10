@@ -224,18 +224,18 @@ export const NotificationSettingsScreen: React.FC = () => {
             <Icon
               name="warning"
               size={24}
-              color={colors.status.warning}
+              color="#FFFFFF"
               style={styles.warningIcon}
             />
             <View style={styles.warningContent}>
-              <Text style={[styles.warningTitle, { color: colors.status.warning }]}>
+              <Text style={[styles.warningTitle, { color: '#FFFFFF' }]}>
                 Bildirimler Kapalı
               </Text>
-              <Text style={[styles.warningText, { color: colors.status.warning }]}>
+              <Text style={[styles.warningText, { color: '#FFFFFF' }]}>
                 Bildirimleri almak için cihaz ayarlarından izin vermeniz gerekiyor.
               </Text>
             </View>
-            <Icon name="chevron-forward" size={20} color={colors.status.warning} />
+            <Icon name="chevron-forward" size={20} color="#FFFFFF" />
           </Pressable>
         )}
 

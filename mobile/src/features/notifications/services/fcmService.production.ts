@@ -105,7 +105,11 @@ class FCMService {
    * Android: Automatically granted (API < 33)
    */
   async requestPermission(): Promise<boolean> {
-    if (!messaging || isExpoGo) return false;
+    // Expo Go'da FCM çalışmadığı için true döndür (geliştirme modu)
+    if (!messaging || isExpoGo) {
+      console.log('[FCM] Expo Go - returning true for development');
+      return true;
+    }
 
     try {
       const authStatus = await messaging().requestPermission();
@@ -128,7 +132,11 @@ class FCMService {
    * Check current permission status
    */
   async checkPermission(): Promise<boolean> {
-    if (!messaging || isExpoGo) return false;
+    // Expo Go'da FCM çalışmadığı için true döndür (geliştirme modu)
+    if (!messaging || isExpoGo) {
+      console.log('[FCM] Expo Go - returning true for development');
+      return true;
+    }
 
     try {
       const authStatus = await messaging().hasPermission();

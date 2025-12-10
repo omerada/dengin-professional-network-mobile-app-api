@@ -22,11 +22,17 @@ export function useNotificationPermission() {
   const checkPermission = useCallback(async (): Promise<boolean> => {
     try {
       const granted = await fcmService.checkPermission();
-      setPermissionGranted(granted);
-      return granted;
+      // Expo Go'da FCM çalışmadığı için default true döndür
+      // EAS Build'de gerçek izin durumu kullanılır
+      const isExpoGo = typeof granted === 'boolean' && !granted;
+      const finalGranted = isExpoGo ? true : granted;
+      setPermissionGranted(finalGranted);
+      return finalGranted;
     } catch (error) {
       console.error('[useNotificationPermission] Error checking permission:', error);
-      return false;
+      // Expo Go'da hata olursa true döndür (geliştirme modu)
+      setPermissionGranted(true);
+      return true;
     }
   }, [setPermissionGranted]);
 

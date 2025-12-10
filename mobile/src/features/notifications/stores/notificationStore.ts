@@ -38,7 +38,8 @@ export const useNotificationStore = create<NotificationStoreState>()(
       unreadByType: {} as Record<string, number>,
       preferences: defaultPreferences,
       fcmToken: null,
-      isPermissionGranted: false,
+      // Default true for Expo Go development, will be checked on mount
+      isPermissionGranted: true,
       isLoading: false,
       error: null,
 

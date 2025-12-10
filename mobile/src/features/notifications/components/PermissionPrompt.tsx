@@ -32,14 +32,14 @@ export const PermissionPrompt: React.FC<PermissionPromptProps> = memo(
         statusBarTranslucent
         onRequestClose={onDismiss}>
         <Animated.View
-          entering={FadeIn.duration(200)}
-          exiting={FadeOut.duration(150)}
+          entering={FadeIn.duration(150)}
+          exiting={FadeOut.duration(100)}
           style={styles.overlay}>
           <Pressable style={styles.backdrop} onPress={onDismiss} />
 
           <Animated.View
-            entering={SlideInDown.springify().damping(15)}
-            exiting={SlideOutDown.duration(200)}
+            entering={SlideInDown.duration(250)}
+            exiting={SlideOutDown.duration(150)}
             style={[styles.content, { backgroundColor: colors.background.secondary }]}>
             <View style={[styles.iconContainer, { backgroundColor: colors.interactive.subtle }]}>
               <Icon name="notifications" size={40} color={colors.interactive.default} />
