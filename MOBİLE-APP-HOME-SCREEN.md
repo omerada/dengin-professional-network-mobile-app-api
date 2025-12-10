@@ -501,13 +501,13 @@ FeedScreen (Ana Container)
 
 ```
 ┌──────────────────────────────────────┐
-│ [Meslek İkonu]  Ana Sayfa      [🔔] │
+│ [Sektör İkonu]  Ana Sayfa      [🔔] │
 └──────────────────────────────────────┘
 ```
 
 **Özellik:**
 
-- Sol: Kullanıcının mesleğine özel dinamik ikon
+- Sol: Kullanıcının sektörüne özel dinamik ikon
 - Orta: "Ana Sayfa" başlığı - basit ve net
 - Sağ: Bildirim ikonu (varsa okunmamış sayısı badge ile)
 
@@ -520,18 +520,6 @@ interface FeedHeaderProps {
   onNotificationPress: () => void;
   userProfession?: Profession; // Kullanıcının mesleği
 }
-
-// Profession Icon Mapping
-const PROFESSION_ICONS: Record<ProfessionCategory, string> = {
-  MEDICAL: "medical", // 🏥 Sağlık - Steteskop ikonu
-  LEGAL: "scale", // ⚖️ Hukuk - Terazi ikonu
-  ENGINEERING: "construct", // 🔧 Mühendislik - İnşaat/araç ikonu
-  EDUCATION: "school", // 🎓 Eğitim - Mezuniyet şapkası
-  SERVICE: "briefcase", // 💼 Hizmet Sektörü - Çanta ikonu
-  CREATIVE: "color-palette", // 🎨 Yaratıcı Sektör - Palet ikonu
-  BUSINESS: "trending-up", // 📈 İş Dünyası - Grafik ikonu
-  OTHER: "people", // 👥 Diğer - İnsan ikonu
-};
 
 // FeedHeader Implementation
 export const FeedHeader: React.FC<FeedHeaderProps> = ({
@@ -714,14 +702,14 @@ const styles = StyleSheet.create({
 </View>
 ```
 
-**Meslek İkonu Özellikleri:**
+**Sektör İkonu Özellikleri:**
 
-- **Dinamik:** Kullanıcının mesleğine göre otomatik değişir
+- **Dinamik:** Kullanıcının sektörüne göre otomatik değişir
 - **Renkli:** Her meslek kategorisinin kendine özel rengi vardır
 - **Tıklanabilir:** İkona tıklayarak meslek detayları görülebilir
 - **Subtitle:** Ortada meslek adı alt başlık olarak gösterilir
 
-**Meslek İkon Haritası:**
+**Sektör İkon Haritası:**
 
 | Meslek Kategorisi | İkon                 | Renk               | Açıklama                   |
 | ----------------- | -------------------- | ------------------ | -------------------------- |
@@ -736,7 +724,7 @@ const styles = StyleSheet.create({
 
 **Kullanıcı Deneyimi:**
 
-1. **İlk Açılış:** Kullanıcı mesleğini seçtiğinde, header'da mesleğine özel ikon belirir
+1. **İlk Açılış:** Kullanıcı sektör seçtiğinde, header'da sektörüne özel ikon belirir
 2. **Meslek Değişikliği:** İkona tıklayarak meslek bilgilerini görüntüleyebilir
 3. **Görsel Tanıma:** Renk ve ikon sayesinde hangi meslek topluluğunda olduğunu anında bilir
 4. **Çoklu Meslek:** Kullanıcı birden fazla mesleğe sahipse, aktif meslek ikonu gösterilir
