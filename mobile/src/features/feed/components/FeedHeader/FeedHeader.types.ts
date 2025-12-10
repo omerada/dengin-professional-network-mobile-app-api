@@ -39,8 +39,12 @@ export type ProfessionInfo = SectorInfo;
 export interface FeedHeaderProps {
   /** Sector info (for sector icon) - Updated from profession to sector (Sprint 1) */
   sector?: SectorInfo;
+  /** Number of unread notifications */
+  unreadNotifications?: number;
   /** Callback when sector icon is pressed */
   onSectorPress?: () => void;
+  /** Callback when notification icon is pressed */
+  onNotificationPress?: () => void;
   /** Test ID */
   testID?: string;
 

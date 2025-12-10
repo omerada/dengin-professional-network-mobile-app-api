@@ -19,6 +19,10 @@ export { FeedSkeleton, PostSkeleton } from './FeedSkeleton';
 export { FeedHeader } from './FeedHeader/index';
 export type { FeedHeaderProps, ProfessionInfo } from './FeedHeader/FeedHeader.types';
 
+// FilterBar modular structure
+export { FilterBar } from './FilterBar';
+export type { FilterBarProps } from './FilterBar';
+
 // EmptyFeed modular structure
 export { EmptyFeed } from './EmptyFeed';
 

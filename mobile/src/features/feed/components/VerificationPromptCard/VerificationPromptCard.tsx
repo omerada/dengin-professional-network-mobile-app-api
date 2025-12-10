@@ -62,19 +62,21 @@ export const VerificationPromptCard: React.FC<VerificationPromptCardProps> = mem
           end={{ x: 1, y: 1 }}
           style={styles.gradientContainer}>
           <View style={styles.content}>
-            {/* Icon: 🎓 School */}
-            <Icon name="school" size={32} color={colors.text.inverse} style={styles.icon} />
+            {/* Icon: 🎓 Shield Checkmark */}
+            <View style={styles.iconContainer}>
+              <Icon name="shield-checkmark" size={40} color={colors.text.inverse} />
+            </View>
 
             {/* Title */}
             <Text style={[styles.title, { color: colors.text.inverse }]}>Mesleğini Doğrula</Text>
 
             {/* Subtitle */}
             <Text style={[styles.subtitle, { color: colors.text.inverse }]}>
-              Uzman rozeti kazan ve topluluğa güvenilir üye olarak katıl.
+              Uzman rozeti kazan, güvenilirliğini artır ve toplulukta öne çık.
             </Text>
 
             {/* CTA Button */}
-            <Animated.View entering={SlideInUp.delay(100).springify()} style={{ width: '100%' }}>
+            <Animated.View entering={SlideInUp.delay(100).springify()}>
               <Pressable
                 style={[styles.button, { backgroundColor: colors.background.primary }]}
                 onPress={handlePress}
@@ -82,8 +84,9 @@ export const VerificationPromptCard: React.FC<VerificationPromptCardProps> = mem
                 accessibilityLabel="Doğrulamaya başla"
                 accessibilityHint="Meslek doğrulama sürecini başlatmak için dokun">
                 <Text style={[styles.buttonText, { color: colors.interactive.default }]}>
-                  Doğrulamaya Başla
+                  Hemen Başla
                 </Text>
+                <Icon name="arrow-forward" size={18} color={colors.interactive.default} />
               </Pressable>
             </Animated.View>
           </View>

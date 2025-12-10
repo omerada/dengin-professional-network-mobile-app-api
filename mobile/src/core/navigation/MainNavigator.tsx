@@ -19,8 +19,10 @@ import { FeedScreen } from '@features/feed/screens/FeedScreen';
 import { PostDetailScreen } from '@features/feed/screens/PostDetailScreen';
 import { CreatePostScreen } from '@features/feed/screens/CreatePostScreen';
 import { CommentsScreen } from '@features/feed/screens/CommentsScreen';
+import { NotificationsScreen } from '@features/notifications/screens/NotificationsScreen';
 import { ConversationListScreen } from '@features/messaging/screens/ConversationListScreen';
 import { ChatScreen } from '@features/messaging/screens/ChatScreen';
+import { ActivityScreen } from '@features/activity/screens/ActivityScreen';
 import { ProfileScreen } from '@features/profile/screens/ProfileScreen';
 import { EditProfileScreen } from '@features/profile/screens/EditProfileScreen';
 import { SettingsScreen } from '@features/profile/screens/SettingsScreen';
@@ -51,6 +53,13 @@ const TAB_CONFIG: TabItem[] = [
     focusedIcon: 'add-circle',
     accessibilityLabel: 'Gönderi oluştur',
     isCenterFab: true, // Elevated center button
+  },
+  {
+    name: 'ActivityTab',
+    label: 'Etkinlik',
+    icon: 'trophy-outline',
+    focusedIcon: 'trophy',
+    accessibilityLabel: 'Etkinlik sekmesi',
   },
   {
     name: 'ProfileTab',
@@ -85,6 +94,7 @@ const FeedStackNavigator: React.FC = () => (
       options={{ presentation: 'modal', gestureEnabled: true }}
     />
     <FeedStack.Screen name="Comments" component={CommentsScreen} />
+    <FeedStack.Screen name="Notifications" component={NotificationsScreen} />
   </FeedStack.Navigator>
 );
 
@@ -164,6 +174,7 @@ export const MainNavigator: React.FC = () => {
           },
         })}
       />
+      <Tab.Screen name="ActivityTab" component={ActivityScreen} />
       <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} />
     </Tab.Navigator>
   );

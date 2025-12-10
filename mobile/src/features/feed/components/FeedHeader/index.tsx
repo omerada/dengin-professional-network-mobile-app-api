@@ -2,101 +2,54 @@
 // Meslektaş Design System - Modern FeedHeader Component
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
-import React, { memo, useCallback } from 'react';
-import { Pressable, ScrollView, Text } from 'react-native';
+import React, { memo } from 'react';
+import { View, Text, Pressable } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
-import { useFeedStore } from '../../stores';
-import type { FeedFilter } from '../../types';
 
 import { styles } from './FeedHeader.styles';
-import { FILTER_OPTIONS, type FeedHeaderProps, type FilterOption } from './FeedHeader.types';
+import type { FeedHeaderProps } from './FeedHeader.types';
 import { ProfessionIcon } from './ProfessionIcon';
 
 /**
  * Modern FeedHeader Component
  *
  * Features:
- * - Sector icon (left side, dynamic & colorful) - Updated from profession to sector (Sprint 1)
- * - Horizontal scrollable filter chips
- * - Animated filter selection
- * - Spring-based button animations
+ * - Sector icon (left side, dynamic & colorful)
+ * - "Ana Sayfa" title (center) with optional profession subtitle
+ * - Notification icon with badge (right side)
  * - Haptic feedback on interactions
+ *
+ * Design: MOBILE-APP-HOME-SCREEN.md Lines 512-680
  *
  * @example
  * ```tsx
  * <FeedHeader
  *   sector={{ name: 'Sağlık', code: 'MEDICAL' }}
+ *   unreadNotifications={3}
  *   onSectorPress={() => navigation.navigate('SectorDetail')}
- *   onCreatePress={() => navigation.navigate('CreatePost')}
+ *   onNotificationPress={() => navigation.navigate('Notifications')}
  * />
  * ```
  */
 export const FeedHeader: React.FC<FeedHeaderProps> = memo(
-  ({ sector, profession, onSectorPress, onProfessionPress, testID }) => {
+  ({
+    sector,
+    profession,
+    unreadNotifications = 0,
+    onSectorPress,
+    onProfessionPress,
+    onNotificationPress,
+    testID,
+  }) => {
     // Backward compatibility: use profession if sector not provided
     const displaySector = sector || profession;
     const handleSectorPress = onSectorPress || onProfessionPress;
     const colors = useColors();
     const { trigger } = useHaptic();
-
-    // Store state
-    const filter = useFeedStore(state => state.filter);
-    const setFilter = useFeedStore(state => state.setFilter);
-
-    // Handle filter press
-    const handleFilterPress = useCallback(
-      (filterKey: FeedFilter) => {
-        if (filterKey !== filter) {
-          trigger('selection');
-          setFilter(filterKey);
-        }
-      },
-      [filter, setFilter, trigger],
-    );
-
-    // Render filter chip
-    const renderFilterChip = useCallback(
-      (option: FilterOption, index: number) => {
-        const isActive = filter === option.key;
-
-        return (
-          <Animated.View key={option.key} entering={FadeIn.delay(index * 50).duration(200)}>
-            <Pressable
-              style={[
-                styles.filterButton,
-                {
-                  backgroundColor: isActive
-                    ? colors.interactive.default
-                    : colors.background.secondary,
-                },
-              ]}
-              onPress={() => handleFilterPress(option.key)}
-              accessibilityRole="button"
-              accessibilityState={{ selected: isActive }}
-              accessibilityLabel={`${option.label} filtresi`}>
-              <Icon
-                name={option.icon}
-                size={16}
-                color={isActive ? colors.text.inverse : colors.text.secondary}
-                style={styles.filterIcon}
-              />
-              <Text
-                style={[
-                  styles.filterLabel,
-                  { color: isActive ? colors.text.inverse : colors.text.secondary },
-                ]}>
-                {option.label}
-              </Text>
-            </Pressable>
-          </Animated.View>
-        );
-      },
-      [filter, colors, handleFilterPress],
-    );
 
     return (
       <Animated.View
@@ -109,23 +62,58 @@ export const FeedHeader: React.FC<FeedHeaderProps> = memo(
           },
         ]}
         testID={testID}>
-        {/* Sector icon - Updated from profession icon (Sprint 1) */}
-        {displaySector && (
-          <ProfessionIcon
-            category={displaySector.code as any}
-            name={displaySector.name}
-            onPress={handleSectorPress}
-            testID={`${testID}-sector-icon`}
-          />
-        )}
+        {/* Left: Sector Icon */}
+        <View style={styles.leftSection}>
+          {displaySector ? (
+            <ProfessionIcon
+              category={displaySector.code as any}
+              name={displaySector.name}
+              onPress={handleSectorPress}
+              testID={`${testID}-sector-icon`}
+            />
+          ) : (
+            <Pressable
+              onPress={handleSectorPress}
+              style={styles.professionIconContainer}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <Icon name="people" size={28} color={colors.interactive.default} />
+            </Pressable>
+          )}
+        </View>
 
-        {/* Filter chips */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filters}>
-          {FILTER_OPTIONS.map((option, index) => renderFilterChip(option, index))}
-        </ScrollView>
+        {/* Center: Title */}
+        <View style={styles.centerSection}>
+          <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Ana Sayfa</Text>
+          {displaySector && (
+            <Text style={[styles.professionSubtitle, { color: colors.text.secondary }]}>
+              {displaySector.name}
+            </Text>
+          )}
+        </View>
+
+        {/* Right: Notification Icon with Badge */}
+        <View style={styles.rightSection}>
+          <Pressable
+            onPress={() => {
+              trigger('light');
+              onNotificationPress?.();
+            }}
+            style={styles.iconButton}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel={`Bildirimler ${unreadNotifications > 0 ? `, ${unreadNotifications} okunmamış` : ''}`}>
+            <Icon name="notifications-outline" size={24} color={colors.text.primary} />
+            {unreadNotifications > 0 && (
+              <Animated.View
+                entering={FadeIn.duration(200)}
+                style={[styles.badge, { backgroundColor: colors.error.main }]}>
+                <Text style={styles.badgeText}>
+                  {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                </Text>
+              </Animated.View>
+            )}
+          </Pressable>
+        </View>
       </Animated.View>
     );
   },

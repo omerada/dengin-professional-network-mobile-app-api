@@ -8,25 +8,40 @@ export const styles = StyleSheet.create({
   container: {
     marginHorizontal: 16,
     marginVertical: 8,
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 1,
-    padding: 16,
+    padding: 20,
   },
 
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
 
-  icon: {
-    marginRight: 8,
+  iconContainer: {
+    alignItems: 'center',
+    borderRadius: 10,
+    height: 40,
+    justifyContent: 'center',
+    marginRight: 12,
+    width: 40,
+  },
+
+  headerTextContainer: {
+    flex: 1,
   },
 
   title: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+    marginBottom: 2,
+  },
+
+  subtitle: {
+    fontSize: 12,
+    fontWeight: '500',
   },
 
   trendList: {
@@ -34,23 +49,23 @@ export const styles = StyleSheet.create({
   },
 
   trendItem: {
+    alignItems: 'flex-start',
+    borderRadius: 10,
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderRadius: 8,
+    paddingVertical: 12,
   },
 
   trendNumber: {
-    width: 24,
-    fontSize: 14,
-    fontWeight: '600',
-    marginRight: 8,
+    fontSize: 16,
+    fontWeight: '700',
+    marginRight: 12,
+    width: 28,
   },
 
   trendText: {
     flex: 1,
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 15,
+    lineHeight: 22,
   },
 
   moreButton: {

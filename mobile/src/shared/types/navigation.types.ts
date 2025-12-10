@@ -38,6 +38,7 @@ export type MainTabParamList = {
   FeedTab: NavigatorScreenParams<FeedStackParamList>;
   MessagingTab: NavigatorScreenParams<MessagingStackParamList>;
   CreatePostTab: undefined;
+  ActivityTab: undefined;
   NotificationsTab: NavigatorScreenParams<NotificationsStackParamList>;
   ProfileTab: NavigatorScreenParams<ProfileStackParamList>;
 };
@@ -51,6 +52,7 @@ export type FeedStackParamList = {
   CreatePost: undefined;
   UserProfile: { userId: number }; // Backend API: userId: number
   Comments: { postId: number }; // Backend API: postId: number
+  Notifications: undefined; // Bildirimler ekranı
 };
 
 /**

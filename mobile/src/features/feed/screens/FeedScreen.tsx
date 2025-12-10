@@ -12,7 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
 import { useFeedPosts, useLikePost, useBookmarkPost, useDeletePost } from '../hooks';
-import { PostCard, FeedHeader, EmptyFeed, FeedSkeleton } from '../components';
+import { PostCard, FeedHeader, FilterBar, EmptyFeed, FeedSkeleton } from '../components';
 import { VerificationPromptCard } from '../components/VerificationPromptCard';
 import { AITrendInsightCard } from '../components/AITrendInsightCard';
 import { SuggestedExpertsCarousel } from '../components/SuggestedExpertsCarousel';
@@ -300,8 +300,15 @@ export const FeedScreen: React.FC = memo(() => {
                 }
               : undefined
           }
+          unreadNotifications={0} // TODO: Get from notifications store/API
           onSectorPress={() => console.log('Sector detail pressed')}
+          onNotificationPress={() => {
+            // @ts-expect-error - Notifications route navigation
+            navigation.navigate('Notifications');
+          }}
         />
+        {/* Filter Bar - Separate from header per design spec */}
+        <FilterBar />
         {/* Show verification prompt for unverified users */}
         {user?.verificationStatus !== 'APPROVED' && (
           <VerificationPromptCard

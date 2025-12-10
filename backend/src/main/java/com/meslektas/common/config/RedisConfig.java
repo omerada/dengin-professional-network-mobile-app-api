@@ -74,6 +74,19 @@ public class RedisConfig {
      */
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+        // Configure ObjectMapper with JSR310 support for cache serialization
+        ObjectMapper cacheObjectMapper = new ObjectMapper();
+        cacheObjectMapper.registerModule(new JavaTimeModule());
+        cacheObjectMapper.findAndRegisterModules();
+        cacheObjectMapper.activateDefaultTyping(
+            LaissezFaireSubTypeValidator.instance,
+            ObjectMapper.DefaultTyping.NON_FINAL,
+            JsonTypeInfo.As.PROPERTY
+        );
+        
+        GenericJackson2JsonRedisSerializer cacheSerializer = 
+            new GenericJackson2JsonRedisSerializer(cacheObjectMapper);
+        
         // Default cache configuration
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
             .entryTtl(Duration.ofMinutes(10))
@@ -81,9 +94,7 @@ public class RedisConfig {
                 RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer())
             )
             .serializeValuesWith(
-                RedisSerializationContext.SerializationPair.fromSerializer(
-                    new GenericJackson2JsonRedisSerializer()
-                )
+                RedisSerializationContext.SerializationPair.fromSerializer(cacheSerializer)
             )
             .disableCachingNullValues();
 

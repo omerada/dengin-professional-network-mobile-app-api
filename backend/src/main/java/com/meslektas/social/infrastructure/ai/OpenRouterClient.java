@@ -72,7 +72,7 @@ public class OpenRouterClient {
     @Cacheable(
         value = "openrouter-responses",
         key = "#systemPrompt + ':' + #userPrompt",
-        condition = "#root.target.config.cacheEnabled"
+        condition = "@openRouterConfig.cacheEnabled"
     )
     public String chatCompletion(String systemPrompt, String userPrompt, int maxTokens) {
         log.debug("OpenRouter request - System: {}, User: {}", 

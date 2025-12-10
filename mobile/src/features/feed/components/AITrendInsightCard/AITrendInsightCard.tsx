@@ -97,11 +97,6 @@ export const AITrendInsightCard: React.FC<AITrendInsightCardProps> = memo(
       onMorePress?.();
     }, [onMorePress, trigger]);
 
-    // Don't render if no profession category
-    if (!professionCategory) {
-      return null;
-    }
-
     // Loading state
     if (isLoading) {
       return (
@@ -143,13 +138,14 @@ export const AITrendInsightCard: React.FC<AITrendInsightCardProps> = memo(
         testID={testID}>
         {/* Header */}
         <View style={styles.header}>
-          <Icon
-            name="bulb-outline"
-            size={28}
-            color={colors.interactive.default}
-            style={styles.icon}
-          />
-          <Text style={[styles.title, { color: colors.text.primary }]}>{cardTitle}</Text>
+          <View
+            style={[styles.iconContainer, { backgroundColor: colors.interactive.default + '15' }]}>
+            <Icon name="trending-up" size={20} color={colors.interactive.default} />
+          </View>
+          <View style={styles.headerTextContainer}>
+            <Text style={[styles.title, { color: colors.text.primary }]}>{cardTitle}</Text>
+            <Text style={[styles.subtitle, { color: colors.text.tertiary }]}>AI ile üretildi</Text>
+          </View>
         </View>
 
         {/* Trend List */}

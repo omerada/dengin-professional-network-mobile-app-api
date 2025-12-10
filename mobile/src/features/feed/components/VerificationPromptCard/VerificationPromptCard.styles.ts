@@ -5,50 +5,57 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
+  button: {
+    alignItems: 'center',
+    borderRadius: 14,
+    flexDirection: 'row',
+    gap: 8,
+    height: 52,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+
   container: {
     marginHorizontal: 16,
     marginVertical: 12,
   },
 
-  gradientContainer: {
-    borderRadius: 16,
-    padding: 20,
-    paddingVertical: 20,
-    overflow: 'hidden',
-  },
-
   content: {
     alignItems: 'center',
+    paddingHorizontal: 4,
   },
 
-  icon: {
-    marginBottom: 12,
+  gradientContainer: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    padding: 24,
   },
 
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: 8,
+  iconContainer: {
+    marginBottom: 16,
+    opacity: 0.95,
   },
 
   subtitle: {
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 21,
+    marginBottom: 24,
+    opacity: 0.9,
+    paddingHorizontal: 4,
     textAlign: 'center',
-    marginBottom: 16,
   },
 
-  button: {
-    width: '100%',
-    height: 48,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  buttonText: {
-    fontSize: 15,
-    fontWeight: '600',
+  title: {
+    fontSize: 20,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+    marginBottom: 12,
+    textAlign: 'center',
   },
 });

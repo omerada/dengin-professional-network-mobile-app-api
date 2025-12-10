@@ -21,14 +21,13 @@ import type { ProfessionCategory } from '@shared/types';
  */
 export function useAITrends(category: ProfessionCategory | undefined) {
   return useQuery({
-    queryKey: ['ai-trends', category],
+    queryKey: ['ai-trends', category || 'general'],
     queryFn: () => {
-      if (!category) {
-        throw new Error('Profession category is required');
-      }
-      return getTrendsByProfession(category);
+      // Use 'OTHER' category as fallback for general trends
+      const categoryToFetch = category || 'OTHER';
+      return getTrendsByProfession(categoryToFetch);
     },
-    enabled: !!category,
+    enabled: true, // Always enabled, use OTHER as fallback
     staleTime: 60 * 60 * 1000, // 1 hour (matches backend cache)
     gcTime: 2 * 60 * 60 * 1000, // 2 hours
     retry: 2,
