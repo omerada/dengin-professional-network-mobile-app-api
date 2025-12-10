@@ -2,8 +2,8 @@
 // Production-ready Firebase Cloud Messaging implementation
 // Industry standard push notifications for React Native
 
-import messaging, { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 import { apiClient } from '@core/api/client';
 import { API_ENDPOINTS } from '@core/api/endpoints';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -15,6 +15,22 @@ import type {
 } from '../types';
 
 const FCM_TOKEN_KEY = '@meslektas/fcm_token';
+const isExpoGo = Constants.appOwnership === 'expo';
+
+// Firebase types
+type RemoteMessage = any;
+
+// Lazy load Firebase Messaging to avoid crashes in Expo Go
+let messaging: any = null;
+
+if (!isExpoGo) {
+  try {
+    const firebaseMessaging = require('@react-native-firebase/messaging');
+    messaging = firebaseMessaging.default;
+  } catch (error) {
+    console.log('[FCM] Firebase not available - running in Expo Go');
+  }
+}
 
 /**
  * Firebase Cloud Messaging Service
@@ -43,44 +59,54 @@ class FCMService {
    * Request permissions, get token, register with backend
    */
   async initialize(): Promise<string | null> {
+    if (!messaging || isExpoGo) {
+      console.log('[FCM] Skipping initialization - Expo Go or Firebase unavailable');
+      return null;
+    }
+
     try {
-      // Request permissions
+      console.log('[FCM] Initializing...');
+
+      // Request permission
       const hasPermission = await this.requestPermission();
       if (!hasPermission) {
-        console.warn('[FCM] Notification permissions not granted');
+        console.log('[FCM] Permission denied');
         return null;
       }
 
       // Get FCM token
       const token = await this.getToken();
       if (!token) {
-        console.error('[FCM] Failed to get FCM token');
+        console.log('[FCM] Failed to get token');
         return null;
       }
 
-      // Register token with backend
+      this.fcmToken = token;
+      console.log('[FCM] Token obtained');
+
+      // Register with backend
       await this.sendTokenToServer(token);
 
-      // Setup token refresh listener
+      // Setup listeners
       this.setupTokenRefreshListener();
-
-      // Setup message handlers
       this.setupMessageHandlers();
 
-      console.log('[FCM] Initialized successfully');
+      console.log('[FCM] Initialization complete');
       return token;
     } catch (error) {
-      console.error('[FCM] Initialization error:', error);
+      console.error('[FCM] Initialization failed:', error);
       return null;
     }
   }
 
   /**
-   * Request notification permissions
-   * iOS: Shows system permission dialog
-   * Android: Granted by default (can be revoked in settings)
+   * Request notification permission
+   * iOS: Shows native permission dialog
+   * Android: Automatically granted (API < 33)
    */
   async requestPermission(): Promise<boolean> {
+    if (!messaging || isExpoGo) return false;
+
     try {
       const authStatus = await messaging().requestPermission();
       const enabled =
@@ -88,22 +114,22 @@ class FCMService {
         authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
       if (enabled) {
-        console.log('[FCM] Notification permissions granted:', authStatus);
-      } else {
-        console.warn('[FCM] Notification permissions denied:', authStatus);
+        console.log('[FCM] Permission granted:', authStatus);
       }
 
       return enabled;
     } catch (error) {
-      console.error('[FCM] Error requesting permissions:', error);
+      console.error('[FCM] Permission request failed:', error);
       return false;
     }
   }
 
   /**
-   * Check if permissions are granted
+   * Check current permission status
    */
   async checkPermission(): Promise<boolean> {
+    if (!messaging || isExpoGo) return false;
+
     try {
       const authStatus = await messaging().hasPermission();
       return (
@@ -111,68 +137,67 @@ class FCMService {
         authStatus === messaging.AuthorizationStatus.PROVISIONAL
       );
     } catch (error) {
-      console.error('[FCM] Error checking permissions:', error);
+      console.error('[FCM] Permission check failed:', error);
       return false;
     }
   }
 
   /**
-   * Get FCM token
-   * Returns cached token if available, otherwise requests new token
+   * Get FCM registration token
+   * Used to send notifications to this device
    */
   async getToken(): Promise<string | null> {
+    if (!messaging || isExpoGo) return null;
+
     try {
       // Check cached token
-      if (this.fcmToken) {
-        return this.fcmToken;
+      const cachedToken = await AsyncStorage.getItem(FCM_TOKEN_KEY);
+      if (cachedToken) {
+        console.log('[FCM] Using cached token');
+        return cachedToken;
       }
 
-      // Check stored token
-      const storedToken = await AsyncStorage.getItem(FCM_TOKEN_KEY);
-      if (storedToken) {
-        this.fcmToken = storedToken;
-        return storedToken;
-      }
-
-      // Get new token from FCM
+      // Get new token
       const token = await messaging().getToken();
+
       if (token) {
-        this.fcmToken = token;
         await AsyncStorage.setItem(FCM_TOKEN_KEY, token);
-        console.log('[FCM] Token obtained:', token.substring(0, 20) + '...');
-        return token;
+        console.log('[FCM] New token obtained');
       }
 
-      console.warn('[FCM] No token received from FCM');
-      return null;
+      return token;
     } catch (error) {
-      console.error('[FCM] Error getting token:', error);
+      console.error('[FCM] Failed to get token:', error);
       return null;
     }
   }
 
   /**
    * Delete FCM token
-   * Called on logout to stop receiving notifications
+   * Call this on logout
    */
   async deleteToken(): Promise<void> {
+    if (!messaging || isExpoGo) return;
+
     try {
       await messaging().deleteToken();
-      this.fcmToken = null;
       await AsyncStorage.removeItem(FCM_TOKEN_KEY);
+      this.fcmToken = null;
       console.log('[FCM] Token deleted');
     } catch (error) {
-      console.error('[FCM] Error deleting token:', error);
+      console.error('[FCM] Failed to delete token:', error);
     }
   }
 
   /**
    * Setup token refresh listener
-   * FCM tokens can be refreshed by the system
+   * Tokens can be refreshed by FCM
    */
-  private setupTokenRefreshListener(): void {
-    this.unsubscribeTokenRefresh = messaging().onTokenRefresh(async token => {
-      console.log('[FCM] Token refreshed:', token.substring(0, 20) + '...');
+  setupTokenRefreshListener(): void {
+    if (!messaging || isExpoGo) return;
+
+    this.unsubscribeTokenRefresh = messaging().onTokenRefresh(async (token: string) => {
+      console.log('[FCM] Token refreshed');
       this.fcmToken = token;
       await AsyncStorage.setItem(FCM_TOKEN_KEY, token);
       await this.sendTokenToServer(token);
@@ -180,48 +205,44 @@ class FCMService {
   }
 
   /**
-   * Setup foreground message handler
-   * Called when app is in foreground
+   * Setup foreground message handlers
+   * Background messages handled in index.js
    */
-  private setupMessageHandlers(): void {
+  setupMessageHandlers(): void {
+    if (!messaging || isExpoGo) return;
+
     // Foreground messages
-    this.unsubscribeMessageHandler = messaging().onMessage(async remoteMessage => {
+    this.unsubscribeMessageHandler = messaging().onMessage(async (remoteMessage: RemoteMessage) => {
       console.log('[FCM] Foreground message received:', remoteMessage);
 
-      // Display notification manually when app is in foreground
-      // You can use react-native-notifications or expo-notifications for this
-      // For now, just log it
-      if (remoteMessage.notification) {
-        console.log('[FCM] Notification:', remoteMessage.notification.title);
-      }
+      // Display local notification if needed
+      // Notification is automatically displayed by FCM
+      // Only data-only messages need manual handling
     });
-
-    // Background/Quit state messages are handled by setBackgroundMessageHandler
-    // This must be registered at the top level (index.js)
   }
 
   /**
-   * Get platform identifier for backend
+   * Get device platform
    */
-  private getPlatform(): DevicePlatform {
+  getPlatform(): DevicePlatform {
     return Platform.OS === 'ios' ? 'IOS' : 'ANDROID';
   }
 
   /**
    * Get device name
    */
-  private getDeviceName(): string {
-    return `${Platform.OS} ${Platform.Version}`;
+  getDeviceName(): string {
+    return `${Platform.OS === 'ios' ? 'iPhone' : 'Android'} ${Platform.Version}`;
   }
 
   /**
    * Register device token with backend
-   * POST /api/devices/register
+   * POST /api/notifications/devices/register
    */
   async sendTokenToServer(token: string): Promise<void> {
     try {
       const request: RegisterDeviceRequest = {
-        token,
+        token: token,
         platform: this.getPlatform(),
         deviceName: this.getDeviceName(),
       };
@@ -231,56 +252,74 @@ class FCMService {
         request,
       );
 
-      console.log('[FCM] Device registered with backend:', response.data);
+      console.log('[FCM] Token registered with backend:', response.data.id);
     } catch (error) {
-      console.error('[FCM] Error registering device:', error);
-      throw error;
+      console.error('[FCM] Failed to register token with backend:', error);
+      // Don't throw - token is still valid locally
     }
   }
 
   /**
-   * Unregister device from backend
-   * POST /api/devices/unregister
+   * Unregister device token from backend
+   * DELETE /api/notifications/devices/unregister
    */
-  async unregisterDevice(): Promise<void> {
+  async removeTokenFromServer(): Promise<void> {
+    if (!this.fcmToken) return;
+
     try {
-      const token = await this.getToken();
-      if (!token) {
-        console.warn('[FCM] No token to unregister');
-        return;
-      }
+      const request: UnregisterDeviceRequest = {
+        token: this.fcmToken,
+      };
 
-      const request: UnregisterDeviceRequest = { token };
-      await apiClient.post(API_ENDPOINTS.NOTIFICATIONS.UNREGISTER_DEVICE, request);
+      await apiClient.delete(API_ENDPOINTS.NOTIFICATIONS.UNREGISTER_DEVICE, {
+        data: request,
+      });
 
-      console.log('[FCM] Device unregistered from backend');
+      console.log('[FCM] Token unregistered from backend');
     } catch (error) {
-      console.error('[FCM] Error unregistering device:', error);
+      console.error('[FCM] Failed to unregister token from backend:', error);
     }
   }
 
   /**
-   * Unregister all devices for current user
-   * POST /api/devices/unregister-all
+   * Get initial notification (app opened from quit state)
    */
-  async unregisterAllDevices(): Promise<void> {
+  async getInitialNotification(): Promise<RemoteMessage | null> {
+    if (!messaging || isExpoGo) return null;
+
     try {
-      await apiClient.post(API_ENDPOINTS.NOTIFICATIONS.UNREGISTER_ALL_DEVICES);
-      console.log('[FCM] All devices unregistered');
+      const remoteMessage = await messaging().getInitialNotification();
+      return remoteMessage;
     } catch (error) {
-      console.error('[FCM] Error unregistering all devices:', error);
+      console.error('[FCM] Failed to get initial notification:', error);
+      return null;
     }
   }
 
   /**
-   * Subscribe to topic (for broadcast notifications)
+   * Set up listener for notification opened from background
+   */
+  onNotificationOpened(handler: (remoteMessage: RemoteMessage) => void): () => void {
+    if (!messaging || isExpoGo) return () => {};
+
+    return messaging().onNotificationOpenedApp((remoteMessage: RemoteMessage) => {
+      console.log('[FCM] Notification opened app from background:', remoteMessage);
+      handler(remoteMessage);
+    });
+  }
+
+  /**
+   * Subscribe to topic
+   * Topics allow sending notifications to groups of devices
    */
   async subscribeToTopic(topic: string): Promise<void> {
+    if (!messaging || isExpoGo) return;
+
     try {
       await messaging().subscribeToTopic(topic);
-      console.log('[FCM] Subscribed to topic:', topic);
+      console.log(`[FCM] Subscribed to topic: ${topic}`);
     } catch (error) {
-      console.error('[FCM] Error subscribing to topic:', error);
+      console.error(`[FCM] Failed to subscribe to topic ${topic}:`, error);
     }
   }
 
@@ -288,82 +327,48 @@ class FCMService {
    * Unsubscribe from topic
    */
   async unsubscribeFromTopic(topic: string): Promise<void> {
+    if (!messaging || isExpoGo) return;
+
     try {
       await messaging().unsubscribeFromTopic(topic);
-      console.log('[FCM] Unsubscribed from topic:', topic);
+      console.log(`[FCM] Unsubscribed from topic: ${topic}`);
     } catch (error) {
-      console.error('[FCM] Error unsubscribing from topic:', error);
+      console.error(`[FCM] Failed to unsubscribe from topic ${topic}:`, error);
     }
   }
 
   /**
-   * Get notification that opened the app (if any)
-   * Called when app is opened from notification
-   */
-  async getInitialNotification(): Promise<FirebaseMessagingTypes.RemoteMessage | null> {
-    try {
-      const remoteMessage = await messaging().getInitialNotification();
-      if (remoteMessage) {
-        console.log('[FCM] App opened from notification:', remoteMessage);
-      }
-      return remoteMessage;
-    } catch (error) {
-      console.error('[FCM] Error getting initial notification:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Setup notification opened listener
-   * Called when user taps on notification
-   */
-  onNotificationOpened(
-    callback: (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => void,
-  ): () => void {
-    return messaging().onNotificationOpenedApp(remoteMessage => {
-      console.log('[FCM] Notification opened app:', remoteMessage);
-      callback(remoteMessage);
-    });
-  }
-
-  /**
-   * Get badge count (iOS only)
-   */
-  async getBadgeCount(): Promise<number> {
-    if (Platform.OS !== 'ios') {
-      return 0;
-    }
-
-    try {
-      // @ts-ignore - iOS only method
-      const count = await messaging().getAPNSToken();
-      return typeof count === 'number' ? count : 0;
-    } catch (error) {
-      console.error('[FCM] Error getting badge count:', error);
-      return 0;
-    }
-  }
-
-  /**
-   * Set badge count (iOS only)
+   * Set app badge count (iOS only)
    */
   async setBadgeCount(count: number): Promise<void> {
-    if (Platform.OS !== 'ios') {
-      return;
-    }
+    if (Platform.OS !== 'ios' || !messaging || isExpoGo) return;
 
     try {
-      // Badge management is typically done via backend
-      // Firebase doesn't provide direct badge setting on mobile
-      console.log('[FCM] Badge count update requested:', count);
+      await messaging().setApplicationIconBadgeNumber(count);
+      console.log(`[FCM] Badge count set to ${count}`);
     } catch (error) {
-      console.error('[FCM] Error setting badge count:', error);
+      console.error('[FCM] Failed to set badge count:', error);
+    }
+  }
+
+  /**
+   * Get app badge count (iOS only)
+   */
+  async getBadgeCount(): Promise<number> {
+    if (Platform.OS !== 'ios' || !messaging || isExpoGo) return 0;
+
+    try {
+      const count = await messaging().getApplicationIconBadgeNumber();
+      return count;
+    } catch (error) {
+      console.error('[FCM] Failed to get badge count:', error);
+      return 0;
     }
   }
 
   /**
    * Cleanup listeners
-   * Called on logout or app unmount
+   * Call this on logout or app unmount
    */
   cleanup(): void {
     if (this.unsubscribeTokenRefresh) {
@@ -376,7 +381,7 @@ class FCMService {
       this.unsubscribeMessageHandler = null;
     }
 
-    console.log('[FCM] Cleaned up listeners');
+    console.log('[FCM] Cleanup complete');
   }
 }
 

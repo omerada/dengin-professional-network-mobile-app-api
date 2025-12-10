@@ -57,16 +57,16 @@ const AppContent: React.FC = () => {
   }, [initialize]);
 
   // Initialize Firebase Cloud Messaging when user is authenticated
+  // Only works in EAS Build, gracefully fails in Expo Go
   useEffect(() => {
     if (isAuthenticated) {
-      // Initialize FCM (works in both development and production with EAS Build)
-      // Note: Won't work in Expo Go - requires development or production build
       notificationHandler.initialize().catch(error => {
-        console.error('[App] Failed to initialize FCM:', error);
+        if (!__DEV__ || !error.message?.includes('Native module')) {
+          console.error('[App] Failed to initialize FCM:', error);
+        }
       });
     }
 
-    // Cleanup on unmount or logout
     return () => {
       if (isAuthenticated) {
         notificationHandler.cleanup();

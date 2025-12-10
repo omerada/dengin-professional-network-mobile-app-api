@@ -2,20 +2,25 @@
 import 'react-native-gesture-handler';
 import 'react-native-reanimated';
 import { registerRootComponent } from 'expo';
-import { LogBox } from 'react-native';
-import messaging from '@react-native-firebase/messaging';
+import { LogBox, Platform } from 'react-native';
+import Constants from 'expo-constants';
 import App from './src/App';
 
 /**
  * Firebase Cloud Messaging - Background Message Handler
- * MUST be registered BEFORE app initialization
- * Handles messages when app is in background or quit state
+ * Only works in EAS Build, not in Expo Go
  */
-messaging().setBackgroundMessageHandler(async remoteMessage => {
-  console.log('[FCM] Background message received:', remoteMessage);
-  // Process background tasks here (e.g., update local data)
-  // Notification display is handled automatically by FCM
-});
+const isExpoGo = Constants.appOwnership === 'expo';
+if (!isExpoGo) {
+  try {
+    const messaging = require('@react-native-firebase/messaging').default;
+    messaging().setBackgroundMessageHandler(async remoteMessage => {
+      console.log('[FCM] Background message received:', remoteMessage);
+    });
+  } catch (error) {
+    console.log('[FCM] Not available in Expo Go - use EAS Build for FCM support');
+  }
+}
 
 // Disable LogBox warnings but allow error overlays for debugging
 LogBox.ignoreAllLogs(__DEV__ ? false : true);

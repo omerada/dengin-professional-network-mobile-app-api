@@ -11,7 +11,41 @@ config.resolver.sourceExts = ['jsx', 'js', 'ts', 'tsx', 'json', 'mjs'];
 
 // Resolver config to handle problematic packages
 config.resolver.resolveRequest = (context, moduleName, platform) => {
-  // Force @stomp/stompjs to use UMD bundle instead of ESM
+  // Mock native modules for Expo Go compatibility
+  if (moduleName === 'react-native-vision-camera') {
+    return {
+      filePath: path.join(__dirname, '__mocks__', 'react-native-vision-camera.js'),
+      type: 'sourceFile',
+    };
+  }
+
+  if (moduleName === 'react-native-biometrics') {
+    return {
+      filePath: path.join(__dirname, '__mocks__', 'react-native-biometrics.js'),
+      type: 'sourceFile',
+    };
+  }
+
+  if (moduleName === 'react-native-image-picker') {
+    return {
+      filePath: path.join(__dirname, '__mocks__', 'react-native-image-picker.js'),
+      type: 'sourceFile',
+    };
+  }
+
+  if (moduleName === '@react-native-firebase/app') {
+    return {
+      filePath: path.join(__dirname, '__mocks__', '@react-native-firebase', 'app.js'),
+      type: 'sourceFile',
+    };
+  }
+
+  if (moduleName === '@react-native-firebase/messaging') {
+    return {
+      filePath: path.join(__dirname, '__mocks__', '@react-native-firebase', 'messaging.js'),
+      type: 'sourceFile',
+    };
+  } // Force @stomp/stompjs to use UMD bundle instead of ESM
   if (moduleName === '@stomp/stompjs') {
     const stompPath = path.join(
       __dirname,
