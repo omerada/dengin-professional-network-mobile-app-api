@@ -136,14 +136,26 @@ export const sectorApi = {
 };
 
 /**
- * Profession Group API Service (Future - Sprint 3)
+ * Profession Group API Service (Sprint 3)
  *
- * TODO: Implement when profession groups are needed
- * Backend endpoints:
- * - GET /api/profession-groups?sectorId={id}
- * - GET /api/profession-groups/{id}
+ * Status: ✅ Production-ready - Backend fully implemented
  *
- * @since Sprint 3 (placeholder)
+ * Backend Implementation Complete:
+ * - ✅ Domain: ProfessionGroup.java entity
+ * - ✅ Repository: ProfessionGroupRepository.java (JPA)
+ * - ✅ DTO: ProfessionGroupResponse.java
+ * - ✅ Mapper: ProfessionGroupMapper.java (MapStruct)
+ * - ✅ Service: ProfessionGroupService.java (business logic, caching)
+ * - ✅ Controller: ProfessionGroupController.java (REST endpoints)
+ *
+ * Available endpoints:
+ * - GET /api/profession-groups?sectorId={id} - Get active groups by sector
+ * - GET /api/profession-groups/{id} - Get group by ID
+ * - GET /api/profession-groups/search?sectorId={id}&q={query} - Search in sector
+ *
+ * All methods are production-ready and cached for performance.
+ *
+ * @since Sprint 3 - Profession group management
  */
 export const professionGroupApi = {
   /**
@@ -153,7 +165,6 @@ export const professionGroupApi = {
    * @future Sprint 3
    */
   getBySector: async (sectorId: number): Promise<ProfessionGroup[]> => {
-    // TODO: Implement in Sprint 3
     const response = await apiClient.get<ApiResponse<ProfessionGroup[]>>('/api/profession-groups', {
       params: { sectorId },
     });
@@ -167,7 +178,6 @@ export const professionGroupApi = {
    * @future Sprint 3
    */
   getById: async (id: number): Promise<ProfessionGroup> => {
-    // TODO: Implement in Sprint 3
     const response = await apiClient.get<ApiResponse<ProfessionGroup>>(
       `/api/profession-groups/${id}`,
     );

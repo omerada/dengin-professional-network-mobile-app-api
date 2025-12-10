@@ -166,6 +166,7 @@ public class OpenRouterClient {
      * Chat message
      */
     @Data
+    @lombok.NoArgsConstructor
     @lombok.AllArgsConstructor
     private static class Message {
         private String role; // "system", "user", "assistant"
@@ -176,6 +177,7 @@ public class OpenRouterClient {
      * OpenRouter chat completion response
      */
     @Data
+    @lombok.NoArgsConstructor
     private static class OpenRouterResponse {
         private String id;
         private String model;
@@ -187,6 +189,7 @@ public class OpenRouterClient {
      * Response choice
      */
     @Data
+    @lombok.NoArgsConstructor
     private static class Choice {
         private Message message;
         @JsonProperty("finish_reason")
@@ -197,6 +200,7 @@ public class OpenRouterClient {
      * Token usage statistics
      */
     @Data
+    @lombok.NoArgsConstructor
     private static class Usage {
         @JsonProperty("prompt_tokens")
         private int promptTokens;

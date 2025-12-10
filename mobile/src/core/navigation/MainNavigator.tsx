@@ -20,6 +20,8 @@ import { PostDetailScreen } from '@features/feed/screens/PostDetailScreen';
 import { CreatePostScreen } from '@features/feed/screens/CreatePostScreen';
 import { CommentsScreen } from '@features/feed/screens/CommentsScreen';
 import { NotificationsScreen } from '@features/notifications/screens/NotificationsScreen';
+import { NotificationSettingsScreen } from '@features/notifications/screens/NotificationSettingsScreen';
+import { VerificationStatusScreen } from '@features/verification/screens/VerificationStatusScreen';
 import { ConversationListScreen } from '@features/messaging/screens/ConversationListScreen';
 import { ChatScreen } from '@features/messaging/screens/ChatScreen';
 import { ActivityScreen } from '@features/activity/screens/ActivityScreen';
@@ -95,6 +97,8 @@ const FeedStackNavigator: React.FC = () => (
     />
     <FeedStack.Screen name="Comments" component={CommentsScreen} />
     <FeedStack.Screen name="Notifications" component={NotificationsScreen} />
+    <FeedStack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
+    <FeedStack.Screen name="VerificationStatus" component={VerificationStatusScreen} />
   </FeedStack.Navigator>
 );
 

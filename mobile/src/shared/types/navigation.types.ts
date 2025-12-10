@@ -53,6 +53,8 @@ export type FeedStackParamList = {
   UserProfile: { userId: number }; // Backend API: userId: number
   Comments: { postId: number }; // Backend API: postId: number
   Notifications: undefined; // Bildirimler ekranı
+  NotificationSettings: undefined; // Bildirim ayarları
+  VerificationStatus: undefined; // Doğrulama durumu
 };
 
 /**

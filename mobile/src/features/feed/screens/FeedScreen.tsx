@@ -20,6 +20,7 @@ import { ActionSheet, type ActionSheetOption } from '@shared/components';
 import { sharePost, showShareError } from '@shared/utils/share';
 import { useAuthStore } from '@features/auth/stores';
 import { useFollow, useUnfollow } from '@features/social/hooks';
+import { useUnreadCount } from '@features/notifications/hooks';
 import type { Post } from '../types';
 
 /**
@@ -47,6 +48,7 @@ export const FeedScreen: React.FC = memo(() => {
   const { medium } = useHaptic();
   const currentUserId = useAuthStore(state => state.user?.id);
   const user = useAuthStore(state => state.user);
+  const { unreadCount } = useUnreadCount();
 
   // Action sheet state
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
@@ -300,7 +302,7 @@ export const FeedScreen: React.FC = memo(() => {
                 }
               : undefined
           }
-          unreadNotifications={0} // TODO: Get from notifications store/API
+          unreadNotifications={unreadCount || 0}
           onSectorPress={() => console.log('Sector detail pressed')}
           onNotificationPress={() => {
             // @ts-expect-error - Notifications route navigation

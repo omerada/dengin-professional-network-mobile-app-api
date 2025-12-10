@@ -17,6 +17,7 @@ export type RootStackParamList = {
   PostDetail: { postId: string };
   Profile: { userId?: string };
   Chat: { conversationId: string };
+  MatchDetail: { matchId: string };
 };
 
 /**
@@ -59,6 +60,7 @@ export type FeedStackParamList = {
   Feed: undefined;
   PostDetail: { postId: string };
   CreatePost: undefined;
+  Profile: { userId: string };
 };
 
 /**
@@ -66,8 +68,10 @@ export type FeedStackParamList = {
  */
 export type MessagingStackParamList = {
   ConversationList: undefined;
+  MessagingList: undefined; // Alias for ConversationList
   Chat: {
     conversationId: string;
+    userId?: string;
     participant?: {
       userId: number;
       fullName: string;
@@ -103,6 +107,7 @@ export type MessagingStackParamList = {
 export type NotificationStackParamList = {
   Notifications: undefined;
   NotificationSettings: undefined;
+  VerificationStatus: undefined;
 };
 
 /**

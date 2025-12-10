@@ -56,19 +56,19 @@ const AppContent: React.FC = () => {
     initialize();
   }, [initialize]);
 
-  // Initialize notifications when user is authenticated
+  // Initialize Firebase Cloud Messaging when user is authenticated
   useEffect(() => {
-    if (isAuthenticated && !__DEV__) {
-      // Only initialize in production builds
-      // Development builds use Expo Go which doesn't support remote notifications
+    if (isAuthenticated) {
+      // Initialize FCM (works in both development and production with EAS Build)
+      // Note: Won't work in Expo Go - requires development or production build
       notificationHandler.initialize().catch(error => {
-        console.error('[App] Failed to initialize notifications:', error);
+        console.error('[App] Failed to initialize FCM:', error);
       });
     }
 
-    // Cleanup on unmount
+    // Cleanup on unmount or logout
     return () => {
-      if (isAuthenticated && !__DEV__) {
+      if (isAuthenticated) {
         notificationHandler.cleanup();
       }
     };

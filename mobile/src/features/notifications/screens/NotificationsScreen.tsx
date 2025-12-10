@@ -1,28 +1,48 @@
 // src/features/notifications/screens/NotificationsScreen.tsx
-// Notifications screen with list and actions
-// Backend: NotificationController API
+// Production-ready Notifications Screen with modern UI
+// Backend: NotificationController API - GET /api/notifications
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, memo } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
+import { useHaptic } from '@shared/hooks/useHaptic';
 import { NotificationList } from '../components/NotificationList';
 import { PermissionPrompt } from '../components/PermissionPrompt';
 import { useMarkAllAsRead, useNotificationPermission, useUnreadCount } from '../hooks';
 import type { NotificationResponse, NotificationType } from '../types';
-import type { RootStackParamList } from '@core/navigation/types';
+import type { FeedStackParamList } from '@shared/types';
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+type NavigationProp = NativeStackNavigationProp<FeedStackParamList>;
 
-export const NotificationsScreen: React.FC = () => {
+/**
+ * NotificationsScreen - Production-ready bildirimler ekranı
+ *
+ * Features:
+ * - Infinite scroll pagination
+ * - Pull-to-refresh
+ * - Mark all as read
+ * - Push notification permission handling
+ * - Smart navigation based on notification type
+ * - Haptic feedback
+ * - Clean Material Design UI
+ *
+ * Backend Integration:
+ * - GET /api/notifications (paginated)
+ * - POST /api/notifications/mark-as-read
+ * - GET /api/notifications/unread-count
+ */
+export const NotificationsScreen: React.FC = memo(() => {
   const colors = useColors();
   const navigation = useNavigation<NavigationProp>();
+  const { trigger } = useHaptic();
   const { markAllAsRead, isPending: isMarkingAllAsRead } = useMarkAllAsRead();
-  const { isPermissionGranted, requestWithPrompt } = useNotificationPermission();
+  const { isPermissionGranted, requestPermission } = useNotificationPermission();
   const { unreadCount } = useUnreadCount();
 
   const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
@@ -30,7 +50,6 @@ export const NotificationsScreen: React.FC = () => {
   // Check permission on mount
   useEffect(() => {
     if (!isPermissionGranted) {
-      // Show prompt after a short delay
       const timer = setTimeout(() => {
         setShowPermissionPrompt(true);
       }, 1000);
@@ -39,100 +58,148 @@ export const NotificationsScreen: React.FC = () => {
     return undefined;
   }, [isPermissionGranted]);
 
-  // Handle notification press - navigate based on type and actionUrl
+  /**
+   * Handle notification press - smart navigation based on type
+   * Backend NotificationType enum ile uyumlu
+   */
   const handleNotificationPress = useCallback(
     (notification: NotificationResponse) => {
+      trigger('light');
       const type = notification.type as NotificationType;
       const metadata = notification.metadata;
 
-      switch (type) {
-        case 'NEW_MESSAGE':
-          if (metadata?.conversationId) {
-            navigation.navigate('Chat', {
-              conversationId: metadata.conversationId,
-            });
-          }
-          break;
+      try {
+        switch (type) {
+          case 'NEW_MESSAGE':
+            if (metadata?.conversationId) {
+              // @ts-expect-error - MessagingStack navigation
+              navigation.navigate('MessagingTab', {
+                screen: 'Chat',
+                params: { conversationId: metadata.conversationId },
+              });
+            }
+            break;
 
-        case 'POST_LIKED':
-        case 'POST_COMMENTED':
-        case 'MENTION':
-          if (metadata?.postId) {
-            navigation.navigate('PostDetail', {
-              postId: metadata.postId,
-            });
-          }
-          break;
+          case 'POST_LIKED':
+          case 'POST_COMMENTED':
+          case 'MENTION':
+            if (metadata?.postId) {
+              navigation.navigate('PostDetail', {
+                postId: Number(metadata.postId),
+              });
+            }
+            break;
 
-        case 'NEW_FOLLOWER':
-          if (metadata?.actorId) {
-            navigation.navigate('Profile', {
-              userId: metadata.actorId,
-            });
-          }
-          break;
+          case 'NEW_FOLLOWER':
+            if (metadata?.actorId) {
+              navigation.navigate('UserProfile', {
+                userId: Number(metadata.actorId),
+              });
+            }
+            break;
 
-        case 'VERIFICATION_APPROVED':
-        case 'VERIFICATION_REJECTED':
-        case 'VERIFICATION_PENDING_REVIEW':
-          navigation.navigate('VerificationStatus');
-          break;
+          case 'VERIFICATION_APPROVED':
+          case 'VERIFICATION_REJECTED':
+          case 'VERIFICATION_PENDING_REVIEW':
+            navigation.navigate('VerificationStatus');
+            break;
 
-        case 'POST_FLAGGED':
-        case 'CONTENT_REMOVED':
-        case 'WARNING_ISSUED':
-          // Moderation notifications - show details
-          if (notification.actionUrl) {
-            // Parse and navigate to actionUrl
-          }
-          break;
+          case 'POST_FLAGGED':
+          case 'CONTENT_REMOVED':
+          case 'WARNING_ISSUED':
+            Alert.alert(
+              notification.title || 'Bildirim',
+              notification.body || 'Detaylar için bildirime tıklayın.',
+              [{ text: 'Tamam' }],
+            );
+            break;
 
-        default:
-          // Use actionUrl if available
-          if (notification.actionUrl) {
-            // Handle deep link navigation
-          }
-          break;
+          default:
+            if (notification.body) {
+              Alert.alert(notification.title || 'Bildirim', notification.body, [{ text: 'Tamam' }]);
+            }
+            break;
+        }
+      } catch (error) {
+        console.error('[NotificationsScreen] Navigation error:', error);
+        Alert.alert('Hata', 'Bildirim açılırken bir hata oluştu.');
       }
     },
-    [navigation],
+    [navigation, trigger],
   );
 
-  // Handle mark all as read
+  /**
+   * Mark all notifications as read with confirmation
+   */
   const handleMarkAllAsRead = useCallback(() => {
     if (unreadCount === 0) return;
 
+    trigger('medium');
     Alert.alert(
-      'Tümünü Okundu Olarak İşaretle',
-      'Tüm bildirimler okundu olarak işaretlenecek. Devam etmek istiyor musunuz?',
+      'Tümünü Okundu İşaretle',
+      `${unreadCount} okunmamış bildirim okundu olarak işaretlenecek.`,
       [
         { text: 'İptal', style: 'cancel' },
         {
-          text: 'Onayla',
-          onPress: () => markAllAsRead(),
+          text: 'Okundu İşaretle',
+          style: 'default',
+          onPress: () => {
+            markAllAsRead();
+            trigger('success');
+          },
         },
       ],
     );
-  }, [unreadCount, markAllAsRead]);
+  }, [unreadCount, markAllAsRead, trigger]);
 
-  // Handle settings navigation
+  /**
+   * Navigate to notification settings
+   */
   const handleSettingsPress = useCallback(() => {
+    trigger('light');
     navigation.navigate('NotificationSettings');
-  }, [navigation]);
+  }, [navigation, trigger]);
 
-  // Handle permission request
+  /**
+   * Go back to previous screen
+   */
+  const handleBack = useCallback(() => {
+    trigger('light');
+    navigation.goBack();
+  }, [navigation, trigger]);
+
+  /**
+   * Handle permission request
+   */
   const handleRequestPermission = useCallback(async () => {
-    await requestWithPrompt();
+    await requestPermission();
     setShowPermissionPrompt(false);
-  }, [requestWithPrompt]);
+  }, [requestPermission]);
 
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top']}>
-      {/* Header */}
-      <View style={[styles.header, { borderBottomColor: colors.border.default }]}>
-        <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Bildirimler</Text>
+      {/* Modern Header with Back Button */}
+      <Animated.View
+        entering={FadeIn.duration(300)}
+        style={[styles.header, { borderBottomColor: colors.border.subtle }]}>
+        <View style={styles.headerLeft}>
+          <Pressable
+            onPress={handleBack}
+            style={({ pressed }) => [styles.backButton, pressed && { opacity: 0.7 }]}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Icon name="arrow-back" size={24} color={colors.text.primary} />
+          </Pressable>
+          <View>
+            <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Bildirimler</Text>
+            {unreadCount > 0 && (
+              <Text style={[styles.headerSubtitle, { color: colors.text.tertiary }]}>
+                {unreadCount} okunmamış
+              </Text>
+            )}
+          </View>
+        </View>
 
         <View style={styles.headerActions}>
           {/* Mark All Read Button */}
@@ -140,11 +207,16 @@ export const NotificationsScreen: React.FC = () => {
             <Pressable
               onPress={handleMarkAllAsRead}
               disabled={isMarkingAllAsRead}
-              style={({ pressed }) => [styles.headerButton, pressed && styles.headerButtonPressed]}>
+              style={({ pressed }) => [
+                styles.headerButton,
+                { backgroundColor: colors.interactive.default + '15' },
+                pressed && styles.headerButtonPressed,
+              ]}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
               {isMarkingAllAsRead ? (
                 <ActivityIndicator size="small" color={colors.interactive.default} />
               ) : (
-                <Icon name="checkmark-done" size={24} color={colors.interactive.default} />
+                <Icon name="checkmark-done" size={20} color={colors.interactive.default} />
               )}
             </Pressable>
           )}
@@ -152,16 +224,17 @@ export const NotificationsScreen: React.FC = () => {
           {/* Settings Button */}
           <Pressable
             onPress={handleSettingsPress}
-            style={({ pressed }) => [styles.headerButton, pressed && styles.headerButtonPressed]}>
-            <Icon name="settings-outline" size={24} color={colors.text.primary} />
+            style={({ pressed }) => [styles.headerButton, pressed && styles.headerButtonPressed]}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <Icon name="settings-outline" size={22} color={colors.text.primary} />
           </Pressable>
         </View>
-      </View>
+      </Animated.View>
 
       {/* Notification List */}
       <NotificationList onNotificationPress={handleNotificationPress} />
 
-      {/* Permission Prompt */}
+      {/* Permission Prompt Modal */}
       <PermissionPrompt
         visible={showPermissionPrompt}
         onRequestPermission={handleRequestPermission}
@@ -170,37 +243,57 @@ export const NotificationsScreen: React.FC = () => {
       />
     </SafeAreaView>
   );
-};
+});
+
+NotificationsScreen.displayName = 'NotificationsScreen';
 
 const styles = StyleSheet.create({
+  backButton: {
+    alignItems: 'center',
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
+  },
   container: {
     flex: 1,
   },
   header: {
+    alignItems: 'center',
+    borderBottomWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: '700',
   },
   headerActions: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     gap: 8,
   },
   headerButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 20,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
   },
   headerButtonPressed: {
-    opacity: 0.7,
+    opacity: 0.6,
+  },
+  headerLeft: {
+    alignItems: 'center',
+    flex: 1,
+    flexDirection: 'row',
+    gap: 12,
+  },
+  headerSubtitle: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    letterSpacing: 0.2,
   },
 });

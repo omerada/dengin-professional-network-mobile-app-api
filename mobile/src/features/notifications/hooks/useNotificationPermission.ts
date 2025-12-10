@@ -1,33 +1,39 @@
 // src/features/notifications/hooks/useNotificationPermission.ts
-// Notification permission hook
-// Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
+// Production-ready notification permission hook using Firebase Cloud Messaging
 
-import { useState, useEffect, useCallback } from 'react';
-import { Alert, Linking, Platform } from 'react-native';
-import { fcmService } from '../services';
+import { useState, useCallback, useEffect } from 'react';
+import { Platform, Linking, Alert } from 'react-native';
+import { fcmService } from '../services/fcmService.production';
 import { useNotificationStore } from '../stores';
 
 /**
- * Bildirim izni hook'u
+ * Production notification permission hook
+ * Manages FCM notification permissions and token registration
  */
 export function useNotificationPermission() {
   const [isLoading, setIsLoading] = useState(false);
-  const isPermissionGranted = useNotificationStore((state) => state.isPermissionGranted);
-  const setPermissionGranted = useNotificationStore((state) => state.setPermissionGranted);
-  const setFcmToken = useNotificationStore((state) => state.setFcmToken);
+  const isPermissionGranted = useNotificationStore(state => state.isPermissionGranted);
+  const setPermissionGranted = useNotificationStore(state => state.setPermissionGranted);
+  const setFcmToken = useNotificationStore(state => state.setFcmToken);
 
-  // Check permission on mount
-  useEffect(() => {
-    checkPermission();
-  }, []);
-
-  const checkPermission = useCallback(async () => {
-    const granted = await fcmService.checkPermission();
-    setPermissionGranted(granted);
-    return granted;
+  /**
+   * Check current permission status
+   */
+  const checkPermission = useCallback(async (): Promise<boolean> => {
+    try {
+      const granted = await fcmService.checkPermission();
+      setPermissionGranted(granted);
+      return granted;
+    } catch (error) {
+      console.error('[useNotificationPermission] Error checking permission:', error);
+      return false;
+    }
   }, [setPermissionGranted]);
 
-  const requestPermission = useCallback(async () => {
+  /**
+   * Request notification permissions
+   */
+  const requestPermission = useCallback(async (): Promise<boolean> => {
     setIsLoading(true);
 
     try {
@@ -35,12 +41,25 @@ export function useNotificationPermission() {
       setPermissionGranted(granted);
 
       if (granted) {
-        // Get and save FCM token
+        // Get and register FCM token
         const token = await fcmService.getToken();
         if (token) {
           setFcmToken(token);
           await fcmService.sendTokenToServer(token);
         }
+      } else {
+        // Show alert to open settings
+        Alert.alert(
+          'Bildirimler Kapalı',
+          'Bildirimleri almak için lütfen ayarlardan bildirimlere izin verin.',
+          [
+            { text: 'İptal', style: 'cancel' },
+            {
+              text: 'Ayarlara Git',
+              onPress: () => openSettings(),
+            },
+          ],
+        );
       }
 
       return granted;
@@ -52,68 +71,29 @@ export function useNotificationPermission() {
     }
   }, [setPermissionGranted, setFcmToken]);
 
-  const promptForPermission = useCallback(async () => {
-    // First check current status
-    const currentStatus = await checkPermission();
-
-    if (currentStatus) {
-      return true;
+  /**
+   * Open device settings
+   */
+  const openSettings = useCallback(() => {
+    if (Platform.OS === 'ios') {
+      Linking.openURL('app-settings:');
+    } else {
+      Linking.openSettings();
     }
+  }, []);
 
-    // Request permission
-    const granted = await requestPermission();
-
-    if (!granted) {
-      // Show alert to open settings
-      Alert.alert(
-        'Bildirimler Kapalı',
-        'Bildirim almak için ayarlardan bildirimleri açmanız gerekmektedir.',
-        [
-          { text: 'İptal', style: 'cancel' },
-          {
-            text: 'Ayarları Aç',
-            onPress: () => {
-              if (Platform.OS === 'ios') {
-                Linking.openURL('app-settings:');
-              } else {
-                Linking.openSettings();
-              }
-            },
-          },
-        ]
-      );
-    }
-
-    return granted;
-  }, [checkPermission, requestPermission]);
-
-  const setupToken = useCallback(async () => {
-    if (!isPermissionGranted) return;
-
-    try {
-      const token = await fcmService.getToken();
-      if (token) {
-        setFcmToken(token);
-        await fcmService.sendTokenToServer(token);
-      }
-
-      // Setup token refresh listener
-      fcmService.setupTokenRefreshListener((newToken) => {
-        setFcmToken(newToken);
-      });
-    } catch (error) {
-      console.error('[useNotificationPermission] Error setting up token:', error);
-    }
-  }, [isPermissionGranted, setFcmToken]);
+  /**
+   * Check permission on mount
+   */
+  useEffect(() => {
+    checkPermission();
+  }, [checkPermission]);
 
   return {
-    isPermissionGranted,
     isLoading,
-    checkPermission,
+    isPermissionGranted,
     requestPermission,
-    promptForPermission,
-    setupToken,
+    checkPermission,
+    openSettings,
   };
 }
-
-export default useNotificationPermission;

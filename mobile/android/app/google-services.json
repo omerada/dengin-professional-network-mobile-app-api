@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "748858155102",
+    "project_id": "meslektas",
+    "storage_bucket": "meslektas.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:748858155102:android:a4c57b0127903d357d94cf",
+        "android_client_info": {
+          "package_name": "com.adalabs.meslektas"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDokz5NdhZXUbPlDG38Pa0RW5OtGsIHFlU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

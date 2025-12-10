@@ -44,8 +44,8 @@ public class FCMPushNotificationService {
     @Value("${firebase.enabled:false}")
     private boolean pushEnabled;
     
-    @Value("${firebase.credentials-file:firebase-service-account.json}")
-    private String credentialsFile;
+    @Value("${firebase.credentials-json:#{null}}")
+    private String credentialsJson;
     
     @Value("${firebase.project-id:}")
     private String projectId;
@@ -58,6 +58,7 @@ public class FCMPushNotificationService {
     
     /**
      * Initialize Firebase Admin SDK
+     * Supports both JSON string (from env) and file-based credentials
      */
     @PostConstruct
     public void initialize() {
@@ -68,30 +69,38 @@ public class FCMPushNotificationService {
         
         try {
             if (FirebaseApp.getApps().isEmpty()) {
-                ClassPathResource resource = new ClassPathResource(credentialsFile);
+                GoogleCredentials credentials = null;
                 
-                if (!resource.exists()) {
-                    log.warn("Firebase credentials file not found: {}. Push notifications will be disabled.", 
-                        credentialsFile);
+                // Try JSON string first (production - from .env)
+                if (credentialsJson != null && !credentialsJson.equals("not-configured")) {
+                    log.info("Loading Firebase credentials from JSON string (env variable)");
+                    try (InputStream stream = new java.io.ByteArrayInputStream(
+                            credentialsJson.getBytes(java.nio.charset.StandardCharsets.UTF_8))) {
+                        credentials = GoogleCredentials.fromStream(stream);
+                    }
+                } 
+                
+                if (credentials == null) {
+                    log.warn("Firebase credentials not configured. Push notifications will be disabled.");
+                    log.warn("Please set FIREBASE_CREDENTIALS_JSON environment variable");
                     return;
                 }
                 
-                try (InputStream serviceAccount = resource.getInputStream()) {
-                    FirebaseOptions options = FirebaseOptions.builder()
-                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                        .setProjectId(projectId)
-                        .build();
-                    
-                    FirebaseApp.initializeApp(options);
-                    initialized = true;
-                    log.info("Firebase Admin SDK initialized successfully for project: {}", projectId);
-                }
+                FirebaseOptions options = FirebaseOptions.builder()
+                    .setCredentials(credentials)
+                    .setProjectId(projectId)
+                    .build();
+                
+                FirebaseApp.initializeApp(options);
+                initialized = true;
+                log.info("Firebase Admin SDK initialized successfully for project: {}", projectId);
             } else {
                 initialized = true;
                 log.info("Firebase Admin SDK already initialized");
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("Failed to initialize Firebase Admin SDK", e);
+            log.error("Please check your FIREBASE_CREDENTIALS_JSON environment variable");
         }
     }
     

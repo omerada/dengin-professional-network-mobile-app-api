@@ -106,7 +106,7 @@ export const FeedHeader: React.FC<FeedHeaderProps> = memo(
             {unreadNotifications > 0 && (
               <Animated.View
                 entering={FadeIn.duration(200)}
-                style={[styles.badge, { backgroundColor: colors.error.main }]}>
+                style={[styles.badge, { backgroundColor: colors.status.error }]}>
                 <Text style={styles.badgeText}>
                   {unreadNotifications > 9 ? '9+' : unreadNotifications}
                 </Text>

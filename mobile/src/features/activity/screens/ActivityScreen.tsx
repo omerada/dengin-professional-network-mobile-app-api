@@ -11,9 +11,9 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
 
 /**
- * ActivityScreen - Gamification & Challenges Hub
+ * ActivityScreen - Gamification & Challenges Hub (Placeholder)
  *
- * Features:
+ * Planned Features:
  * - Weekly/Monthly challenges
  * - Achievement badges
  * - Leaderboard
@@ -22,7 +22,7 @@ import { useColors } from '@contexts/ThemeContext';
  *
  * Design: MOBILE-APP-HOME-SCREEN.md Lines 788-875
  *
- * TODO: Implement full functionality with backend integration
+ * Current Status: Placeholder screen showing upcoming features
  */
 export const ActivityScreen: React.FC = memo(() => {
   const colors = useColors();

@@ -22,7 +22,6 @@ import { useRegistrationStore } from '../stores/registrationStore';
  */
 export const useRegister = () => {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const setAuth = useAuthStore(state => state.setAuth);
   const setLastLoginEmail = useAuthStore(state => state.setLastLoginEmail);
   const resetRegistration = useRegistrationStore(state => state.reset);
 

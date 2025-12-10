@@ -1,9 +1,8 @@
 // src/features/notifications/services/pushNotificationHandler.ts
 // Handles push notifications from backend via WebSocket and REST API
-// Integrates with Expo notification service
+// Integrates with Firebase Cloud Messaging
 
-import { expoNotificationService } from './expoNotificationService';
-import { notificationHandler } from './notificationHandler.production';
+import { fcmService } from './fcmService.production';
 import type { NotificationData, NotificationType } from '../types';
 
 /**
@@ -18,6 +17,8 @@ export interface PushNotificationPayload {
 
 /**
  * Handles push notifications received from backend
+ * Note: With FCM, notifications are handled automatically by Firebase
+ * This handler is primarily for WebSocket notifications
  */
 class PushNotificationHandler {
   /**
@@ -27,46 +28,36 @@ class PushNotificationHandler {
     try {
       console.log('[PushNotificationHandler] Processing notification:', payload);
 
-      // Display local notification
-      await expoNotificationService.displayLocalNotification(
-        payload.title,
-        payload.body,
-        payload.data,
-      );
+      // With FCM, local notifications are displayed automatically
+      // This is mainly for updating the store when receiving via WebSocket
 
-      // Update store via notification handler
-      // Store will be updated automatically via WebSocket/REST listeners
+      // Update store will be handled automatically via WebSocket/REST listeners
     } catch (error) {
       console.error('[PushNotificationHandler] Error handling notification:', error);
     }
   }
 
   /**
-   * Handle notification tap
-   */
-  handleNotificationTap(data: NotificationData): void {
-    notificationHandler.handleNotificationNavigation(data);
-  }
-
-  /**
    * Update badge count
    */
   async updateBadgeCount(count: number): Promise<void> {
-    await expoNotificationService.setBadgeCount(count);
+    await fcmService.setBadgeCount(count);
   }
 
   /**
    * Clear badge
    */
   async clearBadge(): Promise<void> {
-    await expoNotificationService.setBadgeCount(0);
+    await fcmService.setBadgeCount(0);
   }
 
   /**
-   * Clear all notifications
+   * Clear all notifications (iOS only)
    */
   async clearAllNotifications(): Promise<void> {
-    await expoNotificationService.clearAllNotifications();
+    // FCM doesn't have a dismiss all method
+    // This would need to be handled per-platform if needed
+    console.log('[PushNotificationHandler] Clear all notifications called');
   }
 }
 

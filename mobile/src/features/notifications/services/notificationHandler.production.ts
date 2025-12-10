@@ -1,40 +1,68 @@
 // src/features/notifications/services/notificationHandler.production.ts
-// Production-ready notification handler using Expo Notifications
-// Replaces web-compatible stub implementation
+// Production notification handler using Firebase Cloud Messaging
+// Handles notification taps and navigation
 
+import { FirebaseMessagingTypes } from '@react-native-firebase/messaging';
+import { fcmService } from './fcmService.production';
+import { useNotificationStore } from '../stores';
 import { navigationRef } from '@core/navigation/navigationRef';
-import { expoNotificationService } from './expoNotificationService';
-import type { NotificationData } from '../types';
+import type { NotificationType, NotificationData } from '../types';
+import * as Haptics from 'expo-haptics';
 
 /**
  * Production Notification Handler
- * Handles all notification events and navigation
+ *
+ * Responsibilities:
+ * - Initialize FCM
+ * - Handle notification taps
+ * - Navigate to appropriate screens
+ * - Update notification store
+ * - Trigger haptic feedback
  */
 class NotificationHandler {
-  private isInitialized = false;
+  private initialized = false;
+  private unsubscribeOpenedApp: (() => void) | null = null;
 
   /**
-   * Initialize notification handler
+   * Initialize notification system
+   * - Request permissions
+   * - Get FCM token
+   * - Register with backend
+   * - Setup listeners
    */
   async initialize(): Promise<void> {
-    if (this.isInitialized) return;
+    if (this.initialized) {
+      console.log('[NotificationHandler] Already initialized');
+      return;
+    }
 
     try {
-      // Initialize Expo notification service
-      const token = await expoNotificationService.initialize();
+      console.log('[NotificationHandler] Initializing FCM...');
 
+      // Initialize FCM service
+      const token = await fcmService.initialize();
       if (!token) {
-        console.warn('[NotificationHandler] Failed to initialize notifications');
+        console.warn('[NotificationHandler] FCM initialization failed - no token');
         return;
       }
 
-      // Setup response listener for notification taps
-      this.setupNotificationTapHandler();
+      // Check if app was opened from notification (quit state)
+      const initialNotification = await fcmService.getInitialNotification();
+      if (initialNotification) {
+        console.log('[NotificationHandler] App opened from notification (quit state)');
+        // Wait a bit for navigation to be ready
+        setTimeout(() => {
+          this.handleNotificationOpened(initialNotification);
+        }, 1000);
+      }
 
-      // Handle notification that opened the app (from killed state)
-      await this.handleInitialNotification();
+      // Setup notification opened listener (background/foreground state)
+      this.unsubscribeOpenedApp = fcmService.onNotificationOpened(remoteMessage => {
+        console.log('[NotificationHandler] Notification opened app (background/foreground)');
+        this.handleNotificationOpened(remoteMessage);
+      });
 
-      this.isInitialized = true;
+      this.initialized = true;
       console.log('[NotificationHandler] Initialized successfully');
     } catch (error) {
       console.error('[NotificationHandler] Initialization error:', error);
@@ -42,180 +70,211 @@ class NotificationHandler {
   }
 
   /**
-   * Setup notification tap handler
+   * Handle notification tap
+   * Parse notification data and navigate to appropriate screen
    */
-  private setupNotificationTapHandler(): void {
-    // The responseListener in expoNotificationService already handles taps
-    // We just need to listen to our custom event or use the store
-    console.log('[NotificationHandler] Tap handler ready');
-  }
-
-  /**
-   * Handle initial notification (app opened from notification)
-   */
-  private async handleInitialNotification(): Promise<void> {
+  private async handleNotificationOpened(
+    remoteMessage: FirebaseMessagingTypes.RemoteMessage,
+  ): Promise<void> {
     try {
-      // Expo handles this automatically via responseListener
-      // But we can also check manually
-      console.log('[NotificationHandler] Checking for initial notification');
-    } catch (error) {
-      console.error('[NotificationHandler] Error handling initial notification:', error);
-    }
-  }
+      console.log('[NotificationHandler] Handling notification tap:', remoteMessage);
 
-  /**
-   * Navigate based on notification data
-   */
-  handleNotificationNavigation(data?: NotificationData): void {
-    if (!data) {
-      console.warn('[NotificationHandler] No data for navigation');
-      return;
-    }
+      // Haptic feedback
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-    console.log('[NotificationHandler] Navigating from notification:', data);
+      // Extract notification data
+      const notificationData = remoteMessage.data as NotificationData | undefined;
+      if (!notificationData) {
+        console.warn('[NotificationHandler] No notification data found');
+        return;
+      }
 
-    try {
-      switch (data.type) {
-        case 'NEW_MESSAGE':
-          if (data.conversationId) {
-            this.navigateToChat(data.conversationId, data.senderId);
-          }
-          break;
+      const { type, ...metadata } = notificationData;
+      console.log('[NotificationHandler] Notification type:', type, 'Metadata:', metadata);
 
-        case 'NEW_MATCH':
-          if (data.matchId) {
-            this.navigateToMatch(data.matchId);
-          }
-          break;
+      // Navigate based on notification type
+      this.navigateToScreen(type as NotificationType, metadata);
 
-        case 'PROFILE_VIEW':
-          if (data.viewerId) {
-            this.navigateToProfile(data.viewerId);
-          }
-          break;
-
-        case 'VERIFICATION_STATUS':
-          this.navigateToVerification();
-          break;
-
-        case 'MODERATION_ALERT':
-          this.navigateToProfile(); // User's own profile
-          break;
-
-        case 'SYSTEM':
-          this.navigateToNotifications();
-          break;
-
-        default:
-          this.navigateToNotifications();
+      // Mark as read in store
+      if (notificationData.notificationId) {
+        useNotificationStore.getState().markAsRead(notificationData.notificationId);
       }
     } catch (error) {
-      console.error('[NotificationHandler] Navigation error:', error);
+      console.error('[NotificationHandler] Error handling notification:', error);
     }
   }
 
   /**
-   * Navigate to chat screen
+   * Navigate to appropriate screen based on notification type
    */
-  private navigateToChat(conversationId: string, userId?: string): void {
+  private navigateToScreen(type: NotificationType, metadata: Record<string, any>): void {
     if (!navigationRef.isReady()) {
-      console.warn('[NotificationHandler] Navigation not ready');
-      setTimeout(() => this.navigateToChat(conversationId, userId), 500);
+      console.warn('[NotificationHandler] Navigation not ready yet');
+      // Retry after delay
+      setTimeout(() => this.navigateToScreen(type, metadata), 500);
       return;
     }
 
-    navigationRef.navigate('Chat', {
-      conversationId,
+    console.log('[NotificationHandler] Navigating for type:', type);
+
+    switch (type) {
+      // Message notifications
+      case 'NEW_MESSAGE':
+      case 'MESSAGE_RECEIVED':
+        if (metadata.conversationId || metadata.matchId) {
+          this.navigateToChat(metadata.conversationId || metadata.matchId, metadata.userId);
+        } else {
+          this.navigateToMessaging();
+        }
+        break;
+
+      // Match notifications
+      case 'NEW_MATCH':
+      case 'MATCH_ACCEPTED':
+      case 'MATCH_SUGGESTION':
+        if (metadata.matchId) {
+          this.navigateToMatch(metadata.matchId);
+        } else {
+          this.navigateToMessaging();
+        }
+        break;
+
+      // Profile notifications
+      case 'PROFILE_VIEW':
+      case 'PROFILE_LIKE':
+        if (metadata.userId) {
+          this.navigateToProfile(metadata.userId);
+        } else {
+          this.navigateToNotifications();
+        }
+        break;
+
+      // Verification notifications
+      case 'VERIFICATION_APPROVED':
+      case 'VERIFICATION_REJECTED':
+      case 'VERIFICATION_REQUIRED':
+        this.navigateToVerification();
+        break;
+
+      // Post notifications
+      case 'POST_LIKE':
+      case 'POST_COMMENT':
+      case 'POST_MENTION':
+        if (metadata.postId) {
+          this.navigateToPost(metadata.postId);
+        } else {
+          this.navigateToFeed();
+        }
+        break;
+
+      // Moderation notifications
+      case 'POST_FLAGGED':
+      case 'POST_REMOVED':
+      case 'ACCOUNT_WARNING':
+      case 'ACCOUNT_SUSPENDED':
+        this.navigateToNotifications();
+        break;
+
+      // System notifications
+      case 'SYSTEM_ANNOUNCEMENT':
+      case 'FEATURE_ANNOUNCEMENT':
+        this.navigateToNotifications();
+        break;
+
+      // Default: Go to notifications screen
+      default:
+        console.warn('[NotificationHandler] Unknown notification type:', type);
+        this.navigateToNotifications();
+        break;
+    }
+  }
+
+  // =================================================================
+  // Navigation Helper Methods
+  // =================================================================
+
+  private navigateToMessaging(): void {
+    navigationRef.navigate('Main', {
+      screen: 'MessagingTab',
+      params: { screen: 'ConversationList' },
+    });
+  }
+
+  private navigateToChat(conversationId: string, userId?: string): void {
+    navigationRef.navigate('Main', {
+      screen: 'MessagingTab',
+      params: {
+        screen: 'Chat',
+        params: { conversationId, userId },
+      },
+    });
+  }
+
+  private navigateToMatch(matchId: string): void {
+    // Navigate to MatchDetail screen (root level)
+    navigationRef.navigate('MatchDetail', { matchId });
+  }
+
+  private navigateToProfile(userId: string): void {
+    navigationRef.navigate('Main', {
+      screen: 'FeedTab',
+      params: {
+        screen: 'Profile',
+        params: { userId },
+      },
+    });
+  }
+
+  private navigateToVerification(): void {
+    navigationRef.navigate('Main', {
+      screen: 'NotificationsTab',
+      params: {
+        screen: 'VerificationStatus',
+      },
+    });
+  }
+
+  private navigateToPost(postId: string): void {
+    navigationRef.navigate('Main', {
+      screen: 'FeedTab',
+      params: {
+        screen: 'PostDetail',
+        params: { postId },
+      },
+    });
+  }
+
+  private navigateToFeed(): void {
+    navigationRef.navigate('Main', {
+      screen: 'FeedTab',
+      params: { screen: 'Feed' },
+    });
+  }
+
+  private navigateToNotifications(): void {
+    navigationRef.navigate('Main', {
+      screen: 'NotificationsTab',
+      params: {
+        screen: 'Notifications',
+      },
     });
   }
 
   /**
-   * Navigate to match detail
-   */
-  private navigateToMatch(matchId: string): void {
-    if (!navigationRef.isReady()) {
-      setTimeout(() => this.navigateToMatch(matchId), 500);
-      return;
-    }
-
-    // Navigate to messages tab - match details will be shown there
-    console.log('[NotificationHandler] Navigate to match:', matchId);
-    // TODO: Implement match detail screen navigation
-  }
-
-  /**
-   * Navigate to user profile
-   */
-  private navigateToProfile(userId?: string): void {
-    if (!navigationRef.isReady()) {
-      setTimeout(() => this.navigateToProfile(userId), 500);
-      return;
-    }
-
-    if (userId) {
-      navigationRef.navigate('Profile', { userId });
-    } else {
-      navigationRef.navigate('Profile', {});
-    }
-  }
-
-  /**
-   * Navigate to verification screen
-   */
-  private navigateToVerification(): void {
-    if (!navigationRef.isReady()) {
-      setTimeout(() => this.navigateToVerification(), 500);
-      return;
-    }
-
-    // Navigate to verification stack
-    console.log('[NotificationHandler] Navigate to verification');
-    // TODO: Implement verification screen navigation
-  }
-
-  /**
-   * Navigate to notifications list
-   */
-  private navigateToNotifications(): void {
-    if (!navigationRef.isReady()) {
-      setTimeout(() => this.navigateToNotifications(), 500);
-      return;
-    }
-
-    // Navigate to notifications screen
-    console.log('[NotificationHandler] Navigate to notifications');
-    // TODO: Implement notifications screen navigation
-  }
-
-  /**
-   * Display local notification
-   */
-  async displayNotification(title: string, body: string, data: NotificationData): Promise<void> {
-    await expoNotificationService.displayLocalNotification(title, body, data);
-  }
-
-  /**
-   * Update badge count
-   */
-  async updateBadgeCount(count: number): Promise<void> {
-    await expoNotificationService.setBadgeCount(count);
-  }
-
-  /**
-   * Clear all notifications
-   */
-  async clearAllNotifications(): Promise<void> {
-    await expoNotificationService.clearAllNotifications();
-  }
-
-  /**
-   * Cleanup
+   * Cleanup listeners
+   * Called on logout
    */
   cleanup(): void {
-    expoNotificationService.cleanup();
-    this.isInitialized = false;
+    if (this.unsubscribeOpenedApp) {
+      this.unsubscribeOpenedApp();
+      this.unsubscribeOpenedApp = null;
+    }
+
+    fcmService.cleanup();
+    this.initialized = false;
+    console.log('[NotificationHandler] Cleaned up');
   }
 }
 
+// Export singleton instance
 export const notificationHandler = new NotificationHandler();
-export default notificationHandler;

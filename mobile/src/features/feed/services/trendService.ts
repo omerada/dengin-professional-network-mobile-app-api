@@ -28,16 +28,27 @@ export interface AITrendResponse {
  * - AI: OpenRouter API (gpt-4o-mini)
  * - Cache: 1 hour per profession
  * - Rate Limit: 100 requests/hour
+ * - Auth: Bearer token required
  *
  * Replaces: mockTrends.ts (getTrendsByProfession)
  */
 export async function getTrendsByProfession(
   category: ProfessionCategory,
 ): Promise<AITrendResponse[]> {
-  const response = await apiClient.get<AITrendResponse[]>(
-    `${API_ENDPOINTS.TRENDS}/profession/${category}`,
-  );
-  return response.data;
+  try {
+    // Backend returns List<AITrendResponse> directly (no ApiResponse wrapper)
+    const response = await apiClient.get<AITrendResponse[]>(
+      `${API_ENDPOINTS.TRENDS}/profession/${category}`,
+    );
+    return response.data;
+  } catch (error: any) {
+    // Fallback: Return empty array on error (network, auth, etc.)
+    // This prevents FeedScreen from breaking
+    if (__DEV__) {
+      console.warn(`[Trends] Failed to fetch trends for ${category}:`, error.message);
+    }
+    return [];
+  }
 }
 
 /**
@@ -47,6 +58,20 @@ export async function getTrendsByProfession(
  * Backend: GET /api/trends/categories
  */
 export async function getProfessionCategories(): Promise<string[]> {
-  const response = await apiClient.get<string[]>(`${API_ENDPOINTS.TRENDS}/categories`);
-  return response.data;
+  try {
+    const response = await apiClient.get<string[]>(`${API_ENDPOINTS.TRENDS}/categories`);
+    return response.data;
+  } catch (error) {
+    // Fallback to hardcoded categories
+    return [
+      'MEDICAL',
+      'LEGAL',
+      'ENGINEERING',
+      'EDUCATION',
+      'SERVICE',
+      'CREATIVE',
+      'BUSINESS',
+      'OTHER',
+    ];
+  }
 }

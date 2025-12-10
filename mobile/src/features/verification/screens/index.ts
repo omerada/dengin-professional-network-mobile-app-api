@@ -4,3 +4,4 @@ export { DocumentCaptureScreen } from './DocumentCaptureScreen';
 export { SelfieCaptureScreen } from './SelfieCaptureScreen';
 export { VerificationReviewScreen } from './VerificationReviewScreen';
 export { UploadStatusScreen } from './UploadStatusScreen';
+export { VerificationStatusScreen } from './VerificationStatusScreen';

@@ -17,19 +17,29 @@ export type NotificationType =
   | 'POST_LIKED'
   | 'POST_COMMENTED'
   | 'MENTION'
+  | 'POST_LIKE'
+  | 'POST_COMMENT'
+  | 'POST_MENTION'
+  | 'PROFILE_LIKE'
   // Messaging
   | 'NEW_MESSAGE'
+  | 'MESSAGE_RECEIVED'
   | 'NEW_MATCH'
+  | 'MATCH_ACCEPTED'
+  | 'MATCH_SUGGESTION'
   // Verification
   | 'VERIFICATION_APPROVED'
   | 'VERIFICATION_REJECTED'
   | 'VERIFICATION_PENDING_REVIEW'
   | 'VERIFICATION_STATUS'
+  | 'VERIFICATION_REQUIRED'
   // Moderation
   | 'POST_FLAGGED'
   | 'CONTENT_REMOVED'
   | 'WARNING_ISSUED'
   | 'MODERATION_ALERT'
+  | 'POST_REMOVED'
+  | 'ACCOUNT_WARNING'
   // Profile
   | 'PROFILE_VIEW'
   // System
@@ -37,7 +47,9 @@ export type NotificationType =
   | 'PASSWORD_RESET'
   | 'ACCOUNT_SUSPENDED'
   | 'ACCOUNT_REACTIVATED'
-  | 'SYSTEM';
+  | 'SYSTEM'
+  | 'SYSTEM_ANNOUNCEMENT'
+  | 'FEATURE_ANNOUNCEMENT';
 
 /**
  * Bildirim durumu - Backend NotificationStatus enum ile uyumlu
@@ -397,53 +409,77 @@ export interface NotificationStoreState {
  * Bildirim ikonu ve rengi için yardımcı fonksiyonlar
  */
 export const getNotificationIcon = (type: NotificationType): string => {
-  const icons: Record<NotificationType, string> = {
+  const icons: Partial<Record<NotificationType, string>> = {
     NEW_FOLLOWER: 'person-add',
     POST_LIKED: 'heart',
     POST_COMMENTED: 'chatbubble',
     MENTION: 'at',
+    POST_LIKE: 'heart',
+    POST_COMMENT: 'chatbubble',
+    POST_MENTION: 'at',
+    PROFILE_LIKE: 'heart-circle',
     NEW_MESSAGE: 'mail',
+    MESSAGE_RECEIVED: 'mail',
+    NEW_MATCH: 'people',
+    MATCH_ACCEPTED: 'people',
+    MATCH_SUGGESTION: 'people-circle',
     VERIFICATION_APPROVED: 'checkmark-circle',
     VERIFICATION_REJECTED: 'close-circle',
     VERIFICATION_PENDING_REVIEW: 'time',
+    VERIFICATION_STATUS: 'shield-checkmark',
+    VERIFICATION_REQUIRED: 'shield',
     POST_FLAGGED: 'warning',
     CONTENT_REMOVED: 'trash',
     WARNING_ISSUED: 'warning',
+    POST_REMOVED: 'trash',
+    ACCOUNT_WARNING: 'alert',
+    MODERATION_ALERT: 'alert-circle',
+    PROFILE_VIEW: 'eye',
     WELCOME: 'hand-right',
     PASSWORD_RESET: 'key',
     ACCOUNT_SUSPENDED: 'ban',
     ACCOUNT_REACTIVATED: 'checkmark-circle',
     SYSTEM: 'information-circle',
-    NEW_MATCH: 'people',
-    VERIFICATION_STATUS: 'shield-checkmark',
-    MODERATION_ALERT: 'alert-circle',
-    PROFILE_VIEW: 'eye',
+    SYSTEM_ANNOUNCEMENT: 'megaphone',
+    FEATURE_ANNOUNCEMENT: 'sparkles',
   };
   return icons[type] || 'notifications';
 };
 
 export const getNotificationColor = (type: NotificationType): string => {
-  const colors: Record<NotificationType, string> = {
+  const colors: Partial<Record<NotificationType, string>> = {
     NEW_FOLLOWER: '#3B82F6', // Blue
     POST_LIKED: '#EF4444', // Red
     POST_COMMENTED: '#10B981', // Green
     MENTION: '#6366F1', // Indigo
+    POST_LIKE: '#EF4444', // Red
+    POST_COMMENT: '#10B981', // Green
+    POST_MENTION: '#6366F1', // Indigo
+    PROFILE_LIKE: '#EF4444', // Red
     NEW_MESSAGE: '#6366F1', // Indigo
+    MESSAGE_RECEIVED: '#6366F1', // Indigo
+    NEW_MATCH: '#8B5CF6', // Purple
+    MATCH_ACCEPTED: '#8B5CF6', // Purple
+    MATCH_SUGGESTION: '#8B5CF6', // Purple
     VERIFICATION_APPROVED: '#10B981', // Green
     VERIFICATION_REJECTED: '#EF4444', // Red
     VERIFICATION_PENDING_REVIEW: '#F59E0B', // Amber
+    VERIFICATION_STATUS: '#10B981', // Green
+    VERIFICATION_REQUIRED: '#F59E0B', // Amber
     POST_FLAGGED: '#F59E0B', // Amber
     CONTENT_REMOVED: '#EF4444', // Red
     WARNING_ISSUED: '#F59E0B', // Amber
+    POST_REMOVED: '#EF4444', // Red
+    ACCOUNT_WARNING: '#F59E0B', // Amber
+    MODERATION_ALERT: '#F59E0B', // Amber
+    PROFILE_VIEW: '#3B82F6', // Blue
     WELCOME: '#8B5CF6', // Purple
     PASSWORD_RESET: '#6366F1', // Indigo
     ACCOUNT_SUSPENDED: '#EF4444', // Red
     ACCOUNT_REACTIVATED: '#10B981', // Green
     SYSTEM: '#6B7280', // Gray
-    NEW_MATCH: '#8B5CF6', // Purple
-    VERIFICATION_STATUS: '#10B981', // Green
-    MODERATION_ALERT: '#F59E0B', // Amber
-    PROFILE_VIEW: '#3B82F6', // Blue
+    SYSTEM_ANNOUNCEMENT: '#6B7280', // Gray
+    FEATURE_ANNOUNCEMENT: '#8B5CF6', // Purple
   };
   return colors[type] || '#6B7280';
 };
@@ -452,27 +488,39 @@ export const getNotificationColor = (type: NotificationType): string => {
  * Bildirim kategorisi al
  */
 export const getNotificationCategory = (type: NotificationType): NotificationCategory => {
-  const categories: Record<NotificationType, NotificationCategory> = {
+  const categories: Partial<Record<NotificationType, NotificationCategory>> = {
     NEW_FOLLOWER: 'SOCIAL',
     POST_LIKED: 'SOCIAL',
     POST_COMMENTED: 'SOCIAL',
     MENTION: 'SOCIAL',
+    POST_LIKE: 'SOCIAL',
+    POST_COMMENT: 'SOCIAL',
+    POST_MENTION: 'SOCIAL',
+    PROFILE_LIKE: 'SOCIAL',
+    PROFILE_VIEW: 'SOCIAL',
     NEW_MESSAGE: 'MESSAGING',
+    MESSAGE_RECEIVED: 'MESSAGING',
+    NEW_MATCH: 'SOCIAL',
+    MATCH_ACCEPTED: 'SOCIAL',
+    MATCH_SUGGESTION: 'SOCIAL',
     VERIFICATION_APPROVED: 'VERIFICATION',
     VERIFICATION_REJECTED: 'VERIFICATION',
     VERIFICATION_PENDING_REVIEW: 'VERIFICATION',
+    VERIFICATION_STATUS: 'VERIFICATION',
+    VERIFICATION_REQUIRED: 'VERIFICATION',
     POST_FLAGGED: 'MODERATION',
     CONTENT_REMOVED: 'MODERATION',
     WARNING_ISSUED: 'MODERATION',
+    POST_REMOVED: 'MODERATION',
+    ACCOUNT_WARNING: 'MODERATION',
+    MODERATION_ALERT: 'MODERATION',
     WELCOME: 'SYSTEM',
     PASSWORD_RESET: 'SYSTEM',
     ACCOUNT_SUSPENDED: 'SYSTEM',
     ACCOUNT_REACTIVATED: 'SYSTEM',
     SYSTEM: 'SYSTEM',
-    NEW_MATCH: 'SOCIAL',
-    VERIFICATION_STATUS: 'VERIFICATION',
-    MODERATION_ALERT: 'MODERATION',
-    PROFILE_VIEW: 'SOCIAL',
+    SYSTEM_ANNOUNCEMENT: 'SYSTEM',
+    FEATURE_ANNOUNCEMENT: 'SYSTEM',
   };
   return categories[type] || 'SYSTEM';
 };
