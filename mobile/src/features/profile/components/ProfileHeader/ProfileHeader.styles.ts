@@ -4,11 +4,9 @@
 
 import { StyleSheet } from 'react-native';
 
-// Color constants
-const WHITE = '#FFFFFF';
-
 /**
  * ProfileHeader styles - Alphabetically sorted
+ * Note: Color values should be passed via theme colors, not hard-coded
  */
 export const styles = StyleSheet.create({
   avatar: {

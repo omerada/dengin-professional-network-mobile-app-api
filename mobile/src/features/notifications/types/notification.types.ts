@@ -446,42 +446,63 @@ export const getNotificationIcon = (type: NotificationType): string => {
   return icons[type] || 'notifications';
 };
 
+/**
+ * Get semantic notification color based on type
+ * @deprecated Use theme colors from NotificationItem component instead
+ * @param type - Notification type
+ * @returns Hex color string (for backward compatibility)
+ */
 export const getNotificationColor = (type: NotificationType): string => {
-  const colors: Partial<Record<NotificationType, string>> = {
-    NEW_FOLLOWER: '#3B82F6', // Blue
-    POST_LIKED: '#EF4444', // Red
-    POST_COMMENTED: '#10B981', // Green
-    MENTION: '#6366F1', // Indigo
-    POST_LIKE: '#EF4444', // Red
-    POST_COMMENT: '#10B981', // Green
-    POST_MENTION: '#6366F1', // Indigo
-    PROFILE_LIKE: '#EF4444', // Red
-    NEW_MESSAGE: '#6366F1', // Indigo
-    MESSAGE_RECEIVED: '#6366F1', // Indigo
-    NEW_MATCH: '#8B5CF6', // Purple
-    MATCH_ACCEPTED: '#8B5CF6', // Purple
-    MATCH_SUGGESTION: '#8B5CF6', // Purple
-    VERIFICATION_APPROVED: '#10B981', // Green
-    VERIFICATION_REJECTED: '#EF4444', // Red
-    VERIFICATION_PENDING_REVIEW: '#F59E0B', // Amber
-    VERIFICATION_STATUS: '#10B981', // Green
-    VERIFICATION_REQUIRED: '#F59E0B', // Amber
-    POST_FLAGGED: '#F59E0B', // Amber
-    CONTENT_REMOVED: '#EF4444', // Red
-    WARNING_ISSUED: '#F59E0B', // Amber
-    POST_REMOVED: '#EF4444', // Red
-    ACCOUNT_WARNING: '#F59E0B', // Amber
-    MODERATION_ALERT: '#F59E0B', // Amber
-    PROFILE_VIEW: '#3B82F6', // Blue
-    WELCOME: '#8B5CF6', // Purple
-    PASSWORD_RESET: '#6366F1', // Indigo
-    ACCOUNT_SUSPENDED: '#EF4444', // Red
-    ACCOUNT_REACTIVATED: '#10B981', // Green
-    SYSTEM: '#6B7280', // Gray
-    SYSTEM_ANNOUNCEMENT: '#6B7280', // Gray
-    FEATURE_ANNOUNCEMENT: '#8B5CF6', // Purple
+  // Legacy function - kept for backward compatibility
+  // Modern approach: Use theme colors in components
+  const colorMap: Partial<Record<NotificationType, string>> = {
+    // Social - Copper (#F59E42)
+    NEW_FOLLOWER: '#F59E42',
+    PROFILE_VIEW: '#F59E42',
+    MENTION: '#F59E42',
+
+    // Positive - Emerald Green (#10C55F)
+    POST_COMMENTED: '#10C55F',
+    POST_COMMENT: '#10C55F',
+    VERIFICATION_APPROVED: '#10C55F',
+    VERIFICATION_STATUS: '#10C55F',
+    ACCOUNT_REACTIVATED: '#10C55F',
+
+    // Negative - Ruby Red (#EF4444)
+    POST_LIKED: '#EF4444',
+    POST_LIKE: '#EF4444',
+    PROFILE_LIKE: '#EF4444',
+    VERIFICATION_REJECTED: '#EF4444',
+    CONTENT_REMOVED: '#EF4444',
+    POST_REMOVED: '#EF4444',
+    ACCOUNT_SUSPENDED: '#EF4444',
+
+    // Warning - Orange (#F97316)
+    VERIFICATION_PENDING_REVIEW: '#F97316',
+    VERIFICATION_REQUIRED: '#F97316',
+    POST_FLAGGED: '#F97316',
+    WARNING_ISSUED: '#F97316',
+    ACCOUNT_WARNING: '#F97316',
+    MODERATION_ALERT: '#F97316',
+
+    // Info - Indigo (#5674F0)
+    NEW_MESSAGE: '#5674F0',
+    MESSAGE_RECEIVED: '#5674F0',
+    POST_MENTION: '#5674F0',
+    PASSWORD_RESET: '#5674F0',
+
+    // Premium - Purple/Indigo
+    NEW_MATCH: '#7890FF',
+    MATCH_ACCEPTED: '#7890FF',
+    MATCH_SUGGESTION: '#7890FF',
+    WELCOME: '#7890FF',
+    FEATURE_ANNOUNCEMENT: '#7890FF',
+
+    // Neutral - Gray
+    SYSTEM: '#9CA3AF',
+    SYSTEM_ANNOUNCEMENT: '#9CA3AF',
   };
-  return colors[type] || '#6B7280';
+  return colorMap[type] || '#9CA3AF';
 };
 
 /**

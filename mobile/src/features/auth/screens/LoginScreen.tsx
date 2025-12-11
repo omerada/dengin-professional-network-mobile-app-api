@@ -132,7 +132,7 @@ export const LoginScreen: React.FC = () => {
                     backgroundColor: colors.interactive.default,
                   },
                 ]}>
-                <Text style={[styles.logoText, { color: '#FFFFFF' }]}>M</Text>
+                <Text style={[styles.logoText, { color: colors.text.inverse }]}>M</Text>
               </View>
             </View>
             <View style={styles.titleContainer}>

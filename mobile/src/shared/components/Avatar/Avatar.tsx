@@ -192,7 +192,11 @@ export const Avatar: React.FC<AvatarProps> = memo(
 
       return (
         <View style={[styles.placeholder, { backgroundColor }]}>
-          <Text style={[styles.initials, { color: '#FFFFFF', fontSize: sizeConfig.fontSize }]}>
+          <Text
+            style={[
+              styles.initials,
+              { color: colors.text.inverse, fontSize: sizeConfig.fontSize },
+            ]}>
             {initials}
           </Text>
         </View>
@@ -227,7 +231,7 @@ export const Avatar: React.FC<AvatarProps> = memo(
               style={[
                 styles.badgeContent,
                 {
-                  color: '#FFFFFF',
+                  color: colors.text.inverse,
                   fontSize: sizeConfig.fontSize * 0.5,
                 },
               ]}>
@@ -244,7 +248,7 @@ export const Avatar: React.FC<AvatarProps> = memo(
 
       return (
         <View style={[styles.editOverlay, { backgroundColor: 'rgba(0, 0, 0, 0.4)' }]}>
-          <Text style={{ color: '#FFFFFF', fontSize: sizeConfig.fontSize }}>📷</Text>
+          <Text style={{ color: colors.text.inverse, fontSize: sizeConfig.fontSize }}>📷</Text>
         </View>
       );
     };

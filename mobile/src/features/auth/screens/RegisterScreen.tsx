@@ -305,7 +305,7 @@ export const RegisterScreen: React.FC = () => {
                           width: 26,
                           height: 26,
                           borderRadius: 13,
-                          backgroundColor: '#FFFFFF',
+                          backgroundColor: colors.background.primary,
                           shadowColor: '#000',
                           shadowOffset: { width: 0, height: 2 },
                           shadowOpacity: 0.2,

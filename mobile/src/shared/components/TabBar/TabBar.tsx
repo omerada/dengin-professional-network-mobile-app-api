@@ -315,8 +315,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   badgeText: {
-    color: '#FFFFFF',
-    fontSize: 10,
     fontWeight: '700',
   },
 });

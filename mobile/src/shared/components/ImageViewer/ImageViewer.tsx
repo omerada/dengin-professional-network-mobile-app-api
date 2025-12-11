@@ -89,7 +89,7 @@ export const ImageViewer = memo<ImageViewerProps>(function ImageViewer({
   showShare = false,
   onShare,
 }) {
-  useColors(); // Keep hook for future theming
+  const colors = useColors();
   const insets = useSafeAreaInsets();
   const { trigger: triggerHaptic } = useHaptic();
   const [loading, setLoading] = useState(true);
@@ -266,7 +266,7 @@ export const ImageViewer = memo<ImageViewerProps>(function ImageViewer({
             hitSlop={16}
             accessibilityLabel="Close"
             accessibilityRole="button">
-            <Icon name="close" size={28} color="#FFFFFF" />
+            <Icon name="close" size={28} color={colors.text.inverse} />
           </Pressable>
 
           <View style={styles.headerActions}>
@@ -277,7 +277,7 @@ export const ImageViewer = memo<ImageViewerProps>(function ImageViewer({
                 hitSlop={16}
                 accessibilityLabel="Share"
                 accessibilityRole="button">
-                <Icon name="share-outline" size={24} color="#FFFFFF" />
+                <Icon name="share-outline" size={24} color={colors.text.inverse} />
               </Pressable>
             )}
             {showDownload && onDownload && (
@@ -287,7 +287,7 @@ export const ImageViewer = memo<ImageViewerProps>(function ImageViewer({
                 hitSlop={16}
                 accessibilityLabel="Download"
                 accessibilityRole="button">
-                <Icon name="download-outline" size={24} color="#FFFFFF" />
+                <Icon name="download-outline" size={24} color={colors.text.inverse} />
               </Pressable>
             )}
           </View>
@@ -337,7 +337,6 @@ export const ImageViewer = memo<ImageViewerProps>(function ImageViewer({
 // Color constants for ImageViewer (dark overlay theme)
 const OVERLAY_BG = '#000000';
 const OVERLAY_BG_TRANSLUCENT = 'rgba(0, 0, 0, 0.5)';
-const OVERLAY_TEXT = '#FFFFFF';
 
 const styles = StyleSheet.create({
   background: {

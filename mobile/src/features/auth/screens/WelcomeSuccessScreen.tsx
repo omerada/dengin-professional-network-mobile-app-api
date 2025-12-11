@@ -198,7 +198,7 @@ export const WelcomeSuccessScreen: React.FC = () => {
               },
             ]}>
             <Animated.View style={checkContainerStyle}>
-              <Icon name="check" size={72} color="#FFFFFF" />
+              <Icon name="check" size={72} color={colors.text.inverse} />
             </Animated.View>
           </View>
         </View>
@@ -234,8 +234,15 @@ export const WelcomeSuccessScreen: React.FC = () => {
             style={[styles.continueButton, { backgroundColor: colors.interactive.default }]}
             onPress={handleContinue}
             activeOpacity={0.8}>
-            <Text style={styles.continueButtonText}>Devam Et</Text>
-            <Icon name="arrow-right" size={20} color="#FFFFFF" style={styles.arrowIcon} />
+            <Text style={[styles.continueButtonText, { color: colors.text.inverse }]}>
+              Devam Et
+            </Text>
+            <Icon
+              name="arrow-right"
+              size={20}
+              color={colors.text.inverse}
+              style={styles.arrowIcon}
+            />
           </TouchableOpacity>
 
           <TouchableOpacity onPress={handleContinue} style={styles.tapAnywhere}>
@@ -320,7 +327,6 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
   },
   continueButtonText: {
-    color: '#FFFFFF',
     fontSize: 18,
     fontWeight: '700',
     marginRight: spacing.sm,

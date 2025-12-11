@@ -151,7 +151,7 @@ export const StepSuccess: React.FC<StepSuccessProps> = ({ onComplete, duration =
             },
           ]}>
           <Animated.View style={checkContainerStyle}>
-            <Icon name="check" size={56} color="#FFFFFF" />
+            <Icon name="check" size={56} color={colors.text.inverse} />
           </Animated.View>
         </View>
       </Animated.View>

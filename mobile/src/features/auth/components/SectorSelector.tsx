@@ -131,7 +131,7 @@ export const SectorSelector: React.FC<SectorSelectorProps> = ({
           <Icon
             name={getSectorIcon(item.code)}
             size={20}
-            color={isSelected ? '#FFFFFF' : colors.text.secondary}
+            color={isSelected ? colors.text.inverse : colors.text.secondary}
           />
         </View>
 
