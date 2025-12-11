@@ -32,7 +32,8 @@ export const AuthNavigator: React.FC = () => {
       initialRouteName="Onboarding"
       screenOptions={{
         headerShown: false,
-        animation: 'slide_from_right',
+        animation: 'fade_from_bottom',
+        animationDuration: 250,
         gestureEnabled: true,
         fullScreenGestureEnabled: true,
         gestureDirection: 'horizontal',

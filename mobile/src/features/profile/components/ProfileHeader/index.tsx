@@ -148,7 +148,14 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = memo(
 
             {/* Verification badge */}
             {profileData.isProfessionVerified && (
-              <View style={[styles.verifiedBadge, { backgroundColor: colors.status.success }]}>
+              <View
+                style={[
+                  styles.verifiedBadge,
+                  {
+                    backgroundColor: colors.status.success,
+                    borderColor: colors.background.primary,
+                  },
+                ]}>
                 <Icon name="checkmark" size={12} color={colors.text.inverse} />
               </View>
             )}

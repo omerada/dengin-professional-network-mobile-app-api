@@ -206,14 +206,14 @@ export const colors = {
  * Semantic Colors - Light Theme
  */
 export const lightTheme: ThemeColors = {
-  // Backgrounds
+  // Backgrounds (Reduced copper dominance for better balance)
   background: {
     primary: '#FFFFFF',
-    secondary: palette.warmGray[50],
-    tertiary: palette.warmGray[100],
+    secondary: palette.warmGray[50], // Neutral instead of copper
+    tertiary: palette.warmGray[100], // Neutral instead of copper
     elevated: '#FFFFFF',
     overlay: 'rgba(28, 25, 23, 0.54)',
-    accent: palette.copper[50],
+    accent: palette.warmGray[50], // Changed from copper[50] to reduce orange
   },
 
   // Text Colors
@@ -300,17 +300,17 @@ export const lightTheme: ThemeColors = {
 } as const;
 
 /**
- * Semantic Colors - Dark Theme
+ * Semantic Colors - Dark Theme (Balanced, less orange)
  */
 export const darkTheme: ThemeColors = {
-  // Backgrounds
+  // Backgrounds (Neutral grays, minimal copper tint)
   background: {
     primary: palette.warmGray[950],
     secondary: palette.warmGray[900],
     tertiary: palette.warmGray[800],
     elevated: palette.warmGray[900],
     overlay: 'rgba(0, 0, 0, 0.75)',
-    accent: palette.warmGray[800],
+    accent: palette.warmGray[800], // Neutral instead of copper
   },
 
   // Text Colors

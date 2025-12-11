@@ -351,7 +351,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   errorText: {
-    color: OVERLAY_TEXT,
     fontSize: 16,
     marginTop: 12,
   },

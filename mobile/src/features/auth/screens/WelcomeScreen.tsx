@@ -49,10 +49,7 @@ export const WelcomeScreen: React.FC = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top', 'bottom', 'left', 'right']}>
-      <StatusBar
-        barStyle={colors.background.primary === '#FFFFFF' ? 'dark-content' : 'light-content'}
-        backgroundColor={colors.background.primary}
-      />
+      <StatusBar animated translucent={false} />
 
       <View style={styles.content}>
         {/* Hero Logo Area */}

@@ -87,7 +87,6 @@ export const styles = StyleSheet.create({
 
   verifiedBadge: {
     alignItems: 'center',
-    borderColor: WHITE,
     borderRadius: 12,
     borderWidth: 2,
     height: 24,
