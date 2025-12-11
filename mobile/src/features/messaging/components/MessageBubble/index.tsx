@@ -81,7 +81,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
     }, [shouldTriggerReply, onReply, message, triggerHaptic]);
 
     // Colors
-    const textColor = isSentByMe ? '#FFFFFF' : colors.text.primary;
+    const textColor = isSentByMe ? colors.text.inverse : colors.text.primary;
     const metaColor = isSentByMe ? 'rgba(255,255,255,0.7)' : colors.text.tertiary;
 
     // Entry animation disabled for better performance

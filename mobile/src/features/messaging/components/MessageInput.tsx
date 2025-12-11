@@ -135,7 +135,7 @@ export const MessageInput: React.FC<MessageInputProps> = memo(
             buttonAnimatedStyle,
           ]}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Icon name="send" size={20} color="#FFFFFF" />
+          <Icon name="send" size={20} color={colors.text.inverse} />
         </AnimatedPressable>
       </View>
     );

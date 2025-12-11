@@ -67,7 +67,7 @@ export const MessageAttachment: React.FC<MessageAttachmentProps> = memo(
             backgroundColor: isOwn ? 'rgba(255,255,255,0.1)' : colors.background.tertiary,
           },
           fileName: {
-            color: isOwn ? '#FFFFFF' : colors.text.primary,
+            color: isOwn ? colors.text.inverse : colors.text.primary,
           },
           fileSize: {
             color: isOwn ? 'rgba(255,255,255,0.7)' : colors.text.tertiary,
@@ -79,7 +79,7 @@ export const MessageAttachment: React.FC<MessageAttachmentProps> = memo(
       [isOwn, colors],
     );
 
-    const iconColor = isOwn ? '#FFFFFF' : colors.text.secondary;
+    const iconColor = isOwn ? colors.text.inverse : colors.text.secondary;
     const downloadIconColor = isOwn ? 'rgba(255,255,255,0.7)' : colors.text.secondary;
 
     // Resim

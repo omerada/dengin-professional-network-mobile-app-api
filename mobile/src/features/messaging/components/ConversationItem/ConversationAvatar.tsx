@@ -91,7 +91,7 @@ export const ConversationAvatar: React.FC<ConversationAvatarProps> = memo(
           <Animated.View
             entering={FadeIn.duration(300)}
             style={[styles.verifiedBadge, dynamicStyles.verifiedBadge]}>
-            <Icon name="checkmark" size={8} color="#FFFFFF" />
+            <Icon name="checkmark" size={8} color={colors.text.inverse} />
           </Animated.View>
         )}
       </View>

@@ -35,8 +35,8 @@ export const EmptyConversations: React.FC<EmptyConversationsProps> = memo(
               { backgroundColor: colors.interactive.default },
               pressed && styles.buttonPressed,
             ]}>
-            <Icon name="add" size={20} color="#FFFFFF" />
-            <Text style={styles.buttonText}>Yeni Konuşma</Text>
+            <Icon name="add" size={20} color={colors.text.inverse} />
+            <Text style={[styles.buttonText, { color: colors.text.inverse }]}>Yeni Konuşma</Text>
           </Pressable>
         )}
       </View>
@@ -85,7 +85,6 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   buttonText: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },

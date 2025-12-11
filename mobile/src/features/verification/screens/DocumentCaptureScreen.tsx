@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
     ...typography.bodySmall,
     color: 'white',
     fontWeight: '600',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     borderRadius: 16,

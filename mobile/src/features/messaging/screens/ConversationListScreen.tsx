@@ -163,7 +163,7 @@ export const ConversationListScreen: React.FC = () => {
       {/* Connection indicator */}
       {!isConnected && (
         <View style={[styles.connectionBar, { backgroundColor: colors.status.warning }]}>
-          <Icon name="cloud-offline" size={16} color="#FFFFFF" />
+          <Icon name="cloud-offline" size={16} color={colors.text.inverse} />
         </View>
       )}
 
@@ -220,7 +220,7 @@ export const ConversationListScreen: React.FC = () => {
           { backgroundColor: colors.interactive.default, bottom: insets.bottom + 16 },
           pressed && styles.fabPressed,
         ]}>
-        <Icon name="create-outline" size={24} color="#FFFFFF" />
+        <Icon name="create-outline" size={24} color={colors.text.inverse} />
       </Pressable>
     </SafeAreaView>
   );

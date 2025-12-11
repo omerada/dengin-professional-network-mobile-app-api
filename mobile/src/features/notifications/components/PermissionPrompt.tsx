@@ -73,7 +73,7 @@ export const PermissionPrompt: React.FC<PermissionPromptProps> = memo(
                 { backgroundColor: colors.interactive.default },
                 pressed && styles.buttonPressed,
               ]}>
-              <Text style={styles.primaryButtonText}>
+              <Text style={[styles.primaryButtonText, { color: colors.text.inverse }]}>
                 {permissionDenied ? 'Ayarlara Git' : 'Bildirimleri Aç'}
               </Text>
             </Pressable>
@@ -168,7 +168,6 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   primaryButtonText: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },

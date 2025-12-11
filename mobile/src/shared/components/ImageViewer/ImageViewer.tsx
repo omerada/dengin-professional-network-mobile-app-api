@@ -298,14 +298,16 @@ export const ImageViewer = memo<ImageViewerProps>(function ImageViewer({
           <Animated.View style={[styles.imageContainer, imageAnimatedStyle]}>
             {loading && (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#FFFFFF" />
+                <ActivityIndicator size="large" color={colors.text.inverse} />
               </View>
             )}
 
             {error ? (
               <View style={styles.errorContainer}>
-                <Icon name="image-outline" size={48} color="#FFFFFF" />
-                <Text style={styles.errorText}>Resim yüklenemedi</Text>
+                <Icon name="image-outline" size={48} color={colors.text.inverse} />
+                <Text style={[styles.errorText, { color: colors.text.inverse }]}>
+                  Resim yüklenemedi
+                </Text>
               </View>
             ) : (
               <Image

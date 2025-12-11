@@ -16,6 +16,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing, fontSize } from '@theme';
+import { useHaptic } from '@shared/hooks/useHaptic';
 
 interface AvatarPickerProps {
   /**
@@ -58,6 +59,7 @@ interface AvatarPickerProps {
 export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
   ({ currentAvatarUrl, fullName, onImageSelected, onRemove, isLoading = false, size = 120 }) => {
     const colors = useColors();
+    const haptic = useHaptic();
     const [previewUri, setPreviewUri] = useState<string | null>(null);
 
     // Generate initials from full name
@@ -76,12 +78,9 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
       try {
         // Request camera permission
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
-        
+
         if (status !== 'granted') {
-          Alert.alert(
-            'İzin Gerekli',
-            'Fotoğraf çekmek için kamera iznine ihtiyacımız var.'
-          );
+          Alert.alert('İzin Gerekli', 'Fotoğraf çekmek için kamera iznine ihtiyacımız var.');
           return;
         }
 
@@ -95,8 +94,10 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
           const uri = result.assets[0].uri;
           setPreviewUri(uri);
           onImageSelected(uri);
+          haptic.success();
         }
       } catch (error) {
+        haptic.error();
         console.error('[AvatarPicker] Camera error:', error);
         Alert.alert('Hata', 'Kamera açılırken bir hata oluştu.');
       }
@@ -107,11 +108,11 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
       try {
         // Request media library permission
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        
+
         if (status !== 'granted') {
           Alert.alert(
             'İzin Gerekli',
-            'Galeriden fotoğraf seçmek için medya kütüphanesi iznine ihtiyacımız var.'
+            'Galeriden fotoğraf seçmek için medya kütüphanesi iznine ihtiyacımız var.',
           );
           return;
         }
@@ -126,8 +127,10 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
           const uri = result.assets[0].uri;
           setPreviewUri(uri);
           onImageSelected(uri);
+          haptic.success();
         }
       } catch (error) {
+        haptic.error();
         console.error('[AvatarPicker] Gallery error:', error);
         Alert.alert('Hata', 'Galeri açılırken bir hata oluştu.');
       }
@@ -135,6 +138,7 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
 
     // Remove avatar
     const handleRemove = useCallback(() => {
+      haptic.warning();
       Alert.alert('Fotoğrafı Kaldır', 'Profil fotoğrafınızı kaldırmak istediğinize emin misiniz?', [
         { text: 'İptal', style: 'cancel' },
         {
@@ -143,13 +147,15 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
           onPress: () => {
             setPreviewUri(null);
             onRemove?.();
+            haptic.success();
           },
         },
       ]);
-    }, [onRemove]);
+    }, [onRemove, haptic]);
 
     // Show options
     const handlePress = useCallback(() => {
+      haptic.light();
       const options: {
         text: string;
         onPress?: () => void;
@@ -170,7 +176,7 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
       options.push({ text: 'İptal', style: 'cancel' });
 
       Alert.alert('Profil Fotoğrafı', 'Bir seçenek seçin', options);
-    }, [displayUri, handleTakePhoto, handleChooseFromGallery, handleRemove, onRemove]);
+    }, [displayUri, handleTakePhoto, handleChooseFromGallery, handleRemove, onRemove, haptic]);
 
     return (
       <View style={styles.container}>
@@ -224,11 +230,11 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
               },
             ]}>
             {isLoading ? (
-              <ActivityIndicator color="#FFFFFF" size="large" />
+              <ActivityIndicator color={colors.text.inverse} size="large" />
             ) : (
               <>
-                <Icon name="camera" size={24} color="#FFFFFF" />
-                <Text style={styles.overlayText}>Değiştir</Text>
+                <Icon name="camera" size={24} color={colors.text.inverse} />
+                <Text style={[styles.overlayText, { color: colors.text.inverse }]}>Değiştir</Text>
               </>
             )}
           </View>
@@ -269,7 +275,6 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   overlayText: {
-    color: '#FFFFFF',
     fontSize: fontSize.xs,
     fontWeight: '600',
     marginTop: 2,

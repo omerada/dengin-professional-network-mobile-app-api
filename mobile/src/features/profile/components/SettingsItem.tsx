@@ -6,7 +6,7 @@ import React, { memo, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Switch, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
-import { spacing, fontSize } from '@theme';
+import { spacing, fontSize, borderRadius } from '@theme';
 import type { SettingsItemType } from '../types';
 
 interface SettingsItemProps extends SettingsItemType {
@@ -77,7 +77,7 @@ export const SettingsItem: React.FC<SettingsItemProps> = memo(
                 false: colors.border.default,
                 true: colors.interactive.default,
               }}
-              thumbColor="#FFFFFF"
+              thumbColor={colors.background.primary}
             />
           )}
 
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: 36,
     height: 36,
-    borderRadius: 8,
+    borderRadius: borderRadius.md,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: spacing.md,

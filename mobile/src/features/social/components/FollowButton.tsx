@@ -100,7 +100,7 @@ export const FollowButton: React.FC<FollowButtonProps> = memo(
       () => [
         styles.text,
         size === 'sm' ? styles.textSm : styles.textMd,
-        { color: isFollowing ? colors.text.primary : '#FFFFFF' },
+        { color: isFollowing ? colors.text.primary : colors.text.inverse },
       ],
       [size, isFollowing, colors],
     );
@@ -120,7 +120,10 @@ export const FollowButton: React.FC<FollowButtonProps> = memo(
         accessibilityLabel={isFollowing ? 'Takipten çık' : 'Takip et'}
         accessibilityState={{ disabled: isLoading }}>
         {isLoading ? (
-          <ActivityIndicator size="small" color={isFollowing ? colors.text.primary : '#FFFFFF'} />
+          <ActivityIndicator
+            size="small"
+            color={isFollowing ? colors.text.primary : colors.text.inverse}
+          />
         ) : (
           <Text style={textStyle}>{isFollowing ? 'Takipten Çık' : 'Takip Et'}</Text>
         )}
@@ -133,7 +136,7 @@ const styles = StyleSheet.create({
   button: {
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 8,
+    borderRadius: 8, // md token
   },
   buttonSm: {
     paddingVertical: spacing['1'],

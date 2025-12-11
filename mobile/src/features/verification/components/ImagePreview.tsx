@@ -90,7 +90,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = memo(
 
           {/* Yükleniyor overlay */}
           {loading && (
-            <View style={[styles.loadingOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+            <View style={[styles.loadingOverlay, { backgroundColor: colors.background.overlay }]}>
               <Text style={styles.loadingText}>Yükleniyor...</Text>
             </View>
           )}

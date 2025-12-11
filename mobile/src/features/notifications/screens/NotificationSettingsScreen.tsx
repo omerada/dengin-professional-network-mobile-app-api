@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
+import { spacing, borderRadius } from '@theme';
 import { NotificationSettingsToggle } from '../components/NotificationSettingsToggle';
 import { useNotificationSettings, useNotificationPermission } from '../hooks';
 import type { NotificationType } from '../types';
@@ -221,14 +222,16 @@ export const NotificationSettingsScreen: React.FC = () => {
           <Pressable
             onPress={handleEnableNotifications}
             style={[styles.permissionWarning, { backgroundColor: colors.status.warning }]}>
-            <Icon name="warning" size={24} color="#FFFFFF" style={styles.warningIcon} />
+            <Icon name="warning" size={24} color={colors.text.inverse} style={styles.warningIcon} />
             <View style={styles.warningContent}>
-              <Text style={[styles.warningTitle, { color: '#FFFFFF' }]}>Bildirimler Kapalı</Text>
-              <Text style={[styles.warningText, { color: '#FFFFFF' }]}>
+              <Text style={[styles.warningTitle, { color: colors.text.inverse }]}>
+                Bildirimler Kapalı
+              </Text>
+              <Text style={[styles.warningText, { color: colors.text.inverse }]}>
                 Bildirimleri almak için cihaz ayarlarından izin vermeniz gerekiyor.
               </Text>
             </View>
-            <Icon name="chevron-forward" size={20} color="#FFFFFF" />
+            <Icon name="chevron-forward" size={20} color={colors.text.inverse} />
           </Pressable>
         )}
 
@@ -354,31 +357,31 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingTop: 16,
-    paddingBottom: 32,
+    paddingTop: spacing['4'],
+    paddingBottom: spacing['8'],
   },
   permissionWarning: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: 12,
+    padding: spacing['4'],
+    marginHorizontal: spacing['4'],
+    marginTop: spacing['4'],
+    borderRadius: borderRadius.lg,
   },
   quietHoursInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    marginHorizontal: 16,
-    marginTop: 16,
-    borderRadius: 8,
+    padding: spacing['3'],
+    marginHorizontal: spacing['4'],
+    marginTop: spacing['4'],
+    borderRadius: borderRadius.md,
   },
   quietHoursText: {
     fontSize: 14,
     flex: 1,
   },
   warningIcon: {
-    marginRight: 12,
+    marginRight: spacing['3'],
   },
   warningContent: {
     flex: 1,
@@ -396,13 +399,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginTop: 24,
-    marginBottom: 8,
-    marginHorizontal: 16,
+    marginTop: spacing['6'],
+    marginBottom: spacing['2'],
+    marginHorizontal: spacing['4'],
   },
   section: {
-    marginHorizontal: 16,
-    borderRadius: 12,
+    marginHorizontal: spacing['4'],
+    borderRadius: borderRadius.lg,
     overflow: 'hidden',
   },
   separator: {
@@ -412,8 +415,8 @@ const styles = StyleSheet.create({
   helpText: {
     fontSize: 13,
     lineHeight: 18,
-    marginTop: 24,
-    marginHorizontal: 16,
+    marginTop: spacing['6'],
+    marginHorizontal: spacing['4'],
     textAlign: 'center',
   },
 });

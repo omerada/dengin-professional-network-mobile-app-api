@@ -81,6 +81,7 @@ export const NotificationBadge: React.FC<NotificationBadgeProps> = memo(
             paddingHorizontal: isLargeNumber ? sizeConfig.padding + 2 : 0,
             borderRadius: sizeConfig.minSize / 2,
             backgroundColor: colors.status.error,
+            borderColor: colors.background.primary,
           },
         ]}>
         <Text
@@ -88,6 +89,7 @@ export const NotificationBadge: React.FC<NotificationBadgeProps> = memo(
             styles.text,
             {
               fontSize: sizeConfig.fontSize,
+              color: colors.text.inverse,
             },
           ]}>
           {displayCount}
@@ -104,10 +106,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#FFFFFF',
   },
   text: {
-    color: '#FFFFFF',
     fontWeight: '700',
     textAlign: 'center',
   },
