@@ -1,20 +1,22 @@
 // src/theme/shadows.ts
-// Meslektaş Design System - Shadow Tokens
-// Oku: mobile-development-guide/ui-ux-modernization/03-DESIGN-SYSTEM-OVERHAUL.md
+// Meslektaş Design System v2.0 - Copper-Tinted Shadow Tokens
+// Oku: DESIGN-SYSTEM-DOCUMENTATION.md
 
 import { Platform, ViewStyle } from 'react-native';
 import type { ShadowStyle, ShadowVariant, LayeredShadowVariant } from './types';
 
 /**
- * Shadow Generator
- * Creates platform-specific shadows
+ * Copper-Tinted Shadow Generator
+ * Creates platform-specific shadows with copper tint for premium feel
  */
+const COPPER_SHADOW_COLOR = '#E08224'; // Copper 600
+
 const createShadow = (
   offsetY: number,
   blur: number,
   opacity: number,
   elevation: number,
-  color: string = '#000000',
+  color: string = COPPER_SHADOW_COLOR,
 ): ShadowStyle => ({
   shadowColor: color,
   shadowOffset: { width: 0, height: offsetY },
@@ -24,47 +26,56 @@ const createShadow = (
 });
 
 /**
- * Base Shadow Scale
+ * Base Shadow Scale - Copper Tinted
  */
 export const shadows: Record<ShadowVariant, ShadowStyle> = {
-  none: createShadow(0, 0, 0, 0),
+  none: createShadow(0, 0, 0, 0, 'transparent'),
 
-  // Extra Small - Subtle lift
-  xs: createShadow(1, 2, 0.05, 1),
+  // Extra Small - Subtle lift (badges, small cards)
+  xs: createShadow(1, 3, 0.06, 1),
 
   // Small - Cards, buttons
-  sm: createShadow(1, 3, 0.1, 2),
+  sm: createShadow(2, 4, 0.08, 2),
 
   // Medium - Dropdowns, active cards
-  md: createShadow(4, 6, 0.1, 4),
+  md: createShadow(4, 8, 0.1, 4),
 
   // Large - Modals, popovers
-  lg: createShadow(10, 15, 0.1, 8),
+  lg: createShadow(8, 16, 0.12, 8),
 
-  // Extra Large - Dialogs
-  xl: createShadow(20, 25, 0.1, 12),
+  // Extra Large - Dialogs, bottom sheets
+  xl: createShadow(12, 24, 0.14, 12),
 
   // 2XL - Maximum elevation
-  '2xl': createShadow(25, 50, 0.12, 16),
+  '2xl': createShadow(16, 32, 0.16, 16),
 
-  // Card - Alias for sm
-  card: createShadow(1, 3, 0.1, 2),
+  // Button - Subtle lift
+  button: createShadow(1, 3, 0.06, 1),
+
+  // Modal - Strong elevation
+  modal: createShadow(12, 24, 0.14, 12),
+
+  // Dropdown - Medium elevation
+  dropdown: createShadow(4, 8, 0.1, 4),
+
+  // Tooltip - Light elevation
+  tooltip: createShadow(2, 4, 0.08, 2),
 
   // Toast - Elevated notification
-  toast: createShadow(6, 10, 0.15, 6),
+  toast: createShadow(6, 12, 0.12, 6),
 } as const;
 
 /**
- * Layered Shadows
- * More realistic multi-layer shadows
+ * Layered Shadows - Copper Tinted
+ * More realistic multi-layer shadows with copper tint
  */
 export const layeredShadows: Record<LayeredShadowVariant, ViewStyle> = {
   card: Platform.select<ViewStyle>({
     ios: {
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.05,
-      shadowRadius: 1,
+      shadowColor: COPPER_SHADOW_COLOR,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
     },
     android: {
       elevation: 2,
@@ -74,7 +85,7 @@ export const layeredShadows: Record<LayeredShadowVariant, ViewStyle> = {
 
   cardHover: Platform.select<ViewStyle>({
     ios: {
-      shadowColor: '#000000',
+      shadowColor: COPPER_SHADOW_COLOR,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.1,
       shadowRadius: 8,
@@ -87,36 +98,36 @@ export const layeredShadows: Record<LayeredShadowVariant, ViewStyle> = {
 
   button: Platform.select<ViewStyle>({
     ios: {
-      shadowColor: '#0066FF',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
+      shadowColor: COPPER_SHADOW_COLOR,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.06,
+      shadowRadius: 3,
     },
     android: {
-      elevation: 4,
+      elevation: 1,
     },
     default: {},
   }) as ViewStyle,
 
   modal: Platform.select<ViewStyle>({
     ios: {
-      shadowColor: '#000000',
-      shadowOffset: { width: 0, height: -8 },
-      shadowOpacity: 0.15,
+      shadowColor: COPPER_SHADOW_COLOR,
+      shadowOffset: { width: 0, height: 12 },
+      shadowOpacity: 0.14,
       shadowRadius: 24,
     },
     android: {
-      elevation: 24,
+      elevation: 12,
     },
     default: {},
   }) as ViewStyle,
 
   fab: Platform.select<ViewStyle>({
     ios: {
-      shadowColor: '#0066FF',
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.35,
-      shadowRadius: 12,
+      shadowColor: COPPER_SHADOW_COLOR,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.12,
+      shadowRadius: 16,
     },
     android: {
       elevation: 8,
@@ -126,9 +137,9 @@ export const layeredShadows: Record<LayeredShadowVariant, ViewStyle> = {
 
   image: Platform.select<ViewStyle>({
     ios: {
-      shadowColor: '#000000',
+      shadowColor: COPPER_SHADOW_COLOR,
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.15,
+      shadowOpacity: 0.08,
       shadowRadius: 6,
     },
     android: {

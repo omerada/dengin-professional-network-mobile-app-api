@@ -30,14 +30,28 @@ export interface GrayColorScale extends ColorScale {
 }
 
 /**
+ * Warm Gray Color Scale (0-950 dahil)
+ */
+export interface WarmGrayColorScale extends ColorScale {
+  0: string;
+  950: string;
+}
+
+/**
  * Base Color Palette
  */
 export interface ColorPalette {
+  copper: ColorScale;
+  indigo: ColorScale;
+  emerald: ColorScale;
+  orange: ColorScale;
+  ruby: ColorScale;
+  warmGray: WarmGrayColorScale;
+  gold: ColorScale;
+  // Legacy support
   blue: ColorScale;
   green: ColorScale;
-  orange: ColorScale;
   red: ColorScale;
-  gold: ColorScale;
   gray: GrayColorScale;
 }
 
@@ -50,6 +64,7 @@ export interface BackgroundColors {
   tertiary: string;
   elevated: string;
   overlay: string;
+  accent: string;
 }
 
 /**
@@ -62,6 +77,7 @@ export interface TextColors {
   disabled: string;
   inverse: string;
   link: string;
+  accent: string;
   error: string;
   success: string;
 }
@@ -96,15 +112,19 @@ export interface StatusColors {
   success: string;
   successBg: string;
   successBackground: string; // Alias for successBg
+  successBorder: string;
   warning: string;
   warningBg: string;
   warningBackground: string; // Alias for warningBg
+  warningBorder: string;
   error: string;
   errorBg: string;
   errorBackground: string; // Alias for errorBg
+  errorBorder: string;
   info: string;
   infoBg: string;
   infoBackground: string; // Alias for infoBg
+  infoBorder: string;
 }
 
 /**
@@ -115,15 +135,30 @@ export interface SpecialColors {
   premium: string;
   online: string;
   offline: string;
+  badge: string;
+}
+
+/**
+ * Surface Level Colors
+ */
+export interface SurfaceColors {
+  level0: string;
+  level1: string;
+  level2: string;
+  level3: string;
 }
 
 /**
  * Gradient Definitions
  */
 export interface GradientColors {
-  primary: readonly [string, string];
-  premium: readonly [string, string];
-  hero: readonly [string, string];
+  primary: readonly [string, string, string?];
+  secondary: readonly [string, string];
+  premium: readonly [string, string, string?];
+  hero: readonly [string, string, string?];
+  success: readonly [string, string];
+  surface: readonly [string, string];
+  overlay: readonly [string, string];
   dark: readonly [string, string];
   light: readonly [string, string];
 }
@@ -138,6 +173,7 @@ export interface ThemeColors {
   border: BorderColors;
   status: StatusColors;
   special: SpecialColors;
+  surface: SurfaceColors;
   gradient: GradientColors;
 }
 

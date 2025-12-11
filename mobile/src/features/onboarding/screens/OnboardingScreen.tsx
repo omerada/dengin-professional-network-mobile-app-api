@@ -30,7 +30,7 @@ const COLORS = {
   whiteTransparent85: 'rgba(255, 255, 255, 0.85)',
   whiteTransparent70: 'rgba(255, 255, 255, 0.7)',
   whiteTransparent20: 'rgba(255, 255, 255, 0.2)',
-  primaryBlue: '#4A90E2',
+  primaryCopper: '#F59E42',
 };
 
 interface OnboardingSlide {
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
   },
   startButton: {
     alignItems: 'center',
-    backgroundColor: COLORS.primaryBlue,
+    backgroundColor: COLORS.primaryCopper,
     borderRadius: 16,
     flex: 1,
     justifyContent: 'center',

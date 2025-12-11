@@ -1,13 +1,13 @@
 // src/theme/typography.ts
-// Meslektaş Design System - Typography Tokens
-// Oku: mobile-development-guide/ui-ux-modernization/03-DESIGN-SYSTEM-OVERHAUL.md
+// Meslektaş Design System v2.0 - Typography Tokens
+// Oku: DESIGN-SYSTEM-DOCUMENTATION.md
 
 import { TextStyle, Platform } from 'react-native';
 import type { TypographyVariant, TypographyStyles } from './types';
 
 /**
  * Font Families
- * iOS: SF Pro, Android: Roboto
+ * iOS: SF Pro, Android: Roboto (optimized for readability)
  */
 export const fontFamily = {
   // Display & Headings
@@ -55,20 +55,20 @@ export const fontFamily = {
 } as const;
 
 /**
- * Font Sizes
- * Based on 4px scale
+ * Font Sizes - Modular Scale (1.250 - Major Third)
+ * Optimized for mobile readability
  */
 export const fontSize = {
-  xs: 11,
-  sm: 13,
-  base: 15,
-  md: 17,
-  lg: 19,
-  xl: 22,
-  '2xl': 26,
-  '3xl': 32,
-  '4xl': 40,
-  '5xl': 48,
+  xs: 12, // Timestamps, captions
+  sm: 14, // Body small, labels
+  base: 16, // Base body text ⭐
+  md: 18, // Lead text, subtitles
+  lg: 20, // Small headings
+  xl: 24, // H3
+  '2xl': 30, // H2
+  '3xl': 36, // H1
+  '4xl': 48, // Display
+  '5xl': 60, // Hero (rarely used)
 } as const;
 
 /**
