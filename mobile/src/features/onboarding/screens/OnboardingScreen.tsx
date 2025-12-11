@@ -23,14 +23,14 @@ import type { AuthStackNavigationProp } from '@shared/types';
 const { width, height } = Dimensions.get('window');
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList) as typeof FlatList;
 
-// Colors
+// Colors - Yeni tema renkleri
 const COLORS = {
   black: '#000',
   white: '#FFFFFF',
   whiteTransparent85: 'rgba(255, 255, 255, 0.85)',
   whiteTransparent70: 'rgba(255, 255, 255, 0.7)',
   whiteTransparent20: 'rgba(255, 255, 255, 0.2)',
-  primaryCopper: '#F59E42',
+  primaryBlue: '#3B82F6', // Yeni professional blue (eski copper yerine)
 };
 
 interface OnboardingSlide {
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
   },
   startButton: {
     alignItems: 'center',
-    backgroundColor: COLORS.primaryCopper,
+    backgroundColor: COLORS.primaryBlue,
     borderRadius: 16,
     flex: 1,
     justifyContent: 'center',

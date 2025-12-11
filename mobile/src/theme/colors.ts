@@ -5,108 +5,121 @@
 import type { ColorPalette, ThemeColors } from './types';
 
 /**
- * Base Color Palette - "Copper Professional"
- * Yeni özgün tasarım sistemi
+ * Base Color Palette - "Professional Harmony"
+ * Dengeli, modern ve kurumsal tasarım sistemi
+ *
+ * Tasarım Prensipleri:
+ * - Profesyonel ve güven verici primary renk (Mavi)
+ * - Modern ve enerjik secondary renk (Mor)
+ * - Fresh accent renk (Teal)
+ * - Temiz neutral renk (Cool Gray)
  */
 export const palette: ColorPalette = {
-  // PRIMARY - Copper Amber (Ana Marka Rengi)
+  // PRIMARY - Professional Blue (Ana Marka Rengi)
+  // Güven, profesyonellik, sakinlik, istikrar
   copper: {
-    50: '#FFF8F0',
-    100: '#FFECDB',
-    200: '#FFDBB8',
-    300: '#FFC794',
-    400: '#FFB170',
-    500: '#F59E42', // PRIMARY ⭐
-    600: '#E08224',
-    700: '#C76918',
-    800: '#A85510',
-    900: '#8A440D',
+    50: '#EFF6FF', // Çok açık mavi
+    100: '#DBEAFE', // Açık mavi
+    200: '#BFDBFE', // Yumuşak mavi
+    300: '#93C5FD', // Orta açık mavi
+    400: '#60A5FA', // Parlak mavi
+    500: '#3B82F6', // PRIMARY ⭐ Professional Blue
+    600: '#2563EB', // Koyu mavi
+    700: '#1D4ED8', // Çok koyu mavi
+    800: '#1E40AF', // Derin mavi
+    900: '#1E3A8A', // En koyu mavi
   },
 
-  // SECONDARY - Deep Indigo
+  // SECONDARY - Vibrant Purple (İkincil Marka Rengi)
+  // Modernlik, yaratıcılık, inovasyon
   indigo: {
-    50: '#EEF2FF',
-    100: '#DDE3FF',
-    200: '#BCC7FF',
-    300: '#9AABFF',
-    400: '#7890FF',
-    500: '#5674F0',
-    600: '#4560D6',
-    700: '#364DBC',
-    800: '#293B9E',
-    900: '#1E2C7A',
+    50: '#FAF5FF', // Çok açık mor
+    100: '#F3E8FF', // Açık mor
+    200: '#E9D5FF', // Yumuşak mor
+    300: '#D8B4FE', // Orta açık mor
+    400: '#C084FC', // Parlak mor
+    500: '#A855F7', // Vibrant Purple
+    600: '#9333EA', // Koyu mor
+    700: '#7E22CE', // Çok koyu mor
+    800: '#6B21A8', // Derin mor
+    900: '#581C87', // En koyu mor
   },
 
-  // SUCCESS - Emerald Green
+  // SUCCESS - Fresh Emerald
+  // Başarı, pozitiflik, ilerleme
   emerald: {
-    50: '#EDFAF4',
-    100: '#D1F4E0',
-    200: '#A4E9C1',
-    300: '#6DDEA0',
-    400: '#3DD37F',
-    500: '#10C55F',
-    600: '#0BA84F',
-    700: '#078A40',
-    800: '#056D33',
-    900: '#045028',
+    50: '#ECFDF5', // Çok açık yeşil
+    100: '#D1FAE5', // Açık yeşil
+    200: '#A7F3D0', // Yumuşak yeşil
+    300: '#6EE7B7', // Orta açık yeşil
+    400: '#34D399', // Parlak yeşil
+    500: '#10B981', // Fresh Emerald
+    600: '#059669', // Koyu yeşil
+    700: '#047857', // Çok koyu yeşil
+    800: '#065F46', // Derin yeşil
+    900: '#064E3B', // En koyu yeşil
   },
 
-  // WARNING - Warm Orange
+  // WARNING - Balanced Amber
+  // Uyarı, dikkat, ölçülü enerji
   orange: {
-    50: '#FFF7ED',
-    100: '#FFEDD5',
-    200: '#FED7AA',
-    300: '#FDBA74',
-    400: '#FB923C',
-    500: '#F97316',
-    600: '#EA580C',
-    700: '#C2410C',
-    800: '#9A3412',
-    900: '#7C2D12',
+    50: '#FFFBEB', // Çok açık amber
+    100: '#FEF3C7', // Açık amber
+    200: '#FDE68A', // Yumuşak amber
+    300: '#FCD34D', // Orta amber
+    400: '#FBBF24', // Parlak amber
+    500: '#F59E0B', // Balanced Amber
+    600: '#D97706', // Koyu amber
+    700: '#B45309', // Çok koyu amber
+    800: '#92400E', // Derin amber
+    900: '#78350F', // En koyu amber
   },
 
-  // ERROR - Ruby Red
+  // ERROR - Soft Red
+  // Hata, tehlike, dikkat (yumuşatılmış)
   ruby: {
-    50: '#FEF2F2',
-    100: '#FEE2E2',
-    200: '#FECACA',
-    300: '#FCA5A5',
-    400: '#F87171',
-    500: '#EF4444',
-    600: '#DC2626',
-    700: '#B91C1C',
-    800: '#991B1B',
-    900: '#7F1D1D',
+    50: '#FEF2F2', // Çok açık kırmızı
+    100: '#FEE2E2', // Açık kırmızı
+    200: '#FECACA', // Yumuşak kırmızı
+    300: '#FCA5A5', // Orta kırmızı
+    400: '#F87171', // Parlak kırmızı
+    500: '#EF4444', // Soft Red
+    600: '#DC2626', // Koyu kırmızı
+    700: '#B91C1C', // Çok koyu kırmızı
+    800: '#991B1B', // Derin kırmızı
+    900: '#7F1D1D', // En koyu kırmızı
   },
 
-  // PREMIUM - Sophisticated Gold
+  // PREMIUM - Elegant Gold
+  // Premium, özel, değerli
   gold: {
-    50: '#FFFBEB',
-    100: '#FEF3C7',
-    200: '#FDE68A',
-    300: '#FCD34D',
-    400: '#FBBF24',
-    500: '#D4A03F',
-    600: '#B8860B',
-    700: '#996F0A',
-    800: '#7A5908',
-    900: '#614607',
+    50: '#FEFCE8', // Çok açık altın
+    100: '#FEF9C3', // Açık altın
+    200: '#FEF08A', // Yumuşak altın
+    300: '#FDE047', // Orta altın
+    400: '#FACC15', // Parlak altın
+    500: '#EAB308', // Elegant Gold
+    600: '#CA8A04', // Koyu altın
+    700: '#A16207', // Çok koyu altın
+    800: '#854D0E', // Derin altın
+    900: '#713F12', // En koyu altın
   },
 
-  // NEUTRAL - Warm Gray
+  // NEUTRAL - Cool Gray (Modern gri tonları)
+  // Temiz, profesyonel, dengeli
   warmGray: {
-    0: '#FFFFFF',
-    50: '#FAFAF9',
-    100: '#F5F5F4',
-    200: '#E7E5E4',
-    300: '#D6D3D1',
-    400: '#A8A29E',
-    500: '#78716C',
-    600: '#57534E',
-    700: '#44403C',
-    800: '#292524',
-    900: '#1C1917',
-    950: '#0F0E0D',
+    0: '#FFFFFF', // Beyaz
+    50: '#F9FAFB', // Çok açık gri
+    100: '#F3F4F6', // Açık gri
+    200: '#E5E7EB', // Yumuşak gri
+    300: '#D1D5DB', // Orta açık gri
+    400: '#9CA3AF', // Orta gri
+    500: '#6B7280', // Dengeli gri
+    600: '#4B5563', // Koyu gri
+    700: '#374151', // Çok koyu gri
+    800: '#1F2937', // Derin gri
+    900: '#111827', // En koyu gri
+    950: '#030712', // Siyaha yakın
   },
 
   // LEGACY SUPPORT - Backward compatibility
@@ -165,233 +178,259 @@ export const palette: ColorPalette = {
   },
 } as const;
 
-// Legacy color support (backward compatibility)
+/**
+ * Legacy Color Support (Geriye Dönük Uyumluluk)
+ * Eski kod tabanı ile uyumluluk için
+ */
 export const colors = {
-  primary: palette.copper,
-  secondary: palette.indigo,
-  neutral: palette.warmGray,
+  // Ana marka renkleri
+  primary: palette.copper, // Professional Blue
+  secondary: palette.indigo, // Vibrant Purple
+  neutral: palette.warmGray, // Cool Gray
+  accent: palette.emerald, // Fresh Emerald (yeni accent rengi)
+
+  // Semantic renk grupları
   success: {
     light: palette.emerald[300],
     main: palette.emerald[500],
     dark: palette.emerald[700],
     background: palette.emerald[50],
+    text: palette.emerald[600],
   },
   warning: {
     light: palette.orange[300],
     main: palette.orange[500],
     dark: palette.orange[700],
     background: palette.orange[50],
+    text: palette.orange[600],
   },
   error: {
     light: palette.ruby[300],
     main: palette.ruby[500],
     dark: palette.ruby[700],
     background: palette.ruby[50],
+    text: palette.ruby[600],
   },
   info: {
-    light: palette.indigo[300],
-    main: palette.indigo[500],
-    dark: palette.indigo[700],
-    background: palette.indigo[50],
+    light: palette.copper[300], // Mavi bilgi rengi
+    main: palette.copper[500],
+    dark: palette.copper[700],
+    background: palette.copper[50],
+    text: palette.copper[600],
   },
+
+  // Doğrulama durumları
   verification: {
-    pending: palette.orange[500],
-    approved: palette.emerald[500],
-    rejected: palette.ruby[500],
-    expired: palette.warmGray[500],
+    pending: palette.orange[500], // Amber - beklemede
+    approved: palette.emerald[500], // Yeşil - onaylandı
+    rejected: palette.ruby[500], // Kırmızı - reddedildi
+    expired: palette.warmGray[500], // Gri - süresi doldu
+    inReview: palette.indigo[500], // Mor - inceleniyor
+  },
+
+  // Premium ve özel durumlar
+  premium: {
+    light: palette.gold[300],
+    main: palette.gold[500],
+    dark: palette.gold[700],
+    background: palette.gold[50],
+    text: palette.gold[600],
   },
 } as const;
 
 /**
  * Semantic Colors - Light Theme
+ * Modern, temiz ve profesyonel light tema
  */
 export const lightTheme: ThemeColors = {
-  // Backgrounds (Reduced copper dominance for better balance)
+  // Backgrounds - Temiz, havadar ve ferah
   background: {
-    primary: '#FFFFFF',
-    secondary: palette.warmGray[50], // Neutral instead of copper
-    tertiary: palette.warmGray[100], // Neutral instead of copper
-    elevated: '#FFFFFF',
-    overlay: 'rgba(28, 25, 23, 0.54)',
-    accent: palette.warmGray[50], // Changed from copper[50] to reduce orange
+    primary: '#FFFFFF', // Beyaz - temiz ve ferah
+    secondary: palette.warmGray[50], // Çok açık gri - hafif kontrast
+    tertiary: palette.warmGray[100], // Açık gri - belirgin kontrast
+    elevated: '#FFFFFF', // Beyaz - yükseltilmiş kartlar
+    overlay: 'rgba(17, 24, 39, 0.50)', // Koyu overlay - okunabilir
+    accent: palette.copper[50], // Hafif mavi accent - subtle vurgu
   },
 
-  // Text Colors
+  // Text Colors - Net, okunabilir ve dengeli
   text: {
-    primary: palette.warmGray[900],
-    secondary: palette.warmGray[600],
-    tertiary: palette.warmGray[500],
-    disabled: palette.warmGray[400],
-    inverse: '#FFFFFF',
-    link: palette.copper[500],
-    accent: palette.copper[600],
-    error: palette.ruby[500],
-    success: palette.emerald[500],
+    primary: palette.warmGray[900], // Koyu gri - maksimum okunabilirlik
+    secondary: palette.warmGray[600], // Orta gri - ikincil metinler
+    tertiary: palette.warmGray[500], // Açık gri - yardımcı metinler
+    disabled: palette.warmGray[400], // Çok açık gri - disabled durum
+    inverse: '#FFFFFF', // Beyaz - koyu arka planda
+    link: palette.copper[600], // Mavi link - güven verici
+    accent: palette.indigo[600], // Mor accent - modern vurgu
+    error: palette.ruby[600], // Kırmızı - hata durumu
+    success: palette.emerald[600], // Yeşil - başarı durumu
   },
 
-  // Interactive States
+  // Interactive States - Dengeli ve profesyonel
   interactive: {
-    default: palette.copper[500],
-    hover: palette.copper[600],
-    pressed: palette.copper[700],
-    disabled: palette.warmGray[300],
-    focus: palette.copper[200],
-    subtle: palette.copper[50],
+    default: palette.copper[500], // Mavi - ana interaksiyon
+    hover: palette.copper[600], // Koyu mavi - hover durumu
+    pressed: palette.copper[700], // Daha koyu - basılı durum
+    disabled: palette.warmGray[300], // Açık gri - disabled
+    focus: palette.copper[100], // Çok açık mavi - focus ring
+    subtle: palette.warmGray[100], // Nötr - subtle interaksiyon
   },
 
-  // Borders
+  // Borders - İnce ve zarif
   border: {
-    subtle: palette.warmGray[200],
-    default: palette.warmGray[300],
-    strong: palette.warmGray[400],
-    focus: palette.copper[500],
-    error: palette.ruby[500],
+    subtle: palette.warmGray[200], // Çok hafif kenarlık
+    default: palette.warmGray[300], // Standart kenarlık
+    strong: palette.warmGray[400], // Belirgin kenarlık
+    focus: palette.copper[400], // Mavi focus kenarlık
+    error: palette.ruby[500], // Kırmızı hata kenarlık
   },
 
-  // Status Colors
+  // Status Colors - Net ve anlamlı
   status: {
-    success: palette.emerald[500],
-    successBg: palette.emerald[50],
+    success: palette.emerald[500], // Yeşil başarı
+    successBg: palette.emerald[50], // Açık yeşil arka plan
     successBackground: palette.emerald[50],
-    successBorder: palette.emerald[200],
-    warning: palette.orange[500],
-    warningBg: palette.orange[50],
+    successBorder: palette.emerald[200], // Yeşil kenarlık
+    warning: palette.orange[500], // Amber uyarı
+    warningBg: palette.orange[50], // Açık amber arka plan
     warningBackground: palette.orange[50],
-    warningBorder: palette.orange[200],
-    error: palette.ruby[500],
-    errorBg: palette.ruby[50],
+    warningBorder: palette.orange[200], // Amber kenarlık
+    error: palette.ruby[500], // Kırmızı hata
+    errorBg: palette.ruby[50], // Açık kırmızı arka plan
     errorBackground: palette.ruby[50],
-    errorBorder: palette.ruby[200],
-    info: palette.indigo[500],
-    infoBg: palette.indigo[50],
-    infoBackground: palette.indigo[50],
-    infoBorder: palette.indigo[200],
+    errorBorder: palette.ruby[200], // Kırmızı kenarlık
+    info: palette.copper[500], // Mavi bilgi
+    infoBg: palette.copper[50], // Açık mavi arka plan
+    infoBackground: palette.copper[50],
+    infoBorder: palette.copper[200], // Mavi kenarlık
   },
 
-  // Special
+  // Special - Özel durumlar ve ikonlar
   special: {
-    verified: palette.indigo[500],
-    premium: palette.gold[500],
-    online: palette.emerald[500],
-    offline: palette.warmGray[500],
-    badge: palette.ruby[500],
+    verified: palette.copper[500], // Mavi - doğrulanmış
+    premium: palette.gold[500], // Altın - premium
+    online: palette.emerald[500], // Yeşil - çevrimiçi
+    offline: palette.warmGray[400], // Gri - çevrimdışı
+    badge: palette.ruby[500], // Kırmızı - bildirim
   },
 
-  // Surface levels
+  // Surface levels - Katmanlı derinlik
   surface: {
-    level0: '#FFFFFF',
-    level1: palette.warmGray[50],
-    level2: palette.warmGray[100],
-    level3: palette.copper[50],
+    level0: '#FFFFFF', // Zemin
+    level1: palette.warmGray[50], // 1. katman
+    level2: palette.warmGray[100], // 2. katman
+    level3: palette.copper[50], // 3. katman (hafif mavi tint)
   },
 
-  // Gradients
+  // Gradients - Modern ve dengeli
   gradient: {
-    primary: [palette.copper[500], palette.copper[400], palette.copper[600]] as const,
-    secondary: [palette.indigo[500], palette.indigo[400]] as const,
-    premium: [palette.gold[500], palette.gold[400], palette.gold[600]] as const,
-    hero: [palette.copper[500], palette.copper[600], palette.copper[700]] as const,
-    success: [palette.emerald[500], palette.emerald[400]] as const,
-    surface: ['#FFFFFF', palette.warmGray[50]] as const,
-    overlay: ['rgba(28,25,23,0)', 'rgba(28,25,23,0.7)'] as const,
-    dark: ['rgba(15,14,13,0.9)', 'transparent'] as const,
-    light: ['rgba(255,255,255,0.9)', 'transparent'] as const,
+    primary: [palette.copper[500], palette.copper[600]] as const, // Mavi gradient
+    secondary: [palette.indigo[500], palette.indigo[600]] as const, // Mor gradient
+    premium: [palette.gold[400], palette.gold[500], palette.gold[600]] as const, // Altın gradient
+    hero: [palette.copper[500], palette.indigo[500]] as const, // Mavi-Mor hero
+    success: [palette.emerald[500], palette.emerald[600]] as const, // Yeşil gradient
+    surface: ['#FFFFFF', palette.warmGray[50]] as const, // Beyaz gradient
+    overlay: ['rgba(17,24,39,0)', 'rgba(17,24,39,0.75)'] as const, // Koyu overlay
+    dark: ['rgba(3,7,18,0.9)', 'transparent'] as const, // Koyu gradient
+    light: ['rgba(255,255,255,0.95)', 'transparent'] as const, // Açık gradient
   },
 } as const;
 
 /**
- * Semantic Colors - Dark Theme (Balanced, less orange)
+ * Semantic Colors - Dark Theme
+ * Modern, göz yormayan ve dengeli dark tema
+ * OLED ekranlar için optimize edilmiş
  */
 export const darkTheme: ThemeColors = {
-  // Backgrounds (Neutral grays, minimal copper tint)
+  // Backgrounds - Derin ama boğucu olmayan tonlar
   background: {
-    primary: palette.warmGray[950],
-    secondary: palette.warmGray[900],
-    tertiary: palette.warmGray[800],
-    elevated: palette.warmGray[900],
-    overlay: 'rgba(0, 0, 0, 0.75)',
-    accent: palette.warmGray[800], // Neutral instead of copper
+    primary: palette.warmGray[900], // Ana arka plan - derin gri
+    secondary: palette.warmGray[800], // İkincil - orta koyu
+    tertiary: palette.warmGray[700], // Üçüncül - koyu
+    elevated: palette.warmGray[800], // Yükseltilmiş - orta koyu
+    overlay: 'rgba(0, 0, 0, 0.80)', // Overlay - güçlü kontrast
+    accent: palette.warmGray[800], // Accent - hafif aydınlatılmış
   },
 
-  // Text Colors
+  // Text Colors - Yüksek kontrast, göz yormayan
   text: {
-    primary: palette.warmGray[50],
-    secondary: palette.warmGray[300],
-    tertiary: palette.warmGray[400],
-    disabled: palette.warmGray[600],
-    inverse: palette.warmGray[900],
-    link: palette.copper[400],
-    accent: palette.copper[300],
-    error: palette.ruby[400],
-    success: palette.emerald[400],
+    primary: palette.warmGray[50], // Beyaza yakın - maksimum okunabilirlik
+    secondary: palette.warmGray[300], // Orta açık gri - ikincil metinler
+    tertiary: palette.warmGray[400], // Orta gri - yardımcı metinler
+    disabled: palette.warmGray[600], // Koyu gri - disabled
+    inverse: palette.warmGray[900], // Koyu gri - açık arka planda
+    link: palette.copper[400], // Açık mavi - link
+    accent: palette.indigo[400], // Açık mor - accent
+    error: palette.ruby[400], // Açık kırmızı - hata
+    success: palette.emerald[400], // Açık yeşil - başarı
   },
 
-  // Interactive States
+  // Interactive States - Parlak ve net
   interactive: {
-    default: palette.copper[400],
-    hover: palette.copper[300],
-    pressed: palette.copper[500],
-    disabled: palette.warmGray[700],
-    focus: 'rgba(255, 177, 112, 0.3)',
-    subtle: palette.warmGray[800],
+    default: palette.copper[400], // Açık mavi - ana interaksiyon
+    hover: palette.copper[300], // Daha açık mavi - hover
+    pressed: palette.copper[500], // Daha koyu - basılı durum
+    disabled: palette.warmGray[700], // Koyu gri - disabled
+    focus: 'rgba(96, 165, 250, 0.35)', // Mavi focus ring - yarı saydam
+    subtle: palette.warmGray[800], // Koyu gri - subtle
   },
 
-  // Borders
+  // Borders - İnce ve zarif
   border: {
-    subtle: palette.warmGray[800],
-    default: palette.warmGray[700],
-    strong: palette.warmGray[600],
-    focus: palette.copper[400],
-    error: palette.ruby[400],
+    subtle: palette.warmGray[800], // Çok hafif kenarlık
+    default: palette.warmGray[700], // Standart kenarlık
+    strong: palette.warmGray[600], // Belirgin kenarlık
+    focus: palette.copper[400], // Mavi focus kenarlık
+    error: palette.ruby[400], // Kırmızı hata kenarlık
   },
 
-  // Status Colors
+  // Status Colors - Parlak ve net (dark modda daha canlı)
   status: {
-    success: palette.emerald[400],
-    successBg: 'rgba(16, 197, 95, 0.15)',
-    successBackground: 'rgba(16, 197, 95, 0.15)',
-    successBorder: 'rgba(16, 197, 95, 0.3)',
-    warning: palette.orange[400],
-    warningBg: 'rgba(249, 115, 22, 0.15)',
-    warningBackground: 'rgba(249, 115, 22, 0.15)',
-    warningBorder: 'rgba(249, 115, 22, 0.3)',
-    error: palette.ruby[400],
-    errorBg: 'rgba(239, 68, 68, 0.15)',
-    errorBackground: 'rgba(239, 68, 68, 0.15)',
-    errorBorder: 'rgba(239, 68, 68, 0.3)',
-    info: palette.indigo[400],
-    infoBg: 'rgba(86, 116, 240, 0.15)',
-    infoBackground: 'rgba(86, 116, 240, 0.15)',
-    infoBorder: 'rgba(86, 116, 240, 0.3)',
+    success: palette.emerald[400], // Parlak yeşil
+    successBg: 'rgba(52, 211, 153, 0.15)', // Hafif yeşil arka plan
+    successBackground: 'rgba(52, 211, 153, 0.15)',
+    successBorder: 'rgba(52, 211, 153, 0.3)', // Yeşil kenarlık
+    warning: palette.orange[400], // Parlak amber
+    warningBg: 'rgba(251, 191, 36, 0.15)', // Hafif amber arka plan
+    warningBackground: 'rgba(251, 191, 36, 0.15)',
+    warningBorder: 'rgba(251, 191, 36, 0.3)', // Amber kenarlık
+    error: palette.ruby[400], // Parlak kırmızı
+    errorBg: 'rgba(248, 113, 113, 0.15)', // Hafif kırmızı arka plan
+    errorBackground: 'rgba(248, 113, 113, 0.15)',
+    errorBorder: 'rgba(248, 113, 113, 0.3)', // Kırmızı kenarlık
+    info: palette.copper[400], // Parlak mavi
+    infoBg: 'rgba(96, 165, 250, 0.15)', // Hafif mavi arka plan
+    infoBackground: 'rgba(96, 165, 250, 0.15)',
+    infoBorder: 'rgba(96, 165, 250, 0.3)', // Mavi kenarlık
   },
 
-  // Special
+  // Special - Canlı ve belirgin
   special: {
-    verified: palette.indigo[400],
-    premium: palette.gold[400],
-    online: palette.emerald[400],
-    offline: palette.warmGray[500],
-    badge: palette.ruby[400],
+    verified: palette.copper[400], // Açık mavi - doğrulanmış
+    premium: palette.gold[400], // Parlak altın - premium
+    online: palette.emerald[400], // Parlak yeşil - çevrimiçi
+    offline: palette.warmGray[500], // Gri - çevrimdışı
+    badge: palette.ruby[400], // Parlak kırmızı - bildirim
   },
 
-  // Surface levels
+  // Surface levels - Katmanlı derinlik (OLED için optimize)
   surface: {
-    level0: palette.warmGray[950],
-    level1: palette.warmGray[900],
-    level2: palette.warmGray[800],
-    level3: palette.warmGray[700],
+    level0: palette.warmGray[900], // En derin katman (zemin)
+    level1: palette.warmGray[800], // 1. yükseltilmiş katman
+    level2: palette.warmGray[700], // 2. yükseltilmiş katman
+    level3: palette.warmGray[600], // 3. yükseltilmiş katman (en üst)
   },
 
-  // Gradients
+  // Gradients - Derin ve modern
   gradient: {
-    primary: [palette.copper[400], palette.copper[300]] as const,
-    secondary: [palette.indigo[400], palette.indigo[300]] as const,
-    premium: [palette.gold[400], palette.gold[300]] as const,
-    hero: [palette.copper[400], palette.copper[500]] as const,
-    success: [palette.emerald[400], palette.emerald[300]] as const,
-    surface: [palette.warmGray[900], palette.warmGray[800]] as const,
-    overlay: ['rgba(0,0,0,0)', 'rgba(0,0,0,0.9)'] as const,
-    dark: ['rgba(0,0,0,0.9)', 'transparent'] as const,
-    light: ['rgba(255,255,255,0.1)', 'transparent'] as const,
+    primary: [palette.copper[400], palette.copper[500]] as const, // Mavi gradient
+    secondary: [palette.indigo[400], palette.indigo[500]] as const, // Mor gradient
+    premium: [palette.gold[400], palette.gold[500], palette.gold[600]] as const, // Altın gradient
+    hero: [palette.copper[400], palette.indigo[400]] as const, // Mavi-Mor hero
+    success: [palette.emerald[400], palette.emerald[500]] as const, // Yeşil gradient
+    surface: [palette.warmGray[900], palette.warmGray[800]] as const, // Koyu gradient
+    overlay: ['rgba(0,0,0,0)', 'rgba(0,0,0,0.95)'] as const, // Çok koyu overlay
+    dark: ['rgba(0,0,0,0.95)', 'transparent'] as const, // Koyu gradient
+    light: ['rgba(255,255,255,0.08)', 'transparent'] as const, // Hafif açık gradient
   },
 } as const;

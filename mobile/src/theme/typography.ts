@@ -1,13 +1,15 @@
 // src/theme/typography.ts
-// Meslektaş Design System v2.0 - Typography Tokens
-// Oku: DESIGN-SYSTEM-DOCUMENTATION.md
+// Meslektaş Design System v3.0 - Typography Tokens
+// Modern, okunabilir ve profesyonel tipografi sistemi
 
 import { TextStyle, Platform } from 'react-native';
 import type { TypographyVariant, TypographyStyles } from './types';
 
 /**
  * Font Families
- * iOS: SF Pro, Android: Roboto (optimized for readability)
+ * iOS: SF Pro (Apple'ın modern font'u)
+ * Android: Roboto (Google'ın modern font'u)
+ * Optimize edilmiş okunabilirlik ve profesyonel görünüm
  */
 export const fontFamily = {
   // Display & Headings

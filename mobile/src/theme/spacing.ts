@@ -1,12 +1,13 @@
 // src/theme/spacing.ts
-// Meslektaş Design System - Spacing Tokens
-// Oku: mobile-development-guide/ui-ux-modernization/03-DESIGN-SYSTEM-OVERHAUL.md
+// Meslektaş Design System v3.0 - Spacing & Layout Tokens
+// Modern, tutarlı ve ölçeklenebilir spacing sistemi
 
 import type { SpacingKey, BorderRadiusKey, BorderWidthKey, ZIndexKey } from './types';
 
 /**
  * Base Spacing Scale
- * 4px grid system with semantic aliases
+ * 4px grid sistemi - Apple ve Material Design standartlarına uygun
+ * Tüm spacing değerleri 4'ün katları olarak tanımlanmıştır
  */
 export const spacing: Record<SpacingKey, number> = {
   '0': 0,
