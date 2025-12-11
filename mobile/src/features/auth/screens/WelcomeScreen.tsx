@@ -53,7 +53,7 @@ export const WelcomeScreen: React.FC = () => {
 
       <View style={styles.content}>
         {/* Hero Logo Area */}
-        <Animated.View entering={FadeIn.duration(800)} style={styles.heroContainer}>
+        <Animated.View entering={FadeIn.duration(400)} style={styles.heroContainer}>
           <View
             style={[
               styles.logoPlaceholder,
@@ -94,7 +94,7 @@ export const WelcomeScreen: React.FC = () => {
         <View style={styles.spacer} />
 
         {/* Action Buttons */}
-        <Animated.View entering={FadeInDown.delay(400).springify()} style={styles.actionsContainer}>
+        <Animated.View entering={FadeIn.delay(200).duration(300)} style={styles.actionsContainer}>
           <Button
             title={t('auth.login')}
             onPress={handleLogin}
@@ -119,7 +119,7 @@ export const WelcomeScreen: React.FC = () => {
         </Animated.View>
 
         {/* Terms - Clickable */}
-        <Animated.View entering={FadeInDown.delay(800).springify()}>
+        <Animated.View entering={FadeIn.delay(300).duration(300)}>
           <Text style={[styles.termsText, { color: colors.text.secondary }]}>
             Devam ederek{' '}
             <Pressable onPress={handleTerms}>

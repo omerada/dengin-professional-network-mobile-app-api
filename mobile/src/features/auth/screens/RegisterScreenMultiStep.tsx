@@ -17,7 +17,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, SlideInRight, SlideOutLeft } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
 import { Button, Input } from '@shared/components';
 import { StepSuccess } from '@shared/components/StepSuccess';
@@ -241,8 +241,8 @@ export const RegisterScreenMultiStep: React.FC = () => {
         return (
           <Animated.View
             key="step-1"
-            entering={FadeIn.duration(300)}
-            exiting={FadeOut.duration(200)}
+            entering={FadeIn.duration(250)}
+            exiting={FadeOut.duration(150)}
             style={styles.stepContent}>
             {/* Step Header */}
             <View style={styles.stepHeader}>
@@ -330,8 +330,8 @@ export const RegisterScreenMultiStep: React.FC = () => {
         return (
           <Animated.View
             key="step-2"
-            entering={FadeIn.duration(300)}
-            exiting={FadeOut.duration(200)}
+            entering={FadeIn.duration(250)}
+            exiting={FadeOut.duration(150)}
             style={styles.stepContent}>
             {/* Step Header */}
             <View style={styles.stepHeader}>
@@ -434,8 +434,8 @@ export const RegisterScreenMultiStep: React.FC = () => {
         return (
           <Animated.View
             key="step-3"
-            entering={FadeIn.duration(300)}
-            exiting={FadeOut.duration(200)}
+            entering={FadeIn.duration(250)}
+            exiting={FadeOut.duration(150)}
             style={styles.stepContent}>
             {/* Step Header */}
             <View style={styles.stepHeader}>
