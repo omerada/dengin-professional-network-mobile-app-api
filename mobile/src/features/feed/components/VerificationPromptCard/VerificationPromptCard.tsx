@@ -5,7 +5,7 @@
 
 import React, { memo, useCallback } from 'react';
 import { View, Text, Pressable } from 'react-native';
-import Animated, { FadeIn, SlideInUp } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
 
@@ -76,19 +76,17 @@ export const VerificationPromptCard: React.FC<VerificationPromptCardProps> = mem
             </Text>
 
             {/* CTA Button */}
-            <Animated.View entering={SlideInUp.delay(100).springify()}>
-              <Pressable
-                style={[styles.button, { backgroundColor: colors.background.primary }]}
-                onPress={handlePress}
-                accessibilityRole="button"
-                accessibilityLabel="Doğrulamaya başla"
-                accessibilityHint="Meslek doğrulama sürecini başlatmak için dokun">
-                <Text style={[styles.buttonText, { color: colors.interactive.default }]}>
-                  Hemen Başla
-                </Text>
-                <Icon name="arrow-forward" size={18} color={colors.interactive.default} />
-              </Pressable>
-            </Animated.View>
+            <Pressable
+              style={[styles.button, { backgroundColor: colors.background.primary }]}
+              onPress={handlePress}
+              accessibilityRole="button"
+              accessibilityLabel="Doğrulamaya başla"
+              accessibilityHint="Meslek doğrulama sürecini başlatmak için dokun">
+              <Text style={[styles.buttonText, { color: colors.interactive.default }]}>
+                Hemen Başla
+              </Text>
+              <Icon name="arrow-forward" size={18} color={colors.interactive.default} />
+            </Pressable>
           </View>
         </LinearGradient>
       </Animated.View>
