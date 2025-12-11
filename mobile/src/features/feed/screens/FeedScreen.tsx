@@ -309,8 +309,6 @@ export const FeedScreen: React.FC = memo(() => {
             navigation.navigate('Notifications');
           }}
         />
-        {/* Filter Bar - Separate from header per design spec */}
-        <FilterBar />
         {/* Show verification prompt for unverified users */}
         {user?.verificationStatus !== 'APPROVED' && (
           <VerificationPromptCard
