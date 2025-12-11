@@ -139,13 +139,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = memo(
               </View>
             )}
 
-            {/* Edit overlay for own profile */}
-            {isOwnProfile && (
-              <View style={[styles.editOverlay, { backgroundColor: colors.background.overlay }]}>
-                <Icon name="camera" size={20} color={colors.text.inverse} />
-              </View>
-            )}
-
             {/* Verification badge */}
             {profileData.isProfessionVerified && (
               <View
@@ -160,51 +153,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = memo(
               </View>
             )}
           </AnimatedPressable>
-        </Animated.View>
-
-        {/* Name and Profession */}
-        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.infoContainer}>
-          <View style={styles.nameRow}>
-            <Text style={[styles.name, { color: colors.text.primary }]}>
-              {profileData.fullName}
-            </Text>
-            {isOwnProfile && onEditPress && (
-              <AnimatedPressable
-                style={[
-                  styles.editButton,
-                  { backgroundColor: colors.background.secondary },
-                  editAnimatedStyle,
-                ]}
-                onPress={handleEditPress}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                accessibilityRole="button"
-                accessibilityLabel="Profili düzenle">
-                <Icon name="pencil" size={16} color={colors.text.secondary} />
-              </AnimatedPressable>
-            )}
-          </View>
-
-          {profileData.professionName && (
-            <View style={styles.professionRow}>
-              <Icon
-                name="briefcase-outline"
-                size={14}
-                color={colors.text.secondary}
-                style={styles.professionIcon}
-              />
-              <Text style={[styles.profession, { color: colors.text.secondary }]}>
-                {profileData.professionName}
-              </Text>
-              {profileData.isProfessionVerified && (
-                <View style={[styles.verifiedText, { backgroundColor: colors.status.successBg }]}>
-                  <Icon name="shield-checkmark" size={12} color={colors.status.success} />
-                  <Text style={[styles.verifiedLabel, { color: colors.status.success }]}>
-                    Doğrulanmış
-                  </Text>
-                </View>
-              )}
-            </View>
-          )}
         </Animated.View>
       </View>
     );
