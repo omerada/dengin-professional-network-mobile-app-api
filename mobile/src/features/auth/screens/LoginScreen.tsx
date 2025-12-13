@@ -110,34 +110,71 @@ export const LoginScreen: React.FC = () => {
             <Text style={[styles.slogan, { color: colors.text.secondary }]}>
               Profesyoneller için güvenli sosyal ağ
             </Text>
+          </View>
 
-            {/* Feature Badges */}
-            <View style={styles.badgesContainer}>
-              <View style={[styles.badge, { backgroundColor: colors.background.secondary }]}>
-                <Icon name="shield" size={14} color={colors.interactive.default} />
-                <Text style={[styles.badgeText, { color: colors.text.secondary }]}>Güvenli</Text>
-              </View>
-              <View style={[styles.badge, { backgroundColor: colors.background.secondary }]}>
-                <Icon name="check-circle" size={14} color={colors.interactive.default} />
-                <Text style={[styles.badgeText, { color: colors.text.secondary }]}>
-                  Doğrulanmış
+          {/* Social Login - Priority (Üstte) */}
+          <View style={styles.socialSection}>
+            <Text style={[styles.socialTitle, { color: colors.text.primary }]}>Hızlı Giriş</Text>
+            <View style={styles.socialButtonsColumn}>
+              {Platform.OS === 'ios' && (
+                <TouchableOpacity
+                  style={[
+                    styles.socialButtonLarge,
+                    {
+                      backgroundColor: colors.background.secondary,
+                      borderColor: colors.border.default,
+                    },
+                  ]}
+                  disabled={true}>
+                  <FAIcon name="apple" size={20} color={colors.text.primary} />
+                  <Text style={[styles.socialButtonLargeText, { color: colors.text.primary }]}>
+                    Apple ile Giriş Yap
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              <TouchableOpacity
+                style={[
+                  styles.socialButtonLarge,
+                  {
+                    backgroundColor: colors.background.secondary,
+                    borderColor: colors.border.default,
+                  },
+                ]}
+                disabled={true}>
+                <FAIcon name="google" size={20} color={colors.text.primary} />
+                <Text style={[styles.socialButtonLargeText, { color: colors.text.primary }]}>
+                  Google ile Giriş Yap
                 </Text>
-              </View>
-              <View style={[styles.badge, { backgroundColor: colors.background.secondary }]}>
-                <Icon name="zap" size={14} color={colors.interactive.default} />
-                <Text style={[styles.badgeText, { color: colors.text.secondary }]}>
-                  Profesyonel
-                </Text>
-              </View>
+              </TouchableOpacity>
             </View>
           </View>
 
-          {/* Error Message */}
+          {/* Divider */}
+          <View style={styles.divider}>
+            <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
+            <Text style={[styles.dividerText, { color: colors.text.tertiary }]}>veya</Text>
+            <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
+          </View>
+
+          {/* Error Message - Empathic */}
           {isError && error && (
             <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
-              <Text style={[styles.errorText, { color: colors.status.error }]}>
-                {getErrorMessage(error)}
-              </Text>
+              <Icon name="alert-circle" size={18} color={colors.status.error} />
+              <View style={styles.errorContent}>
+                <Text style={[styles.errorText, { color: colors.status.error }]}>
+                  {error.message?.includes('credentials') || error.message?.includes('password')
+                    ? '😔 E-posta veya şifre hatalı. Tekrar dener misin?'
+                    : error.message?.includes('network') || error.message?.includes('connection')
+                      ? '📶 Bağlantı sorunu. İnternet bağlantını kontrol et'
+                      : '😔 Bir şeyler ters gitti. Tekrar dener misin?'}
+                </Text>
+                <TouchableOpacity onPress={handleForgotPassword}>
+                  <Text style={[styles.errorAction, { color: colors.interactive.default }]}>
+                    Şifremi Unuttum
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
 
@@ -198,55 +235,13 @@ export const LoginScreen: React.FC = () => {
           {/* Login Button */}
           <View style={styles.actions}>
             <Button
-              title={t('auth.login')}
+              title={isLoading ? 'Giriş yapılıyor...' : t('auth.login')}
               onPress={handleSubmit(onSubmit)}
               loading={isLoading}
               disabled={isLoading || isBiometricLoading}
               size="lg"
               fullWidth
             />
-
-            {/* Social Login - Inspired by reference design */}
-            <View style={styles.divider}>
-              <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
-              <Text style={[styles.dividerText, { color: colors.text.secondary }]}>
-                Or Sign in with
-              </Text>
-              <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
-            </View>
-
-            <View style={styles.socialButtonsRow}>
-              {Platform.OS === 'ios' && (
-                <TouchableOpacity
-                  style={[styles.socialButton, { backgroundColor: colors.background.secondary }]}
-                  disabled={true}>
-                  <FAIcon name="apple" size={18} color={colors.text.secondary} />
-                  <Text style={[styles.socialButtonText, { color: colors.text.primary }]}>
-                    Apple
-                  </Text>
-                </TouchableOpacity>
-              )}
-
-              {Platform.OS === 'android' && (
-                <TouchableOpacity
-                  style={[styles.socialButton, { backgroundColor: colors.background.secondary }]}
-                  disabled={true}>
-                  <FAIcon name="google" size={18} color={colors.text.secondary} />
-                  <Text style={[styles.socialButtonText, { color: colors.text.primary }]}>
-                    Google
-                  </Text>
-                </TouchableOpacity>
-              )}
-
-              <TouchableOpacity
-                style={[styles.socialButton, { backgroundColor: colors.background.secondary }]}
-                disabled={true}>
-                <FAIcon name="facebook" size={18} color={colors.text.secondary} />
-                <Text style={[styles.socialButtonText, { color: colors.text.primary }]}>
-                  Facebook
-                </Text>
-              </TouchableOpacity>
-            </View>
 
             {/* Biometric Login */}
             {isBiometricAvailable && (
@@ -296,11 +291,11 @@ const styles = StyleSheet.create({
   },
   heroSection: {
     alignItems: 'center',
-    marginBottom: spacing['2xl'],
+    marginBottom: spacing.xl,
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: spacing.xl,
+    marginBottom: spacing.md,
   },
   logoText: {
     fontSize: 36,
@@ -311,45 +306,52 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
     marginTop: spacing.sm,
-    marginBottom: spacing.lg,
     textAlign: 'center',
   },
-  badgesContainer: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginBottom: spacing.xl,
+  socialSection: {
+    marginBottom: spacing.lg,
   },
-  badge: {
+  socialTitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    marginBottom: spacing.md,
+    textAlign: 'center',
+  },
+  socialButtonsColumn: {
+    gap: spacing.md,
+  },
+  socialButtonLarge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: 16,
-    gap: spacing.xs,
+    justifyContent: 'center',
+    paddingVertical: spacing.lg,
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: spacing.md,
   },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  titleContainer: {
-    marginBottom: spacing['2xl'],
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-  },
-  subtitle: {
+  socialButtonLargeText: {
     fontSize: 16,
+    fontWeight: '600',
   },
   errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     padding: spacing.md,
-    borderRadius: 8,
-    marginBottom: spacing.xl + spacing.md,
+    borderRadius: 12,
+    marginBottom: spacing.lg,
+    gap: spacing.sm,
+  },
+  errorContent: {
+    flex: 1,
   },
   errorText: {
     fontSize: 14,
-    textAlign: 'center',
+    marginBottom: spacing.xs,
+  },
+  errorAction: {
+    fontSize: 14,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
   form: {
     marginBottom: spacing.lg,
@@ -364,33 +366,15 @@ const styles = StyleSheet.create({
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: spacing.lg,
+    marginVertical: spacing.xl,
   },
   dividerLine: {
     flex: 1,
     height: 1,
   },
   dividerText: {
-    marginHorizontal: spacing.md,
-    fontSize: 14,
-  },
-  socialButtonsRow: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    marginBottom: spacing.lg,
-  },
-  socialButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    borderRadius: 12,
-    gap: spacing.sm,
-  },
-  socialButtonText: {
-    fontSize: 15,
+    marginHorizontal: spacing.lg,
+    fontSize: 13,
     fontWeight: '500',
   },
   registerContainer: {

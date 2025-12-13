@@ -2,8 +2,8 @@
 // Welcome Success Screen - Modern, Professional & Premium
 // Shows after successful registration with balanced, corporate animations
 
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import React, { useEffect, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue,
@@ -40,8 +40,8 @@ export const WelcomeSuccessScreen: React.FC = () => {
   const user = useAuthStore(state => state.user);
   const setAuth = useAuthStore(state => state.setAuth);
 
-  // Handle continue button press
-  const handleContinue = async () => {
+  // Handle continue (auto + manual)
+  const handleContinue = useCallback(async () => {
     // Get temporary stored data from registration
     const tempUser = useAuthStore.getState().user;
     const tempAccessToken = (useAuthStore.getState() as any).tempAccessToken;
@@ -54,7 +54,7 @@ export const WelcomeSuccessScreen: React.FC = () => {
         refreshToken: tempRefreshToken,
       });
     }
-  };
+  }, [setAuth]);
 
   // Animation values - Balanced & Professional
   const iconScale = useSharedValue(0);
@@ -139,7 +139,14 @@ export const WelcomeSuccessScreen: React.FC = () => {
         stiffness: 90,
       }),
     );
-  }, []);
+
+    // 8. AUTO-CONTINUE: Navigate to main app after 2.5 seconds
+    const autoNavigateTimer = setTimeout(() => {
+      handleContinue();
+    }, 2500);
+
+    return () => clearTimeout(autoNavigateTimer);
+  }, [handleContinue]);
 
   // Animated styles
   const iconContainerStyle = useAnimatedStyle(() => ({
@@ -232,27 +239,10 @@ export const WelcomeSuccessScreen: React.FC = () => {
           </LinearGradient>
         </Animated.View>
 
-        {/* Continue Button - Smooth entrance */}
+        {/* Skip Button - Optional (auto-navigate after 2.5s) */}
         <Animated.View style={[styles.buttonContainer, buttonStyle]}>
-          <TouchableOpacity
-            style={[styles.continueButton, { backgroundColor: colors.interactive.default }]}
-            onPress={handleContinue}
-            activeOpacity={0.85}>
-            <LinearGradient
-              colors={[colors.interactive.default, colors.interactive.default]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.buttonGradient}>
-              <Text style={[styles.continueButtonText, { color: colors.text.inverse }]}>
-                Başlayalım
-              </Text>
-              <Icon
-                name="arrow-right"
-                size={20}
-                color={colors.text.inverse}
-                style={styles.arrowIcon}
-              />
-            </LinearGradient>
+          <TouchableOpacity style={styles.skipButton} onPress={handleContinue} activeOpacity={0.7}>
+            <Text style={[styles.skipButtonText, { color: colors.text.tertiary }]}>Atla →</Text>
           </TouchableOpacity>
         </Animated.View>
       </View>
@@ -345,32 +335,13 @@ const styles = StyleSheet.create({
   buttonContainer: {
     alignItems: 'center',
     marginTop: spacing['3xl'],
-    width: '100%',
   },
-  continueButton: {
-    borderRadius: 14,
-    elevation: 4,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    width: '100%',
-  },
-  buttonGradient: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
+  skipButton: {
+    paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.lg,
-    width: '100%',
   },
-  continueButtonText: {
-    fontSize: 18,
-    fontWeight: '700',
-    letterSpacing: 0.3,
-  },
-  arrowIcon: {
-    marginLeft: spacing.sm,
+  skipButtonText: {
+    fontSize: 15,
+    fontWeight: '500',
   },
 });

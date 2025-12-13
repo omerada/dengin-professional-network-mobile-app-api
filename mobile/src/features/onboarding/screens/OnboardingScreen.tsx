@@ -165,7 +165,7 @@ export const OnboardingScreen: React.FC = () => {
   const handleComplete = async () => {
     try {
       await asyncStorage.set(STORAGE_KEYS.ONBOARDING_COMPLETED, true);
-      navigation.replace('Login');
+      navigation.replace('Welcome');
     } catch (error) {
       console.error('Error completing onboarding:', error);
     }

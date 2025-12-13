@@ -26,11 +26,16 @@ export interface LoginFormData {
  * Register form data
  * Note: Backend expects 'name' and 'surname'
  * Sprint 1: Added sectorId for sector-based community structure
+ *
+ * Updated for RegisterScreenOptimized:
+ * - confirmPassword: optional (only used in legacy RegisterScreenMultiStep)
+ * - acceptTerms: optional (implicit consent in optimized flow)
+ * - sectorId/professionId: optional (can be skipped in 2-step flow)
  */
 export interface RegisterFormData {
   email: string;
   password: string;
-  confirmPassword: string;
+  confirmPassword?: string; // Optional: only for legacy RegisterScreenMultiStep
   firstName: string; // Mapped to 'name' in API call
   lastName: string; // Mapped to 'surname' in API call
   // Sprint 1: Sector-based community structure
@@ -38,7 +43,7 @@ export interface RegisterFormData {
   // Deprecated: Kept for backward compatibility
   professionId?: number | null;
   customProfession?: string;
-  acceptTerms: boolean;
+  acceptTerms?: boolean; // Optional: implicit consent in RegisterScreenOptimized
 }
 
 /**
