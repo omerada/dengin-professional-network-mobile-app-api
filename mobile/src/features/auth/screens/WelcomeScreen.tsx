@@ -52,7 +52,7 @@ export const WelcomeScreen: React.FC = () => {
       <StatusBar animated translucent={false} />
 
       <View style={styles.content}>
-        {/* Hero Logo Area */}
+        {/* Hero Logo Area - DENGIN Branding */}
         <Animated.View entering={FadeIn.duration(400)} style={styles.heroContainer}>
           <View
             style={[
@@ -62,9 +62,9 @@ export const WelcomeScreen: React.FC = () => {
                 shadowColor: colors.interactive.default,
               },
             ]}>
-            <Text style={[styles.logoText, { color: colors.interactive.default }]}>M</Text>
+            <Text style={[styles.logoText, { color: colors.interactive.default }]}>D</Text>
           </View>
-          <Text style={[styles.appName, { color: colors.text.primary }]}>Meslektaş</Text>
+          <Text style={[styles.appName, { color: colors.text.primary }]}>Dengin</Text>
           <Text style={[styles.tagline, { color: colors.text.secondary }]}>
             Profesyoneller için güvenli sosyal ağ
           </Text>

@@ -108,7 +108,7 @@ export const NewUserEmptyState: React.FC<NewUserEmptyStateProps> = memo(
         <Animated.Text
           entering={FadeInDown.delay(300).duration(400)}
           style={[styles.subtitle, { color: colors.text.secondary }]}>
-          Meslektaş topluluğuna katılmak için birkaç adım kaldı
+          Dengin topluluğuna katılmak için birkaç adım kaldı
         </Animated.Text>
 
         {/* Checklist */}

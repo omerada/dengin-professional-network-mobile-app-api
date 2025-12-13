@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
+import FAIcon from 'react-native-vector-icons/FontAwesome';
 
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
@@ -86,10 +87,6 @@ export const LoginScreen: React.FC = () => {
     navigation.navigate('ForgotPassword');
   }, [navigation]);
 
-  const handleBack = useCallback(() => {
-    navigation.goBack();
-  }, [navigation]);
-
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
@@ -103,45 +100,35 @@ export const LoginScreen: React.FC = () => {
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity
-              onPress={handleBack}
-              accessible={true}
-              accessibilityRole="button"
-              accessibilityLabel="Geri dön"
-              style={styles.backButton}
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-              <View
-                style={[
-                  styles.backButtonCircle,
-                  { backgroundColor: colors.background.secondary, marginLeft: -8 },
-                ]}>
-                <Icon name="chevron-left" size={28} color={colors.text.primary} />
-              </View>
-            </TouchableOpacity>
-          </View>
-
-          {/* Hero Section */}
+          {/* Hero Section - DENGIN Branding */}
           <View style={styles.heroSection}>
             <View style={styles.logoContainer}>
-              <View
-                style={[
-                  styles.logoPlaceholder,
-                  {
-                    backgroundColor: colors.interactive.default,
-                  },
-                ]}>
-                <Text style={[styles.logoText, { color: colors.text.inverse }]}>M</Text>
-              </View>
+              <Text style={[styles.logoText, { color: colors.interactive.default }]}>DENGIN</Text>
             </View>
-            <View style={styles.titleContainer}>
-              <Text style={[styles.title, { color: colors.text.primary }]}>
-                {t('auth.welcomeBack')}
-              </Text>
-              <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
-                Profesyonel ağınıza giriş yapın
-              </Text>
+
+            {/* Slogan */}
+            <Text style={[styles.slogan, { color: colors.text.secondary }]}>
+              Profesyoneller için güvenli sosyal ağ
+            </Text>
+
+            {/* Feature Badges */}
+            <View style={styles.badgesContainer}>
+              <View style={[styles.badge, { backgroundColor: colors.background.secondary }]}>
+                <Icon name="shield" size={14} color={colors.interactive.default} />
+                <Text style={[styles.badgeText, { color: colors.text.secondary }]}>Güvenli</Text>
+              </View>
+              <View style={[styles.badge, { backgroundColor: colors.background.secondary }]}>
+                <Icon name="check-circle" size={14} color={colors.interactive.default} />
+                <Text style={[styles.badgeText, { color: colors.text.secondary }]}>
+                  Doğrulanmış
+                </Text>
+              </View>
+              <View style={[styles.badge, { backgroundColor: colors.background.secondary }]}>
+                <Icon name="zap" size={14} color={colors.interactive.default} />
+                <Text style={[styles.badgeText, { color: colors.text.secondary }]}>
+                  Profesyonel
+                </Text>
+              </View>
             </View>
           </View>
 
@@ -219,25 +206,60 @@ export const LoginScreen: React.FC = () => {
               fullWidth
             />
 
+            {/* Social Login - Inspired by reference design */}
+            <View style={styles.divider}>
+              <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
+              <Text style={[styles.dividerText, { color: colors.text.secondary }]}>
+                Or Sign in with
+              </Text>
+              <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
+            </View>
+
+            <View style={styles.socialButtonsRow}>
+              {Platform.OS === 'ios' && (
+                <TouchableOpacity
+                  style={[styles.socialButton, { backgroundColor: colors.background.secondary }]}
+                  disabled={true}>
+                  <FAIcon name="apple" size={18} color={colors.text.secondary} />
+                  <Text style={[styles.socialButtonText, { color: colors.text.primary }]}>
+                    Apple
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              {Platform.OS === 'android' && (
+                <TouchableOpacity
+                  style={[styles.socialButton, { backgroundColor: colors.background.secondary }]}
+                  disabled={true}>
+                  <FAIcon name="google" size={18} color={colors.text.secondary} />
+                  <Text style={[styles.socialButtonText, { color: colors.text.primary }]}>
+                    Google
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              <TouchableOpacity
+                style={[styles.socialButton, { backgroundColor: colors.background.secondary }]}
+                disabled={true}>
+                <FAIcon name="facebook" size={18} color={colors.text.secondary} />
+                <Text style={[styles.socialButtonText, { color: colors.text.primary }]}>
+                  Facebook
+                </Text>
+              </TouchableOpacity>
+            </View>
+
             {/* Biometric Login */}
             {isBiometricAvailable && (
-              <>
-                <View style={styles.divider}>
-                  <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
-                  <Text style={[styles.dividerText, { color: colors.text.secondary }]}>veya</Text>
-                  <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
-                </View>
-
-                <Button
-                  title={`${biometricName} ile Giriş`}
-                  onPress={loginWithBiometric}
-                  loading={isBiometricLoading}
-                  disabled={isLoading || isBiometricLoading}
-                  variant="outline"
-                  size="lg"
-                  fullWidth
-                />
-              </>
+              <Button
+                title={`${biometricName} ile Giriş`}
+                onPress={loginWithBiometric}
+                loading={isBiometricLoading}
+                disabled={isLoading || isBiometricLoading}
+                variant="ghost"
+                size="md"
+                fullWidth
+                style={{ marginTop: spacing.md }}
+              />
             )}
           </View>
 
@@ -270,24 +292,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: spacing.xl,
-  },
-  header: {
-    height: 56,
-    justifyContent: 'center',
-    marginBottom: spacing.lg,
-    marginTop: spacing.sm,
-    marginLeft: spacing.xs,
-  },
-  backButton: {
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  backButtonCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingTop: spacing.xl,
   },
   heroSection: {
     alignItems: 'center',
@@ -295,32 +300,44 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: spacing.lg,
-  },
-  logoPlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
+    marginBottom: spacing.xl,
   },
   logoText: {
-    fontSize: 48,
-    fontWeight: 'bold',
+    fontSize: 36,
+    fontWeight: '700',
+    letterSpacing: 1,
+  },
+  slogan: {
+    fontSize: 15,
+    fontWeight: '500',
+    marginTop: spacing.sm,
+    marginBottom: spacing.lg,
+    textAlign: 'center',
+  },
+  badgesContainer: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.xl,
+  },
+  badge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: 16,
+    gap: spacing.xs,
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: '500',
   },
   titleContainer: {
-    marginBottom: spacing.md,
+    marginBottom: spacing['2xl'],
     alignItems: 'center',
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: spacing.sm,
+    fontSize: 24,
+    fontWeight: '700',
   },
   subtitle: {
     fontSize: 16,
@@ -356,6 +373,25 @@ const styles = StyleSheet.create({
   dividerText: {
     marginHorizontal: spacing.md,
     fontSize: 14,
+  },
+  socialButtonsRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  socialButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: 12,
+    gap: spacing.sm,
+  },
+  socialButtonText: {
+    fontSize: 15,
+    fontWeight: '500',
   },
   registerContainer: {
     flexDirection: 'row',

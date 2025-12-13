@@ -215,7 +215,7 @@ export const WelcomeSuccessScreen: React.FC = () => {
         {/* Subtitle - Staggered entrance */}
         <Animated.Text style={[styles.subtitle, { color: colors.text.secondary }, subtitleStyle]}>
           Hesabın başarıyla oluşturuldu.{'\n'}
-          Meslektaş ailesine katıldığın için teşekkürler.
+          Dengin ailesine katıldığın için teşekkürler.
         </Animated.Text>
 
         {/* Success Badge - Premium with pulse */}

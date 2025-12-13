@@ -6,7 +6,7 @@
  */
 export const APP_CONFIG = {
   // App info
-  APP_NAME: 'Meslektaş',
+  APP_NAME: 'Dengin',
   APP_VERSION: '1.0.0',
   BUILD_NUMBER: '1',
 

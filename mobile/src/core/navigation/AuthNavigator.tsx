@@ -7,7 +7,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '@shared/types';
 
 // Auth Screens
-import { WelcomeScreen } from '@features/auth/screens/WelcomeScreen';
+// import { WelcomeScreen } from '@features/auth/screens/WelcomeScreen'; // Removed - skip Welcome
 import { LoginScreen } from '@features/auth/screens/LoginScreen';
 // import { RegisterScreen } from '@features/auth/screens/RegisterScreen'; // Old single-step version
 import { RegisterScreenMultiStep } from '@features/auth/screens/RegisterScreenMultiStep';
@@ -46,7 +46,7 @@ export const AuthNavigator: React.FC = () => {
           gestureEnabled: false,
         }}
       />
-      <Stack.Screen name="Welcome" component={WelcomeScreen} />
+      {/* Welcome screen removed - navigation goes directly to Login after onboarding */}
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreenMultiStep} />
       <Stack.Screen
