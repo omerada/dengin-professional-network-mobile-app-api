@@ -41,18 +41,19 @@ export interface WarmGrayColorScale extends ColorScale {
  * Base Color Palette
  */
 export interface ColorPalette {
-  copper: ColorScale;
-  indigo: ColorScale;
-  emerald: ColorScale;
-  orange: ColorScale;
-  ruby: ColorScale;
-  warmGray: WarmGrayColorScale;
-  gold: ColorScale;
-  // Legacy support
-  blue: ColorScale;
-  green: ColorScale;
-  red: ColorScale;
-  gray: GrayColorScale;
+  copper: ColorScale; // Primary - Warm Copper #D9C5AC
+  indigo: ColorScale; // Secondary - Sage Green
+  emerald: ColorScale; // Success - Natural Emerald
+  orange: ColorScale; // Warning - Warm Amber
+  ruby: ColorScale; // Error - Muted Red
+  gold: ColorScale; // Premium - Rose Gold
+  teal: ColorScale; // Accent - Deep Teal
+  warmGray: WarmGrayColorScale; // Neutral - Warm Gray
+  // Legacy support (backward compatibility)
+  blue: ColorScale; // Maps to teal
+  green: ColorScale; // Maps to emerald
+  red: ColorScale; // Maps to ruby
+  gray: GrayColorScale; // Maps to warmGray
 }
 
 /**
