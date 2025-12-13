@@ -154,20 +154,6 @@ export const OnboardingScreen: React.FC = () => {
         index: currentIndex + 1,
         animated: true,
       });
-    } else {
-      handleComplete();
-    }
-  };
-
-  /**
-   * Handle Skip & Complete
-   */
-  const handleComplete = async () => {
-    try {
-      await asyncStorage.set(STORAGE_KEYS.ONBOARDING_COMPLETED, true);
-      navigation.replace('Welcome');
-    } catch (error) {
-      console.error('Error completing onboarding:', error);
     }
   };
 
@@ -175,13 +161,6 @@ export const OnboardingScreen: React.FC = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top', 'bottom']}>
-      {/* Header - Skip Button */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleComplete} style={styles.skipButton}>
-          <Text style={[styles.skipText, { color: colors.text.tertiary }]}>Atla</Text>
-        </TouchableOpacity>
-      </View>
-
       {/* Slides */}
       <FlatList
         ref={flatListRef}
@@ -206,16 +185,39 @@ export const OnboardingScreen: React.FC = () => {
           ))}
         </View>
 
-        {/* CTA Button */}
-        <TouchableOpacity
-          onPress={handleNext}
-          style={[styles.ctaButton, { backgroundColor: colors.interactive.default }]}
-          activeOpacity={0.85}>
-          <Text style={[styles.ctaButtonText, { color: colors.text.inverse }]}>
-            {currentIndex === slides.length - 1 ? 'Başlayın' : 'İleri'}
-          </Text>
-          <Icon name="arrow-right" size={20} color={colors.text.inverse} style={styles.ctaIcon} />
-        </TouchableOpacity>
+        {/* CTA Buttons */}
+        {currentIndex === slides.length - 1 ? (
+          <View style={styles.finalButtons}>
+            <TouchableOpacity
+              onPress={() => {
+                asyncStorage.set(STORAGE_KEYS.ONBOARDING_COMPLETED, true);
+                navigation.replace('Login');
+              }}
+              style={[styles.ctaButton, { backgroundColor: colors.interactive.default }]}
+              activeOpacity={0.85}>
+              <Text style={[styles.ctaButtonText, { color: colors.text.inverse }]}>Giriş Yap</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                asyncStorage.set(STORAGE_KEYS.ONBOARDING_COMPLETED, true);
+                navigation.replace('Register');
+              }}
+              style={[styles.ctaButtonOutline, { borderColor: colors.interactive.default }]}
+              activeOpacity={0.85}>
+              <Text style={[styles.ctaButtonOutlineText, { color: colors.interactive.default }]}>
+                Kayıt Ol
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity
+            onPress={handleNext}
+            style={[styles.ctaButton, { backgroundColor: colors.interactive.default }]}
+            activeOpacity={0.85}>
+            <Text style={[styles.ctaButtonText, { color: colors.text.inverse }]}>İleri</Text>
+            <Icon name="arrow-right" size={20} color={colors.text.inverse} style={styles.ctaIcon} />
+          </TouchableOpacity>
+        )}
       </Animated.View>
     </SafeAreaView>
   );
@@ -237,18 +239,29 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginRight: 8,
   },
+  ctaButtonOutline: {
+    alignItems: 'center',
+    borderRadius: 28,
+    borderWidth: 2,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    marginTop: 12,
+  },
+  ctaButtonOutlineText: {
+    fontSize: 17,
+    fontWeight: '600',
+  },
   ctaIcon: {
     marginLeft: 4,
+  },
+  finalButtons: {
+    gap: 0,
   },
   footer: {
     paddingBottom: 20,
     paddingHorizontal: 24,
     paddingTop: 20,
-  },
-  header: {
-    alignItems: 'flex-end',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
   },
   iconContainer: {
     alignItems: 'center',
@@ -256,7 +269,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     height: 140,
     justifyContent: 'center',
-    marginBottom: 40,
+    marginBottom: 64,
     width: 140,
   },
   pagination: {

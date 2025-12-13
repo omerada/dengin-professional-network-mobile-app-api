@@ -91,7 +91,7 @@ export const RegisterScreenOptimized: React.FC = () => {
     formState: { errors },
     trigger,
     watch,
-    getValues,
+    setValue,
   } = useForm<RegisterOptimizedSchemaType>({
     resolver: zodResolver(registerOptimizedSchema),
     mode: 'onTouched',
@@ -100,8 +100,8 @@ export const RegisterScreenOptimized: React.FC = () => {
       password: '',
       firstName: '',
       lastName: '',
-      sectorId: null,
-      professionId: null,
+      sectorId: undefined,
+      professionId: undefined,
       customProfession: '',
     },
   });
@@ -121,23 +121,6 @@ export const RegisterScreenOptimized: React.FC = () => {
     }
   }, [trigger]);
 
-  /**
-   * Skip Professional Info (Optional)
-   */
-  const handleSkipProfessional = useCallback(() => {
-    const formData = getValues();
-    // Submit without professional info (all null)
-    register({
-      ...formData,
-      sectorId: null,
-      professionId: null,
-      customProfession: '',
-    });
-  }, [getValues, register]);
-
-  /**
-   * Submit with Professional Info
-   */
   /**
    * Final Submit (with professional info)
    */
@@ -203,14 +186,14 @@ export const RegisterScreenOptimized: React.FC = () => {
             </Text>
           </View>
 
-          {/* Error Message - Empathic */}
+          {/* Error Message - Professional */}
           {isError && error && (
             <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
               <Icon name="alert-circle" size={18} color={colors.status.error} />
               <Text style={[styles.errorText, { color: colors.status.error }]}>
                 {error.message?.includes('email')
-                  ? '📧 Bu e-posta zaten kullanımda. Giriş yapmayı dener misin?'
-                  : '😔 Bir şeyler ters gitti. Tekrar dener misin?'}
+                  ? 'Bu e-posta zaten kullanımda. Giriş yapmayı dener misiniz?'
+                  : 'Bir hata oluştu. Lütfen tekrar deneyin.'}
               </Text>
             </View>
           )}
@@ -389,10 +372,15 @@ export const RegisterScreenOptimized: React.FC = () => {
             </Animated.View>
           ) : (
             <Animated.View key="step-2" entering={FadeIn} exiting={FadeOut}>
-              {/* Professional Info (Optional) */}
-              <Text style={[styles.stepSubtitle, { color: colors.text.secondary }]}>
-                Mesleğinizi belirterek size özel içerikler görebilirsiniz (İsteğe bağlı)
-              </Text>
+              {/* Professional Info (Required) */}
+              <View style={styles.stepHeader}>
+                <Text style={[styles.stepSubtitle, { color: colors.text.secondary }]}>
+                  Mesleğinizi belirtin ve profesyonel ağınıza katılın
+                </Text>
+                <Text style={[styles.stepDescription, { color: colors.text.tertiary }]}>
+                  Sektörünüzden profesyonellerle bağlantı kurun
+                </Text>
+              </View>
 
               <Controller
                 control={control}
@@ -424,16 +412,7 @@ export const RegisterScreenOptimized: React.FC = () => {
               {/* Buttons */}
               <View style={styles.buttonGroup}>
                 <Button
-                  title="Atla"
-                  onPress={handleSkipProfessional}
-                  variant="outline"
-                  size="lg"
-                  fullWidth
-                  loading={isLoading}
-                  disabled={isLoading}
-                />
-                <Button
-                  title={isLoading ? 'Hesap oluşturuluyor...' : 'Tamamla'}
+                  title={isLoading ? 'Hesap oluşturuluyor...' : 'Hesap Oluştur'}
                   onPress={handleSubmit(onSubmit)}
                   size="lg"
                   fullWidth
@@ -583,9 +562,17 @@ const styles = StyleSheet.create({
   socialSection: {
     marginBottom: spacing.lg,
   },
-  stepSubtitle: {
-    fontSize: 15,
+  stepHeader: {
     marginBottom: spacing.xl,
+  },
+  stepSubtitle: {
+    fontSize: 17,
+    fontWeight: '600',
+    marginBottom: spacing.xs,
+    textAlign: 'center',
+  },
+  stepDescription: {
+    fontSize: 14,
     textAlign: 'center',
   },
   strengthBar: {

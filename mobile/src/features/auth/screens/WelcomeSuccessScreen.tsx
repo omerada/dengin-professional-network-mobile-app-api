@@ -140,10 +140,10 @@ export const WelcomeSuccessScreen: React.FC = () => {
       }),
     );
 
-    // 8. AUTO-CONTINUE: Navigate to main app after 2.5 seconds
+    // 8. AUTO-CONTINUE: Navigate to main app after 4 seconds
     const autoNavigateTimer = setTimeout(() => {
       handleContinue();
-    }, 2500);
+    }, 4000);
 
     return () => clearTimeout(autoNavigateTimer);
   }, [handleContinue]);
@@ -239,10 +239,16 @@ export const WelcomeSuccessScreen: React.FC = () => {
           </LinearGradient>
         </Animated.View>
 
-        {/* Skip Button - Optional (auto-navigate after 2.5s) */}
+        {/* Continue Button - Manual navigation */}
         <Animated.View style={[styles.buttonContainer, buttonStyle]}>
-          <TouchableOpacity style={styles.skipButton} onPress={handleContinue} activeOpacity={0.7}>
-            <Text style={[styles.skipButtonText, { color: colors.text.tertiary }]}>Atla →</Text>
+          <TouchableOpacity
+            style={[styles.continueButton, { backgroundColor: colors.interactive.default }]}
+            onPress={handleContinue}
+            activeOpacity={0.85}>
+            <Text style={[styles.continueButtonText, { color: colors.text.inverse }]}>
+              Devam Et
+            </Text>
+            <Icon name="arrow-right" size={20} color={colors.text.inverse} />
           </TouchableOpacity>
         </Animated.View>
       </View>
@@ -335,13 +341,25 @@ const styles = StyleSheet.create({
   buttonContainer: {
     alignItems: 'center',
     marginTop: spacing['3xl'],
+    width: '100%',
   },
-  skipButton: {
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.xl,
+  continueButton: {
+    alignItems: 'center',
+    borderRadius: 28,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: spacing['2xl'],
+    gap: spacing.sm,
+    minWidth: 200,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  skipButtonText: {
-    fontSize: 15,
-    fontWeight: '500',
+  continueButtonText: {
+    fontSize: 17,
+    fontWeight: '600',
   },
 });

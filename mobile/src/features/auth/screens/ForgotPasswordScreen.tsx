@@ -131,30 +131,16 @@ export const ForgotPasswordScreen: React.FC = () => {
           <View style={styles.header}>
             <TouchableOpacity
               onPress={handleBack}
-              accessible={true}
-              accessibilityRole="button"
-              accessibilityLabel="Geri dön"
               style={styles.backButton}
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-              <View
-                style={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: 28,
-                  backgroundColor: colors.background.secondary,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <Icon name="chevron-left" size={32} color={colors.text.primary} />
-              </View>
+              <Icon name="arrow-left" size={24} color={colors.text.primary} />
             </TouchableOpacity>
+            <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Şifremi Unuttum</Text>
+            <View style={styles.headerSpacer} />
           </View>
 
-          {/* Title */}
-          <View style={styles.titleContainer}>
-            <Text style={[styles.title, { color: colors.text.primary }]}>
-              {t('auth.forgotPassword')}
-            </Text>
+          {/* Subtitle */}
+          <View style={styles.subtitleContainer}>
             <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
               E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.
             </Text>
@@ -163,8 +149,11 @@ export const ForgotPasswordScreen: React.FC = () => {
           {/* Error Message */}
           {isError && error && (
             <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
+              <Icon name="alert-circle" size={18} color={colors.status.error} />
               <Text style={[styles.errorText, { color: colors.status.error }]}>
-                {getErrorMessage(error)}
+                {error.message?.includes('not found') || error.message?.includes('bulunamadı')
+                  ? 'Bu e-posta adresi kayıtlı değil.'
+                  : 'Bir hata oluştu. Lütfen tekrar deneyin.'}
               </Text>
             </View>
           )}
@@ -229,37 +218,43 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: spacing.xl,
+    paddingTop: spacing.md,
   },
   header: {
-    height: 56,
-    justifyContent: 'center',
-    marginTop: spacing.sm,
-    marginLeft: -spacing.xl,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.lg,
+    paddingHorizontal: spacing.xs,
   },
   backButton: {
-    justifyContent: 'center',
-    alignItems: 'flex-start',
+    padding: spacing.sm,
   },
-  titleContainer: {
-    marginBottom: spacing['3xl'],
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '600',
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: spacing.md,
+  headerSpacer: {
+    width: 40,
+  },
+  subtitleContainer: {
+    marginBottom: spacing.xl,
   },
   subtitle: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: 15,
+    lineHeight: 22,
   },
   errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
     padding: spacing.md,
-    borderRadius: 8,
-    marginBottom: spacing.xl + spacing.md,
+    borderRadius: 12,
+    marginBottom: spacing.lg,
   },
   errorText: {
+    flex: 1,
     fontSize: 14,
-    textAlign: 'center',
   },
   form: {
     marginBottom: spacing.lg,

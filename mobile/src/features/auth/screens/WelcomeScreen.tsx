@@ -62,7 +62,7 @@ export const WelcomeScreen: React.FC = () => {
                 shadowColor: colors.interactive.default,
               },
             ]}>
-            <Text style={[styles.logoText, { color: colors.interactive.default }]}>D</Text>
+            <Icon name="users" size={56} color={colors.interactive.default} />
           </View>
           <Text style={[styles.appName, { color: colors.text.primary }]}>Dengin</Text>
           <Text style={[styles.tagline, { color: colors.text.secondary }]}>
@@ -118,31 +118,21 @@ export const WelcomeScreen: React.FC = () => {
           />
         </Animated.View>
 
-        {/* Terms - Clickable */}
+        {/* Terms - Clickable with proper Text nesting */}
         <Animated.View entering={FadeIn.delay(300).duration(300)}>
           <Text style={[styles.termsText, { color: colors.text.secondary }]}>
             Devam ederek{' '}
-            <Pressable onPress={handleTerms}>
-              <Text
-                style={{
-                  color: colors.interactive.default,
-                  fontWeight: '600',
-                  textDecorationLine: 'underline',
-                }}>
-                Kullanım Koşulları
-              </Text>
-            </Pressable>{' '}
-            ve{' '}
-            <Pressable onPress={handlePrivacy}>
-              <Text
-                style={{
-                  color: colors.interactive.default,
-                  fontWeight: '600',
-                  textDecorationLine: 'underline',
-                }}>
-                Gizlilik Politikası
-              </Text>
-            </Pressable>
+            <Text
+              style={[styles.termsLink, { color: colors.interactive.default }]}
+              onPress={handleTerms}>
+              Kullanım Koşulları
+            </Text>
+            {' ve '}
+            <Text
+              style={[styles.termsLink, { color: colors.interactive.default }]}
+              onPress={handlePrivacy}>
+              Gizlilik Politikası
+            </Text>
             'nı kabul etmiş olursunuz.
           </Text>
         </Animated.View>
@@ -227,5 +217,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
     paddingHorizontal: spacing.md,
+  },
+  termsLink: {
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
 });

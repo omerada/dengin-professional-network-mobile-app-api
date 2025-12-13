@@ -95,42 +95,59 @@ export const registerSchema = z
  * Optimized Register form validation schema (for RegisterScreenOptimized)
  * Modern 2-step approach:
  * - Step 1 (Essentials): email, password, firstName, lastName
- * - Step 2 (Professional - Optional): sectorId, professionId, customProfession
+ * - Step 2 (Professional - Required): sectorId, professionId, customProfession
  *
  * Key UX improvements:
  * - No confirmPassword (uses password strength indicator instead)
- * - Sector/profession fully optional (can be skipped)
+ * - Sector/profession required for professional platform
  * - Implicit terms acceptance (no checkbox)
  */
-export const registerOptimizedSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'E-posta adresi gerekli')
-    .regex(emailRegex, 'Geçerli bir e-posta adresi giriniz'),
-  password: z
-    .string()
-    .min(1, 'Şifre gerekli')
-    .min(8, 'Şifre en az 8 karakter olmalı')
-    .regex(passwordRegex, 'Şifre en az 8 karakter ve bir büyük harf içermeli'),
-  firstName: z
-    .string()
-    .min(1, 'Ad gerekli')
-    .min(2, 'Ad en az 2 karakter olmalı')
-    .max(50, 'Ad en fazla 50 karakter olabilir'),
-  lastName: z
-    .string()
-    .min(1, 'Soyad gerekli')
-    .min(2, 'Soyad en az 2 karakter olmalı')
-    .max(50, 'Soyad en fazla 50 karakter olabilir'),
-  // Professional info - all optional
-  sectorId: z.number().optional().nullable(),
-  professionId: z.number().optional().nullable(),
-  customProfession: z
-    .string()
-    .max(100, 'Meslek en fazla 100 karakter olabilir')
-    .optional()
-    .or(z.literal('')),
-});
+export const registerOptimizedSchema = z
+  .object({
+    email: z
+      .string()
+      .min(1, 'E-posta adresi gerekli')
+      .regex(emailRegex, 'Geçerli bir e-posta adresi giriniz'),
+    password: z
+      .string()
+      .min(1, 'Şifre gerekli')
+      .min(8, 'Şifre en az 8 karakter olmalı')
+      .regex(passwordRegex, 'Şifre en az 8 karakter ve bir büyük harf içermeli'),
+    firstName: z
+      .string()
+      .min(1, 'Ad gerekli')
+      .min(2, 'Ad en az 2 karakter olmalı')
+      .max(50, 'Ad en fazla 50 karakter olabilir'),
+    lastName: z
+      .string()
+      .min(1, 'Soyad gerekli')
+      .min(2, 'Soyad en az 2 karakter olmalı')
+      .max(50, 'Soyad en fazla 50 karakter olabilir'),
+    // Professional info - required
+    sectorId: z.number({
+      required_error: 'Sektör seçimi zorunludur',
+      invalid_type_error: 'Sektör seçimi zorunludur',
+    }),
+    professionId: z.number().optional().nullable(),
+    customProfession: z
+      .string()
+      .max(100, 'Meslek en fazla 100 karakter olabilir')
+      .optional()
+      .or(z.literal('')),
+  })
+  .refine(
+    data => {
+      // Either professionId or customProfession must be provided
+      if (!data.professionId && (!data.customProfession || data.customProfession.trim() === '')) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: 'Meslek seçimi veya meslek girişi zorunludur',
+      path: ['professionId'],
+    },
+  );
 
 /**
  * Forgot password form validation schema

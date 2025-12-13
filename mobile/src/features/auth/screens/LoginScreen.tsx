@@ -100,6 +100,24 @@ export const LoginScreen: React.FC = () => {
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity
+              onPress={() => {
+                if (navigation.canGoBack()) {
+                  navigation.goBack();
+                } else {
+                  navigation.replace('Welcome');
+                }
+              }}
+              style={styles.backButton}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+              <Icon name="arrow-left" size={24} color={colors.text.primary} />
+            </TouchableOpacity>
+            <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Giriş Yap</Text>
+            <View style={styles.headerSpacer} />
+          </View>
+
           {/* Hero Section - DENGIN Branding */}
           <View style={styles.heroSection}>
             <View style={styles.logoContainer}>
@@ -157,17 +175,17 @@ export const LoginScreen: React.FC = () => {
             <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
           </View>
 
-          {/* Error Message - Empathic */}
+          {/* Error Message - Professional */}
           {isError && error && (
             <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
               <Icon name="alert-circle" size={18} color={colors.status.error} />
               <View style={styles.errorContent}>
                 <Text style={[styles.errorText, { color: colors.status.error }]}>
                   {error.message?.includes('credentials') || error.message?.includes('password')
-                    ? '😔 E-posta veya şifre hatalı. Tekrar dener misin?'
+                    ? 'E-posta veya şifre hatalı. Lütfen tekrar deneyin.'
                     : error.message?.includes('network') || error.message?.includes('connection')
-                      ? '📶 Bağlantı sorunu. İnternet bağlantını kontrol et'
-                      : '😔 Bir şeyler ters gitti. Tekrar dener misin?'}
+                      ? 'Bağlantı sorunu. İnternet bağlantınızı kontrol edin.'
+                      : 'Bir hata oluştu. Lütfen tekrar deneyin.'}
                 </Text>
                 <TouchableOpacity onPress={handleForgotPassword}>
                   <Text style={[styles.errorAction, { color: colors.interactive.default }]}>
@@ -287,7 +305,24 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: spacing.xl,
-    paddingTop: spacing.xl,
+    paddingTop: spacing.md,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.lg,
+    paddingHorizontal: spacing.xs,
+  },
+  backButton: {
+    padding: spacing.sm,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  headerSpacer: {
+    width: 40,
   },
   heroSection: {
     alignItems: 'center',
