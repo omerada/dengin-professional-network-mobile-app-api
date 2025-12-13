@@ -30,30 +30,38 @@ export interface GrayColorScale extends ColorScale {
 }
 
 /**
- * Warm Gray Color Scale (0-950 dahil)
+ * Slate Color Scale (0-950 dahil)
  */
-export interface WarmGrayColorScale extends ColorScale {
+export interface SlateColorScale extends ColorScale {
   0: string;
   950: string;
 }
 
 /**
- * Base Color Palette
+ * Base Color Palette - Anatolian Professional System
  */
 export interface ColorPalette {
-  copper: ColorScale; // Primary - Warm Copper #D9C5AC
-  indigo: ColorScale; // Secondary - Sage Green
-  emerald: ColorScale; // Success - Natural Emerald
-  orange: ColorScale; // Warning - Warm Amber
-  ruby: ColorScale; // Error - Muted Red
-  gold: ColorScale; // Premium - Rose Gold
-  teal: ColorScale; // Accent - Deep Teal
-  warmGray: WarmGrayColorScale; // Neutral - Warm Gray
+  // Main colors (Anatolian Professional)
+  terracotta: ColorScale; // Primary - Terracotta #DC582A (özgün)
+  slate: SlateColorScale; // Neutral - Slate (modern profesyonel)
+  emerald: ColorScale; // Success - Emerald (güven)
+  orange: ColorScale; // Warning - Orange
+  red: ColorScale; // Error - Red
+  violet: ColorScale; // Premium - Violet
+  sky: ColorScale; // Accent - Sky Blue (service)
+  rose: ColorScale; // Creative - Rose
+  amber: ColorScale; // Education - Amber
+  indigo: ColorScale; // Secondary - Sage Green (kept for compatibility)
   // Legacy support (backward compatibility)
-  blue: ColorScale; // Maps to teal
-  green: ColorScale; // Maps to emerald
-  red: ColorScale; // Maps to ruby
-  gray: GrayColorScale; // Maps to warmGray
+  blue: ColorScale; // Old primary - maps to terracotta
+  green: ColorScale; // Old success - maps to emerald
+  purple: ColorScale; // Old premium - maps to violet
+  copper: ColorScale; // Old copper - maps to terracotta
+  ruby: ColorScale; // Old error - maps to red
+  gold: ColorScale; // Old premium - maps to violet
+  gray: SlateColorScale; // Old neutral - maps to slate
+  warmGray: SlateColorScale; // Old warm gray - maps to slate
+  teal: ColorScale; // Info/legacy - kept for compatibility
 }
 
 /**
