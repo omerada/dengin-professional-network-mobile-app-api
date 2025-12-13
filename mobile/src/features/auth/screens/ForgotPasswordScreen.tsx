@@ -135,7 +135,9 @@ export const ForgotPasswordScreen: React.FC = () => {
               hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
               <Icon name="arrow-left" size={24} color={colors.text.primary} />
             </TouchableOpacity>
-            <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Şifremi Unuttum</Text>
+            <Text style={[styles.headerTitle, { color: colors.text.primary }]}>
+              Şifremi Unuttum
+            </Text>
             <View style={styles.headerSpacer} />
           </View>
 
