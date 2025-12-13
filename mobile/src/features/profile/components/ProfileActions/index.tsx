@@ -6,9 +6,11 @@ import React, { memo, useCallback } from 'react';
 import { Alert, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 import { Button } from '@shared/components';
 import { useHaptic } from '@shared/hooks/useHaptic';
+import { useColors } from '@contexts/ThemeContext';
 import { useFollow, useUnfollow, useBlock, useUnblock } from '@features/social/hooks/useFollow';
 
 import { styles } from './ProfileActions.styles';
@@ -46,6 +48,7 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
   }) => {
     const navigation = useNavigation();
     const { trigger } = useHaptic();
+    const colors = useColors();
 
     // Mutations
     const followMutation = useFollow();
@@ -182,7 +185,7 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
             variant="outline"
             size="md"
             fullWidth
-            leftIcon="chatbubble-outline"
+            leftIcon={<Icon name="chatbubble-outline" size={20} color={colors.text.secondary} />}
           />
         </View>
 
@@ -192,7 +195,7 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
           onPress={handleMorePress}
           variant="outline"
           size="md"
-          leftIcon="ellipsis-horizontal"
+          leftIcon={<Icon name="ellipsis-horizontal" size={20} color={colors.text.secondary} />}
           style={styles.moreButton}
         />
       </Animated.View>

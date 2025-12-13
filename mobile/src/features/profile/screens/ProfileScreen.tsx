@@ -1,12 +1,14 @@
 // src/features/profile/screens/ProfileScreen.tsx
-// Modern Profile Screen with Design System integration
-// Oku: mobile-development-guide/ui-ux-modernization/09-PROFILE-REDESIGN.md
+// Modern Minimal Profile Screen - Backend %100 Uyumlu
+// Design: Instagram + BeReal inspired, Soft Orange Theme
+// Backend: GET /api/users/me, GET /api/users/{id}
 
 import React, { useCallback, useMemo } from 'react';
-import { View, ScrollView, RefreshControl, Alert, Text, ActivityIndicator } from 'react-native';
+import { View, ScrollView, RefreshControl, Alert, Text, ActivityIndicator, Pressable, TouchableOpacity, Image } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useColors } from '@contexts/ThemeContext';
 import { useAuthStore } from '@features/auth/stores';
@@ -15,7 +17,7 @@ import { useFollow, useUnfollow } from '@features/social/hooks/useFollow';
 import { useUserPosts } from '@features/feed/hooks';
 import { PostCard } from '@features/feed/components';
 import { Button, Loading, Skeleton } from '@shared/components';
-import { ProfileHeader, ProfileStats, ProfileBio, ProfileActions } from '../components';
+import { ProfileBio, ProfileActions } from '../components';
 import { useMyProfile, useProfile, useProfileStats } from '../hooks';
 import type { ProfileStats as ProfileStatsType } from '../types';
 import type { Post } from '@features/feed/types';
@@ -40,7 +42,6 @@ export const ProfileScreen: React.FC = () => {
   const route = useRoute();
   const params = route.params as RouteParams | undefined;
   const currentUser = useAuthStore(state => state.user);
-  const { logout, isLoading: isLoggingOut } = useLogout();
 
   // Follow mutations
   const followMutation = useFollow();
@@ -160,10 +161,6 @@ export const ProfileScreen: React.FC = () => {
     [viewedUserId, followMutation, unfollowMutation],
   );
 
-  const handleLogout = useCallback(() => {
-    logout();
-  }, [logout]);
-
   // Loading state
   if (isLoading && !profile) {
     return (
@@ -202,54 +199,128 @@ export const ProfileScreen: React.FC = () => {
             tintColor={colors.interactive.default}
           />
         }>
-        {/* Profile Header */}
-        <ProfileHeader
-          profile={profile}
-          isOwnProfile={isOwnProfile}
-          onAvatarPress={handleAvatarPress}
-          onEditPress={handleEditPress}
-        />
+        {/* Modern Premium Header */}
+        <View style={styles.premiumHeader}>
+          {/* Blurred Background */}
+          <View style={[styles.blurredBackground, { backgroundColor: colors.interactive.focus }]} />
 
-        {/* Profile Stats */}
-        <ProfileStats stats={stats} userId={profileUserId ?? 0} interactive={!isOwnProfile} />
+          {/* Settings Button */}
+          {isOwnProfile && (
+            <TouchableOpacity
+              onPress={handleSettingsPress}
+              style={[styles.settingsButtonTop, { backgroundColor: 'rgba(255,255,255,0.3)' }]}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <Icon name="settings-outline" size={22} color="#fff" />
+            </TouchableOpacity>
+          )}
+
+          {/* Centered Profile Content */}
+          <View style={styles.profileContent}>
+            {/* Avatar with Glow */}
+            <Animated.View entering={FadeIn.duration(500)} style={styles.avatarGlowContainer}>
+              <View style={[styles.avatarGlow, { backgroundColor: colors.interactive.default }]} />
+              <Pressable onPress={isOwnProfile ? handleAvatarPress : undefined}>
+                {profile.avatarUrl ? (
+                  <Image
+                    source={{ uri: profile.avatarUrl }}
+                    style={styles.premiumAvatar}
+                  />
+                ) : (
+                  <View style={[styles.premiumAvatar, styles.avatarPlaceholder, { backgroundColor: colors.interactive.focus }]}>
+                    <Text style={[styles.avatarInitials, { color: colors.interactive.default }]}>
+                      {profile.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                    </Text>
+                  </View>
+                )}
+              </Pressable>
+            </Animated.View>
+
+            {/* Profession Name - Big Bold */}
+            <Animated.View entering={FadeInDown.delay(200).duration(400)}>
+              <Text style={[styles.professionTitle, { color: colors.text.primary }]}>
+                {('professionName' in profile ? profile.professionName : profile.profession?.name) || profile.fullName}
+              </Text>
+            </Animated.View>
+
+            {/* Username - Small */}
+            <Animated.View entering={FadeInDown.delay(300).duration(400)}>
+              <Text style={[styles.usernameSmall, { color: colors.text.secondary }]}>
+                @{profile.fullName.toLowerCase().replace(/\s+/g, '_')}
+              </Text>
+            </Animated.View>
+
+            {/* Stats - Horizontal Big Numbers */}
+            <Animated.View entering={FadeInDown.delay(400).duration(400)} style={styles.statsRow}>
+              <View style={styles.statBox}>
+                <Text style={[styles.statNumber, { color: colors.text.primary }]}>
+                  {stats.postCount}
+                </Text>
+                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>
+                  Gönderi
+                </Text>
+              </View>
+
+              <View style={[styles.statDivider, { backgroundColor: colors.border.subtle }]} />
+
+              <Pressable 
+                style={styles.statBox}
+                onPress={() => {
+                  // @ts-expect-error - navigation types
+                  navigation.navigate('FollowersList', { userId: profileUserId });
+                }}>
+                <Text style={[styles.statNumber, { color: colors.text.primary }]}>
+                  {stats.followerCount >= 1000 ? `${(stats.followerCount / 1000).toFixed(1)}k` : stats.followerCount}
+                </Text>
+                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>
+                  Takipçi
+                </Text>
+              </Pressable>
+
+              <View style={[styles.statDivider, { backgroundColor: colors.border.subtle }]} />
+
+              <Pressable 
+                style={styles.statBox}
+                onPress={() => {
+                  // @ts-expect-error - navigation types
+                  navigation.navigate('FollowingList', { userId: profileUserId });
+                }}>
+                <Text style={[styles.statNumber, { color: colors.text.primary }]}>
+                  {stats.followingCount >= 1000 ? `${(stats.followingCount / 1000).toFixed(1)}k` : stats.followingCount}
+                </Text>
+                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>
+                  Takip
+                </Text>
+              </Pressable>
+            </Animated.View>
+          </View>
+        </View>
 
         {/* Bio */}
         {'bio' in profile && profile.bio && <ProfileBio bio={profile.bio} />}
 
         {/* Actions for other users */}
-        {!isOwnProfile && 'userId' in profile && (
+        {!isOwnProfile && 'userId' in profile && profile.userId && (
           <ProfileActions
             userId={profile.userId}
-            isFollowing={profile.isFollowing}
-            isFollowedBy={profile.isFollowedBy}
-            isBlocked={profile.isBlocked}
+            isFollowing={profile.isFollowing ?? false}
+            isFollowedBy={profile.isFollowedBy ?? false}
+            isBlocked={profile.isBlocked ?? false}
             onFollowChange={handleFollowChange}
           />
         )}
 
-        {/* Own profile actions */}
+        {/* Own profile action - Edit Profile */}
         {isOwnProfile && (
           <Animated.View
             entering={FadeInDown.delay(350).duration(400)}
-            style={styles.ownProfileActions}>
+            style={styles.editProfileButton}>
             <Button
-              title="Ayarlar"
-              onPress={handleSettingsPress}
+              title="Profili Düzenle"
+              onPress={handleEditPress}
               variant="outline"
               size="md"
               fullWidth
-              leftIcon="settings-outline"
             />
-            <View style={styles.logoutButton}>
-              <Button
-                title="Çıkış Yap"
-                onPress={handleLogout}
-                loading={isLoggingOut}
-                variant="danger"
-                size="md"
-                fullWidth
-              />
-            </View>
           </Animated.View>
         )}
 

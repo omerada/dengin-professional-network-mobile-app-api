@@ -132,6 +132,7 @@ const ProfileStackNavigator: React.FC = () => (
       fullScreenGestureEnabled: true,
       animation: 'slide_from_right',
     }}>
+    {/* Modern Premium Profile Screen */}
     <ProfileStack.Screen name="Profile" component={ProfileScreen} />
     <ProfileStack.Screen name="EditProfile" component={EditProfileScreen} />
     <ProfileStack.Screen name="Settings" component={SettingsScreen} />
