@@ -8,6 +8,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-na
 import { useColors } from '@contexts/ThemeContext';
 import { spacing, fontSize } from '@theme';
 import { spring } from '@theme/animations';
+import { HAPTIC_TYPES } from '@constants/hapticPresets';
 import { useHaptic } from '@shared/hooks/useHaptic';
 import { useFollow, useUnfollow } from '../hooks';
 
@@ -65,7 +66,7 @@ export const FollowButton: React.FC<FollowButtonProps> = memo(
     }));
 
     const handlePress = useCallback(async () => {
-      haptic.medium();
+      haptic.trigger(HAPTIC_TYPES.buttonPressImportant);
       try {
         if (isFollowing) {
           await unfollow.mutateAsync(userId);

@@ -63,7 +63,9 @@ export const FollowingListScreen: React.FC = () => {
       <EmptyState
         icon="person-add-outline"
         title="Henüz takip edilen yok"
-        message="Bu kullanıcı henüz kimseyi takip etmiyor"
+        description="Bu kullanıcı henüz kimseyi takip etmiyor"
+        floatingIcon
+        animated
       />
     );
   }, [isLoading]);

@@ -10,8 +10,9 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeInDown, FadeInUp, SlideInRight, FadeIn } from 'react-native-reanimated';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Feather';
+import { SCREEN_ANIMATIONS } from '@constants/animationPresets';
 
 import { useColors } from '@contexts/ThemeContext';
 import { asyncStorage } from '@core/storage/asyncStorage';
@@ -70,11 +71,11 @@ const SlideItem: React.FC<SlideProps> = ({ slide, index }) => {
 
   return (
     <Animated.View
-      entering={FadeIn.delay(index * 100).duration(600)}
+      entering={SCREEN_ANIMATIONS.listItemEnter(index, 3)}
       style={[styles.slide, { width }]}>
       {/* Icon Container */}
       <Animated.View
-        entering={SlideInRight.delay(200 + index * 100).springify()}
+        entering={SCREEN_ANIMATIONS.heroEnter}
         style={[
           styles.iconContainer,
           {
@@ -86,9 +87,7 @@ const SlideItem: React.FC<SlideProps> = ({ slide, index }) => {
       </Animated.View>
 
       {/* Text Content */}
-      <Animated.View
-        entering={FadeInDown.delay(300 + index * 100).duration(500)}
-        style={styles.textContainer}>
+      <Animated.View entering={SCREEN_ANIMATIONS.contentEnter} style={styles.textContainer}>
         <Text style={[styles.slideTitle, { color: colors.text.primary }]}>{slide.title}</Text>
         <Text style={[styles.slideDescription, { color: colors.text.secondary }]}>
           {slide.description}

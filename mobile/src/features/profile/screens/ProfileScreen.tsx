@@ -4,15 +4,25 @@
 // Backend: GET /api/users/me, GET /api/users/{id}
 
 import React, { useCallback, useMemo } from 'react';
-import { View, ScrollView, RefreshControl, Alert, Text, ActivityIndicator, Pressable, TouchableOpacity, Image } from 'react-native';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import {
+  View,
+  ScrollView,
+  RefreshControl,
+  Alert,
+  Text,
+  ActivityIndicator,
+  Pressable,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { SCREEN_ANIMATIONS } from '@constants/animationPresets';
 
 import { useColors } from '@contexts/ThemeContext';
 import { useAuthStore } from '@features/auth/stores';
-import { useLogout } from '@features/auth/hooks';
 import { useFollow, useUnfollow } from '@features/social/hooks/useFollow';
 import { useUserPosts } from '@features/feed/hooks';
 import { PostCard } from '@features/feed/components';
@@ -167,7 +177,7 @@ export const ProfileScreen: React.FC = () => {
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.background.primary }]}
         edges={['top']}>
-        <Animated.View entering={FadeIn.duration(300)} style={styles.container}>
+        <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={styles.container}>
           <Skeleton variant="rectangular" />
         </Animated.View>
       </SafeAreaView>
@@ -217,18 +227,27 @@ export const ProfileScreen: React.FC = () => {
           {/* Centered Profile Content */}
           <View style={styles.profileContent}>
             {/* Avatar with Glow */}
-            <Animated.View entering={FadeIn.duration(500)} style={styles.avatarGlowContainer}>
+            <Animated.View
+              entering={SCREEN_ANIMATIONS.heroEnter}
+              style={styles.avatarGlowContainer}>
               <View style={[styles.avatarGlow, { backgroundColor: colors.interactive.default }]} />
               <Pressable onPress={isOwnProfile ? handleAvatarPress : undefined}>
                 {profile.avatarUrl ? (
-                  <Image
-                    source={{ uri: profile.avatarUrl }}
-                    style={styles.premiumAvatar}
-                  />
+                  <Image source={{ uri: profile.avatarUrl }} style={styles.premiumAvatar} />
                 ) : (
-                  <View style={[styles.premiumAvatar, styles.avatarPlaceholder, { backgroundColor: colors.interactive.focus }]}>
+                  <View
+                    style={[
+                      styles.premiumAvatar,
+                      styles.avatarPlaceholder,
+                      { backgroundColor: colors.interactive.focus },
+                    ]}>
                     <Text style={[styles.avatarInitials, { color: colors.interactive.default }]}>
-                      {profile.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                      {profile.fullName
+                        .split(' ')
+                        .map(n => n[0])
+                        .join('')
+                        .toUpperCase()
+                        .slice(0, 2)}
                     </Text>
                   </View>
                 )}
@@ -236,60 +255,60 @@ export const ProfileScreen: React.FC = () => {
             </Animated.View>
 
             {/* Profession Name - Big Bold */}
-            <Animated.View entering={FadeInDown.delay(200).duration(400)}>
+            <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(0, 3)}>
               <Text style={[styles.professionTitle, { color: colors.text.primary }]}>
-                {('professionName' in profile ? profile.professionName : profile.profession?.name) || profile.fullName}
+                {('professionName' in profile
+                  ? profile.professionName
+                  : profile.profession?.name) || profile.fullName}
               </Text>
             </Animated.View>
 
             {/* Username - Small */}
-            <Animated.View entering={FadeInDown.delay(300).duration(400)}>
+            <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(1, 3)}>
               <Text style={[styles.usernameSmall, { color: colors.text.secondary }]}>
                 @{profile.fullName.toLowerCase().replace(/\s+/g, '_')}
               </Text>
             </Animated.View>
 
             {/* Stats - Horizontal Big Numbers */}
-            <Animated.View entering={FadeInDown.delay(400).duration(400)} style={styles.statsRow}>
+            <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(2, 3)} style={styles.statsRow}>
               <View style={styles.statBox}>
                 <Text style={[styles.statNumber, { color: colors.text.primary }]}>
                   {stats.postCount}
                 </Text>
-                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>
-                  Gönderi
-                </Text>
+                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Gönderi</Text>
               </View>
 
               <View style={[styles.statDivider, { backgroundColor: colors.border.subtle }]} />
 
-              <Pressable 
+              <Pressable
                 style={styles.statBox}
                 onPress={() => {
                   // @ts-expect-error - navigation types
                   navigation.navigate('FollowersList', { userId: profileUserId });
                 }}>
                 <Text style={[styles.statNumber, { color: colors.text.primary }]}>
-                  {stats.followerCount >= 1000 ? `${(stats.followerCount / 1000).toFixed(1)}k` : stats.followerCount}
+                  {stats.followerCount >= 1000
+                    ? `${(stats.followerCount / 1000).toFixed(1)}k`
+                    : stats.followerCount}
                 </Text>
-                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>
-                  Takipçi
-                </Text>
+                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Takipçi</Text>
               </Pressable>
 
               <View style={[styles.statDivider, { backgroundColor: colors.border.subtle }]} />
 
-              <Pressable 
+              <Pressable
                 style={styles.statBox}
                 onPress={() => {
                   // @ts-expect-error - navigation types
                   navigation.navigate('FollowingList', { userId: profileUserId });
                 }}>
                 <Text style={[styles.statNumber, { color: colors.text.primary }]}>
-                  {stats.followingCount >= 1000 ? `${(stats.followingCount / 1000).toFixed(1)}k` : stats.followingCount}
+                  {stats.followingCount >= 1000
+                    ? `${(stats.followingCount / 1000).toFixed(1)}k`
+                    : stats.followingCount}
                 </Text>
-                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>
-                  Takip
-                </Text>
+                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Takip</Text>
               </Pressable>
             </Animated.View>
           </View>

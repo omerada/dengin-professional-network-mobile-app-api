@@ -7,7 +7,8 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
+import { SCREEN_ANIMATIONS } from '@constants/animationPresets';
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
 
@@ -35,7 +36,7 @@ export const VerificationStatusScreen: React.FC = memo(() => {
       edges={['top']}>
       {/* Header */}
       <Animated.View
-        entering={FadeIn.duration(300)}
+        entering={SCREEN_ANIMATIONS.screenEnter}
         style={[styles.header, { borderBottomColor: colors.border.subtle }]}>
         <Pressable
           onPress={handleBack}

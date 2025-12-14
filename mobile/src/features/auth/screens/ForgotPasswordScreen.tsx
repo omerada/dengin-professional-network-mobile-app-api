@@ -26,7 +26,6 @@ import { useForgotPassword } from '../hooks';
 import { forgotPasswordSchema, ForgotPasswordSchemaType } from '../validation';
 import { AuthStackNavigationProp } from '@shared/types';
 import { spacing } from '@theme';
-import { getErrorMessage } from '@core/utils/errorUtils';
 
 /**
  * Modern Forgot Password Screen

@@ -9,6 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing, typography } from '@theme';
+import { HAPTIC_TYPES } from '@constants/hapticPresets';
 import { Button } from '@shared/components';
 import { useHaptic } from '@shared/hooks/useHaptic';
 import { useVerificationStore } from '../stores';
@@ -59,7 +60,7 @@ export const VerificationIntroScreen: React.FC = memo(() => {
    * Doğrulamayı başlat
    */
   const handleStart = useCallback(() => {
-    haptic.medium();
+    haptic.trigger(HAPTIC_TYPES.buttonPressImportant);
     reset(); // Önceki verileri temizle
     setStep('document_front');
     navigation.navigate('DocumentCapture', { documentType: 'diploma', side: 'front' });

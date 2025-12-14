@@ -15,7 +15,8 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import Animated, { FadeIn, FadeOut, SlideInDown } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
+import { SCREEN_ANIMATIONS } from '@constants/animationPresets';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -212,7 +213,9 @@ export const CreatePostScreen: React.FC = () => {
 
           {/* Image Preview with animation */}
           {draftImages.length > 0 && (
-            <Animated.View entering={FadeIn.duration(300)} exiting={FadeOut.duration(200)}>
+            <Animated.View
+              entering={SCREEN_ANIMATIONS.cardEnter}
+              exiting={SCREEN_ANIMATIONS.cardExit}>
               <ImagePreviewGrid
                 images={draftImages}
                 onRemove={removeDraftImage}
@@ -225,8 +228,8 @@ export const CreatePostScreen: React.FC = () => {
           {/* Upload Progress with animation */}
           {uploadProgress && (
             <Animated.View
-              entering={SlideInDown.springify()}
-              exiting={FadeOut.duration(200)}
+              entering={SCREEN_ANIMATIONS.modalEnter}
+              exiting={SCREEN_ANIMATIONS.modalExit}
               style={styles.progressContainer}>
               <Text
                 style={[styles.progressText, { color: colors.text.secondary }]}
@@ -245,7 +248,7 @@ export const CreatePostScreen: React.FC = () => {
                   now: uploadProgress.progress,
                 }}>
                 <Animated.View
-                  entering={FadeIn}
+                  entering={SCREEN_ANIMATIONS.quickFadeIn}
                   style={[
                     styles.progressFill,
                     {
@@ -261,7 +264,7 @@ export const CreatePostScreen: React.FC = () => {
 
         {/* Bottom Toolbar with animation */}
         <Animated.View
-          entering={SlideInDown.delay(200).springify()}
+          entering={SCREEN_ANIMATIONS.contentEnter}
           style={[
             styles.toolbar,
             {

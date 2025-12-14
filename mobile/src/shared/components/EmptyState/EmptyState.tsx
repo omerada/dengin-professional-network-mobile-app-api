@@ -25,17 +25,32 @@ import { Button } from '../Button';
 export interface EmptyStateProps {
   /** Icon name from Ionicons */
   icon?: string;
+  /** Icon color override */
+  iconColor?: string;
   /** Main title text */
   title: string;
   /** Optional description message */
+  description?: string;
+  /** @deprecated Use description instead */
   message?: string;
-  /** Optional action button label */
+  /** Action configuration */
+  action?: {
+    title: string;
+    onPress: () => void;
+    variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  };
+  /** @deprecated Use action instead */
   actionLabel?: string;
-  /** Callback when action button is pressed */
+  /** @deprecated Use action instead */
   onAction?: () => void;
-  /** Secondary action button label */
+  /** Secondary action configuration */
+  secondaryAction?: {
+    title: string;
+    onPress: () => void;
+  };
+  /** @deprecated Use secondaryAction instead */
   secondaryActionLabel?: string;
-  /** Secondary action callback */
+  /** @deprecated Use secondaryAction instead */
   onSecondaryAction?: () => void;
   /** Animated entrance */
   animated?: boolean;
@@ -133,18 +148,35 @@ FloatingIcon.displayName = 'FloatingIcon';
 export const EmptyState: React.FC<EmptyStateProps> = memo(
   ({
     icon = 'file-tray-outline',
+    iconColor,
     title,
-    message,
-    actionLabel,
-    onAction,
-    secondaryActionLabel,
-    onSecondaryAction,
+    description,
+    message, // deprecated
+    action,
+    actionLabel, // deprecated
+    onAction, // deprecated
+    secondaryAction,
+    secondaryActionLabel, // deprecated
+    onSecondaryAction, // deprecated
     animated = true,
     floatingIcon = false,
     style,
     testID,
   }) => {
     const { colors } = useTheme();
+
+    // Backwards compatibility
+    const displayDescription = description || message;
+    const displayAction =
+      action ||
+      (actionLabel && onAction
+        ? { title: actionLabel, onPress: onAction, variant: 'primary' as const }
+        : undefined);
+    const displaySecondaryAction =
+      secondaryAction ||
+      (secondaryActionLabel && onSecondaryAction
+        ? { title: secondaryActionLabel, onPress: onSecondaryAction }
+        : undefined);
 
     // Entering animations for staggered reveal
     const containerEntering = animated ? FadeIn.duration(300) : undefined;
@@ -159,10 +191,10 @@ export const EmptyState: React.FC<EmptyStateProps> = memo(
         testID={testID}
         accessible
         accessibilityRole="alert"
-        accessibilityLabel={`${title}. ${message || ''}`}>
+        accessibilityLabel={`${title}. ${displayDescription || ''}`}>
         <FloatingIcon
           icon={icon}
-          iconColor={colors.text.tertiary}
+          iconColor={iconColor || colors.text.tertiary}
           backgroundColor={colors.background.secondary}
           floating={floatingIcon}
         />
@@ -173,30 +205,30 @@ export const EmptyState: React.FC<EmptyStateProps> = memo(
           {title}
         </Animated.Text>
 
-        {message && (
+        {displayDescription && (
           <Animated.Text
             entering={messageEntering}
             style={[styles.message, { color: colors.text.secondary }]}>
-            {message}
+            {displayDescription}
           </Animated.Text>
         )}
 
-        {(actionLabel || secondaryActionLabel) && (
+        {(displayAction || displaySecondaryAction) && (
           <Animated.View entering={buttonEntering} style={styles.buttonContainer}>
-            {actionLabel && onAction && (
+            {displayAction && (
               <Button
-                title={actionLabel}
-                onPress={onAction}
-                variant="primary"
+                title={displayAction.title}
+                onPress={displayAction.onPress}
+                variant={displayAction.variant || 'primary'}
                 size="md"
                 style={styles.button}
               />
             )}
 
-            {secondaryActionLabel && onSecondaryAction && (
+            {displaySecondaryAction && (
               <Button
-                title={secondaryActionLabel}
-                onPress={onSecondaryAction}
+                title={displaySecondaryAction.title}
+                onPress={displaySecondaryAction.onPress}
                 variant="outline"
                 size="md"
                 style={styles.secondaryButton}

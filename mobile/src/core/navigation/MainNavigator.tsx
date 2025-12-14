@@ -13,6 +13,7 @@ import {
   ProfileStackParamList,
 } from '@shared/types';
 import { AnimatedTabBar, TabItem } from './components/AnimatedTabBar';
+import { NAVIGATION_ANIMATIONS } from '@constants/animationPresets';
 
 // Screens
 import { FeedScreen } from '@features/feed/screens/FeedScreen';
@@ -84,16 +85,16 @@ const FeedStackNavigator: React.FC = () => (
   <FeedStack.Navigator
     screenOptions={{
       headerShown: false,
-      gestureEnabled: true,
-      fullScreenGestureEnabled: true,
-      animation: 'slide_from_right',
+      ...NAVIGATION_ANIMATIONS.stack,
     }}>
     <FeedStack.Screen name="Feed" component={FeedScreen} />
     <FeedStack.Screen name="PostDetail" component={PostDetailScreen} />
     <FeedStack.Screen
       name="CreatePost"
       component={CreatePostScreen}
-      options={{ presentation: 'modal', gestureEnabled: true }}
+      options={{
+        ...NAVIGATION_ANIMATIONS.modal,
+      }}
     />
     <FeedStack.Screen name="Comments" component={CommentsScreen} />
     <FeedStack.Screen name="Notifications" component={NotificationsScreen} />
@@ -108,16 +109,16 @@ const MessagingStackNavigator: React.FC = () => (
   <MessagingStack.Navigator
     screenOptions={{
       headerShown: false,
-      gestureEnabled: true,
-      fullScreenGestureEnabled: true,
-      animation: 'slide_from_right',
+      ...NAVIGATION_ANIMATIONS.stack,
     }}>
     <MessagingStack.Screen name="ConversationList" component={ConversationListScreen} />
     <MessagingStack.Screen name="Chat" component={ChatScreen} />
     <MessagingStack.Screen
       name="NewConversation"
       component={require('@features/messaging/screens/NewConversationScreen').NewConversationScreen}
-      options={{ presentation: 'modal', gestureEnabled: true }}
+      options={{
+        ...NAVIGATION_ANIMATIONS.modal,
+      }}
     />
   </MessagingStack.Navigator>
 );
@@ -128,9 +129,7 @@ const ProfileStackNavigator: React.FC = () => (
   <ProfileStack.Navigator
     screenOptions={{
       headerShown: false,
-      gestureEnabled: true,
-      fullScreenGestureEnabled: true,
-      animation: 'slide_from_right',
+      ...NAVIGATION_ANIMATIONS.stack,
     }}>
     {/* Modern Premium Profile Screen */}
     <ProfileStack.Screen name="Profile" component={ProfileScreen} />

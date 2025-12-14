@@ -5,7 +5,7 @@
 import React, { memo, useCallback, forwardRef, useImperativeHandle, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, Modal } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
+import Animated, { SlideInDown } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
 import type { ConversationSummary } from '../types';
 

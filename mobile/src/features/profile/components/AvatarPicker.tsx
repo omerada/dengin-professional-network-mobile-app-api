@@ -16,6 +16,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing, fontSize } from '@theme';
+import { HAPTIC_TYPES } from '@constants/hapticPresets';
 import { useHaptic } from '@shared/hooks/useHaptic';
 
 interface AvatarPickerProps {
@@ -155,7 +156,7 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
 
     // Show options
     const handlePress = useCallback(() => {
-      haptic.light();
+      haptic.trigger(HAPTIC_TYPES.buttonPress);
       const options: {
         text: string;
         onPress?: () => void;

@@ -28,7 +28,6 @@ import { useAuthStore } from '../stores';
 import { loginSchema, LoginSchemaType } from '../validation';
 import { AuthStackNavigationProp } from '@shared/types';
 import { spacing } from '@theme';
-import { getErrorMessage } from '@core/utils/errorUtils';
 
 /**
  * Modern Login Screen

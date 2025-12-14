@@ -26,7 +26,6 @@ import { useRegister } from '../hooks';
 import { registerSchema, RegisterSchemaType } from '../validation';
 import { AuthStackNavigationProp } from '@shared/types';
 import { spacing } from '@theme';
-import { getErrorMessage } from '@core/utils/errorUtils';
 
 /**
  * Modern Register Screen

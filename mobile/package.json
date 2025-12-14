@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "get-ip": "node scripts/get-local-ip.js",
+    "prestart": "npm run get-ip",
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "npm run get-ip && expo start --android",
+    "ios": "npm run get-ip && expo start --ios",
     "web": "expo start --web",
     "test": "jest",
     "test:watch": "jest --watch",

@@ -4,16 +4,17 @@
 // Oku: mobile-development-guide/ui-ux-modernization/07-SCREEN-REDESIGNS.md
 
 import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, StatusBar, Pressable } from 'react-native';
+import { View, Text, StyleSheet, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
-import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
 import { useLocale } from '@contexts/LocaleContext';
 import { Button } from '@shared/components';
 import { AuthStackNavigationProp } from '@shared/types';
 import { spacing } from '@theme';
+import { SCREEN_ANIMATIONS } from '@constants/animationPresets';
 
 /**
  * Modern Welcome Screen
@@ -53,7 +54,7 @@ export const WelcomeScreen: React.FC = () => {
 
       <View style={styles.content}>
         {/* Hero Logo Area - DENGIN Branding */}
-        <Animated.View entering={FadeIn.duration(400)} style={styles.heroContainer}>
+        <Animated.View entering={SCREEN_ANIMATIONS.heroEnter} style={styles.heroContainer}>
           <View
             style={[
               styles.logoPlaceholder,
@@ -94,7 +95,7 @@ export const WelcomeScreen: React.FC = () => {
         <View style={styles.spacer} />
 
         {/* Action Buttons */}
-        <Animated.View entering={FadeIn.delay(200).duration(300)} style={styles.actionsContainer}>
+        <Animated.View entering={SCREEN_ANIMATIONS.contentEnter} style={styles.actionsContainer}>
           <Button
             title={t('auth.login')}
             onPress={handleLogin}

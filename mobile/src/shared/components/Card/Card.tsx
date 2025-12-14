@@ -93,8 +93,9 @@ export const Card: React.FC<CardProps> = memo(
     const paddingValue = CARD_PADDING_VALUES[padding];
     const borderRadius = CARD_RADIUS_VALUES[size];
 
-    // Default gradient colors
-    const defaultGradientColors = gradientColors ?? colors.gradient.primary;
+    // Default gradient colors - ensure at least 2 colors
+    const gradientArray = gradientColors ?? colors.gradient.primary;
+    const defaultGradientColors = gradientArray.filter(Boolean) as [string, string, ...string[]];
 
     // Shadow styles (only for elevated and gradient variants)
     const shadowStyle = useMemo(() => {

@@ -4,15 +4,17 @@
 
 import React, { useCallback, useMemo, useState, memo } from 'react';
 import { RefreshControl, ActivityIndicator, Alert, StyleSheet } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { SCREEN_ANIMATIONS } from '@constants/animationPresets';
+import { HAPTIC_TYPES } from '@constants/hapticPresets';
 
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
 import { useFeedPosts, useLikePost, useBookmarkPost, useDeletePost } from '../hooks';
-import { PostCard, FeedHeader, FilterBar, EmptyFeed, FeedSkeleton } from '../components';
+import { PostCard, FeedHeader, EmptyFeed, FeedSkeleton } from '../components';
 import { VerificationPromptCard } from '../components/VerificationPromptCard';
 import { AITrendInsightCard } from '../components/AITrendInsightCard';
 import { SuggestedExpertsCarousel } from '../components/SuggestedExpertsCarousel';
@@ -45,7 +47,7 @@ import type { Post } from '../types';
 export const FeedScreen: React.FC = memo(() => {
   const colors = useColors();
   const navigation = useNavigation();
-  const { medium } = useHaptic();
+  const { trigger } = useHaptic();
   const currentUserId = useAuthStore(state => state.user?.id);
   const user = useAuthStore(state => state.user);
   const { unreadCount } = useUnreadCount();
@@ -147,9 +149,9 @@ export const FeedScreen: React.FC = memo(() => {
    * Handle pull-to-refresh with haptic feedback
    */
   const handleRefresh = useCallback(() => {
-    medium();
+    trigger(HAPTIC_TYPES.pullToRefresh);
     refetch();
-  }, [medium, refetch]);
+  }, [trigger, refetch]);
 
   /**
    * Handle infinite scroll - load more posts
@@ -349,7 +351,7 @@ export const FeedScreen: React.FC = memo(() => {
     if (!isFetchingNextPage) return null;
 
     return (
-      <Animated.View entering={FadeIn.duration(200)} style={styles.footer}>
+      <Animated.View entering={SCREEN_ANIMATIONS.quickFadeIn} style={styles.footer}>
         <ActivityIndicator size="small" color={colors.interactive.default} />
       </Animated.View>
     );
@@ -379,7 +381,7 @@ export const FeedScreen: React.FC = memo(() => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top']}>
-      <Animated.View entering={FadeIn.duration(300)} style={styles.container}>
+      <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={styles.container}>
         {/* FlashList for optimized performance */}
         <FlashList
           data={posts}
