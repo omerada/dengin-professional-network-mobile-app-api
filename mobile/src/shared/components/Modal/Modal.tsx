@@ -30,6 +30,7 @@ import { useColors } from '@contexts/ThemeContext';
 import { spacing, fontSize } from '@theme';
 import { spring as springPresets } from '@theme/animations';
 import { useHaptic } from '@shared/hooks/useHaptic';
+import { UNIFIED_TIMING } from '@constants/unifiedTiming';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -120,8 +121,8 @@ export const Modal: React.FC<ModalProps> = memo(
         testID={testID}
         accessibilityViewIsModal>
         <Animated.View
-          entering={FadeIn.duration(200)}
-          exiting={FadeOut.duration(150)}
+          entering={FadeIn.duration(UNIFIED_TIMING.componentEnter)}
+          exiting={FadeOut.duration(UNIFIED_TIMING.componentExit)}
           style={styles.overlay}>
           <TouchableWithoutFeedback
             onPress={closeOnBackdrop ? handleClosePress : undefined}
@@ -130,8 +131,11 @@ export const Modal: React.FC<ModalProps> = memo(
           </TouchableWithoutFeedback>
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
             <Animated.View
-              entering={FadeIn.duration(250).springify().damping(20).stiffness(300)}
-              exiting={FadeOut.duration(150)}
+              entering={FadeIn.duration(UNIFIED_TIMING.componentEnter)
+                .springify()
+                .damping(20)
+                .stiffness(300)}
+              exiting={FadeOut.duration(UNIFIED_TIMING.componentExit)}
               style={[styles.content, { backgroundColor: colors.background.primary }]}>
               {(title || showCloseButton) && (
                 <View style={[styles.header, { borderBottomColor: colors.border.default }]}>
@@ -282,8 +286,8 @@ export const BottomSheet: React.FC<BottomSheetProps> = memo(
         testID={testID}
         accessibilityViewIsModal>
         <Animated.View
-          entering={FadeIn.duration(200)}
-          exiting={FadeOut.duration(150)}
+          entering={FadeIn.duration(UNIFIED_TIMING.componentEnter)}
+          exiting={FadeOut.duration(UNIFIED_TIMING.componentExit)}
           style={styles.overlay}>
           <TouchableWithoutFeedback onPress={handleClose} accessible={false}>
             <View style={StyleSheet.absoluteFill} />
@@ -292,7 +296,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = memo(
           <GestureDetector gesture={panGesture}>
             <Animated.View
               entering={SlideInDown.springify().damping(20).stiffness(200)}
-              exiting={SlideOutDown.duration(200)}
+              exiting={SlideOutDown.duration(UNIFIED_TIMING.componentExit)}
               style={[
                 styles.bottomSheetContent,
                 {

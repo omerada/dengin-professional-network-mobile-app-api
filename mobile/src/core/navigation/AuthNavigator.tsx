@@ -5,12 +5,11 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '@shared/types';
+import { UNIFIED_NAVIGATION } from '@constants/unifiedNavigation';
 
 // Auth Screens
 import { WelcomeScreen } from '@features/auth/screens/WelcomeScreen';
 import { LoginScreen } from '@features/auth/screens/LoginScreen';
-// import { RegisterScreen } from '@features/auth/screens/RegisterScreen'; // Old single-step version
-// import { RegisterScreenMultiStep } from '@features/auth/screens/RegisterScreenMultiStep'; // Old 3-step version
 import { RegisterScreenOptimized } from '@features/auth/screens/RegisterScreenOptimized';
 import { WelcomeSuccessScreen } from '@features/auth/screens/WelcomeSuccessScreen';
 import { ForgotPasswordScreen } from '@features/auth/screens/ForgotPasswordScreen';
@@ -25,25 +24,15 @@ const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 /**
  * Auth Navigator - handles authentication flow
- * Includes: Onboarding, Welcome, Login, Register, Welcome Success, Forgot Password, Legal
+ * Uses UNIFIED_NAVIGATION for consistent transitions (300ms)
  */
 export const AuthNavigator: React.FC = () => {
   return (
-    <Stack.Navigator
-      initialRouteName="Onboarding"
-      screenOptions={{
-        headerShown: false,
-        animation: 'fade_from_bottom',
-        animationDuration: 250,
-        gestureEnabled: true,
-        fullScreenGestureEnabled: true,
-        gestureDirection: 'horizontal',
-      }}>
+    <Stack.Navigator initialRouteName="Onboarding" screenOptions={UNIFIED_NAVIGATION.stack}>
       <Stack.Screen
         name="Onboarding"
         component={OnboardingScreen}
         options={{
-          animation: 'fade',
           gestureEnabled: false,
         }}
       />
@@ -51,7 +40,6 @@ export const AuthNavigator: React.FC = () => {
         name="Welcome"
         component={WelcomeScreen}
         options={{
-          animation: 'fade',
           gestureEnabled: false,
         }}
       />
@@ -61,27 +49,12 @@ export const AuthNavigator: React.FC = () => {
         name="WelcomeSuccess"
         component={WelcomeSuccessScreen}
         options={{
-          animation: 'fade',
           gestureEnabled: false,
         }}
       />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-      <Stack.Screen
-        name="Terms"
-        component={TermsScreen}
-        options={{
-          presentation: 'modal',
-          animation: 'slide_from_bottom',
-        }}
-      />
-      <Stack.Screen
-        name="Privacy"
-        component={PrivacyScreen}
-        options={{
-          presentation: 'modal',
-          animation: 'slide_from_bottom',
-        }}
-      />
+      <Stack.Screen name="Terms" component={TermsScreen} options={UNIFIED_NAVIGATION.modal} />
+      <Stack.Screen name="Privacy" component={PrivacyScreen} options={UNIFIED_NAVIGATION.modal} />
     </Stack.Navigator>
   );
 };

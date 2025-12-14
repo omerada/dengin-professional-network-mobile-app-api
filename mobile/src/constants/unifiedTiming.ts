@@ -91,6 +91,13 @@ export const UNIFIED_TIMING = {
    */
   contentDelayAfterHeader: 100,
 
+  /**
+   * Loading state crossfade duration
+   * Use for: Loading → Content transitions
+   * Value: 250ms
+   */
+  loadingCrossfade: 250,
+
   // ============================================================================
   // Micro-Interactions
   // ============================================================================

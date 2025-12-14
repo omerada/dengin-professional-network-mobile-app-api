@@ -1,98 +1,131 @@
 // src/shared/components/LoadingStateWrapper/LoadingStateWrapper.tsx
-// Production-ready loading state wrapper component
-// Automatically renders appropriate loading component based on strategy
+// Smooth loading state transitions with crossfade support
+// Production-ready implementation
 
-import React, { memo } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import React, { memo, ReactNode } from 'react';
+import { StyleSheet, ViewStyle } from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { UNIFIED_TIMING } from '@constants/unifiedTiming';
 
-import { FeedSkeleton } from '@features/feed/components';
-import { Loading, LoadingOverlay } from '@shared/components/Loading';
-import { useLoadingState, type UseLoadingStateOptions } from '@shared/hooks';
+// ============================================================================
+// Types
+// ============================================================================
 
-export interface LoadingStateWrapperProps extends UseLoadingStateOptions {
+export interface LoadingStateWrapperProps {
   /**
-   * Content to show when not loading
+   * Whether content is loading
    */
-  children: React.ReactNode;
-
+  isLoading: boolean;
   /**
-   * Number of skeleton items (for skeleton strategy)
+   * Skeleton/loading component
    */
-  skeletonCount?: number;
-
+  skeleton: ReactNode;
   /**
-   * Whether to show images in skeleton (for skeleton strategy)
+   * Actual content component
    */
-  skeletonShowImages?: boolean;
+  content: ReactNode;
+  /**
+   * Transition type
+   * @default 'crossfade'
+   */
+  transition?: 'crossfade' | 'fade' | 'none';
+  /**
+   * Container style
+   */
+  style?: ViewStyle;
+  /**
+   * Test ID
+   */
+  testID?: string;
 }
+
+// ============================================================================
+// LoadingStateWrapper Component
+// ============================================================================
 
 /**
  * LoadingStateWrapper Component
  *
- * Automatically handles loading states based on screen type
- * and renders appropriate loading component.
+ * Smooth transitions between loading and content states.
+ * Prevents jarring flash of content by using crossfade.
  *
  * @example
  * ```tsx
- * <LoadingStateWrapper screenName="feed" isLoading={isLoading}>
- *   <FlatList data={posts} renderItem={renderItem} />
- * </LoadingStateWrapper>
+ * <LoadingStateWrapper
+ *   isLoading={isLoading}
+ *   skeleton={<FeedSkeleton />}
+ *   content={<PostList posts={posts} />}
+ *   transition="crossfade"
+ * />
  * ```
  */
 export const LoadingStateWrapper: React.FC<LoadingStateWrapperProps> = memo(
-  ({
-    children,
-    screenName,
-    strategy: overrideStrategy,
-    message: overrideMessage,
-    isLoading = false,
-    skeletonCount = 3,
-    skeletonShowImages = true,
-  }) => {
-    const { strategy, message, indicatorColor } = useLoadingState({
-      screenName,
-      strategy: overrideStrategy,
-      message: overrideMessage,
-      isLoading,
-    });
+  ({ isLoading, skeleton, content, transition = 'crossfade', style, testID }) => {
+    // Determine animation based on transition type
+    const getEnteringAnimation = () => {
+      switch (transition) {
+        case 'crossfade':
+          return FadeIn.duration(UNIFIED_TIMING.loadingCrossfade);
+        case 'fade':
+          return FadeIn.duration(UNIFIED_TIMING.componentEnter);
+        case 'none':
+          return undefined;
+        default:
+          return FadeIn.duration(UNIFIED_TIMING.loadingCrossfade);
+      }
+    };
 
-    if (!isLoading) {
-      return <>{children}</>;
-    }
+    const getExitingAnimation = () => {
+      switch (transition) {
+        case 'crossfade':
+          return FadeOut.duration(UNIFIED_TIMING.componentExit);
+        case 'fade':
+          return FadeOut.duration(UNIFIED_TIMING.componentExit);
+        case 'none':
+          return undefined;
+        default:
+          return FadeOut.duration(UNIFIED_TIMING.componentExit);
+      }
+    };
 
-    // Render appropriate loading component based on strategy
-    switch (strategy) {
-      case 'skeleton':
-        return <FeedSkeleton count={skeletonCount} showImages={skeletonShowImages} />;
+    const entering = getEnteringAnimation();
+    const exiting = getExitingAnimation();
 
-      case 'overlay':
-        return (
-          <>
-            {children}
-            <LoadingOverlay message={message} />
-          </>
-        );
-
-      case 'inline':
-        return (
-          <View style={styles.inlineContainer}>
-            <ActivityIndicator size="small" color={indicatorColor} />
-          </View>
-        );
-
-      case 'spinner':
-      default:
-        return <Loading message={message} />;
-    }
+    return (
+      <Animated.View style={[styles.container, style]} testID={testID}>
+        {isLoading ? (
+          <Animated.View
+            key="skeleton"
+            entering={entering}
+            exiting={exiting}
+            style={styles.stateContainer}>
+            {skeleton}
+          </Animated.View>
+        ) : (
+          <Animated.View
+            key="content"
+            entering={entering}
+            exiting={exiting}
+            style={styles.stateContainer}>
+            {content}
+          </Animated.View>
+        )}
+      </Animated.View>
+    );
   },
 );
 
 LoadingStateWrapper.displayName = 'LoadingStateWrapper';
 
+// ============================================================================
+// Styles
+// ============================================================================
+
 const styles = StyleSheet.create({
-  inlineContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
+  container: {
+    flex: 1,
+  },
+  stateContainer: {
+    flex: 1,
   },
 });

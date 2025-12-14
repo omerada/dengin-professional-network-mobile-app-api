@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
 import { spring } from '@theme/animations';
+import { UNIFIED_TIMING } from '@constants/unifiedTiming';
 
 // ============================================================================
 // Types
@@ -186,8 +187,8 @@ export const ActionSheet: React.FC<ActionSheetProps> = memo(
         <View style={styles.modalContainer} testID={testID}>
           {/* Overlay */}
           <Animated.View
-            entering={FadeIn.duration(200)}
-            exiting={FadeOut.duration(200)}
+            entering={FadeIn.duration(UNIFIED_TIMING.componentEnter)}
+            exiting={FadeOut.duration(UNIFIED_TIMING.componentExit)}
             style={styles.overlay}>
             <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
           </Animated.View>
@@ -195,7 +196,7 @@ export const ActionSheet: React.FC<ActionSheetProps> = memo(
           {/* Content */}
           <Animated.View
             entering={SlideInDown.springify().damping(18)}
-            exiting={SlideOutDown.duration(200)}
+            exiting={SlideOutDown.duration(UNIFIED_TIMING.componentExit)}
             style={[styles.container, { paddingBottom: Math.max(insets.bottom, 16) }]}>
             <Pressable onPress={e => e.stopPropagation()}>
               {/* Header */}

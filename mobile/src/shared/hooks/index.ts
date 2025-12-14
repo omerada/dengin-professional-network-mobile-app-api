@@ -81,6 +81,33 @@ export {
   useEnterAnimation,
 } from './useAnimatedValue';
 
+// Phase 2: Press & Focus animations
+export { usePressAnimation, usePressAnimationWithHaptic } from './usePressAnimation';
+export type { UsePressAnimationConfig } from './usePressAnimation';
+
+export { useInputFocusAnimation, useInputFocusAnimationWithHaptic } from './useInputFocusAnimation';
+export type { UseInputFocusAnimationConfig } from './useInputFocusAnimation';
+
+// Phase 2: Success Celebration
+export { useSuccessCelebration, getSuccessCelebrationPattern } from './useSuccessCelebration';
+export type {
+  UseSuccessCelebrationReturn,
+  SuccessCelebrationOptions,
+  SuccessCelebrationAnimation,
+  SuccessCelebrationPattern,
+} from './useSuccessCelebration';
+
+// Phase 3: Gesture & Scroll Enhancements
+export { useSwipeBackGesture, useSwipeBackGestureWithShadow } from './useSwipeBackGesture';
+export type { UseSwipeBackGestureConfig, UseSwipeBackGestureReturn } from './useSwipeBackGesture';
+
+export { useParallaxScroll, useHeaderCollapse, useListItemReveal } from './useParallaxScroll';
+export type {
+  UseParallaxScrollConfig,
+  UseParallaxScrollReturn,
+  ParallaxStyleConfig,
+} from './useParallaxScroll';
+
 // Lifecycle hooks
 export {
   usePrevious,
