@@ -21,6 +21,14 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
+  verificationBadge: {
+    alignItems: 'center',
+    bottom: -2,
+    justifyContent: 'center',
+    position: 'absolute',
+    right: -2,
+  },
+
   container: {
     overflow: 'hidden',
   },

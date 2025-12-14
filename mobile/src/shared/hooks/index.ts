@@ -103,3 +103,7 @@ export {
   getResponsiveSpacing,
 } from './useDimensions';
 export type { WindowDimensions, ScreenDimensions } from './useDimensions';
+
+// Loading state hook
+export { useLoadingState } from './useLoadingState';
+export type { UseLoadingStateOptions, LoadingStateResult } from './useLoadingState';

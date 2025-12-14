@@ -10,6 +10,7 @@ import { NotificationItem } from './NotificationItem';
 import { EmptyNotifications } from './EmptyNotifications';
 import { useNotifications, useMarkAsRead, useDeleteNotification } from '../hooks';
 import { useColors } from '@contexts/ThemeContext';
+import { SkeletonNotificationItem, SkeletonList } from '@shared/components';
 import type { NotificationResponse } from '../types';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<NotificationResponse>);
@@ -129,11 +130,11 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
       return <EmptyNotifications />;
     }, [isLoading]);
 
-    // Loading state
+    // Loading state - show skeleton
     if (isLoading) {
       return (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.interactive.default} />
+          <SkeletonList ItemSkeleton={SkeletonNotificationItem} count={10} />
         </View>
       );
     }

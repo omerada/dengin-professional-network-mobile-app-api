@@ -11,8 +11,14 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import {
+  navigateToChatFromTab,
+  navigateToPostDetail,
+  navigateToUserProfile,
+} from '@core/navigation';
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
+
 import { NotificationList } from '../components/NotificationList';
 import { PermissionPrompt } from '../components/PermissionPrompt';
 import { useMarkAllAsRead, useNotificationPermission, useUnreadCount } from '../hooks';
@@ -77,11 +83,7 @@ export const NotificationsScreen: React.FC = memo(() => {
         switch (type) {
           case 'NEW_MESSAGE':
             if (metadata?.conversationId) {
-              // @ts-expect-error - MessagingStack navigation
-              navigation.navigate('MessagingTab', {
-                screen: 'Chat',
-                params: { conversationId: metadata.conversationId },
-              });
+              navigateToChatFromTab(navigation, metadata.conversationId);
             }
             break;
 
@@ -89,7 +91,7 @@ export const NotificationsScreen: React.FC = memo(() => {
           case 'POST_COMMENTED':
           case 'MENTION':
             if (metadata?.postId) {
-              navigation.navigate('PostDetail', {
+              navigateToPostDetail(navigation, {
                 postId: Number(metadata.postId),
               });
             }
@@ -97,7 +99,7 @@ export const NotificationsScreen: React.FC = memo(() => {
 
           case 'NEW_FOLLOWER':
             if (metadata?.actorId) {
-              navigation.navigate('UserProfile', {
+              navigateToUserProfile(navigation, {
                 userId: Number(metadata.actorId),
               });
             }

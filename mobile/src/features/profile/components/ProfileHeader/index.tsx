@@ -6,7 +6,6 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { Image, Pressable, Text, View } from 'react-native';
 import Animated, {
   FadeIn,
-  FadeInDown,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -43,21 +42,16 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
  * ```
  */
 export const ProfileHeader: React.FC<ProfileHeaderProps> = memo(
-  ({ profile, isOwnProfile = false, onAvatarPress, onEditPress, testID }) => {
+  ({ profile, isOwnProfile = false, onAvatarPress, testID }) => {
     const colors = useColors();
     const { trigger } = useHaptic();
 
     // Animation values
     const avatarScale = useSharedValue(1);
-    const editScale = useSharedValue(1);
 
     // Animated styles
     const avatarAnimatedStyle = useAnimatedStyle(() => ({
       transform: [{ scale: avatarScale.value }],
-    }));
-
-    const editAnimatedStyle = useAnimatedStyle(() => ({
-      transform: [{ scale: editScale.value }],
     }));
 
     // Normalize profile data (handles both ProfileResponse and MyProfileResponse)
@@ -100,16 +94,6 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = memo(
       }, 100);
       onAvatarPress?.();
     }, [isOwnProfile, onAvatarPress, trigger, avatarScale]);
-
-    // Handle edit press
-    const handleEditPress = useCallback(() => {
-      trigger('light');
-      editScale.value = withSpring(0.9, spring.press);
-      setTimeout(() => {
-        editScale.value = withSpring(1, spring.snappy);
-      }, 100);
-      onEditPress?.();
-    }, [onEditPress, trigger, editScale]);
 
     return (
       <View style={styles.container} testID={testID}>

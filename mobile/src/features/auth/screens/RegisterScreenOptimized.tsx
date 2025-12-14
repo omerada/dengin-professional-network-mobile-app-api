@@ -91,7 +91,6 @@ export const RegisterScreenOptimized: React.FC = () => {
     formState: { errors },
     trigger,
     watch,
-    setValue,
   } = useForm<RegisterOptimizedSchemaType>({
     resolver: zodResolver(registerOptimizedSchema),
     mode: 'onTouched',

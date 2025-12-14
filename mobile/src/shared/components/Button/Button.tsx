@@ -13,7 +13,7 @@ import Animated, {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
-import { spring } from '@theme/animations';
+
 import { styles, getVariantStyles } from './Button.styles';
 import { ButtonProps, BUTTON_SIZE_CONFIG } from './Button.types';
 
@@ -54,7 +54,7 @@ export const Button = memo<ButtonProps>(
     onPress,
     onLongPress,
     hapticType = 'light',
-    pressScale = 0.97,
+    pressScale = 0.96, // UNIFIED: Standardized press scale
     style,
     textStyle,
     loadingColor,
@@ -83,13 +83,13 @@ export const Button = memo<ButtonProps>(
       return '#FFFFFF';
     }, [loadingColor, variant, colors]);
 
-    // Animation handlers
+    // Animation handlers - UNIFIED: Standardized spring config
     const handlePressIn = useCallback(() => {
-      pressed.value = withSpring(1, spring.press);
+      pressed.value = withSpring(1, { damping: 15, stiffness: 500, mass: 0.5 });
     }, [pressed]);
 
     const handlePressOut = useCallback(() => {
-      pressed.value = withSpring(0, spring.press);
+      pressed.value = withSpring(0, { damping: 15, stiffness: 500, mass: 0.5 });
     }, [pressed]);
 
     const handlePress = useCallback(() => {

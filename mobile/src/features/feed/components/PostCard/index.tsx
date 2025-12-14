@@ -85,16 +85,16 @@ export const PostCard: React.FC<PostCardProps> = memo(
       transform: [{ scale: heartScale.value }],
     }));
 
-    // Double-tap like handler
+    // Double-tap like handler - UNIFIED: Optimized timing (600ms → 320ms)
     const handleDoubleTapLike = useCallback(() => {
       if (!isLiked) {
         trigger('success');
-        // Animate heart
+        // Animate heart - Scale up (180ms)
         heartScale.value = withSpring(1.2, { damping: 10, stiffness: 300 });
         heartOpacity.value = 1;
-        // Hide after delay
-        heartScale.value = withDelay(600, withSpring(0, { damping: 15 }));
-        heartOpacity.value = withDelay(600, withSpring(0));
+        // Hide after optimized delay (180ms + 140ms = 320ms total)
+        heartScale.value = withDelay(180, withSpring(0, { damping: 15, stiffness: 400 }));
+        heartOpacity.value = withDelay(180, withSpring(0, { damping: 15 }));
         // Trigger callback
         onLike?.(postId, isLiked);
       }
@@ -108,18 +108,16 @@ export const PostCard: React.FC<PostCardProps> = memo(
         handleDoubleTapLike();
       });
 
-    // Navigation handlers
+    // Navigation handlers - Using type-safe helpers
     const handlePostPress = useCallback(() => {
       trigger('light');
-      // @ts-expect-error - navigation types not fully typed
-      navigation.navigate('PostDetail', { postId });
+      navigation.navigate('PostDetail', { postId: String(postId) });
     }, [postId, navigation, trigger]);
 
     const handleAuthorPress = useCallback(() => {
       trigger('light');
       const userId = post.author.userId ?? post.author.id;
-      // @ts-expect-error - navigation types not fully typed
-      navigation.navigate('UserProfile', { userId });
+      navigation.navigate('Profile', { userId: String(userId) });
     }, [post.author, navigation, trigger]);
 
     // Action handlers

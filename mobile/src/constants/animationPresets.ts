@@ -4,6 +4,7 @@
 
 import { FadeIn, FadeOut, FadeInDown, SlideInDown, SlideOutDown } from 'react-native-reanimated';
 import { duration } from '@theme/animations';
+import { UNIFIED_TIMING } from './unifiedTiming';
 
 /**
  * Standardized Screen Animations
@@ -29,12 +30,12 @@ export const SCREEN_ANIMATIONS = {
    * Staggered list item entrance animation
    * Use for: List items, cards in feed
    * @param index - Item index for stagger delay
-   * @param itemCount - Total items to prevent excessive delays
+   * PRODUCTION STANDARD: Always use 40ms delay, max 400ms cap
    */
-  listItemEnter: (index: number, itemCount: number = 10) => {
-    // Cap delay at 10 items to prevent excessive animation times
-    const cappedIndex = Math.min(index, itemCount);
-    return FadeInDown.delay(cappedIndex * 50).duration(duration.elementMove);
+  listItemEnter: (index: number) => {
+    // UNIFIED TIMING: 40ms per item, max 400ms total delay
+    const delay = Math.min(index * UNIFIED_TIMING.listItemDelay, UNIFIED_TIMING.listItemDelayMax);
+    return FadeInDown.delay(delay).duration(UNIFIED_TIMING.listItemDuration);
   },
 
   /**
@@ -90,6 +91,14 @@ export const SCREEN_ANIMATIONS = {
    * Use for: Small UI elements removal
    */
   quickFadeOut: FadeOut.duration(duration.fastest),
+
+  /**
+   * Fade in list animation
+   * Use for: List containers
+   */
+  fadeInList: {
+    entering: FadeIn.duration(duration.elementMove),
+  },
 } as const;
 
 /**

@@ -21,6 +21,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
 import { ConversationItem, EmptyConversations } from '../components';
 import { useConversations, useSocket } from '../hooks';
+import { SkeletonConversationItem, SkeletonList } from '@shared/components';
 import type { Conversation } from '../types';
 import type { MessagingStackParamList } from '@core/navigation/types';
 
@@ -149,12 +150,12 @@ export const ConversationListScreen: React.FC = () => {
     if (isLoading) {
       return (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.interactive.default} />
+          <SkeletonList ItemSkeleton={SkeletonConversationItem} count={8} />
         </View>
       );
     }
     return <EmptyConversations onStartConversation={handleNewConversation} />;
-  }, [isLoading, handleNewConversation, colors.interactive.default]);
+  }, [isLoading, handleNewConversation]);
 
   return (
     <SafeAreaView

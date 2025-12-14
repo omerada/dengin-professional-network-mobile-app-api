@@ -51,10 +51,13 @@ const TabButton: React.FC<TabButtonProps> = memo(({ item, focused, onPress, onLo
     }
   }, [focused, focusProgress, scale, isCenterFab]);
 
-  // Handle press
+  // Handle press - UNIFIED: Standardized press scale (0.96)
   const handlePress = useCallback(() => {
     trigger('selection');
-    scale.value = withSequence(withSpring(0.92, spring.press), withSpring(1, spring.snappy));
+    scale.value = withSequence(
+      withSpring(0.96, { damping: 15, stiffness: 500, mass: 0.5 }),
+      withSpring(1, spring.snappy),
+    );
     onPress();
   }, [onPress, trigger, scale]);
 

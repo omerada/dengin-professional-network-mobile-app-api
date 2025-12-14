@@ -8,8 +8,13 @@ import Animated from 'react-native-reanimated';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { SCREEN_ANIMATIONS } from '@constants/animationPresets';
-import { HAPTIC_TYPES } from '@constants/hapticPresets';
+import { SCREEN_ANIMATIONS, HAPTIC_TYPES, getListItemDelay } from '@constants';
+import {
+  navigateToComments,
+  navigateToReportContent,
+  navigateToNotifications,
+  navigateToVerificationIntro,
+} from '@core/navigation';
 
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
@@ -95,8 +100,8 @@ export const FeedScreen: React.FC = memo(() => {
    */
   const handleComment = useCallback(
     (postId: number) => {
-      // @ts-expect-error - Comments route not yet defined in types
-      navigation.navigate('Comments', { postId });
+      // @ts-expect-error - Navigation prop type mismatch
+      navigateToComments(navigation, { postId });
     },
     [navigation],
   );
@@ -195,10 +200,10 @@ export const FeedScreen: React.FC = memo(() => {
   const handleReportPost = useCallback(() => {
     if (selectedPost) {
       handleCloseActionSheet();
-      // @ts-expect-error - ReportContent route not yet defined in types
-      navigation.navigate('ReportContent', {
+      // @ts-expect-error - Navigation prop type mismatch
+      navigateToReportContent(navigation, {
         contentId: selectedPost.id,
-        contentType: 'POST',
+        contentType: 'post',
       });
     }
   }, [selectedPost, navigation, handleCloseActionSheet]);
@@ -251,37 +256,53 @@ export const FeedScreen: React.FC = memo(() => {
   /**
    * Render single post item with suggested experts carousel every 5th post
    * Memoized for FlashList performance
+   * Uses UNIFIED_TIMING for consistent list animations (40ms delay)
    */
   const renderPost = useCallback(
-    ({ item, index }: ListRenderItemInfo<Post>) => (
-      <>
-        {/* Show suggested experts carousel every 5th post (after 1st, 6th, 11th...) */}
-        {index > 0 && index % 5 === 0 && (
-          <SuggestedExpertsCarousel
-            onExpertPress={expertId => {
-              // @ts-expect-error - UserProfile route not yet defined in types
-              navigation.navigate('UserProfile', { userId: expertId });
-            }}
-            onFollowToggle={(expertId, isFollowing) => {
-              if (isFollowing) {
-                unfollowMutation.mutate(expertId);
-              } else {
-                followMutation.mutate(expertId);
-              }
-            }}
+    ({ item, index }: ListRenderItemInfo<Post>) => {
+      const animationDelay = getListItemDelay(index);
+
+      return (
+        <Animated.View
+          entering={SCREEN_ANIMATIONS.fadeInList.entering.delay(animationDelay)}
+          style={{ flex: 1 }}>
+          {/* Show suggested experts carousel every 5th post (after 1st, 6th, 11th...) */}
+          {index > 0 && index % 5 === 0 && (
+            <SuggestedExpertsCarousel
+              onExpertPress={expertId => {
+                // @ts-expect-error - UserProfile route not yet defined in types
+                navigation.navigate('UserProfile', { userId: expertId });
+              }}
+              onFollowToggle={(expertId, isFollowing) => {
+                if (isFollowing) {
+                  unfollowMutation.mutate(expertId);
+                } else {
+                  followMutation.mutate(expertId);
+                }
+              }}
+            />
+          )}
+          <PostCard
+            post={item}
+            onLike={handleLike}
+            onComment={handleComment}
+            onShare={handleShare}
+            onBookmark={handleBookmark}
+            onMenuPress={handleMenuPress}
           />
-        )}
-        <PostCard
-          post={item}
-          onLike={handleLike}
-          onComment={handleComment}
-          onShare={handleShare}
-          onBookmark={handleBookmark}
-          onMenuPress={handleMenuPress}
-        />
-      </>
-    ),
-    [handleLike, handleComment, handleShare, handleBookmark, handleMenuPress, navigation],
+        </Animated.View>
+      );
+    },
+    [
+      handleLike,
+      handleComment,
+      handleShare,
+      handleBookmark,
+      handleMenuPress,
+      navigation,
+      unfollowMutation,
+      followMutation,
+    ],
   );
 
   /**
@@ -307,14 +328,17 @@ export const FeedScreen: React.FC = memo(() => {
           unreadNotifications={unreadCount || 0}
           onSectorPress={() => console.log('Sector detail pressed')}
           onNotificationPress={() => {
-            // @ts-expect-error - Notifications route navigation
-            navigation.navigate('Notifications');
+            // @ts-expect-error - Navigation prop type mismatch
+            navigateToNotifications(navigation);
           }}
         />
         {/* Show verification prompt for unverified users */}
         {user?.verificationStatus !== 'APPROVED' && (
           <VerificationPromptCard
-            onPress={() => navigation.navigate('VerificationIntro' as never)}
+            onPress={() => {
+              // @ts-expect-error - Navigation prop type mismatch
+              navigateToVerificationIntro(navigation);
+            }}
           />
         )}
         {/* Always show AI trend insights */}

@@ -2,7 +2,7 @@
 // Post detay ekranı - Backend API uyumlu
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -14,7 +14,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SAFE_AREA_EDGES, HAPTIC_TYPES } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
+import { useHaptic } from '@shared/hooks/useHaptic';
 import { useAuthStore } from '@features/auth/stores';
 import {
   usePost,
@@ -44,6 +46,7 @@ type PostDetailNavigationProp = NativeStackNavigationProp<FeedStackParamList, 'P
 
 export const PostDetailScreen: React.FC = () => {
   const colors = useColors();
+  const { trigger } = useHaptic();
   const navigation = useNavigation<PostDetailNavigationProp>();
   const route = useRoute<PostDetailRouteProp>();
   const { postId } = route.params; // postId: number
@@ -96,6 +99,11 @@ export const PostDetailScreen: React.FC = () => {
       bookmarkPost.mutate({ postId: post.id, isSaved: post.userInteraction?.isSaved ?? false });
     }
   }, [bookmarkPost, post]);
+
+  const handleRefresh = useCallback(() => {
+    trigger(HAPTIC_TYPES.pullToRefresh);
+    refetch();
+  }, [refetch, trigger]);
 
   const handleMenuPress = useCallback(() => {
     setShowActionSheet(true);
@@ -190,6 +198,19 @@ export const PostDetailScreen: React.FC = () => {
     return options;
   }, [post, currentUserId, deletePost]);
 
+  const refreshControl = useMemo(
+    () => (
+      <RefreshControl
+        refreshing={isRefetching}
+        onRefresh={handleRefresh}
+        tintColor={colors.interactive.default}
+        colors={[colors.interactive.default]}
+        progressBackgroundColor={colors.background.primary}
+      />
+    ),
+    [isRefetching, handleRefresh, colors],
+  );
+
   if (isLoading || !post) {
     return (
       <SafeAreaView
@@ -203,16 +224,10 @@ export const PostDetailScreen: React.FC = () => {
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
-      edges={['bottom']}>
+      edges={SAFE_AREA_EDGES.standard}>
       <ScrollView
         style={styles.scrollView}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={refetch}
-            tintColor={colors.interactive.default}
-          />
-        }
+        refreshControl={refreshControl}
         showsVerticalScrollIndicator={false}>
         {/* Post */}
         <View style={styles.postContainer}>

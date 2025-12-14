@@ -82,6 +82,7 @@ export const Avatar: React.FC<AvatarProps> = memo(
     accessibilityLabel,
     selected = false,
     hapticType = 'light',
+    verified = false,
   }) => {
     const colors = useColors();
     const { trigger } = useHaptic();
@@ -253,6 +254,37 @@ export const Avatar: React.FC<AvatarProps> = memo(
       );
     };
 
+    // Render verification badge
+    const renderVerificationBadge = () => {
+      if (!verified) return null;
+
+      const verificationSize = sizeConfig.badgeSize * 1.8;
+
+      return (
+        <View
+          style={[
+            styles.verificationBadge,
+            {
+              backgroundColor: '#1DA1F2', // Twitter blue
+              borderColor: colors.background.primary,
+              borderRadius: verificationSize / 2,
+              borderWidth: sizeConfig.badgeBorderWidth,
+              height: verificationSize,
+              width: verificationSize,
+            },
+          ]}>
+          <Text
+            style={{
+              color: '#FFFFFF',
+              fontSize: sizeConfig.fontSize * 0.65,
+              fontWeight: '700',
+            }}>
+            ✓
+          </Text>
+        </View>
+      );
+    };
+
     // Accessibility label
     const a11yLabel =
       accessibilityLabel ?? (name ? `${name} profil fotoğrafı` : 'Profil fotoğrafı');
@@ -273,6 +305,7 @@ export const Avatar: React.FC<AvatarProps> = memo(
           {renderContent()}
           {renderEditOverlay()}
           {renderBadge()}
+          {renderVerificationBadge()}
         </AnimatedPressable>
       );
     }
@@ -287,6 +320,7 @@ export const Avatar: React.FC<AvatarProps> = memo(
         {renderContent()}
         {renderEditOverlay()}
         {renderBadge()}
+        {renderVerificationBadge()}
       </Animated.View>
     );
   },

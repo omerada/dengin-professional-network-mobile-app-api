@@ -19,3 +19,14 @@ export type {
   SkeletonProps,
   SkeletonVariant,
 } from './Skeleton.types';
+
+// Production-ready skeleton presets
+export {
+  SkeletonPostCard,
+  SkeletonProfileHeader,
+  SkeletonConversationItem,
+  SkeletonNotificationItem,
+  SkeletonCommentItem,
+  SkeletonUserListItem,
+  SkeletonList,
+} from './SkeletonPresets';

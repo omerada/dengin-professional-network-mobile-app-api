@@ -19,14 +19,21 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { SCREEN_ANIMATIONS } from '@constants/animationPresets';
+import { SCREEN_ANIMATIONS, SAFE_AREA_EDGES, UNIFIED_TIMING, getListItemDelay } from '@constants';
+import {
+  navigateToPostDetail,
+  navigateToEditProfile,
+  navigateToSettings,
+  navigateToFollowersList,
+  navigateToFollowingList,
+} from '@core/navigation';
 
 import { useColors } from '@contexts/ThemeContext';
 import { useAuthStore } from '@features/auth/stores';
 import { useFollow, useUnfollow } from '@features/social/hooks/useFollow';
 import { useUserPosts } from '@features/feed/hooks';
 import { PostCard } from '@features/feed/components';
-import { Button, Loading, Skeleton } from '@shared/components';
+import { Button, Loading, SkeletonProfileHeader } from '@shared/components';
 import { ProfileBio, ProfileActions } from '../components';
 import { useMyProfile, useProfile, useProfileStats } from '../hooks';
 import type { ProfileStats as ProfileStatsType } from '../types';
@@ -114,15 +121,18 @@ export const ProfileScreen: React.FC = () => {
 
   // Handlers
   const handleAvatarPress = useCallback(() => {
-    navigation.navigate('EditProfile' as never);
+    // @ts-expect-error - Navigation prop type mismatch
+    navigateToEditProfile(navigation);
   }, [navigation]);
 
   const handleEditPress = useCallback(() => {
-    navigation.navigate('EditProfile' as never);
+    // @ts-expect-error - Navigation prop type mismatch
+    navigateToEditProfile(navigation);
   }, [navigation]);
 
   const handleSettingsPress = useCallback(() => {
-    navigation.navigate('Settings' as never);
+    // @ts-expect-error - Navigation prop type mismatch
+    navigateToSettings(navigation);
   }, [navigation]);
 
   const handleRefresh = useCallback(() => {
@@ -136,8 +146,8 @@ export const ProfileScreen: React.FC = () => {
 
   const handlePostPress = useCallback(
     (postId: number) => {
-      // @ts-expect-error - navigation types not fully typed
-      navigation.navigate('PostDetail', { postId });
+      // @ts-expect-error - Navigation prop type mismatch
+      navigateToPostDetail(navigation, { postId });
     },
     [navigation],
   );
@@ -176,9 +186,9 @@ export const ProfileScreen: React.FC = () => {
     return (
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.background.primary }]}
-        edges={['top']}>
+        edges={SAFE_AREA_EDGES.standard}>
         <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={styles.container}>
-          <Skeleton variant="rectangular" />
+          <SkeletonProfileHeader />
         </Animated.View>
       </SafeAreaView>
     );
@@ -189,7 +199,7 @@ export const ProfileScreen: React.FC = () => {
     return (
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.background.primary }]}
-        edges={['top']}>
+        edges={SAFE_AREA_EDGES.standard}>
         <Loading message="Profil bulunamadı" />
       </SafeAreaView>
     );
@@ -198,7 +208,7 @@ export const ProfileScreen: React.FC = () => {
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
-      edges={['top']}>
+      edges={SAFE_AREA_EDGES.standard}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -255,7 +265,7 @@ export const ProfileScreen: React.FC = () => {
             </Animated.View>
 
             {/* Profession Name - Big Bold */}
-            <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(0, 3)}>
+            <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(0)}>
               <Text style={[styles.professionTitle, { color: colors.text.primary }]}>
                 {('professionName' in profile
                   ? profile.professionName
@@ -264,14 +274,14 @@ export const ProfileScreen: React.FC = () => {
             </Animated.View>
 
             {/* Username - Small */}
-            <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(1, 3)}>
+            <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(1)}>
               <Text style={[styles.usernameSmall, { color: colors.text.secondary }]}>
                 @{profile.fullName.toLowerCase().replace(/\s+/g, '_')}
               </Text>
             </Animated.View>
 
             {/* Stats - Horizontal Big Numbers */}
-            <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(2, 3)} style={styles.statsRow}>
+            <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(2)} style={styles.statsRow}>
               <View style={styles.statBox}>
                 <Text style={[styles.statNumber, { color: colors.text.primary }]}>
                   {stats.postCount}
@@ -284,8 +294,10 @@ export const ProfileScreen: React.FC = () => {
               <Pressable
                 style={styles.statBox}
                 onPress={() => {
-                  // @ts-expect-error - navigation types
-                  navigation.navigate('FollowersList', { userId: profileUserId });
+                  if (profileUserId) {
+                    // @ts-expect-error - Navigation prop type mismatch
+                    navigateToFollowersList(navigation, { userId: profileUserId });
+                  }
                 }}>
                 <Text style={[styles.statNumber, { color: colors.text.primary }]}>
                   {stats.followerCount >= 1000
@@ -300,8 +312,10 @@ export const ProfileScreen: React.FC = () => {
               <Pressable
                 style={styles.statBox}
                 onPress={() => {
-                  // @ts-expect-error - navigation types
-                  navigation.navigate('FollowingList', { userId: profileUserId });
+                  if (profileUserId) {
+                    // @ts-expect-error - Navigation prop type mismatch
+                    navigateToFollowingList(navigation, { userId: profileUserId });
+                  }
                 }}>
                 <Text style={[styles.statNumber, { color: colors.text.primary }]}>
                   {stats.followingCount >= 1000
@@ -362,17 +376,24 @@ export const ProfileScreen: React.FC = () => {
                 // Ensure post has all required fields for PostCard
                 if (!post || !post.postId) return null;
 
+                const animationDelay = getListItemDelay(index);
+
                 return (
-                  <PostCard
+                  <Animated.View
                     key={post.postId}
-                    post={post}
-                    index={index}
-                    onLike={() => {}}
-                    onComment={() => handlePostPress(Number(post.postId))}
-                    onShare={() => {}}
-                    onBookmark={() => {}}
-                    onMenuPress={() => {}}
-                  />
+                    entering={FadeInDown.delay(animationDelay).duration(
+                      UNIFIED_TIMING.listItemDuration,
+                    )}>
+                    <PostCard
+                      post={post}
+                      index={index}
+                      onLike={() => {}}
+                      onComment={() => handlePostPress(Number(post.postId))}
+                      onShare={() => {}}
+                      onBookmark={() => {}}
+                      onMenuPress={() => {}}
+                    />
+                  </Animated.View>
                 );
               })}
               {hasNextPage && (

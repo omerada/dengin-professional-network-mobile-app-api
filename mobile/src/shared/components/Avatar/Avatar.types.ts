@@ -137,6 +137,9 @@ export interface AvatarProps {
 
   /** Haptic feedback type */
   hapticType?: 'light' | 'medium' | 'none';
+
+  /** Whether to show verification badge (blue checkmark) */
+  verified?: boolean;
 }
 
 /**

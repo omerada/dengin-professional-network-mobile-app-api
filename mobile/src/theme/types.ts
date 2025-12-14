@@ -426,6 +426,7 @@ export type HapticType =
  * Haptic Feedback Interface
  */
 export interface HapticFeedback {
+  // Core triggers
   trigger: (type: HapticType) => void;
   light: () => void;
   medium: () => void;
@@ -436,4 +437,11 @@ export interface HapticFeedback {
   selection: () => void;
   buttonPress: () => void;
   like: () => void;
+  // New shortcuts for complete UX coverage
+  checkbox: () => void; // For checkbox interactions
+  radio: () => void; // For radio button interactions
+  toggle: () => void; // For switch/toggle interactions
+  slider: () => void; // For slider interactions
+  longPress: () => void; // For long press gestures
+  contextMenu: () => void; // For context menu interactions
 }

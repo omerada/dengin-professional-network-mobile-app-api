@@ -3,10 +3,12 @@
 // Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
 
 import React, { useMemo, useCallback, useState } from 'react';
-import { StyleSheet, ScrollView, Alert } from 'react-native';
+import { StyleSheet, ScrollView, Alert, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { HAPTIC_TYPES } from '@constants';
 import { useTheme, useColors } from '@contexts/ThemeContext';
+import { useHaptic } from '@shared/hooks/useHaptic';
 import { spacing } from '@theme';
 import { SettingsSection } from '../components';
 import type { SettingsSectionType } from '../types';
@@ -24,10 +26,12 @@ import type { SettingsSectionType } from '../types';
 export const SettingsScreen: React.FC = () => {
   const { toggleTheme, isDark } = useTheme();
   const colors = useColors();
+  const { trigger } = useHaptic();
   const navigation = useNavigation();
 
   // Loading states
   const [loadingStates, _setLoadingStates] = useState<Record<string, boolean>>({});
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Handlers
   const handleEditProfile = useCallback(() => {
@@ -67,6 +71,15 @@ export const SettingsScreen: React.FC = () => {
   const handleDeleteAccount = useCallback(() => {
     navigation.navigate('AccountDeletion' as never);
   }, [navigation]);
+
+  const handleRefresh = useCallback(() => {
+    trigger(HAPTIC_TYPES.pullToRefresh);
+    setIsRefreshing(true);
+    // Simulate settings refresh (in real app, refetch user preferences)
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 800);
+  }, [trigger]);
 
   // Settings sections
   const sections: SettingsSectionType[] = useMemo(
@@ -193,11 +206,27 @@ export const SettingsScreen: React.FC = () => {
     ],
   );
 
+  const refreshControl = useMemo(
+    () => (
+      <RefreshControl
+        refreshing={isRefreshing}
+        onRefresh={handleRefresh}
+        tintColor={colors.interactive.default}
+        colors={[colors.interactive.default]}
+        progressBackgroundColor={colors.background.primary}
+      />
+    ),
+    [isRefreshing, handleRefresh, colors],
+  );
+
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.secondary }]}
       edges={['bottom']}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        refreshControl={refreshControl}>
         {sections.map(section => (
           <SettingsSection
             key={section.title}

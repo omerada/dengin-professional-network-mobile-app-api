@@ -13,7 +13,7 @@ import {
   ProfileStackParamList,
 } from '@shared/types';
 import { AnimatedTabBar, TabItem } from './components/AnimatedTabBar';
-import { NAVIGATION_ANIMATIONS } from '@constants/animationPresets';
+import { NAVIGATION_ANIMATIONS, MODAL_SCREEN_OPTIONS } from '@constants';
 
 // Screens
 import { FeedScreen } from '@features/feed/screens/FeedScreen';
@@ -92,9 +92,7 @@ const FeedStackNavigator: React.FC = () => (
     <FeedStack.Screen
       name="CreatePost"
       component={CreatePostScreen}
-      options={{
-        ...NAVIGATION_ANIMATIONS.modal,
-      }}
+      options={MODAL_SCREEN_OPTIONS}
     />
     <FeedStack.Screen name="Comments" component={CommentsScreen} />
     <FeedStack.Screen name="Notifications" component={NotificationsScreen} />
@@ -116,9 +114,7 @@ const MessagingStackNavigator: React.FC = () => (
     <MessagingStack.Screen
       name="NewConversation"
       component={require('@features/messaging/screens/NewConversationScreen').NewConversationScreen}
-      options={{
-        ...NAVIGATION_ANIMATIONS.modal,
-      }}
+      options={MODAL_SCREEN_OPTIONS}
     />
   </MessagingStack.Navigator>
 );

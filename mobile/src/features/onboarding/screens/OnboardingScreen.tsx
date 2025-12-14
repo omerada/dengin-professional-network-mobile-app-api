@@ -71,7 +71,7 @@ const SlideItem: React.FC<SlideProps> = ({ slide, index }) => {
 
   return (
     <Animated.View
-      entering={SCREEN_ANIMATIONS.listItemEnter(index, 3)}
+      entering={SCREEN_ANIMATIONS.listItemEnter(index)}
       style={[styles.slide, { width }]}>
       {/* Icon Container */}
       <Animated.View
