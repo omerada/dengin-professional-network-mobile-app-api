@@ -92,6 +92,33 @@ export const CARD_NAVIGATION: NativeStackNavigationOptions = {
 };
 
 /**
+ * Interactive Modal
+ * Kullanım: CreatePost, EditProfile, Forms - Kullanıcı input alan modaller
+ * Özellik: Easy swipe-to-dismiss, larger gesture response
+ */
+export const INTERACTIVE_MODAL_NAVIGATION: NativeStackNavigationOptions = {
+  presentation: 'modal',
+  animation: 'slide_from_bottom',
+  animationDuration: UNIFIED_TIMING.screenEnter, // 300ms
+  gestureEnabled: true,
+  gestureDirection: 'vertical',
+  headerShown: false,
+};
+
+/**
+ * Critical Modal
+ * Kullanım: Verification flow, Payment, Important processes
+ * Özellik: No gesture dismiss - kazara kapatmayı engeller
+ */
+export const CRITICAL_MODAL_NAVIGATION: NativeStackNavigationOptions = {
+  presentation: 'fullScreenModal',
+  animation: 'fade',
+  animationDuration: UNIFIED_TIMING.componentEnter, // 200ms
+  gestureEnabled: false, // Kritik akışlarda kazara kapatmayı engelle
+  headerShown: false,
+};
+
+/**
  * Unified Navigation Options Collection
  * Tüm navigation tiplerini içeren ana export
  */
@@ -102,6 +129,8 @@ export const UNIFIED_NAVIGATION = {
   sheet: SHEET_NAVIGATION,
   instant: INSTANT_NAVIGATION,
   card: CARD_NAVIGATION,
+  interactiveModal: INTERACTIVE_MODAL_NAVIGATION,
+  criticalModal: CRITICAL_MODAL_NAVIGATION,
 } as const;
 
 /**

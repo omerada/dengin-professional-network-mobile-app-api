@@ -17,7 +17,7 @@ export const EMPTY_STATE_PRESETS: Record<
   }
 > = {
   /**
-   * Empty feed state
+   * Empty feed state - no posts
    */
   emptyFeed: {
     icon: 'newspaper-outline',
@@ -26,6 +26,50 @@ export const EMPTY_STATE_PRESETS: Record<
     action: {
       title: 'Gönderi Oluştur',
       variant: 'primary',
+    },
+  },
+
+  /**
+   * Empty feed - no following
+   */
+  emptyFeedNoFollowing: {
+    icon: 'people-outline',
+    title: 'Henüz kimseyi takip etmiyorsun',
+    description: 'Profesyonelleri keşfet ve ağını genişlet',
+    action: {
+      title: 'Keşfet',
+      variant: 'primary',
+    },
+  },
+
+  /**
+   * Feed search no results
+   */
+  feedNoResults: {
+    icon: 'search-outline',
+    title: 'Sonuç bulunamadı',
+    description: 'Farklı filtreler veya arama terimleri deneyin',
+  },
+
+  /**
+   * Feed offline
+   */
+  feedOffline: {
+    icon: 'cloud-offline-outline',
+    title: 'İnternet bağlantısı yok',
+    description: 'Bağlantınızı kontrol edin',
+  },
+
+  /**
+   * Feed error
+   */
+  feedError: {
+    icon: 'alert-circle-outline',
+    title: 'Bir hata oluştu',
+    description: 'Lütfen tekrar deneyin',
+    action: {
+      title: 'Tekrar Dene',
+      variant: 'secondary',
     },
   },
 

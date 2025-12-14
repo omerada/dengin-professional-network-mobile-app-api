@@ -3,6 +3,10 @@
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 export { NotificationItem, type NotificationItemProps } from './NotificationItem';
+export {
+  EnhancedNotificationCard,
+  type EnhancedNotificationCardProps,
+} from './EnhancedNotificationCard';
 export { EmptyNotifications } from './EmptyNotifications';
 export { NotificationList } from './NotificationList';
 export { NotificationSettingsToggle } from './NotificationSettingsToggle';

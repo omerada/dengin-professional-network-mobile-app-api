@@ -27,3 +27,6 @@ export { CommentCard } from './CommentCard';
 export { AddCommentForm } from './AddCommentForm';
 export { PostTextInput } from './PostTextInput';
 export { ImagePreviewGrid } from './ImagePreviewGrid';
+
+// Bottom sheets
+export { PostOptionsSheet, type PostOptionsSheetRef } from './PostOptionsSheet';

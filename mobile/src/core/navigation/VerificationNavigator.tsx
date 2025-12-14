@@ -3,6 +3,7 @@
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import React from 'react';
+import { View } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
   VerificationIntroScreen,
@@ -11,13 +12,15 @@ import {
   VerificationReviewScreen,
   UploadStatusScreen,
 } from '@features/verification/screens';
+import { VerificationProgressIndicator } from '@features/verification/components';
+import { useVerificationStore } from '@features/verification/stores';
 import { useColors } from '@contexts/ThemeContext';
 import { VerificationStackParamList } from '@shared/types';
 
 const Stack = createNativeStackNavigator<VerificationStackParamList>();
 
 /**
- * Verification Navigator
+ * Verification Navigator with global progress indicator
  */
 export const VerificationNavigator: React.FC = () => {
   const colors = useColors();
@@ -85,6 +88,24 @@ export const VerificationNavigator: React.FC = () => {
         }}
       />
     </Stack.Navigator>
+  );
+};
+
+/**
+ * Verification Navigator wrapper with progress indicator
+ */
+export const VerificationNavigatorWithProgress: React.FC = () => {
+  const colors = useColors();
+  const currentStep = useVerificationStore(state => state.currentStep);
+
+  // Don't show progress on intro and status screens
+  const showProgress = currentStep !== 'intro' && currentStep !== 'uploading';
+
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.background.primary }}>
+      {showProgress && <VerificationProgressIndicator currentStep={currentStep} />}
+      <VerificationNavigator />
+    </View>
   );
 };
 

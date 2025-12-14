@@ -183,3 +183,7 @@ export type { LoadingStateWrapperProps } from './LoadingStateWrapper';
 // FormField component - Real-time validation UX
 export { FormField, ValidationHelpers } from './FormField';
 export type { FormFieldProps, ValidationRule } from './FormField';
+
+// Upload & Network feedback components
+export { UploadProgress, type UploadProgressProps } from './UploadProgress';
+export { OfflineBanner } from './OfflineBanner';

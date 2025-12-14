@@ -87,7 +87,7 @@ export const AppNavigator: React.FC = () => {
             <Stack.Screen
               name="Verification"
               component={VerificationNavigator}
-              options={UNIFIED_NAVIGATION.modal}
+              options={UNIFIED_NAVIGATION.criticalModal} // Critical modal - prevent accidental dismissal
             />
           </>
         ) : (

@@ -89,7 +89,7 @@ const FeedStackNavigator: React.FC = () => (
     <FeedStack.Screen
       name="CreatePost"
       component={CreatePostScreen}
-      options={UNIFIED_NAVIGATION.modal}
+      options={UNIFIED_NAVIGATION.interactiveModal} // Interactive modal for user input
     />
     <FeedStack.Screen name="Comments" component={CommentsScreen} />
     <FeedStack.Screen name="Notifications" component={NotificationsScreen} />
@@ -107,7 +107,7 @@ const MessagingStackNavigator: React.FC = () => (
     <MessagingStack.Screen
       name="NewConversation"
       component={require('@features/messaging/screens/NewConversationScreen').NewConversationScreen}
-      options={UNIFIED_NAVIGATION.modal}
+      options={UNIFIED_NAVIGATION.interactiveModal} // Interactive modal for user input
     />
   </MessagingStack.Navigator>
 );

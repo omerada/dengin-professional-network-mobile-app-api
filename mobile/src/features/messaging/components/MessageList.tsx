@@ -69,8 +69,8 @@ export const MessageList: React.FC<MessageListProps> = memo(
             message={item}
             isOwn={isOwn}
             showAvatar={showAvatar}
+            senderAvatar={isOwn ? null : item.senderName}
             onLongPress={onMessageLongPress}
-            onReply={onReplyPress}
           />
         );
       },
@@ -103,10 +103,10 @@ export const MessageList: React.FC<MessageListProps> = memo(
 
       return (
         <View style={styles.typingContainer}>
-          <TypingIndicator users={typingUsers} />
+          <TypingIndicator visible={true} userName={userName} />
         </View>
       );
-    }, [typingUsers]);
+    }, [typingUsers, userName]);
 
     const ListFooterComponent = useCallback(() => {
       if (!isFetchingMore) return null;
