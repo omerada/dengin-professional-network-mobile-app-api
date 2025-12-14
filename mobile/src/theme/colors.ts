@@ -399,7 +399,7 @@ export const lightTheme: ThemeColors = {
     pressed: palette.terracotta[800], // Çok koyu terracotta - pressed
     disabled: palette.slate[300], // Açık slate - disabled
     focus: palette.terracotta[500], // Parlak terracotta - focus ring
-    subtle: palette.terracotta[100], // Çok açık terracotta - subtle interaction
+    subtle: palette.terracotta[50], // Çok çok açık terracotta - subtle interaction (tab background)
   },
 
   // Borders - İnce ve zarif

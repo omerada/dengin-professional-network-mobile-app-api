@@ -73,7 +73,7 @@ const TabButton: React.FC<TabButtonProps> = memo(({ item, focused, onPress, onLo
     backgroundColor: interpolateColor(
       focusProgress.value,
       [0, 1],
-      ['transparent', colors.interactive.focus],
+      ['transparent', colors.interactive.subtle],
     ),
   }));
 
@@ -81,12 +81,12 @@ const TabButton: React.FC<TabButtonProps> = memo(({ item, focused, onPress, onLo
     color: interpolateColor(
       focusProgress.value,
       [0, 1],
-      [colors.text.tertiary, colors.interactive.default],
+      [colors.text.secondary, colors.interactive.default],
     ),
-    opacity: 0.7 + focusProgress.value * 0.3,
+    opacity: 0.8 + focusProgress.value * 0.2,
   }));
 
-  const iconColor = focused ? colors.interactive.default : colors.text.tertiary;
+  const iconColor = focused ? colors.interactive.default : colors.text.secondary;
 
   // Center FAB rendering (elevated button)
   if (isCenterFab) {
