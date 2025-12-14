@@ -2,13 +2,14 @@
 // Animated Counter Component - Production Ready
 // Stats ve number'lar için count-up animation
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, TextStyle, StyleProp } from 'react-native';
 import Animated, {
   useSharedValue,
-  useAnimatedProps,
+  useAnimatedReaction,
   withTiming,
   Easing,
+  runOnJS,
 } from 'react-native-reanimated';
 
 const AnimatedText = Animated.createAnimatedComponent(Text);
@@ -67,7 +68,23 @@ export const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
   testID,
 }) => {
   const animatedValue = useSharedValue(0);
+  const [displayText, setDisplayText] = useState(
+    `${prefix}${useLocale ? (0).toLocaleString(locale) : '0'}${suffix}`,
+  );
 
+  // Update display text when animated value changes
+  useAnimatedReaction(
+    () => Math.floor(animatedValue.value),
+    currentValue => {
+      const formattedValue = useLocale
+        ? currentValue.toLocaleString(locale)
+        : currentValue.toString();
+      runOnJS(setDisplayText)(`${prefix}${formattedValue}${suffix}`);
+    },
+    [useLocale, locale, prefix, suffix],
+  );
+
+  // Animate to new value when prop changes
   useEffect(() => {
     animatedValue.value = withTiming(value, {
       duration,
@@ -75,16 +92,9 @@ export const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
     });
   }, [value, duration, animatedValue]);
 
-  const animatedProps = useAnimatedProps(() => {
-    const displayValue = Math.floor(animatedValue.value);
-    const formattedValue = useLocale
-      ? displayValue.toLocaleString(locale)
-      : displayValue.toString();
-
-    return {
-      text: `${prefix}${formattedValue}${suffix}`,
-    } as any;
-  });
-
-  return <AnimatedText testID={testID} animatedProps={animatedProps} style={style} />;
+  return (
+    <Text testID={testID} style={style}>
+      {displayText}
+    </Text>
+  );
 };

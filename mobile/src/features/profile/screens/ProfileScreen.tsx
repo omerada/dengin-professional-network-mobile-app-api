@@ -120,18 +120,31 @@ export const ProfileScreen: React.FC = () => {
 
   // Combine stats from profile or separate query
   const stats: ProfileStatsType = useMemo(() => {
-    if (profile?.stats) {
-      return profile.stats;
+    const result = profile?.stats ||
+      profileStats || {
+        postCount: 0,
+        followerCount: 0,
+        followingCount: 0,
+      };
+
+    // Debug: Log stats with more details
+    if (__DEV__) {
+      console.log('═══════════════════════════════════════');
+      console.log('[ProfileScreen] 🔍 STATS DEBUG');
+      console.log('[ProfileScreen] profileUserId:', profileUserId);
+      console.log('[ProfileScreen] isOwnProfile:', isOwnProfile);
+      console.log('[ProfileScreen] Final stats:', result);
+      console.log('[ProfileScreen] Profile stats:', profile?.stats);
+      console.log('[ProfileScreen] Separate stats query:', profileStats);
+      console.log(
+        '[ProfileScreen] Profile object keys:',
+        profile ? Object.keys(profile) : 'no profile',
+      );
+      console.log('═══════════════════════════════════════');
     }
-    if (profileStats) {
-      return profileStats;
-    }
-    return {
-      postCount: 0,
-      followerCount: 0,
-      followingCount: 0,
-    };
-  }, [profile?.stats, profileStats]);
+
+    return result;
+  }, [profile?.stats, profileStats, profileUserId, isOwnProfile]);
 
   // Handlers
   const handleAvatarPress = useCallback(() => {
@@ -245,8 +258,18 @@ export const ProfileScreen: React.FC = () => {
         }>
         {/* Modern Premium Header */}
         <View style={styles.premiumHeader}>
-          {/* Blurred Background */}
-          <View style={[styles.blurredBackground, { backgroundColor: colors.interactive.focus }]} />
+          {/* Blurred Background with Avatar */}
+          {profile.avatarUrl ? (
+            <Image
+              source={{ uri: profile.avatarUrl }}
+              style={styles.blurredBackground}
+              blurRadius={5}
+            />
+          ) : (
+            <View
+              style={[styles.blurredBackground, { backgroundColor: colors.interactive.focus }]}
+            />
+          )}
 
           {/* Settings Button */}
           {isOwnProfile && (
@@ -288,26 +311,44 @@ export const ProfileScreen: React.FC = () => {
               </Pressable>
             </Animated.View>
 
-            {/* Profession Name - Big Bold */}
+            {/* Full Name - Big Bold */}
             <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(0)}>
               <Text style={[styles.professionTitle, { color: colors.text.primary }]}>
-                {('professionName' in profile
-                  ? profile.professionName
-                  : profile.profession?.name) || profile.fullName}
+                {profile.fullName}
               </Text>
             </Animated.View>
 
-            {/* Username - Small */}
-            <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(1)}>
-              <Text style={[styles.usernameSmall, { color: colors.text.secondary }]}>
-                @{profile.fullName.toLowerCase().replace(/\s+/g, '_')}
-              </Text>
-            </Animated.View>
+            {/* Profession - Subtitle with Icon */}
+            {('professionName' in profile && profile.professionName) ||
+            ('profession' in profile && profile.profession?.name) ? (
+              <Animated.View
+                entering={SCREEN_ANIMATIONS.listItemEnter(1)}
+                style={styles.professionRow}>
+                <Icon
+                  name="briefcase"
+                  size={14}
+                  color={colors.text.secondary}
+                  style={styles.professionIcon}
+                />
+                <Text style={[styles.professionSubtitle, { color: colors.text.secondary }]}>
+                  {'professionName' in profile ? profile.professionName : profile.profession?.name}
+                </Text>
+                {profile.isProfessionVerified && (
+                  <Icon
+                    name="checkmark-circle"
+                    size={16}
+                    color={colors.status.success}
+                    style={{ marginLeft: 4 }}
+                  />
+                )}
+              </Animated.View>
+            ) : null}
 
             {/* Stats - Horizontal Big Numbers */}
             <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(2)} style={styles.statsRow}>
               <View style={styles.statBox}>
                 <AnimatedCounter
+                  key={`post-${stats.postCount}`}
                   value={stats.postCount}
                   duration={800}
                   style={[styles.statNumber, { color: colors.text.primary }]}
@@ -326,6 +367,7 @@ export const ProfileScreen: React.FC = () => {
                   }
                 }}>
                 <AnimatedCounter
+                  key={`follower-${stats.followerCount}`}
                   value={stats.followerCount}
                   duration={800}
                   style={[styles.statNumber, { color: colors.text.primary }]}
@@ -344,6 +386,7 @@ export const ProfileScreen: React.FC = () => {
                   }
                 }}>
                 <AnimatedCounter
+                  key={`following-${stats.followingCount}`}
                   value={stats.followingCount}
                   duration={800}
                   style={[styles.statNumber, { color: colors.text.primary }]}
@@ -355,7 +398,11 @@ export const ProfileScreen: React.FC = () => {
         </View>
 
         {/* Bio */}
-        {'bio' in profile && profile.bio && <ProfileBio bio={profile.bio} />}
+        {'bio' in profile && profile.bio && (
+          <Animated.View entering={FadeInDown.delay(300).duration(400)} style={styles.bioSection}>
+            <ProfileBio bio={profile.bio} />
+          </Animated.View>
+        )}
 
         {/* Actions for other users */}
         {!isOwnProfile && 'userId' in profile && profile.userId && (

@@ -39,10 +39,11 @@ export const styles = StyleSheet.create({
     borderBottomRightRadius: 32,
     height: 180,
     left: 0,
-    opacity: 0.3,
+    opacity: 0.8,
     position: 'absolute',
     right: 0,
     top: 0,
+    width: '100%',
   },
 
   container: {
@@ -101,8 +102,29 @@ export const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '800',
     letterSpacing: -0.5,
-    marginBottom: 4,
+    marginBottom: 8,
     textAlign: 'center',
+  },
+
+  professionRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+
+  professionIcon: {
+    marginRight: 6,
+  },
+
+  professionSubtitle: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+
+  bioSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
 
   profileContent: {
@@ -162,11 +184,5 @@ export const styles = StyleSheet.create({
     marginTop: 24,
     paddingHorizontal: 40,
     width: '100%',
-  },
-
-  usernameSmall: {
-    fontSize: 15,
-    fontWeight: '500',
-    marginBottom: 8,
   },
 });

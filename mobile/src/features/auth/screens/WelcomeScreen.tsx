@@ -4,7 +4,7 @@
 // Oku: mobile-development-guide/ui-ux-modernization/07-SCREEN-REDESIGNS.md
 
 import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
@@ -55,16 +55,11 @@ export const WelcomeScreen: React.FC = () => {
       <View style={styles.content}>
         {/* Hero Logo Area - DENGIN Branding */}
         <Animated.View entering={SCREEN_ANIMATIONS.heroEnter} style={styles.heroContainer}>
-          <View
-            style={[
-              styles.logoPlaceholder,
-              {
-                backgroundColor: colors.interactive.subtle,
-                shadowColor: colors.interactive.default,
-              },
-            ]}>
-            <Icon name="users" size={56} color={colors.interactive.default} />
-          </View>
+          <Image
+            source={require('../../../../assets/dengin-icon.png')}
+            style={styles.appLogo}
+            resizeMode="contain"
+          />
           <Text style={[styles.appName, { color: colors.text.primary }]}>Dengin</Text>
           <Text style={[styles.tagline, { color: colors.text.secondary }]}>
             Profesyoneller için güvenli sosyal ağ
@@ -185,17 +180,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
-  logoPlaceholder: {
-    alignItems: 'center',
-    borderRadius: 32,
-    elevation: 6,
-    height: 120,
-    justifyContent: 'center',
-    marginBottom: spacing['2xl'],
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 20,
-    width: 120,
+  appLogo: {
+    height: 100,
+    marginBottom: spacing.xl,
+    width: 100,
   },
   logoText: {
     fontSize: 56,

@@ -3,19 +3,21 @@
 // Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
 
 import React, { useMemo, useCallback, useState } from 'react';
-import { StyleSheet, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView, useColorScheme } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { HAPTIC_TYPES, SCREEN_ANIMATIONS } from '@constants';
-import { useTheme, useColors } from '@contexts/ThemeContext';
+import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
 import { spacing } from '@theme';
+import { asyncStorage, STORAGE_KEYS } from '@core/storage';
 import { SettingsSection } from '../components';
-import { CustomRefreshControl } from '@shared/components';
+import { CustomRefreshControl, ScreenHeader } from '@shared/components';
 import { useLogout } from '@features/auth/hooks';
 import type { SettingsSectionType } from '../types';
+import type { ThemeMode } from '@theme/types';
 
 /**
  * SettingsScreen
@@ -28,12 +30,39 @@ import type { SettingsSectionType } from '../types';
  * - Danger Zone (delete account)
  */
 export const SettingsScreen: React.FC = () => {
-  const { setThemeMode, themeMode, isDark } = useTheme();
   const colors = useColors();
   const { trigger } = useHaptic();
   const toast = useToast();
   const navigation = useNavigation();
   const { logout, isLoading: isLoggingOut } = useLogout();
+  const systemColorScheme = useColorScheme();
+
+  // Theme state
+  const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
+  const isDark = themeMode === 'system' ? systemColorScheme === 'dark' : themeMode === 'dark';
+
+  // Load theme preference on mount
+  React.useEffect(() => {
+    const loadTheme = async () => {
+      try {
+        const saved = await asyncStorage.get<ThemeMode>(STORAGE_KEYS.THEME);
+        if (saved) setThemeModeState(saved);
+      } catch (error) {
+        console.warn('Failed to load theme:', error);
+      }
+    };
+    loadTheme();
+  }, []);
+
+  // Save theme preference
+  const setThemeMode = useCallback(async (mode: ThemeMode) => {
+    setThemeModeState(mode);
+    try {
+      await asyncStorage.set(STORAGE_KEYS.THEME, mode);
+    } catch (error) {
+      console.warn('Failed to save theme:', error);
+    }
+  }, []);
 
   // Loading states
   const [loadingStates, _setLoadingStates] = useState<Record<string, boolean>>({});
@@ -265,6 +294,7 @@ export const SettingsScreen: React.FC = () => {
       style={[styles.container, { backgroundColor: colors.background.secondary }]}
       edges={['top', 'bottom']}>
       <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={{ flex: 1 }}>
+        <ScreenHeader title="Ayarlar" showBackButton={true} showBorder={true} />
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}

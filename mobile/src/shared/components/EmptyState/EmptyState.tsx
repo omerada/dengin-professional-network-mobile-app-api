@@ -3,7 +3,7 @@
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo } from 'react';
-import { StyleSheet, ViewStyle } from 'react-native';
+import { StyleSheet, ViewStyle, Image } from 'react-native';
 import Animated, {
   FadeIn,
   FadeInUp,
@@ -25,6 +25,8 @@ import { Button } from '../Button';
 export interface EmptyStateProps {
   /** Icon name from Ionicons */
   icon?: string;
+  /** Custom image source (alternative to icon) */
+  customImage?: any;
   /** Icon color override */
   iconColor?: string;
   /** Main title text */
@@ -67,14 +69,15 @@ export interface EmptyStateProps {
 // ============================================================================
 
 interface FloatingIconProps {
-  icon: string;
+  icon?: string;
+  customImage?: any;
   iconColor: string;
   backgroundColor: string;
   floating: boolean;
 }
 
 const FloatingIcon: React.FC<FloatingIconProps> = memo(
-  ({ icon, iconColor, backgroundColor, floating }) => {
+  ({ icon, customImage, iconColor, backgroundColor, floating }) => {
     const translateY = useSharedValue(0);
 
     React.useEffect(() => {
@@ -93,7 +96,11 @@ const FloatingIcon: React.FC<FloatingIconProps> = memo(
 
     return (
       <Animated.View style={[styles.iconContainer, { backgroundColor }, floating && animatedStyle]}>
-        <Icon name={icon} size={48} color={iconColor} />
+        {customImage ? (
+          <Image source={customImage} style={styles.customImage} resizeMode="contain" />
+        ) : (
+          <Icon name={icon || 'file-tray-outline'} size={48} color={iconColor} />
+        )}
       </Animated.View>
     );
   },
@@ -148,6 +155,7 @@ FloatingIcon.displayName = 'FloatingIcon';
 export const EmptyState: React.FC<EmptyStateProps> = memo(
   ({
     icon = 'file-tray-outline',
+    customImage,
     iconColor,
     title,
     description,
@@ -194,6 +202,7 @@ export const EmptyState: React.FC<EmptyStateProps> = memo(
         accessibilityLabel={`${title}. ${displayDescription || ''}`}>
         <FloatingIcon
           icon={icon}
+          customImage={customImage}
           iconColor={iconColor || colors.text.tertiary}
           backgroundColor={colors.background.secondary}
           floating={floatingIcon}
@@ -268,6 +277,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: spacing.lg,
     width: 96,
+  },
+  customImage: {
+    height: 56,
+    width: 56,
   },
   message: {
     fontSize: fontSize.base,
