@@ -67,7 +67,7 @@ export const AppNavigator: React.FC = () => {
   if (isLoading) {
     return (
       <View style={[styles.splashContainer, { backgroundColor: colors.background.primary }]}>
-        <Text style={[styles.splashLogo, { color: colors.interactive.default }]}>Meslektaş</Text>
+        <Text style={[styles.splashLogo, { color: colors.interactive.default }]}>Dengin</Text>
         <ActivityIndicator
           size="large"
           color={colors.interactive.default}

@@ -97,8 +97,8 @@ public class OpenRouterClient {
                 .url(config.getBaseUrl() + "/chat/completions")
                 .header("Authorization", "Bearer " + config.getApiKey())
                 .header("Content-Type", "application/json")
-                .header("HTTP-Referer", "https://meslektas.com")
-                .header("X-Title", "Meslektas Backend")
+                .header("HTTP-Referer", "https://dengin.com")
+                .header("X-Title", "Dengin Backend")
                 .post(RequestBody.create(jsonPayload, MediaType.parse("application/json")))
                 .build();
             

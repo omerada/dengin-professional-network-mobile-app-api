@@ -1,5 +1,7 @@
-package com.meslektas.verification.domain.model;
+package com.dengin.verification.domain.model;
 
+import com.dengin.verification.domain.model.AIVerificationResult;
+import com.dengin.verification.domain.model.ConfidenceScore;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

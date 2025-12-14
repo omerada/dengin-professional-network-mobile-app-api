@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Mobile app must send the name along with the token.
  * 
  * Configuration:
- * - apple.oauth.client-id: Your app's bundle ID (e.g., com.meslektas.app)
+ * - apple.oauth.client-id: Your app's bundle ID (e.g., com.dengin.app)
  * - apple.oauth.team-id: Your Apple Developer Team ID
  */
 @Component

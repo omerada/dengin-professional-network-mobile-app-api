@@ -1,5 +1,5 @@
 // src/features/feed/components/FeedHeader/ProfessionIcon.tsx
-// Meslektaş Design System - Profession Icon Component
+// Dengin Design System - Profession Icon Component
 // Oku: mobile-development-guide/sprints/30-SPRINT-HOME-SCREEN-COMPLETION.md Lines 692-780
 
 import React, { memo } from 'react';

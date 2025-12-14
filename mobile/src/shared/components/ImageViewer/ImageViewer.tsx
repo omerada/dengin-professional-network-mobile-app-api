@@ -1,5 +1,5 @@
 // src/shared/components/ImageViewer/ImageViewer.tsx
-// Meslektaş Design System - Full Screen Image Viewer
+// Dengin Design System - Full Screen Image Viewer
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback, useState } from 'react';

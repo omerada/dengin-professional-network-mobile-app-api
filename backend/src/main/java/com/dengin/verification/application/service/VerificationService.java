@@ -7,7 +7,7 @@ import com.dengin.verification.application.dto.VerificationAttemptResponse;
 import com.dengin.verification.application.dto.VerificationEligibilityResponse;
 import com.dengin.verification.application.dto.VerificationStatisticsResponse;
 import com.dengin.verification.domain.model.*;
-import com.meslektas.verification.domain.model.*;
+import com.dengin.verification.domain.model.*;
 import com.dengin.verification.domain.repository.VerificationRequestRepository;
 import com.dengin.verification.domain.service.VerificationAttemptPolicy;
 import com.dengin.verification.infrastructure.aws.RekognitionService;

@@ -1,5 +1,5 @@
 // src/shared/components/SwipeableRow/SwipeableRow.tsx
-// Meslektaş Design System - Swipeable Row Component
+// Dengin Design System - Swipeable Row Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback, useImperativeHandle, forwardRef } from 'react';

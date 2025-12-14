@@ -52,8 +52,8 @@ export const APP_CONFIG = {
 
   // Deep linking
   DEEP_LINK: {
-    SCHEME: 'meslektas',
-    PREFIX: 'meslektas://',
+    SCHEME: 'dengin',
+    PREFIX: 'dengin://',
   },
 } as const;
 

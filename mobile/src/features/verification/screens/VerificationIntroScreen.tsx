@@ -82,7 +82,7 @@ export const VerificationIntroScreen: React.FC = memo(() => {
           <Text style={styles.headerIcon}>🔐</Text>
           <Text style={[styles.title, { color: colors.text.primary }]}>Meslek Doğrulama</Text>
           <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
-            Meslektaşlarınızla güvenle bağlantı kurmak için mesleğinizi doğrulayın
+            Denginlarınızla güvenle bağlantı kurmak için mesleğinizi doğrulayın
           </Text>
         </View>
 

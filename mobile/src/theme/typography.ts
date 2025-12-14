@@ -1,5 +1,5 @@
 // src/theme/typography.ts
-// Meslektaş Design System v3.0 - Typography Tokens
+// Dengin Design System v3.0 - Typography Tokens
 // Modern, okunabilir ve profesyonel tipografi sistemi
 
 import { TextStyle, Platform } from 'react-native';

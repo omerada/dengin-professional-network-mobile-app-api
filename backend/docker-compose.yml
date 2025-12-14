@@ -4,9 +4,9 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: meslektas-postgres
+    container_name: dengin-postgres
     environment:
-      POSTGRES_DB: meslektas_dev
+      POSTGRES_DB: dengin_dev
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       PGDATA: /var/lib/postgresql/data/pgdata
@@ -15,7 +15,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - meslektas-network
+      - dengin-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -25,13 +25,13 @@ services:
   # Redis Cache
   redis:
     image: redis:7-alpine
-    container_name: meslektas-redis
+    container_name: dengin-redis
     ports:
       - "6380:6379"
     volumes:
       - redis_data:/data
     networks:
-      - meslektas-network
+      - dengin-network
     command: redis-server --appendonly yes
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -42,7 +42,7 @@ services:
   # LocalStack (AWS Services for Development)
   localstack:
     image: localstack/localstack:latest
-    container_name: meslektas-localstack
+    container_name: dengin-localstack
     ports:
       - "4566:4566" # LocalStack Gateway
       - "4510-4559:4510-4559" # External services port range
@@ -55,19 +55,20 @@ services:
       - AWS_SECRET_ACCESS_KEY=test
       - HOSTNAME_EXTERNAL=192.168.1.101 # Otomatik güncellenecek: scripts/get-local-ip.js çalıştırın
       - PERSISTENCE=1 # Enable data persistence
+      - AWS_S3_PRESIGNED_URL_HOST=http://192.168.1.101:4566 # Mobile access için
     volumes:
       - localstack_data:/var/lib/localstack
       - ./docker/localstack:/etc/localstack/init/ready.d
       # Docker socket removed for Windows compatibility
     networks:
-      - meslektas-network
+      - dengin-network
 
   # pgAdmin (Database Management UI)
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: meslektas-pgadmin
+    container_name: dengin-pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@meslektas.com
+      PGADMIN_DEFAULT_EMAIL: admin@dengin.com
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: "False"
     ports:
@@ -75,12 +76,12 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     networks:
-      - meslektas-network
+      - dengin-network
     depends_on:
       - postgres
 
 networks:
-  meslektas-network:
+  dengin-network:
     driver: bridge
 
 volumes:

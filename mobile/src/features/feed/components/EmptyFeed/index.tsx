@@ -1,5 +1,5 @@
 // src/features/feed/components/EmptyFeed/index.tsx
-// Meslektaş Design System - Modern EmptyFeed Component
+// Dengin Design System - Modern EmptyFeed Component
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import React, { memo, useCallback } from 'react';

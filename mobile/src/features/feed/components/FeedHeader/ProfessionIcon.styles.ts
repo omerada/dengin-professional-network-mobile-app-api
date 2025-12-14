@@ -1,5 +1,5 @@
 // src/features/feed/components/FeedHeader/ProfessionIcon.styles.ts
-// Meslektaş Design System - ProfessionIcon Styles
+// Dengin Design System - ProfessionIcon Styles
 // Oku: mobile-development-guide/sprints/30-SPRINT-HOME-SCREEN-COMPLETION.md Lines 692-780
 
 import { StyleSheet } from 'react-native';

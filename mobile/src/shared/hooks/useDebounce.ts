@@ -1,5 +1,5 @@
 // src/shared/hooks/useDebounce.ts
-// Meslektaş Design System - Debounce Hook
+// Dengin Design System - Debounce Hook
 // Oku: mobile-development-guide/ui-ux-modernization/15-PERFORMANCE-OPTIMIZATION.md
 
 import { useState, useEffect, useCallback, useRef } from 'react';

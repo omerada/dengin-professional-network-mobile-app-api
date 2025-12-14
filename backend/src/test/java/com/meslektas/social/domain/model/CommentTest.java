@@ -1,5 +1,7 @@
-package com.meslektas.social.domain.model;
+package com.dengin.social.domain.model;
 
+import com.dengin.social.domain.model.Comment;
+import com.dengin.social.domain.model.CommentContent;
 import org.junit.jupiter.api.*;
 
 import static org.assertj.core.api.Assertions.*;

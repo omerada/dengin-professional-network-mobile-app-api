@@ -1,5 +1,5 @@
 // src/shared/hooks/useAnimatedValue.ts
-// Meslektaş Design System - Animated Value Hooks
+// Dengin Design System - Animated Value Hooks
 // Oku: mobile-development-guide/ui-ux-modernization/05-ANIMATION-MOTION.md
 
 import { useCallback } from 'react';

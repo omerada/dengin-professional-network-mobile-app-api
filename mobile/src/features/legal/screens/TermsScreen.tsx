@@ -53,7 +53,7 @@ export const TermsScreen: React.FC = () => {
 
         <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>1. Kabul</Text>
         <Text style={[styles.paragraph, { color: colors.text.secondary }]}>
-          Meslektaş platformunu kullanarak, işbu Kullanım Koşullarını kabul etmiş sayılırsınız. Bu
+          Dengin platformunu kullanarak, işbu Kullanım Koşullarını kabul etmiş sayılırsınız. Bu
           koşulları kabul etmiyorsanız, lütfen platformu kullanmayın.
         </Text>
 
@@ -61,8 +61,8 @@ export const TermsScreen: React.FC = () => {
           2. Hesap Oluşturma
         </Text>
         <Text style={[styles.paragraph, { color: colors.text.secondary }]}>
-          Meslektaş&apos;ta hesap oluşturmak için 18 yaşında veya daha büyük olmalısınız.
-          Hesabınızın güvenliğinden siz sorumlusunuz ve şifrenizi gizli tutmalısınız.
+          Dengin&apos;ta hesap oluşturmak için 18 yaşında veya daha büyük olmalısınız. Hesabınızın
+          güvenliğinden siz sorumlusunuz ve şifrenizi gizli tutmalısınız.
         </Text>
 
         <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>
@@ -92,8 +92,8 @@ export const TermsScreen: React.FC = () => {
 
         <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>6. Fikri Mülkiyet</Text>
         <Text style={[styles.paragraph, { color: colors.text.secondary }]}>
-          Platform üzerindeki tüm içerik, tasarım, logo ve markalar Meslektaş&apos;ın
-          mülkiyetindedir. İzinsiz kullanım yasaktır.
+          Platform üzerindeki tüm içerik, tasarım, logo ve markalar Dengin&apos;ın mülkiyetindedir.
+          İzinsiz kullanım yasaktır.
         </Text>
 
         <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>7. Hesap İptali</Text>
@@ -106,13 +106,13 @@ export const TermsScreen: React.FC = () => {
           8. Sorumluluk Reddi
         </Text>
         <Text style={[styles.paragraph, { color: colors.text.secondary }]}>
-          Meslektaş, platformun kesintisiz ve hatasız çalışacağını garanti etmez. Kullanıcılar arası
+          Dengin, platformun kesintisiz ve hatasız çalışacağını garanti etmez. Kullanıcılar arası
           etkileşimlerden doğan zararlardan sorumlu tutulamaz.
         </Text>
 
         <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>9. İletişim</Text>
         <Text style={[styles.paragraph, { color: colors.text.secondary }]}>
-          Kullanım koşulları hakkında sorularınız için: info@meslektas.com
+          Kullanım koşulları hakkında sorularınız için: info@dengin.com
         </Text>
 
         <View style={{ height: spacing.xl }} />

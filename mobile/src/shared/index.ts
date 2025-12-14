@@ -1,5 +1,5 @@
 // src/shared/index.ts
-// Meslektaş Shared Module Exports
+// Dengin Shared Module Exports
 // Oku: mobile-development-guide/ui-ux-modernization/14-SPRINT-IMPLEMENTATION-PLAN.md
 
 // Components

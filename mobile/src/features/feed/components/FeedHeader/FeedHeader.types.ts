@@ -1,5 +1,5 @@
 // src/features/feed/components/FeedHeader/FeedHeader.types.ts
-// Meslektaş Design System - FeedHeader Type Definitions
+// Dengin Design System - FeedHeader Type Definitions
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import type { FeedFilter } from '../../types';

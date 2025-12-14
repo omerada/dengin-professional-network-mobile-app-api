@@ -73,7 +73,7 @@ public class Message {
 ### STOMP Protocol
 
 ```
-Client connects to: ws://api.meslektas.com/ws
+Client connects to: ws://api.dengin.com/ws
 With headers: Authorization: Bearer {JWT}
 
 Subscriptions:

@@ -1,5 +1,5 @@
 // src/shared/components/ErrorFallback.tsx
-// Meslektaş Design System - Modern Error Fallback Component
+// Dengin Design System - Modern Error Fallback Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback } from 'react';

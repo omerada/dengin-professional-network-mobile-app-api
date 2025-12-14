@@ -1,5 +1,5 @@
 // src/shared/components/TabBar/TabBar.tsx
-// Meslektaş Design System - Animated Tab Bar Component
+// Dengin Design System - Animated Tab Bar Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback, useMemo } from 'react';

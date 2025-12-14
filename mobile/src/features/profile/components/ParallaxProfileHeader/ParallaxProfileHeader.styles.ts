@@ -1,5 +1,5 @@
 // src/features/profile/components/ParallaxProfileHeader/ParallaxProfileHeader.styles.ts
-// Meslektaş Design System - ParallaxProfileHeader Styles
+// Dengin Design System - ParallaxProfileHeader Styles
 // Oku: mobile-development-guide/ui-ux-modernization/10-PROFILE-EXPERIENCE.md
 
 import { StyleSheet } from 'react-native';

@@ -74,7 +74,7 @@ public class SentryConfig {
     public Sentry.OptionsConfiguration<SentryOptions> customOptionsConfiguration() {
         return options -> {
             // Set release version for tracking
-            options.setRelease("meslektas-backend@" + applicationVersion);
+            options.setRelease("dengin-backend@" + applicationVersion);
 
             // Set environment
             options.setEnvironment(environment);

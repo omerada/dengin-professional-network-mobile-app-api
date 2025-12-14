@@ -22,7 +22,7 @@ public class S3HealthIndicator implements HealthIndicator {
     private final String bucketName;
 
     public S3HealthIndicator(S3Client s3Client,
-            @Value("${aws.s3.bucket-name:meslektas-uploads}") String bucketName) {
+            @Value("${aws.s3.bucket-name:dengin-uploads}") String bucketName) {
         this.s3Client = s3Client;
         this.bucketName = bucketName;
     }

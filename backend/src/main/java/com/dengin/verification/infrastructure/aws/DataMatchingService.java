@@ -35,7 +35,7 @@ public class DataMatchingService {
     
     private final RekognitionClient rekognitionClient;
     
-    @Value("${aws.rekognition.bucket-name:meslektas-verifications}")
+    @Value("${aws.rekognition.bucket-name:dengin-verifications}")
     private String bucketName;
     
     // Patterns for data extraction

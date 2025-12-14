@@ -48,7 +48,7 @@ public class PasswordResetService {
     private final ApplicationEventPublisher eventPublisher;
     private final EmailService emailService;
 
-    @Value("${app.frontend-url:https://meslektas.com}")
+    @Value("${app.frontend-url:https://dengin.com}")
     private String frontendUrl;
 
     private static final String RESET_TOKEN_PREFIX = "password_reset:token:";

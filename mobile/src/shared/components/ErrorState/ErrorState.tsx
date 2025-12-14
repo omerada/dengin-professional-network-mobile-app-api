@@ -1,5 +1,5 @@
 // src/shared/components/ErrorState/ErrorState.tsx
-// Meslektaş Design System - Error State Component
+// Dengin Design System - Error State Component
 // Oku: mobile/UX-FLOW-IYILESTIRME-RAPORU.md Section 4.1
 
 import React, { memo, useCallback } from 'react';

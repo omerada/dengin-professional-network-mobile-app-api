@@ -1,5 +1,5 @@
 // src/features/feed/components/FeedHeader/professionConfig.ts
-// Meslektaş Design System - Profession Icon & Color Configuration
+// Dengin Design System - Profession Icon & Color Configuration
 // Oku: mobile-development-guide/sprints/30-SPRINT-HOME-SCREEN-COMPLETION.md Lines 692-780
 
 import type { ProfessionCategory } from '@shared/types/api.types';

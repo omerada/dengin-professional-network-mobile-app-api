@@ -47,7 +47,7 @@ public class EmailTemplateRenderer {
                     Merhaba %s,
                 </p>
                 <p style="margin: 0 0 16px 0; color: #374151; font-size: 16px; line-height: 1.5;">
-                    Meslektaş hesabınızı oluşturduğunuz için teşekkür ederiz.
+                    Dengin hesabınızı oluşturduğunuz için teşekkür ederiz.
                     E-posta adresinizi doğrulamak için aşağıdaki butona tıklayın.
                 </p>
                 <p style="margin: 0 0 16px 0; color: #6B7280; font-size: 14px; line-height: 1.5;">
@@ -98,7 +98,7 @@ public class EmailTemplateRenderer {
                     Merhaba %s,
                 </p>
                 <p style="margin: 0 0 16px 0; color: #374151; font-size: 16px; line-height: 1.5;">
-                    Meslektaş'a hoş geldiniz! 🎉
+                    Dengin'a hoş geldiniz! 🎉
                 </p>
                 <p style="margin: 0 0 16px 0; color: #374151; font-size: 16px; line-height: 1.5;">
                     Sağlık sektöründeki meslektaşlarınızla bağlantı kurmak, bilgi paylaşmak
@@ -110,15 +110,15 @@ public class EmailTemplateRenderer {
                 <ul style="margin: 0 0 16px 0; padding-left: 24px; color: #374151; font-size: 16px; line-height: 1.8;">
                     <li>Profilinizi tamamlayın</li>
                     <li>Meslek doğrulaması yapın</li>
-                    <li>Meslektaşlarınızı takip edin</li>
+                    <li>Denginlarınızı takip edin</li>
                     <li>İlk gönderinizi paylaşın</li>
                 </ul>
                 """, recipientName);
 
         return renderBaseTemplate(
-                "Meslektaş'a Hoş Geldiniz!",
+                "Dengin'a Hoş Geldiniz!",
                 body,
-                "https://meslektas.com/dashboard",
+                "https://dengin.com/dashboard",
                 "Profili Tamamla",
                 SUCCESS_COLOR);
     }
@@ -145,7 +145,7 @@ public class EmailTemplateRenderer {
         return renderBaseTemplate(
                 "Şifre Sıfırlama Hakkında",
                 body,
-                "https://meslektas.com/login",
+                "https://dengin.com/login",
                 "Giriş Yap",
                 PRIMARY_COLOR);
     }
@@ -169,7 +169,7 @@ public class EmailTemplateRenderer {
                         <div style="background-color: #FEF2F2; border-radius: 8px; padding: 16px; margin: 16px 0;">
                             <p style="margin: 0; color: #991B1B; font-size: 14px; line-height: 1.5;">
                                 <strong>⚠️ Bu işlemi siz yapmadıysanız</strong><br>
-                                Lütfen hemen <a href="mailto:destek@meslektas.com" style="color: #991B1B;">destek@meslektas.com</a>
+                                Lütfen hemen <a href="mailto:destek@dengin.com" style="color: #991B1B;">destek@dengin.com</a>
                                 adresinden bizimle iletişime geçin.
                             </p>
                         </div>
@@ -220,7 +220,7 @@ public class EmailTemplateRenderer {
                                             <!-- Header -->
                                             <tr>
                                                 <td style="padding: 32px 32px 0 32px; text-align: center;">
-                                                    <img src="https://meslektas.com/logo.png" alt="Meslektaş" style="height: 40px; margin-bottom: 24px;">
+                                                    <img src="https://dengin.com/logo.png" alt="Dengin" style="height: 40px; margin-bottom: 24px;">
                                                     <h1 style="margin: 0; color: #111827; font-size: 24px; font-weight: 600;">
                                                         %s
                                                     </h1>
@@ -239,8 +239,8 @@ public class EmailTemplateRenderer {
                                             <tr>
                                                 <td style="padding: 24px 32px; border-top: 1px solid #E5E7EB;">
                                                     <p style="margin: 0; color: #9CA3AF; font-size: 12px; text-align: center; line-height: 1.5;">
-                                                        Bu e-posta Meslektaş tarafından gönderilmiştir.<br>
-                                                        <a href="https://meslektas.com/settings/notifications" style="color: #6B7280;">Bildirim tercihlerini yönet</a>
+                                                        Bu e-posta Dengin tarafından gönderilmiştir.<br>
+                                                        <a href="https://dengin.com/settings/notifications" style="color: #6B7280;">Bildirim tercihlerini yönet</a>
                                                     </p>
                                                 </td>
                                             </tr>

@@ -34,8 +34,8 @@
         "simulator": false
       },
       "env": {
-        "API_BASE_URL": "https://api.meslektas.com",
-        "WS_URL": "wss://api.meslektas.com/ws"
+        "API_BASE_URL": "https://api.dengin.com",
+        "WS_URL": "wss://api.dengin.com/ws"
       }
     }
   },

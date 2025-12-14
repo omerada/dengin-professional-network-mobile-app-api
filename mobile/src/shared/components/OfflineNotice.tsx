@@ -1,5 +1,5 @@
 // src/shared/components/OfflineNotice.tsx
-// Meslektaş Design System - Modern Offline Notice Component
+// Dengin Design System - Modern Offline Notice Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useEffect, useState } from 'react';

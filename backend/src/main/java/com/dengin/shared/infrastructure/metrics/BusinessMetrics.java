@@ -26,9 +26,9 @@ import java.util.List;
  * Metrics are scraped by Prometheus via /actuator/prometheus endpoint.
  * 
  * Example Grafana queries:
- * - User growth: meslektas_users_total
- * - Verification queue: meslektas_verifications_pending
- * - Daily active users: meslektas_users_active_24h
+ * - User growth: dengin_users_total
+ * - Verification queue: dengin_verifications_pending
+ * - Daily active users: dengin_users_active_24h
  */
 @Component
 @RequiredArgsConstructor
@@ -37,7 +37,7 @@ public class BusinessMetrics implements MeterBinder {
     private final UserRepository userRepository;
     private final VerificationRequestRepository verificationRepository;
 
-    private static final String PREFIX = "meslektas";
+    private static final String PREFIX = "dengin";
 
     @Override
     public void bindTo(MeterRegistry registry) {

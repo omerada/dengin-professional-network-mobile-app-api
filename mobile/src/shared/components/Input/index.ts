@@ -1,5 +1,5 @@
 // src/shared/components/Input/index.ts
-// Meslektaş Design System - Input Component Exports
+// Dengin Design System - Input Component Exports
 
 export { Input } from './Input';
 export type {

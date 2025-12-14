@@ -6,7 +6,7 @@ import com.dengin.messaging.application.command.SendMessageCommand;
 import com.dengin.messaging.application.dto.SendMessageResponse;
 import com.dengin.messaging.application.service.ConversationService;
 import com.dengin.messaging.infrastructure.websocket.dto.*;
-import com.meslektas.messaging.infrastructure.websocket.dto.*;
+import com.dengin.messaging.infrastructure.websocket.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;

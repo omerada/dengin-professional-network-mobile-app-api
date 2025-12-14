@@ -1,5 +1,5 @@
 // src/shared/components/SearchBar/SearchBar.tsx
-// Meslektaş Design System - Modern SearchBar Component
+// Dengin Design System - Modern SearchBar Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback, useRef, useState } from 'react';

@@ -40,7 +40,7 @@ export enum SocketStatus {
 
 /**
  * Send message request via WebSocket
- * Backend: com.meslektas.messaging.application.dto.SendMessageRequest
+ * Backend: com.dengin.messaging.application.dto.SendMessageRequest
  *
  * NOT: Backend UUID tipi bekliyor, number değil!
  */
@@ -66,7 +66,7 @@ export interface WsAttachment {
 
 /**
  * Message response from WebSocket
- * Backend: com.meslektas.messaging.application.dto.MessageDto
+ * Backend: com.dengin.messaging.application.dto.MessageDto
  *
  * NOT: Backend UUID tipleri kullanıyor
  */
@@ -85,7 +85,7 @@ export interface WsMessageResponse {
 
 /**
  * Typing notification
- * Backend: com.meslektas.messaging.infrastructure.websocket.dto.TypingNotification
+ * Backend: com.dengin.messaging.infrastructure.websocket.dto.TypingNotification
  */
 export interface WsTypingNotification {
   conversationId: string;
@@ -97,7 +97,7 @@ export interface WsTypingNotification {
 
 /**
  * Read receipt
- * Backend: com.meslektas.messaging.infrastructure.websocket.dto.ReadReceipt
+ * Backend: com.dengin.messaging.infrastructure.websocket.dto.ReadReceipt
  */
 export interface WsReadReceipt {
   conversationId: string;

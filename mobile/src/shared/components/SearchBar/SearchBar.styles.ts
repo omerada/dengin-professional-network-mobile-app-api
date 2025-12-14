@@ -1,5 +1,5 @@
 // src/shared/components/SearchBar/SearchBar.styles.ts
-// Meslektaş Design System - SearchBar Styles
+// Dengin Design System - SearchBar Styles
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import { StyleSheet } from 'react-native';

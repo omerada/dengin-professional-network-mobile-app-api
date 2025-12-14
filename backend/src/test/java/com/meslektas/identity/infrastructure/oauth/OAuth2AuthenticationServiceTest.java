@@ -1,10 +1,10 @@
-package com.meslektas.identity.infrastructure.oauth;
+package com.dengin.identity.infrastructure.oauth;
 
-import com.meslektas.identity.domain.model.OAuthProvider;
-import com.meslektas.identity.domain.model.User;
-import com.meslektas.identity.domain.repository.UserRepository;
-import com.meslektas.identity.infrastructure.security.JwtTokenProvider;
-import org.junit.jupiter.api.BeforeEach;
+import com.dengin.identity.domain.model.OAuthProvider;
+import com.dengin.identity.domain.model.User;
+import com.dengin.identity.domain.repository.UserRepository;
+import com.dengin.identity.infrastructure.oauth.*;
+import com.dengin.identity.infrastructure.security.JwtTokenProvider;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

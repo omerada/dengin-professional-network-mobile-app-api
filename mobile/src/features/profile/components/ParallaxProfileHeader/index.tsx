@@ -1,5 +1,5 @@
 // src/features/profile/components/ParallaxProfileHeader/index.tsx
-// Meslektaş Design System - ParallaxProfileHeader Component
+// Dengin Design System - ParallaxProfileHeader Component
 // Oku: mobile-development-guide/ui-ux-modernization/10-PROFILE-EXPERIENCE.md
 
 import React, { memo, useCallback, useMemo } from 'react';

@@ -1,5 +1,5 @@
 // src/theme/colors.ts
-// Meslektaş Design System v3.0 - Professional Color Tokens
+// Dengin Design System v3.0 - Professional Color Tokens
 // Redesigned with Warm Copper (#D9C5AC) as Primary Brand Color
 
 import type { ColorPalette, ThemeColors } from './types';

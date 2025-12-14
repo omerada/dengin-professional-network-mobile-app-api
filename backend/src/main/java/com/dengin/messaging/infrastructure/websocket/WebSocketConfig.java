@@ -68,8 +68,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // Primary WebSocket endpoint with SockJS fallback for older browsers
         registry.addEndpoint("/ws")
                 .setAllowedOrigins(
-                        "https://meslektas.com",
-                        "https://www.meslektas.com",
+                        "https://dengin.com",
+                        "https://www.dengin.com",
                         "http://localhost:3000", // Development
                         "http://localhost:8080" // Development
                 )
@@ -80,8 +80,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // Raw WebSocket endpoint (without SockJS) for mobile clients
         registry.addEndpoint("/ws-raw")
                 .setAllowedOrigins(
-                        "https://meslektas.com",
-                        "https://www.meslektas.com",
+                        "https://dengin.com",
+                        "https://www.dengin.com",
                         "http://localhost:3000",
                         "http://localhost:8080");
 

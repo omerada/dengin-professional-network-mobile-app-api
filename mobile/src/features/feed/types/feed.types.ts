@@ -6,7 +6,7 @@ import type { PagedResponse } from '@shared/types';
 
 /**
  * Post yazarı - Backend FeedPostResponse.AuthorDto ile %100 uyumlu
- * Backend: com.meslektas.social.application.dto.FeedPostResponse.AuthorDto
+ * Backend: com.dengin.social.application.dto.FeedPostResponse.AuthorDto
  */
 export interface PostAuthor {
   /** Backend: userId (Long) */
@@ -61,7 +61,7 @@ export interface UserInteraction {
 
 /**
  * Post - Backend FeedPostResponse ile %100 uyumlu
- * Backend: com.meslektas.social.application.dto.FeedPostResponse
+ * Backend: com.dengin.social.application.dto.FeedPostResponse
  *
  * NOT: Backend hem Long id hem UUID postId döndürüyor.
  * - API çağrılarında Long id kullanılmalı (PostController Long.parseLong kullanıyor)

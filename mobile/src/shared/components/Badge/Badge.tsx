@@ -1,5 +1,5 @@
 // src/shared/components/Badge/Badge.tsx
-// Meslektaş Design System - Modern Badge Component
+// Dengin Design System - Modern Badge Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useEffect, useMemo } from 'react';

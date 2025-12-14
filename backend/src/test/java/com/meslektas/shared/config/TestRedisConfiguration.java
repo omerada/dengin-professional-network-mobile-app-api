@@ -1,4 +1,4 @@
-package com.meslektas.shared.config;
+package com.dengin.shared.config;
 
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;

@@ -24,10 +24,10 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisMessageBrokerConfig {
 
-    public static final String MESSAGING_TOPIC = "meslektas:messaging";
-    public static final String TYPING_TOPIC = "meslektas:typing";
-    public static final String READ_RECEIPT_TOPIC = "meslektas:read-receipts";
-    public static final String PRESENCE_TOPIC = "meslektas:presence";
+    public static final String MESSAGING_TOPIC = "dengin:messaging";
+    public static final String TYPING_TOPIC = "dengin:typing";
+    public static final String READ_RECEIPT_TOPIC = "dengin:read-receipts";
+    public static final String PRESENCE_TOPIC = "dengin:presence";
 
     /**
      * Redis message listener container for handling pub/sub messages

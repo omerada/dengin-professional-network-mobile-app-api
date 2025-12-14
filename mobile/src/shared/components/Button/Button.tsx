@@ -1,5 +1,5 @@
 // src/shared/components/Button/Button.tsx
-// Meslektaş Design System - Modern Button Component
+// Dengin Design System - Modern Button Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback, useMemo } from 'react';

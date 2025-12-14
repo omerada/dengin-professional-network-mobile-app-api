@@ -1,5 +1,5 @@
 // src/shared/components/ActionSheet/ActionSheet.tsx
-// Meslektaş Design System - Modern ActionSheet Component
+// Dengin Design System - Modern ActionSheet Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback } from 'react';

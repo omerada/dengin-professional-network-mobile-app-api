@@ -1,5 +1,5 @@
 // src/shared/components/Skeleton/index.ts
-// Meslektaş Design System - Skeleton Component Exports
+// Dengin Design System - Skeleton Component Exports
 
 export {
   Skeleton,

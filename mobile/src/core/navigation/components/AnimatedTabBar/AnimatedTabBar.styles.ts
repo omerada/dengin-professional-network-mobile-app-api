@@ -1,5 +1,5 @@
 // src/core/navigation/components/AnimatedTabBar/AnimatedTabBar.styles.ts
-// Meslektaş Design System - AnimatedTabBar Styles
+// Dengin Design System - AnimatedTabBar Styles
 // Oku: mobile-development-guide/ui-ux-modernization/06-MICRO-INTERACTIONS.md
 
 import { StyleSheet, Platform } from 'react-native';

@@ -1,5 +1,5 @@
 // src/shared/components/PullToRefresh/PullToRefresh.tsx
-// Meslektaş Design System - Modern Pull To Refresh Component
+// Dengin Design System - Modern Pull To Refresh Component
 // Oku: mobile-development-guide/ui-ux-modernization/06-MICRO-INTERACTIONS.md
 
 import React, { memo, useCallback, useMemo } from 'react';

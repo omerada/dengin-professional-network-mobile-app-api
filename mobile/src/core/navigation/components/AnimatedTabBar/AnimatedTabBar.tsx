@@ -1,5 +1,5 @@
 // src/core/navigation/components/AnimatedTabBar/AnimatedTabBar.tsx
-// Meslektaş Design System - Modern AnimatedTabBar Component
+// Dengin Design System - Modern AnimatedTabBar Component
 // Oku: mobile-development-guide/ui-ux-modernization/06-MICRO-INTERACTIONS.md
 
 import React, { memo, useCallback, useEffect } from 'react';

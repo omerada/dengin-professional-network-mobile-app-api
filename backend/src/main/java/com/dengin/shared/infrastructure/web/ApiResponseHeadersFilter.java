@@ -26,7 +26,7 @@ public class ApiResponseHeadersFilter extends OncePerRequestFilter {
     @Value("${app.api.version:v1}")
     private String apiVersion;
     
-    @Value("${spring.application.name:meslektas}")
+    @Value("${spring.application.name:dengin}")
     private String applicationName;
 
     @Override

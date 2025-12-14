@@ -1,5 +1,8 @@
-package com.meslektas.social.domain.model;
+package com.dengin.social.domain.model;
 
+import com.dengin.social.domain.model.Follow;
+import com.dengin.social.domain.model.UserFollowedEvent;
+import com.dengin.social.domain.model.UserUnfollowedEvent;
 import org.junit.jupiter.api.*;
 
 import static org.assertj.core.api.Assertions.*;

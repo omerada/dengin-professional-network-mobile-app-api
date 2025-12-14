@@ -1,13 +1,14 @@
-package com.meslektas.social.application.service;
+package com.dengin.social.application.service;
 
-import com.meslektas.common.infrastructure.DomainEventPublisher;
-import com.meslektas.identity.domain.model.Profession;
-import com.meslektas.identity.domain.model.User;
-import com.meslektas.identity.domain.repository.UserRepository;
-import com.meslektas.social.application.dto.FollowResponse;
-import com.meslektas.social.application.dto.UserFollowDto;
-import com.meslektas.social.domain.model.Follow;
-import com.meslektas.social.domain.repository.FollowRepository;
+import com.dengin.common.infrastructure.DomainEventPublisher;
+import com.dengin.identity.domain.model.Profession;
+import com.dengin.identity.domain.model.User;
+import com.dengin.identity.domain.repository.UserRepository;
+import com.dengin.social.application.dto.FollowResponse;
+import com.dengin.social.application.dto.UserFollowDto;
+import com.dengin.social.application.service.FollowService;
+import com.dengin.social.domain.model.Follow;
+import com.dengin.social.domain.repository.FollowRepository;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

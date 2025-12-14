@@ -1,5 +1,5 @@
 // src/shared/components/Input/Input.types.ts
-// Meslektaş Design System - Input Type Definitions
+// Dengin Design System - Input Type Definitions
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import type { TextInputProps, TextStyle, ViewStyle } from 'react-native';

@@ -54,7 +54,7 @@ export const PrivacyScreen: React.FC = () => {
         </Text>
 
         <Text style={[styles.intro, { color: colors.text.secondary }]}>
-          Meslektaş olarak gizliliğinizi ciddiye alıyoruz. Bu politika, kişisel verilerinizin nasıl
+          Dengin olarak gizliliğinizi ciddiye alıyoruz. Bu politika, kişisel verilerinizin nasıl
           toplandığını, kullanıldığını ve korunduğunu açıklar.
         </Text>
 
@@ -138,8 +138,8 @@ export const PrivacyScreen: React.FC = () => {
         <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>9. İletişim</Text>
         <Text style={[styles.paragraph, { color: colors.text.secondary }]}>
           Gizlilik politikası ve kişisel verileriniz hakkında sorularınız için:
-          {'\n\n'}E-posta: privacy@meslektas.com
-          {'\n'}Veri Sorumlusu: Meslektaş Teknoloji A.Ş.
+          {'\n\n'}E-posta: privacy@dengin.com
+          {'\n'}Veri Sorumlusu: Dengin Teknoloji A.Ş.
         </Text>
 
         <View style={{ height: spacing.xl }} />

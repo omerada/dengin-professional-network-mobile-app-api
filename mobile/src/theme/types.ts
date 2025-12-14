@@ -1,5 +1,5 @@
 // src/theme/types.ts
-// Meslektaş Design System - TypeScript Type Definitions
+// Dengin Design System - TypeScript Type Definitions
 // Oku: mobile-development-guide/ui-ux-modernization/03-DESIGN-SYSTEM-OVERHAUL.md
 
 import { TextStyle, ViewStyle } from 'react-native';

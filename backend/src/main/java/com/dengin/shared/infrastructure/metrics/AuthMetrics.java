@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 public class AuthMetrics {
 
     private final MeterRegistry registry;
-    private static final String PREFIX = "meslektas_auth";
+    private static final String PREFIX = "dengin_auth";
 
     // ==================== Login Metrics ====================
 

@@ -1,5 +1,5 @@
 // src/shared/components/Input/Input.styles.ts
-// Meslektaş Design System - Input Styles
+// Dengin Design System - Input Styles
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import { StyleSheet } from 'react-native';

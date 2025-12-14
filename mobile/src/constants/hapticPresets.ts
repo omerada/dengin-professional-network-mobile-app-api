@@ -1,5 +1,5 @@
 // src/constants/hapticPresets.ts
-// Standardized Haptic Feedback Presets for Meslektaş App
+// Standardized Haptic Feedback Presets for Dengin App
 
 import type { HapticType } from '@theme/types';
 

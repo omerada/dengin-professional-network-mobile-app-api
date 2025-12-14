@@ -1,5 +1,5 @@
 // src/shared/components/Toast/Toast.styles.ts
-// Meslektaş Design System - Toast Styles
+// Dengin Design System - Toast Styles
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import { StyleSheet } from 'react-native';

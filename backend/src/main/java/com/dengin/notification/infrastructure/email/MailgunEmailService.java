@@ -40,10 +40,10 @@ public class MailgunEmailService implements EmailService {
     @Value("${mailgun.domain:}")
     private String domain;
 
-    @Value("${mailgun.sender-email:noreply@meslektas.com}")
+    @Value("${mailgun.sender-email:noreply@dengin.com}")
     private String senderEmail;
 
-    @Value("${mailgun.sender-name:Meslektaş}")
+    @Value("${mailgun.sender-name:Dengin}")
     private String senderName;
 
     @Value("${mailgun.enabled:true}")
@@ -114,7 +114,7 @@ public class MailgunEmailService implements EmailService {
         log.info("Sending verification email to: {}", recipientEmail);
 
         try {
-            String subject = "E-posta Adresinizi Doğrulayın - Meslektaş";
+            String subject = "E-posta Adresinizi Doğrulayın - Dengin";
             String htmlBody = templateRenderer.renderVerificationEmail(recipientName, verificationLink);
 
             sendEmailWithRetry(recipientEmail, recipientName, subject, htmlBody);
@@ -148,7 +148,7 @@ public class MailgunEmailService implements EmailService {
         log.info("Sending password reset email to: {}", recipientEmail);
 
         try {
-            String subject = "Şifre Sıfırlama - Meslektaş";
+            String subject = "Şifre Sıfırlama - Dengin";
             String htmlBody = templateRenderer.renderPasswordResetEmail(recipientName, resetLink);
 
             sendEmailWithRetry(recipientEmail, recipientName, subject, htmlBody);
@@ -169,7 +169,7 @@ public class MailgunEmailService implements EmailService {
         log.info("Sending welcome email to: {}", recipientEmail);
 
         try {
-            String subject = "Meslektaş'a Hoş Geldiniz!";
+            String subject = "Dengin'e Hoş Geldiniz!";
             String htmlBody = templateRenderer.renderWelcomeEmail(recipientName);
 
             sendEmailWithRetry(recipientEmail, recipientName, subject, htmlBody);
@@ -190,7 +190,7 @@ public class MailgunEmailService implements EmailService {
         log.info("Sending OAuth login reminder to: {}", recipientEmail);
 
         try {
-            String subject = "Şifre Sıfırlama Hakkında - Meslektaş";
+            String subject = "Şifre Sıfırlama Hakkında - Dengin";
             String htmlBody = templateRenderer.renderOAuthReminderEmail(oauthProviderName);
 
             sendEmailWithRetry(recipientEmail, null, subject, htmlBody);
@@ -211,7 +211,7 @@ public class MailgunEmailService implements EmailService {
         log.info("Sending password changed email to: {}", recipientEmail);
 
         try {
-            String subject = "Şifreniz Değiştirildi - Meslektaş";
+            String subject = "Şifreniz Değiştirildi - Dengin";
             String htmlBody = templateRenderer.renderPasswordChangedEmail(recipientName);
 
             sendEmailWithRetry(recipientEmail, recipientName, subject, htmlBody);
@@ -247,7 +247,7 @@ public class MailgunEmailService implements EmailService {
                         .add("html", htmlBody);
 
                 // Add tracking tags
-                formBuilder.add("o:tag", "meslektas-transactional");
+                formBuilder.add("o:tag", "dengin-transactional");
                 formBuilder.add("o:tracking", "yes");
                 formBuilder.add("o:tracking-clicks", "yes");
                 formBuilder.add("o:tracking-opens", "yes");
@@ -355,25 +355,25 @@ public class MailgunEmailService implements EmailService {
 
     private String getSubjectForType(NotificationType type, NotificationContent content) {
         if (content.getTitle() != null && !content.getTitle().isBlank()) {
-            return content.getTitle() + " - Meslektaş";
+            return content.getTitle() + " - Dengin";
         }
 
         return switch (type) {
-            case NEW_FOLLOWER -> "Yeni takipçiniz var - Meslektaş";
-            case POST_LIKED -> "Gönderiniz beğenildi - Meslektaş";
-            case POST_COMMENTED -> "Gönderinize yorum yapıldı - Meslektaş";
-            case MENTION -> "Bahsedildiniz - Meslektaş";
-            case NEW_MESSAGE -> "Yeni mesajınız var - Meslektaş";
-            case VERIFICATION_APPROVED -> "Meslek doğrulamanız onaylandı - Meslektaş";
-            case VERIFICATION_REJECTED -> "Meslek doğrulamanız hakkında - Meslektaş";
-            case VERIFICATION_PENDING_REVIEW -> "Doğrulama işleminiz inceleniyor - Meslektaş";
-            case POST_FLAGGED -> "Gönderiniz hakkında bilgilendirme - Meslektaş";
-            case CONTENT_REMOVED -> "İçerik bildirimi - Meslektaş";
-            case WARNING_ISSUED -> "Önemli bilgilendirme - Meslektaş";
-            case WELCOME -> "Meslektaş'a hoş geldiniz!";
-            case PASSWORD_RESET -> "Şifre sıfırlama - Meslektaş";
-            case ACCOUNT_SUSPENDED -> "Hesap bildirimi - Meslektaş";
-            case ACCOUNT_REACTIVATED -> "Hesabınız aktif - Meslektaş";
+            case NEW_FOLLOWER -> "Yeni takipçiniz var - Dengin";
+            case POST_LIKED -> "Gönderiniz beğenildi - Dengin";
+            case POST_COMMENTED -> "Gönderinize yorum yapıldı - Dengin";
+            case MENTION -> "Bahsedildiniz - Dengin";
+            case NEW_MESSAGE -> "Yeni mesajınız var - Dengin";
+            case VERIFICATION_APPROVED -> "Meslek doğrulamanız onaylandı - Dengin";
+            case VERIFICATION_REJECTED -> "Meslek doğrulamanız hakkında - Dengin";
+            case VERIFICATION_PENDING_REVIEW -> "Doğrulama işleminiz inceleniyor - Dengin";
+            case POST_FLAGGED -> "Gönderiniz hakkında bilgilendirme - Dengin";
+            case CONTENT_REMOVED -> "İçerik bildirimi - Dengin";
+            case WARNING_ISSUED -> "Önemli bilgilendirme - Dengin";
+            case WELCOME -> "Dengin'a hoş geldiniz!";
+            case PASSWORD_RESET -> "Şifre sıfırlama - Dengin";
+            case ACCOUNT_SUSPENDED -> "Hesap bildirimi - Dengin";
+            case ACCOUNT_REACTIVATED -> "Hesabınız aktif - Dengin";
         };
     }
 }

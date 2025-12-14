@@ -1,5 +1,5 @@
 // src/shared/components/Card/Card.tsx
-// Meslektaş Design System - Modern Card Component
+// Dengin Design System - Modern Card Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback, useMemo } from 'react';

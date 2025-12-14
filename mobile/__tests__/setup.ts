@@ -285,7 +285,7 @@ jest.mock('@react-native-async-storage/async-storage', () => {
     ...mockStorage,
     getItem: jest.fn().mockImplementation((key: string) => {
       // Return null immediately for theme to avoid loading state
-      if (key === 'meslektas_theme') {
+      if (key === 'dengin_theme') {
         return Promise.resolve(null);
       }
       return mockStorage.getItem(key);

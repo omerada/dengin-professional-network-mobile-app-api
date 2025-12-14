@@ -1,6 +1,6 @@
 // src/features/messaging/services/messagingService.ts
 // Messaging HTTP API servisi - Backend ConversationController ile %100 uyumlu
-// Backend: com.meslektas.messaging.api.ConversationController
+// Backend: com.dengin.messaging.api.ConversationController
 // Oku: backend-development-guide/sprint-planning/26-SPRINT-7-8.md
 
 import { apiClient } from '@core/api/client';

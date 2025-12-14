@@ -1,5 +1,5 @@
 // src/shared/components/Toast/Toast.tsx
-// Meslektaş Design System - Modern Toast Component
+// Dengin Design System - Modern Toast Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback, useEffect, useMemo } from 'react';

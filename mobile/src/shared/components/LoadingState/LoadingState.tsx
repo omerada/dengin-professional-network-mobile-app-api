@@ -1,5 +1,5 @@
 // src/shared/components/LoadingState/LoadingState.tsx
-// Meslektaş Design System - Loading State Component
+// Dengin Design System - Loading State Component
 // Oku: mobile/UX-FLOW-IYILESTIRME-RAPORU.md Section 4.1
 
 import React, { memo } from 'react';

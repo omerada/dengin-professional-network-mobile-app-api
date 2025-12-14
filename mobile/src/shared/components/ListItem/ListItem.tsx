@@ -1,5 +1,5 @@
 // src/shared/components/ListItem/ListItem.tsx
-// Meslektaş Design System - ListItem Component
+// Dengin Design System - ListItem Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback, useMemo } from 'react';

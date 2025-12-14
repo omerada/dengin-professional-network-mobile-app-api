@@ -1,5 +1,5 @@
 // src/features/feed/components/FeedHeader/FeedHeader.styles.ts
-// Meslektaş Design System - FeedHeader Styles
+// Dengin Design System - FeedHeader Styles
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import { StyleSheet } from 'react-native';

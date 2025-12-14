@@ -1,5 +1,5 @@
 // src/shared/components/Input/Input.tsx
-// Meslektaş Design System - Modern Input Component
+// Dengin Design System - Modern Input Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, {

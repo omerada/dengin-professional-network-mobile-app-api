@@ -7,7 +7,7 @@
  */
 export const API_ENDPOINTS = {
   // Authentication - Backend: /api/auth/*
-  // Backend: com.meslektas.identity.api.AuthController
+  // Backend: com.dengin.identity.api.AuthController
   AUTH: {
     LOGIN: '/api/auth/login',
     REGISTER: '/api/auth/register',
@@ -37,7 +37,7 @@ export const API_ENDPOINTS = {
   },
 
   // Professions - Backend: /api/professions/*
-  // Backend: com.meslektas.identity.api.ProfessionController
+  // Backend: com.dengin.identity.api.ProfessionController
   PROFESSIONS: {
     LIST: '/api/professions',
     SEARCH: '/api/professions/search',
@@ -50,7 +50,7 @@ export const API_ENDPOINTS = {
   },
 
   // Verification - Backend: /api/verifications/*
-  // Backend: com.meslektas.verification.api.VerificationController
+  // Backend: com.dengin.verification.api.VerificationController
   VERIFICATION: {
     // POST /api/verifications - Submit verification
     SUBMIT: '/api/verifications',
@@ -111,7 +111,7 @@ export const API_ENDPOINTS = {
   },
 
   // Messaging - Backend: /api/conversations/* and /api/messages/*
-  // Backend: com.meslektas.messaging.api.ConversationController
+  // Backend: com.dengin.messaging.api.ConversationController
   MESSAGING: {
     // Conversation endpoints
     CONVERSATIONS: '/api/conversations',
@@ -162,7 +162,7 @@ export const API_ENDPOINTS = {
   },
 
   // Social - Backend: /api/users/{userId}/*
-  // Backend: com.meslektas.social.api.FollowController, BlockController
+  // Backend: com.dengin.social.api.FollowController, BlockController
   SOCIAL: {
     // Follow endpoints
     FOLLOW: (userId: string | number) => `/api/users/${userId}/follow`,
@@ -181,7 +181,7 @@ export const API_ENDPOINTS = {
   },
 
   // Sanctions - Backend: /api/sanctions/*
-  // Backend: com.meslektas.moderation.api.SanctionController
+  // Backend: com.dengin.moderation.api.SanctionController
   SANCTIONS: {
     // GET /api/sanctions/my-sanctions - Get all my sanctions
     MY_SANCTIONS: '/api/sanctions/my-sanctions',
@@ -198,12 +198,12 @@ export const API_ENDPOINTS = {
   },
 
   // Trends - Backend: /api/trends/*
-  // Backend: com.meslektas.social.api.TrendController
+  // Backend: com.dengin.social.api.TrendController
   // OpenRouter AI integration for profession-specific trends
   TRENDS: '/api/trends',
 
   // User Suggestions - Backend: /api/users/suggested
-  // Backend: com.meslektas.social.api.SuggestionController
+  // Backend: com.dengin.social.api.SuggestionController
   // Algorithm-based user recommendations
   USER_SUGGESTIONS: '/api/users/suggested',
 } as const;

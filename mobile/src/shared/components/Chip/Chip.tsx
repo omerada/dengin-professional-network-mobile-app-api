@@ -1,5 +1,5 @@
 // src/shared/components/Chip/Chip.tsx
-// Meslektaş Design System - Chip/Tag Component
+// Dengin Design System - Chip/Tag Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback, useMemo } from 'react';

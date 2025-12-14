@@ -1,5 +1,5 @@
 // src/features/feed/components/PostActions.tsx
-// Meslektaş Design System - Modern Post Actions Component
+// Dengin Design System - Modern Post Actions Component
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import React, { memo, useCallback } from 'react';

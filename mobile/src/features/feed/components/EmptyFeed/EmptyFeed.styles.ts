@@ -1,5 +1,5 @@
 // src/features/feed/components/EmptyFeed/EmptyFeed.styles.ts
-// Meslektaş Design System - EmptyFeed Styles
+// Dengin Design System - EmptyFeed Styles
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import { StyleSheet } from 'react-native';

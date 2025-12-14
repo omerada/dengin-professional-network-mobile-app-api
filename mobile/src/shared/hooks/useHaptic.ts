@@ -1,5 +1,5 @@
 // src/shared/hooks/useHaptic.ts
-// Meslektaş Design System - Haptic Feedback Hook
+// Dengin Design System - Haptic Feedback Hook
 // Oku: mobile-development-guide/ui-ux-modernization/16-HAPTIC-FEEDBACK.md
 
 import { useCallback, useMemo } from 'react';

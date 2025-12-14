@@ -1,5 +1,5 @@
 // src/shared/components/Avatar/Avatar.tsx
-// Meslektaş Design System - Modern Avatar Component
+// Dengin Design System - Modern Avatar Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback, useMemo } from 'react';

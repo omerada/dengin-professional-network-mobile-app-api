@@ -386,7 +386,7 @@ exports[`NewUserEmptyState Snapshot matches snapshot with new user 1`] = `
       ]
     }
   >
-    Meslektaş topluluğuna katılmak için birkaç adım kaldı
+    Dengin topluluğuna katılmak için birkaç adım kaldı
   </Text>
   <View
     entering={
@@ -1810,7 +1810,7 @@ exports[`NewUserEmptyState Snapshot matches snapshot with partial completion 1`]
       ]
     }
   >
-    Meslektaş topluluğuna katılmak için birkaç adım kaldı
+    Dengin topluluğuna katılmak için birkaç adım kaldı
   </Text>
   <View
     entering={

@@ -32,7 +32,7 @@ public class RekognitionService {
 
     private final RekognitionClient rekognitionClient;
 
-    @org.springframework.beans.factory.annotation.Value("${aws.rekognition.bucket-name:meslektas-verifications}")
+    @org.springframework.beans.factory.annotation.Value("${aws.rekognition.bucket-name:dengin-verifications}")
     private String bucketName;
 
     private static final float FACE_SIMILARITY_THRESHOLD = 90.0f;

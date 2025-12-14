@@ -1,5 +1,5 @@
 // src/features/activity/screens/ActivityScreen.tsx
-// Meslektaş Etkinlik Ekranı - Gamification & Challenges
+// Dengin Etkinlik Ekranı - Gamification & Challenges
 // Oku: MOBILE-APP-HOME-SCREEN.md Lines 788-875
 
 import React, { memo } from 'react';

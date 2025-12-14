@@ -1,5 +1,5 @@
 // src/features/feed/screens/FeedScreen.tsx
-// Meslektaş Feed Ekranı - Production Ready Implementation
+// Dengin Feed Ekranı - Production Ready Implementation
 // Oku: MOBILE-APP-HOME-SCREEN.md, mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import React, { useCallback, useMemo, useState, memo } from 'react';

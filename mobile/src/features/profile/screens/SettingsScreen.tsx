@@ -61,7 +61,7 @@ export const SettingsScreen: React.FC = () => {
 
   const handleContact = useCallback(() => {
     // Open contact support
-    Alert.alert('İletişim', 'destek@meslektas.app');
+    Alert.alert('İletişim', 'destek@dengin.app');
   }, []);
 
   const handleDeleteAccount = useCallback(() => {

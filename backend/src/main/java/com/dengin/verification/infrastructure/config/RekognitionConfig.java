@@ -29,7 +29,7 @@ public class RekognitionConfig {
     private String accessKey;
     private String secretKey;
     private String endpoint; // For LocalStack
-    private String bucketName = "meslektas-verifications"; // S3 bucket for verification documents
+    private String bucketName = "dengin-verifications"; // S3 bucket for verification documents
     
     @Bean
     public String verificationBucketName() {

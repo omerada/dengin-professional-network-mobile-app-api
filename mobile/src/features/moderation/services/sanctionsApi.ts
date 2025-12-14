@@ -1,6 +1,6 @@
 // src/features/moderation/services/sanctionsApi.ts
 // Sanctions API service - Backend SanctionController ile %100 uyumlu
-// Backend: com.meslektas.moderation.api.SanctionController
+// Backend: com.dengin.moderation.api.SanctionController
 
 import { apiClient } from '@core/api';
 import { API_ENDPOINTS } from '@core/api/endpoints';

@@ -1,5 +1,5 @@
 // src/features/profile/components/ProfileBio/ProfileBio.types.ts
-// Meslektaş Design System - ProfileBio Type Definitions
+// Dengin Design System - ProfileBio Type Definitions
 // Oku: mobile-development-guide/ui-ux-modernization/09-PROFILE-REDESIGN.md
 
 /**

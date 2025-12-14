@@ -1,5 +1,5 @@
 // src/constants/animationPresets.ts
-// Standardized Animation Presets for Meslektaş App
+// Standardized Animation Presets for Dengin App
 // Oku: mobile-development-guide/ui-ux-modernization/03-DESIGN-SYSTEM-OVERHAUL.md
 
 import { FadeIn, FadeOut, FadeInDown, SlideInDown, SlideOutDown } from 'react-native-reanimated';

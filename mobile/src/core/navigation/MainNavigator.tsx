@@ -1,5 +1,5 @@
 // src/core/navigation/MainNavigator.tsx
-// Meslektaş Design System - Modern Main Navigator
+// Dengin Design System - Modern Main Navigator
 // Oku: mobile-development-guide/core/09-NAVIGATION.md
 // Oku: mobile-development-guide/ui-ux-modernization/06-MICRO-INTERACTIONS.md
 

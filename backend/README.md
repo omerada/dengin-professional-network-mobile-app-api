@@ -1,4 +1,4 @@
-# Meslektaş Backend
+# Dengin Backend
 
 ## Quick Start
 
@@ -53,12 +53,12 @@ mvn spring-boot:run -Dspring-boot.run.profiles=prod
 - **Swagger UI:** http://localhost:8080/swagger-ui.html
 - **API Docs:** http://localhost:8080/v3/api-docs
 - **Health Check:** http://localhost:8080/actuator/health
-- **pgAdmin:** http://localhost:5050 (admin@meslektas.com / admin)
+- **pgAdmin:** http://localhost:5050 (admin@dengin.com / admin)
 
 ### Database
 
 - **Host:** localhost:5432
-- **Database:** meslektas_dev
+- **Database:** dengin_dev
 - **Username:** postgres
 - **Password:** postgres
 
@@ -143,4 +143,4 @@ mvn spring-boot:run -Dspring-boot.run.profiles=prod
 
 ## License
 
-Private - Meslektaş Platform
+Private - Dengin Platform

@@ -1,5 +1,5 @@
 // src/theme/shadows.ts
-// Meslektaş Design System v3.0 - Modern Shadow Tokens
+// Dengin Design System v3.0 - Modern Shadow Tokens
 // Profesyonel ve dengeli shadow sistemi
 
 import { Platform, ViewStyle } from 'react-native';

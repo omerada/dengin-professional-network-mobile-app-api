@@ -11,7 +11,7 @@ import com.dengin.social.domain.model.Comment;
 import com.dengin.social.domain.model.CommentContent;
 import com.dengin.social.domain.model.Post;
 import com.dengin.social.domain.model.PostStatus;
-import com.meslektas.social.domain.model.*;
+import com.dengin.social.domain.model.*;
 import com.dengin.social.domain.repository.CommentRepository;
 import com.dengin.social.domain.repository.PostRepository;
 import com.dengin.identity.domain.repository.UserRepository;

@@ -22,7 +22,7 @@ public record BlockedUserDto(
 
         @Schema(description = "User's surname", example = "Yılmaz") String surname,
 
-        @Schema(description = "User's avatar URL", example = "https://cdn.meslektas.com/avatars/123.jpg") String avatarUrl,
+        @Schema(description = "User's avatar URL", example = "https://cdn.dengin.com/avatars/123.jpg") String avatarUrl,
 
         @Schema(description = "When the user was blocked", example = "2024-01-15T10:30:00") LocalDateTime blockedAt,
 

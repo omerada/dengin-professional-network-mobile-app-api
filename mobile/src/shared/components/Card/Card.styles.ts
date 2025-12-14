@@ -1,5 +1,5 @@
 // src/shared/components/Card/Card.styles.ts
-// Meslektaş Design System - Card Styles
+// Dengin Design System - Card Styles
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import { StyleSheet } from 'react-native';

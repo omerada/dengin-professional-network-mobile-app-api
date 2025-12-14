@@ -1,5 +1,5 @@
 // src/features/feed/components/EmptyFeed/EmptyFeed.types.ts
-// Meslektaş Design System - EmptyFeed Type Definitions
+// Dengin Design System - EmptyFeed Type Definitions
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 /**

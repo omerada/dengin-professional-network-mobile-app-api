@@ -1,5 +1,5 @@
 // src/features/feed/components/FeedSkeleton.tsx
-// Meslektaş Design System - Feed Skeleton Loading Component
+// Dengin Design System - Feed Skeleton Loading Component
 // Oku: mobile-development-guide/ui-ux-modernization/17-LOADING-STATES.md
 
 import React, { memo } from 'react';

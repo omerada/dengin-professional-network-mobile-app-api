@@ -1,5 +1,5 @@
 // src/shared/components/index.ts
-// Meslektaş Design System - Component Exports
+// Dengin Design System - Component Exports
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 // Core components

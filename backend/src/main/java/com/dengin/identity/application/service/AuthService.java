@@ -61,7 +61,7 @@ public class AuthService {
     @Value("${app.jwt.expiration}")
     private long jwtExpirationMs;
 
-    @Value("${app.frontend-url:https://meslektas.com}")
+    @Value("${app.frontend-url:https://dengin.com}")
     private String frontendUrl;
 
     private static final String EMAIL_VERIFICATION_PREFIX = "email_verification:";

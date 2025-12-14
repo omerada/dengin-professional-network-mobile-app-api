@@ -30,7 +30,7 @@ public record SectorResponse(
         @Schema(description = "Sector description", example = "Sağlık sektörü profesyonelleri")
         String description,
         
-        @Schema(description = "Sector icon URL", example = "https://cdn.meslektas.com/icons/medical.png")
+        @Schema(description = "Sector icon URL", example = "https://cdn.dengin.com/icons/medical.png")
         String iconUrl,
         
         @Schema(description = "Display order (lower = shown first)", example = "1")

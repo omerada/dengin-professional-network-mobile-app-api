@@ -1,5 +1,5 @@
 // src/shared/types/component.types.ts
-// Meslektaş Design System - Component Types
+// Dengin Design System - Component Types
 // Oku: mobile-development-guide/ui-ux-modernization/14-SPRINT-IMPLEMENTATION-PLAN.md
 
 import { ViewStyle, TextStyle, ImageStyle, StyleProp } from 'react-native';

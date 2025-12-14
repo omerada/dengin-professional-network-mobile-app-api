@@ -1,4 +1,4 @@
-package com.meslektas.shared;
+package com.dengin.shared;
 
 import org.junit.jupiter.api.Tag;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -52,7 +52,7 @@ public abstract class BaseDockerIntegrationTest {
     protected static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(
         DockerImageName.parse("postgres:15-alpine")
     )
-        .withDatabaseName("meslektas_test")
+        .withDatabaseName("dengin_test")
         .withUsername("test")
         .withPassword("test")
         .withReuse(true);

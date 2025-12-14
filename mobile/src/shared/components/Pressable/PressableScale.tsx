@@ -1,5 +1,5 @@
 // src/shared/components/Pressable/PressableScale.tsx
-// Meslektaş Design System - PressableScale Component
+// Dengin Design System - PressableScale Component
 // Oku: mobile-development-guide/ui-ux-modernization/14-SPRINT-IMPLEMENTATION-PLAN.md
 
 /* eslint-disable react-hooks/exhaustive-deps */

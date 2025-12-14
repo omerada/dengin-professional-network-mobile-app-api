@@ -8,10 +8,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
- * Meslektaş Backend Application
+ * Dengin Backend Application
  * Strategic Domain-Driven Design Implementation
  * 
- * @author Meslektaş Team
+ * @author Dengin Team
  * @version 1.0.0
  */
 @SpringBootApplication
@@ -19,9 +19,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableAsync
 @EnableScheduling
 @EnableTransactionManagement
-public class MeslektasApplication {
+public class DenginApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(MeslektasApplication.class, args);
+        SpringApplication.run(DenginApplication.class, args);
     }
 }

@@ -1,5 +1,5 @@
 // src/shared/components/Avatar/Avatar.styles.ts
-// Meslektaş Design System - Avatar Styles
+// Dengin Design System - Avatar Styles
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import { StyleSheet } from 'react-native';

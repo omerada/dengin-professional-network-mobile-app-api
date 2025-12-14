@@ -26,7 +26,7 @@ import lombok.NoArgsConstructor;
  *   "id": 123,
  *   "fullName": "Dr. Ayşe Yılmaz",
  *   "profession": "Kardiyolog",
- *   "avatarUrl": "https://cdn.meslektas.com/avatars/123.jpg",
+ *   "avatarUrl": "https://cdn.dengin.com/avatars/123.jpg",
  *   "isVerified": true,
  *   "isFollowing": false,
  *   "followerCount": 1250

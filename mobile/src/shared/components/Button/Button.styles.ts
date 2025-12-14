@@ -1,5 +1,5 @@
 // src/shared/components/Button/Button.styles.ts
-// Meslektaş Design System - Button Styles
+// Dengin Design System - Button Styles
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import { StyleSheet } from 'react-native';

@@ -1,5 +1,5 @@
 // src/shared/components/EmptyState/EmptyState.tsx
-// Meslektaş Design System - Modern EmptyState Component
+// Dengin Design System - Modern EmptyState Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo } from 'react';

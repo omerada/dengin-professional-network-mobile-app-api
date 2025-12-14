@@ -1,5 +1,5 @@
 // src/shared/components/ScreenHeader/ScreenHeader.tsx
-// Meslektaş Design System - Standardized Screen Header
+// Dengin Design System - Standardized Screen Header
 // Oku: mobile/UX-FLOW-IYILESTIRME-RAPORU.md Section 1.2
 
 import React, { memo } from 'react';

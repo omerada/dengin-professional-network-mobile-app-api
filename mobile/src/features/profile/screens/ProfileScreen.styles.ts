@@ -1,5 +1,5 @@
 // src/features/profile/screens/ProfileScreen.styles.ts
-// Meslektaş Design System - ProfileScreen Styles
+// Dengin Design System - ProfileScreen Styles
 // Modern Premium Profile Design
 
 import { StyleSheet } from 'react-native';

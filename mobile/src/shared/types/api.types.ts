@@ -133,7 +133,7 @@ export interface Profession {
 
 /**
  * Profession category enum - Backend ProfessionCategory.java ile %100 uyumlu
- * @see backend/src/main/java/com/meslektas/identity/domain/model/ProfessionCategory.java
+ * @see backend/src/main/java/com/dengin/identity/domain/model/ProfessionCategory.java
  * @deprecated Use Sector codes instead (Sprint 1)
  */
 export type ProfessionCategory =
@@ -441,7 +441,7 @@ export type PostVisibility = 'PUBLIC' | 'VERIFIED_ONLY' | 'FOLLOWERS_ONLY';
 
 /**
  * Post image DTO - Backend PostImageDto.java ile %100 uyumlu
- * @see backend/src/main/java/com/meslektas/social/application/dto/PostImageDto.java
+ * @see backend/src/main/java/com/dengin/social/application/dto/PostImageDto.java
  */
 export interface PostImageDto {
   /** S3 key - ZORUNLU! Backend @NotBlank validation */

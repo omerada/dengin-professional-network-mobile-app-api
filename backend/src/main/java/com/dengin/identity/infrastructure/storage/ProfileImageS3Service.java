@@ -30,7 +30,7 @@ import java.util.UUID;
  * 5. Images served via CloudFront CDN with 1-year cache
  * 
  * References:
- * - Working example: com.meslektas.verification.infrastructure.storage
+ * - Working example: com.dengin.verification.infrastructure.storage
  * - Mobile pattern: mobile/src/features/verification/services/uploadService.ts
  */
 @Slf4j
@@ -171,18 +171,22 @@ public class ProfileImageS3Service {
 
             HeadObjectResponse headResponse = s3Client.headObject(headRequest);
 
-            // Additional validation: Check metadata (optional for LocalStack compatibility)
+            // Additional validation: Check metadata (optional - LocalStack presigned URL doesn't preserve metadata)
             String uploadedUserId = headResponse.metadata().get("user-id");
-            if (uploadedUserId != null && !userId.toString().equals(uploadedUserId)) {
-                log.warn("Metadata mismatch: Expected userId {}, got {}", userId, uploadedUserId);
-                throw new BusinessException(
-                        "Upload verification failed: metadata mismatch",
-                        "UPLOAD_VERIFICATION_FAILED"
-                );
-            }
-
-            if (uploadedUserId == null) {
-                log.debug("No user-id metadata found in S3 object (LocalStack may not preserve metadata from presigned URLs)");
+            if (uploadedUserId != null) {
+                // Metadata exists, validate it
+                if (!userId.toString().equals(uploadedUserId)) {
+                    log.warn("Metadata mismatch: Expected userId {}, got {}", userId, uploadedUserId);
+                    throw new BusinessException(
+                            "Upload verification failed: metadata mismatch",
+                            "UPLOAD_VERIFICATION_FAILED"
+                    );
+                }
+                log.debug("Metadata validation passed for user {}", userId);
+            } else {
+                // No metadata - this is expected with presigned URLs (especially LocalStack)
+                // S3 key validation (done above) is sufficient for security
+                log.debug("No user-id metadata found - relying on S3 key validation (expected with presigned URLs)");
             }
 
             log.info("Upload confirmed for user {} - Key: {}", userId, s3Key);

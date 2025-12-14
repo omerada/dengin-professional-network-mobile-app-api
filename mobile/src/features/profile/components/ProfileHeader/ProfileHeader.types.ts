@@ -1,5 +1,5 @@
 // src/features/profile/components/ProfileHeader/ProfileHeader.types.ts
-// Meslektaş Design System - ProfileHeader Type Definitions
+// Dengin Design System - ProfileHeader Type Definitions
 // Oku: mobile-development-guide/ui-ux-modernization/09-PROFILE-REDESIGN.md
 
 import type { ProfileResponse, MyProfileResponse } from '../../types';

@@ -46,58 +46,58 @@ public class ApplicationMetrics {
         this.meterRegistry = meterRegistry;
 
         // Initialize business counters
-        this.userRegistrationCounter = Counter.builder("meslektas.user.registration")
+        this.userRegistrationCounter = Counter.builder("dengin.user.registration")
                 .description("Number of user registrations")
                 .tag("type", "registration")
                 .register(meterRegistry);
 
-        this.verificationSubmittedCounter = Counter.builder("meslektas.verification.submitted")
+        this.verificationSubmittedCounter = Counter.builder("dengin.verification.submitted")
                 .description("Number of verification requests submitted")
                 .register(meterRegistry);
 
-        this.verificationApprovedCounter = Counter.builder("meslektas.verification.approved")
+        this.verificationApprovedCounter = Counter.builder("dengin.verification.approved")
                 .description("Number of verifications approved")
                 .register(meterRegistry);
 
-        this.verificationRejectedCounter = Counter.builder("meslektas.verification.rejected")
+        this.verificationRejectedCounter = Counter.builder("dengin.verification.rejected")
                 .description("Number of verifications rejected")
                 .register(meterRegistry);
 
-        this.postCreatedCounter = Counter.builder("meslektas.post.created")
+        this.postCreatedCounter = Counter.builder("dengin.post.created")
                 .description("Number of posts created")
                 .register(meterRegistry);
 
-        this.commentCreatedCounter = Counter.builder("meslektas.comment.created")
+        this.commentCreatedCounter = Counter.builder("dengin.comment.created")
                 .description("Number of comments created")
                 .register(meterRegistry);
 
-        this.messageSentCounter = Counter.builder("meslektas.message.sent")
+        this.messageSentCounter = Counter.builder("dengin.message.sent")
                 .description("Number of messages sent")
                 .register(meterRegistry);
 
-        this.connectionCreatedCounter = Counter.builder("meslektas.connection.created")
+        this.connectionCreatedCounter = Counter.builder("dengin.connection.created")
                 .description("Number of connections created")
                 .register(meterRegistry);
 
         // Initialize moderation counters
-        this.reportCreatedCounter = Counter.builder("meslektas.moderation.report.created")
+        this.reportCreatedCounter = Counter.builder("dengin.moderation.report.created")
                 .description("Number of content reports created")
                 .register(meterRegistry);
 
-        this.highRiskContentCounter = Counter.builder("meslektas.moderation.high_risk")
+        this.highRiskContentCounter = Counter.builder("dengin.moderation.high_risk")
                 .description("Number of high-risk content detected")
                 .register(meterRegistry);
 
-        this.sanctionAppliedCounter = Counter.builder("meslektas.moderation.sanction.applied")
+        this.sanctionAppliedCounter = Counter.builder("dengin.moderation.sanction.applied")
                 .description("Number of user sanctions applied")
                 .register(meterRegistry);
 
         // Initialize performance timers
-        this.feedGenerationTimer = Timer.builder("meslektas.feed.generation")
+        this.feedGenerationTimer = Timer.builder("dengin.feed.generation")
                 .description("Time to generate user feed")
                 .register(meterRegistry);
 
-        this.searchQueryTimer = Timer.builder("meslektas.search.query")
+        this.searchQueryTimer = Timer.builder("dengin.search.query")
                 .description("Time for search queries")
                 .register(meterRegistry);
     }
@@ -187,7 +187,7 @@ public class ApplicationMetrics {
      * Record a sanction with type tag.
      */
     public void recordSanctionApplied(String sanctionType) {
-        meterRegistry.counter("meslektas.moderation.sanction.applied",
+        meterRegistry.counter("dengin.moderation.sanction.applied",
                 "type", sanctionType).increment();
     }
 
@@ -218,7 +218,7 @@ public class ApplicationMetrics {
      * @param milliseconds time in milliseconds
      */
     public void recordDatabaseQueryTime(String queryName, long milliseconds) {
-        Timer.builder("meslektas.database.query")
+        Timer.builder("dengin.database.query")
                 .tag("name", queryName)
                 .register(meterRegistry)
                 .record(milliseconds, TimeUnit.MILLISECONDS);
@@ -232,7 +232,7 @@ public class ApplicationMetrics {
      * @param milliseconds time in milliseconds
      */
     public void recordApiLatency(String endpoint, String method, long milliseconds) {
-        Timer.builder("meslektas.api.latency")
+        Timer.builder("dengin.api.latency")
                 .tag("endpoint", endpoint)
                 .tag("method", method)
                 .register(meterRegistry)

@@ -1,5 +1,5 @@
 // src/features/profile/components/ProfileHeader/index.tsx
-// Meslektaş Design System - Modern ProfileHeader Component
+// Dengin Design System - Modern ProfileHeader Component
 // Oku: mobile-development-guide/ui-ux-modernization/09-PROFILE-REDESIGN.md
 
 import React, { memo, useCallback, useMemo } from 'react';

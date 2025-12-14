@@ -1,5 +1,5 @@
 // src/shared/components/Avatar/Avatar.types.ts
-// Meslektaş Design System - Avatar Type Definitions
+// Dengin Design System - Avatar Type Definitions
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import type { ViewStyle, ImageSourcePropType } from 'react-native';

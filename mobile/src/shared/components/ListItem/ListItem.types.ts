@@ -1,5 +1,5 @@
 // src/shared/components/ListItem/ListItem.types.ts
-// Meslektaş Design System - ListItem Type Definitions
+// Dengin Design System - ListItem Type Definitions
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import type { ViewStyle, TextStyle } from 'react-native';

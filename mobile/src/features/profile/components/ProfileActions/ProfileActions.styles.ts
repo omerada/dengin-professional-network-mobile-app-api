@@ -1,5 +1,5 @@
 // src/features/profile/components/ProfileActions/ProfileActions.styles.ts
-// Meslektaş Design System - ProfileActions Styles
+// Dengin Design System - ProfileActions Styles
 // Oku: mobile-development-guide/ui-ux-modernization/09-PROFILE-REDESIGN.md
 
 import { StyleSheet } from 'react-native';

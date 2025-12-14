@@ -2,7 +2,7 @@ package com.dengin.verification.domain.model;
 
 import com.dengin.common.domain.AggregateRoot;
 import com.dengin.verification.domain.event.*;
-import com.meslektas.verification.domain.event.*;
+import com.dengin.verification.domain.event.*;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

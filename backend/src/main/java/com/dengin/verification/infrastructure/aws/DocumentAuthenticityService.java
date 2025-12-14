@@ -37,7 +37,7 @@ public class DocumentAuthenticityService {
     
     private final RekognitionClient rekognitionClient;
     
-    @Value("${aws.rekognition.bucket-name:meslektas-verifications}")
+    @Value("${aws.rekognition.bucket-name:dengin-verifications}")
     private String bucketName;
     
     // Known official labels to detect

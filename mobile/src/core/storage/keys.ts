@@ -6,32 +6,32 @@
  */
 export const STORAGE_KEYS = {
   // User preferences
-  THEME: 'meslektas_theme',
-  LANGUAGE: 'meslektas_language',
-  ONBOARDING_COMPLETED: 'meslektas_onboarding_completed',
-  BIOMETRIC_ENABLED: 'meslektas_biometric_enabled',
+  THEME: 'dengin_theme',
+  LANGUAGE: 'dengin_language',
+  ONBOARDING_COMPLETED: 'dengin_onboarding_completed',
+  BIOMETRIC_ENABLED: 'dengin_biometric_enabled',
 
   // Cache
-  USER_CACHE: 'meslektas_user_cache',
-  FEED_CACHE: 'meslektas_feed_cache',
+  USER_CACHE: 'dengin_user_cache',
+  FEED_CACHE: 'dengin_feed_cache',
 
   // Offline data
-  OFFLINE_MESSAGES: 'meslektas_offline_messages',
-  PENDING_UPLOADS: 'meslektas_pending_uploads',
+  OFFLINE_MESSAGES: 'dengin_offline_messages',
+  PENDING_UPLOADS: 'dengin_pending_uploads',
 
   // App state
-  LAST_SYNC: 'meslektas_last_sync',
-  APP_VERSION: 'meslektas_app_version',
+  LAST_SYNC: 'dengin_last_sync',
+  APP_VERSION: 'dengin_app_version',
 } as const;
 
 /**
  * SecureStore keys for sensitive data
  */
 export const SECURE_KEYS = {
-  ACCESS_TOKEN: 'meslektas_access_token',
-  REFRESH_TOKEN: 'meslektas_refresh_token',
-  USER_CREDENTIALS: 'meslektas_user_credentials',
-  BIOMETRIC_KEY: 'meslektas_biometric_key',
+  ACCESS_TOKEN: 'dengin_access_token',
+  REFRESH_TOKEN: 'dengin_refresh_token',
+  USER_CREDENTIALS: 'dengin_user_credentials',
+  BIOMETRIC_KEY: 'dengin_biometric_key',
   TOKEN_EXPIRES_AT: 'token_expires_at',
 } as const;
 

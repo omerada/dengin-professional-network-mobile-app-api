@@ -3,7 +3,7 @@ package com.dengin.notification.api;
 import com.dengin.common.api.ApiResponse;
 import com.dengin.identity.infrastructure.security.UserDetailsImpl;
 import com.dengin.notification.application.dto.*;
-import com.meslektas.notification.application.dto.*;
+import com.dengin.notification.application.dto.*;
 import com.dengin.notification.application.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

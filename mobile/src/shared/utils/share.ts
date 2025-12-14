@@ -73,7 +73,7 @@ export async function sharePost(post: {
   author: { fullName?: string; name?: string; surname?: string };
 }): Promise<ShareResult> {
   // Deep link URL for the post (adjust based on your app's deep link scheme)
-  const postUrl = `meslektas://post/${post.postId}`;
+  const postUrl = `dengin://post/${post.postId}`;
 
   // Get author display name
   const authorName =
@@ -113,7 +113,7 @@ export async function shareProfile(profile: {
   fullName: string;
   profession?: string;
 }): Promise<ShareResult> {
-  const profileUrl = `meslektas://profile/${profile.userId}`;
+  const profileUrl = `dengin://profile/${profile.userId}`;
 
   const message = profile.profession
     ? `${profile.fullName} - ${profile.profession} | Dengin`

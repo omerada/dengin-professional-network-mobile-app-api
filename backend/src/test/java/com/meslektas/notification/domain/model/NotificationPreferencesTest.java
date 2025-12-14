@@ -1,5 +1,8 @@
-package com.meslektas.notification.domain.model;
+package com.dengin.notification.domain.model;
 
+import com.dengin.notification.domain.model.DeliveryChannel;
+import com.dengin.notification.domain.model.NotificationPreferences;
+import com.dengin.notification.domain.model.NotificationType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

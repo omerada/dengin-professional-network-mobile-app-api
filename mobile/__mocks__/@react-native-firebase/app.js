@@ -6,7 +6,7 @@ const firebase = {
   app: () => ({
     name: '[DEFAULT]',
     options: {
-      projectId: 'meslektas-test',
+      projectId: 'dengin-test',
     },
   }),
   initializeApp: jest.fn(),

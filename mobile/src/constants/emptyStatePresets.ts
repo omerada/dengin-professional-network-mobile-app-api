@@ -1,5 +1,5 @@
 // src/constants/emptyStatePresets.ts
-// Standardized Empty State Presets for Meslektaş App
+// Standardized Empty State Presets for Dengin App
 
 import type { EmptyStateProps } from '@shared/components/EmptyState/EmptyState';
 

@@ -1,5 +1,5 @@
 // src/features/profile/components/ProfileBio/index.tsx
-// Meslektaş Design System - Modern ProfileBio Component
+// Dengin Design System - Modern ProfileBio Component
 // Oku: mobile-development-guide/ui-ux-modernization/09-PROFILE-REDESIGN.md
 
 import React, { memo, useState, useCallback } from 'react';

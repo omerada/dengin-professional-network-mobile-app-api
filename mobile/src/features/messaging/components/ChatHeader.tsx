@@ -1,5 +1,5 @@
 // src/features/messaging/components/ChatHeader.tsx
-// Meslektaş Design System - Modern Chat Header
+// Dengin Design System - Modern Chat Header
 // Oku: mobile-development-guide/ui-ux-modernization/09-MESSAGING-EXPERIENCE.md
 
 import React, { memo, useCallback } from 'react';

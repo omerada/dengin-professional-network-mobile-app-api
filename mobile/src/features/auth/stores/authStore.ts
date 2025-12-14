@@ -178,7 +178,7 @@ export const useAuthStore = create<AuthStore>()(
       },
     }),
     {
-      name: 'meslektas-auth-storage',
+      name: 'dengin-auth-storage',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: state => ({
         user: state.user,

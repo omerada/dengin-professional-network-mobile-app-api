@@ -1,5 +1,5 @@
 // src/contexts/ThemeContext.tsx
-// Meslektaş Design System - Modern Theme Provider
+// Dengin Design System - Modern Theme Provider
 // Oku: mobile-development-guide/ui-ux-modernization/03-DESIGN-SYSTEM-OVERHAUL.md
 
 import React, { createContext, useContext, useCallback, useMemo, useEffect, useState } from 'react';

@@ -1,5 +1,5 @@
 // src/shared/components/Loading/Loading.tsx
-// Meslektaş Design System - Modern Loading Components
+// Dengin Design System - Modern Loading Components
 // Oku: mobile-development-guide/ui-ux-modernization/17-LOADING-STATES.md
 
 import React, { memo, useEffect, useCallback } from 'react';

@@ -23,7 +23,7 @@ export const PostHeader: React.FC<PostHeaderProps> = memo(
     // Backend API: name, surname, professionName
     const fullName = `${author.name} ${author.surname}`;
     const initials = `${author.name[0] || ''}${author.surname[0] || ''}`;
-    const professionDisplay = author.professionName || author.profession || 'Meslektaş';
+    const professionDisplay = author.professionName || author.profession || 'Dengin';
 
     return (
       <View style={styles.container}>

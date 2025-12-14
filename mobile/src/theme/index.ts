@@ -1,5 +1,5 @@
 // src/theme/index.ts
-// Meslektaş Design System - Unified Exports
+// Dengin Design System - Unified Exports
 // Oku: mobile-development-guide/ui-ux-modernization/03-DESIGN-SYSTEM-OVERHAUL.md
 
 // Types

@@ -1,5 +1,5 @@
 // src/shared/components/BackButton/BackButton.tsx
-// Meslektaş Design System - Standardized Back Button
+// Dengin Design System - Standardized Back Button
 // Oku: mobile/UX-FLOW-IYILESTIRME-RAPORU.md Section 1.1
 
 import React, { memo, useCallback } from 'react';

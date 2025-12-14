@@ -1,5 +1,5 @@
 // src/shared/components/ListItem/ListItem.styles.ts
-// Meslektaş Design System - ListItem Styles
+// Dengin Design System - ListItem Styles
 
 import { StyleSheet } from 'react-native';
 

@@ -1,5 +1,6 @@
-package com.meslektas.social.domain.model;
+package com.dengin.social.domain.model;
 
+import com.dengin.social.domain.model.Like;
 import org.junit.jupiter.api.*;
 
 import java.time.LocalDateTime;

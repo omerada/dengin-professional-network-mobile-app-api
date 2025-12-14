@@ -1,5 +1,5 @@
 // src/shared/utils/numberUtils.ts
-// Meslektaş Design System - Number Formatting Utilities
+// Dengin Design System - Number Formatting Utilities
 // Oku: mobile-development-guide/ui-ux-modernization/14-SPRINT-IMPLEMENTATION-PLAN.md
 
 /**

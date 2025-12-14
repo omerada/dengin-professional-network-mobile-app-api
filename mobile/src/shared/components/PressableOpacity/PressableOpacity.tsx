@@ -1,5 +1,5 @@
 // src/shared/components/PressableOpacity/PressableOpacity.tsx
-// Meslektaş Design System - PressableOpacity Component
+// Dengin Design System - PressableOpacity Component
 // Oku: mobile/UX-FLOW-IYILESTIRME-RAPORU.md Section 3.3
 
 import React, { memo, useCallback } from 'react';

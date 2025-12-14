@@ -1,5 +1,5 @@
 // src/theme/animations.ts
-// Meslektaş Design System - Animation Tokens
+// Dengin Design System - Animation Tokens
 // Oku: mobile-development-guide/ui-ux-modernization/03-DESIGN-SYSTEM-OVERHAUL.md
 
 import { Easing } from 'react-native-reanimated';

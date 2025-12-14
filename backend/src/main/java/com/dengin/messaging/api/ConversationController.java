@@ -7,7 +7,7 @@ import com.dengin.messaging.application.command.DeleteMessageCommand;
 import com.dengin.messaging.application.command.MarkMessagesReadCommand;
 import com.dengin.messaging.application.command.SendMessageCommand;
 import com.dengin.messaging.application.dto.*;
-import com.meslektas.messaging.application.dto.*;
+import com.dengin.messaging.application.dto.*;
 import com.dengin.messaging.application.query.GetConversationsQuery;
 import com.dengin.messaging.application.query.GetMessagesQuery;
 import com.dengin.messaging.application.query.SearchMessagesQuery;

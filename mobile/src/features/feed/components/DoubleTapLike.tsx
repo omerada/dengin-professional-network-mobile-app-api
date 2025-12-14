@@ -1,5 +1,5 @@
 // src/features/feed/components/DoubleTapLike.tsx
-// Meslektaş Design System - Instagram Style Double Tap Like
+// Dengin Design System - Instagram Style Double Tap Like
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import React, { memo, useCallback, useMemo } from 'react';

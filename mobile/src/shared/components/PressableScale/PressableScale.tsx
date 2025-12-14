@@ -1,5 +1,5 @@
 // src/shared/components/PressableScale/PressableScale.tsx
-// Meslektaş Design System - PressableScale Component
+// Dengin Design System - PressableScale Component
 // Oku: mobile/UX-FLOW-IYILESTIRME-RAPORU.md Section 3.3
 
 import React, { memo, useCallback } from 'react';

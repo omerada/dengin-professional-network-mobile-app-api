@@ -39,7 +39,7 @@ public record ProfessionGroupResponse(
         @Schema(description = "Whether verification is required to join", example = "true")
         Boolean requiresVerification,
         
-        @Schema(description = "Profession icon URL", example = "https://cdn.meslektas.com/icons/doctor.png")
+        @Schema(description = "Profession icon URL", example = "https://cdn.dengin.com/icons/doctor.png")
         String iconUrl,
         
         @Schema(description = "Display order within sector (lower = shown first)", example = "1")

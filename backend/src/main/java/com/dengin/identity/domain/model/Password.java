@@ -49,7 +49,7 @@ public class Password implements ValueObject {
         "password", "123456789", "12345678", "qwerty123", "abc123456",
         "password123", "admin123", "letmein123", "welcome123",
         "sifre123", "parola123", "turkiye123", "istanbul123",
-        "meslektas123", "ankara123", "izmir123"
+        "dengin123", "ankara123", "izmir123"
     };
     
     @Getter

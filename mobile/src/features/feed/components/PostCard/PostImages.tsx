@@ -1,5 +1,5 @@
 // src/features/feed/components/PostCard/PostImages.tsx
-// Meslektaş Design System - Modern PostImages Component
+// Dengin Design System - Modern PostImages Component
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import React, { memo, useCallback, useMemo } from 'react';

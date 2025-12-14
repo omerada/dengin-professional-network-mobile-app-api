@@ -42,7 +42,7 @@ public class KVKKDocumentDeletionService {
     private final S3Client s3Client;
     private final StorageService storageService;
     
-    @Value("${aws.s3.verification-bucket:meslektas-verifications}")
+    @Value("${aws.s3.verification-bucket:dengin-verifications}")
     private String verificationBucket;
     
     @Value("${kvkk.manual-review-retention-days:7}")

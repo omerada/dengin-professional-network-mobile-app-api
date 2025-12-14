@@ -3,7 +3,7 @@ package com.dengin.notification.application.handler;
 import com.dengin.notification.application.service.NotificationService;
 import com.dengin.notification.domain.model.NotificationType;
 import com.dengin.verification.domain.event.*;
-import com.meslektas.verification.domain.event.*;
+import com.dengin.verification.domain.event.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;

@@ -1,5 +1,5 @@
 // src/shared/components/SearchBar/SearchBar.types.ts
-// Meslektaş Design System - SearchBar Types
+// Dengin Design System - SearchBar Types
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import { ViewStyle, TextInputProps } from 'react-native';

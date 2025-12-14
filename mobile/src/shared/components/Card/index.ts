@@ -1,5 +1,5 @@
 // src/shared/components/Card/index.ts
-// Meslektaş Design System - Card Component Exports
+// Dengin Design System - Card Component Exports
 
 export { Card } from './Card';
 export type {
