@@ -14,10 +14,11 @@ import org.mapstruct.*;
  * - User -> UserResponse (for auth responses)
  * - User -> UserProfileResponse (for profile endpoints)
  */
-@Mapper(componentModel = "spring", uses = { ProfessionMapper.class }, unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", uses = { ProfessionMapper.class, SectorMapper.class }, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
 
     @Mapping(target = "fullName", expression = "java(user.getFullName())")
+    @Mapping(target = "sector", source = "sector")
     UserResponse toResponse(User user);
 
     /**

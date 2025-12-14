@@ -54,7 +54,6 @@ export const Button = memo<ButtonProps>(
     onPress,
     onLongPress,
     hapticType = 'light',
-    pressScale = 0.96, // UNIFIED: Standardized press scale
     style,
     textStyle,
     loadingColor,
@@ -83,7 +82,7 @@ export const Button = memo<ButtonProps>(
       return '#FFFFFF';
     }, [loadingColor, variant, colors]);
 
-    // Animation handlers - UNIFIED: Standardized spring config
+    // Animation handlers - UNIFIED: Standardized spring config (0.96 scale)
     const handlePressIn = useCallback(() => {
       pressed.value = withSpring(1, { damping: 15, stiffness: 500, mass: 0.5 });
     }, [pressed]);
@@ -104,9 +103,9 @@ export const Button = memo<ButtonProps>(
       onLongPress();
     }, [disabled, loading, trigger, onLongPress]);
 
-    // Animated styles
+    // Animated styles - PRODUCTION STANDARD: 0.96 scale
     const animatedContainerStyle = useAnimatedStyle(() => {
-      const scaleValue = interpolate(pressed.value, [0, 1], [1, pressScale]);
+      const scaleValue = interpolate(pressed.value, [0, 1], [1, 0.96]);
       return {
         transform: [{ scale: scaleValue }],
       };

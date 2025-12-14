@@ -134,3 +134,7 @@ export type { WindowDimensions, ScreenDimensions } from './useDimensions';
 // Loading state hook
 export { useLoadingState } from './useLoadingState';
 export type { UseLoadingStateOptions, LoadingStateResult } from './useLoadingState';
+
+// Unified feedback hook - Production UX
+export { useFeedback } from './useFeedback';
+export type { FeedbackLevel, FeedbackOptions } from './useFeedback';

@@ -16,6 +16,8 @@ export type { SearchBarProps, SearchBarSize } from './SearchBar';
 export { Loading, LoadingOverlay, Spinner, DotsLoading } from './Loading';
 export { ErrorFallback } from './ErrorFallback';
 export { OfflineNotice } from './OfflineNotice';
+export { ErrorBoundary } from './ErrorBoundary';
+export { NetworkErrorBoundary } from './NetworkErrorBoundary';
 export { PullToRefresh, useRefreshControl } from './PullToRefresh';
 export { StepSuccess } from './StepSuccess';
 export type { StepSuccessProps } from './StepSuccess';

@@ -1,10 +1,11 @@
 // src/shared/components/CustomRefreshControl/CustomRefreshControl.tsx
 // Branded refresh control with smooth animations
-// Production-ready implementation
+// Production-ready implementation with haptic feedback
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { RefreshControl, RefreshControlProps } from 'react-native';
 import { useColors } from '@contexts/ThemeContext';
+import { useHaptic } from '@shared/hooks/useHaptic';
 
 interface CustomRefreshControlProps extends Omit<RefreshControlProps, 'tintColor' | 'colors'> {
   /** Override default brand color */
@@ -39,13 +40,20 @@ interface CustomRefreshControlProps extends Omit<RefreshControlProps, 'tintColor
 export const CustomRefreshControl = memo<CustomRefreshControlProps>(
   ({ color, refreshing, onRefresh, ...props }) => {
     const colors = useColors();
+    const { trigger } = useHaptic();
 
     const brandColor = color || colors.interactive.default;
+
+    // PRODUCTION: Haptic feedback on pull-to-refresh
+    const handleRefresh = useCallback(() => {
+      trigger('light'); // Subtle haptic feedback on refresh start
+      onRefresh?.();
+    }, [trigger, onRefresh]);
 
     return (
       <RefreshControl
         refreshing={refreshing}
-        onRefresh={onRefresh}
+        onRefresh={handleRefresh}
         // iOS
         tintColor={brandColor}
         titleColor={colors.text.secondary}

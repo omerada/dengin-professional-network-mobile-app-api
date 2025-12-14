@@ -250,7 +250,8 @@ export interface LegacyCreatePostRequest {
 export interface CreatePostDto {
   content: string;
   images: LocalImage[];
-  professionId?: number;
+  /** Meslek ID'si - Backend zorunlu olarak bekliyor */
+  professionId: number;
 }
 
 /**

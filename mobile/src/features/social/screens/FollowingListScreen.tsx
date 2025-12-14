@@ -3,14 +3,19 @@
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART5.md
 
 import React, { useCallback, useMemo } from 'react';
-import { View, StyleSheet, RefreshControl, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { FlatList } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
 import { SCREEN_ANIMATIONS } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
-import { Loading, UnifiedEmptyState, AnimatedListItem } from '@shared/components';
+import {
+  Loading,
+  UnifiedEmptyState,
+  AnimatedListItem,
+  CustomRefreshControl,
+} from '@shared/components';
 import { ErrorBoundary } from '@core/components';
 import { spacing } from '@theme';
 import { UserListItem } from '../components';
@@ -103,13 +108,7 @@ export const FollowingListScreen: React.FC = () => {
           onEndReachedThreshold={0.5}
           ListFooterComponent={ListFooterComponent}
           ListEmptyComponent={ListEmptyComponent}
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefetching}
-              onRefresh={refetch}
-              tintColor={colors.interactive.default}
-            />
-          }
+          refreshControl={<CustomRefreshControl refreshing={isRefetching} onRefresh={refetch} />}
           ItemSeparatorComponent={ItemSeparatorComponent}
           contentContainerStyle={
             users.length === 0 ? ({ flexGrow: 1 } as unknown as ContentStyle) : undefined

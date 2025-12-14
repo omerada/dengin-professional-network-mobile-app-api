@@ -4,7 +4,7 @@
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 import React, { memo, useCallback } from 'react';
-import { FlatList, StyleSheet, RefreshControl, ActivityIndicator, View } from 'react-native';
+import { FlatList, StyleSheet, ActivityIndicator, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { NotificationItem } from './NotificationItem';
 import { EmptyNotifications } from './EmptyNotifications';
@@ -14,6 +14,7 @@ import {
   AnimatedListItem,
   NotificationListSkeleton,
   UnifiedLoadingState,
+  CustomRefreshControl,
 } from '@shared/components';
 import type { NotificationResponse } from '../types';
 
@@ -143,16 +144,7 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
         keyExtractor={keyExtractor}
         getItemLayout={getItemLayout}
         contentContainerStyle={notifications.length === 0 ? styles.emptyContainer : undefined}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={refetch}
-            colors={[colors.interactive.default]}
-            tintColor={colors.interactive.default}
-            progressBackgroundColor={colors.background.primary}
-            titleColor={colors.text.secondary}
-          />
-        }
+        refreshControl={<CustomRefreshControl refreshing={isRefreshing} onRefresh={refetch} />}
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.5}
         ListFooterComponent={renderFooter}

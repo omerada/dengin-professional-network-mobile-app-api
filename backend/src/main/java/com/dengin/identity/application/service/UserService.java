@@ -12,8 +12,10 @@ import com.dengin.identity.application.dto.request.UpdateUserRequest;
 import com.dengin.identity.application.dto.response.UserResponse;
 import com.dengin.identity.application.mapper.UserMapper;
 import com.dengin.identity.domain.model.Profession;
+import com.dengin.identity.domain.model.Sector;
 import com.dengin.identity.domain.model.User;
 import com.dengin.identity.domain.repository.ProfessionRepository;
+import com.dengin.identity.domain.repository.SectorRepository;
 import com.dengin.identity.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +45,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ProfessionRepository professionRepository;
+    private final SectorRepository sectorRepository;
     private final UserMapper userMapper;
     private final ApplicationEventPublisher eventPublisher;
     private final StorageService storageService;
@@ -278,8 +281,25 @@ public class UserService {
         Profession newProfession = professionRepository.findById(request.professionId())
                 .orElseThrow(() -> new ResourceNotFoundException("Profession", request.professionId()));
 
-        // Domain logic handles the business rules
-        user.selectProfession(newProfession);
+        // Auto-update sector from profession category (fetch from DB to avoid transient issue)
+        Sector sector = null;
+        if (newProfession.getCategory() != null) {
+            String sectorCode = newProfession.getCategory().name();
+            sector = sectorRepository.findByCode(sectorCode)
+                    .orElseGet(() -> {
+                        // If sector doesn't exist, create it
+                        log.warn("Sector not found for code: {}. Creating new sector.", sectorCode);
+                        Sector newSector = Sector.builder()
+                                .code(sectorCode)
+                                .name(newProfession.getCategory().getDisplayName())
+                                .isActive(true)
+                                .build();
+                        return sectorRepository.save(newSector);
+                    });
+        }
+
+        // Use domain method to set profession and sector
+        user.selectProfession(newProfession, sector);
 
         // Save
         User updatedUser = userRepository.save(user);

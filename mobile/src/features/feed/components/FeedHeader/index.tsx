@@ -44,6 +44,7 @@ export const FeedHeader: React.FC<FeedHeaderProps> = memo(
     onSectorPress,
     onProfessionPress,
     onNotificationPress,
+    onSearchPress,
     testID,
   }) => {
     // Backward compatibility: use profession if sector not provided
@@ -92,8 +93,22 @@ export const FeedHeader: React.FC<FeedHeaderProps> = memo(
           )}
         </View>
 
-        {/* Right: Notification Icon with Badge */}
+        {/* Right: Search & Notification Icons */}
         <View style={styles.rightSection}>
+          {/* Search Icon */}
+          <Pressable
+            onPress={() => {
+              trigger('light');
+              onSearchPress?.();
+            }}
+            style={[styles.iconButton, { marginRight: 8 }]}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel="Kullanıcı ara">
+            <Icon name="search-outline" size={24} color={colors.text.primary} />
+          </Pressable>
+
+          {/* Notification Icon */}
           <Pressable
             onPress={() => {
               trigger('light');

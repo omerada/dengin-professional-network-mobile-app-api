@@ -55,6 +55,7 @@ export type FeedStackParamList = {
   Notifications: undefined; // Bildirimler ekranı
   NotificationSettings: undefined; // Bildirim ayarları
   VerificationStatus: undefined; // Doğrulama durumu
+  NewConversation: undefined; // Kullanıcı arama ekranı (Ana Sayfa'dan erişim için)
 };
 
 /**

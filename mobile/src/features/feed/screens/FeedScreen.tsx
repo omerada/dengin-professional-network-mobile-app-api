@@ -333,6 +333,10 @@ export const FeedScreen: React.FC = memo(() => {
             // @ts-expect-error - Navigation prop type mismatch
             navigateToNotifications(navigation);
           }}
+          onSearchPress={() => {
+            // @ts-expect-error - Navigation prop type mismatch
+            navigation.navigate('NewConversation');
+          }}
         />
         {/* Show verification prompt for unverified users */}
         {user?.verificationStatus !== 'APPROVED' && (

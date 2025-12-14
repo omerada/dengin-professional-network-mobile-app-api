@@ -45,6 +45,8 @@ export interface FeedHeaderProps {
   onSectorPress?: () => void;
   /** Callback when notification icon is pressed */
   onNotificationPress?: () => void;
+  /** Callback when search icon is pressed */
+  onSearchPress?: () => void;
   /** Test ID */
   testID?: string;
 

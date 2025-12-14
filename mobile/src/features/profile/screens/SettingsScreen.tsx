@@ -3,7 +3,7 @@
 // Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
 
 import React, { useMemo, useCallback, useState } from 'react';
-import { StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { StyleSheet, ScrollView } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -13,6 +13,8 @@ import { useToast } from '@contexts/ToastContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
 import { spacing } from '@theme';
 import { SettingsSection } from '../components';
+import { CustomRefreshControl } from '@shared/components';
+import { useLogout } from '@features/auth/hooks';
 import type { SettingsSectionType } from '../types';
 
 /**
@@ -31,6 +33,7 @@ export const SettingsScreen: React.FC = () => {
   const { trigger } = useHaptic();
   const toast = useToast();
   const navigation = useNavigation();
+  const { logout, isLoading: isLoggingOut } = useLogout();
 
   // Loading states
   const [loadingStates, _setLoadingStates] = useState<Record<string, boolean>>({});
@@ -77,6 +80,11 @@ export const SettingsScreen: React.FC = () => {
     trigger(HAPTIC_TYPES.warning);
     navigation.navigate('AccountDeletion' as never);
   }, [navigation, trigger]);
+
+  const handleLogout = useCallback(() => {
+    trigger(HAPTIC_TYPES.warning);
+    logout();
+  }, [logout, trigger]);
 
   // Cycle through theme modes: system → light → dark → system
   const handleThemeCycle = useCallback(() => {
@@ -202,6 +210,20 @@ export const SettingsScreen: React.FC = () => {
         ],
       },
       {
+        title: 'Hesap İşlemleri',
+        items: [
+          {
+            id: 'logout',
+            title: 'Çıkış Yap',
+            subtitle: 'Hesabınızdan güvenli çıkış yapın',
+            icon: 'log-out-outline',
+            type: 'navigation',
+            onPress: handleLogout,
+            loading: isLoggingOut,
+          },
+        ],
+      },
+      {
         title: 'Tehlikeli Bölge',
         items: [
           {
@@ -218,6 +240,7 @@ export const SettingsScreen: React.FC = () => {
     [
       themeMode,
       isDark,
+      isLoggingOut,
       handleThemeCycle,
       handleEditProfile,
       handleChangePassword,
@@ -227,27 +250,20 @@ export const SettingsScreen: React.FC = () => {
       handleBlockedUsers,
       handleHelp,
       handleContact,
+      handleLogout,
       handleDeleteAccount,
     ],
   );
 
   const refreshControl = useMemo(
-    () => (
-      <RefreshControl
-        refreshing={isRefreshing}
-        onRefresh={handleRefresh}
-        tintColor={colors.interactive.default}
-        colors={[colors.interactive.default]}
-        progressBackgroundColor={colors.background.primary}
-      />
-    ),
-    [isRefreshing, handleRefresh, colors],
+    () => <CustomRefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />,
+    [isRefreshing, handleRefresh],
   );
 
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.secondary }]}
-      edges={['bottom']}>
+      edges={['top', 'bottom']}>
       <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={{ flex: 1 }}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}

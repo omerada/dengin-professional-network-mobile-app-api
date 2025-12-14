@@ -8,14 +8,13 @@ import {
   View,
   StyleSheet,
   FlatList,
-  RefreshControl,
   ActivityIndicator,
   TextInput,
   Pressable,
   Alert,
 } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -24,7 +23,7 @@ import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks';
 import { ConversationItem, ConversationSkeleton } from '../components';
 import { useConversations, useSocket } from '../hooks';
-import { AnimatedListItem, UnifiedEmptyState } from '@shared/components';
+import { AnimatedListItem, UnifiedEmptyState, CustomRefreshControl } from '@shared/components';
 import type { Conversation } from '../types';
 import type { MessagingStackParamList } from '@core/navigation/types';
 
@@ -32,7 +31,6 @@ type NavigationProp = NativeStackNavigationProp<MessagingStackParamList>;
 
 export const ConversationListScreen: React.FC = () => {
   const colors = useColors();
-  const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
   const { trigger } = useHaptic();
 
@@ -216,16 +214,7 @@ export const ConversationListScreen: React.FC = () => {
             ListFooterComponent={ListFooterComponent}
             onEndReached={handleLoadMore}
             onEndReachedThreshold={0.3}
-            refreshControl={
-              <RefreshControl
-                refreshing={isRefreshing}
-                onRefresh={refetch}
-                colors={[colors.interactive.default]}
-                tintColor={colors.interactive.default}
-                progressBackgroundColor={colors.background.primary}
-                titleColor={colors.text.secondary}
-              />
-            }
+            refreshControl={<CustomRefreshControl refreshing={isRefreshing} onRefresh={refetch} />}
             contentContainerStyle={[
               styles.listContent,
               filteredConversations.length === 0 && styles.emptyListContent,
@@ -234,17 +223,6 @@ export const ConversationListScreen: React.FC = () => {
             keyboardShouldPersistTaps="handled"
           />
         )}
-
-        {/* New conversation FAB */}
-        <Pressable
-          onPress={handleNewConversation}
-          style={({ pressed }) => [
-            styles.fab,
-            { backgroundColor: colors.interactive.default, bottom: insets.bottom + 16 },
-            pressed && styles.fabPressed,
-          ]}>
-          <Icon name="create-outline" size={24} color={colors.text.inverse} />
-        </Pressable>
       </Animated.View>
     </SafeAreaView>
   );
@@ -260,24 +238,6 @@ const styles = StyleSheet.create({
   },
   emptyListContent: {
     flex: 1,
-  },
-  fab: {
-    alignItems: 'center',
-    borderRadius: 28,
-    elevation: 4,
-    height: 56,
-    justifyContent: 'center',
-    position: 'absolute',
-    right: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    width: 56,
-  },
-  fabPressed: {
-    opacity: 0.9,
-    transform: [{ scale: 0.95 }],
   },
   listContent: {
     flexGrow: 1,

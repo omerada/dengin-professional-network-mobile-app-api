@@ -7,7 +7,6 @@ import React, { useCallback, useMemo } from 'react';
 import {
   View,
   ScrollView,
-  RefreshControl,
   Text,
   ActivityIndicator,
   Pressable,
@@ -40,7 +39,13 @@ import { useAuthStore } from '@features/auth/stores';
 import { useFollow, useUnfollow } from '@features/social/hooks/useFollow';
 import { useUserPosts } from '@features/feed/hooks';
 import { PostCard } from '@features/feed/components';
-import { Button, Loading, SkeletonProfileHeader, AnimatedCounter } from '@shared/components';
+import {
+  Button,
+  Loading,
+  SkeletonProfileHeader,
+  AnimatedCounter,
+  CustomRefreshControl,
+} from '@shared/components';
 import { ProfileBio, ProfileActions } from '../components';
 import { useMyProfile, useProfile, useProfileStats } from '../hooks';
 import type { ProfileStats as ProfileStatsType } from '../types';
@@ -236,14 +241,7 @@ export const ProfileScreen: React.FC = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={handleRefresh}
-            tintColor={colors.interactive.default}
-            colors={[colors.interactive.default]}
-            progressBackgroundColor={colors.background.primary}
-            titleColor={colors.text.secondary}
-          />
+          <CustomRefreshControl refreshing={isRefetching} onRefresh={handleRefresh} />
         }>
         {/* Modern Premium Header */}
         <View style={styles.premiumHeader}>

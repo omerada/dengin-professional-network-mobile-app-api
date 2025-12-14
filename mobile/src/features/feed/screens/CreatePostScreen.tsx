@@ -28,6 +28,7 @@ import { imagePickerService } from '../services';
 import { PostTextInput, ImagePreviewGrid } from '../components';
 import { SuccessCelebration, ActionFeedback } from '@shared/components';
 import { HAPTIC_TYPES } from '@constants/hapticPresets';
+import { useAuthStore } from '@features/auth/stores';
 import type { UploadProgress, FeedStoreState } from '../types';
 
 /**
@@ -50,6 +51,9 @@ export const CreatePostScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation();
   const { medium, heavy, trigger } = useHaptic();
+
+  // Auth state - needed for professionId
+  const user = useAuthStore(state => state.user);
 
   // Store state
   const draftContent = useFeedStore((state: FeedStoreState) => state.draftContent);
@@ -95,6 +99,14 @@ export const CreatePostScreen: React.FC = () => {
   const handlePost = useCallback(() => {
     if (!canPost || isPosting) return;
 
+    // Get user's professionId - required by backend
+    const professionId = user?.professionId;
+    if (!professionId) {
+      trigger(HAPTIC_TYPES.error);
+      Alert.alert('Hata', 'Meslek bilgisi bulunamadı. Lütfen profilinizi tamamlayın.');
+      return;
+    }
+
     trigger('medium'); // Haptic feedback for important action
 
     createPost.mutate(
@@ -102,6 +114,7 @@ export const CreatePostScreen: React.FC = () => {
         data: {
           content: draftContent.trim(),
           images: draftImages,
+          professionId, // Backend requires this field
         },
         onProgress: (progress: UploadProgress) => {
           setUploadProgress(progress);
@@ -118,7 +131,7 @@ export const CreatePostScreen: React.FC = () => {
         },
       },
     );
-  }, [canPost, isPosting, createPost, draftContent, draftImages, trigger, clearDraft]);
+  }, [canPost, isPosting, createPost, draftContent, draftImages, user, trigger, clearDraft]);
 
   // Header buttons
   useLayoutEffect(() => {

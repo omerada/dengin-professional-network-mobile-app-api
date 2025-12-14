@@ -229,6 +229,38 @@ public class User extends AggregateRoot {
      * 
      * Business Rule: Verified profession cannot be changed
      */
+    /**
+     * Select profession with sector
+     * 
+     * @param profession the profession to select
+     * @param sector the sector (must be from DB, not transient)
+     */
+    public void selectProfession(Profession profession, Sector sector) {
+        if (Boolean.TRUE.equals(this.isProfessionVerified) && this.profession != null) {
+            if (!this.profession.isGeneralCategory()) {
+                throw new BusinessException(
+                        "Doğrulanmış meslek değiştirilemez",
+                        "PROFESSION_CHANGE_NOT_ALLOWED");
+            }
+        }
+
+        this.profession = profession;
+        this.isProfessionVerified = false;
+        this.professionVerifiedAt = null;
+
+        // Set sector if provided
+        if (sector != null) {
+            this.sector = sector;
+        }
+
+        checkProfileCompleteness();
+    }
+
+    /**
+     * Select profession without changing sector (backward compatibility)
+     * 
+     * @deprecated Use selectProfession(Profession, Sector) instead
+     */
     @Deprecated(since = "Sprint 1", forRemoval = false)
     public void selectProfession(Profession profession) {
         if (Boolean.TRUE.equals(this.isProfessionVerified) && this.profession != null) {
@@ -242,11 +274,6 @@ public class User extends AggregateRoot {
         this.profession = profession;
         this.isProfessionVerified = false;
         this.professionVerifiedAt = null;
-
-        // Auto-update sector from profession for backward compatibility
-        if (profession != null) {
-            this.sector = Sector.fromProfessionCategory(profession.getCategory());
-        }
 
         checkProfileCompleteness();
     }

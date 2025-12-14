@@ -101,14 +101,33 @@ public class AuthService {
             user.selectSector(sector);
             log.info("User registered with sector: {} ({})", sector.getName(), sector.getCode());
         }
-        // Backward compatibility: profession still works
-        else if (request.professionId() != null) {
+
+        // Set profession if provided (can be used together with sector)
+        if (request.professionId() != null) {
             Profession profession = professionRepository.findById(request.professionId())
                     .orElseThrow(() -> new BusinessException(
                             "Geçersiz meslek seçimi",
                             "INVALID_PROFESSION"));
-            user.selectProfession(profession);
-            log.info("User registered with profession (deprecated): {}", profession.getName());
+            
+            // If sector not set, auto-set from profession
+            Sector professionSector = null;
+            if (user.getSector() == null && profession.getCategory() != null) {
+                String sectorCode = profession.getCategory().name();
+                professionSector = sectorRepository.findByCode(sectorCode)
+                        .orElseGet(() -> {
+                            log.warn("Sector not found for code: {}. Creating new sector.", sectorCode);
+                            Sector newSector = Sector.builder()
+                                    .code(sectorCode)
+                                    .name(profession.getCategory().getDisplayName())
+                                    .isActive(true)
+                                    .build();
+                            return sectorRepository.save(newSector);
+                        });
+            }
+            
+            // Use domain method
+            user.selectProfession(profession, professionSector);
+            log.info("User registered with profession: {}", profession.getName());
         } else if (request.customProfession() != null && !request.customProfession().isBlank()) {
             // Custom profession - validate and find OTHER category profession
             if (containsProfanity(request.customProfession())) {

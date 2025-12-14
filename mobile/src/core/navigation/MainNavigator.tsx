@@ -89,12 +89,20 @@ const FeedStackNavigator: React.FC = () => (
     <FeedStack.Screen
       name="CreatePost"
       component={CreatePostScreen}
-      options={UNIFIED_NAVIGATION.interactiveModal} // Interactive modal for user input
+      options={{
+        ...UNIFIED_NAVIGATION.interactiveModal,
+        headerShown: true, // Show header for post button
+      }}
     />
     <FeedStack.Screen name="Comments" component={CommentsScreen} />
     <FeedStack.Screen name="Notifications" component={NotificationsScreen} />
     <FeedStack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
     <FeedStack.Screen name="VerificationStatus" component={VerificationStatusScreen} />
+    <FeedStack.Screen
+      name="NewConversation"
+      component={require('@features/messaging/screens/NewConversationScreen').NewConversationScreen}
+      options={UNIFIED_NAVIGATION.interactiveModal}
+    />
   </FeedStack.Navigator>
 );
 

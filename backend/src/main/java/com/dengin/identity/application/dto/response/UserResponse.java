@@ -27,8 +27,9 @@ public class UserResponse {
     private LocalDate dateOfBirth;
     private String gender;
     
-    // Profession
+    // Profession & Sector
     private ProfessionResponse profession;
+    private SectorResponse sector;
     private Boolean isProfessionVerified;
     private LocalDateTime professionVerifiedAt;
     
