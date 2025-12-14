@@ -23,7 +23,7 @@ import { useToast } from '@contexts/ToastContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
 import { useProfessions } from '@shared/hooks/useProfessions';
 import { useSectors } from '@shared/hooks/useSectors';
-import { Button, Input, SuccessCelebration, ActionFeedback } from '@shared/components';
+import { Button, Input } from '@shared/components';
 import { HAPTIC_TYPES } from '@constants/hapticPresets';
 import { spacing, fontSize } from '@theme';
 import { AvatarPicker } from '../components';
@@ -99,9 +99,6 @@ export const EditProfileScreen: React.FC = () => {
   // Date picker state
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [tempDate, setTempDate] = useState({ day: '', month: '', year: '' });
-
-  // Success celebration state
-  const [showSuccess, setShowSuccess] = useState(false);
 
   // Track changes for save button
   const [hasChanges, setHasChanges] = useState(false);
@@ -224,7 +221,7 @@ export const EditProfileScreen: React.FC = () => {
         });
       }
 
-      // Success - Show celebration with haptic
+      // Success - Show toast with haptic
       trigger(HAPTIC_TYPES.success);
       toast.success('Profil güncellendi');
 
@@ -232,13 +229,8 @@ export const EditProfileScreen: React.FC = () => {
       setPendingAvatarUri(null);
       setShouldDeleteAvatar(false);
 
-      // Refetch to update UI (don't await, let it run in background)
+      // Refetch to update UI in background
       refetch();
-
-      // Show success celebration after a small delay to prevent state conflicts
-      setTimeout(() => {
-        setShowSuccess(true);
-      }, 100);
     } catch (error: any) {
       console.error('[EditProfileScreen] Save error:', error);
       trigger(HAPTIC_TYPES.error);
@@ -542,26 +534,6 @@ export const EditProfileScreen: React.FC = () => {
           />
         </View>
       </KeyboardAvoidingView>
-
-      {/* Success Feedback */}
-      <ActionFeedback
-        type="success"
-        visible={showSuccess}
-        duration={1200}
-        onDismiss={() => {
-          setShowSuccess(false);
-        }}
-      />
-
-      {/* Success Celebration */}
-      <SuccessCelebration
-        visible={showSuccess}
-        type="checkmark"
-        onComplete={() => {
-          // Just close the celebration, state already updated
-          setShowSuccess(false);
-        }}
-      />
 
       {/* Profession Picker Modal */}
       <Modal
