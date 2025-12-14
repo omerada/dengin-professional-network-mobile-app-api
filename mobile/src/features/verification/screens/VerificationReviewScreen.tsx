@@ -9,7 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing, typography } from '@theme';
-import { Button } from '@shared/components';
+import { Button, SuccessCelebration } from '@shared/components';
 import { useVerificationStore } from '../stores';
 import { StepIndicator, ImagePreview } from '../components';
 import type { VerificationStackParamList } from '@shared/types/navigation.types';
@@ -25,6 +25,8 @@ export const VerificationReviewScreen: React.FC = memo(() => {
 
   const { data, currentStep, setStep, setDocumentFront, setDocumentBack, setSelfie } =
     useVerificationStore();
+
+  const [showSuccess, setShowSuccess] = React.useState(false);
 
   /**
    * Belge ön yüzünü tekrar çek
@@ -64,8 +66,8 @@ export const VerificationReviewScreen: React.FC = memo(() => {
     }
 
     setStep('uploading');
-    navigation.navigate('VerificationStatus');
-  }, [data, navigation, setStep]);
+    setShowSuccess(true);
+  }, [data, setStep]);
 
   /**
    * İptal et
@@ -194,6 +196,16 @@ export const VerificationReviewScreen: React.FC = memo(() => {
           accessibilityLabel="Doğrulama belgelerini gönder"
         />
       </View>
+
+      {/* Success Celebration */}
+      <SuccessCelebration
+        visible={showSuccess}
+        type="checkmark"
+        onComplete={() => {
+          setShowSuccess(false);
+          navigation.navigate('VerificationStatus');
+        }}
+      />
     </SafeAreaView>
   );
 });

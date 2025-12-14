@@ -13,6 +13,7 @@ import { linking } from './linking';
 import { AuthNavigator } from './AuthNavigator';
 import { MainNavigator } from './MainNavigator';
 import { VerificationNavigator } from './VerificationNavigator';
+import { UNIFIED_NAVIGATION } from '@constants/unifiedNavigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -79,24 +80,14 @@ export const AppNavigator: React.FC = () => {
 
   return (
     <NavigationContainer ref={navigationRef} linking={linking}>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-          animation: 'fade',
-          gestureEnabled: true,
-          fullScreenGestureEnabled: true,
-        }}>
+      <Stack.Navigator screenOptions={UNIFIED_NAVIGATION.stack}>
         {isAuthenticated ? (
           <>
             <Stack.Screen name="Main" component={MainNavigator} />
             <Stack.Screen
               name="Verification"
               component={VerificationNavigator}
-              options={{
-                presentation: 'modal',
-                animation: 'slide_from_bottom',
-                gestureEnabled: false,
-              }}
+              options={UNIFIED_NAVIGATION.modal}
             />
           </>
         ) : (

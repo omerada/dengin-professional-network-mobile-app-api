@@ -33,7 +33,7 @@ import { useAuthStore } from '@features/auth/stores';
 import { useFollow, useUnfollow } from '@features/social/hooks/useFollow';
 import { useUserPosts } from '@features/feed/hooks';
 import { PostCard } from '@features/feed/components';
-import { Button, Loading, SkeletonProfileHeader } from '@shared/components';
+import { Button, Loading, SkeletonProfileHeader, AnimatedCounter } from '@shared/components';
 import { ProfileBio, ProfileActions } from '../components';
 import { useMyProfile, useProfile, useProfileStats } from '../hooks';
 import type { ProfileStats as ProfileStatsType } from '../types';
@@ -283,9 +283,11 @@ export const ProfileScreen: React.FC = () => {
             {/* Stats - Horizontal Big Numbers */}
             <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(2)} style={styles.statsRow}>
               <View style={styles.statBox}>
-                <Text style={[styles.statNumber, { color: colors.text.primary }]}>
-                  {stats.postCount}
-                </Text>
+                <AnimatedCounter
+                  value={stats.postCount}
+                  duration={800}
+                  style={[styles.statNumber, { color: colors.text.primary }]}
+                />
                 <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Gönderi</Text>
               </View>
 
@@ -299,11 +301,11 @@ export const ProfileScreen: React.FC = () => {
                     navigateToFollowersList(navigation, { userId: profileUserId });
                   }
                 }}>
-                <Text style={[styles.statNumber, { color: colors.text.primary }]}>
-                  {stats.followerCount >= 1000
-                    ? `${(stats.followerCount / 1000).toFixed(1)}k`
-                    : stats.followerCount}
-                </Text>
+                <AnimatedCounter
+                  value={stats.followerCount}
+                  duration={800}
+                  style={[styles.statNumber, { color: colors.text.primary }]}
+                />
                 <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Takipçi</Text>
               </Pressable>
 
@@ -317,11 +319,11 @@ export const ProfileScreen: React.FC = () => {
                     navigateToFollowingList(navigation, { userId: profileUserId });
                   }
                 }}>
-                <Text style={[styles.statNumber, { color: colors.text.primary }]}>
-                  {stats.followingCount >= 1000
-                    ? `${(stats.followingCount / 1000).toFixed(1)}k`
-                    : stats.followingCount}
-                </Text>
+                <AnimatedCounter
+                  value={stats.followingCount}
+                  duration={800}
+                  style={[styles.statNumber, { color: colors.text.primary }]}
+                />
                 <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Takip</Text>
               </Pressable>
             </Animated.View>

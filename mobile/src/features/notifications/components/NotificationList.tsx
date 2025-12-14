@@ -5,12 +5,16 @@
 
 import React, { memo, useCallback } from 'react';
 import { FlatList, StyleSheet, RefreshControl, ActivityIndicator, View } from 'react-native';
-import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { NotificationItem } from './NotificationItem';
 import { EmptyNotifications } from './EmptyNotifications';
 import { useNotifications, useMarkAsRead, useDeleteNotification } from '../hooks';
 import { useColors } from '@contexts/ThemeContext';
-import { SkeletonNotificationItem, SkeletonList } from '@shared/components';
+import {
+  AnimatedListItem,
+  NotificationListSkeleton,
+  UnifiedLoadingState,
+} from '@shared/components';
 import type { NotificationResponse } from '../types';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<NotificationResponse>);
@@ -96,19 +100,14 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
       [],
     );
 
-    // Render item
+    // Render item with AnimatedListItem wrapper for press animation
     const renderItem = useCallback(
       ({ item }: { item: NotificationResponse }) => (
-        <Animated.View
-          entering={FadeIn.duration(200)}
-          exiting={FadeOut.duration(150)}
-          layout={Layout.springify()}>
-          <NotificationItem
-            notification={item}
-            onPress={handleNotificationPress}
-            onLongPress={() => handleDelete(item.notificationId)}
-          />
-        </Animated.View>
+        <AnimatedListItem
+          onPress={() => handleNotificationPress(item)}
+          onLongPress={() => handleDelete(item.notificationId)}>
+          <NotificationItem notification={item} />
+        </AnimatedListItem>
       ),
       [handleNotificationPress, handleDelete],
     );
@@ -130,12 +129,10 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
       return <EmptyNotifications />;
     }, [isLoading]);
 
-    // Loading state - show skeleton
+    // Loading state - show unified skeleton
     if (isLoading) {
       return (
-        <View style={styles.loadingContainer}>
-          <SkeletonList ItemSkeleton={SkeletonNotificationItem} count={10} />
-        </View>
+        <UnifiedLoadingState strategy="skeleton" customSkeleton={<NotificationListSkeleton />} />
       );
     }
 

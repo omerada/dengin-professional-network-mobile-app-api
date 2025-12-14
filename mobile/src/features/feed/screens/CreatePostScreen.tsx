@@ -26,6 +26,7 @@ import { useFeedStore } from '../stores';
 import { useCreatePost } from '../hooks';
 import { imagePickerService } from '../services';
 import { PostTextInput, ImagePreviewGrid } from '../components';
+import { SuccessCelebration } from '@shared/components';
 import type { UploadProgress, FeedStoreState } from '../types';
 
 /**
@@ -59,6 +60,7 @@ export const CreatePostScreen: React.FC = () => {
 
   // Upload state
   const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
   const createPost = useCreatePost();
 
   const canPost = draftContent.trim().length > 0 || draftImages.length > 0;
@@ -94,16 +96,24 @@ export const CreatePostScreen: React.FC = () => {
 
     trigger('medium'); // Haptic feedback for important action
 
-    createPost.mutate({
-      data: {
-        content: draftContent.trim(),
-        images: draftImages,
+    createPost.mutate(
+      {
+        data: {
+          content: draftContent.trim(),
+          images: draftImages,
+        },
+        onProgress: (progress: UploadProgress) => {
+          setUploadProgress(progress);
+        },
       },
-      onProgress: (progress: UploadProgress) => {
-        setUploadProgress(progress);
+      {
+        onSuccess: () => {
+          clearDraft();
+          setShowSuccess(true);
+        },
       },
-    });
-  }, [canPost, isPosting, createPost, draftContent, draftImages, trigger]);
+    );
+  }, [canPost, isPosting, createPost, draftContent, draftImages, trigger, clearDraft]);
 
   // Header buttons
   useLayoutEffect(() => {
@@ -307,6 +317,16 @@ export const CreatePostScreen: React.FC = () => {
           </Text>
         </Animated.View>
       </KeyboardAvoidingView>
+
+      {/* Success Celebration */}
+      <SuccessCelebration
+        visible={showSuccess}
+        type="checkmark"
+        onComplete={() => {
+          setShowSuccess(false);
+          navigation.goBack();
+        }}
+      />
     </SafeAreaView>
   );
 };

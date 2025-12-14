@@ -9,6 +9,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
+import { AnimatedBadge } from '@shared/components';
 
 import { styles } from './FeedHeader.styles';
 import type { FeedHeaderProps } from './FeedHeader.types';
@@ -103,15 +104,15 @@ export const FeedHeader: React.FC<FeedHeaderProps> = memo(
             accessibilityRole="button"
             accessibilityLabel={`Bildirimler ${unreadNotifications > 0 ? `, ${unreadNotifications} okunmamış` : ''}`}>
             <Icon name="notifications-outline" size={24} color={colors.text.primary} />
-            {unreadNotifications > 0 && (
-              <Animated.View
-                entering={FadeIn.duration(200)}
-                style={[styles.badge, { backgroundColor: colors.status.error }]}>
-                <Text style={styles.badgeText}>
-                  {unreadNotifications > 9 ? '9+' : unreadNotifications}
-                </Text>
-              </Animated.View>
-            )}
+            <View style={styles.badgeContainer}>
+              <AnimatedBadge
+                count={unreadNotifications}
+                variant="error"
+                size="md"
+                pulse={unreadNotifications > 0}
+                animateOnChange
+              />
+            </View>
           </Pressable>
         </View>
       </Animated.View>

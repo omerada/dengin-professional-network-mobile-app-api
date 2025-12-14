@@ -7,6 +7,7 @@ export * from './hapticPresets';
 export * from './unifiedTiming';
 export * from './safeAreaConfig';
 export * from './loadingStrategy';
+export * from './unifiedNavigation';
 
 // Selective export from navigationConfig to avoid NAVIGATION_ANIMATIONS collision
 export {

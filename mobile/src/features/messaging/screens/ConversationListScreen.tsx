@@ -19,9 +19,9 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
-import { ConversationItem, EmptyConversations } from '../components';
+import { ConversationItem } from '../components';
 import { useConversations, useSocket } from '../hooks';
-import { SkeletonConversationItem, SkeletonList } from '@shared/components';
+import { AnimatedListItem, UnifiedEmptyState, UnifiedLoadingState } from '@shared/components';
 import type { Conversation } from '../types';
 import type { MessagingStackParamList } from '@core/navigation/types';
 
@@ -125,11 +125,11 @@ export const ConversationListScreen: React.FC = () => {
       }
 
       return (
-        <ConversationItem
-          conversation={item}
-          onPress={handleConversationPress}
-          onLongPress={handleConversationLongPress}
-        />
+        <AnimatedListItem
+          onPress={() => handleConversationPress(item)}
+          onLongPress={() => handleConversationLongPress(item)}>
+          <ConversationItem conversation={item} />
+        </AnimatedListItem>
       );
     },
     [handleConversationPress, handleConversationLongPress],
@@ -147,14 +147,20 @@ export const ConversationListScreen: React.FC = () => {
   }, [isFetchingNextPage, colors.interactive.default]);
 
   const ListEmptyComponent = useCallback(() => {
-    if (isLoading) {
-      return (
-        <View style={styles.loadingContainer}>
-          <SkeletonList ItemSkeleton={SkeletonConversationItem} count={8} />
-        </View>
-      );
-    }
-    return <EmptyConversations onStartConversation={handleNewConversation} />;
+    if (isLoading) return null;
+
+    return (
+      <UnifiedEmptyState
+        icon="chatbubbles-outline"
+        title="Henüz Mesajınız Yok"
+        description="Profesyonellerle sohbet başlatın ve ağınızı genişletin"
+        primaryAction={{
+          label: 'Yeni Sohbet Başlat',
+          icon: 'add-circle-outline',
+          onPress: handleNewConversation,
+        }}
+      />
+    );
   }, [isLoading, handleNewConversation]);
 
   return (
@@ -188,30 +194,35 @@ export const ConversationListScreen: React.FC = () => {
         </View>
       </View>
 
+      {/* Loading state */}
+      {isLoading && <UnifiedLoadingState strategy="spinner" message="Konuşmalar yükleniyor..." />}
+
       {/* Conversation list */}
-      <FlatList
-        data={filteredConversations}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-        ListEmptyComponent={ListEmptyComponent}
-        ListFooterComponent={ListFooterComponent}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.3}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={refetch}
-            colors={[colors.interactive.default]}
-            tintColor={colors.interactive.default}
-          />
-        }
-        contentContainerStyle={[
-          styles.listContent,
-          filteredConversations.length === 0 && styles.emptyListContent,
-        ]}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      />
+      {!isLoading && (
+        <FlatList
+          data={filteredConversations}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          ListEmptyComponent={ListEmptyComponent}
+          ListFooterComponent={ListFooterComponent}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.3}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={refetch}
+              colors={[colors.interactive.default]}
+              tintColor={colors.interactive.default}
+            />
+          }
+          contentContainerStyle={[
+            styles.listContent,
+            filteredConversations.length === 0 && styles.emptyListContent,
+          ]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        />
+      )}
 
       {/* New conversation FAB */}
       <Pressable

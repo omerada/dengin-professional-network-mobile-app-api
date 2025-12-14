@@ -22,7 +22,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useColors } from '@contexts/ThemeContext';
 import { useLocale } from '@contexts/LocaleContext';
-import { Button, Input } from '@shared/components';
+import { Button, Input, ShakeAnimation } from '@shared/components';
 import { SAFE_AREA_EDGES } from '@constants';
 import { useLogin, useBiometricLogin } from '../hooks';
 import { useAuthStore } from '../stores';
@@ -177,23 +177,25 @@ export const LoginScreen: React.FC = () => {
 
           {/* Error Message - Professional */}
           {isError && error && (
-            <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
-              <Icon name="alert-circle" size={18} color={colors.status.error} />
-              <View style={styles.errorContent}>
-                <Text style={[styles.errorText, { color: colors.status.error }]}>
-                  {error.message?.includes('credentials') || error.message?.includes('password')
-                    ? 'E-posta veya şifre hatalı. Lütfen tekrar deneyin.'
-                    : error.message?.includes('network') || error.message?.includes('connection')
-                      ? 'Bağlantı sorunu. İnternet bağlantınızı kontrol edin.'
-                      : 'Bir hata oluştu. Lütfen tekrar deneyin.'}
-                </Text>
-                <TouchableOpacity onPress={handleForgotPassword}>
-                  <Text style={[styles.errorAction, { color: colors.interactive.default }]}>
-                    Şifremi Unuttum
+            <ShakeAnimation trigger={isError}>
+              <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
+                <Icon name="alert-circle" size={18} color={colors.status.error} />
+                <View style={styles.errorContent}>
+                  <Text style={[styles.errorText, { color: colors.status.error }]}>
+                    {error.message?.includes('credentials') || error.message?.includes('password')
+                      ? 'E-posta veya şifre hatalı. Lütfen tekrar deneyin.'
+                      : error.message?.includes('network') || error.message?.includes('connection')
+                        ? 'Bağlantı sorunu. İnternet bağlantınızı kontrol edin.'
+                        : 'Bir hata oluştu. Lütfen tekrar deneyin.'}
                   </Text>
-                </TouchableOpacity>
+                  <TouchableOpacity onPress={handleForgotPassword}>
+                    <Text style={[styles.errorAction, { color: colors.interactive.default }]}>
+                      Şifremi Unuttum
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
+            </ShakeAnimation>
           )}
 
           {/* Form */}

@@ -15,9 +15,9 @@ export interface ConversationItemProps {
   conversation: Conversation;
 
   /**
-   * Tıklama handler
+   * Tıklama handler (optional - can be handled by AnimatedListItem wrapper)
    */
-  onPress: (conversation: Conversation) => void;
+  onPress?: (conversation: Conversation) => void;
 
   /**
    * Uzun basma handler

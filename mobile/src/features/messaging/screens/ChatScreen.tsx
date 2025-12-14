@@ -14,6 +14,7 @@ import { SAFE_AREA_EDGES } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks';
 import { useAuthStore } from '@features/auth/stores';
+import { UnifiedLoadingState, MessageListSkeleton } from '@shared/components';
 import {
   ChatHeader,
   MessageList,
@@ -269,6 +270,23 @@ export const ChatScreen: React.FC = () => {
   // Get typing users for this conversation
   const { typingUsers } = useMessagingStore();
   const conversationTypingUsers = typingUsers[conversationId] || [];
+
+  // Show loading skeleton while initial load
+  if (isLoading && messages.length === 0) {
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background.primary }]}
+        edges={SAFE_AREA_EDGES.standard}>
+        <ChatHeader
+          conversation={displayConversation}
+          onBackPress={handleBackPress}
+          onProfilePress={handleProfilePress}
+          onOptionsPress={handleOptionsPress}
+        />
+        <UnifiedLoadingState strategy="skeleton" customSkeleton={<MessageListSkeleton />} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView

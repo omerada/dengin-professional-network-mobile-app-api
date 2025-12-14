@@ -8,7 +8,7 @@ import { FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
-import { EmptyState, Loading } from '@shared/components';
+import { Loading, UnifiedEmptyState, AnimatedListItem } from '@shared/components';
 import { spacing } from '@theme';
 import { UserListItem } from '../components';
 import { useFollowers } from '../hooks';
@@ -42,7 +42,11 @@ export const FollowersListScreen: React.FC = () => {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const renderItem = useCallback(
-    ({ item }: { item: FollowUser }) => <UserListItem user={item} showFollowButton />,
+    ({ item }: { item: FollowUser }) => (
+      <AnimatedListItem>
+        <UserListItem user={item} showFollowButton />
+      </AnimatedListItem>
+    ),
     [],
   );
 
@@ -60,12 +64,10 @@ export const FollowersListScreen: React.FC = () => {
   const ListEmptyComponent = useMemo(() => {
     if (isLoading) return null;
     return (
-      <EmptyState
+      <UnifiedEmptyState
         icon="people-outline"
-        title="Henüz takipçi yok"
+        title="Henüz Takipçi Yok"
         description="Bu kullanıcının henüz takipçisi bulunmuyor"
-        floatingIcon
-        animated
       />
     );
   }, [isLoading]);

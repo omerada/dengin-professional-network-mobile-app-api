@@ -86,7 +86,7 @@ export const ConversationItem: React.FC<ConversationItemProps> = memo(
     const handlePress = useCallback(() => {
       try {
         triggerHaptic('selection');
-        onPress(conversation);
+        onPress?.(conversation);
       } catch (error) {
         console.error('[ConversationItem] Error in handlePress:', error);
       }

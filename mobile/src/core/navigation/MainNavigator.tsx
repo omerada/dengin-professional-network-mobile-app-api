@@ -13,7 +13,7 @@ import {
   ProfileStackParamList,
 } from '@shared/types';
 import { AnimatedTabBar, TabItem } from './components/AnimatedTabBar';
-import { NAVIGATION_ANIMATIONS, MODAL_SCREEN_OPTIONS } from '@constants';
+import { UNIFIED_NAVIGATION } from '@constants/unifiedNavigation';
 
 // Screens
 import { FeedScreen } from '@features/feed/screens/FeedScreen';
@@ -82,17 +82,13 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 // Feed Stack
 const FeedStack = createNativeStackNavigator<FeedStackParamList>();
 const FeedStackNavigator: React.FC = () => (
-  <FeedStack.Navigator
-    screenOptions={{
-      headerShown: false,
-      ...NAVIGATION_ANIMATIONS.stack,
-    }}>
+  <FeedStack.Navigator screenOptions={UNIFIED_NAVIGATION.stack}>
     <FeedStack.Screen name="Feed" component={FeedScreen} />
     <FeedStack.Screen name="PostDetail" component={PostDetailScreen} />
     <FeedStack.Screen
       name="CreatePost"
       component={CreatePostScreen}
-      options={MODAL_SCREEN_OPTIONS}
+      options={UNIFIED_NAVIGATION.modal}
     />
     <FeedStack.Screen name="Comments" component={CommentsScreen} />
     <FeedStack.Screen name="Notifications" component={NotificationsScreen} />
@@ -104,17 +100,13 @@ const FeedStackNavigator: React.FC = () => (
 // Messaging Stack
 const MessagingStack = createNativeStackNavigator<MessagingStackParamList>();
 const MessagingStackNavigator: React.FC = () => (
-  <MessagingStack.Navigator
-    screenOptions={{
-      headerShown: false,
-      ...NAVIGATION_ANIMATIONS.stack,
-    }}>
+  <MessagingStack.Navigator screenOptions={UNIFIED_NAVIGATION.stack}>
     <MessagingStack.Screen name="ConversationList" component={ConversationListScreen} />
     <MessagingStack.Screen name="Chat" component={ChatScreen} />
     <MessagingStack.Screen
       name="NewConversation"
       component={require('@features/messaging/screens/NewConversationScreen').NewConversationScreen}
-      options={MODAL_SCREEN_OPTIONS}
+      options={UNIFIED_NAVIGATION.modal}
     />
   </MessagingStack.Navigator>
 );
@@ -122,11 +114,7 @@ const MessagingStackNavigator: React.FC = () => (
 // Profile Stack
 const ProfileStack = createNativeStackNavigator<ProfileStackParamList>();
 const ProfileStackNavigator: React.FC = () => (
-  <ProfileStack.Navigator
-    screenOptions={{
-      headerShown: false,
-      ...NAVIGATION_ANIMATIONS.stack,
-    }}>
+  <ProfileStack.Navigator screenOptions={UNIFIED_NAVIGATION.stack}>
     {/* Modern Premium Profile Screen */}
     <ProfileStack.Screen name="Profile" component={ProfileScreen} />
     <ProfileStack.Screen name="EditProfile" component={EditProfileScreen} />

@@ -3,15 +3,15 @@
 // Backend: NotificationResponse DTO
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
-import React, { memo, useCallback } from 'react';
-import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
+import React, { memo } from 'react';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
 import type { NotificationResponse, NotificationType } from '../types';
 
 export interface NotificationItemProps {
   notification: NotificationResponse;
-  onPress: (notification: NotificationResponse) => void;
+  onPress?: (notification: NotificationResponse) => void;
   onLongPress?: (notification: NotificationResponse) => void;
 }
 
@@ -93,76 +93,60 @@ const formatRelativeTime = (dateString: string): string => {
   });
 };
 
-export const NotificationItem: React.FC<NotificationItemProps> = memo(
-  ({ notification, onPress, onLongPress }) => {
-    const colors = useColors();
+export const NotificationItem: React.FC<NotificationItemProps> = memo(({ notification }) => {
+  const colors = useColors();
 
-    const handlePress = useCallback(() => {
-      onPress(notification);
-    }, [notification, onPress]);
+  // Backend: read field (boolean)
+  const isUnread = !notification.read;
 
-    const handleLongPress = useCallback(() => {
-      onLongPress?.(notification);
-    }, [notification, onLongPress]);
+  // Backend icon field (derived) veya type'dan hesapla
+  const iconConfig = notification.icon
+    ? { name: notification.icon, color: notification.color || colors.text.tertiary }
+    : getNotificationIcon(notification.type, colors);
 
-    // Backend: read field (boolean)
-    const isUnread = !notification.read;
+  // Metadata'dan resim URL'i
+  const imageUrl = notification.metadata?.imageUrl || notification.metadata?.actorAvatarUrl;
 
-    // Backend icon field (derived) veya type'dan hesapla
-    const iconConfig = notification.icon
-      ? { name: notification.icon, color: notification.color || colors.text.tertiary }
-      : getNotificationIcon(notification.type, colors);
+  // Backend relativeTime field veya hesaplanan
+  const displayTime = notification.relativeTime || formatRelativeTime(notification.createdAt);
 
-    // Metadata'dan resim URL'i
-    const imageUrl = notification.metadata?.imageUrl || notification.metadata?.actorAvatarUrl;
-
-    // Backend relativeTime field veya hesaplanan
-    const displayTime = notification.relativeTime || formatRelativeTime(notification.createdAt);
-
-    return (
-      <Pressable
-        onPress={handlePress}
-        onLongPress={handleLongPress}
-        style={({ pressed }) => [
-          styles.container,
-          {
-            backgroundColor: isUnread
-              ? colors.interactive.subtle
-              : pressed
-                ? colors.background.secondary
-                : colors.background.primary,
-          },
-        ]}>
-        {/* Icon or Image */}
-        <View style={styles.iconContainer}>
-          {imageUrl ? (
-            <Image source={{ uri: imageUrl }} style={styles.image} />
-          ) : (
-            <View style={[styles.iconCircle, { backgroundColor: `${iconConfig.color}20` }]}>
-              <Icon name={iconConfig.name} size={20} color={iconConfig.color} />
-            </View>
-          )}
-        </View>
-        /* Content */
-        <View style={styles.content}>
-          <Text
-            style={[styles.title, { color: colors.text.primary }, isUnread && styles.titleUnread]}
-            numberOfLines={1}>
-            {notification.title}
-          </Text>
-          <Text style={[styles.body, { color: colors.text.secondary }]} numberOfLines={2}>
-            {notification.body}
-          </Text>
-          <Text style={[styles.time, { color: colors.text.secondary }]}>{displayTime}</Text>
-        </View>
-        {/* Unread indicator */}
-        {isUnread && (
-          <View style={[styles.unreadDot, { backgroundColor: colors.interactive.default }]} />
+  return (
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: isUnread ? colors.interactive.subtle : colors.background.primary,
+        },
+      ]}>
+      {/* Icon or Image */}
+      <View style={styles.iconContainer}>
+        {imageUrl ? (
+          <Image source={{ uri: imageUrl }} style={styles.image} />
+        ) : (
+          <View style={[styles.iconCircle, { backgroundColor: `${iconConfig.color}20` }]}>
+            <Icon name={iconConfig.name} size={20} color={iconConfig.color} />
+          </View>
         )}
-      </Pressable>
-    );
-  },
-);
+      </View>
+      {/* Content */}
+      <View style={styles.content}>
+        <Text
+          style={[styles.title, { color: colors.text.primary }, isUnread && styles.titleUnread]}
+          numberOfLines={1}>
+          {notification.title}
+        </Text>
+        <Text style={[styles.body, { color: colors.text.secondary }]} numberOfLines={2}>
+          {notification.body}
+        </Text>
+        <Text style={[styles.time, { color: colors.text.secondary }]}>{displayTime}</Text>
+      </View>
+      {/* Unread indicator */}
+      {isUnread && (
+        <View style={[styles.unreadDot, { backgroundColor: colors.interactive.default }]} />
+      )}
+    </View>
+  );
+});
 
 NotificationItem.displayName = 'NotificationItem';
 

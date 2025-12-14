@@ -16,7 +16,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
-import { Button, Input } from '@shared/components';
+import { Button, Input, SuccessCelebration } from '@shared/components';
 import { spacing, fontSize } from '@theme';
 import { AvatarPicker } from '../components';
 import {
@@ -62,10 +62,13 @@ export const EditProfileScreen: React.FC = () => {
   const [bio, setBio] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [gender, setGender] = useState<Gender | null>(null);
-  
+
   // Avatar state - pending upload
   const [pendingAvatarUri, setPendingAvatarUri] = useState<string | null>(null);
   const [shouldDeleteAvatar, setShouldDeleteAvatar] = useState(false);
+
+  // Success celebration state
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Track changes for save button
   const [hasChanges, setHasChanges] = useState(false);
@@ -102,13 +105,10 @@ export const EditProfileScreen: React.FC = () => {
   }, [name, surname, bio, dateOfBirth, gender, profile, pendingAvatarUri, shouldDeleteAvatar]);
 
   // Handle avatar selection (just set pending, don't upload yet)
-  const handleAvatarSelected = useCallback(
-    (uri: string) => {
-      setPendingAvatarUri(uri);
-      setShouldDeleteAvatar(false); // Cancel any pending delete
-    },
-    [],
-  );
+  const handleAvatarSelected = useCallback((uri: string) => {
+    setPendingAvatarUri(uri);
+    setShouldDeleteAvatar(false); // Cancel any pending delete
+  }, []);
 
   // Handle avatar removal (just mark for deletion, don't delete yet)
   const handleAvatarRemove = useCallback(() => {
@@ -158,15 +158,13 @@ export const EditProfileScreen: React.FC = () => {
         await updateProfile.mutateAsync(updateData);
       }
 
-      // Success
-      Alert.alert('Başarılı', 'Profiliniz güncellendi.', [
-        { text: 'Tamam', onPress: () => navigation.goBack() },
-      ]);
-      
+      // Success - Show celebration
+      setShowSuccess(true);
+
       // Clear pending states
       setPendingAvatarUri(null);
       setShouldDeleteAvatar(false);
-      
+
       // Refetch to update UI
       refetch();
     } catch (error: any) {
@@ -210,10 +208,16 @@ export const EditProfileScreen: React.FC = () => {
           keyboardShouldPersistTaps="handled">
           {/* Avatar Picker */}
           <AvatarPicker
-            currentAvatarUrl={pendingAvatarUri || (shouldDeleteAvatar ? null : profile?.avatarUrl ?? null)}
+            currentAvatarUrl={
+              pendingAvatarUri || (shouldDeleteAvatar ? null : (profile?.avatarUrl ?? null))
+            }
             fullName={profile?.fullName || 'Kullanıcı'}
             onImageSelected={handleAvatarSelected}
-            onRemove={(profile?.avatarUrl || pendingAvatarUri) && !shouldDeleteAvatar ? handleAvatarRemove : undefined}
+            onRemove={
+              (profile?.avatarUrl || pendingAvatarUri) && !shouldDeleteAvatar
+                ? handleAvatarRemove
+                : undefined
+            }
             isLoading={false}
           />
 
@@ -288,6 +292,19 @@ export const EditProfileScreen: React.FC = () => {
           />
         </View>
       </KeyboardAvoidingView>
+
+      {/* Success Celebration */}
+      <SuccessCelebration
+        visible={showSuccess}
+        type="checkmark"
+        onComplete={() => {
+          setShowSuccess(false);
+          setPendingAvatarUri(null);
+          setShouldDeleteAvatar(false);
+          refetch();
+          navigation.goBack();
+        }}
+      />
     </SafeAreaView>
   );
 };
