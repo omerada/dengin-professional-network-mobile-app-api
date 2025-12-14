@@ -263,7 +263,7 @@ export const ProfileScreen: React.FC = () => {
             <Image
               source={{ uri: profile.avatarUrl }}
               style={styles.blurredBackground}
-              blurRadius={5}
+              blurRadius={8}
             />
           ) : (
             <View

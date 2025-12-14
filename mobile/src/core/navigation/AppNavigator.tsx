@@ -45,14 +45,32 @@ export const goBack = () => {
 
 /**
  * Reset navigation state
+ * Waits for navigation to be ready before attempting reset
  */
 export const resetNavigation = (
   index: number,
   routes: Array<{ name: keyof RootStackParamList; params?: any }>,
 ) => {
-  if (navigationRef.isReady()) {
-    navigationRef.reset({ index, routes });
-  }
+  // Use a small delay to ensure navigation is fully initialized
+  // This prevents "The action 'RESET' was not handled" errors
+  const attemptReset = () => {
+    if (navigationRef.isReady()) {
+      try {
+        navigationRef.reset({ index, routes });
+      } catch (error) {
+        if (__DEV__) {
+          console.warn('[Navigation] Reset failed, retrying...', error);
+        }
+        // Retry after a short delay
+        setTimeout(attemptReset, 100);
+      }
+    } else {
+      // Navigation not ready, retry after a short delay
+      setTimeout(attemptReset, 50);
+    }
+  };
+
+  attemptReset();
 };
 
 /**

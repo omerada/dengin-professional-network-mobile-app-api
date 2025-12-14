@@ -69,4 +69,5 @@ export const CustomRefreshControl = memo<CustomRefreshControlProps>(
 
 CustomRefreshControl.displayName = 'CustomRefreshControl';
 
+export { CustomRefreshControl };
 export default CustomRefreshControl;

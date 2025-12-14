@@ -69,10 +69,13 @@ export const useBiometricLogin = () => {
       await tokenService.saveTokens(tokens);
 
       // Update auth store
+      // This will automatically trigger navigation through AppNavigator's isAuthenticated check
       setUser(user);
 
-      // Navigate to main app using helper function
-      resetNavigation(0, [{ name: 'Main' }]);
+      // No need to manually navigate - AppNavigator will re-render with isAuthenticated=true
+      if (__DEV__) {
+        console.log('[useBiometricLogin] Biometric login successful, auth state updated');
+      }
     },
 
     onError: (error: Error) => {

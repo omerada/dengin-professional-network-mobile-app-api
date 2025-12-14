@@ -40,7 +40,6 @@ export const SettingsScreen: React.FC = () => {
   // Theme state
   const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
   const isDark = themeMode === 'system' ? systemColorScheme === 'dark' : themeMode === 'dark';
-
   // Load theme preference on mount
   React.useEffect(() => {
     const loadTheme = async () => {

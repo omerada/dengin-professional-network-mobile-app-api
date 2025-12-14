@@ -143,12 +143,42 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 /**
  * Hook to access theme context
  * Provides full theme access with type safety
+ *
+ * PRODUCTION-READY: Falls back to system theme if ThemeProvider is not available
  */
 export const useTheme = (): ThemeContextValue => {
   const context = useContext(ThemeContext);
 
   if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    // FALLBACK: Return default theme context instead of throwing error
+    // This prevents crashes when component is used outside ThemeProvider
+    const systemColorScheme = useColorScheme();
+    const isDarkMode = systemColorScheme === 'dark';
+    const fallbackTheme = isDarkMode ? dark : light;
+
+    if (__DEV__) {
+      console.warn('[ThemeContext] useTheme called outside ThemeProvider. Using fallback theme.');
+    }
+
+    return {
+      theme: fallbackTheme,
+      colors: fallbackTheme.colors,
+      typography: fallbackTheme.typography,
+      spacing: fallbackTheme.spacing,
+      shadows: fallbackTheme.shadows,
+      isDark: isDarkMode,
+      themeMode: 'system',
+      setThemeMode: () => {
+        if (__DEV__) {
+          console.warn('[ThemeContext] setThemeMode called outside ThemeProvider');
+        }
+      },
+      toggleTheme: () => {
+        if (__DEV__) {
+          console.warn('[ThemeContext] toggleTheme called outside ThemeProvider');
+        }
+      },
+    };
   }
 
   return context;
@@ -157,12 +187,14 @@ export const useTheme = (): ThemeContextValue => {
 /**
  * Hook for animated theme transitions
  * Returns animated style that transitions between light/dark
+ *
+ * PRODUCTION-READY: Works with fallback theme
  */
 export const useAnimatedThemeStyle = (
   lightStyle: Record<string, string>,
   darkStyle: Record<string, string>,
 ) => {
-  const { isDark } = useTheme();
+  const { isDark } = useTheme(); // Now safe with fallback
   const progress = useSharedValue(isDark ? 1 : 0);
 
   useEffect(() => {

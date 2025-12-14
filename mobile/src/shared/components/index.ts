@@ -69,6 +69,10 @@ export { CustomRefreshControl } from './CustomRefreshControl';
 
 export { PulseLoader } from './PulseLoader';
 
+// ScreenHeader component
+export { ScreenHeader } from './ScreenHeader';
+export type { ScreenHeaderProps, ScreenHeaderVariant } from './ScreenHeader';
+
 // EmptyState Presets - Production UX Enhancement
 export {
   EmptyStatePreset,
