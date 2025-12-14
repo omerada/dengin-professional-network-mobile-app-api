@@ -11,6 +11,7 @@ import Animated from 'react-native-reanimated';
 import { SCREEN_ANIMATIONS } from '@constants/animationPresets';
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
+import { fontSize } from '@theme';
 
 /**
  * VerificationStatusScreen - Doğrulama durumu ekranı
@@ -82,7 +83,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   description: {
-    fontSize: 16,
+    fontSize: fontSize.base,
     lineHeight: 24,
     textAlign: 'center',
   },
@@ -98,7 +99,7 @@ const styles = StyleSheet.create({
     width: 40,
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: fontSize.lg,
     fontWeight: '700',
     letterSpacing: 0.2,
   },
@@ -111,7 +112,7 @@ const styles = StyleSheet.create({
     width: 120,
   },
   title: {
-    fontSize: 24,
+    fontSize: fontSize['2xl'],
     fontWeight: '700',
     marginBottom: 12,
     textAlign: 'center',

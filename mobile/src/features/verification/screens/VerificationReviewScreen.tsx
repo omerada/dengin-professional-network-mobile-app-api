@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, typography, fontSize } from '@theme';
 import { Button, SuccessCelebration } from '@shared/components';
 import { useVerificationStore } from '../stores';
 import { StepIndicator, ImagePreview } from '../components';
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   checkIcon: {
-    fontSize: 16,
+    fontSize: fontSize.base,
     marginRight: spacing.sm,
   },
   checkText: {

@@ -222,6 +222,8 @@ export const ConversationListScreen: React.FC = () => {
                 onRefresh={refetch}
                 colors={[colors.interactive.default]}
                 tintColor={colors.interactive.default}
+                progressBackgroundColor={colors.background.primary}
+                titleColor={colors.text.secondary}
               />
             }
             contentContainerStyle={[

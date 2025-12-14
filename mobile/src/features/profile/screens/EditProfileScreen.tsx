@@ -9,7 +9,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { Button, Input, SuccessCelebration } from '@shared/components';
+import { useHaptic } from '@shared/hooks/useHaptic';
+import { Button, Input, SuccessCelebration, ActionFeedback } from '@shared/components';
+import { HAPTIC_TYPES } from '@constants/hapticPresets';
 import { spacing, fontSize } from '@theme';
 import { AvatarPicker } from '../components';
 import {
@@ -41,6 +43,7 @@ export const EditProfileScreen: React.FC = () => {
   const colors = useColors();
   const toast = useToast();
   const navigation = useNavigation();
+  const { trigger } = useHaptic();
 
   // Fetch current profile
   const { data: profile, isLoading: _isLoadingProfile, refetch } = useMyProfile();
@@ -152,7 +155,8 @@ export const EditProfileScreen: React.FC = () => {
         await updateProfile.mutateAsync(updateData);
       }
 
-      // Success - Show celebration
+      // Success - Show celebration with haptic
+      trigger(HAPTIC_TYPES.success);
       setShowSuccess(true);
       toast.success('Profil güncellendi');
 
@@ -164,6 +168,7 @@ export const EditProfileScreen: React.FC = () => {
       refetch();
     } catch (error: any) {
       console.error('[EditProfileScreen] Save error:', error);
+      trigger(HAPTIC_TYPES.error);
       toast.error(error.message || 'Profil güncellenirken bir hata oluştu.');
     }
   }, [
@@ -287,6 +292,20 @@ export const EditProfileScreen: React.FC = () => {
           />
         </View>
       </KeyboardAvoidingView>
+
+      {/* Success Feedback */}
+      <ActionFeedback
+        type="success"
+        visible={showSuccess}
+        duration={1200}
+        onDismiss={() => {
+          setShowSuccess(false);
+          setPendingAvatarUri(null);
+          setShouldDeleteAvatar(false);
+          refetch();
+          navigation.goBack();
+        }}
+      />
 
       {/* Success Celebration */}
       <SuccessCelebration

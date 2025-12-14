@@ -26,7 +26,8 @@ import { useFeedStore } from '../stores';
 import { useCreatePost } from '../hooks';
 import { imagePickerService } from '../services';
 import { PostTextInput, ImagePreviewGrid } from '../components';
-import { SuccessCelebration } from '@shared/components';
+import { SuccessCelebration, ActionFeedback } from '@shared/components';
+import { HAPTIC_TYPES } from '@constants/hapticPresets';
 import type { UploadProgress, FeedStoreState } from '../types';
 
 /**
@@ -108,8 +109,12 @@ export const CreatePostScreen: React.FC = () => {
       },
       {
         onSuccess: () => {
+          trigger(HAPTIC_TYPES.success); // Success haptic feedback
           clearDraft();
           setShowSuccess(true);
+        },
+        onError: () => {
+          trigger(HAPTIC_TYPES.error); // Error haptic feedback
         },
       },
     );
@@ -317,6 +322,17 @@ export const CreatePostScreen: React.FC = () => {
           </Text>
         </Animated.View>
       </KeyboardAvoidingView>
+
+      {/* Success Feedback */}
+      <ActionFeedback
+        type="success"
+        visible={showSuccess}
+        duration={1200}
+        onDismiss={() => {
+          setShowSuccess(false);
+          navigation.goBack();
+        }}
+      />
 
       {/* Success Celebration */}
       <SuccessCelebration

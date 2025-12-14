@@ -180,19 +180,21 @@ export const FeedScreen: React.FC = memo(() => {
    */
   const handleDeletePost = useCallback(() => {
     if (selectedPost) {
+      trigger(HAPTIC_TYPES.warning); // Critical action feedback
       Alert.alert('Gönderiyi Sil', 'Bu gönderiyi silmek istediğinize emin misiniz?', [
         { text: 'İptal', style: 'cancel' },
         {
           text: 'Sil',
           style: 'destructive',
           onPress: () => {
+            trigger(HAPTIC_TYPES.delete); // Confirm deletion feedback
             deletePost.mutate(selectedPost.id);
             handleCloseActionSheet();
           },
         },
       ]);
     }
-  }, [selectedPost, deletePost, handleCloseActionSheet]);
+  }, [selectedPost, deletePost, handleCloseActionSheet, trigger]);
 
   /**
    * Report post
@@ -392,6 +394,7 @@ export const FeedScreen: React.FC = memo(() => {
         tintColor={colors.interactive.default}
         colors={[colors.interactive.default]}
         progressBackgroundColor={colors.background.primary}
+        titleColor={colors.text.secondary}
       />
     ),
     [isRefetching, handleRefresh, colors],

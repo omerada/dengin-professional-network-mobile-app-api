@@ -172,7 +172,8 @@ export const ProfileScreen: React.FC = () => {
     (isFollowing: boolean) => {
       if (!viewedUserId) return;
 
-      trigger(HAPTIC_TYPES.buttonPress);
+      // Critical social action - stronger haptic feedback
+      trigger(isFollowing ? HAPTIC_TYPES.warning : HAPTIC_TYPES.buttonPressImportant);
 
       if (isFollowing) {
         // Currently following, so unfollow
@@ -200,7 +201,7 @@ export const ProfileScreen: React.FC = () => {
         });
       }
     },
-    [viewedUserId, followMutation, unfollowMutation, trigger],
+    [viewedUserId, followMutation, unfollowMutation, trigger, toast],
   );
 
   // Loading state
@@ -239,6 +240,9 @@ export const ProfileScreen: React.FC = () => {
             refreshing={isRefetching}
             onRefresh={handleRefresh}
             tintColor={colors.interactive.default}
+            colors={[colors.interactive.default]}
+            progressBackgroundColor={colors.background.primary}
+            titleColor={colors.text.secondary}
           />
         }>
         {/* Modern Premium Header */}

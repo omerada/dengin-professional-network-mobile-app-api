@@ -28,7 +28,7 @@ import { useLogin, useBiometricLogin } from '../hooks';
 import { useAuthStore } from '../stores';
 import { loginSchema, LoginSchemaType } from '../validation';
 import { AuthStackNavigationProp } from '@shared/types';
-import { spacing } from '@theme';
+import { spacing, fontSize } from '@theme';
 
 /**
  * Modern Login Screen
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
     width: 40,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: fontSize.xl,
     fontWeight: '600',
   },
   heroSection: {
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
   },
   socialButtonLargeText: {
-    fontSize: 16,
+    fontSize: fontSize.base,
     fontWeight: '600',
   },
   socialButtonsColumn: {

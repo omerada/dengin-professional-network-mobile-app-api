@@ -32,6 +32,7 @@ export { ActivityScreenSkeleton } from './Skeleton/ActivityScreenSkeleton';
 export { AnimatedListItem } from './AnimatedListItem';
 export { AnimatedCounter } from './AnimatedCounter';
 export { AnimatedBadge } from './AnimatedBadge';
+export { AnimatedCheckmark } from './AnimatedCheckmark';
 export { SuccessCelebration } from './SuccessCelebration';
 export { ShakeAnimation } from './ShakeAnimation';
 
@@ -50,6 +51,21 @@ export type { CardProps, CardVariant, CardPadding } from './Card';
 
 export { EmptyState } from './EmptyState';
 export type { EmptyStateProps } from './EmptyState';
+
+export { ProgressiveImage } from './ProgressiveImage';
+
+export { HeroImage } from './HeroImage';
+export type { HeroImageProps } from './HeroImage';
+
+export { SwipeableCard } from './SwipeableCard';
+export type { SwipeableCardProps } from './SwipeableCard';
+
+export { ActionFeedback } from './ActionFeedback';
+export type { ActionFeedbackProps, ActionFeedbackType } from './ActionFeedback';
+
+export { CustomRefreshControl } from './CustomRefreshControl';
+
+export { PulseLoader } from './PulseLoader';
 
 // EmptyState Presets - Production UX Enhancement
 export {
@@ -163,3 +179,7 @@ export type { SwipeableRowProps, SwipeableRowRef, SwipeAction } from './Swipeabl
 // LoadingStateWrapper component - Production UX Improvement
 export { LoadingStateWrapper } from './LoadingStateWrapper';
 export type { LoadingStateWrapperProps } from './LoadingStateWrapper';
+
+// FormField component - Real-time validation UX
+export { FormField, ValidationHelpers } from './FormField';
+export type { FormFieldProps, ValidationRule } from './FormField';

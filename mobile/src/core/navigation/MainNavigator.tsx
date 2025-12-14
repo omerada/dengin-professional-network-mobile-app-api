@@ -13,6 +13,7 @@ import {
   ProfileStackParamList,
 } from '@shared/types';
 import { AnimatedTabBar, TabItem } from './components/AnimatedTabBar';
+import { TabScreenWrapper } from './components/TabScreenWrapper';
 import { UNIFIED_NAVIGATION } from '@constants/unifiedNavigation';
 
 // Screens
@@ -148,8 +149,20 @@ export const MainNavigator: React.FC = () => {
       screenOptions={{
         headerShown: false,
       }}>
-      <Tab.Screen name="FeedTab" component={FeedStackNavigator} />
-      <Tab.Screen name="MessagingTab" component={MessagingStackNavigator} />
+      <Tab.Screen name="FeedTab">
+        {() => (
+          <TabScreenWrapper>
+            <FeedStackNavigator />
+          </TabScreenWrapper>
+        )}
+      </Tab.Screen>
+      <Tab.Screen name="MessagingTab">
+        {() => (
+          <TabScreenWrapper>
+            <MessagingStackNavigator />
+          </TabScreenWrapper>
+        )}
+      </Tab.Screen>
       <Tab.Screen
         name="CreatePostTab"
         component={FeedStackNavigator}
@@ -162,8 +175,20 @@ export const MainNavigator: React.FC = () => {
           },
         })}
       />
-      <Tab.Screen name="ActivityTab" component={ActivityScreen} />
-      <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} />
+      <Tab.Screen name="ActivityTab">
+        {() => (
+          <TabScreenWrapper>
+            <ActivityScreen />
+          </TabScreenWrapper>
+        )}
+      </Tab.Screen>
+      <Tab.Screen name="ProfileTab">
+        {() => (
+          <TabScreenWrapper>
+            <ProfileStackNavigator />
+          </TabScreenWrapper>
+        )}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 };

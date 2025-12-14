@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, typography, fontSize } from '@theme';
 import { HAPTIC_TYPES } from '@constants/hapticPresets';
 import { Button } from '@shared/components';
 import { useHaptic } from '@shared/hooks/useHaptic';
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   securityIcon: {
-    fontSize: 20,
+    fontSize: fontSize.xl,
     marginRight: spacing.sm,
   },
   securityNote: {

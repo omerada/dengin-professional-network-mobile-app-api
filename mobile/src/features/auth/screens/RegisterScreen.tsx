@@ -25,7 +25,7 @@ import { SectorSelector } from '../components';
 import { useRegister } from '../hooks';
 import { registerSchema, RegisterSchemaType } from '../validation';
 import { AuthStackNavigationProp } from '@shared/types';
-import { spacing } from '@theme';
+import { spacing, fontSize } from '@theme';
 
 /**
  * Modern Register Screen
@@ -485,7 +485,7 @@ const styles = StyleSheet.create({
     marginLeft: spacing.md,
   },
   title: {
-    fontSize: 28,
+    fontSize: fontSize['2xl'],
     fontWeight: 'bold',
     marginBottom: spacing.sm,
   },

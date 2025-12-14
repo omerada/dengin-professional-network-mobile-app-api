@@ -149,6 +149,8 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
             onRefresh={refetch}
             colors={[colors.interactive.default]}
             tintColor={colors.interactive.default}
+            progressBackgroundColor={colors.background.primary}
+            titleColor={colors.text.secondary}
           />
         }
         onEndReached={handleEndReached}

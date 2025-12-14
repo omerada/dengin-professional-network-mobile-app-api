@@ -55,7 +55,7 @@ export const PressableScale = memo<PressableScaleProps>(
     onPress,
     onPressIn,
     onPressOut,
-    scaleValue = 0.96,
+    scaleValue = 0.96, // UNIFIED: Standardized press scale across app
     enableHaptic = false,
     hapticType = 'light',
     style,

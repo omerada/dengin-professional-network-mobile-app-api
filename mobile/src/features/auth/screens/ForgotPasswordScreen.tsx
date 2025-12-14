@@ -25,7 +25,7 @@ import { Button, Input } from '@shared/components';
 import { useForgotPassword } from '../hooks';
 import { forgotPasswordSchema, ForgotPasswordSchemaType } from '../validation';
 import { AuthStackNavigationProp } from '@shared/types';
-import { spacing } from '@theme';
+import { spacing, fontSize } from '@theme';
 
 /**
  * Modern Forgot Password Screen
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
     width: 40,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: fontSize.xl,
     fontWeight: '600',
   },
   keyboardAvoid: {

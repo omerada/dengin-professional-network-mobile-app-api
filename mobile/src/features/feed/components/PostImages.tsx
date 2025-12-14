@@ -16,6 +16,7 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { ProgressiveImage } from '@shared/components';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const IMAGE_GAP = 2;
@@ -46,10 +47,11 @@ export const PostImages: React.FC<PostImagesProps> = memo(({ images, postId }) =
     return (
       <>
         <Pressable onPress={() => openImage(0)}>
-          <Image
+          <ProgressiveImage
             source={{ uri: imageUrl }}
             style={[styles.singleImage, { height: 300, width: screenWidth }]}
             resizeMode="cover"
+            showLoadingIndicator
           />
         </Pressable>
         <ImageModal
@@ -72,7 +74,12 @@ export const PostImages: React.FC<PostImagesProps> = memo(({ images, postId }) =
               key={`${postId}-image-${index}`}
               style={styles.twoImageItem}
               onPress={() => openImage(index)}>
-              <Image source={{ uri: imageUrl }} style={styles.twoImageContent} resizeMode="cover" />
+              <ProgressiveImage
+                source={{ uri: imageUrl }}
+                style={styles.twoImageContent}
+                resizeMode="cover"
+                showLoadingIndicator
+              />
             </Pressable>
           ))}
         </View>
@@ -92,10 +99,11 @@ export const PostImages: React.FC<PostImagesProps> = memo(({ images, postId }) =
       <>
         <View style={styles.threeImages}>
           <Pressable style={styles.threeImageMain} onPress={() => openImage(0)}>
-            <Image
+            <ProgressiveImage
               source={{ uri: images[0] }}
               style={styles.threeImageMainContent}
               resizeMode="cover"
+              showLoadingIndicator
             />
           </Pressable>
           <View style={styles.threeImageSide}>
@@ -104,10 +112,11 @@ export const PostImages: React.FC<PostImagesProps> = memo(({ images, postId }) =
                 key={`${postId}-image-${index + 1}`}
                 style={styles.threeImageSideItem}
                 onPress={() => openImage(index + 1)}>
-                <Image
+                <ProgressiveImage
                   source={{ uri: imageUrl }}
                   style={styles.threeImageSideContent}
                   resizeMode="cover"
+                  showLoadingIndicator
                 />
               </Pressable>
             ))}
@@ -132,7 +141,12 @@ export const PostImages: React.FC<PostImagesProps> = memo(({ images, postId }) =
             key={`${postId}-image-${index}`}
             style={styles.fourImageItem}
             onPress={() => openImage(index)}>
-            <Image source={{ uri: imageUrl }} style={styles.fourImageContent} resizeMode="cover" />
+            <ProgressiveImage
+              source={{ uri: imageUrl }}
+              style={styles.fourImageContent}
+              resizeMode="cover"
+              showLoadingIndicator
+            />
             {index === 3 && images.length > 4 && (
               <View style={styles.moreOverlay}>
                 <Text style={styles.moreText}>+{images.length - 4}</Text>

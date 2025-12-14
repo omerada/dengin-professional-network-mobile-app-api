@@ -17,6 +17,7 @@ import {
   navigateToUserProfile,
 } from '@core/navigation';
 import { SCREEN_ANIMATIONS } from '@constants';
+import { fontSize } from '@theme';
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
 
@@ -300,7 +301,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: fontSize.xl,
     fontWeight: '700',
     letterSpacing: 0.2,
   },
