@@ -126,39 +126,39 @@ export const BlockedUserItem = React.memo<BlockedUserItemProps>(({ user, onUnblo
 BlockedUserItem.displayName = 'BlockedUserItem';
 
 const styles = StyleSheet.create({
+  blockedDate: {
+    fontSize: fontSize.sm,
+    marginTop: spacing.xs,
+  },
   container: {
-    flexDirection: 'row',
     alignItems: 'center',
+    borderRadius: borderRadius.md,
+    flexDirection: 'row',
     justifyContent: 'space-between',
     padding: spacing.md,
-    borderRadius: borderRadius.md,
-  },
-  userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    marginRight: spacing.md,
-  },
-  textContainer: {
-    marginLeft: spacing.md,
-    flex: 1,
   },
   name: {
     fontSize: fontSize.md,
     fontWeight: '600',
   },
-  blockedDate: {
-    fontSize: fontSize.sm,
-    marginTop: spacing.xs,
+  textContainer: {
+    flex: 1,
+    marginLeft: spacing.md,
   },
   unblocked: {
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
     padding: spacing.lg,
   },
   unblockedText: {
     fontSize: fontSize.md,
     fontWeight: '500',
+  },
+  userInfo: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flex: 1,
+    marginRight: spacing.md,
   },
 });
 

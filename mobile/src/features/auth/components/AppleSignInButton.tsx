@@ -75,11 +75,11 @@ export const AppleSignInButton: React.FC<AppleSignInButtonProps> = memo(
 
 const styles = StyleSheet.create({
   button: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    height: 52,
     borderRadius: 12,
+    flexDirection: 'row',
+    height: 52,
+    justifyContent: 'center',
   },
   icon: {
     marginRight: spacing.sm,

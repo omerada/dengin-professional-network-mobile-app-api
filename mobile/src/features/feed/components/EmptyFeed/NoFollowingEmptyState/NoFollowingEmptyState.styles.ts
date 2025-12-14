@@ -6,53 +6,34 @@ import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   container: {
+    alignItems: 'center',
     flex: 1,
+    justifyContent: 'center',
     paddingHorizontal: 24,
     paddingVertical: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 
-  iconContainer: {
-    marginBottom: 24,
-  },
-
-  title: {
-    fontSize: 22,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-
-  subtitle: {
-    fontSize: 15,
-    lineHeight: 22,
-    textAlign: 'center',
-    marginBottom: 32,
-    paddingHorizontal: 8,
-  },
-
-  expertsPreviewContainer: {
+  ctaButtonsContainer: {
+    gap: 12,
     width: '100%',
-    marginBottom: 24,
-  },
-
-  expertCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    marginBottom: 8,
-    borderRadius: 12,
-    borderWidth: 1,
   },
 
   expertAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: 12,
-    justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 24,
+    height: 48,
+    justifyContent: 'center',
+    marginRight: 12,
+    width: 48,
+  },
+
+  expertCard: {
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: 'row',
+    marginBottom: 8,
+    padding: 12,
   },
 
   expertInfo: {
@@ -66,22 +47,23 @@ export const styles = StyleSheet.create({
   },
 
   expertNameWithBadge: {
-    flexDirection: 'row',
     alignItems: 'center',
-  },
-
-  verifiedBadge: {
-    marginLeft: 4,
+    flexDirection: 'row',
   },
 
   expertProfession: {
     fontSize: 13,
   },
 
+  expertsPreviewContainer: {
+    marginBottom: 24,
+    width: '100%',
+  },
+
   followButton: {
+    borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 8,
   },
 
   followButtonText: {
@@ -89,17 +71,16 @@ export const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  ctaButtonsContainer: {
-    width: '100%',
-    gap: 12,
+  iconContainer: {
+    marginBottom: 24,
   },
 
   primaryButton: {
-    width: '100%',
-    height: 52,
-    borderRadius: 12,
-    justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 12,
+    height: 52,
+    justifyContent: 'center',
+    width: '100%',
   },
 
   primaryButtonText: {
@@ -108,16 +89,35 @@ export const styles = StyleSheet.create({
   },
 
   secondaryButton: {
-    width: '100%',
-    height: 48,
-    borderRadius: 12,
-    justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 12,
     borderWidth: 1.5,
+    height: 48,
+    justifyContent: 'center',
+    width: '100%',
   },
 
   secondaryButtonText: {
     fontSize: 15,
     fontWeight: '600',
+  },
+
+  subtitle: {
+    fontSize: 15,
+    lineHeight: 22,
+    marginBottom: 32,
+    paddingHorizontal: 8,
+    textAlign: 'center',
+  },
+
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+
+  verifiedBadge: {
+    marginLeft: 4,
   },
 });

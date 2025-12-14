@@ -204,51 +204,51 @@ FeedSkeleton.displayName = 'FeedSkeleton';
 // ============================================================================
 
 const styles = StyleSheet.create({
+  actions: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing['4'],
+  },
+  actionsLeft: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing['4'],
+  },
   container: {
     flex: 1,
   },
-  postContainer: {
-    width: SCREEN_WIDTH,
-    paddingVertical: spacing['3'],
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E0E0E0',
+  content: {
+    marginBottom: spacing['3'],
+    paddingHorizontal: spacing['4'],
   },
   header: {
-    flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: spacing['4'],
+    flexDirection: 'row',
     marginBottom: spacing['3'],
+    paddingHorizontal: spacing['4'],
   },
   headerText: {
     flex: 1,
     marginLeft: spacing['3'],
   },
-  subHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: spacing['1'],
-  },
-  content: {
-    paddingHorizontal: spacing['4'],
+  imageContainer: {
     marginBottom: spacing['3'],
+    paddingHorizontal: spacing['4'],
+  },
+  postContainer: {
+    borderBottomColor: '#E0E0E0',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingVertical: spacing['3'],
+    width: SCREEN_WIDTH,
   },
   spacerSm: {
     height: spacing['1.5'],
   },
-  imageContainer: {
-    paddingHorizontal: spacing['4'],
-    marginBottom: spacing['3'],
-  },
-  actions: {
-    flexDirection: 'row',
+  subHeaderRow: {
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing['4'],
-  },
-  actionsLeft: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing['4'],
+    marginTop: spacing['1'],
   },
 });
 

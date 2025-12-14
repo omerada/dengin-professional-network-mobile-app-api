@@ -105,17 +105,17 @@ export const UnifiedLoadingState: React.FC<UnifiedLoadingStateProps> = ({
 
 const styles = StyleSheet.create({
   centerContainer: {
+    alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
     paddingVertical: spacing.xl,
+  },
+  inlineContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.lg,
   },
   skeletonContainer: {
     flex: 1,
-  },
-  inlineContainer: {
-    paddingVertical: spacing.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });

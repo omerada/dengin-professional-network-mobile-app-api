@@ -371,35 +371,35 @@ const ActionButton = memo<ActionButtonProps>(function ActionButton({
 // ============================================================================
 
 const styles = StyleSheet.create({
-  container: {
-    overflow: 'hidden',
-  },
-  content: {
-    backgroundColor: 'transparent',
-  },
-  actionsContainer: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    flexDirection: 'row',
-    overflow: 'hidden',
-  },
-  leftActions: {
-    left: 0,
-    justifyContent: 'flex-start',
-  },
-  rightActions: {
-    right: 0,
-    justifyContent: 'flex-end',
-  },
   actionButton: {
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 8,
   },
   actionLabel: {
     fontSize: 12,
     fontWeight: '600',
     marginTop: 4,
+  },
+  actionsContainer: {
+    bottom: 0,
+    flexDirection: 'row',
+    overflow: 'hidden',
+    position: 'absolute',
+    top: 0,
+  },
+  container: {
+    overflow: 'hidden',
+  },
+  content: {
+    backgroundColor: 'transparent',
+  },
+  leftActions: {
+    justifyContent: 'flex-start',
+    left: 0,
+  },
+  rightActions: {
+    justifyContent: 'flex-end',
+    right: 0,
   },
 });

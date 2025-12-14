@@ -13,8 +13,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Feather';
 import { SCREEN_ANIMATIONS } from '@constants/animationPresets';
+import { HAPTIC_TYPES } from '@constants/hapticPresets';
 
 import { useColors } from '@contexts/ThemeContext';
+import { useHaptic } from '@shared/hooks/useHaptic';
 import { asyncStorage } from '@core/storage/asyncStorage';
 import { STORAGE_KEYS } from '@core/storage/keys';
 import type { AuthStackNavigationProp } from '@shared/types';
@@ -127,6 +129,7 @@ const PaginationDot: React.FC<DotProps> = ({ active }) => {
 export const OnboardingScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation<AuthStackNavigationProp>();
+  const { trigger } = useHaptic();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
@@ -137,6 +140,7 @@ export const OnboardingScreen: React.FC = () => {
   const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
     if (viewableItems.length > 0 && viewableItems[0].index !== null) {
       setCurrentIndex(viewableItems[0].index);
+      trigger(HAPTIC_TYPES.selection);
     }
   }).current;
 
@@ -149,6 +153,7 @@ export const OnboardingScreen: React.FC = () => {
    */
   const handleNext = () => {
     if (currentIndex < slides.length - 1) {
+      trigger(HAPTIC_TYPES.buttonPress);
       flatListRef.current?.scrollToIndex({
         index: currentIndex + 1,
         animated: true,
@@ -189,6 +194,7 @@ export const OnboardingScreen: React.FC = () => {
           <View style={styles.finalButtons}>
             <TouchableOpacity
               onPress={() => {
+                trigger(HAPTIC_TYPES.buttonPress);
                 asyncStorage.set(STORAGE_KEYS.ONBOARDING_COMPLETED, true);
                 navigation.replace('Login');
               }}
@@ -198,6 +204,7 @@ export const OnboardingScreen: React.FC = () => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
+                trigger(HAPTIC_TYPES.buttonPress);
                 asyncStorage.set(STORAGE_KEYS.ONBOARDING_COMPLETED, true);
                 navigation.replace('Register');
               }}
@@ -233,23 +240,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 16,
   },
-  ctaButtonText: {
-    fontSize: 17,
-    fontWeight: '600',
-    marginRight: 8,
-  },
   ctaButtonOutline: {
     alignItems: 'center',
     borderRadius: 28,
     borderWidth: 2,
     flexDirection: 'row',
     justifyContent: 'center',
-    paddingVertical: 14,
     marginTop: 12,
+    paddingVertical: 14,
   },
   ctaButtonOutlineText: {
     fontSize: 17,
     fontWeight: '600',
+  },
+  ctaButtonText: {
+    fontSize: 17,
+    fontWeight: '600',
+    marginRight: 8,
   },
   ctaIcon: {
     marginLeft: 4,

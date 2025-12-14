@@ -168,17 +168,17 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
 NotificationList.displayName = 'NotificationList';
 
 const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   emptyContainer: {
     flex: 1,
   },
   footer: {
-    paddingVertical: 20,
     alignItems: 'center',
+    paddingVertical: 20,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
   },
 });
 

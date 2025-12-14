@@ -312,103 +312,103 @@ export const BiometricSetupScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    padding: spacing.xl,
-    alignItems: 'center',
-  },
-  iconContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-  },
-  icon: {
-    fontSize: 60,
-  },
-  title: {
-    ...typography.h2,
-    textAlign: 'center',
-    marginBottom: spacing.sm,
-  },
-  description: {
-    ...typography.body1,
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-    lineHeight: 24,
-  },
-  statusBadge: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: spacing.xl,
-    marginBottom: spacing.xl,
-  },
-  statusText: {
-    ...typography.subtitle2,
-  },
-  benefitsCard: {
-    width: '100%',
-    padding: spacing.lg,
-    borderRadius: spacing.md,
-    marginBottom: spacing.xl,
-  },
-  benefitsTitle: {
-    ...typography.subtitle1,
-    marginBottom: spacing.md,
-  },
-  benefitItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: spacing.sm,
-  },
-  benefitIcon: {
-    fontSize: 18,
-    marginRight: spacing.sm,
-  },
-  benefitText: {
-    ...typography.body2,
-    flex: 1,
-    lineHeight: 22,
-  },
-  buttonContainer: {
-    width: '100%',
-    marginBottom: spacing.xl,
-  },
   actionButton: {
     width: '100%',
   },
   backButton: {
     marginTop: spacing.lg,
   },
-  noteCard: {
-    padding: spacing.md,
-    borderRadius: spacing.sm,
-    borderWidth: 1,
+  benefitIcon: {
+    fontSize: 18,
+    marginRight: spacing.sm,
   },
-  noteText: {
-    ...typography.caption,
+  benefitItem: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    marginBottom: spacing.sm,
+  },
+  benefitText: {
+    ...typography.body2,
+    flex: 1,
+    lineHeight: 22,
+  },
+  benefitsCard: {
+    borderRadius: spacing.md,
+    marginBottom: spacing.xl,
+    padding: spacing.lg,
+    width: '100%',
+  },
+  benefitsTitle: {
+    ...typography.subtitle1,
+    marginBottom: spacing.md,
+  },
+  buttonContainer: {
+    marginBottom: spacing.xl,
+    width: '100%',
+  },
+  container: {
+    flex: 1,
+  },
+  content: {
+    alignItems: 'center',
+    flex: 1,
+    padding: spacing.xl,
+  },
+  description: {
+    ...typography.body1,
+    lineHeight: 24,
+    marginBottom: spacing.lg,
     textAlign: 'center',
-    lineHeight: 18,
+  },
+  icon: {
+    fontSize: 60,
+  },
+  iconContainer: {
+    alignItems: 'center',
+    borderRadius: 60,
+    height: 120,
+    justifyContent: 'center',
+    marginBottom: spacing.xl,
+    width: 120,
   },
   infoCard: {
-    width: '100%',
-    padding: spacing.lg,
     borderRadius: spacing.md,
-    marginTop: spacing.xl,
     marginBottom: spacing.xl,
+    marginTop: spacing.xl,
+    padding: spacing.lg,
+    width: '100%',
+  },
+  infoText: {
+    ...typography.body2,
+    lineHeight: 22,
   },
   infoTitle: {
     ...typography.subtitle1,
     marginBottom: spacing.sm,
   },
-  infoText: {
-    ...typography.body2,
-    lineHeight: 22,
+  noteCard: {
+    borderRadius: spacing.sm,
+    borderWidth: 1,
+    padding: spacing.md,
+  },
+  noteText: {
+    ...typography.caption,
+    lineHeight: 18,
+    textAlign: 'center',
+  },
+  statusBadge: {
+    borderRadius: spacing.xl,
+    marginBottom: spacing.xl,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
+  statusText: {
+    ...typography.subtitle2,
+  },
+  title: {
+    ...typography.h2,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
   },
 });
 

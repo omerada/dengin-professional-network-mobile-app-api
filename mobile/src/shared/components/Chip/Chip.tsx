@@ -312,19 +312,10 @@ export const ChipGroup = memo<ChipGroupProps>(function ChipGroup({ children, spa
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     alignSelf: 'flex-start',
-  },
-  label: {
-    fontWeight: '500',
-  },
-  leftIcon: {
-    marginRight: 4,
-  },
-  rightIcon: {
-    marginLeft: 4,
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   deleteButton: {
     marginLeft: 4,
@@ -335,5 +326,14 @@ const styles = StyleSheet.create({
   group: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+  },
+  label: {
+    fontWeight: '500',
+  },
+  leftIcon: {
+    marginRight: 4,
+  },
+  rightIcon: {
+    marginLeft: 4,
   },
 });

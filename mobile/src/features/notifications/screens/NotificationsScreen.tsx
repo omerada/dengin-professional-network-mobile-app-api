@@ -6,7 +6,7 @@
 import React, { useCallback, useEffect, useState, memo } from 'react';
 import { View, Text, StyleSheet, Pressable, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useNavigation } from '@react-navigation/native';
@@ -16,6 +16,7 @@ import {
   navigateToPostDetail,
   navigateToUserProfile,
 } from '@core/navigation';
+import { SCREEN_ANIMATIONS } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
 
@@ -189,7 +190,7 @@ export const NotificationsScreen: React.FC = memo(() => {
       edges={['top']}>
       {/* Modern Header with Back Button */}
       <Animated.View
-        entering={FadeIn.duration(300)}
+        entering={SCREEN_ANIMATIONS.headerEnter}
         style={[styles.header, { borderBottomColor: colors.border.subtle }]}>
         <View style={styles.headerLeft}>
           <Pressable

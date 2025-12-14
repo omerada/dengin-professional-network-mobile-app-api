@@ -239,17 +239,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: spacing.lg,
   },
-  uploadingContainer: {
-    alignItems: 'center',
-  },
-  uploadingIcon: {
-    fontSize: 64,
-    marginBottom: spacing.lg,
-  },
-  uploadingTitle: {
-    ...typography.h2,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
+  footer: {
+    borderTopWidth: 1,
+    padding: spacing.lg,
   },
   resultContainer: {
     alignItems: 'center',
@@ -259,20 +251,37 @@ const styles = StyleSheet.create({
     fontSize: 80,
     marginBottom: spacing.lg,
   },
-  resultTitle: {
-    ...typography.h2,
-    textAlign: 'center',
-    marginBottom: spacing.md,
-  },
   resultText: {
     ...typography.body,
-    textAlign: 'center',
     paddingHorizontal: spacing.lg,
+    textAlign: 'center',
   },
-  footer: {
-    padding: spacing.lg,
-    borderTopWidth: 1,
+  resultTitle: {
+    ...typography.h2,
+    marginBottom: spacing.md,
+    textAlign: 'center',
+  },
+  uploadingContainer: {
+    alignItems: 'center',
+  },
+  uploadingIcon: {
+    fontSize: 64,
+    marginBottom: spacing.lg,
+  },
+  uploadingTitle: {
+    ...typography.h2,
+    marginBottom: spacing.xl,
+    textAlign: 'center',
   },
 });
 
-export default UploadStatusScreen;
+// Wrap with Error Boundary for production safety
+import { ErrorBoundary } from '@core/components';
+
+export default function UploadStatusScreenWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <UploadStatusScreen />
+    </ErrorBoundary>
+  );
+}

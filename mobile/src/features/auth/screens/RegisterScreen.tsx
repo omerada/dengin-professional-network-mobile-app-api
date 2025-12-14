@@ -388,6 +388,17 @@ const styles = StyleSheet.create({
   actions: {
     marginBottom: spacing.xl,
   },
+  backButton: {
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
+  backButtonCircle: {
+    alignItems: 'center',
+    borderRadius: 24,
+    height: 48,
+    justifyContent: 'center',
+    width: 48,
+  },
   backButtonText: {
     fontSize: 32,
     fontWeight: '300',
@@ -396,12 +407,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   errorContainer: {
+    alignItems: 'center',
     borderRadius: 12,
+    flexDirection: 'row',
+    gap: spacing.sm,
     marginBottom: spacing.xl,
     padding: spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
   },
   errorSmall: {
     fontSize: 12,
@@ -419,30 +430,16 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.xs,
   },
   header: {
-    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: spacing.sm,
+    flexDirection: 'row',
     marginBottom: spacing.md,
     marginLeft: spacing.xs,
-  },
-  backButton: {
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  backButtonCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
+    marginTop: spacing.sm,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     marginLeft: spacing.md,
-  },
-  subtitleContainer: {
-    marginBottom: spacing.xl,
   },
   keyboardAvoid: {
     flex: 1,
@@ -461,8 +458,8 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    marginHorizontal: -spacing.xs,
     marginBottom: spacing.sm,
+    marginHorizontal: -spacing.xs,
   },
   scrollContent: {
     flexGrow: 1,
@@ -472,9 +469,12 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
   },
+  subtitleContainer: {
+    marginBottom: spacing.xl,
+  },
   termsContainer: {
-    marginTop: spacing.md,
     marginBottom: spacing.sm,
+    marginTop: spacing.md,
   },
   termsText: {
     fontSize: 13,

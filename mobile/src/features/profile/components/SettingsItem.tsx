@@ -105,18 +105,26 @@ SettingsItem.displayName = 'SettingsItem';
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: spacing.md,
+    flexDirection: 'row',
     paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
   },
   iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: borderRadius.md,
-    justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: borderRadius.md,
+    height: 36,
+    justifyContent: 'center',
     marginRight: spacing.md,
+    width: 36,
+  },
+  rightContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  subtitle: {
+    fontSize: fontSize.sm,
+    marginTop: 2,
   },
   textContainer: {
     flex: 1,
@@ -125,13 +133,5 @@ const styles = StyleSheet.create({
   title: {
     fontSize: fontSize.base,
     fontWeight: '500',
-  },
-  subtitle: {
-    fontSize: fontSize.sm,
-    marginTop: 2,
-  },
-  rightContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
   },
 });

@@ -58,6 +58,11 @@ export const MessageListSkeleton: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  bubble: {
+    borderRadius: 18,
+    maxWidth: '75%',
+    padding: spacing.md,
+  },
   container: {
     flex: 1,
     padding: spacing.md,
@@ -65,30 +70,25 @@ const styles = StyleSheet.create({
   messageItem: {
     marginBottom: spacing.sm,
   },
-  sentMessage: {
-    alignItems: 'flex-end',
+  receivedBubble: {
+    borderBottomLeftRadius: 4,
   },
   receivedMessage: {
     alignItems: 'flex-start',
   },
-  bubble: {
-    maxWidth: '75%',
-    borderRadius: 18,
-    padding: spacing.md,
-  },
   sentBubble: {
     borderBottomRightRadius: 4,
   },
-  receivedBubble: {
-    borderBottomLeftRadius: 4,
-  },
-  textLine: {
-    height: 12,
-    borderRadius: 6,
-    marginBottom: spacing.xs,
+  sentMessage: {
+    alignItems: 'flex-end',
   },
   shortLine: {
-    width: '40%',
     marginBottom: 0,
+    width: '40%',
+  },
+  textLine: {
+    borderRadius: 6,
+    height: 12,
+    marginBottom: spacing.xs,
   },
 });

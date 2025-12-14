@@ -130,40 +130,40 @@ export const CameraControls: React.FC<CameraControlsProps> = memo(
 CameraControls.displayName = 'CameraControls';
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-  },
-  leftControls: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    gap: spacing.md,
-  },
   centerSpace: {
     flex: 1,
   },
-  rightControls: {
-    flex: 1,
+  container: {
+    alignItems: 'center',
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: spacing.md,
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
   },
   controlButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
     alignItems: 'center',
+    borderRadius: 24,
+    height: 48,
     justifyContent: 'center',
+    width: 48,
   },
   controlIcon: {
     fontSize: 20,
   },
   flashOff: {
     opacity: 0.5,
+  },
+  leftControls: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: spacing.md,
+    justifyContent: 'flex-start',
+  },
+  rightControls: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: spacing.md,
+    justifyContent: 'flex-end',
   },
 });
 

@@ -176,6 +176,10 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
 DocumentCaptureScreen.displayName = 'DocumentCaptureScreen';
 
 const styles = StyleSheet.create({
+  buttons: {
+    gap: spacing.md,
+    marginBottom: spacing.lg,
+  },
   container: {
     flex: 1,
   },
@@ -183,6 +187,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: spacing.lg,
+  },
+  infoBox: {
+    backgroundColor: 'rgba(100, 150, 255, 0.1)',
+    borderRadius: 12,
+    marginBottom: spacing.xl,
+    padding: spacing.md,
+  },
+  infoSubtext: {
+    ...typography.caption,
+  },
+  infoText: {
+    ...typography.body,
+    fontWeight: '600',
+    marginBottom: spacing.xs,
   },
   subtitle: {
     ...typography.body,
@@ -193,23 +211,5 @@ const styles = StyleSheet.create({
     ...typography.h2,
     marginBottom: spacing.sm,
     textAlign: 'center',
-  },
-  infoBox: {
-    backgroundColor: 'rgba(100, 150, 255, 0.1)',
-    borderRadius: 12,
-    marginBottom: spacing.xl,
-    padding: spacing.md,
-  },
-  infoText: {
-    ...typography.body,
-    fontWeight: '600',
-    marginBottom: spacing.xs,
-  },
-  infoSubtext: {
-    ...typography.caption,
-  },
-  buttons: {
-    gap: spacing.md,
-    marginBottom: spacing.lg,
   },
 });

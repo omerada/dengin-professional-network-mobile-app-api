@@ -165,14 +165,14 @@ export const FilterChips: React.FC<FilterChipsProps> = ({
 // ============================================================================
 
 const styles = StyleSheet.create({
+  chipWrapper: {
+    marginRight: 8,
+  },
   container: {
     width: '100%',
   },
   scrollContent: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-  },
-  chipWrapper: {
-    marginRight: 8,
   },
 });

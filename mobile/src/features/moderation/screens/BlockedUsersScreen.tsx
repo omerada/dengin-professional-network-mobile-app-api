@@ -3,9 +3,10 @@
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART5.md
 
 import React, { useCallback } from 'react';
-import { View, Text, FlatList, StyleSheet, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
 import { Avatar, EmptyState, Loading, Button } from '@shared/components';
 import { spacing, fontSize } from '@theme';
 import { useBlockedUsers } from '../hooks';
@@ -19,31 +20,21 @@ import type { BlockedUser } from '../types';
  */
 export const BlockedUsersScreen: React.FC = () => {
   const colors = useColors();
+  const toast = useToast();
   const { data: blockedUsers, isLoading, refetch } = useBlockedUsers();
   const unblock = useUnblock();
 
   const handleUnblock = useCallback(
     async (user: BlockedUser) => {
-      Alert.alert(
-        'Engeli Kaldır',
-        `${user.fullName} engelini kaldırmak istediğinize emin misiniz?`,
-        [
-          { text: 'İptal', style: 'cancel' },
-          {
-            text: 'Engeli Kaldır',
-            onPress: async () => {
-              try {
-                await unblock.mutateAsync(user.id);
-                refetch();
-              } catch (error) {
-                Alert.alert('Hata', 'Engel kaldırılırken bir hata oluştu');
-              }
-            },
-          },
-        ],
-      );
+      try {
+        await unblock.mutateAsync(user.id);
+        refetch();
+        toast.success('Engel kaldırıldı');
+      } catch (error) {
+        toast.error('Engel kaldırılırken bir hata oluştu');
+      }
     },
-    [unblock, refetch],
+    [unblock, refetch, toast],
   );
 
   const renderItem = useCallback(
@@ -109,29 +100,29 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  item: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing.md,
+  date: {
+    fontSize: fontSize.xs,
+    marginTop: 2,
+  },
+  emptyContent: {
+    flex: 1,
   },
   info: {
     flex: 1,
     marginLeft: spacing.md,
     marginRight: spacing.sm,
   },
+  item: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    padding: spacing.md,
+  },
   name: {
     fontSize: fontSize.md,
     fontWeight: '600',
   },
-  date: {
-    fontSize: fontSize.xs,
-    marginTop: 2,
-  },
   separator: {
     height: 1,
     marginLeft: 76,
-  },
-  emptyContent: {
-    flex: 1,
   },
 });

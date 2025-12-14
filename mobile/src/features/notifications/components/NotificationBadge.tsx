@@ -103,9 +103,9 @@ NotificationBadge.displayName = 'NotificationBadge';
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
+    justifyContent: 'center',
   },
   text: {
     fontWeight: '700',

@@ -160,13 +160,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  outerRing: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
-  },
   innerCircle: {
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  outerRing: {
+    alignItems: 'center',
+    backgroundColor: 'transparent',
     justifyContent: 'center',
   },
 });

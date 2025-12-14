@@ -248,42 +248,42 @@ EmptyState.displayName = 'EmptyState';
 // ============================================================================
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.xl,
-  },
-  iconContainer: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.lg,
-  },
-  title: {
-    fontSize: fontSize.lg,
-    fontWeight: '600',
-    textAlign: 'center',
-    marginBottom: spacing.sm,
-  },
-  message: {
-    fontSize: fontSize.base,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: spacing.lg,
-    maxWidth: 280,
+  button: {
+    minWidth: 160,
   },
   buttonContainer: {
     alignItems: 'center',
     gap: spacing.sm,
   },
-  button: {
-    minWidth: 160,
+  container: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    padding: spacing.xl,
+  },
+  iconContainer: {
+    alignItems: 'center',
+    borderRadius: 48,
+    height: 96,
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
+    width: 96,
+  },
+  message: {
+    fontSize: fontSize.base,
+    lineHeight: 22,
+    marginBottom: spacing.lg,
+    maxWidth: 280,
+    textAlign: 'center',
   },
   secondaryButton: {
     minWidth: 160,
+  },
+  title: {
+    fontSize: fontSize.lg,
+    fontWeight: '600',
+    marginBottom: spacing.sm,
+    textAlign: 'center',
   },
 });
 

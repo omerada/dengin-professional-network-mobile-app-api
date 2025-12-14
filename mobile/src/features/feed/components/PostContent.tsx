@@ -79,8 +79,8 @@ PostContent.displayName = 'PostContent';
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 16,
     marginBottom: 12,
+    paddingHorizontal: 16,
   },
   content: {
     fontSize: 15,

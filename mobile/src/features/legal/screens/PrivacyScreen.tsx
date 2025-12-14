@@ -150,8 +150,8 @@ export const PrivacyScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   backButton: {
-    justifyContent: 'center',
     alignItems: 'flex-start',
+    justifyContent: 'center',
   },
   backButtonText: {
     fontSize: 32,
@@ -173,8 +173,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
     paddingLeft: spacing.sm,
     paddingRight: spacing.md,
-    paddingVertical: spacing.md,
     paddingTop: spacing.lg,
+    paddingVertical: spacing.md,
   },
   headerTitle: {
     fontSize: 18,

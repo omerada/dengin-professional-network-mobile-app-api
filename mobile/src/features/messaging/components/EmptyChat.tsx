@@ -42,24 +42,24 @@ const styles = StyleSheet.create({
     // Inverted FlatList için dönüştürme
     transform: [{ scaleY: -1 }],
   },
+  description: {
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
+  },
   iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 40,
+    height: 80,
+    justifyContent: 'center',
     marginBottom: 16,
+    width: 80,
   },
   title: {
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 8,
     textAlign: 'center',
-  },
-  description: {
-    fontSize: 14,
-    textAlign: 'center',
-    lineHeight: 20,
   },
 });
 

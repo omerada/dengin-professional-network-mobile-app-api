@@ -561,6 +561,10 @@ const styles = StyleSheet.create({
   socialSection: {
     marginBottom: spacing.lg,
   },
+  stepDescription: {
+    fontSize: 14,
+    textAlign: 'center',
+  },
   stepHeader: {
     marginBottom: spacing.xl,
   },
@@ -568,10 +572,6 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: '600',
     marginBottom: spacing.xs,
-    textAlign: 'center',
-  },
-  stepDescription: {
-    fontSize: 14,
     textAlign: 'center',
   },
   strengthBar: {

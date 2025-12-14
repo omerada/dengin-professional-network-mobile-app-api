@@ -240,8 +240,8 @@ const styles = StyleSheet.create({
     width: 40,
   },
   backButton: {
-    justifyContent: 'center',
     alignItems: 'flex-start',
+    justifyContent: 'center',
   },
   container: {
     alignItems: 'center',

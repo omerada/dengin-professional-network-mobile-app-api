@@ -210,8 +210,47 @@ export const ForgotPasswordScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  actions: {
+    marginBottom: spacing.xl,
+  },
+  backButton: {
+    padding: spacing.sm,
+  },
+  backToLogin: {
+    alignItems: 'center',
+    padding: spacing.md,
+  },
   container: {
     flex: 1,
+  },
+  errorContainer: {
+    alignItems: 'center',
+    borderRadius: 12,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+    padding: spacing.md,
+  },
+  errorText: {
+    flex: 1,
+    fontSize: 14,
+  },
+  form: {
+    marginBottom: spacing.lg,
+  },
+  header: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: spacing.lg,
+    paddingHorizontal: spacing.xs,
+  },
+  headerSpacer: {
+    width: 40,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '600',
   },
   keyboardAvoid: {
     flex: 1,
@@ -221,77 +260,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.md,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.lg,
-    paddingHorizontal: spacing.xs,
-  },
-  backButton: {
-    padding: spacing.sm,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-  },
-  headerSpacer: {
-    width: 40,
-  },
-  subtitleContainer: {
-    marginBottom: spacing.xl,
-  },
   subtitle: {
     fontSize: 15,
     lineHeight: 22,
   },
-  errorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    padding: spacing.md,
-    borderRadius: 12,
-    marginBottom: spacing.lg,
-  },
-  errorText: {
-    flex: 1,
-    fontSize: 14,
-  },
-  form: {
-    marginBottom: spacing.lg,
-  },
-  actions: {
+  subtitleContainer: {
     marginBottom: spacing.xl,
   },
-  backToLogin: {
-    alignItems: 'center',
-    padding: spacing.md,
-  },
   successContent: {
+    alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
     paddingHorizontal: spacing.xl,
   },
   successIcon: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: spacing.xl,
+    borderRadius: 60,
     borderWidth: 3,
+    height: 120,
+    justifyContent: 'center',
+    marginBottom: spacing.xl,
+    width: 120,
+  },
+  successText: {
+    fontSize: 16,
+    lineHeight: 24,
+    paddingHorizontal: spacing.md,
+    textAlign: 'center',
   },
   successTitle: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: spacing.md,
     textAlign: 'center',
-  },
-  successText: {
-    fontSize: 16,
-    textAlign: 'center',
-    lineHeight: 24,
-    paddingHorizontal: spacing.md,
   },
 });

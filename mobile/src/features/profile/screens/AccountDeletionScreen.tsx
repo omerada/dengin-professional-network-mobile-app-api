@@ -304,93 +304,93 @@ export const AccountDeletionScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  buttonContainer: {
+    gap: spacing.md,
+    marginBottom: spacing.xl,
+  },
+  cancelButton: {
+    // Styled via variant="ghost"
+  },
+  confirmTextHighlight: {
+    fontWeight: 'bold',
+  },
   container: {
     flex: 1,
+  },
+  customReasonInput: {
+    marginTop: spacing.md,
+  },
+  deleteButton: {
+    // Styled via variant="danger"
+  },
+  infoCard: {
+    borderRadius: spacing.sm,
+    padding: spacing.md,
+  },
+  infoText: {
+    ...typography.caption,
+    lineHeight: 20,
   },
   keyboardView: {
     flex: 1,
   },
-  scrollContent: {
-    padding: spacing.lg,
-  },
-  warningCard: {
-    padding: spacing.lg,
-    borderRadius: spacing.md,
-    marginBottom: spacing.xl,
-  },
-  warningIcon: {
-    fontSize: 40,
-    textAlign: 'center',
-    marginBottom: spacing.sm,
-  },
-  warningTitle: {
-    ...typography.h3,
-    textAlign: 'center',
-    marginBottom: spacing.sm,
-  },
-  warningText: {
-    ...typography.body2,
-    marginBottom: spacing.sm,
-  },
-  warningList: {
-    marginTop: spacing.sm,
-  },
-  warningItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+  reasonButton: {
     marginBottom: spacing.xs,
-  },
-  warningBullet: {
-    ...typography.body2,
-    marginRight: spacing.xs,
-    fontWeight: 'bold',
-  },
-  warningItemText: {
-    ...typography.body2,
-    flex: 1,
-  },
-  section: {
-    marginBottom: spacing.xl,
-  },
-  sectionTitle: {
-    ...typography.subtitle1,
-    marginBottom: spacing.xs,
-  },
-  sectionSubtitle: {
-    ...typography.body2,
-    marginBottom: spacing.md,
-  },
-  confirmTextHighlight: {
-    fontWeight: 'bold',
   },
   reasonsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
   },
-  reasonButton: {
-    marginBottom: spacing.xs,
+  scrollContent: {
+    padding: spacing.lg,
   },
-  customReasonInput: {
-    marginTop: spacing.md,
-  },
-  buttonContainer: {
-    gap: spacing.md,
+  section: {
     marginBottom: spacing.xl,
   },
-  deleteButton: {
-    // Styled via variant="danger"
+  sectionSubtitle: {
+    ...typography.body2,
+    marginBottom: spacing.md,
   },
-  cancelButton: {
-    // Styled via variant="ghost"
+  sectionTitle: {
+    ...typography.subtitle1,
+    marginBottom: spacing.xs,
   },
-  infoCard: {
-    padding: spacing.md,
-    borderRadius: spacing.sm,
+  warningBullet: {
+    ...typography.body2,
+    fontWeight: 'bold',
+    marginRight: spacing.xs,
   },
-  infoText: {
-    ...typography.caption,
-    lineHeight: 20,
+  warningCard: {
+    borderRadius: spacing.md,
+    marginBottom: spacing.xl,
+    padding: spacing.lg,
+  },
+  warningIcon: {
+    fontSize: 40,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  warningItem: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    marginBottom: spacing.xs,
+  },
+  warningItemText: {
+    ...typography.body2,
+    flex: 1,
+  },
+  warningList: {
+    marginTop: spacing.sm,
+  },
+  warningText: {
+    ...typography.body2,
+    marginBottom: spacing.sm,
+  },
+  warningTitle: {
+    ...typography.h3,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
   },
 });
 

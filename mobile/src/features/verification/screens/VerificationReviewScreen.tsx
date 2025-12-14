@@ -213,51 +213,8 @@ export const VerificationReviewScreen: React.FC = memo(() => {
 VerificationReviewScreen.displayName = 'VerificationReviewScreen';
 
 const styles = StyleSheet.create({
-  container: {
+  cancelButton: {
     flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xl,
-  },
-  stepIndicator: {
-    marginTop: spacing.md,
-    marginBottom: spacing.lg,
-  },
-  header: {
-    marginBottom: spacing.xl,
-  },
-  title: {
-    ...typography.h2,
-    marginBottom: spacing.sm,
-  },
-  subtitle: {
-    ...typography.body,
-  },
-  previewSection: {
-    marginBottom: spacing.xl,
-    gap: spacing.lg,
-  },
-  previewItem: {
-    alignItems: 'center',
-  },
-  checklistContainer: {
-    padding: spacing.md,
-    borderRadius: 12,
-    marginBottom: spacing.lg,
-  },
-  checklistTitle: {
-    ...typography.body,
-    fontWeight: '600',
-    marginBottom: spacing.md,
-  },
-  checklistItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.sm,
   },
   checkIcon: {
     fontSize: 16,
@@ -267,11 +224,66 @@ const styles = StyleSheet.create({
     ...typography.bodySmall,
     flex: 1,
   },
+  checklistContainer: {
+    borderRadius: 12,
+    marginBottom: spacing.lg,
+    padding: spacing.md,
+  },
+  checklistItem: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginBottom: spacing.sm,
+  },
+  checklistTitle: {
+    ...typography.body,
+    fontWeight: '600',
+    marginBottom: spacing.md,
+  },
+  container: {
+    flex: 1,
+  },
+  footer: {
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    gap: spacing.md,
+    padding: spacing.lg,
+  },
+  header: {
+    marginBottom: spacing.xl,
+  },
+  previewItem: {
+    alignItems: 'center',
+  },
+  previewSection: {
+    gap: spacing.lg,
+    marginBottom: spacing.xl,
+  },
+  scrollContent: {
+    paddingBottom: spacing.xl,
+    paddingHorizontal: spacing.lg,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  stepIndicator: {
+    marginBottom: spacing.lg,
+    marginTop: spacing.md,
+  },
+  submitButton: {
+    flex: 2,
+  },
+  subtitle: {
+    ...typography.body,
+  },
+  title: {
+    ...typography.h2,
+    marginBottom: spacing.sm,
+  },
   warningContainer: {
+    alignItems: 'flex-start',
+    borderRadius: 12,
     flexDirection: 'row',
     padding: spacing.md,
-    borderRadius: 12,
-    alignItems: 'flex-start',
   },
   warningIcon: {
     fontSize: 16,
@@ -281,18 +293,15 @@ const styles = StyleSheet.create({
     ...typography.bodySmall,
     flex: 1,
   },
-  footer: {
-    flexDirection: 'row',
-    padding: spacing.lg,
-    borderTopWidth: 1,
-    gap: spacing.md,
-  },
-  cancelButton: {
-    flex: 1,
-  },
-  submitButton: {
-    flex: 2,
-  },
 });
 
-export default VerificationReviewScreen;
+// Wrap with Error Boundary for production safety
+import { ErrorBoundary } from '@core/components';
+
+export default function VerificationReviewScreenWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <VerificationReviewScreen />
+    </ErrorBoundary>
+  );
+}

@@ -236,20 +236,20 @@ PullToRefresh.displayName = 'PullToRefresh';
 
 const styles = StyleSheet.create({
   indicator: {
-    width: 32,
+    alignItems: 'center',
     height: 32,
     justifyContent: 'center',
-    alignItems: 'center',
-  },
-  indicatorInner: {
-    width: 24,
-    height: 24,
+    width: 32,
   },
   indicatorArc: {
-    width: 24,
-    height: 24,
     borderRadius: 12,
     borderWidth: 2.5,
+    height: 24,
+    width: 24,
+  },
+  indicatorInner: {
+    height: 24,
+    width: 24,
   },
 });
 

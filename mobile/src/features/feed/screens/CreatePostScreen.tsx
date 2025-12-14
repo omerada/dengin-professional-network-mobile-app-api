@@ -335,69 +335,69 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 16,
-  },
   headerButton: {
     padding: 8,
   },
+  imageCount: {
+    fontSize: 13,
+  },
+  keyboardView: {
+    flex: 1,
+  },
   postButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    alignItems: 'center',
     borderRadius: 20,
     minWidth: 70,
-    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
   postButtonText: {
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '600',
   },
+  progressBar: {
+    borderRadius: 2,
+    height: 4,
+    overflow: 'hidden',
+  },
   progressContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
+  },
+  progressFill: {
+    borderRadius: 2,
+    height: '100%',
   },
   progressText: {
     fontSize: 13,
     marginBottom: 8,
   },
-  progressBar: {
-    height: 4,
-    borderRadius: 2,
-    overflow: 'hidden',
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 16,
   },
-  progressFill: {
-    height: '100%',
-    borderRadius: 2,
+  scrollView: {
+    flex: 1,
   },
   toolbar: {
-    flexDirection: 'row',
     alignItems: 'center',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    flexDirection: 'row',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderTopWidth: StyleSheet.hairlineWidth,
   },
   toolbarButton: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     marginRight: 24,
   },
   toolbarLabel: {
-    marginLeft: 6,
     fontSize: 14,
     fontWeight: '500',
+    marginLeft: 6,
   },
   toolbarSpacer: {
     flex: 1,
-  },
-  imageCount: {
-    fontSize: 13,
   },
 });

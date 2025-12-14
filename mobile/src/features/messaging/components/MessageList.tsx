@@ -184,8 +184,12 @@ export const MessageList: React.FC<MessageListProps> = memo(
 MessageList.displayName = 'MessageList';
 
 const styles = StyleSheet.create({
-  list: {
+  centerContainer: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    // Inverted list için dönüştürme
+    transform: [{ scaleY: -1 }],
   },
   contentContainer: {
     paddingVertical: 8,
@@ -193,9 +197,8 @@ const styles = StyleSheet.create({
   emptyContainer: {
     flexGrow: 1,
   },
-  typingContainer: {
-    // Inverted list için dönüştürme
-    transform: [{ scaleY: -1 }],
+  list: {
+    flex: 1,
   },
   loadingContainer: {
     paddingVertical: 16,
@@ -203,10 +206,7 @@ const styles = StyleSheet.create({
     // Inverted list için dönüştürme
     transform: [{ scaleY: -1 }],
   },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  typingContainer: {
     // Inverted list için dönüştürme
     transform: [{ scaleY: -1 }],
   },

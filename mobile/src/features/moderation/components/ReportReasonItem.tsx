@@ -79,22 +79,22 @@ ReportReasonItem.displayName = 'ReportReasonItem';
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: spacing.md,
     borderRadius: borderRadius.md,
     borderWidth: 1.5,
-  },
-  left: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    flex: 1,
+    justifyContent: 'space-between',
+    padding: spacing.md,
   },
   label: {
     fontSize: fontSize.md,
     fontWeight: '500',
+  },
+  left: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flex: 1,
+    gap: spacing.md,
   },
 });
 

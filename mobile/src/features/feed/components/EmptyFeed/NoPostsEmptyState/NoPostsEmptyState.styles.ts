@@ -6,36 +6,47 @@ import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   container: {
+    alignItems: 'center',
     flex: 1,
+    justifyContent: 'center',
     paddingHorizontal: 24,
     paddingVertical: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
+  },
+
+  ctaButtonsContainer: {
+    gap: 12,
+    width: '100%',
   },
 
   iconContainer: {
     marginBottom: 24,
   },
 
-  title: {
-    fontSize: 20,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 12,
-    paddingHorizontal: 8,
-  },
-
-  subtitle: {
-    fontSize: 15,
-    lineHeight: 22,
-    textAlign: 'center',
-    marginBottom: 32,
-    paddingHorizontal: 8,
-  },
-
-  trendsContainer: {
+  primaryButton: {
+    alignItems: 'center',
+    borderRadius: 12,
+    height: 52,
+    justifyContent: 'center',
     width: '100%',
-    marginBottom: 24,
+  },
+
+  primaryButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
+  secondaryButton: {
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1.5,
+    height: 48,
+    justifyContent: 'center',
+    width: '100%',
+  },
+
+  secondaryButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
   },
 
   sectionTitle: {
@@ -45,22 +56,46 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
 
+  subtitle: {
+    fontSize: 15,
+    lineHeight: 22,
+    marginBottom: 32,
+    paddingHorizontal: 8,
+    textAlign: 'center',
+  },
+
+  title: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 12,
+    paddingHorizontal: 8,
+    textAlign: 'center',
+  },
+
+  trendArrow: {
+    marginLeft: 8,
+  },
+
   trendCard: {
-    flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    marginBottom: 8,
     borderRadius: 12,
     borderWidth: 1,
+    flexDirection: 'row',
+    marginBottom: 8,
+    padding: 16,
+  },
+
+  trendCategory: {
+    fontSize: 13,
   },
 
   trendIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 12,
-    justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 20,
+    height: 40,
+    justifyContent: 'center',
+    marginRight: 12,
+    width: 40,
   },
 
   trendInfo: {
@@ -73,43 +108,8 @@ export const styles = StyleSheet.create({
     marginBottom: 2,
   },
 
-  trendCategory: {
-    fontSize: 13,
-  },
-
-  trendArrow: {
-    marginLeft: 8,
-  },
-
-  ctaButtonsContainer: {
+  trendsContainer: {
+    marginBottom: 24,
     width: '100%',
-    gap: 12,
-  },
-
-  primaryButton: {
-    width: '100%',
-    height: 52,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  primaryButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-
-  secondaryButton: {
-    width: '100%',
-    height: 48,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1.5,
-  },
-
-  secondaryButtonText: {
-    fontSize: 15,
-    fontWeight: '600',
   },
 });

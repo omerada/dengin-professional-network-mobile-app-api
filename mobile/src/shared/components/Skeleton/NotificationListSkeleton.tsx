@@ -66,44 +66,44 @@ export const NotificationListSkeleton: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  avatar: {
+    borderRadius: 24,
+    height: 48,
+    marginRight: spacing.md,
+    width: 48,
+  },
   container: {
     flex: 1,
-  },
-  notificationItem: {
-    flexDirection: 'row',
-    padding: spacing.md,
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: 'transparent',
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: spacing.md,
   },
   content: {
     flex: 1,
   },
-  textLine: {
-    height: 12,
-    borderRadius: 6,
-    marginBottom: spacing.xs,
-  },
-  titleLine: {
-    width: '70%',
-  },
   descLine: {
     width: '90%',
   },
-  timeLine: {
-    width: '30%',
-    marginBottom: 0,
-  },
   icon: {
-    width: 24,
-    height: 24,
     borderRadius: 12,
+    height: 24,
     marginLeft: spacing.sm,
+    width: 24,
+  },
+  notificationItem: {
+    alignItems: 'center',
+    borderBottomColor: 'transparent',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    padding: spacing.md,
+  },
+  textLine: {
+    borderRadius: 6,
+    height: 12,
+    marginBottom: spacing.xs,
+  },
+  timeLine: {
+    marginBottom: 0,
+    width: '30%',
+  },
+  titleLine: {
+    width: '70%',
   },
 });

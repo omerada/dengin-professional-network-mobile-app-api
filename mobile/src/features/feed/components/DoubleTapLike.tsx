@@ -219,16 +219,16 @@ DoubleTapLike.displayName = 'DoubleTapLike';
 
 const styles = StyleSheet.create({
   container: {
-    position: 'relative',
     overflow: 'hidden',
+    position: 'relative',
   },
   heartContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    left: 0,
+    pointerEvents: 'none',
     position: 'absolute',
     top: 0,
-    left: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    pointerEvents: 'none',
   },
   heartShadow: {
     textShadowColor: 'rgba(0, 0, 0, 0.3)',

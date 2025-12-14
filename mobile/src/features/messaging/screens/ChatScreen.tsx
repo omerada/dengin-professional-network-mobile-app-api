@@ -4,22 +4,22 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Alert, StyleSheet } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
-import { SAFE_AREA_EDGES } from '@constants';
+import { SAFE_AREA_EDGES, SCREEN_ANIMATIONS } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks';
 import { useAuthStore } from '@features/auth/stores';
-import { UnifiedLoadingState, MessageListSkeleton } from '@shared/components';
 import {
   ChatHeader,
   MessageList,
   MessageInput,
   MessageOptionsSheet,
+  ChatSkeleton,
   type MessageOptionsSheetRef,
 } from '../components';
 import { useMessages, useSendMessage, useTyping } from '../hooks';
@@ -283,7 +283,7 @@ export const ChatScreen: React.FC = () => {
           onProfilePress={handleProfilePress}
           onOptionsPress={handleOptionsPress}
         />
-        <UnifiedLoadingState strategy="skeleton" customSkeleton={<MessageListSkeleton />} />
+        <ChatSkeleton count={8} />
       </SafeAreaView>
     );
   }
@@ -296,7 +296,7 @@ export const ChatScreen: React.FC = () => {
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
-        <Animated.View entering={FadeIn.duration(300)} style={styles.content}>
+        <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={styles.content}>
           {/* Header */}
           <ChatHeader
             conversation={displayConversation}
@@ -350,4 +350,13 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChatScreen;
+// Wrap with Error Boundary for production safety
+import { ErrorBoundary } from '@core/components';
+
+export default function ChatScreenWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <ChatScreen />
+    </ErrorBoundary>
+  );
+}

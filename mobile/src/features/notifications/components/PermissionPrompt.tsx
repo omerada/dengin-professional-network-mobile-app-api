@@ -109,78 +109,78 @@ FeatureItem.displayName = 'FeatureItem';
 PermissionPrompt.displayName = 'PermissionPrompt';
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
+  buttonPressed: {
+    opacity: 0.8,
+  },
   content: {
+    alignItems: 'center',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    paddingTop: 24,
     paddingBottom: Platform.OS === 'ios' ? 40 : 24,
     paddingHorizontal: 24,
-    alignItems: 'center',
-  },
-  iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '700',
-    marginBottom: 8,
-    textAlign: 'center',
+    paddingTop: 24,
   },
   description: {
     fontSize: 15,
-    textAlign: 'center',
     lineHeight: 22,
     marginBottom: 24,
-  },
-  features: {
-    width: '100%',
-    marginBottom: 24,
-  },
-  featureItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
+    textAlign: 'center',
   },
   featureIcon: {
     marginRight: 12,
   },
+  featureItem: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginBottom: 12,
+  },
   featureText: {
     fontSize: 15,
   },
-  primaryButton: {
+  features: {
+    marginBottom: 24,
     width: '100%',
-    paddingVertical: 16,
-    borderRadius: 12,
+  },
+  iconContainer: {
     alignItems: 'center',
+    borderRadius: 40,
+    height: 80,
+    justifyContent: 'center',
+    marginBottom: 20,
+    width: 80,
+  },
+  overlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  primaryButton: {
+    alignItems: 'center',
+    borderRadius: 12,
     marginBottom: 12,
+    paddingVertical: 16,
+    width: '100%',
   },
   primaryButtonText: {
     fontSize: 16,
     fontWeight: '600',
   },
   secondaryButton: {
-    paddingVertical: 12,
     paddingHorizontal: 24,
+    paddingVertical: 12,
   },
   secondaryButtonText: {
     fontSize: 15,
     fontWeight: '500',
   },
-  buttonPressed: {
-    opacity: 0.8,
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 8,
+    textAlign: 'center',
   },
 });
 

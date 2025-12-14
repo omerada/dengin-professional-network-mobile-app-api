@@ -252,36 +252,36 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
 AvatarPicker.displayName = 'AvatarPicker';
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    paddingVertical: spacing.lg,
+  avatar: {
+    borderWidth: 3,
   },
   avatarContainer: {
     position: 'relative',
   },
-  avatar: {
-    borderWidth: 3,
-  },
   avatarPlaceholder: {
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  container: {
+    alignItems: 'center',
+    paddingVertical: spacing.lg,
+  },
+  hint: {
+    fontSize: fontSize.sm,
+    marginTop: spacing.sm,
   },
   initials: {
     fontWeight: '700',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
     opacity: 0.7,
   },
   overlayText: {
     fontSize: fontSize.xs,
     fontWeight: '600',
     marginTop: 2,
-  },
-  hint: {
-    fontSize: fontSize.sm,
-    marginTop: spacing.sm,
   },
 });

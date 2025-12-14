@@ -742,129 +742,40 @@ export const RegisterScreenMultiStep: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  actions: {
+    marginBottom: spacing.md,
+    marginTop: spacing.xl,
+  },
+  backButton: {
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
+  backButtonCircle: {
+    alignItems: 'center',
+    borderRadius: 24,
+    height: 48,
+    justifyContent: 'center',
+    width: 48,
+  },
+  checkbox: {
+    alignItems: 'center',
+    borderRadius: 6,
+    borderWidth: 2,
+    height: 24,
+    justifyContent: 'center',
+    marginTop: 2,
+    width: 24,
+  },
+  checkboxRow: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+  },
   container: {
     flex: 1,
   },
-  keyboardAvoid: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: spacing.xl,
-    paddingHorizontal: spacing.lg,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: spacing.sm,
-    marginBottom: spacing.md,
-    marginLeft: spacing.xs,
-  },
-  backButton: {
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  backButtonCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginLeft: spacing.md,
-  },
-  errorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 12,
-    marginBottom: spacing.lg,
-    padding: spacing.md,
-  },
-  errorText: {
-    fontSize: 14,
-    marginLeft: spacing.sm,
-    flex: 1,
-  },
-  stepContent: {
-    marginTop: spacing.lg,
-  },
-  stepHeader: {
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-    paddingHorizontal: spacing.md,
-  },
-  stepTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: spacing.sm,
-    textAlign: 'center',
-    letterSpacing: -0.5,
-  },
-  stepSubtitle: {
-    fontSize: 16,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  stepForm: {
-    gap: spacing.md,
-  },
-  summaryCard: {
-    borderRadius: 16,
-    padding: spacing.lg,
-    marginBottom: spacing.xl,
-  },
-  summaryTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: spacing.md,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-  },
-  summaryText: {
-    fontSize: 16,
-    marginLeft: spacing.md,
-  },
-  termsContainer: {
-    marginTop: spacing.md,
-  },
-  checkboxRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
-    borderWidth: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 2,
-  },
-  termsTextContainer: {
-    flex: 1,
-    marginLeft: spacing.md,
-  },
-  termsText: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  termsLink: {
-    fontWeight: '600',
-    textDecorationLine: 'underline',
-  },
-  actions: {
-    marginTop: spacing.xl,
-    marginBottom: spacing.md,
-  },
   divider: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     marginVertical: spacing.lg,
   },
   dividerLine: {
@@ -872,27 +783,35 @@ const styles = StyleSheet.create({
     height: 1,
   },
   dividerText: {
-    marginHorizontal: spacing.md,
     fontSize: 14,
+    marginHorizontal: spacing.md,
   },
-  socialButtonsRow: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    marginBottom: spacing.lg,
-  },
-  socialButton: {
-    flex: 1,
-    flexDirection: 'row',
+  errorContainer: {
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
     borderRadius: 12,
-    gap: spacing.sm,
+    flexDirection: 'row',
+    marginBottom: spacing.lg,
+    padding: spacing.md,
   },
-  socialButtonText: {
-    fontSize: 15,
-    fontWeight: '500',
+  errorText: {
+    flex: 1,
+    fontSize: 14,
+    marginLeft: spacing.sm,
+  },
+  header: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginBottom: spacing.md,
+    marginLeft: spacing.xs,
+    marginTop: spacing.sm,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginLeft: spacing.md,
+  },
+  keyboardAvoid: {
+    flex: 1,
   },
   loginContainer: {
     flexDirection: 'row',
@@ -901,5 +820,86 @@ const styles = StyleSheet.create({
   },
   loginLink: {
     fontWeight: '600',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: spacing.xl,
+    paddingHorizontal: spacing.lg,
+  },
+  socialButton: {
+    alignItems: 'center',
+    borderRadius: 12,
+    flex: 1,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  socialButtonText: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  socialButtonsRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  stepContent: {
+    marginTop: spacing.lg,
+  },
+  stepForm: {
+    gap: spacing.md,
+  },
+  stepHeader: {
+    alignItems: 'center',
+    marginBottom: spacing.xl,
+    paddingHorizontal: spacing.md,
+  },
+  stepSubtitle: {
+    fontSize: 16,
+    lineHeight: 22,
+    textAlign: 'center',
+  },
+  stepTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    letterSpacing: -0.5,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  summaryCard: {
+    borderRadius: 16,
+    marginBottom: spacing.xl,
+    padding: spacing.lg,
+  },
+  summaryRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    paddingVertical: spacing.sm,
+  },
+  summaryText: {
+    fontSize: 16,
+    marginLeft: spacing.md,
+  },
+  summaryTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: spacing.md,
+  },
+  termsContainer: {
+    marginTop: spacing.md,
+  },
+  termsLink: {
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  termsText: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  termsTextContainer: {
+    flex: 1,
+    marginLeft: spacing.md,
   },
 });

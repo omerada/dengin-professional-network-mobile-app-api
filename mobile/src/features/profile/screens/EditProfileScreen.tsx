@@ -4,18 +4,11 @@
 // Backend: PUT /api/users/me, POST /api/users/me/avatar
 
 import React, { useState, useCallback, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
 import { Button, Input, SuccessCelebration } from '@shared/components';
 import { spacing, fontSize } from '@theme';
 import { AvatarPicker } from '../components';
@@ -46,6 +39,7 @@ const GENDER_OPTIONS: GenderOption[] = [
  */
 export const EditProfileScreen: React.FC = () => {
   const colors = useColors();
+  const toast = useToast();
   const navigation = useNavigation();
 
   // Fetch current profile
@@ -122,11 +116,11 @@ export const EditProfileScreen: React.FC = () => {
 
     // Validation
     if (!name.trim()) {
-      Alert.alert('Hata', 'Ad alanı boş bırakılamaz.');
+      toast.error('Ad alanı boş bırakılamaz.');
       return;
     }
     if (!surname.trim()) {
-      Alert.alert('Hata', 'Soyad alanı boş bırakılamaz.');
+      toast.error('Soyad alanı boş bırakılamaz.');
       return;
     }
 
@@ -160,6 +154,7 @@ export const EditProfileScreen: React.FC = () => {
 
       // Success - Show celebration
       setShowSuccess(true);
+      toast.success('Profil güncellendi');
 
       // Clear pending states
       setPendingAvatarUri(null);
@@ -169,7 +164,7 @@ export const EditProfileScreen: React.FC = () => {
       refetch();
     } catch (error: any) {
       console.error('[EditProfileScreen] Save error:', error);
-      Alert.alert('Hata', error.message || 'Profil güncellenirken bir hata oluştu.');
+      toast.error(error.message || 'Profil güncellenirken bir hata oluştu.');
     }
   }, [
     hasChanges,
@@ -313,33 +308,33 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
+  footer: {
+    borderTopWidth: 1,
     padding: spacing.lg,
   },
   form: {
     gap: spacing.md,
   },
+  genderButton: {
+    flex: 1,
+  },
+  genderOptions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
   genderSection: {
     marginTop: spacing.sm,
+  },
+  keyboardView: {
+    flex: 1,
   },
   label: {
     fontSize: fontSize.sm,
     fontWeight: '500',
     marginBottom: spacing.sm,
   },
-  genderOptions: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  genderButton: {
-    flex: 1,
-  },
-  footer: {
+  scrollContent: {
+    flexGrow: 1,
     padding: spacing.lg,
-    borderTopWidth: 1,
   },
 });

@@ -14,14 +14,17 @@ import {
   Pressable,
   Alert,
 } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SCREEN_ANIMATIONS, HAPTIC_TYPES } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
-import { ConversationItem } from '../components';
+import { useHaptic } from '@shared/hooks';
+import { ConversationItem, ConversationSkeleton } from '../components';
 import { useConversations, useSocket } from '../hooks';
-import { AnimatedListItem, UnifiedEmptyState, UnifiedLoadingState } from '@shared/components';
+import { AnimatedListItem, UnifiedEmptyState } from '@shared/components';
 import type { Conversation } from '../types';
 import type { MessagingStackParamList } from '@core/navigation/types';
 
@@ -31,6 +34,7 @@ export const ConversationListScreen: React.FC = () => {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp>();
+  const { trigger } = useHaptic();
 
   // State
   const [searchQuery, setSearchQuery] = useState('');
@@ -59,6 +63,7 @@ export const ConversationListScreen: React.FC = () => {
   // Handlers
   const handleConversationPress = useCallback(
     (conversation: Conversation) => {
+      trigger(HAPTIC_TYPES.listItemPress);
       try {
         if (!conversation) {
           console.error('[ConversationList] Conversation is null/undefined');
@@ -88,7 +93,7 @@ export const ConversationListScreen: React.FC = () => {
         Alert.alert('Hata', 'Konuşma açılırken bir hata oluştu');
       }
     },
-    [navigation],
+    [navigation, trigger],
   );
 
   const handleConversationLongPress = useCallback(
@@ -118,18 +123,20 @@ export const ConversationListScreen: React.FC = () => {
 
   // Render functions
   const renderItem = useCallback(
-    ({ item }: { item: Conversation }) => {
+    ({ item, index }: { item: Conversation; index: number }) => {
       if (!item) {
         console.error('[ConversationList] renderItem: item is null/undefined');
         return null;
       }
 
       return (
-        <AnimatedListItem
-          onPress={() => handleConversationPress(item)}
-          onLongPress={() => handleConversationLongPress(item)}>
-          <ConversationItem conversation={item} />
-        </AnimatedListItem>
+        <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(index)}>
+          <AnimatedListItem
+            onPress={() => handleConversationPress(item)}
+            onLongPress={() => handleConversationLongPress(item)}>
+            <ConversationItem conversation={item} />
+          </AnimatedListItem>
+        </Animated.View>
       );
     },
     [handleConversationPress, handleConversationLongPress],
@@ -167,134 +174,137 @@ export const ConversationListScreen: React.FC = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top']}>
-      {/* Connection indicator */}
-      {!isConnected && (
-        <View style={[styles.connectionBar, { backgroundColor: colors.status.warning }]}>
-          <Icon name="cloud-offline" size={16} color={colors.text.inverse} />
-        </View>
-      )}
+      <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={{ flex: 1 }}>
+        {/* Connection indicator */}
+        {!isConnected && (
+          <View style={[styles.connectionBar, { backgroundColor: colors.status.warning }]}>
+            <Icon name="cloud-offline" size={16} color={colors.text.inverse} />
+          </View>
+        )}
 
-      {/* Search bar */}
-      <View style={[styles.searchContainer, { backgroundColor: colors.background.secondary }]}>
-        <View style={[styles.searchInputContainer, { backgroundColor: colors.background.primary }]}>
-          <Icon name="search" size={18} color={colors.text.tertiary} />
-          <TextInput
-            style={[styles.searchInput, { color: colors.text.primary }]}
-            placeholder="Konuşmalarda ara..."
-            placeholderTextColor={colors.text.tertiary}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            returnKeyType="search"
-          />
-          {searchQuery.length > 0 && (
-            <Pressable onPress={() => setSearchQuery('')}>
-              <Icon name="close-circle" size={18} color={colors.text.tertiary} />
-            </Pressable>
-          )}
-        </View>
-      </View>
-
-      {/* Loading state */}
-      {isLoading && <UnifiedLoadingState strategy="spinner" message="Konuşmalar yükleniyor..." />}
-
-      {/* Conversation list */}
-      {!isLoading && (
-        <FlatList
-          data={filteredConversations}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          ListEmptyComponent={ListEmptyComponent}
-          ListFooterComponent={ListFooterComponent}
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.3}
-          refreshControl={
-            <RefreshControl
-              refreshing={isRefreshing}
-              onRefresh={refetch}
-              colors={[colors.interactive.default]}
-              tintColor={colors.interactive.default}
+        {/* Search bar */}
+        <View style={[styles.searchContainer, { backgroundColor: colors.background.secondary }]}>
+          <View
+            style={[styles.searchInputContainer, { backgroundColor: colors.background.primary }]}>
+            <Icon name="search" size={18} color={colors.text.tertiary} />
+            <TextInput
+              style={[styles.searchInput, { color: colors.text.primary }]}
+              placeholder="Konuşmalarda ara..."
+              placeholderTextColor={colors.text.tertiary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              returnKeyType="search"
             />
-          }
-          contentContainerStyle={[
-            styles.listContent,
-            filteredConversations.length === 0 && styles.emptyListContent,
-          ]}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        />
-      )}
+            {searchQuery.length > 0 && (
+              <Pressable onPress={() => setSearchQuery('')}>
+                <Icon name="close-circle" size={18} color={colors.text.tertiary} />
+              </Pressable>
+            )}
+          </View>
+        </View>
 
-      {/* New conversation FAB */}
-      <Pressable
-        onPress={handleNewConversation}
-        style={({ pressed }) => [
-          styles.fab,
-          { backgroundColor: colors.interactive.default, bottom: insets.bottom + 16 },
-          pressed && styles.fabPressed,
-        ]}>
-        <Icon name="create-outline" size={24} color={colors.text.inverse} />
-      </Pressable>
+        {/* Loading state - Skeleton */}
+        {isLoading && <ConversationSkeleton count={8} />}
+
+        {/* Conversation list */}
+        {!isLoading && (
+          <FlatList
+            data={filteredConversations}
+            renderItem={renderItem}
+            keyExtractor={keyExtractor}
+            ListEmptyComponent={ListEmptyComponent}
+            ListFooterComponent={ListFooterComponent}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.3}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefreshing}
+                onRefresh={refetch}
+                colors={[colors.interactive.default]}
+                tintColor={colors.interactive.default}
+              />
+            }
+            contentContainerStyle={[
+              styles.listContent,
+              filteredConversations.length === 0 && styles.emptyListContent,
+            ]}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          />
+        )}
+
+        {/* New conversation FAB */}
+        <Pressable
+          onPress={handleNewConversation}
+          style={({ pressed }) => [
+            styles.fab,
+            { backgroundColor: colors.interactive.default, bottom: insets.bottom + 16 },
+            pressed && styles.fabPressed,
+          ]}>
+          <Icon name="create-outline" size={24} color={colors.text.inverse} />
+        </Pressable>
+      </Animated.View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  connectionBar: {
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
   container: {
     flex: 1,
   },
-  connectionBar: {
-    paddingVertical: 4,
+  emptyListContent: {
+    flex: 1,
+  },
+  fab: {
     alignItems: 'center',
+    borderRadius: 28,
+    elevation: 4,
+    height: 56,
+    justifyContent: 'center',
+    position: 'absolute',
+    right: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    width: 56,
+  },
+  fabPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.95 }],
+  },
+  listContent: {
+    flexGrow: 1,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  loadingFooter: {
+    alignItems: 'center',
+    paddingVertical: 16,
   },
   searchContainer: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-  },
-  searchInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    gap: 8,
   },
   searchInput: {
     flex: 1,
     fontSize: 15,
     paddingVertical: 0,
   },
-  listContent: {
-    flexGrow: 1,
-  },
-  emptyListContent: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
+  searchInputContainer: {
     alignItems: 'center',
-  },
-  loadingFooter: {
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  fab: {
-    position: 'absolute',
-    right: 16,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  },
-  fabPressed: {
-    opacity: 0.9,
-    transform: [{ scale: 0.95 }],
+    borderRadius: 10,
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
 });
 

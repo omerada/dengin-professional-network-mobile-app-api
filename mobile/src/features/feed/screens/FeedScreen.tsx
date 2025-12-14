@@ -462,4 +462,13 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FeedScreen;
+// Wrap with Error Boundary for production safety
+import { ErrorBoundary } from '@core/components';
+
+export default function FeedScreenWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <FeedScreen />
+    </ErrorBoundary>
+  );
+}

@@ -77,24 +77,24 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = memo(
 
 const styles = StyleSheet.create({
   button: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    height: 52,
     borderRadius: 12,
     borderWidth: 1,
-  },
-  iconContainer: {
-    width: 24,
-    height: 24,
-    marginRight: spacing.sm,
+    flexDirection: 'row',
+    height: 52,
     justifyContent: 'center',
-    alignItems: 'center',
   },
   googleIcon: {
+    color: '#4285F4',
     fontSize: 20,
-    fontWeight: '700',
-    color: '#4285F4', // Google blue
+    fontWeight: '700', // Google blue
+  },
+  iconContainer: {
+    alignItems: 'center',
+    height: 24,
+    justifyContent: 'center',
+    marginRight: spacing.sm,
+    width: 24,
   },
   text: {
     fontSize: fontSize.md,

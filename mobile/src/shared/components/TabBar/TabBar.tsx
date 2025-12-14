@@ -290,13 +290,25 @@ const TabItem = memo<TabItemComponentProps>(function TabItem({
 // ============================================================================
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
+  badge: {
     alignItems: 'center',
+    borderRadius: 9,
+    height: 18,
+    justifyContent: 'center',
+    marginLeft: 6,
+    minWidth: 18,
+    paddingHorizontal: 5,
+  },
+  badgeText: {
+    fontWeight: '700',
+  },
+  container: {
+    alignItems: 'center',
+    flexDirection: 'row',
   },
   tab: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     justifyContent: 'center',
   },
   tabIcon: {
@@ -304,17 +316,5 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     textAlign: 'center',
-  },
-  badge: {
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
-    paddingHorizontal: 5,
-    marginLeft: 6,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  badgeText: {
-    fontWeight: '700',
   },
 });

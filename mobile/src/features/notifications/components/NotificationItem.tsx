@@ -151,31 +151,39 @@ export const NotificationItem: React.FC<NotificationItemProps> = memo(({ notific
 NotificationItem.displayName = 'NotificationItem';
 
 const styles = StyleSheet.create({
+  body: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 4,
+  },
   container: {
-    flexDirection: 'row',
     alignItems: 'flex-start',
+    flexDirection: 'row',
+    gap: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    gap: 12,
-  },
-  iconContainer: {
-    width: 44,
-    height: 44,
-  },
-  iconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  image: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
   },
   content: {
     flex: 1,
+  },
+  iconCircle: {
+    alignItems: 'center',
+    borderRadius: 22,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
+  },
+  iconContainer: {
+    height: 44,
+    width: 44,
+  },
+  image: {
+    borderRadius: 22,
+    height: 44,
+    width: 44,
+  },
+  time: {
+    fontSize: 12,
   },
   title: {
     fontSize: 15,
@@ -184,19 +192,11 @@ const styles = StyleSheet.create({
   titleUnread: {
     fontWeight: '600',
   },
-  body: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 4,
-  },
-  time: {
-    fontSize: 12,
-  },
   unreadDot: {
-    width: 8,
-    height: 8,
     borderRadius: 4,
+    height: 8,
     marginTop: 4,
+    width: 8,
   },
 });
 

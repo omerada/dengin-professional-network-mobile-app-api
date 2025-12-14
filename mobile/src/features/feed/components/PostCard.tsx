@@ -212,10 +212,10 @@ PostCard.displayName = 'PostCard';
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E0E0E0',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingVertical: 12,
+    width: '100%',
   },
 });
 

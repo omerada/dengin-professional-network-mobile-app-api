@@ -61,7 +61,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = memo(
             },
             style,
           ]}>
-          <Text style={[styles.placeholderIcon]}>📷</Text>
+          <Text style={styles.placeholderIcon}>📷</Text>
           <Text style={[styles.placeholderText, { color: colors.text.secondary }]}>{label}</Text>
         </View>
       );
@@ -124,14 +124,27 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
   },
+  image: {
+    height: '100%',
+    width: '100%',
+  },
   imageContainer: {
     borderRadius: 12,
-    overflow: 'hidden',
     borderWidth: 2,
+    overflow: 'hidden',
   },
-  image: {
-    width: '100%',
-    height: '100%',
+  label: {
+    ...typography.caption,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  labelContainer: {
+    bottom: 0,
+    left: 0,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    position: 'absolute',
+    right: 0,
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -143,24 +156,11 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: '600',
   },
-  labelContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-  },
-  label: {
-    ...typography.caption,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
   placeholder: {
-    borderRadius: 12,
-    borderWidth: 2,
-    borderStyle: 'dashed',
     alignItems: 'center',
+    borderRadius: 12,
+    borderStyle: 'dashed',
+    borderWidth: 2,
     justifyContent: 'center',
   },
   placeholderIcon: {
@@ -171,10 +171,10 @@ const styles = StyleSheet.create({
     ...typography.bodySmall,
   },
   retakeButton: {
-    marginTop: spacing.sm,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.md,
     borderRadius: 16,
+    marginTop: spacing.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
   },
   retakeText: {
     ...typography.bodySmall,

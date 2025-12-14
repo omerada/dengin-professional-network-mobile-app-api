@@ -5,10 +5,13 @@
 import React, { useCallback, useMemo } from 'react';
 import { View, StyleSheet, RefreshControl, ActivityIndicator } from 'react-native';
 import { FlatList } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
+import { SCREEN_ANIMATIONS } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
 import { Loading, UnifiedEmptyState, AnimatedListItem } from '@shared/components';
+import { ErrorBoundary } from '@core/components';
 import { spacing } from '@theme';
 import { UserListItem } from '../components';
 import { useFollowing } from '../hooks';
@@ -42,10 +45,12 @@ export const FollowingListScreen: React.FC = () => {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const renderItem = useCallback(
-    ({ item }: { item: FollowUser }) => (
-      <AnimatedListItem>
-        <UserListItem user={item} showFollowButton />
-      </AnimatedListItem>
+    ({ item, index }: { item: FollowUser; index: number }) => (
+      <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(index)}>
+        <AnimatedListItem>
+          <UserListItem user={item} showFollowButton />
+        </AnimatedListItem>
+      </Animated.View>
     ),
     [],
   );
@@ -89,43 +94,53 @@ export const FollowingListScreen: React.FC = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['bottom']}>
-      <FlatList
-        data={users}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-        onEndReached={handleEndReached}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={ListFooterComponent}
-        ListEmptyComponent={ListEmptyComponent}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={refetch}
-            tintColor={colors.interactive.default}
-          />
-        }
-        ItemSeparatorComponent={ItemSeparatorComponent}
-        contentContainerStyle={
-          users.length === 0 ? ({ flexGrow: 1 } as unknown as ContentStyle) : undefined
-        }
-      />
+      <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={{ flex: 1 }}>
+        <FlatList
+          data={users}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={ListFooterComponent}
+          ListEmptyComponent={ListEmptyComponent}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={refetch}
+              tintColor={colors.interactive.default}
+            />
+          }
+          ItemSeparatorComponent={ItemSeparatorComponent}
+          contentContainerStyle={
+            users.length === 0 ? ({ flexGrow: 1 } as unknown as ContentStyle) : undefined
+          }
+        />
+      </Animated.View>
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  emptyContent: {
+    flex: 1,
+  },
+  footer: {
+    alignItems: 'center',
+    padding: spacing.lg,
   },
   separator: {
     height: 1,
     marginLeft: 76,
   },
-  footer: {
-    padding: spacing.lg,
-    alignItems: 'center',
-  },
-  emptyContent: {
-    flex: 1,
-  },
 });
+
+// Wrap with Error Boundary for production safety
+export default function FollowingListScreenWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <FollowingListScreen />
+    </ErrorBoundary>
+  );
+}

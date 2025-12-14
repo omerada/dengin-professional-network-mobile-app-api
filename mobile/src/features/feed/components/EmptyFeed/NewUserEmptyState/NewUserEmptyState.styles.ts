@@ -5,68 +5,66 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingVertical: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  iconContainer: {
-    marginBottom: 24,
-  },
-
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-
-  subtitle: {
-    fontSize: 16,
-    lineHeight: 24,
-    textAlign: 'center',
-    marginBottom: 32,
-    paddingHorizontal: 16,
-  },
-
   checklistContainer: {
-    width: '100%',
     marginBottom: 24,
+    width: '100%',
   },
 
   checklistItem: {
-    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    marginBottom: 8,
     borderRadius: 12,
+    flexDirection: 'row',
+    marginBottom: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
 
   checklistItemLeft: {
+    alignItems: 'center',
     flexDirection: 'row',
-    alignItems: 'center',
     flex: 1,
-  },
-
-  checkmarkContainer: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    marginRight: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 
   checkmarkCompleted: {
     backgroundColor: '#10B981', // green-500
   },
 
+  checkmarkContainer: {
+    alignItems: 'center',
+    borderRadius: 12,
+    height: 24,
+    justifyContent: 'center',
+    marginRight: 12,
+    width: 24,
+  },
+
   checkmarkIncomplete: {
     borderWidth: 2,
+  },
+
+  container: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 40,
+  },
+
+  ctaButton: {
+    alignItems: 'center',
+    borderRadius: 12,
+    height: 52,
+    justifyContent: 'center',
+    width: '100%',
+  },
+
+  ctaButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
+  iconContainer: {
+    marginBottom: 24,
   },
 
   itemIcon: {
@@ -74,9 +72,9 @@ export const styles = StyleSheet.create({
   },
 
   itemLabel: {
+    flex: 1,
     fontSize: 15,
     fontWeight: '500',
-    flex: 1,
   },
 
   itemXP: {
@@ -85,9 +83,20 @@ export const styles = StyleSheet.create({
     marginLeft: 8,
   },
 
+  progressBarFill: {
+    borderRadius: 4,
+    height: '100%',
+  },
+
+  progressBarTrack: {
+    borderRadius: 4,
+    height: 8,
+    overflow: 'hidden',
+  },
+
   progressContainer: {
-    width: '100%',
     marginBottom: 24,
+    width: '100%',
   },
 
   progressHeader: {
@@ -106,35 +115,26 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  progressBarTrack: {
-    height: 8,
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-
-  progressBarFill: {
-    height: '100%',
-    borderRadius: 4,
-  },
-
-  ctaButton: {
-    width: '100%',
-    height: 52,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  ctaButtonText: {
+  subtitle: {
     fontSize: 16,
-    fontWeight: '600',
+    lineHeight: 24,
+    marginBottom: 32,
+    paddingHorizontal: 16,
+    textAlign: 'center',
+  },
+
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: 12,
+    textAlign: 'center',
   },
 
   xpBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
     borderRadius: 12,
     marginLeft: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
   },
 
   xpBadgeText: {

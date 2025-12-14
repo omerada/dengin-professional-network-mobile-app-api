@@ -18,8 +18,8 @@ export const modernStyles = StyleSheet.create({
   // ========================================
   
   container: {
-    flex: 1,
     backgroundColor: '#FFFFFF',
+    flex: 1,
   },
 
   scrollContent: {
@@ -32,39 +32,39 @@ export const modernStyles = StyleSheet.create({
   // ========================================
   
   loadingContainer: {
+    alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
     paddingTop: 100,
   },
 
   errorContainer: {
+    alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
     paddingHorizontal: 32,
     paddingTop: 100,
   },
 
   errorText: {
-    fontSize: 16,
     color: '#666666',
+    fontSize: 16,
     marginTop: 16,
     textAlign: 'center',
   },
 
   retryButton: {
+    backgroundColor: '#F59E42',
+    borderRadius: 12,
     marginTop: 24,
     paddingHorizontal: 32,
     paddingVertical: 12,
-    backgroundColor: '#F59E42',
-    borderRadius: 12,
   },
 
   retryButtonText: {
+    color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '600',
-    color: '#FFFFFF',
   },
 
   // ========================================
@@ -72,11 +72,11 @@ export const modernStyles = StyleSheet.create({
   // ========================================
   
   instagramHeader: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
+    paddingBottom: 12,
     paddingHorizontal: 16,
     paddingTop: 16,
-    paddingBottom: 12,
   },
 
   avatarSection: {
@@ -84,33 +84,33 @@ export const modernStyles = StyleSheet.create({
   },
 
   avatar: {
-    width: 86,
-    height: 86,
-    borderRadius: 43,
     backgroundColor: '#F5F5F5',
+    borderRadius: 43,
+    height: 86,
+    width: 86,
   },
 
   avatarPlaceholder: {
-    width: 86,
-    height: 86,
-    borderRadius: 43,
-    backgroundColor: '#F5F5F5',
     alignItems: 'center',
+    backgroundColor: '#F5F5F5',
+    borderRadius: 43,
+    height: 86,
     justifyContent: 'center',
+    width: 86,
   },
 
   avatarInitials: {
+    color: '#999999',
     fontSize: 32,
     fontWeight: '600',
-    color: '#999999',
     letterSpacing: 1,
   },
 
   statsSection: {
+    alignItems: 'center',
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-around',
-    alignItems: 'center',
   },
 
   statColumn: {
@@ -118,15 +118,15 @@ export const modernStyles = StyleSheet.create({
   },
 
   statValue: {
+    color: '#1A1A1A',
     fontSize: 18,
     fontWeight: '700',
-    color: '#1A1A1A',
     marginBottom: 2,
   },
 
   statLabel: {
-    fontSize: 13,
     color: '#666666',
+    fontSize: 13,
     fontWeight: '400',
   },
 
@@ -135,20 +135,20 @@ export const modernStyles = StyleSheet.create({
   // ========================================
   
   infoSection: {
-    paddingHorizontal: 16,
     paddingBottom: 16,
+    paddingHorizontal: 16,
   },
 
   nameRow: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     marginBottom: 2,
   },
 
   fullName: {
+    color: '#1A1A1A',
     fontSize: 15,
     fontWeight: '600',
-    color: '#1A1A1A',
     marginRight: 8,
   },
 
@@ -157,31 +157,31 @@ export const modernStyles = StyleSheet.create({
   },
 
   professionRow: {
-    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 2,
+    flexDirection: 'row',
     marginBottom: 4,
+    marginTop: 2,
   },
 
   professionText: {
-    fontSize: 14,
     color: '#666666',
+    fontSize: 14,
     fontWeight: '400',
     marginRight: 4,
   },
 
   verifiedBadge: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: '#FFFFFF',
     alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    height: 16,
     justifyContent: 'center',
+    width: 16,
   },
 
   bioText: {
-    fontSize: 14,
     color: '#1A1A1A',
+    fontSize: 14,
     lineHeight: 18,
     marginTop: 4,
   },
@@ -192,41 +192,41 @@ export const modernStyles = StyleSheet.create({
   
   actionsContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingBottom: 16,
     gap: 8,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
   },
 
   editProfileButton: {
-    flex: 1,
-    height: 32,
+    alignItems: 'center',
     backgroundColor: '#F0F0F0',
     borderRadius: 8,
-    alignItems: 'center',
+    flex: 1,
+    height: 32,
     justifyContent: 'center',
   },
 
   editProfileButtonText: {
+    color: '#1A1A1A',
     fontSize: 14,
     fontWeight: '600',
-    color: '#1A1A1A',
   },
 
   settingsIconButton: {
-    width: 32,
-    height: 32,
+    alignItems: 'center',
     backgroundColor: '#F0F0F0',
     borderRadius: 8,
-    alignItems: 'center',
+    height: 32,
     justifyContent: 'center',
+    width: 32,
   },
 
   followButton: {
-    flex: 1,
-    height: 32,
+    alignItems: 'center',
     backgroundColor: '#F59E42',
     borderRadius: 8,
-    alignItems: 'center',
+    flex: 1,
+    height: 32,
     justifyContent: 'center',
   },
 
@@ -235,9 +235,9 @@ export const modernStyles = StyleSheet.create({
   },
 
   followButtonText: {
+    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '600',
-    color: '#FFFFFF',
   },
 
   followingButtonText: {
@@ -245,18 +245,18 @@ export const modernStyles = StyleSheet.create({
   },
 
   messageButton: {
-    flex: 1,
-    height: 32,
+    alignItems: 'center',
     backgroundColor: '#F0F0F0',
     borderRadius: 8,
-    alignItems: 'center',
+    flex: 1,
+    height: 32,
     justifyContent: 'center',
   },
 
   messageButtonText: {
+    color: '#1A1A1A',
     fontSize: 14,
     fontWeight: '600',
-    color: '#1A1A1A',
   },
 
   // ========================================
@@ -264,41 +264,41 @@ export const modernStyles = StyleSheet.create({
   // ========================================
   
   postsSection: {
-    marginTop: 8,
-    borderTopWidth: 1,
     borderTopColor: '#F0F0F0',
+    borderTopWidth: 1,
+    marginTop: 8,
     paddingTop: 16,
   },
 
   postsSectionHeader: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
     marginBottom: 16,
+    paddingHorizontal: 16,
   },
 
   sectionTitle: {
+    color: '#1A1A1A',
     fontSize: 16,
     fontWeight: '700',
-    color: '#1A1A1A',
   },
 
   postsCount: {
+    color: '#999999',
     fontSize: 14,
     fontWeight: '600',
-    color: '#999999',
   },
 
   postsLoading: {
-    paddingVertical: 60,
     alignItems: 'center',
+    paddingVertical: 60,
   },
 
   emptyPosts: {
-    paddingVertical: 80,
     alignItems: 'center',
     paddingHorizontal: 32,
+    paddingVertical: 80,
   },
 
   emptyIcon: {
@@ -306,10 +306,10 @@ export const modernStyles = StyleSheet.create({
   },
 
   emptyText: {
-    fontSize: 15,
     color: '#999999',
-    textAlign: 'center',
+    fontSize: 15,
     lineHeight: 22,
+    textAlign: 'center',
   },
 
   postsList: {
@@ -317,21 +317,21 @@ export const modernStyles = StyleSheet.create({
   },
 
   loadMoreButton: {
-    paddingVertical: 20,
     paddingHorizontal: 16,
+    paddingVertical: 20,
   },
 
   loadMoreButtonInner: {
-    height: 44,
+    alignItems: 'center',
     backgroundColor: '#F5F5F5',
     borderRadius: 12,
-    alignItems: 'center',
+    height: 44,
     justifyContent: 'center',
   },
 
   loadMoreText: {
+    color: '#666666',
     fontSize: 14,
     fontWeight: '600',
-    color: '#666666',
   },
 });

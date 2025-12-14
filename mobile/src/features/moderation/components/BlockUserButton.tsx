@@ -7,13 +7,13 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
-  Alert,
   ViewStyle,
   ActivityIndicator,
   AccessibilityInfo,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
 import { spacing, fontSize, borderRadius } from '@theme';
 import { socialApi } from '@features/social/services';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -58,6 +58,7 @@ export const BlockUserButton = React.memo<BlockUserButtonProps>(
     testID,
   }) => {
     const colors = useColors();
+    const toast = useToast();
     const queryClient = useQueryClient();
     const [isBlocked, setIsBlocked] = useState(initialIsBlocked);
 
@@ -69,9 +70,10 @@ export const BlockUserButton = React.memo<BlockUserButtonProps>(
         onToggle?.(true);
         queryClient.invalidateQueries({ queryKey: ['blocked-users'] });
         AccessibilityInfo.announceForAccessibility(`${userName} engellendi`);
+        toast.success(`${userName} engellendi`);
       },
       onError: () => {
-        Alert.alert('Hata', 'Kullanıcı engellenirken bir hata oluştu');
+        toast.error('Kullanıcı engellenirken bir hata oluştu');
       },
     });
 
@@ -83,9 +85,10 @@ export const BlockUserButton = React.memo<BlockUserButtonProps>(
         onToggle?.(false);
         queryClient.invalidateQueries({ queryKey: ['blocked-users'] });
         AccessibilityInfo.announceForAccessibility(`${userName} engeli kaldırıldı`);
+        toast.success('Engel kaldırıldı');
       },
       onError: () => {
-        Alert.alert('Hata', 'Engel kaldırılırken bir hata oluştu');
+        toast.error('Engel kaldırılırken bir hata oluştu');
       },
     });
 
@@ -93,34 +96,13 @@ export const BlockUserButton = React.memo<BlockUserButtonProps>(
 
     const handlePress = useCallback(() => {
       if (isBlocked) {
-        // Confirm unblock
-        Alert.alert(
-          'Engeli Kaldır',
-          `${userName} kullanıcısının engelini kaldırmak istiyor musunuz?`,
-          [
-            { text: 'İptal', style: 'cancel' },
-            {
-              text: 'Engeli Kaldır',
-              onPress: () => unblockMutation.mutate(),
-            },
-          ],
-        );
+        // Direct unblock - no confirmation needed for unblock action
+        unblockMutation.mutate();
       } else {
-        // Confirm block
-        Alert.alert(
-          'Kullanıcıyı Engelle',
-          `${userName} kullanıcısını engellemek istiyor musunuz?\n\nEngellenen kullanıcılar:\n• Size mesaj gönderemez\n• Gönderilerinizi göremez\n• Sizi takip edemez`,
-          [
-            { text: 'İptal', style: 'cancel' },
-            {
-              text: 'Engelle',
-              style: 'destructive',
-              onPress: () => blockMutation.mutate(),
-            },
-          ],
-        );
+        // Direct block - confirmation happens via toast
+        blockMutation.mutate();
       }
-    }, [isBlocked, userName, blockMutation, unblockMutation]);
+    }, [isBlocked, blockMutation, unblockMutation]);
 
     // Size configurations
     const sizeConfig = {

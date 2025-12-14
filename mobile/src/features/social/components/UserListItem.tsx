@@ -102,33 +102,33 @@ export const UserListItem: React.FC<UserListItemProps> = memo(
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     padding: spacing.md,
+  },
+  followsYou: {
+    fontSize: fontSize.xs,
+    marginTop: 2,
   },
   info: {
     flex: 1,
     marginLeft: spacing.md,
     marginRight: spacing.sm,
   },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   name: {
     fontSize: fontSize.md,
     fontWeight: '600',
   },
-  verifiedBadge: {
-    marginLeft: spacing.xs,
+  nameRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
   },
   profession: {
     fontSize: fontSize.sm,
     marginTop: 2,
   },
-  followsYou: {
-    fontSize: fontSize.xs,
-    marginTop: 2,
+  verifiedBadge: {
+    marginLeft: spacing.xs,
   },
 });
 

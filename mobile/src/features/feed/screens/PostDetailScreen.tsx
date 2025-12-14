@@ -310,29 +310,29 @@ export const PostDetailScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  commentsContainer: {
+    paddingBottom: 16,
+  },
+  commentsLoading: {
+    alignItems: 'center',
+    padding: 24,
+  },
   container: {
     flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  postContainer: {
-    paddingTop: 12,
   },
   divider: {
     height: 8,
     marginVertical: 8,
   },
-  commentsContainer: {
-    paddingBottom: 16,
-  },
-  commentsLoading: {
-    padding: 24,
+  loadingContainer: {
     alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  postContainer: {
+    paddingTop: 12,
+  },
+  scrollView: {
+    flex: 1,
   },
 });

@@ -64,39 +64,39 @@ export const ImagePreviewGrid: React.FC<ImagePreviewGridProps> = memo(
 ImagePreviewGrid.displayName = 'ImagePreviewGrid';
 
 const styles = StyleSheet.create({
+  addButton: {
+    alignItems: 'center',
+    borderRadius: 8,
+    borderStyle: 'dashed',
+    borderWidth: 2,
+    height: IMAGE_SIZE,
+    justifyContent: 'center',
+    width: IMAGE_SIZE,
+  },
   container: {
     paddingVertical: 12,
   },
-  scrollContent: {
-    paddingHorizontal: 16,
+  image: {
+    borderRadius: 8,
+    height: IMAGE_SIZE,
+    width: IMAGE_SIZE,
   },
   imageWrapper: {
     marginRight: 8,
     position: 'relative',
   },
-  image: {
-    width: IMAGE_SIZE,
-    height: IMAGE_SIZE,
-    borderRadius: 8,
-  },
   removeButton: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    width: 22,
-    height: 22,
+    alignItems: 'center',
     borderRadius: 11,
+    height: 22,
     justifyContent: 'center',
-    alignItems: 'center',
+    position: 'absolute',
+    right: 4,
+    top: 4,
+    width: 22,
   },
-  addButton: {
-    width: IMAGE_SIZE,
-    height: IMAGE_SIZE,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderStyle: 'dashed',
-    justifyContent: 'center',
-    alignItems: 'center',
+  scrollContent: {
+    paddingHorizontal: 16,
   },
 });
 

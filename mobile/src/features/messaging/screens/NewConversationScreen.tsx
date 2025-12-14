@@ -210,20 +210,69 @@ export const NewConversationScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  avatar: {
+    borderRadius: 22,
+    height: 44,
+    width: 44,
+  },
+  avatarPlaceholder: {
+    alignItems: 'center',
+    borderRadius: 22,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
+  },
+  backButton: {
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
   container: {
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
+  emptyContainer: {
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(0,0,0,0.1)',
-  },
-  backButton: {
+    gap: 16,
     justifyContent: 'center',
-    alignItems: 'flex-start',
+    paddingVertical: 48,
+  },
+  emptyListContent: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  header: {
+    alignItems: 'center',
+    borderBottomColor: 'rgba(0,0,0,0.1)',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    flexDirection: 'row',
+    paddingBottom: 12,
+    paddingHorizontal: 16,
+  },
+  headerSpacer: {
+    width: 40,
+  },
+  listContent: {
+    flexGrow: 1,
+  },
+  searchContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    paddingVertical: 0,
+  },
+  searchInputContainer: {
+    alignItems: 'center',
+    borderRadius: 10,
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
   title: {
     flex: 1,
@@ -231,65 +280,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
-  headerSpacer: {
-    width: 40,
-  },
-  searchContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  searchInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    gap: 8,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 15,
-    paddingVertical: 0,
-  },
-  listContent: {
-    flexGrow: 1,
-  },
-  emptyListContent: {
-    flex: 1,
-    justifyContent: 'center',
-  },
   userItem: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
+    gap: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    gap: 12,
-  },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-  },
-  avatarPlaceholder: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   userName: {
     flex: 1,
     fontSize: 16,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 48,
-    gap: 16,
-  },
-  emptyText: {
-    fontSize: 14,
-    textAlign: 'center',
   },
 });
 

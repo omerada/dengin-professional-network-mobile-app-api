@@ -3,11 +3,13 @@
 // Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
 
 import React, { useMemo, useCallback, useState } from 'react';
-import { StyleSheet, ScrollView, Alert, RefreshControl } from 'react-native';
+import { StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { HAPTIC_TYPES } from '@constants';
+import { HAPTIC_TYPES, SCREEN_ANIMATIONS } from '@constants';
 import { useTheme, useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
 import { spacing } from '@theme';
 import { SettingsSection } from '../components';
@@ -24,9 +26,10 @@ import type { SettingsSectionType } from '../types';
  * - Danger Zone (delete account)
  */
 export const SettingsScreen: React.FC = () => {
-  const { toggleTheme, isDark } = useTheme();
+  const { setThemeMode, themeMode, isDark } = useTheme();
   const colors = useColors();
   const { trigger } = useHaptic();
+  const toast = useToast();
   const navigation = useNavigation();
 
   // Loading states
@@ -59,18 +62,34 @@ export const SettingsScreen: React.FC = () => {
   }, [navigation]);
 
   const handleHelp = useCallback(() => {
+    trigger(HAPTIC_TYPES.buttonPress);
     // Open help center or FAQ
-    Alert.alert('Yardım', 'Yardım merkezi yakında eklenecek.');
-  }, []);
+    toast.info('Yardım merkezi yakında eklenecek.');
+  }, [trigger, toast]);
 
   const handleContact = useCallback(() => {
+    trigger(HAPTIC_TYPES.buttonPress);
     // Open contact support
-    Alert.alert('İletişim', 'destek@dengin.app');
-  }, []);
+    toast.info('İletişim: destek@dengin.app');
+  }, [trigger, toast]);
 
   const handleDeleteAccount = useCallback(() => {
+    trigger(HAPTIC_TYPES.warning);
     navigation.navigate('AccountDeletion' as never);
-  }, [navigation]);
+  }, [navigation, trigger]);
+
+  // Cycle through theme modes: system → light → dark → system
+  const handleThemeCycle = useCallback(() => {
+    trigger(HAPTIC_TYPES.selection);
+    const modes = ['system', 'light', 'dark'] as const;
+    const currentIndex = modes.indexOf(themeMode);
+    const nextMode = modes[(currentIndex + 1) % modes.length];
+    setThemeMode(nextMode);
+
+    // User feedback with toast
+    const labels = { system: 'Sistem', light: 'Açık', dark: 'Koyu' };
+    toast.success(`Tema: ${labels[nextMode]}`);
+  }, [themeMode, setThemeMode, trigger, toast]);
 
   const handleRefresh = useCallback(() => {
     trigger(HAPTIC_TYPES.pullToRefresh);
@@ -149,12 +168,17 @@ export const SettingsScreen: React.FC = () => {
         title: 'Görünüm',
         items: [
           {
-            id: 'darkMode',
-            title: 'Karanlık Mod',
-            icon: 'moon-outline',
-            type: 'toggle',
-            value: isDark,
-            onToggle: toggleTheme,
+            id: 'themeMode',
+            title: 'Tema',
+            subtitle: `${themeMode === 'system' ? 'Sistem' : themeMode === 'light' ? 'Açık' : 'Koyu'}${themeMode === 'system' ? ` (${isDark ? 'Koyu' : 'Açık'})` : ''}`,
+            icon:
+              themeMode === 'system'
+                ? 'phone-portrait-outline'
+                : isDark
+                  ? 'moon-outline'
+                  : 'sunny-outline',
+            type: 'navigation',
+            onPress: handleThemeCycle,
           },
         ],
       },
@@ -192,8 +216,9 @@ export const SettingsScreen: React.FC = () => {
       },
     ],
     [
+      themeMode,
       isDark,
-      toggleTheme,
+      handleThemeCycle,
       handleEditProfile,
       handleChangePassword,
       handleBiometric,
@@ -223,19 +248,21 @@ export const SettingsScreen: React.FC = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.secondary }]}
       edges={['bottom']}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        refreshControl={refreshControl}>
-        {sections.map(section => (
-          <SettingsSection
-            key={section.title}
-            title={section.title}
-            items={section.items}
-            loadingStates={loadingStates}
-          />
-        ))}
-      </ScrollView>
+      <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={{ flex: 1 }}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={refreshControl}>
+          {sections.map(section => (
+            <SettingsSection
+              key={section.title}
+              title={section.title}
+              items={section.items}
+              loadingStates={loadingStates}
+            />
+          ))}
+        </ScrollView>
+      </Animated.View>
     </SafeAreaView>
   );
 };

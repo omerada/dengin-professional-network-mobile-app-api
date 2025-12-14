@@ -8,7 +8,6 @@ import {
   View,
   ScrollView,
   RefreshControl,
-  Alert,
   Text,
   ActivityIndicator,
   Pressable,
@@ -19,7 +18,13 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { SCREEN_ANIMATIONS, SAFE_AREA_EDGES, UNIFIED_TIMING, getListItemDelay } from '@constants';
+import {
+  SCREEN_ANIMATIONS,
+  SAFE_AREA_EDGES,
+  UNIFIED_TIMING,
+  getListItemDelay,
+  HAPTIC_TYPES,
+} from '@constants';
 import {
   navigateToPostDetail,
   navigateToEditProfile,
@@ -27,8 +32,10 @@ import {
   navigateToFollowersList,
   navigateToFollowingList,
 } from '@core/navigation';
+import { useHaptic } from '@shared/hooks';
 
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
 import { useAuthStore } from '@features/auth/stores';
 import { useFollow, useUnfollow } from '@features/social/hooks/useFollow';
 import { useUserPosts } from '@features/feed/hooks';
@@ -59,6 +66,8 @@ export const ProfileScreen: React.FC = () => {
   const route = useRoute();
   const params = route.params as RouteParams | undefined;
   const currentUser = useAuthStore(state => state.user);
+  const { trigger } = useHaptic();
+  const toast = useToast();
 
   // Follow mutations
   const followMutation = useFollow();
@@ -146,10 +155,11 @@ export const ProfileScreen: React.FC = () => {
 
   const handlePostPress = useCallback(
     (postId: number) => {
+      trigger(HAPTIC_TYPES.listItemPress);
       // @ts-expect-error - Navigation prop type mismatch
       navigateToPostDetail(navigation, { postId });
     },
-    [navigation],
+    [navigation, trigger],
   );
 
   const handleLoadMorePosts = useCallback(() => {
@@ -162,23 +172,35 @@ export const ProfileScreen: React.FC = () => {
     (isFollowing: boolean) => {
       if (!viewedUserId) return;
 
+      trigger(HAPTIC_TYPES.buttonPress);
+
       if (isFollowing) {
         // Currently following, so unfollow
         unfollowMutation.mutate(viewedUserId, {
+          onSuccess: () => {
+            trigger(HAPTIC_TYPES.success);
+            toast.success('Takipten çıkıldı');
+          },
           onError: () => {
-            Alert.alert('Hata', 'Takipten çıkılamadı. Lütfen tekrar deneyin.');
+            trigger(HAPTIC_TYPES.error);
+            toast.error('Takipten çıkılamadı. Lütfen tekrar deneyin.');
           },
         });
       } else {
         // Not following, so follow
         followMutation.mutate(viewedUserId, {
+          onSuccess: () => {
+            trigger(HAPTIC_TYPES.success);
+            toast.success('Takip edildi');
+          },
           onError: () => {
-            Alert.alert('Hata', 'Takip edilemedi. Lütfen tekrar deneyin.');
+            trigger(HAPTIC_TYPES.error);
+            toast.error('Takip edilemedi. Lütfen tekrar deneyin.');
           },
         });
       }
     },
-    [viewedUserId, followMutation, unfollowMutation],
+    [viewedUserId, followMutation, unfollowMutation, trigger],
   );
 
   // Loading state
@@ -417,4 +439,13 @@ export const ProfileScreen: React.FC = () => {
   );
 };
 
-export default ProfileScreen;
+// Wrap with Error Boundary for production safety
+import { ErrorBoundary } from '@core/components';
+
+export default function ProfileScreenWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <ProfileScreen />
+    </ErrorBoundary>
+  );
+}

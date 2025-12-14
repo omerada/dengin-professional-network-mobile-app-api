@@ -135,28 +135,28 @@ export const FollowButton: React.FC<FollowButtonProps> = memo(
 
 const styles = StyleSheet.create({
   button: {
-    justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 8, // md token
-  },
-  buttonSm: {
-    paddingVertical: spacing['1'],
-    paddingHorizontal: spacing['4'],
-    minWidth: 90,
+    borderRadius: 8,
+    justifyContent: 'center', // md token
   },
   buttonMd: {
-    paddingVertical: spacing['2'],
-    paddingHorizontal: spacing['6'],
     minWidth: 110,
+    paddingHorizontal: spacing['6'],
+    paddingVertical: spacing['2'],
+  },
+  buttonSm: {
+    minWidth: 90,
+    paddingHorizontal: spacing['4'],
+    paddingVertical: spacing['1'],
   },
   text: {
     fontWeight: '600',
   },
-  textSm: {
-    fontSize: fontSize.sm,
-  },
   textMd: {
     fontSize: fontSize.base,
+  },
+  textSm: {
+    fontSize: fontSize.sm,
   },
 });
 

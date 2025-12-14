@@ -91,8 +91,8 @@ LoadingStateWrapper.displayName = 'LoadingStateWrapper';
 
 const styles = StyleSheet.create({
   inlineContainer: {
-    padding: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 16,
   },
 });

@@ -236,59 +236,10 @@ export const SelfieCaptureScreen: React.FC = memo(() => {
 SelfieCaptureScreen.displayName = 'SelfieCaptureScreen';
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  permissionContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xl,
-  },
-  permissionIcon: {
-    fontSize: 64,
-    marginBottom: spacing.lg,
-  },
-  permissionTitle: {
-    ...typography.h2,
-    textAlign: 'center',
-    marginBottom: spacing.sm,
-  },
-  permissionText: {
-    ...typography.body,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
-  },
-  permissionButton: {
-    minWidth: 200,
-  },
-  topBar: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 20,
-  },
-  topBarContent: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.md,
-  },
-  stepText: {
-    ...typography.bodySmall,
-    color: 'white',
-    fontWeight: '600',
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: 16,
-  },
   bottomControls: {
-    position: 'absolute',
     bottom: 0,
     left: 0,
+    position: 'absolute',
     right: 0,
     zIndex: 20,
   },
@@ -299,9 +250,67 @@ const styles = StyleSheet.create({
   captureHint: {
     ...typography.bodySmall,
     color: 'white',
-    textAlign: 'center',
     marginBottom: spacing.lg,
+    textAlign: 'center',
+  },
+  container: {
+    backgroundColor: '#000',
+    flex: 1,
+  },
+  permissionButton: {
+    minWidth: 200,
+  },
+  permissionContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    padding: spacing.xl,
+  },
+  permissionIcon: {
+    fontSize: 64,
+    marginBottom: spacing.lg,
+  },
+  permissionText: {
+    ...typography.body,
+    marginBottom: spacing.xl,
+    textAlign: 'center',
+  },
+  permissionTitle: {
+    ...typography.h2,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  stepText: {
+    ...typography.bodySmall,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: 16,
+    color: 'white',
+    fontWeight: '600',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  topBar: {
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    zIndex: 20,
+  },
+  topBarContent: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    padding: spacing.md,
   },
 });
 
-export default SelfieCaptureScreen;
+// Wrap with Error Boundary for production safety
+import { ErrorBoundary } from '@core/components';
+
+export default function SelfieCaptureScreenWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <SelfieCaptureScreen />
+    </ErrorBoundary>
+  );
+}

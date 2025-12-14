@@ -267,12 +267,6 @@ PostActions.displayName = 'PostActions';
 // ============================================================================
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingTop: 8,
-  },
   action: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -282,9 +276,15 @@ const styles = StyleSheet.create({
     minWidth: 44, // Touch target
   },
   actionCount: {
-    marginLeft: 6,
     fontSize: 14,
     fontWeight: '500',
+    marginLeft: 6,
+  },
+  container: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingTop: 8,
   },
   spacer: {
     flex: 1,

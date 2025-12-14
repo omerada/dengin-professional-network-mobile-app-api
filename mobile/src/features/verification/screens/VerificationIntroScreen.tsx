@@ -165,16 +165,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
-  stepIndicator: {
-    marginTop: spacing.md,
-    marginBottom: spacing.lg,
+  footer: {
+    borderTopWidth: 1,
+    padding: spacing.lg,
   },
   header: {
     alignItems: 'center',
@@ -184,73 +177,89 @@ const styles = StyleSheet.create({
     fontSize: 64,
     marginBottom: spacing.md,
   },
-  title: {
-    ...typography.h1,
-    textAlign: 'center',
-    marginBottom: spacing.sm,
-  },
-  subtitle: {
-    ...typography.body,
-    textAlign: 'center',
-    paddingHorizontal: spacing.md,
-  },
-  stepsSection: {
-    marginBottom: spacing.xl,
-  },
-  sectionTitle: {
-    ...typography.h3,
-    marginBottom: spacing.md,
-  },
   infoCard: {
-    flexDirection: 'row',
-    padding: spacing.md,
     borderRadius: 12,
+    flexDirection: 'row',
     marginBottom: spacing.sm,
+    padding: spacing.md,
+  },
+  infoContent: {
+    flex: 1,
+  },
+  infoDescription: {
+    ...typography.bodySmall,
   },
   infoIcon: {
     fontSize: 32,
     marginRight: spacing.md,
-  },
-  infoContent: {
-    flex: 1,
   },
   infoTitle: {
     ...typography.body,
     fontWeight: '600',
     marginBottom: spacing.xs,
   },
-  infoDescription: {
-    ...typography.bodySmall,
-  },
-  requirementsSection: {
-    marginBottom: spacing.xl,
-  },
-  requirementsList: {
-    padding: spacing.md,
-    borderRadius: 12,
-  },
   requirementItem: {
     ...typography.bodySmall,
     marginBottom: spacing.xs,
   },
-  securityNote: {
-    flexDirection: 'row',
-    padding: spacing.md,
+  requirementsList: {
     borderRadius: 12,
-    alignItems: 'flex-start',
+    padding: spacing.md,
+  },
+  requirementsSection: {
+    marginBottom: spacing.xl,
+  },
+  scrollContent: {
+    paddingBottom: spacing.xxl,
+    paddingHorizontal: spacing.lg,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  sectionTitle: {
+    ...typography.h3,
+    marginBottom: spacing.md,
   },
   securityIcon: {
     fontSize: 20,
     marginRight: spacing.sm,
   },
+  securityNote: {
+    alignItems: 'flex-start',
+    borderRadius: 12,
+    flexDirection: 'row',
+    padding: spacing.md,
+  },
   securityText: {
     ...typography.bodySmall,
     flex: 1,
   },
-  footer: {
-    padding: spacing.lg,
-    borderTopWidth: 1,
+  stepIndicator: {
+    marginBottom: spacing.lg,
+    marginTop: spacing.md,
+  },
+  stepsSection: {
+    marginBottom: spacing.xl,
+  },
+  subtitle: {
+    ...typography.body,
+    paddingHorizontal: spacing.md,
+    textAlign: 'center',
+  },
+  title: {
+    ...typography.h1,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
   },
 });
 
-export default VerificationIntroScreen;
+// Wrap with Error Boundary for production safety
+import { ErrorBoundary } from '@core/components';
+
+export default function VerificationIntroScreenWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <VerificationIntroScreen />
+    </ErrorBoundary>
+  );
+}

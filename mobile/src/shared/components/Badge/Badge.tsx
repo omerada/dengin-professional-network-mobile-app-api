@@ -225,15 +225,15 @@ Badge.displayName = 'Badge';
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
+  dot: {},
   text: {
     color: '#FFFFFF',
     fontWeight: '600',
     textAlign: 'center',
   },
-  dot: {},
 });
 
 export default Badge;

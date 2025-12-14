@@ -260,14 +260,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  footer: {
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
   loadingContainer: {
+    alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-  },
-  footer: {
-    paddingVertical: 20,
-    alignItems: 'center',
   },
 });
 

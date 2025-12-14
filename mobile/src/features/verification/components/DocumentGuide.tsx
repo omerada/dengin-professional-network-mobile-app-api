@@ -161,11 +161,11 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   hintContainer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
     alignItems: 'center',
+    left: 0,
     paddingHorizontal: spacing.lg,
+    position: 'absolute',
+    right: 0,
   },
   hintText: {
     ...typography.body,
@@ -175,10 +175,10 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   typeIndicator: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
     alignItems: 'center',
+    left: 0,
+    position: 'absolute',
+    right: 0,
   },
   typeText: {
     ...typography.h3,

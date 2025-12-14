@@ -157,8 +157,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderRadius: 2,
     height: 4,
-    marginTop: 8,
     marginBottom: 16,
+    marginTop: 8,
     width: 40,
   },
   modalContent: {

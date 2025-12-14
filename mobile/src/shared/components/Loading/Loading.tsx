@@ -410,36 +410,36 @@ LoadingOverlay.displayName = 'LoadingOverlay';
 // ============================================================================
 
 const styles = StyleSheet.create({
+  dot: {},
+  dotsContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    height: 24,
+    justifyContent: 'center',
+  },
   message: {
     marginTop: spacing['3'],
     textAlign: 'center',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
     zIndex: 999,
   },
   overlayContent: {
-    padding: spacing['6'],
+    alignItems: 'center',
     minWidth: 120,
-    alignItems: 'center',
-  },
-  spinnerContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  spinnerTrack: {
-    position: 'absolute',
+    padding: spacing['6'],
   },
   spinnerArc: {
     position: 'absolute',
   },
-  dotsContainer: {
-    flexDirection: 'row',
+  spinnerContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    height: 24,
   },
-  dot: {},
+  spinnerTrack: {
+    position: 'absolute',
+  },
 });

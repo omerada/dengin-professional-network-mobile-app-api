@@ -8,3 +8,4 @@ export { NotificationList } from './NotificationList';
 export { NotificationSettingsToggle } from './NotificationSettingsToggle';
 export { PermissionPrompt } from './PermissionPrompt';
 export { NotificationBadge } from './NotificationBadge';
+export { NotificationSkeleton } from './NotificationSkeleton';

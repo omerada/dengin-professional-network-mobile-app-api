@@ -121,23 +121,23 @@ export const SuccessCelebration: React.FC<SuccessCelebrationProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
     zIndex: 9999,
   },
+  iconBackground: {
+    alignItems: 'center',
+    borderRadius: 70,
+    height: 140,
+    justifyContent: 'center',
+    width: 140,
+  },
   iconContainer: {
+    elevation: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 16,
-    elevation: 12,
-  },
-  iconBackground: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });

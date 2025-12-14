@@ -204,12 +204,12 @@ export const SkeletonList: React.FC<{
 const styles = StyleSheet.create({
   // Post Card
   postCard: {
-    paddingVertical: spacing.md,
     gap: spacing.md,
+    paddingVertical: spacing.md,
   },
   postHeader: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
   },
@@ -218,8 +218,8 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   postContent: {
-    paddingHorizontal: spacing.md,
     gap: spacing.xs,
+    paddingHorizontal: spacing.md,
   },
   postActions: {
     flexDirection: 'row',
@@ -246,49 +246,49 @@ const styles = StyleSheet.create({
   profileStats: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingVertical: spacing.md,
     paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
   },
   statItem: {
     alignItems: 'center',
     gap: spacing.xs,
   },
   profileBio: {
-    paddingHorizontal: spacing.xl,
     gap: spacing.xs,
+    paddingHorizontal: spacing.xl,
   },
   profileActions: {
     flexDirection: 'row',
+    gap: spacing.md,
     justifyContent: 'space-between',
     paddingHorizontal: spacing.xl,
-    gap: spacing.md,
   },
 
   // Conversation Item
   conversationItem: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     gap: spacing.md,
-    paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
   },
   conversationContent: {
     flex: 1,
     gap: spacing.xs,
   },
   conversationHeader: {
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
   },
 
   // Notification Item
   notificationItem: {
-    flexDirection: 'row',
     alignItems: 'flex-start',
+    flexDirection: 'row',
     gap: spacing.md,
-    paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
   },
   notificationContent: {
     flex: 1,
@@ -297,29 +297,29 @@ const styles = StyleSheet.create({
 
   // Comment Item
   commentItem: {
-    flexDirection: 'row',
     alignItems: 'flex-start',
+    flexDirection: 'row',
     gap: spacing.sm,
-    paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
   },
   commentContent: {
     flex: 1,
     gap: spacing.xs,
   },
   commentHeader: {
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
   },
 
   // User List Item
   userListItem: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     gap: spacing.md,
-    paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
   },
   userInfo: {
     flex: 1,

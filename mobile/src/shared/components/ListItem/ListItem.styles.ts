@@ -5,8 +5,8 @@ import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     paddingHorizontal: 16,
   },
 
@@ -16,14 +16,14 @@ export const styles = StyleSheet.create({
   },
 
   leftContainer: {
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
 
   rightContainer: {
-    justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
+    justifyContent: 'center',
   },
 
   title: {
@@ -44,9 +44,9 @@ export const styles = StyleSheet.create({
   },
 
   divider: {
+    bottom: 0,
     height: StyleSheet.hairlineWidth,
     position: 'absolute',
-    bottom: 0,
     right: 0,
   },
 
@@ -64,14 +64,14 @@ export const styles = StyleSheet.create({
 
   // Swipe actions
   swipeActionsContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     justifyContent: 'flex-end',
   },
 
   swipeAction: {
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 20,
   },
 

@@ -97,19 +97,19 @@ export const styles = StyleSheet.create({
     position: 'relative',
   },
 
-  profileContent: {
-    alignItems: 'center',
-    paddingTop: 40,
-    width: '100%',
-    zIndex: 1,
-  },
-
   professionTitle: {
     fontSize: 28,
     fontWeight: '800',
     letterSpacing: -0.5,
     marginBottom: 4,
     textAlign: 'center',
+  },
+
+  profileContent: {
+    alignItems: 'center',
+    paddingTop: 40,
+    width: '100%',
+    zIndex: 1,
   },
 
   scrollContent: {

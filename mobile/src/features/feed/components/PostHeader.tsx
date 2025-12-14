@@ -79,67 +79,67 @@ export const PostHeader: React.FC<PostHeaderProps> = memo(
 PostHeader.displayName = 'PostHeader';
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    marginBottom: 12,
-  },
   authorContainer: {
+    alignItems: 'center',
     flexDirection: 'row',
-    alignItems: 'center',
     flex: 1,
-  },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-  },
-  avatarPlaceholder: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    fontSize: 16,
-    fontWeight: '600',
   },
   authorInfo: {
     flex: 1,
     marginLeft: 12,
-  },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   authorName: {
     fontSize: 15,
     fontWeight: '600',
     maxWidth: '80%',
   },
-  verifiedIcon: {
-    marginLeft: 4,
+  avatar: {
+    borderRadius: 22,
+    height: 44,
+    width: 44,
   },
-  metaRow: {
-    flexDirection: 'row',
+  avatarPlaceholder: {
     alignItems: 'center',
-    marginTop: 2,
+    borderRadius: 22,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
   },
-  profession: {
-    fontSize: 13,
+  avatarText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  container: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+    paddingHorizontal: 16,
   },
   dot: {
+    fontSize: 13,
     marginHorizontal: 4,
+  },
+  menuButton: {
+    padding: 8,
+  },
+  metaRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginTop: 2,
+  },
+  nameRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  profession: {
     fontSize: 13,
   },
   time: {
     fontSize: 13,
   },
-  menuButton: {
-    padding: 8,
+  verifiedIcon: {
+    marginLeft: 4,
   },
 });
 

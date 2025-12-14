@@ -143,15 +143,42 @@ export const WelcomeScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  actionsContainer: {
+    marginBottom: spacing.lg,
+  },
+  appName: {
+    fontSize: 40,
+    fontWeight: '800',
+    letterSpacing: -1,
+    marginBottom: spacing.md,
+  },
+  buttonSpacer: {
+    height: spacing.md,
+  },
   container: {
     flex: 1,
   },
   content: {
     flex: 1,
-    paddingHorizontal: spacing.xl,
     justifyContent: 'space-between',
-    paddingTop: spacing['4xl'],
     paddingBottom: spacing['2xl'],
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing['4xl'],
+  },
+  featureBadge: {
+    borderRadius: 20,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  featureBadgeText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  featuresRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.sm,
+    justifyContent: 'center',
   },
   heroContainer: {
     alignItems: 'center',
@@ -159,68 +186,41 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logoPlaceholder: {
-    width: 120,
-    height: 120,
-    borderRadius: 32,
-    justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 32,
+    elevation: 6,
+    height: 120,
+    justifyContent: 'center',
     marginBottom: spacing['2xl'],
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
     shadowRadius: 20,
-    elevation: 6,
+    width: 120,
   },
   logoText: {
     fontSize: 56,
     fontWeight: '800',
     letterSpacing: -2,
   },
-  appName: {
-    fontSize: 40,
-    fontWeight: '800',
-    marginBottom: spacing.md,
-    letterSpacing: -1,
-  },
-  tagline: {
-    fontSize: 17,
-    textAlign: 'center',
-    lineHeight: 24,
-    fontWeight: '500',
-    opacity: 0.8,
-    marginBottom: spacing.xl,
-  },
-  featuresRow: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-  },
-  featureBadge: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: 20,
-  },
-  featureBadgeText: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
   spacer: {
     flex: 0.5,
   },
-  actionsContainer: {
-    marginBottom: spacing.lg,
-  },
-  buttonSpacer: {
-    height: spacing.md,
-  },
-  termsText: {
-    fontSize: 13,
+  tagline: {
+    fontSize: 17,
+    fontWeight: '500',
+    lineHeight: 24,
+    marginBottom: spacing.xl,
+    opacity: 0.8,
     textAlign: 'center',
-    lineHeight: 20,
-    paddingHorizontal: spacing.md,
   },
   termsLink: {
     fontWeight: '600',
     textDecorationLine: 'underline',
+  },
+  termsText: {
+    fontSize: 13,
+    lineHeight: 20,
+    paddingHorizontal: spacing.md,
+    textAlign: 'center',
   },
 });

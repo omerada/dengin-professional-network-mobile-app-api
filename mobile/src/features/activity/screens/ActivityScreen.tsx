@@ -5,8 +5,9 @@
 import React, { memo } from 'react';
 import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 
+import { SCREEN_ANIMATIONS } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
 import { ComingSoon } from '@shared/components';
 
@@ -31,7 +32,7 @@ export const ActivityScreen: React.FC = memo(() => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top']}>
-      <Animated.View entering={FadeIn.duration(300)} style={styles.content}>
+      <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={styles.content}>
         <ComingSoon featureName="Etkinlikler, yarışmalar ve rozetler" />
       </Animated.View>
     </SafeAreaView>

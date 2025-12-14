@@ -126,41 +126,41 @@ export const UnifiedEmptyState: React.FC<UnifiedEmptyStateProps> = ({
 };
 
 const styles = StyleSheet.create({
+  actionsContainer: {
+    alignItems: 'center',
+    width: '100%',
+  },
   container: {
+    alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
     paddingHorizontal: spacing.xl,
     paddingVertical: spacing['3xl'],
   },
-  iconContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-  },
-  title: {
-    ...typography.h3,
-    textAlign: 'center',
-    marginBottom: spacing.md,
-  },
   description: {
     ...typography.body,
-    textAlign: 'center',
     marginBottom: spacing['2xl'],
     maxWidth: 300,
+    textAlign: 'center',
   },
-  actionsContainer: {
-    width: '100%',
+  iconContainer: {
     alignItems: 'center',
+    borderRadius: 60,
+    height: 120,
+    justifyContent: 'center',
+    marginBottom: spacing.xl,
+    width: 120,
   },
   primaryButton: {
-    width: '100%',
     marginBottom: spacing.md,
+    width: '100%',
   },
   secondaryButton: {
     width: '100%',
+  },
+  title: {
+    ...typography.h3,
+    marginBottom: spacing.md,
+    textAlign: 'center',
   },
 });

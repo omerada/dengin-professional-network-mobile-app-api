@@ -72,67 +72,67 @@ export const ActivityScreenSkeleton: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  activityBadge: {
+    borderRadius: 12,
+    height: 24,
+    width: 24,
+  },
+  activityContent: {
+    flex: 1,
+  },
+  activityIcon: {
+    borderRadius: 20,
+    height: 40,
+    marginRight: spacing.md,
+    width: 40,
+  },
+  activityItem: {
+    alignItems: 'center',
+    borderRadius: 12,
+    flexDirection: 'row',
+    marginBottom: spacing.sm,
+    padding: spacing.md,
+  },
+  activityList: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     padding: spacing.md,
+  },
+  descLine: {
+    marginBottom: 0,
+    width: '80%',
+  },
+  statCard: {
+    alignItems: 'center',
+    borderRadius: 12,
+    flex: 1,
+    marginHorizontal: spacing.xs,
+    padding: spacing.md,
+  },
+  statLabel: {
+    borderRadius: 6,
+    height: 12,
+    width: 60,
+  },
+  statNumber: {
+    borderRadius: 12,
+    height: 24,
+    marginBottom: spacing.sm,
+    width: 40,
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: spacing.xl,
   },
-  statCard: {
-    flex: 1,
-    marginHorizontal: spacing.xs,
-    padding: spacing.md,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  statNumber: {
-    width: 40,
-    height: 24,
-    borderRadius: 12,
-    marginBottom: spacing.sm,
-  },
-  statLabel: {
-    width: 60,
-    height: 12,
-    borderRadius: 6,
-  },
-  activityList: {
-    flex: 1,
-  },
-  activityItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing.md,
-    borderRadius: 12,
-    marginBottom: spacing.sm,
-  },
-  activityIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: spacing.md,
-  },
-  activityContent: {
-    flex: 1,
-  },
   textLine: {
-    height: 12,
     borderRadius: 6,
+    height: 12,
     marginBottom: spacing.xs,
   },
   titleLine: {
     width: '60%',
-  },
-  descLine: {
-    width: '80%',
-    marginBottom: 0,
-  },
-  activityBadge: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
   },
 });

@@ -328,29 +328,29 @@ export const BottomSheet: React.FC<BottomSheetProps> = memo(
 
 const styles = StyleSheet.create({
   overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    flex: 1,
+    justifyContent: 'center',
   },
   content: {
-    width: SCREEN_WIDTH - 48,
-    maxHeight: SCREEN_HEIGHT * 0.8,
     borderRadius: 16,
+    maxHeight: SCREEN_HEIGHT * 0.8,
     overflow: 'hidden',
+    width: SCREEN_WIDTH - 48,
   },
   header: {
+    alignItems: 'center',
+    borderBottomWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     paddingHorizontal: spacing['6'],
     paddingVertical: spacing['4'],
-    borderBottomWidth: 1,
   },
   title: {
+    flex: 1,
     fontSize: fontSize.lg,
     fontWeight: '600',
-    flex: 1,
   },
   closeButton: {
     padding: spacing['1'],
@@ -360,25 +360,25 @@ const styles = StyleSheet.create({
   },
   // BottomSheet styles
   bottomSheetContent: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
   },
   handle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
     alignSelf: 'center',
+    borderRadius: 2,
+    height: 4,
     marginTop: spacing['2'],
+    width: 40,
   },
   bottomSheetHeader: {
+    alignItems: 'center',
+    borderBottomWidth: 1,
     paddingHorizontal: spacing['6'],
     paddingVertical: spacing['4'],
-    borderBottomWidth: 1,
-    alignItems: 'center',
   },
   bottomSheetBody: {
     padding: spacing['6'],

@@ -100,16 +100,16 @@ export const AppNavigator: React.FC = () => {
 
 const styles = StyleSheet.create({
   splashContainer: {
+    alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
+  },
+  splashLoader: {
+    marginTop: 16,
   },
   splashLogo: {
     fontSize: 32,
     fontWeight: 'bold',
     marginBottom: 24,
-  },
-  splashLoader: {
-    marginTop: 16,
   },
 });

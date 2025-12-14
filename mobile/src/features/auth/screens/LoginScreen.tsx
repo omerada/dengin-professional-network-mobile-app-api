@@ -298,37 +298,76 @@ export const LoginScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  actions: {
+    marginBottom: spacing.xl,
+  },
+  backButton: {
+    padding: spacing.sm,
+  },
   container: {
     flex: 1,
   },
-  keyboardAvoid: {
+  divider: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginVertical: spacing.xl,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+  },
+  dividerText: {
+    fontSize: 13,
+    fontWeight: '500',
+    marginHorizontal: spacing.lg,
+  },
+  errorAction: {
+    fontSize: 14,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  errorContainer: {
+    alignItems: 'flex-start',
+    borderRadius: 12,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+    padding: spacing.md,
+  },
+  errorContent: {
     flex: 1,
   },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: spacing.xl,
-    paddingTop: spacing.md,
+  errorText: {
+    fontSize: 14,
+    marginBottom: spacing.xs,
+  },
+  forgotPassword: {
+    alignSelf: 'flex-end',
+    marginTop: -spacing.sm,
+  },
+  form: {
+    marginBottom: spacing.lg,
   },
   header: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: spacing.lg,
     paddingHorizontal: spacing.xs,
   },
-  backButton: {
-    padding: spacing.sm,
+  headerSpacer: {
+    width: 40,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: '600',
   },
-  headerSpacer: {
-    width: 40,
-  },
   heroSection: {
     alignItems: 'center',
     marginBottom: spacing.xl,
+  },
+  keyboardAvoid: {
+    flex: 1,
   },
   logoContainer: {
     alignItems: 'center',
@@ -339,11 +378,37 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 1,
   },
+  registerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: spacing.xl,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.md,
+  },
   slogan: {
     fontSize: 15,
     fontWeight: '500',
     marginTop: spacing.sm,
     textAlign: 'center',
+  },
+  socialButtonLarge: {
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: spacing.md,
+    justifyContent: 'center',
+    paddingVertical: spacing.lg,
+  },
+  socialButtonLargeText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  socialButtonsColumn: {
+    gap: spacing.md,
   },
   socialSection: {
     marginBottom: spacing.lg,
@@ -353,70 +418,5 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: spacing.md,
     textAlign: 'center',
-  },
-  socialButtonsColumn: {
-    gap: spacing.md,
-  },
-  socialButtonLarge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.lg,
-    borderRadius: 12,
-    borderWidth: 1,
-    gap: spacing.md,
-  },
-  socialButtonLargeText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  errorContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    padding: spacing.md,
-    borderRadius: 12,
-    marginBottom: spacing.lg,
-    gap: spacing.sm,
-  },
-  errorContent: {
-    flex: 1,
-  },
-  errorText: {
-    fontSize: 14,
-    marginBottom: spacing.xs,
-  },
-  errorAction: {
-    fontSize: 14,
-    fontWeight: '600',
-    textDecorationLine: 'underline',
-  },
-  form: {
-    marginBottom: spacing.lg,
-  },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginTop: -spacing.sm,
-  },
-  actions: {
-    marginBottom: spacing.xl,
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: spacing.xl,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-  },
-  dividerText: {
-    marginHorizontal: spacing.lg,
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  registerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: spacing.xl,
   },
 });

@@ -217,24 +217,65 @@ const ImageModal: React.FC<ImageModalProps> = ({ visible, images, initialIndex, 
 };
 
 const styles = StyleSheet.create({
-  singleImage: {
-    width: '100%',
+  closeButton: {
+    padding: 8,
+    position: 'absolute',
+    right: 16,
+    top: 50,
+    zIndex: 1,
   },
-  twoImages: {
-    flexDirection: 'row',
-    height: 200,
-    width: '100%',
-  },
-  twoImageItem: {
-    flex: 1,
-    marginHorizontal: IMAGE_GAP / 2,
-  },
-  twoImageContent: {
+  fourImageContent: {
     flex: 1,
   },
-  threeImages: {
+  fourImageItem: {
+    height: '50%',
+    padding: IMAGE_GAP / 2,
+    width: '50%',
+  },
+  fourImages: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     height: 250,
+    width: '100%',
+  },
+  modalContainer: {
+    backgroundColor: '#000000',
+    flex: 1,
+  },
+  modalImage: {
+    height: SCREEN_HEIGHT * 0.8,
+  },
+  modalImageContainer: {
+    alignItems: 'center',
+    height: SCREEN_HEIGHT,
+    justifyContent: 'center',
+  },
+  moreOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    margin: IMAGE_GAP / 2,
+  },
+  moreText: {
+    color: '#FFFFFF',
+    fontSize: 24,
+    fontWeight: '600',
+  },
+  pagination: {
+    alignSelf: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 16,
+    bottom: 50,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    position: 'absolute',
+  },
+  paginationText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+  },
+  singleImage: {
     width: '100%',
   },
   threeImageMain: {
@@ -247,70 +288,29 @@ const styles = StyleSheet.create({
   threeImageSide: {
     flex: 1,
   },
+  threeImageSideContent: {
+    flex: 1,
+  },
   threeImageSideItem: {
     flex: 1,
     marginBottom: IMAGE_GAP,
   },
-  threeImageSideContent: {
-    flex: 1,
-  },
-  fourImages: {
+  threeImages: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     height: 250,
     width: '100%',
   },
-  fourImageItem: {
-    width: '50%',
-    height: '50%',
-    padding: IMAGE_GAP / 2,
-  },
-  fourImageContent: {
+  twoImageContent: {
     flex: 1,
   },
-  moreOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: IMAGE_GAP / 2,
-  },
-  moreText: {
-    color: '#FFFFFF',
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  modalContainer: {
+  twoImageItem: {
     flex: 1,
-    backgroundColor: '#000000',
+    marginHorizontal: IMAGE_GAP / 2,
   },
-  closeButton: {
-    position: 'absolute',
-    top: 50,
-    right: 16,
-    zIndex: 1,
-    padding: 8,
-  },
-  modalImageContainer: {
-    height: SCREEN_HEIGHT,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalImage: {
-    height: SCREEN_HEIGHT * 0.8,
-  },
-  pagination: {
-    position: 'absolute',
-    bottom: 50,
-    alignSelf: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 16,
-  },
-  paginationText: {
-    color: '#FFFFFF',
-    fontSize: 14,
+  twoImages: {
+    flexDirection: 'row',
+    height: 200,
+    width: '100%',
   },
 });
 

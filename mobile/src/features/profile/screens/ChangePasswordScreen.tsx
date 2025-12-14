@@ -10,7 +10,6 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -143,7 +142,7 @@ export const ChangePasswordScreen: React.FC = () => {
 
     try {
       await changePassword.mutateAsync(request);
-      toast.success('Şifreniz başarıyla değiştirildi', 'Başarılı');
+      toast.success('Şifreniz başarıyla değiştirildi');
       navigation.goBack();
     } catch (error: any) {
       const errorMessage = getErrorMessage(error);
@@ -151,7 +150,7 @@ export const ChangePasswordScreen: React.FC = () => {
       if (errorMessage.toLowerCase().includes('current password')) {
         setErrors(prev => ({ ...prev, currentPassword: 'Mevcut şifre yanlış' }));
       } else {
-        Alert.alert('Hata', errorMessage);
+        toast.error(errorMessage);
       }
     }
   }, [
@@ -380,12 +379,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: spacing.lg,
-  },
   infoCard: {
     marginBottom: spacing.xl,
   },
@@ -396,54 +389,60 @@ const styles = StyleSheet.create({
   inputContainer: {
     marginBottom: spacing.lg,
   },
+  keyboardView: {
+    flex: 1,
+  },
   label: {
     ...typography.subtitle2,
     marginBottom: spacing.xs,
   },
-  strengthContainer: {
-    flexDirection: 'row',
+  requirementIcon: {
+    ...typography.body2,
+    fontWeight: '600',
+    width: 20,
+  },
+  requirementItem: {
     alignItems: 'center',
-    marginTop: spacing.sm,
+    flexDirection: 'row',
+  },
+  requirementText: {
+    ...typography.body2,
+  },
+  requirementsCard: {
+    borderRadius: spacing.sm,
+    marginBottom: spacing.xl,
+    padding: spacing.md,
+  },
+  requirementsList: {
+    gap: spacing.xs,
+  },
+  requirementsTitle: {
+    ...typography.subtitle2,
+    marginBottom: spacing.sm,
+  },
+  scrollContent: {
+    padding: spacing.lg,
+  },
+  strengthBar: {
+    borderRadius: 2,
+    flex: 1,
+    height: 4,
   },
   strengthBars: {
     flexDirection: 'row',
     flex: 1,
     gap: spacing.xs,
   },
-  strengthBar: {
-    flex: 1,
-    height: 4,
-    borderRadius: 2,
+  strengthContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginTop: spacing.sm,
   },
   strengthText: {
     ...typography.caption,
     marginLeft: spacing.sm,
-    width: 70,
     textAlign: 'right',
-  },
-  requirementsCard: {
-    padding: spacing.md,
-    borderRadius: spacing.sm,
-    marginBottom: spacing.xl,
-  },
-  requirementsTitle: {
-    ...typography.subtitle2,
-    marginBottom: spacing.sm,
-  },
-  requirementsList: {
-    gap: spacing.xs,
-  },
-  requirementItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  requirementIcon: {
-    ...typography.body2,
-    width: 20,
-    fontWeight: '600',
-  },
-  requirementText: {
-    ...typography.body2,
+    width: 70,
   },
   submitButton: {
     marginTop: spacing.md,
