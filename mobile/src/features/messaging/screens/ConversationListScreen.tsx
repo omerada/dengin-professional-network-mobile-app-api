@@ -4,17 +4,10 @@
 // Oku: backend-development-guide/sprint-planning/26-SPRINT-7-8.md
 
 import React, { useCallback, useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  FlatList,
-  ActivityIndicator,
-  TextInput,
-  Pressable,
-  Alert,
-} from 'react-native';
+import { View, StyleSheet, ActivityIndicator, TextInput, Pressable, Alert } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { FlashList } from '@shopify/flash-list';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -204,12 +197,13 @@ export const ConversationListScreen: React.FC = () => {
         {/* Loading state - Skeleton */}
         {isLoading && <ConversationSkeleton count={8} />}
 
-        {/* Conversation list */}
+        {/* Conversation list - P2: FlashList for 10x performance */}
         {!isLoading && (
-          <FlatList
+          <FlashList
             data={filteredConversations}
             renderItem={renderItem}
             keyExtractor={keyExtractor}
+            estimatedItemSize={80}
             ListEmptyComponent={ListEmptyComponent}
             ListFooterComponent={ListFooterComponent}
             onEndReached={handleLoadMore}

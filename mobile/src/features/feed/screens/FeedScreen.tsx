@@ -2,7 +2,7 @@
 // Dengin Feed Ekranı - Production Ready Implementation
 // Oku: MOBILE-APP-HOME-SCREEN.md, mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
-import React, { useCallback, useMemo, useState, memo } from 'react';
+import React, { useCallback, useMemo, useState, memo, useEffect } from 'react';
 import { RefreshControl, ActivityIndicator, Alert, StyleSheet } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
@@ -28,6 +28,8 @@ import { sharePost, showShareError } from '@shared/utils/share';
 import { useAuthStore } from '@features/auth/stores';
 import { useFollow, useUnfollow } from '@features/social/hooks';
 import { useUnreadCount } from '@features/notifications/hooks';
+import { asyncStorage } from '@core/storage/asyncStorage';
+import { STORAGE_KEYS } from '@core/storage/keys';
 import type { Post } from '../types';
 
 /**
@@ -61,6 +63,9 @@ export const FeedScreen: React.FC = memo(() => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [actionSheetVisible, setActionSheetVisible] = useState(false);
 
+  // P2 Addition: Engagement card visibility state
+  const [showVerificationPrompt, setShowVerificationPrompt] = useState(false);
+
   // Follow/Unfollow mutations
   const followMutation = useFollow();
   const unfollowMutation = useUnfollow();
@@ -80,6 +85,54 @@ export const FeedScreen: React.FC = memo(() => {
   const likePost = useLikePost();
   const bookmarkPost = useBookmarkPost();
   const deletePost = useDeletePost();
+
+  // ============================================================================
+  // P2 Addition: Engagement Card Frequency Logic
+  // ============================================================================
+
+  /**
+   * Check if verification prompt should be shown
+   * Rules:
+   * - Only for unverified users
+   * - Show once per session (until dismissed)
+   * - Don't show if dismissed within last 24 hours
+   */
+  useEffect(() => {
+    const checkVerificationPrompt = async () => {
+      if (user?.verificationStatus === 'APPROVED') {
+        setShowVerificationPrompt(false);
+        return;
+      }
+
+      const promptShown = await asyncStorage.get(STORAGE_KEYS.VERIFICATION_PROMPT_SHOWN);
+      const dismissedAt = await asyncStorage.get(STORAGE_KEYS.VERIFICATION_PROMPT_DISMISSED_AT);
+
+      // If dismissed recently (within 24 hours), don't show
+      if (dismissedAt) {
+        const daysPassed = (Date.now() - parseInt(dismissedAt, 10)) / (1000 * 60 * 60 * 24);
+        if (daysPassed < 1) {
+          setShowVerificationPrompt(false);
+          return;
+        }
+      }
+
+      // Show if not shown in current session
+      if (!promptShown) {
+        setShowVerificationPrompt(true);
+        await asyncStorage.set(STORAGE_KEYS.VERIFICATION_PROMPT_SHOWN, true);
+      }
+    };
+
+    checkVerificationPrompt();
+  }, [user?.verificationStatus]);
+
+  /**
+   * Handle verification prompt dismissal
+   */
+  const handleDismissVerificationPrompt = useCallback(async () => {
+    setShowVerificationPrompt(false);
+    await asyncStorage.set(STORAGE_KEYS.VERIFICATION_PROMPT_DISMISSED_AT, Date.now().toString());
+  }, []);
 
   // ============================================================================
   // Handlers
@@ -256,7 +309,10 @@ export const FeedScreen: React.FC = memo(() => {
   // ============================================================================
 
   /**
-   * Render single post item with suggested experts carousel every 5th post
+   * Render single post item with engagement cards
+   * P2 Optimized: Strategic placement based on index
+   * - AI Trend: Every 10th post
+   * - Suggested Experts: Every 20th post
    * Memoized for FlashList performance
    * Uses UNIFIED_TIMING for consistent list animations (40ms delay)
    */
@@ -268,8 +324,17 @@ export const FeedScreen: React.FC = memo(() => {
         <Animated.View
           entering={SCREEN_ANIMATIONS.fadeInList.entering.delay(animationDelay)}
           style={{ flex: 1 }}>
-          {/* Show suggested experts carousel every 5th post (after 1st, 6th, 11th...) */}
-          {index > 0 && index % 5 === 0 && (
+          {/* P2: AI Trend Insight - Every 10th post */}
+          {index > 0 && index % 10 === 0 && (
+            <AITrendInsightCard
+              professionCategory={user?.sector?.code}
+              onTrendPress={trend => console.log('Trend pressed:', trend)}
+              onMorePress={() => console.log('More trends pressed')}
+            />
+          )}
+
+          {/* P2: Suggested Experts - Every 20th post */}
+          {index > 0 && index % 20 === 0 && (
             <SuggestedExpertsCarousel
               onExpertPress={expertId => {
                 // @ts-expect-error - UserProfile route not yet defined in types
@@ -284,6 +349,7 @@ export const FeedScreen: React.FC = memo(() => {
               }}
             />
           )}
+
           <PostCard
             post={item}
             onLike={handleLike}
@@ -298,6 +364,7 @@ export const FeedScreen: React.FC = memo(() => {
     [
       handleLike,
       handleComment,
+      user?.sector?.code,
       handleShare,
       handleBookmark,
       handleMenuPress,
@@ -338,24 +405,20 @@ export const FeedScreen: React.FC = memo(() => {
             navigation.navigate('NewConversation');
           }}
         />
-        {/* Show verification prompt for unverified users */}
-        {user?.verificationStatus !== 'APPROVED' && (
+        {/* P2 Optimized: Show verification prompt based on frequency logic */}
+        {showVerificationPrompt && (
           <VerificationPromptCard
             onPress={() => {
               // @ts-expect-error - Navigation prop type mismatch
               navigateToVerificationIntro(navigation);
+              handleDismissVerificationPrompt();
             }}
+            onDismiss={handleDismissVerificationPrompt}
           />
         )}
-        {/* Always show AI trend insights */}
-        <AITrendInsightCard
-          professionCategory={user?.sector?.code}
-          onTrendPress={trend => console.log('Trend pressed:', trend)}
-          onMorePress={() => console.log('More trends pressed')}
-        />
       </>
     );
-  }, [user, navigation]);
+  }, [user, navigation, showVerificationPrompt, handleDismissVerificationPrompt]);
 
   /**
    * Empty state component

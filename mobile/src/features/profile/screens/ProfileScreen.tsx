@@ -350,7 +350,7 @@ export const ProfileScreen: React.FC = () => {
                 <AnimatedCounter
                   key={`post-${stats.postCount}`}
                   value={stats.postCount}
-                  duration={800}
+                  duration={UNIFIED_TIMING.counterAnimation}
                   style={[styles.statNumber, { color: colors.text.primary }]}
                 />
                 <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Gönderi</Text>
@@ -369,7 +369,7 @@ export const ProfileScreen: React.FC = () => {
                 <AnimatedCounter
                   key={`follower-${stats.followerCount}`}
                   value={stats.followerCount}
-                  duration={800}
+                  duration={UNIFIED_TIMING.counterAnimation}
                   style={[styles.statNumber, { color: colors.text.primary }]}
                 />
                 <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Takipçi</Text>
@@ -388,7 +388,7 @@ export const ProfileScreen: React.FC = () => {
                 <AnimatedCounter
                   key={`following-${stats.followingCount}`}
                   value={stats.followingCount}
-                  duration={800}
+                  duration={UNIFIED_TIMING.counterAnimation}
                   style={[styles.statNumber, { color: colors.text.primary }]}
                 />
                 <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Takip</Text>
@@ -399,7 +399,11 @@ export const ProfileScreen: React.FC = () => {
 
         {/* Bio */}
         {'bio' in profile && profile.bio && (
-          <Animated.View entering={FadeInDown.delay(300).duration(400)} style={styles.bioSection}>
+          <Animated.View
+            entering={FadeInDown.delay(UNIFIED_TIMING.bioFadeDelay).duration(
+              UNIFIED_TIMING.bioFadeDuration,
+            )}
+            style={styles.bioSection}>
             <ProfileBio bio={profile.bio} />
           </Animated.View>
         )}

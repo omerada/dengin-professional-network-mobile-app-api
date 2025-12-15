@@ -63,7 +63,7 @@ export const ProfileBio: React.FC<ProfileBioProps> = memo(({ bio, maxLines = 3, 
   // Toggle expanded state
   const toggleExpanded = useCallback(() => {
     trigger('selection');
-    buttonScale.value = withSpring(0.95, spring.press);
+    buttonScale.value = withSpring(0.96, spring.press);
     setTimeout(() => {
       buttonScale.value = withSpring(1, spring.snappy);
     }, 100);

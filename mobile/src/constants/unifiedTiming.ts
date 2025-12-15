@@ -211,6 +211,38 @@ export const UNIFIED_TIMING = {
   confettiDuration: 3000,
 
   // ============================================================================
+  // Counter & Progress Animations (P2 Addition)
+  // ============================================================================
+
+  /**
+   * Counter number animation duration
+   * Use for: Profile stats counter, follower count
+   * Value: 600ms (optimized from 800ms for snappier feel)
+   */
+  counterAnimation: 600,
+
+  /**
+   * Pulse/heartbeat animation cycle
+   * Use for: Upload status, loading indicators
+   * Value: 600ms per cycle (optimized from 800ms)
+   */
+  pulseAnimation: 600,
+
+  /**
+   * Profile bio fade-in delay
+   * Use for: Staggered profile content
+   * Value: 300ms
+   */
+  bioFadeDelay: 300,
+
+  /**
+   * Profile bio fade-in duration
+   * Use for: Bio section entrance
+   * Value: 400ms
+   */
+  bioFadeDuration: 400,
+
+  // ============================================================================
   // Empty State Transitions
   // ============================================================================
 

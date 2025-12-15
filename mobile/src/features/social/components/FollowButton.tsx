@@ -111,7 +111,7 @@ export const FollowButton: React.FC<FollowButtonProps> = memo(
         style={[buttonStyle, animatedStyle]}
         onPress={handlePress}
         onPressIn={() => {
-          scale.value = withSpring(0.95, spring.press);
+          scale.value = withSpring(0.96, spring.press);
         }}
         onPressOut={() => {
           scale.value = withSpring(1, spring.press);

@@ -31,6 +31,8 @@ interface MessageBubbleProps {
   senderAvatar?: string | null;
   /** Callback when long press */
   onLongPress?: (message: Message | ClientMessage) => void;
+  /** P2 Addition: Is this a newly received message (animate entrance) */
+  isNew?: boolean;
 }
 
 // ============================================================================
@@ -39,10 +41,11 @@ interface MessageBubbleProps {
 
 /**
  * Message Bubble with smooth entrance animation
+ * P2 Optimized: Only animates new messages, old messages render instantly
  *
  * Features:
- * - Slide-in animation from left/right
- * - Fade in animation
+ * - Slide-in animation from left/right (only for new messages)
+ * - Fade in animation (only for new messages)
  * - WhatsApp-style bubble design
  * - Avatar support
  * - Time display
@@ -54,22 +57,30 @@ interface MessageBubbleProps {
  *   message={message}
  *   isOwn={true}
  *   showAvatar={true}
+ *   isNew={true}
  *   onLongPress={handleLongPress}
  * />
  * ```
  */
 export const MessageBubble: React.FC<MessageBubbleProps> = memo(
-  ({ message, isOwn, showAvatar = true, senderAvatar, onLongPress }) => {
+  ({ message, isOwn, showAvatar = true, senderAvatar, onLongPress, isNew = false }) => {
     const colors = useColors();
 
-    // Animation values
-    const translateX = useSharedValue(isOwn ? 50 : -50);
-    const opacity = useSharedValue(0);
+    // P2: Animation values - only animate if isNew
+    const translateX = useSharedValue(isNew ? (isOwn ? 50 : -50) : 0);
+    const opacity = useSharedValue(isNew ? 0 : 1);
 
     useEffect(() => {
-      translateX.value = withSpring(0, { damping: 15, stiffness: 150 });
-      opacity.value = withTiming(1, { duration: 200 });
-    }, [translateX, opacity]);
+      if (isNew) {
+        // Animate entrance for new messages
+        translateX.value = withSpring(0, { damping: 15, stiffness: 150 });
+        opacity.value = withTiming(1, { duration: 200 });
+      } else {
+        // Instant render for old messages (performance optimization)
+        translateX.value = 0;
+        opacity.value = 1;
+      }
+    }, [isNew, translateX, opacity]);
 
     const animatedStyle = useAnimatedStyle(() => ({
       transform: [{ translateX: translateX.value }],

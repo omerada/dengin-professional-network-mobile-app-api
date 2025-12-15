@@ -135,7 +135,7 @@ export const EnhancedNotificationCard: React.FC<EnhancedNotificationCardProps> =
     const scale = useSharedValue(1);
 
     const handlePressIn = useCallback(() => {
-      scale.value = withSpring(0.98, { damping: 15, stiffness: 400 });
+      scale.value = withSpring(0.96, { damping: 15, stiffness: 400 });
     }, [scale]);
 
     const handlePressOut = useCallback(() => {

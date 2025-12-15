@@ -28,7 +28,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
  * PressableScale Props
  */
 export interface PressableScaleProps extends Omit<PressableProps, 'style'> {
-  /** Scale when pressed (default: 0.95) */
+  /** Scale when pressed (default: 0.96) */
   activeScale?: number;
   /** Spring damping (default: 15) */
   damping?: number;
@@ -58,7 +58,7 @@ export interface PressableScaleProps extends Omit<PressableProps, 'style'> {
  * </PressableScale>
  */
 export const PressableScale = memo<PressableScaleProps>(function PressableScale({
-  activeScale = 0.95,
+  activeScale = 0.96,
   damping = 15,
   stiffness = 150,
   haptic: enableHaptic = false,

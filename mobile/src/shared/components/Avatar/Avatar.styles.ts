@@ -50,6 +50,14 @@ export const styles = StyleSheet.create({
     borderWidth: 3,
   },
 
+  // P3: Skeleton loading overlay
+  skeleton: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
+  },
+
   verificationBadge: {
     alignItems: 'center',
     bottom: -2,

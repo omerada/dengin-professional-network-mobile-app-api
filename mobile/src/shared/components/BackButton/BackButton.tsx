@@ -89,7 +89,7 @@ export const BackButton = memo<BackButtonProps>(
         onPress={handlePress}
         onPressIn={() => {
           if (!disabled) {
-            scale.value = withSpring(0.92, spring.press);
+            scale.value = withSpring(0.96, spring.press);
           }
         }}
         onPressOut={() => {

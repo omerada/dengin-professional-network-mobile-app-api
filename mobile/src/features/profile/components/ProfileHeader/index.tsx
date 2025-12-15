@@ -88,7 +88,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = memo(
       if (!isOwnProfile) return;
 
       trigger('light');
-      avatarScale.value = withSpring(0.95, spring.press);
+      avatarScale.value = withSpring(0.96, spring.press);
       setTimeout(() => {
         avatarScale.value = withSpring(1, spring.snappy);
       }, 100);

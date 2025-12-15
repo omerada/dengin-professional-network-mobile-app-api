@@ -38,7 +38,7 @@ const StatItem: React.FC<StatItemProps> = memo(({ label, value, onPress, delay =
     if (!onPress) return;
 
     trigger('light');
-    scale.value = withSpring(0.95, spring.press);
+    scale.value = withSpring(0.96, spring.press);
     setTimeout(() => {
       scale.value = withSpring(1, spring.snappy);
     }, 100);

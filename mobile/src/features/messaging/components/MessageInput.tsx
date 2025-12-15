@@ -17,6 +17,10 @@ interface MessageInputProps {
   placeholder?: string;
   disabled?: boolean;
   maxLength?: number;
+  /** P2: Media attachment handlers */
+  onImagePick?: () => void;
+  onCameraOpen?: () => void;
+  onVoiceRecord?: () => void;
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -31,6 +35,9 @@ export const MessageInput: React.FC<MessageInputProps> = memo(
     placeholder = 'Mesaj yaz...',
     disabled = false,
     maxLength = 2000,
+    onImagePick,
+    onCameraOpen,
+    onVoiceRecord,
   }) => {
     const colors = useColors();
     const [isFocused, setIsFocused] = useState(false);
@@ -38,6 +45,7 @@ export const MessageInput: React.FC<MessageInputProps> = memo(
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const canSend = value.trim().length > 0 && !disabled;
+    const hasText = value.trim().length > 0;
 
     const handleChangeText = useCallback(
       (text: string) => {
@@ -100,6 +108,28 @@ export const MessageInput: React.FC<MessageInputProps> = memo(
 
     return (
       <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+        {/* P2: Media attachment buttons (shown when no text) */}
+        {!hasText && (
+          <View style={styles.mediaButtons}>
+            {onImagePick && (
+              <Pressable
+                onPress={onImagePick}
+                style={styles.mediaButton}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Icon name="image-outline" size={24} color={colors.text.secondary} />
+              </Pressable>
+            )}
+            {onCameraOpen && (
+              <Pressable
+                onPress={onCameraOpen}
+                style={styles.mediaButton}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Icon name="camera-outline" size={24} color={colors.text.secondary} />
+              </Pressable>
+            )}
+          </View>
+        )}
+
         <View
           style={[
             styles.inputContainer,
@@ -126,22 +156,51 @@ export const MessageInput: React.FC<MessageInputProps> = memo(
           />
         </View>
 
-        <AnimatedPressable
-          onPress={handleSend}
-          disabled={!canSend}
-          style={[
-            styles.sendButton,
-            { backgroundColor: colors.interactive.default },
-            buttonAnimatedStyle,
-          ]}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          <Icon name="send" size={20} color={colors.text.inverse} />
-        </AnimatedPressable>
+        {/* P2: Send button or voice record (animated transition) */}
+        {hasText ? (
+          <AnimatedPressable
+            onPress={handleSend}
+            disabled={!canSend}
+            style={[
+              styles.sendButton,
+              { backgroundColor: colors.interactive.default },
+              buttonAnimatedStyle,
+            ]}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Icon name="send" size={20} color={colors.text.inverse} />
+          </AnimatedPressable>
+        ) : (
+          onVoiceRecord && (
+            <Pressable
+              onPress={onVoiceRecord}
+              style={styles.voiceButton}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <Icon name="mic-outline" size={24} color={colors.text.secondary} />
+            </Pressable>
+          )
+        )}
       </View>
     );
+  mediaButton: {
+    alignItems: 'center',
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
   },
-);
-
+  mediaButtons: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 4,
+  },
+  sendButton: {
+    alignItems: 'center',
+    borderRadius: 20,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
+  },
+  voiceButton: {
+    alignItems: 'center'
 MessageInput.displayName = 'MessageInput';
 
 const styles = StyleSheet.create({

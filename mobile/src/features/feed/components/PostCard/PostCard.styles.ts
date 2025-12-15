@@ -138,6 +138,12 @@ export const imageStyles = StyleSheet.create({
     paddingHorizontal: 16,
   },
 
+  // P3: Error placeholder
+  errorPlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
   gridContainer: {
     borderRadius: 12,
     flexDirection: 'row',
@@ -187,5 +193,13 @@ export const imageStyles = StyleSheet.create({
     borderRadius: 12,
     height: 300,
     width: '100%',
+  },
+
+  // P3: Loading skeleton
+  skeleton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    zIndex: 1,
   },
 });

@@ -11,11 +11,13 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Modal,
   TouchableOpacity,
   TextInput,
   FlatList,
+  Dimensions,
 } from 'react-native';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
@@ -23,7 +25,7 @@ import { useToast } from '@contexts/ToastContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
 import { useProfessions } from '@shared/hooks/useProfessions';
 import { useSectors } from '@shared/hooks/useSectors';
-import { Button, Input } from '@shared/components';
+import { Button, Input, BottomSheet } from '@shared/components';
 import { HAPTIC_TYPES } from '@constants/hapticPresets';
 import { spacing, fontSize } from '@theme';
 import { AvatarPicker } from '../components';
@@ -535,22 +537,13 @@ export const EditProfileScreen: React.FC = () => {
         </View>
       </KeyboardAvoidingView>
 
-      {/* Profession Picker Modal */}
-      <Modal
+      {/* Profession Picker - P2 Optimized: BottomSheet */}
+      <BottomSheet
         visible={showProfessionPicker}
-        animationType="slide"
-        transparent={false}
-        onRequestClose={handleCloseProfessionPicker}>
-        <SafeAreaView
-          style={[styles.modalContainer, { backgroundColor: colors.background.primary }]}
-          edges={['top', 'bottom']}>
-          <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: colors.text.primary }]}>Meslek Seç</Text>
-            <TouchableOpacity onPress={handleCloseProfessionPicker} style={styles.modalCloseButton}>
-              <Text style={[styles.modalCloseText, { color: colors.text.secondary }]}>Kapat</Text>
-            </TouchableOpacity>
-          </View>
-
+        onClose={handleCloseProfessionPicker}
+        title="Meslek Seç"
+        height={SCREEN_HEIGHT * 0.8}>
+        <View style={styles.bottomSheetContent}>
           {/* Sector Info */}
           {selectedSector && (
             <View style={styles.sectorInfoBanner}>
@@ -622,27 +615,16 @@ export const EditProfileScreen: React.FC = () => {
             }
             contentContainerStyle={styles.professionList}
           />
-        </SafeAreaView>
-      </Modal>
+        </View>
+      </BottomSheet>
 
-      {/* Sector Picker Modal */}
-      <Modal
+      {/* Sector Picker - P2 Optimized: BottomSheet */}
+      <BottomSheet
         visible={showSectorPicker}
-        animationType="slide"
-        transparent={false}
-        onRequestClose={handleCloseSectorPicker}>
-        <SafeAreaView
-          style={[styles.modalContainer, { backgroundColor: colors.background.primary }]}
-          edges={['top', 'bottom']}>
-          <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: colors.text.primary }]}>
-              Çalışma Alanı Seç
-            </Text>
-            <TouchableOpacity onPress={handleCloseSectorPicker} style={styles.modalCloseButton}>
-              <Text style={[styles.modalCloseText, { color: colors.text.secondary }]}>Kapat</Text>
-            </TouchableOpacity>
-          </View>
-
+        onClose={handleCloseSectorPicker}
+        title="Çalışma Alanı Seç"
+        height={SCREEN_HEIGHT * 0.7}>
+        <View style={styles.bottomSheetContent}>
           <FlatList
             data={sectors}
             keyExtractor={item => item.id.toString()}
@@ -677,25 +659,16 @@ export const EditProfileScreen: React.FC = () => {
             }
             contentContainerStyle={styles.professionList}
           />
-        </SafeAreaView>
-      </Modal>
+        </View>
+      </BottomSheet>
 
-      {/* Gender Picker Modal */}
-      <Modal
+      {/* Gender Picker - P2 Optimized: BottomSheet */}
+      <BottomSheet
         visible={showGenderPicker}
-        animationType="slide"
-        transparent={false}
-        onRequestClose={handleCloseGenderPicker}>
-        <SafeAreaView
-          style={[styles.modalContainer, { backgroundColor: colors.background.primary }]}
-          edges={['top', 'bottom']}>
-          <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: colors.text.primary }]}>Cinsiyet Seç</Text>
-            <TouchableOpacity onPress={handleCloseGenderPicker} style={styles.modalCloseButton}>
-              <Text style={[styles.modalCloseText, { color: colors.text.secondary }]}>Kapat</Text>
-            </TouchableOpacity>
-          </View>
-
+        onClose={handleCloseGenderPicker}
+        title="Cinsiyet Seç"
+        height={SCREEN_HEIGHT * 0.4}>
+        <View style={styles.bottomSheetContent}>
           <FlatList
             data={GENDER_OPTIONS}
             keyExtractor={item => item.value}
@@ -718,25 +691,16 @@ export const EditProfileScreen: React.FC = () => {
             )}
             contentContainerStyle={styles.professionList}
           />
-        </SafeAreaView>
-      </Modal>
+        </View>
+      </BottomSheet>
 
-      {/* Date Picker Modal */}
-      <Modal
+      {/* Date Picker - P2 Optimized: BottomSheet */}
+      <BottomSheet
         visible={showDatePicker}
-        animationType="slide"
-        transparent={false}
-        onRequestClose={handleCloseDatePicker}>
-        <SafeAreaView
-          style={[styles.modalContainer, { backgroundColor: colors.background.primary }]}
-          edges={['top', 'bottom']}>
-          <View style={styles.modalHeader}>
-            <Text style={[styles.modalTitle, { color: colors.text.primary }]}>Doğum Tarihi</Text>
-            <TouchableOpacity onPress={handleCloseDatePicker} style={styles.modalCloseButton}>
-              <Text style={[styles.modalCloseText, { color: colors.text.secondary }]}>İptal</Text>
-            </TouchableOpacity>
-          </View>
-
+        onClose={handleCloseDatePicker}
+        title="Doğum Tarihi"
+        height={SCREEN_HEIGHT * 0.6}>
+        <View style={styles.bottomSheetContent}>
           <View style={styles.datePickerContent}>
             <View style={styles.datePickerRow}>
               <View style={styles.datePickerItem}>
@@ -811,13 +775,18 @@ export const EditProfileScreen: React.FC = () => {
               />
             </View>
           </View>
-        </SafeAreaView>
-      </Modal>
+        </View>
+      </BottomSheet>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  // P2 Addition: BottomSheet content styling
+  bottomSheetContent: {
+    flex: 1,
+    paddingTop: spacing.sm,
+  },
   container: {
     flex: 1,
   },

@@ -1,9 +1,10 @@
 // src/shared/components/Avatar/Avatar.tsx
 // Dengin Design System - Modern Avatar Component
+// P3: Optimized with skeleton loading and error handling
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
-import React, { memo, useCallback, useMemo } from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { Image, Pressable, Text, View, ActivityIndicator } from 'react-native';
 import Animated, {
   FadeIn,
   interpolate,
@@ -87,6 +88,10 @@ export const Avatar: React.FC<AvatarProps> = memo(
     const colors = useColors();
     const { trigger } = useHaptic();
 
+    // P3: Image loading states
+    const [isLoading, setIsLoading] = useState(!!uri || !!source);
+    const [hasError, setHasError] = useState(false);
+
     // Animation values
     const pressed = useSharedValue(0);
     const sizeConfig = AVATAR_SIZE_CONFIG[size];
@@ -126,7 +131,7 @@ export const Avatar: React.FC<AvatarProps> = memo(
         return {};
       }
 
-      const scale = interpolate(pressed.value, [0, 1], [1, 0.95]);
+      const scale = interpolate(pressed.value, [0, 1], [1, 0.96]);
       return { transform: [{ scale }] };
     });
 
@@ -173,34 +178,64 @@ export const Avatar: React.FC<AvatarProps> = memo(
         colors.interactive.default,
         selected,
         sizeConfig.dimension,
-        style,
-      ],
-    );
+       P3: Image load handlers
+    const handleLoadStart = useCallback(() => {
+      setIsLoading(true);
+      setHasError(false);
+    }, []);
+
+    const handleLoadEnd = useCallback(() => {
+      setIsLoading(false);
+    }, []);
+
+    const handleError = useCallback(() => {
+      setIsLoading(false);
+      setHasError(true);
+    }, []);
 
     // Render image or initials
     const renderContent = () => {
       const imageSource = source ?? (uri ? { uri } : null);
 
-      if (imageSource) {
+      // P3: Show initials if error or no image
+      if (!imageSource || hasError) {
         return (
-          <Animated.View
-            entering={animated ? FadeIn.duration(300) : undefined}
-            style={styles.image}>
-            <Image source={imageSource} style={styles.image} resizeMode="cover" />
-          </Animated.View>
+          <View style={[styles.placeholder, { backgroundColor }]}>
+            <Text
+              style={[
+                styles.initials,
+                { color: colors.text.inverse, fontSize: sizeConfig.fontSize },
+              ]}>
+              {initials}
+            </Text>
+          </View>
         );
       }
 
       return (
-        <View style={[styles.placeholder, { backgroundColor }]}>
-          <Text
-            style={[
-              styles.initials,
-              { color: colors.text.inverse, fontSize: sizeConfig.fontSize },
-            ]}>
-            {initials}
-          </Text>
-        </View>
+        <Animated.View
+          entering={animated ? FadeIn.duration(300) : undefined}
+          style={styles.image}>
+          {/* P3: Loading skeleton */}
+          {isLoading && (
+            <View
+              style={[
+                styles.skeleton,
+                { backgroundColor: colors.background.tertiary },
+              ]}>
+              <ActivityIndicator size="small" color={colors.text.tertiary} />
+            </View>
+          )}
+          {/* P3: Optimized Image with error handling */}
+          <Image
+            source={imageSource}
+            style={styles.image}
+            resizeMode="cover"
+            onLoadStart={handleLoadStart}
+            onLoadEnd={handleLoadEnd}
+            onError={handleError}
+          />
+        </Animated.View>
       );
     };
 

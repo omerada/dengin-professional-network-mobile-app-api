@@ -42,7 +42,7 @@ export const MessageAttachment: React.FC<MessageAttachmentProps> = memo(
     const isImage = contentType?.startsWith('image/');
 
     const handlePressIn = useCallback(() => {
-      scale.value = withSpring(0.97, { damping: 15 });
+      scale.value = withSpring(0.96, { damping: 15 });
     }, [scale]);
 
     const handlePressOut = useCallback(() => {

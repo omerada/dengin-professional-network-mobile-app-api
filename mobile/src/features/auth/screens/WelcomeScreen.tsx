@@ -1,4 +1,8 @@
 // src/features/auth/screens/WelcomeScreen.tsx
+// @deprecated This screen is no longer used in the auth flow (P1 Optimization)
+// Onboarding screen now directly navigates to Login/Register
+// Kept for potential future use as a landing page
+//
 // Modern Welcome Screen - İlk giriş ekranı
 // Oku: mobile-development-guide/features/03-AUTH-MODULE.md
 // Oku: mobile-development-guide/ui-ux-modernization/07-SCREEN-REDESIGNS.md
@@ -17,6 +21,8 @@ import { spacing } from '@theme';
 import { SCREEN_ANIMATIONS } from '@constants/animationPresets';
 
 /**
+ * @deprecated Screen no longer in use - P1 Auth Flow Optimization
+ *
  * Modern Welcome Screen
  * First screen user sees, provides login/register options
  * Features:

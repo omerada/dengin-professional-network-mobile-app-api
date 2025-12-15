@@ -16,6 +16,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing, typography } from '@theme';
+import { UNIFIED_TIMING } from '@constants';
 import { Button } from '@shared/components';
 import { useVerificationStore } from '../stores';
 import { uploadService } from '../services';
@@ -47,12 +48,15 @@ export const UploadStatusScreen: React.FC = memo(() => {
   const scale = useSharedValue(1);
 
   /**
-   * Pulse animasyonu
+   * Pulse animasyonu - P2 Optimized: 800ms → 600ms (UNIFIED_TIMING)
    */
   useEffect(() => {
     if (isUploading) {
       scale.value = withRepeat(
-        withSequence(withTiming(1.1, { duration: 800 }), withTiming(1, { duration: 800 })),
+        withSequence(
+          withTiming(1.1, { duration: UNIFIED_TIMING.pulseAnimation }),
+          withTiming(1, { duration: UNIFIED_TIMING.pulseAnimation }),
+        ),
         -1,
         true,
       );

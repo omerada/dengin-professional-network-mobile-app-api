@@ -71,7 +71,7 @@ export const Card: React.FC<CardProps> = memo(
     onLongPress,
     disabled = false,
     animated = true,
-    pressScale = 0.98,
+    pressScale = 0.96,
     style,
     testID,
     accessibilityLabel,

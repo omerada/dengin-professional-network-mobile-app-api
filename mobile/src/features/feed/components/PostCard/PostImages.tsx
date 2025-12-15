@@ -1,13 +1,15 @@
 // src/features/feed/components/PostCard/PostImages.tsx
 // Dengin Design System - Modern PostImages Component
+// P3: Optimized with skeleton loading and error handling
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
-import React, { memo, useCallback, useMemo } from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { Image, Pressable, Text, View, ActivityIndicator } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 
 import { useHaptic } from '@shared/hooks/useHaptic';
+import { useColors } from '@contexts/ThemeContext';
 
 import { imageStyles } from './PostCard.styles';
 import type { PostImagesProps } from './PostCard.types';
@@ -34,7 +36,27 @@ import type { PostImagesProps } from './PostCard.types';
 export const PostImages: React.FC<PostImagesProps> = memo(
   ({ images, postId, onImagePress, testID }) => {
     const { trigger } = useHaptic();
+    const colors = useColors();
     const navigation = useNavigation();
+
+    // P3: Track loading state for each image
+    const [loadingStates, setLoadingStates] = useState<Record<number, boolean>>({});
+    const [errorStates, setErrorStates] = useState<Record<number, boolean>>({});
+
+    // P3: Image loading handlers
+    const handleLoadStart = useCallback((index: number) => {
+      setLoadingStates(prev => ({ ...prev, [index]: true }));
+      setErrorStates(prev => ({ ...prev, [index]: false }));
+    }, []);
+
+    const handleLoadEnd = useCallback((index: number) => {
+      setLoadingStates(prev => ({ ...prev, [index]: false }));
+    }, []);
+
+    const handleError = useCallback((index: number) => {
+      setLoadingStates(prev => ({ ...prev, [index]: false }));
+      setErrorStates(prev => ({ ...prev, [index]: true }));
+    }, []);
 
     // Handle image press
     const handleImagePress = useCallback(
@@ -64,16 +86,47 @@ export const PostImages: React.FC<PostImagesProps> = memo(
 
       if (count === 2) {
         return { type: 'grid' as const, columns: 2, rows: 1 };
-      }
+      const isLoading = loadingStates[0];
+      const hasError = errorStates[0];
 
-      if (count === 3) {
-        return { type: 'grid' as const, columns: 3, rows: 1 };
-      }
-
-      // 4 or more: 2x2 grid with "+X" overlay on last
-      return { type: 'grid' as const, columns: 2, rows: 2, overflow: count - 4 };
-    }, [images.length]);
-
+      return (
+        <View style={imageStyles.container} testID={testID}>
+          <Pressable onPress={() => handleImagePress(0)}>
+            <Animated.View entering={FadeIn.duration(300)}>
+              {/* P3: Loading skeleton */}
+              {isLoading && !hasError && (
+                <View
+                  style={[
+                    imageStyles.skeleton,
+                    imageStyles.singleImage,
+                    { backgroundColor: colors.background.tertiary },
+                  ]}>
+                  <ActivityIndicator size="large" color={colors.text.tertiary} />
+                </View>
+              )}
+              {/* P3: Error placeholder */}
+              {hasError && (
+                <View
+                  style={[
+                    imageStyles.errorPlaceholder,
+                    imageStyles.singleImage,
+                    { backgroundColor: colors.background.tertiary },
+                  ]}>
+                  <Text style={{ color: colors.text.tertiary }}>❌</Text>
+                </View>
+              )}
+              {/* P3: Optimized image with handlers */}
+              {!hasError && (
+                <Image
+                  source={{ uri: image.thumbnailUrl ?? image.url }}
+                  style={imageStyles.singleImage}
+                  resizeMode="cover"
+                  accessibilityLabel="Gönderi görseli"
+                  onLoadStart={() => handleLoadStart(0)}
+                  onLoadEnd={() => handleLoadEnd(0)}
+                  onError={() => handleError(0)}
+                />
+              )}
     if (images.length === 0) return null;
 
     // Single image layout
@@ -91,11 +144,39 @@ export const PostImages: React.FC<PostImagesProps> = memo(
               />
             </Animated.View>
           </Pressable>
-        </View>
-      );
-    }
-
-    // Grid layout (2, 3, 4+ images)
+        </View>{/* P3: Grid skeleton */}
+                {loadingStates[index] && !errorStates[index] && (
+                  <View
+                    style={[
+                      imageStyles.skeleton,
+                      imageStyles.gridImage,
+                      { backgroundColor: colors.background.tertiary },
+                    ]}>
+                    <ActivityIndicator size="small" color={colors.text.tertiary} />
+                  </View>
+                )}
+                {/* P3: Grid error placeholder */}
+                {errorStates[index] && (
+                  <View
+                    style={[
+                      imageStyles.errorPlaceholder,
+                      imageStyles.gridImage,
+                      { backgroundColor: colors.background.tertiary },
+                    ]}>
+                    <Text style={{ color: colors.text.tertiary, fontSize: 20 }}>❌</Text>
+                  </View>
+                )}
+                {/* P3: Optimized grid image */}
+                {!errorStates[index] && (
+                  <Image
+                    source={{ uri: image.thumbnailUrl ?? image.url }}
+                    style={imageStyles.gridImage}
+                    resizeMode="cover"
+                    onLoadStart={() => handleLoadStart(index)}
+                    onLoadEnd={() => handleLoadEnd(index)}
+                    onError={() => handleError(index)}
+                  />
+                )} (2, 3, 4+ images)
     const displayImages = images.slice(0, 4);
 
     // Get appropriate style based on layout

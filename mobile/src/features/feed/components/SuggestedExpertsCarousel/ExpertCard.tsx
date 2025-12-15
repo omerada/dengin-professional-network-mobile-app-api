@@ -48,7 +48,7 @@ export const ExpertCard: React.FC<ExpertCardProps> = memo(
 
     // Handle card press with animation
     const handlePressIn = () => {
-      scale.value = withSpring(0.95, { damping: 15 });
+      scale.value = withSpring(0.96, { damping: 15 });
     };
 
     const handlePressOut = () => {

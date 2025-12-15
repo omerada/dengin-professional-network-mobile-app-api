@@ -171,7 +171,7 @@ export const ParallaxProfileHeader: React.FC<ParallaxProfileHeaderProps> = memo(
     const handleAvatarPress = useCallback(() => {
       if (!onAvatarPress) return;
       trigger('light');
-      avatarScale.value = withSpring(0.95, spring.press);
+      avatarScale.value = withSpring(0.96, spring.press);
       setTimeout(() => {
         avatarScale.value = withSpring(1, spring.snappy);
       }, 100);
@@ -185,7 +185,7 @@ export const ParallaxProfileHeader: React.FC<ParallaxProfileHeaderProps> = memo(
 
     const handleFollowPress = useCallback(() => {
       trigger('medium');
-      buttonScale.value = withSpring(0.95, spring.press);
+      buttonScale.value = withSpring(0.96, spring.press);
       setTimeout(() => {
         buttonScale.value = withSpring(1, spring.snappy);
       }, 100);

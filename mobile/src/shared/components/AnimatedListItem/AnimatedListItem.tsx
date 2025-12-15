@@ -53,7 +53,7 @@ export const AnimatedListItem: React.FC<AnimatedListItemProps> = ({
   onPress,
   onLongPress,
   hapticType = 'light',
-  pressScale = 0.98,
+  pressScale = 0.96,
   disabled = false,
   testID,
 }) => {

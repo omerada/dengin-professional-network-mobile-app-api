@@ -64,6 +64,9 @@ export const MessageList: React.FC<MessageListProps> = memo(
         const previousMessage = messages[index + 1]; // inverted list
         const showAvatar = !previousMessage || previousMessage.senderId !== item.senderId;
 
+        // P2: Only animate the first message (most recent, since list is inverted)
+        const isNew = index === 0;
+
         return (
           <MessageBubble
             message={item}
@@ -71,6 +74,7 @@ export const MessageList: React.FC<MessageListProps> = memo(
             showAvatar={showAvatar}
             senderAvatar={isOwn ? null : item.senderName}
             onLongPress={onMessageLongPress}
+            isNew={isNew}
           />
         );
       },

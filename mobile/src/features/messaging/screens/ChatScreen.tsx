@@ -198,6 +198,22 @@ export const ChatScreen: React.FC = () => {
     [startTyping, stopTyping],
   );
 
+  // P2: Media attachment handlers
+  const handleImagePick = useCallback(() => {
+    triggerHaptic('light');
+    Alert.alert('Resim Seç', 'Bu özellik yakında eklenecek');
+  }, [triggerHaptic]);
+
+  const handleCameraOpen = useCallback(() => {
+    triggerHaptic('light');
+    Alert.alert('Kamera', 'Bu özellik yakında eklenecek');
+  }, [triggerHaptic]);
+
+  const handleVoiceRecord = useCallback(() => {
+    triggerHaptic('medium');
+    Alert.alert('Sesli Mesaj', 'Bu özellik yakında eklenecek');
+  }, [triggerHaptic]);
+
   const handleMessageLongPress = useCallback(
     (message: Message | ClientMessage) => {
       triggerHaptic('medium');
@@ -319,12 +335,15 @@ export const ChatScreen: React.FC = () => {
             onMessageLongPress={handleMessageLongPress}
           />
 
-          {/* Input */}
+          {/* Input - P2: With media attachment support */}
           <MessageInput
             value={messageText}
             onChangeText={handleTextChange}
             onSend={handleSend}
             disabled={isSending}
+            onImagePick={handleImagePick}
+            onCameraOpen={handleCameraOpen}
+            onVoiceRecord={handleVoiceRecord}
           />
 
           {/* Message options sheet */}
