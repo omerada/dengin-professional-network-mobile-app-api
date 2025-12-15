@@ -417,24 +417,6 @@ export interface LegacySubmitVerificationRequest {
 }
 
 /**
- * Post entity
- */
-export interface Post {
-  id: number;
-  content: string;
-  imageUrls: string[];
-  author: User;
-  likeCount: number;
-  commentCount: number;
-  shareCount: number;
-  isLiked: boolean;
-  isBookmarked: boolean;
-  visibility: PostVisibility;
-  createdAt: string;
-  updatedAt: string;
-}
-
-/**
  * Post visibility enum
  */
 export type PostVisibility = 'PUBLIC' | 'VERIFIED_ONLY' | 'FOLLOWERS_ONLY';

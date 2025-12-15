@@ -22,10 +22,13 @@ export { PullToRefresh, useRefreshControl } from './PullToRefresh';
 export { StepSuccess } from './StepSuccess';
 export type { StepSuccessProps } from './StepSuccess';
 
-// Unified Loading State System
+// Unified Loading State System - PRODUCTION STANDARD
 export { UnifiedLoadingState } from './LoadingState/UnifiedLoadingState';
-export { LoadingStateManager } from './LoadingStateManager';
-export type { LoadingStateManagerProps, LoadingStrategy } from './LoadingStateManager';
+export type {
+  UnifiedLoadingStateProps,
+  LoadingStrategy,
+  LoadingVariant,
+} from './LoadingState/UnifiedLoadingState';
 
 // Skeleton Components
 export { MessageListSkeleton } from './Skeleton/MessageListSkeleton';
@@ -40,9 +43,6 @@ export { AnimatedCheckmark } from './AnimatedCheckmark';
 export { SuccessCelebration } from './SuccessCelebration';
 export { ShakeAnimation } from './ShakeAnimation';
 
-// Unified Empty State
-export { UnifiedEmptyState } from './UnifiedEmptyState';
-
 // Display components
 export { Avatar } from './Avatar';
 export type { AvatarProps, AvatarSize } from './Avatar';
@@ -52,10 +52,6 @@ export type { BadgeProps, BadgeVariant } from './Badge';
 
 export { Card } from './Card';
 export type { CardProps, CardVariant, CardPadding } from './Card';
-
-// @deprecated Use UnifiedEmptyState instead - EmptyState will be removed in future versions
-export { EmptyState } from './EmptyState';
-export type { EmptyStateProps } from './EmptyState';
 
 // Unified Empty State (PRODUCTION READY)
 export { UnifiedEmptyState } from './UnifiedEmptyState/UnifiedEmptyState';
@@ -78,23 +74,6 @@ export { PulseLoader } from './PulseLoader';
 // ScreenHeader component
 export { ScreenHeader } from './ScreenHeader';
 export type { ScreenHeaderProps, ScreenHeaderVariant } from './ScreenHeader';
-
-// EmptyState Presets - Production UX Enhancement
-export {
-  EmptyStatePreset,
-  EmptyFeed,
-  EmptyNotifications,
-  EmptyMessages,
-  EmptyConversations,
-  SearchNoResults,
-  EmptyActivity,
-  EmptyPosts,
-  EmptyFollowers,
-  EmptyFollowing,
-  NetworkError,
-  ComingSoon,
-} from './EmptyState';
-export type { EmptyStatePresetProps, EmptyStatePresetType } from './EmptyState';
 
 // Skeleton components
 export { Skeleton, SkeletonPost, SkeletonMessage } from './Skeleton';
@@ -188,8 +167,10 @@ export type { TabBarProps, TabItem } from './TabBar';
 export { SwipeableRow } from './SwipeableRow';
 export type { SwipeableRowProps, SwipeableRowRef, SwipeAction } from './SwipeableRow';
 
-// LoadingStateWrapper component - Production UX Improvement
+// LoadingStateWrapper component - DEPRECATED: Use UnifiedLoadingState instead
+/** @deprecated Use UnifiedLoadingState component instead */
 export { LoadingStateWrapper } from './LoadingStateWrapper';
+/** @deprecated Use UnifiedLoadingState component instead */
 export type { LoadingStateWrapperProps } from './LoadingStateWrapper';
 
 // FormField component - Real-time validation UX

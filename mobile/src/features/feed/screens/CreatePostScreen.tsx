@@ -22,6 +22,7 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
+import { spacing } from '@theme';
 import { useFeedStore } from '../stores';
 import { useCreatePost } from '../hooks';
 import { imagePickerService } from '../services';
@@ -400,11 +401,11 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 13,
-    marginBottom: 8,
+    marginBottom: spacing.sm, // 8
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 16,
+    paddingBottom: spacing.md, // 16
   },
   scrollView: {
     flex: 1,

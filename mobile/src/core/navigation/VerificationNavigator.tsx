@@ -16,7 +16,7 @@ import { VerificationProgressIndicator } from '@features/verification/components
 import { useVerificationStore } from '@features/verification/stores';
 import { useColors } from '@contexts/ThemeContext';
 import { VerificationStackParamList } from '@shared/types';
-import { getNavigationConfig, NAVIGATION_PRESETS } from '@constants/unifiedNavigation';
+import { UNIFIED_NAVIGATION } from '@constants/unifiedNavigation';
 
 const Stack = createNativeStackNavigator<VerificationStackParamList>();
 
@@ -33,7 +33,7 @@ export const VerificationNavigator: React.FC = () => {
     <Stack.Navigator
       screenOptions={{
         headerShown: true,
-        ...getNavigationConfig('criticalModal'),
+        ...UNIFIED_NAVIGATION.SCREEN,
         headerStyle: {
           backgroundColor: colors.background.primary,
         },
@@ -57,7 +57,7 @@ export const VerificationNavigator: React.FC = () => {
         name="DocumentCapture"
         component={DocumentCaptureScreen}
         options={{
-          ...NAVIGATION_PRESETS.media, // Fullscreen camera
+          ...UNIFIED_NAVIGATION.FULLSCREEN,
           title: 'Kimlik Belgesi',
         }}
       />
@@ -65,7 +65,7 @@ export const VerificationNavigator: React.FC = () => {
         name="SelfieCapture"
         component={SelfieCaptureScreen}
         options={{
-          ...NAVIGATION_PRESETS.media, // Fullscreen camera
+          ...UNIFIED_NAVIGATION.FULLSCREEN,
           title: 'Selfie',
         }}
       />
@@ -73,7 +73,6 @@ export const VerificationNavigator: React.FC = () => {
         name="VerificationReview"
         component={VerificationReviewScreen}
         options={{
-          ...NAVIGATION_PRESETS.critical, // Critical step - no dismiss
           title: 'İnceleme',
           headerBackVisible: true,
         }}

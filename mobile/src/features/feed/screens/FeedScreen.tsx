@@ -27,7 +27,7 @@ import { SuggestedExpertsCarousel } from '../components/SuggestedExpertsCarousel
 import {
   ActionSheet,
   type ActionSheetOption,
-  LoadingStateWrapper,
+  UnifiedLoadingState,
   CustomRefreshControl,
 } from '@shared/components';
 import { sharePost, showShareError } from '@shared/utils/share';
@@ -60,7 +60,7 @@ import type { Post } from '../types';
 export const FeedScreen: React.FC = memo(() => {
   const colors = useColors();
   const navigation = useNavigation();
-  const { triggerSocial, triggerContent, triggerSystem } = useSemanticHaptic();
+  const { triggerContent, triggerSystem, trigger } = useSemanticHaptic();
   const toast = useToast();
   const currentUserId = useAuthStore(state => state.user?.id);
   const user = useAuthStore(state => state.user);
@@ -499,18 +499,22 @@ export const FeedScreen: React.FC = memo(() => {
       );
     }
 
+    // Unified loading state: skeleton → empty content
+    if (isLoading && posts.length === 0) {
+      return (
+        <UnifiedLoadingState
+          strategy="skeleton"
+          variant="list"
+          customSkeleton={<FeedSkeleton count={3} showImages />}
+        />
+      );
+    }
+
     return (
-      <LoadingStateWrapper
-        isLoading={isLoading && posts.length === 0}
-        skeleton={<FeedSkeleton count={3} showImages />}
-        content={
-          <EmptyFeed
-            title="Henüz gönderi yok"
-            message="Takip ettiğin kişilerin gönderilerini burada göreceksin."
-            icon="newspaper-outline"
-          />
-        }
-        transition="crossfade"
+      <EmptyFeed
+        title="Henüz gönderi yok"
+        message="Takip ettiğin kişilerin gönderilerini burada göreceksin."
+        icon="newspaper-outline"
       />
     );
   }, [isLoading, posts.length, hasTimedOut, retry]);

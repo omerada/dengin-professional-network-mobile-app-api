@@ -19,6 +19,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
+import { spacing } from '@theme';
 import { useDebounce } from '@shared/hooks/useDebounce';
 import { useUserSearch } from '@features/social/hooks';
 import { useStartConversation } from '../hooks';
@@ -283,9 +284,9 @@ const styles = StyleSheet.create({
   userItem: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    gap: spacing.sm + spacing.xs, // 12
+    paddingHorizontal: spacing.md, // 16
+    paddingVertical: spacing.sm + spacing.xs, // 12
   },
   userName: {
     flex: 1,

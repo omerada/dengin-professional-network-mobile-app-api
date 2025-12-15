@@ -1,9 +1,11 @@
 // src/core/navigation/index.ts
-export { AppNavigator, navigationRef, navigate, goBack, resetNavigation } from './AppNavigator';
+export { AppNavigator } from './AppNavigator';
 export { AuthNavigator } from './AuthNavigator';
 export { MainNavigator } from './MainNavigator';
 export { VerificationNavigator } from './VerificationNavigator';
 export { linking } from './linking';
+export { navigationRef, navigate, goBack, reset as resetNavigation } from './navigationRef';
+export * from './types';
 
 // Type-safe navigation helpers
 export {
@@ -21,6 +23,9 @@ export {
   navigateToNotificationSettings,
   navigateToChangePassword,
   navigateToBlockedUsers,
+  navigateToPrivacySettings,
+  navigateToBiometricSettings,
+  navigateToAccountDeletion,
   navigateToVerificationIntro,
   navigateToChatFromTab,
   navigateToNewConversation,

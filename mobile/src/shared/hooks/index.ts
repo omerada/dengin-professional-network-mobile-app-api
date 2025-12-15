@@ -2,9 +2,6 @@
 // Shared hooks exports
 // Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
 
-// Existing hooks
-export { useDebounce } from '../../hooks/useDebounce';
-
 // Sector hooks (Sprint 1)
 export {
   useSectors,

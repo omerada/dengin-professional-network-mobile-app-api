@@ -25,7 +25,7 @@ import {
   navigateToUserProfile,
 } from '@core/navigation';
 import { SCREEN_ANIMATIONS } from '@constants';
-import { fontSize } from '@theme';
+import { fontSize, spacing } from '@theme';
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
 
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
     flexDirection: 'row',
-    gap: 12,
+    gap: spacing.sm + spacing.xs, // 12
   },
   headerSubtitle: {
     fontSize: 12,

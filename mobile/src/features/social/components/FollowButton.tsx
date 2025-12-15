@@ -53,7 +53,7 @@ export interface FollowButtonProps {
 export const FollowButton: React.FC<FollowButtonProps> = memo(
   ({ userId, isFollowing, onFollowChange, size = 'md' }) => {
     const colors = useColors();
-    const { triggerSocial } = useSemanticHaptic();
+    const { triggerSocial, trigger } = useSemanticHaptic();
     const toast = useToast();
     const follow = useFollow();
     const unfollow = useUnfollow();
@@ -73,20 +73,20 @@ export const FollowButton: React.FC<FollowButtonProps> = memo(
         if (isFollowing) {
           await unfollow.mutateAsync(userId);
           toast.success('Takipten çıkıldı');
-          haptic.success();
+          trigger(HAPTIC_TYPES.success);
           onFollowChange?.(userId, false);
         } else {
           await follow.mutateAsync(userId);
           toast.success('Takip edildi');
-          haptic.success();
+          trigger(HAPTIC_TYPES.success);
           onFollowChange?.(userId, true);
         }
       } catch (error) {
-        haptic.error();
+        trigger(HAPTIC_TYPES.error);
         toast.error('İşlem başarısız oldu');
         console.error('Follow/Unfollow error:', error);
       }
-    }, [userId, isFollowing, follow, unfollow, onFollowChange, haptic, toast]);
+    }, [userId, isFollowing, follow, unfollow, onFollowChange, trigger, toast, triggerSocial]);
 
     const buttonStyle = useMemo(
       () => [

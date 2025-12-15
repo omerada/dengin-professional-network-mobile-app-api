@@ -7,6 +7,7 @@ import { View, Text, StyleSheet, Modal, Pressable, Platform, Linking } from 'rea
 import Icon from 'react-native-vector-icons/Ionicons';
 import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
+import { spacing } from '@theme';
 
 interface PermissionPromptProps {
   visible: boolean;
@@ -131,18 +132,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   featureIcon: {
-    marginRight: 12,
+    marginRight: spacing.sm + spacing.xs, // 12
   },
   featureItem: {
     alignItems: 'center',
     flexDirection: 'row',
-    marginBottom: 12,
+    marginBottom: spacing.sm + spacing.xs, // 12
   },
   featureText: {
     fontSize: 15,
   },
   features: {
-    marginBottom: 24,
+    marginBottom: spacing.lg + spacing.xs, // 24
     width: '100%',
   },
   iconContainer: {
@@ -150,7 +151,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     height: 80,
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: spacing.lg - spacing.xs, // 20
     width: 80,
   },
   overlay: {
@@ -179,7 +180,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: '700',
-    marginBottom: 8,
+    marginBottom: spacing.sm, // 8
     textAlign: 'center',
   },
 });

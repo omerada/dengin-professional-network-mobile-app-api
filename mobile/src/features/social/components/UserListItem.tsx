@@ -3,10 +3,10 @@
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART5.md
 
 import React, { memo, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
-import { Avatar, Badge } from '@shared/components';
+import { Avatar, Badge, PressableScale } from '@shared/components';
 import { spacing, fontSize } from '@theme';
 import { FollowButton } from './FollowButton';
 import type { FollowUser } from '../types';
@@ -52,50 +52,49 @@ export const UserListItem: React.FC<UserListItemProps> = memo(
     }, [navigation, user.id]);
 
     return (
-      <TouchableOpacity
-        style={[styles.container, { backgroundColor: colors.background.primary }]}
-        onPress={handlePress}
-        activeOpacity={0.7}>
-        <Avatar
-          uri={user.avatarUrl ?? undefined}
-          name={user.fullName}
-          size="lg"
-          status={user.isProfessionVerified ? 'online' : undefined}
-          badgeColor={colors.interactive.default}
-        />
+      <PressableScale onPress={handlePress} hapticType="light">
+        <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+          <Avatar
+            uri={user.avatarUrl ?? undefined}
+            name={user.fullName}
+            size="lg"
+            status={user.isProfessionVerified ? 'online' : undefined}
+            badgeColor={colors.interactive.default}
+          />
 
-        <View style={styles.info}>
-          <View style={styles.nameRow}>
-            <Text style={[styles.name, { color: colors.text.primary }]} numberOfLines={1}>
-              {user.fullName}
-            </Text>
-            {user.isProfessionVerified && (
-              <Badge variant="success" dot size="sm" style={styles.verifiedBadge} />
+          <View style={styles.info}>
+            <View style={styles.nameRow}>
+              <Text style={[styles.name, { color: colors.text.primary }]} numberOfLines={1}>
+                {user.fullName}
+              </Text>
+              {user.isProfessionVerified && (
+                <Badge variant="success" dot size="sm" style={styles.verifiedBadge} />
+              )}
+            </View>
+
+            {user.profession && (
+              <Text style={[styles.profession, { color: colors.text.secondary }]} numberOfLines={1}>
+                {user.profession.name}
+              </Text>
+            )}
+
+            {user.isFollowedBy && !user.isFollowing && (
+              <Text style={[styles.followsYou, { color: colors.text.secondary }]}>
+                Seni takip ediyor
+              </Text>
             )}
           </View>
 
-          {user.profession && (
-            <Text style={[styles.profession, { color: colors.text.secondary }]} numberOfLines={1}>
-              {user.profession.name}
-            </Text>
-          )}
-
-          {user.isFollowedBy && !user.isFollowing && (
-            <Text style={[styles.followsYou, { color: colors.text.secondary }]}>
-              Seni takip ediyor
-            </Text>
+          {showFollowButton && (
+            <FollowButton
+              userId={user.id}
+              isFollowing={user.isFollowing}
+              onFollowChange={onFollowChange}
+              size="sm"
+            />
           )}
         </View>
-
-        {showFollowButton && (
-          <FollowButton
-            userId={user.id}
-            isFollowing={user.isFollowing}
-            onFollowChange={onFollowChange}
-            size="sm"
-          />
-        )}
-      </TouchableOpacity>
+      </PressableScale>
     );
   },
 );

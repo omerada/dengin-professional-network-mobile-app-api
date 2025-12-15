@@ -63,7 +63,7 @@ export const VerificationIntroScreen: React.FC = memo(() => {
     reset(); // Önceki verileri temizle
     setStep('document_front');
     navigation.navigate('DocumentCapture', { documentType: 'diploma', side: 'front' });
-  }, [navigation, reset, setStep, haptic]);
+  }, [navigation, reset, setStep, triggerNavigation]);
 
   return (
     <SafeAreaView

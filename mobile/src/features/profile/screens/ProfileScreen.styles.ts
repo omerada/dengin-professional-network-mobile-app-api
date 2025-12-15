@@ -56,15 +56,6 @@ export const styles = StyleSheet.create({
     paddingVertical: 12,
   },
 
-  emptyPosts: {
-    alignItems: 'center',
-    paddingVertical: 32,
-  },
-
-  emptyText: {
-    fontSize: 14,
-  },
-
   loadMoreButton: {
     marginVertical: 16,
   },
@@ -152,35 +143,5 @@ export const styles = StyleSheet.create({
     top: 12,
     width: 40,
     zIndex: 10,
-  },
-
-  statBox: {
-    alignItems: 'center',
-    flex: 1,
-  },
-
-  statDivider: {
-    height: 40,
-    width: 1,
-  },
-
-  statLabel: {
-    fontSize: 13,
-    fontWeight: '500',
-    marginTop: 2,
-  },
-
-  statNumber: {
-    fontSize: 24,
-    fontWeight: '800',
-  },
-
-  statsRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 24,
-    paddingHorizontal: 40,
-    width: '100%',
   },
 });

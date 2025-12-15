@@ -68,7 +68,7 @@ export const ProfileBio: React.FC<ProfileBioProps> = memo(({ bio, maxLines = 3, 
       buttonScale.value = withSpring(1, spring.snappy);
     }, 100);
     setIsExpanded(prev => !prev);
-  }, [trigger, buttonScale]);
+  }, [triggerNavigation, buttonScale]);
 
   if (!bio) {
     return null;

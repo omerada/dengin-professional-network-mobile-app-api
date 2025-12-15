@@ -13,10 +13,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Feather';
 import { SCREEN_ANIMATIONS } from '@constants/animationPresets';
-import { HAPTIC_TYPES } from '@constants/hapticPresets';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { asyncStorage } from '@core/storage/asyncStorage';
 import { STORAGE_KEYS } from '@core/storage/keys';
 import type { AuthStackNavigationProp } from '@shared/types';
@@ -129,7 +128,7 @@ const PaginationDot: React.FC<DotProps> = ({ active }) => {
 export const OnboardingScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation<AuthStackNavigationProp>();
-  const { triggerNavigation, triggerContent } = useSemanticHaptic();
+  const { triggerNavigation } = useSemanticHaptic();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
@@ -140,7 +139,7 @@ export const OnboardingScreen: React.FC = () => {
   const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
     if (viewableItems.length > 0 && viewableItems[0].index !== null) {
       setCurrentIndex(viewableItems[0].index);
-      triggerContent('scroll');
+      triggerNavigation('screenOpen');
     }
   }).current;
 

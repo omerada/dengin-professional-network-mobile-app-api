@@ -7,7 +7,7 @@ import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
-import { EmptyState } from '@shared/components';
+import { UnifiedEmptyState } from '@shared/components';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing } from '@theme';
 
@@ -44,17 +44,14 @@ export const NotFoundScreen: React.FC = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top', 'bottom']}>
-      <EmptyState
-        icon="alert-circle-outline"
+      <UnifiedEmptyState
+        icon="alert-circle"
         title="Sayfa Bulunamadı"
         description="Aradığınız içerik kaldırılmış veya mevcut değil."
-        action={{
-          title: 'Ana Sayfaya Dön',
+        primaryAction={{
+          label: 'Ana Sayfaya Dön',
           onPress: handleGoHome,
-          variant: 'primary',
         }}
-        floatingIcon
-        animated
       />
     </SafeAreaView>
   );

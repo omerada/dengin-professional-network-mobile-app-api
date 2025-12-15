@@ -3,10 +3,13 @@
 // Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
 
 import React, { memo, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Switch, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Switch, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
+import { useHaptic } from '@shared/hooks';
+import { PressableScale } from '@shared/components';
 import { spacing, fontSize, borderRadius } from '@theme';
+import { HAPTIC_TYPES } from '@constants';
 import type { SettingsItemType } from '../types';
 
 interface SettingsItemProps extends SettingsItemType {
@@ -28,12 +31,19 @@ interface SettingsItemProps extends SettingsItemType {
 export const SettingsItem: React.FC<SettingsItemProps> = memo(
   ({ id: _id, title, subtitle, icon, type, value, onPress, onToggle, isLoading = false }) => {
     const colors = useColors();
+    const { trigger } = useHaptic();
 
     const handlePress = useCallback(() => {
       if (!isLoading && onPress) {
+        // Haptic feedback based on type
+        if (type === 'danger') {
+          trigger(HAPTIC_TYPES.warning);
+        } else {
+          trigger(HAPTIC_TYPES.buttonPress);
+        }
         onPress();
       }
-    }, [isLoading, onPress]);
+    }, [isLoading, onPress, type, trigger]);
 
     const handleToggle = useCallback(
       (newValue: boolean) => {
@@ -88,15 +98,20 @@ export const SettingsItem: React.FC<SettingsItemProps> = memo(
       </View>
     );
 
-    // Toggle items don't need to be wrapped in TouchableOpacity
+    // Toggle items don't need to be wrapped in PressableScale
     if (type === 'toggle') {
       return content;
     }
 
     return (
-      <TouchableOpacity onPress={handlePress} disabled={isLoading} activeOpacity={0.7}>
+      <PressableScale
+        onPress={handlePress}
+        disabled={isLoading}
+        activeScale={0.98}
+        haptic
+        hapticType={type === 'danger' ? 'heavy' : 'light'}>
         {content}
-      </TouchableOpacity>
+      </PressableScale>
     );
   },
 );

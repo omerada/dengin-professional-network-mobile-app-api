@@ -6,6 +6,7 @@ import React, { memo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
+import { spacing } from '@theme';
 
 interface EmptyChatProps {
   userName?: string;
@@ -58,7 +59,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 8,
+    marginBottom: spacing.sm, // 8
     textAlign: 'center',
   },
 });

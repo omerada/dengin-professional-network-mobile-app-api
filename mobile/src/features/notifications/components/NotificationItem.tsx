@@ -3,11 +3,13 @@
 // Backend: NotificationResponse DTO
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { ProgressiveImage } from '@shared/components';
+import { ProgressiveImage, PressableScale } from '@shared/components';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
+import { useHaptic } from '@shared/hooks';
+import { spacing } from '@theme';
 import type { NotificationResponse, NotificationType } from '../types';
 
 export interface NotificationItemProps {
@@ -94,60 +96,96 @@ const formatRelativeTime = (dateString: string): string => {
   });
 };
 
-export const NotificationItem: React.FC<NotificationItemProps> = memo(({ notification }) => {
-  const colors = useColors();
+export const NotificationItem: React.FC<NotificationItemProps> = memo(
+  ({ notification, onPress, onLongPress }) => {
+    const colors = useColors();
+    const { trigger } = useHaptic();
 
-  // Backend: read field (boolean)
-  const isUnread = !notification.read;
+    // Backend: read field (boolean)
+    const isUnread = !notification.read;
 
-  // Backend icon field (derived) veya type'dan hesapla
-  const iconConfig = notification.icon
-    ? { name: notification.icon, color: notification.color || colors.text.tertiary }
-    : getNotificationIcon(notification.type, colors);
+    const handlePress = useCallback(() => {
+      if (onPress) {
+        trigger('light');
+        onPress(notification);
+      }
+    }, [onPress, notification, trigger]);
 
-  // Metadata'dan resim URL'i
-  const imageUrl = notification.metadata?.imageUrl || notification.metadata?.actorAvatarUrl;
+    const handleLongPress = useCallback(() => {
+      if (onLongPress) {
+        trigger('medium');
+        onLongPress(notification);
+      }
+    }, [onLongPress, notification, trigger]);
 
-  // Backend relativeTime field veya hesaplanan
-  const displayTime = notification.relativeTime || formatRelativeTime(notification.createdAt);
+    // Backend icon field (derived) veya type'dan hesapla
+    const iconConfig = notification.icon
+      ? { name: notification.icon, color: notification.color || colors.text.tertiary }
+      : getNotificationIcon(notification.type, colors);
 
-  return (
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: isUnread ? colors.interactive.subtle : colors.background.primary,
-        },
-      ]}>
-      {/* Icon or Image */}
-      <View style={styles.iconContainer}>
-        {imageUrl ? (
-          <ProgressiveImage source={{ uri: imageUrl }} style={styles.image} showLoadingIndicator />
-        ) : (
-          <View style={[styles.iconCircle, { backgroundColor: `${iconConfig.color}20` }]}>
-            <Icon name={iconConfig.name} size={20} color={iconConfig.color} />
-          </View>
+    // Metadata'dan resim URL'i
+    const imageUrl = notification.metadata?.imageUrl || notification.metadata?.actorAvatarUrl;
+
+    // Backend relativeTime field veya hesaplanan
+    const displayTime = notification.relativeTime || formatRelativeTime(notification.createdAt);
+
+    const content = (
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: isUnread ? colors.interactive.subtle : colors.background.primary,
+          },
+        ]}>
+        {/* Icon or Image */}
+        <View style={styles.iconContainer}>
+          {imageUrl ? (
+            <ProgressiveImage
+              source={{ uri: imageUrl }}
+              style={styles.image}
+              showLoadingIndicator
+            />
+          ) : (
+            <View style={[styles.iconCircle, { backgroundColor: `${iconConfig.color}20` }]}>
+              <Icon name={iconConfig.name} size={20} color={iconConfig.color} />
+            </View>
+          )}
+        </View>
+        {/* Content */}
+        <View style={styles.content}>
+          <Text
+            style={[styles.title, { color: colors.text.primary }, isUnread && styles.titleUnread]}
+            numberOfLines={1}>
+            {notification.title}
+          </Text>
+          <Text style={[styles.body, { color: colors.text.secondary }]} numberOfLines={2}>
+            {notification.body}
+          </Text>
+          <Text style={[styles.time, { color: colors.text.secondary }]}>{displayTime}</Text>
+        </View>
+        {/* Unread indicator */}
+        {isUnread && (
+          <View style={[styles.unreadDot, { backgroundColor: colors.interactive.default }]} />
         )}
       </View>
-      {/* Content */}
-      <View style={styles.content}>
-        <Text
-          style={[styles.title, { color: colors.text.primary }, isUnread && styles.titleUnread]}
-          numberOfLines={1}>
-          {notification.title}
-        </Text>
-        <Text style={[styles.body, { color: colors.text.secondary }]} numberOfLines={2}>
-          {notification.body}
-        </Text>
-        <Text style={[styles.time, { color: colors.text.secondary }]}>{displayTime}</Text>
-      </View>
-      {/* Unread indicator */}
-      {isUnread && (
-        <View style={[styles.unreadDot, { backgroundColor: colors.interactive.default }]} />
-      )}
-    </View>
-  );
-});
+    );
+
+    if (onPress || onLongPress) {
+      return (
+        <PressableScale
+          onPress={handlePress}
+          onLongPress={handleLongPress}
+          activeScale={0.98}
+          haptic={false} // Manual haptic in handlers
+        >
+          {content}
+        </PressableScale>
+      );
+    }
+
+    return content;
+  },
+);
 
 NotificationItem.displayName = 'NotificationItem';
 
@@ -155,14 +193,14 @@ const styles = StyleSheet.create({
   body: {
     fontSize: 14,
     lineHeight: 20,
-    marginBottom: 4,
+    marginBottom: spacing.xs, // 4
   },
   container: {
     alignItems: 'flex-start',
     flexDirection: 'row',
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    gap: spacing.sm + spacing.xs, // 12
+    paddingHorizontal: spacing.md, // 16
+    paddingVertical: spacing.sm + spacing.xs, // 12
   },
   content: {
     flex: 1,

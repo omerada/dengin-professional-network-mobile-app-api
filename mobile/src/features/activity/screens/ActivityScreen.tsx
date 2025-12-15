@@ -9,7 +9,7 @@ import Animated from 'react-native-reanimated';
 
 import { SCREEN_ANIMATIONS } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
-import { ComingSoon } from '@shared/components';
+import { UnifiedEmptyState } from '@shared/components';
 
 /**
  * ActivityScreen - Gamification & Challenges Hub (Placeholder)
@@ -33,7 +33,11 @@ export const ActivityScreen: React.FC = memo(() => {
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top']}>
       <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={styles.content}>
-        <ComingSoon featureName="Etkinlikler, yarışmalar ve rozetler" />
+        <UnifiedEmptyState
+          icon="activity"
+          title="Yakında Geliyor"
+          description="Etkinlikler, yarışmalar ve rozetler çok yakında burada olacak!"
+        />
       </Animated.View>
     </SafeAreaView>
   );

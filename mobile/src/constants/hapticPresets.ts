@@ -120,6 +120,7 @@ export const SEMANTIC_HAPTICS = {
     discard: 'light' as HapticType, // Discarded changes
     publish: 'success' as HapticType, // Published successfully
     draft: 'light' as HapticType, // Saved as draft
+    refresh: 'medium' as HapticType, // Refresh content
   },
 
   /**
@@ -133,6 +134,7 @@ export const SEMANTIC_HAPTICS = {
     modalOpen: 'light' as HapticType, // Modal opened
     modalClose: 'light' as HapticType, // Modal closed
     back: 'light' as HapticType, // Navigate back
+    navigate: 'light' as HapticType, // General navigation
   },
 
   /**
@@ -145,6 +147,7 @@ export const SEMANTIC_HAPTICS = {
     error: 'error' as HapticType, // Validation error
     success: 'success' as HapticType, // Form success
     clear: 'light' as HapticType, // Clear field
+    select: 'light' as HapticType, // Select option
   },
 
   /**
@@ -156,6 +159,8 @@ export const SEMANTIC_HAPTICS = {
     retry: 'medium' as HapticType, // Retry action
     cancel: 'light' as HapticType, // Action cancelled
     confirm: 'success' as HapticType, // Action confirmed
+    success: 'success' as HapticType, // Success feedback
+    error: 'error' as HapticType, // Error feedback
     alert: 'warning' as HapticType, // Alert shown
   },
 

@@ -3,18 +3,11 @@
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import React, { memo } from 'react';
-import {
-  StyleSheet,
-  View,
-  Image,
-  TouchableOpacity,
-  Text,
-  Dimensions,
-  ViewStyle,
-} from 'react-native';
+import { StyleSheet, View, Image, Text, Dimensions, ViewStyle } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing, typography } from '@theme';
+import { PressableScale } from '@shared/components';
 import type { CapturedImage } from '../types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -103,15 +96,17 @@ export const ImagePreview: React.FC<ImagePreviewProps> = memo(
 
         {/* Tekrar çek butonu */}
         {onRetake && !loading && (
-          <TouchableOpacity
-            style={[styles.retakeButton, { backgroundColor: colors.background.secondary }]}
+          <PressableScale
             onPress={onRetake}
+            hapticType="light"
             accessibilityRole="button"
             accessibilityLabel={`${label} tekrar çek`}>
-            <Text style={[styles.retakeText, { color: colors.interactive.default }]}>
-              Tekrar Çek
-            </Text>
-          </TouchableOpacity>
+            <View style={[styles.retakeButton, { backgroundColor: colors.background.secondary }]}>
+              <Text style={[styles.retakeText, { color: colors.interactive.default }]}>
+                Tekrar Çek
+              </Text>
+            </View>
+          </PressableScale>
         )}
       </Animated.View>
     );

@@ -75,75 +75,78 @@ export const WelcomeSuccessScreen: React.FC = () => {
   const buttonTranslateY = useSharedValue(30);
 
   useEffect(() => {
-    // 1. Icon entrance - Professional scale with rotation (300ms)
+    // UNIFIED TIMING: Simplified animation sequence for professional feel
+    // Total animation: 600ms (reduced from 700ms)
+
+    // 1. Icon entrance - Standard spring (300ms)
     iconScale.value = withSpring(1, {
-      damping: 14,
-      stiffness: 90,
+      damping: 15,
+      stiffness: 100,
     });
     iconRotate.value = withTiming(0, {
-      duration: 400,
+      duration: 300,
       easing: Easing.out(Easing.cubic),
     });
 
-    // 2. Check mark draw effect (100ms delay)
+    // 2. Check mark (80ms delay) - UNIFIED_TIMING.componentEnter
     checkOpacity.value = withDelay(
-      100,
+      80,
+      withTiming(1, { duration: 200, easing: Easing.out(Easing.ease) }),
+    );
+
+    // 3. Glow pulse (160ms delay) - Subtle feedback
+    glowOpacity.value = withDelay(
+      160,
+      withSequence(withTiming(0.5, { duration: 300 }), withTiming(0.2, { duration: 400 })),
+    );
+
+    // 4. Title (200ms delay) - UNIFIED_TIMING.componentEnter
+    titleOpacity.value = withDelay(
+      200,
       withTiming(1, { duration: 300, easing: Easing.out(Easing.ease) }),
     );
-
-    // 3. Subtle glow pulse (200ms delay)
-    glowOpacity.value = withDelay(
-      200,
-      withSequence(withTiming(0.6, { duration: 400 }), withTiming(0.3, { duration: 600 })),
-    );
-
-    // 4. Title stagger (250ms delay) - Corporate stagger pattern
-    titleOpacity.value = withDelay(
-      250,
-      withTiming(1, { duration: 400, easing: Easing.out(Easing.ease) }),
-    );
     titleTranslateY.value = withDelay(
-      250,
-      withTiming(0, { duration: 400, easing: Easing.out(Easing.cubic) }),
+      200,
+      withTiming(0, { duration: 300, easing: Easing.out(Easing.cubic) }),
     );
 
-    // 5. Subtitle stagger (400ms delay)
+    // 5. Subtitle (320ms delay) - Reduced stagger gap
     subtitleOpacity.value = withDelay(
-      400,
-      withTiming(1, { duration: 400, easing: Easing.out(Easing.ease) }),
+      320,
+      withTiming(1, { duration: 300, easing: Easing.out(Easing.ease) }),
     );
     subtitleTranslateY.value = withDelay(
-      400,
-      withTiming(0, { duration: 400, easing: Easing.out(Easing.cubic) }),
+      320,
+      withTiming(0, { duration: 300, easing: Easing.out(Easing.cubic) }),
     );
 
-    // 6. Badge entrance with subtle bounce (550ms delay)
-    badgeOpacity.value = withDelay(550, withTiming(1, { duration: 300 }));
+    // 6. Badge (420ms delay) - Tighter timing
+    badgeOpacity.value = withDelay(420, withTiming(1, { duration: 200 }));
     badgeScale.value = withDelay(
-      550,
+      420,
       withSpring(1, {
-        damping: 12,
+        damping: 15,
         stiffness: 100,
       }),
     );
 
-    // 7. Button entrance (700ms delay) - Final CTA
+    // 7. Button (500ms delay) - Earlier CTA visibility
     buttonOpacity.value = withDelay(
-      700,
-      withTiming(1, { duration: 400, easing: Easing.out(Easing.ease) }),
+      500,
+      withTiming(1, { duration: 300, easing: Easing.out(Easing.ease) }),
     );
     buttonTranslateY.value = withDelay(
-      700,
+      500,
       withSpring(0, {
-        damping: 14,
-        stiffness: 90,
+        damping: 15,
+        stiffness: 100,
       }),
     );
 
-    // 8. AUTO-CONTINUE: Navigate to main app after 4 seconds
+    // 8. AUTO-CONTINUE: Navigate after 2.5s (reduced from 4s)
     const autoNavigateTimer = setTimeout(() => {
       handleContinue();
-    }, 4000);
+    }, 2500);
 
     return () => clearTimeout(autoNavigateTimer);
   }, [handleContinue]);

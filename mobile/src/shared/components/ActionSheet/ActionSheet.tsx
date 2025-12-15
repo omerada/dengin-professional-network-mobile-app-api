@@ -1,25 +1,22 @@
 // src/shared/components/ActionSheet/ActionSheet.tsx
 // Dengin Design System - Modern ActionSheet Component
+// Built on top of BottomSheet for code reuse and consistency
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback } from 'react';
-import { View, Text, Pressable, StyleSheet, Modal } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
   withSequence,
-  FadeIn,
-  FadeOut,
-  SlideInDown,
-  SlideOutDown,
 } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
 import { spring } from '@theme/animations';
-import { UNIFIED_TIMING } from '@constants/unifiedTiming';
+import { BottomSheet } from '../Modal';
 
 // ============================================================================
 // Types
@@ -124,11 +121,14 @@ OptionButton.displayName = 'OptionButton';
 /**
  * Modern ActionSheet Component
  *
+ * Built on top of BottomSheet for code reuse.
+ * Provides iOS-style action sheet with options list.
+ *
  * Features:
- * - Animated slide-in/out with spring physics
+ * - Built on BottomSheet (DRY principle)
  * - Haptic feedback on option selection
  * - Destructive option styling
- * - Safe area aware
+ * - Disabled state support
  * - Accessibility support
  *
  * @example
@@ -156,7 +156,7 @@ export const ActionSheet: React.FC<ActionSheetProps> = memo(
     const handleOptionPress = useCallback(
       (option: ActionSheetOption) => {
         onClose();
-        // Small delay to allow modal to close before action
+        // Small delay to allow sheet to close before action
         setTimeout(() => option.onPress(), 150);
       },
       [onClose],
@@ -175,80 +175,62 @@ export const ActionSheet: React.FC<ActionSheetProps> = memo(
       transform: [{ scale: cancelScale.value }],
     }));
 
-    if (!visible) return null;
-
     return (
-      <Modal
+      <BottomSheet
         visible={visible}
-        transparent
-        animationType="none"
-        onRequestClose={onClose}
-        statusBarTranslucent>
-        <View style={styles.modalContainer} testID={testID}>
-          {/* Overlay */}
-          <Animated.View
-            entering={FadeIn.duration(UNIFIED_TIMING.componentEnter)}
-            exiting={FadeOut.duration(UNIFIED_TIMING.componentExit)}
-            style={styles.overlay}>
-            <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
-          </Animated.View>
-
-          {/* Content */}
-          <Animated.View
-            entering={SlideInDown.springify().damping(18)}
-            exiting={SlideOutDown.duration(UNIFIED_TIMING.componentExit)}
-            style={[styles.container, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-            <Pressable onPress={e => e.stopPropagation()}>
-              {/* Header */}
-              {(title || message) && (
-                <View
-                  style={[
-                    styles.header,
-                    {
-                      backgroundColor: colors.background.secondary,
-                      borderBottomColor: colors.border.default,
-                    },
-                  ]}>
-                  {title && (
-                    <Text style={[styles.title, { color: colors.text.secondary }]}>{title}</Text>
-                  )}
-                  {message && (
-                    <Text style={[styles.message, { color: colors.text.tertiary }]}>{message}</Text>
-                  )}
-                </View>
+        onClose={onClose}
+        swipeToDismiss={true}
+        height="auto"
+        testID={testID}>
+        <View style={{ paddingBottom: Math.max(insets.bottom, 0) }}>
+          {/* Header */}
+          {(title || message) && (
+            <View
+              style={[
+                styles.header,
+                {
+                  backgroundColor: colors.background.primary,
+                  borderBottomColor: colors.border.default,
+                },
+              ]}>
+              {title && (
+                <Text style={[styles.title, { color: colors.text.secondary }]}>{title}</Text>
               )}
+              {message && (
+                <Text style={[styles.message, { color: colors.text.tertiary }]}>{message}</Text>
+              )}
+            </View>
+          )}
 
-              {/* Options */}
-              <View style={styles.optionsContainer}>
-                {options.map((option, index) => (
-                  <OptionButton
-                    key={option.id}
-                    option={option}
-                    isFirst={index === 0 && !title && !message}
-                    isLast={index === options.length - 1}
-                    onPress={() => handleOptionPress(option)}
-                  />
-                ))}
-              </View>
+          {/* Options */}
+          <View style={styles.optionsContainer}>
+            {options.map((option, index) => (
+              <OptionButton
+                key={option.id}
+                option={option}
+                isFirst={index === 0 && !title && !message}
+                isLast={index === options.length - 1}
+                onPress={() => handleOptionPress(option)}
+              />
+            ))}
+          </View>
 
-              {/* Cancel Button */}
-              <AnimatedPressable
-                style={[
-                  styles.cancelButton,
-                  { backgroundColor: colors.background.secondary },
-                  cancelAnimatedStyle,
-                ]}
-                onPress={handleCancel}
-                accessibilityRole="button"
-                accessibilityLabel={cancelLabel}>
-                <Text style={[styles.cancelLabel, { color: colors.interactive.default }]}>
-                  {cancelLabel}
-                </Text>
-              </AnimatedPressable>
-            </Pressable>
-          </Animated.View>
+          {/* Cancel Button */}
+          <AnimatedPressable
+            style={[
+              styles.cancelButton,
+              { backgroundColor: colors.background.secondary },
+              cancelAnimatedStyle,
+            ]}
+            onPress={handleCancel}
+            accessibilityRole="button"
+            accessibilityLabel={cancelLabel}>
+            <Text style={[styles.cancelLabel, { color: colors.interactive.default }]}>
+              {cancelLabel}
+            </Text>
+          </AnimatedPressable>
         </View>
-      </Modal>
+      </BottomSheet>
     );
   },
 );
@@ -270,9 +252,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
-  container: {
-    paddingHorizontal: 8,
-  },
   disabledOption: {
     opacity: 0.5,
   },
@@ -283,10 +262,8 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderTopLeftRadius: 14,
-    borderTopRightRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    marginBottom: 8,
+    paddingBottom: 12,
   },
   lastOption: {
     borderBottomLeftRadius: 14,
@@ -297,10 +274,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
     textAlign: 'center',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
   },
   option: {
     alignItems: 'center',
@@ -320,10 +293,6 @@ const styles = StyleSheet.create({
   optionsContainer: {
     borderRadius: 14,
     overflow: 'hidden',
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   title: {
     fontSize: 14,

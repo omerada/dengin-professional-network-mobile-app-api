@@ -17,6 +17,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SAFE_AREA_EDGES, HAPTIC_TYPES } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
+import { spacing } from '@theme';
 import { useAuthStore } from '@features/auth/stores';
 import {
   usePost,
@@ -330,7 +331,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   postContainer: {
-    paddingTop: 12,
+    paddingTop: spacing.md, // 12
   },
   scrollView: {
     flex: 1,

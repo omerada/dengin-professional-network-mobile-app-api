@@ -7,7 +7,7 @@ import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { Avatar, EmptyState, Loading, Button } from '@shared/components';
+import { Avatar, UnifiedEmptyState, Loading, Button } from '@shared/components';
 import { spacing, fontSize } from '@theme';
 import { useBlockedUsers } from '../hooks';
 import { useUnblock } from '@features/social';
@@ -84,10 +84,10 @@ export const BlockedUsersScreen: React.FC = () => {
         keyExtractor={keyExtractor}
         ItemSeparatorComponent={ItemSeparatorComponent}
         ListEmptyComponent={
-          <EmptyState
-            icon="person-remove-outline"
+          <UnifiedEmptyState
+            icon="user-x"
             title="Engellenen kullanıcı yok"
-            message="Engellediğiniz kullanıcılar burada görünecektir"
+            description="Engellediğiniz kullanıcılar burada görünecektir"
           />
         }
         contentContainerStyle={(!blockedUsers || blockedUsers.length === 0) && styles.emptyContent}

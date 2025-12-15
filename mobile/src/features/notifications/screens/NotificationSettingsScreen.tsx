@@ -18,6 +18,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing, borderRadius } from '@theme';
+import { UNIFIED_HEADER } from '@constants';
 import { NotificationSettingsToggle } from '../components/NotificationSettingsToggle';
 import { useNotificationSettings, useNotificationPermission } from '../hooks';
 import type { NotificationType } from '../types';
@@ -197,9 +198,9 @@ export const NotificationSettingsScreen: React.FC = () => {
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
           <View
             style={{
-              width: 56,
-              height: 56,
-              borderRadius: 28,
+              width: UNIFIED_HEADER.HEIGHT,
+              height: UNIFIED_HEADER.HEIGHT,
+              borderRadius: UNIFIED_HEADER.HEIGHT / 2,
               backgroundColor: colors.background.secondary,
               justifyContent: 'center',
               alignItems: 'center',

@@ -3,9 +3,10 @@
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART6.md
 
 import React, { memo, useCallback } from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@contexts/ThemeContext';
+import { PressableScale } from '@shared/components';
 import { spacing, fontSize } from '@theme';
 import { useAppleSignIn } from '../hooks';
 
@@ -55,20 +56,18 @@ export const AppleSignInButton: React.FC<AppleSignInButtonProps> = memo(
     const textColor = isDark ? '#000000' : '#FFFFFF';
 
     return (
-      <TouchableOpacity
-        style={[styles.button, { backgroundColor: buttonBackgroundColor }]}
-        onPress={handlePress}
-        disabled={appleSignIn.isPending}
-        activeOpacity={0.7}>
-        {appleSignIn.isPending ? (
-          <ActivityIndicator color={textColor} size="small" />
-        ) : (
-          <>
-            <Icon name="logo-apple" size={20} color={textColor} style={styles.icon} />
-            <Text style={[styles.text, { color: textColor }]}>Apple ile devam et</Text>
-          </>
-        )}
-      </TouchableOpacity>
+      <PressableScale onPress={handlePress} disabled={appleSignIn.isPending} hapticType="light">
+        <View style={[styles.button, { backgroundColor: buttonBackgroundColor }]}>
+          {appleSignIn.isPending ? (
+            <ActivityIndicator color={textColor} size="small" />
+          ) : (
+            <>
+              <Icon name="logo-apple" size={20} color={textColor} style={styles.icon} />
+              <Text style={[styles.text, { color: textColor }]}>Apple ile devam et</Text>
+            </>
+          )}
+        </View>
+      </PressableScale>
     );
   },
 );

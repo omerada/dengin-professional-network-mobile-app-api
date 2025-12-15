@@ -8,6 +8,15 @@ import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { HAPTIC_TYPES, SCREEN_ANIMATIONS } from '@constants';
+import {
+  navigateToEditProfile,
+  navigateToChangePassword,
+  navigateToBiometricSettings,
+  navigateToNotificationSettings,
+  navigateToPrivacySettings,
+  navigateToBlockedUsers,
+  navigateToAccountDeletion,
+} from '@core/navigation';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
@@ -67,29 +76,29 @@ export const SettingsScreen: React.FC = () => {
   const [loadingStates, _setLoadingStates] = useState<Record<string, boolean>>({});
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Handlers
+  // Handlers - UNIFIED: Using navigation helpers instead of direct navigate
   const handleEditProfile = useCallback(() => {
-    navigation.navigate('EditProfile' as never);
+    navigateToEditProfile(navigation as any);
   }, [navigation]);
 
   const handleChangePassword = useCallback(() => {
-    navigation.navigate('ChangePassword' as never);
+    navigateToChangePassword(navigation as any);
   }, [navigation]);
 
   const handleBiometric = useCallback(() => {
-    navigation.navigate('BiometricSettings' as never);
+    navigateToBiometricSettings(navigation as any);
   }, [navigation]);
 
   const handleNotificationSettings = useCallback(() => {
-    navigation.navigate('NotificationSettings' as never);
+    navigateToNotificationSettings(navigation as any);
   }, [navigation]);
 
   const handlePrivacySettings = useCallback(() => {
-    navigation.navigate('PrivacySettings' as never);
+    navigateToPrivacySettings(navigation as any);
   }, [navigation]);
 
   const handleBlockedUsers = useCallback(() => {
-    navigation.navigate('BlockedUsers' as never);
+    navigateToBlockedUsers(navigation as any);
   }, [navigation]);
 
   const handleHelp = useCallback(() => {
@@ -106,7 +115,7 @@ export const SettingsScreen: React.FC = () => {
 
   const handleDeleteAccount = useCallback(() => {
     trigger(HAPTIC_TYPES.warning);
-    navigation.navigate('AccountDeletion' as never);
+    navigateToAccountDeletion(navigation as any);
   }, [navigation, trigger]);
 
   const handleLogout = useCallback(() => {

@@ -15,6 +15,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
 import { useHaptic } from '@shared/hooks/useHaptic';
 import { spring } from '@theme/animations';
+import { spacing } from '@theme';
 import { useMessagingStore } from '../stores';
 import type { Conversation } from '../types';
 
@@ -275,8 +276,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
     flexDirection: 'row',
-    gap: 12,
-    paddingHorizontal: 8,
+    gap: spacing.md, // 12
+    paddingHorizontal: spacing.sm, // 8
   },
   status: {
     fontSize: 12,

@@ -2,7 +2,8 @@
 // Type-Safe Navigation Helpers - Production Ready
 // Eliminates @ts-expect-error and 'as never' usage
 
-import { NavigationProp, CommonActions } from '@react-navigation/native';
+import type { NavigationProp } from '@react-navigation/native';
+import { CommonActions } from '@react-navigation/native';
 import { z } from 'zod';
 
 /**
@@ -203,42 +204,63 @@ export function navigateToCreatePost(navigation: NavigationProp<any>): void {
  * Navigate to Edit Profile screen
  */
 export function navigateToEditProfile(navigation: NavigationProp<any>): void {
-  navigation.navigate('EditProfile');
+  (navigation as any).navigate('EditProfile');
 }
 
 /**
  * Navigate to Settings screen
  */
 export function navigateToSettings(navigation: NavigationProp<any>): void {
-  navigation.navigate('Settings');
+  (navigation as any).navigate('Settings');
 }
 
 /**
  * Navigate to Notifications screen
  */
 export function navigateToNotifications(navigation: NavigationProp<any>): void {
-  navigation.navigate('Notifications');
+  (navigation as any).navigate('Notifications');
 }
 
 /**
  * Navigate to Notification Settings screen
  */
 export function navigateToNotificationSettings(navigation: NavigationProp<any>): void {
-  navigation.navigate('NotificationSettings');
+  (navigation as any).navigate('NotificationSettings');
 }
 
 /**
  * Navigate to Change Password screen
  */
 export function navigateToChangePassword(navigation: NavigationProp<any>): void {
-  navigation.navigate('ChangePassword');
+  (navigation as any).navigate('ChangePassword');
 }
 
 /**
  * Navigate to Blocked Users screen
  */
 export function navigateToBlockedUsers(navigation: NavigationProp<any>): void {
-  navigation.navigate('BlockedUsers');
+  (navigation as any).navigate('BlockedUsers');
+}
+
+/**
+ * Navigate to Privacy Settings screen
+ */
+export function navigateToPrivacySettings(navigation: NavigationProp<any>): void {
+  (navigation as any).navigate('PrivacySettings');
+}
+
+/**
+ * Navigate to Biometric Settings screen
+ */
+export function navigateToBiometricSettings(navigation: NavigationProp<any>): void {
+  (navigation as any).navigate('BiometricSettings');
+}
+
+/**
+ * Navigate to Account Deletion screen
+ */
+export function navigateToAccountDeletion(navigation: NavigationProp<any>): void {
+  (navigation as any).navigate('AccountDeletion');
 }
 
 /**

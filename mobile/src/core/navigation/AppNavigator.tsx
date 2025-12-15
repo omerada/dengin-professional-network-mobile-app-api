@@ -4,74 +4,19 @@
 
 import React from 'react';
 import { View, StyleSheet, ActivityIndicator, Text, Image } from 'react-native';
-import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native-stack';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { RootStackParamList } from '@shared/types';
+import { RootStackParamList } from './types';
 import { useAuthStore } from '@features/auth/stores/authStore';
 import { useColors } from '@contexts/ThemeContext';
 import { linking } from './linking';
 import { AuthNavigator } from './AuthNavigator';
 import { MainNavigator } from './MainNavigator';
 import { VerificationNavigator } from './VerificationNavigator';
-import { getNavigationConfig, NAVIGATION_PRESETS } from '@constants/unifiedNavigation';
+import { UNIFIED_NAVIGATION } from '@constants/unifiedNavigation';
+import { navigationRef } from './navigationRef';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
-/**
- * Navigation container ref for navigation outside of React components
- */
-export const navigationRef = createNavigationContainerRef<RootStackParamList>();
-
-/**
- * Navigate function for use outside of React components
- */
-export const navigate = <T extends keyof RootStackParamList>(
-  name: T,
-  params?: RootStackParamList[T],
-) => {
-  if (navigationRef.isReady()) {
-    (navigationRef as any).navigate(name, params);
-  }
-};
-
-/**
- * Go back function for use outside of React components
- */
-export const goBack = () => {
-  if (navigationRef.isReady() && navigationRef.canGoBack()) {
-    navigationRef.goBack();
-  }
-};
-
-/**
- * Reset navigation state
- * Waits for navigation to be ready before attempting reset
- */
-export const resetNavigation = (
-  index: number,
-  routes: Array<{ name: keyof RootStackParamList; params?: any }>,
-) => {
-  // Use a small delay to ensure navigation is fully initialized
-  // This prevents "The action 'RESET' was not handled" errors
-  const attemptReset = () => {
-    if (navigationRef.isReady()) {
-      try {
-        navigationRef.reset({ index, routes });
-      } catch (error) {
-        if (__DEV__) {
-          console.warn('[Navigation] Reset failed, retrying...', error);
-        }
-        // Retry after a short delay
-        setTimeout(attemptReset, 100);
-      }
-    } else {
-      // Navigation not ready, retry after a short delay
-      setTimeout(attemptReset, 50);
-    }
-  };
-
-  attemptReset();
-};
 
 /**
  * App Navigator - Root navigation container
@@ -103,14 +48,14 @@ export const AppNavigator: React.FC = () => {
 
   return (
     <NavigationContainer ref={navigationRef} linking={linking}>
-      <Stack.Navigator screenOptions={getNavigationConfig('screen')}>
+      <Stack.Navigator screenOptions={UNIFIED_NAVIGATION.SCREEN}>
         {isAuthenticated ? (
           <>
             <Stack.Screen name="Main" component={MainNavigator} />
             <Stack.Screen
               name="Verification"
               component={VerificationNavigator}
-              options={NAVIGATION_PRESETS.critical} // Critical flow - prevent accidental dismissal
+              options={UNIFIED_NAVIGATION.FULLSCREEN}
             />
           </>
         ) : (

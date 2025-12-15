@@ -9,10 +9,10 @@ import { useColors } from '@contexts/ThemeContext';
 import { spacing } from '@theme';
 import { Loading } from '../Loading';
 
-type LoadingStrategy = 'skeleton' | 'spinner' | 'inline' | 'button';
-type LoadingVariant = 'screen' | 'list' | 'section';
+export type LoadingStrategy = 'skeleton' | 'spinner' | 'inline' | 'button';
+export type LoadingVariant = 'screen' | 'list' | 'section';
 
-interface UnifiedLoadingStateProps {
+export interface UnifiedLoadingStateProps {
   /** Loading strategy */
   strategy: LoadingStrategy;
   /** Loading variant */
@@ -23,6 +23,10 @@ interface UnifiedLoadingStateProps {
   message?: string;
   /** Size for spinner */
   size?: 'small' | 'large';
+  /** Full screen mode */
+  fullScreen?: boolean;
+  /** Minimum loading time (prevents flashing) */
+  minLoadingTime?: number;
 }
 
 /**

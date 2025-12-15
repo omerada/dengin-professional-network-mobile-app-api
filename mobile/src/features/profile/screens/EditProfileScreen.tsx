@@ -26,7 +26,6 @@ import { useSemanticHaptic } from '@shared/hooks';
 import { useProfessions } from '@shared/hooks/useProfessions';
 import { useSectors } from '@shared/hooks/useSectors';
 import { Button, Input, BottomSheet } from '@shared/components';
-import { HAPTIC_TYPES } from '@constants/hapticPresets';
 import { spacing, fontSize } from '@theme';
 import { AvatarPicker } from '../components';
 import {

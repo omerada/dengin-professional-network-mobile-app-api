@@ -91,7 +91,6 @@ export {
   getResponsiveSpacing,
 } from './hooks';
 export type { WindowDimensions, ScreenDimensions } from './hooks';
-export { useDebounce } from '../hooks/useDebounce';
 
 // Utils - exclude duplicates already exported from hooks
 export {
@@ -116,16 +115,6 @@ export {
   withErrorBoundary,
   tryCatch,
   retryWithBackoff,
-  haptic,
-  hapticLight,
-  hapticMedium,
-  hapticHeavy,
-  hapticSelection,
-  hapticSuccess,
-  hapticWarning,
-  hapticError,
-  withHaptic,
-  useHaptics,
   formatRelativeTime,
   formatDate,
   formatDateTime,
@@ -150,4 +139,4 @@ export {
   shareProfile,
   copyToClipboard,
 } from './utils';
-export type { ErrorFallbackProps, HapticType, FormatNumberOptions } from './utils';
+export type { ErrorFallbackProps, FormatNumberOptions } from './utils';

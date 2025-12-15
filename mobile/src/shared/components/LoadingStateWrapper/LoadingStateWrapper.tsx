@@ -1,6 +1,13 @@
 // src/shared/components/LoadingStateWrapper/LoadingStateWrapper.tsx
-// Smooth loading state transitions with crossfade support
-// Production-ready implementation
+// @deprecated Use UnifiedLoadingState instead
+// Kept for backward compatibility only
+
+/**
+ * DEPRECATED: Use UnifiedLoadingState component instead
+ *
+ * ❌ OLD: <LoadingStateWrapper isLoading={isLoading} skeleton={<Skeleton />} content={<Content />} />
+ * ✅ NEW: {isLoading ? <UnifiedLoadingState strategy="skeleton" customSkeleton={<Skeleton />} /> : <Content />}
+ */
 
 import React, { memo, ReactNode } from 'react';
 import { StyleSheet, ViewStyle } from 'react-native';

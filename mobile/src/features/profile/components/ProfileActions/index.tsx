@@ -48,7 +48,7 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
     testID,
   }) => {
     const navigation = useNavigation();
-    const { triggerSocial, triggerSystem } = useSemanticHaptic();
+    const { triggerSocial, trigger } = useSemanticHaptic();
     const toast = useToast();
     const colors = useColors();
 

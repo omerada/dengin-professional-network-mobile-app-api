@@ -2,7 +2,6 @@
 // Central exports for all constants
 
 export * from './animationPresets';
-export * from './emptyStatePresets';
 export * from './hapticPresets';
 export * from './unifiedTiming';
 export * from './safeAreaConfig';

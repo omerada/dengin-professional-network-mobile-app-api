@@ -34,21 +34,6 @@ export {
 } from './errorHandling';
 export type { ErrorFallbackProps } from './errorHandling';
 
-// Haptic feedback utilities
-export {
-  haptic,
-  hapticLight,
-  hapticMedium,
-  hapticHeavy,
-  hapticSelection,
-  hapticSuccess,
-  hapticWarning,
-  hapticError,
-  withHaptic,
-  useHaptics,
-} from './haptics';
-export type { HapticType } from './haptics';
-
 // Date utilities
 export {
   formatRelativeTime,

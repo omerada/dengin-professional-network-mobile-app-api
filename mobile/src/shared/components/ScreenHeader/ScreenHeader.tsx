@@ -1,13 +1,14 @@
 // src/shared/components/ScreenHeader/ScreenHeader.tsx
 // Dengin Design System - Standardized Screen Header
-// Oku: mobile/UX-FLOW-IYILESTIRME-RAPORU.md Section 1.2
+// Production Standard: UNIFIED_HEADER.HEIGHT = 56px
 
 import React, { memo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { useColors } from '@contexts/ThemeContext';
-import { spacing } from '@theme';
+import { UNIFIED_HEADER } from '@constants/layoutConstants';
+import { UNIFIED_TIMING } from '@constants/unifiedTiming';
 import { BackButton } from '../BackButton';
 
 import type { ScreenHeaderProps } from './ScreenHeader.types';
@@ -76,15 +77,15 @@ export const ScreenHeader = memo<ScreenHeaderProps>(
 
     return (
       <Animated.View
-        entering={FadeIn.duration(300)}
+        entering={FadeIn.duration(UNIFIED_TIMING.headerEnter)}
         style={[
           styles.container,
           {
             backgroundColor: backgroundColor || colors.background.primary,
             borderBottomColor: colors.border.subtle,
             borderBottomWidth: showBorder ? StyleSheet.hairlineWidth : 0,
-            minHeight: variantConfig.minHeight,
-            paddingVertical: variant === 'large' ? spacing.md : spacing.sm,
+            height: UNIFIED_HEADER.HEIGHT, // ✅ Enforced 56px height
+            paddingHorizontal: UNIFIED_HEADER.PADDING_HORIZONTAL,
           },
           style,
         ]}
@@ -149,17 +150,17 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     flexDirection: 'row',
-    paddingHorizontal: spacing.md,
+    // height and padding set dynamically using UNIFIED_HEADER
   },
   leftSection: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 44,
+    width: UNIFIED_HEADER.MIN_TAP_TARGET,
   },
   rightSection: {
     alignItems: 'flex-end',
     justifyContent: 'center',
-    width: 44,
+    width: UNIFIED_HEADER.MIN_TAP_TARGET,
   },
   subtitle: {
     marginTop: 2,

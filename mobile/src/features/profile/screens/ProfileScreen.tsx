@@ -4,27 +4,13 @@
 // Backend: GET /api/users/me, GET /api/users/{id}
 
 import React, { memo, useCallback, useMemo } from 'react';
-import {
-  View,
-  ScrollView,
-  Text,
-  ActivityIndicator,
-  Pressable,
-  TouchableOpacity,
-  Image,
-} from 'react-native';
+import { View, ScrollView, Text, ActivityIndicator, Image } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { SCREEN_ANIMATIONS, SAFE_AREA_EDGES, HAPTIC_TYPES, UNIFIED_TIMING } from '@constants';
-import {
-  navigateToPostDetail,
-  navigateToEditProfile,
-  navigateToSettings,
-  navigateToFollowersList,
-  navigateToFollowingList,
-} from '@core/navigation';
+import { navigateToPostDetail, navigateToEditProfile, navigateToSettings } from '@core/navigation';
 import { useSemanticHaptic } from '@shared/hooks';
 
 import { useColors } from '@contexts/ThemeContext';
@@ -37,10 +23,11 @@ import {
   Button,
   Loading,
   SkeletonProfileHeader,
-  AnimatedCounter,
   CustomRefreshControl,
+  PressableScale,
+  UnifiedEmptyState,
 } from '@shared/components';
-import { ProfileBio, ProfileActions } from '../components';
+import { ProfileBio, ProfileActions, ProfileStats } from '../components';
 import { ErrorBoundary } from '@core/components';
 import { useMyProfile, useProfile, useProfileStats } from '../hooks';
 import type { ProfileStats as ProfileStatsType } from '../types';
@@ -66,7 +53,7 @@ export const ProfileScreen: React.FC = memo(() => {
   const route = useRoute();
   const params = route.params as RouteParams | undefined;
   const currentUser = useAuthStore(state => state.user);
-  const { triggerSocial, triggerNavigation, triggerSystem } = useSemanticHaptic();
+  const { trigger } = useSemanticHaptic();
   const toast = useToast();
 
   // Follow mutations
@@ -141,20 +128,17 @@ export const ProfileScreen: React.FC = memo(() => {
     return result;
   }, [profile?.stats, profileStats, profileUserId, isOwnProfile]);
 
-  // Handlers
+  // Handlers - UNIFIED: Navigation helpers with proper typing
   const handleAvatarPress = useCallback(() => {
-    // @ts-expect-error - Navigation prop type mismatch
-    navigateToEditProfile(navigation);
+    navigateToEditProfile(navigation as any);
   }, [navigation]);
 
   const handleEditPress = useCallback(() => {
-    // @ts-expect-error - Navigation prop type mismatch
-    navigateToEditProfile(navigation);
+    navigateToEditProfile(navigation as any);
   }, [navigation]);
 
   const handleSettingsPress = useCallback(() => {
-    // @ts-expect-error - Navigation prop type mismatch
-    navigateToSettings(navigation);
+    navigateToSettings(navigation as any);
   }, [navigation]);
 
   const handleRefresh = useCallback(() => {
@@ -265,12 +249,17 @@ export const ProfileScreen: React.FC = memo(() => {
 
           {/* Settings Button */}
           {isOwnProfile && (
-            <TouchableOpacity
-              onPress={handleSettingsPress}
-              style={[styles.settingsButtonTop, { backgroundColor: 'rgba(255,255,255,0.3)' }]}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <PressableScale
+              onPress={() => {
+                trigger(HAPTIC_TYPES.buttonPress);
+                handleSettingsPress();
+              }}
+              activeScale={0.9}
+              haptic
+              hapticType="light"
+              style={[styles.settingsButtonTop, { backgroundColor: 'rgba(255,255,255,0.3)' }]}>
               <Icon name="settings-outline" size={22} color="#fff" />
-            </TouchableOpacity>
+            </PressableScale>
           )}
 
           {/* Centered Profile Content */}
@@ -280,7 +269,17 @@ export const ProfileScreen: React.FC = memo(() => {
               entering={SCREEN_ANIMATIONS.heroEnter}
               style={styles.avatarGlowContainer}>
               <View style={[styles.avatarGlow, { backgroundColor: colors.interactive.default }]} />
-              <Pressable onPress={isOwnProfile ? handleAvatarPress : undefined}>
+              <PressableScale
+                onPress={
+                  isOwnProfile
+                    ? () => {
+                        trigger(HAPTIC_TYPES.buttonPress);
+                        handleAvatarPress();
+                      }
+                    : undefined
+                }
+                activeScale={0.95}
+                disabled={!isOwnProfile}>
                 {profile.avatarUrl ? (
                   <Image source={{ uri: profile.avatarUrl }} style={styles.premiumAvatar} />
                 ) : (
@@ -300,7 +299,7 @@ export const ProfileScreen: React.FC = memo(() => {
                     </Text>
                   </View>
                 )}
-              </Pressable>
+              </PressableScale>
             </Animated.View>
 
             {/* Full Name - Big Bold */}
@@ -336,56 +335,10 @@ export const ProfileScreen: React.FC = memo(() => {
               </Animated.View>
             ) : null}
 
-            {/* Stats - Horizontal Big Numbers */}
-            <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(2)} style={styles.statsRow}>
-              <View style={styles.statBox}>
-                <AnimatedCounter
-                  key={`post-${stats.postCount}`}
-                  value={stats.postCount}
-                  duration={UNIFIED_TIMING.counterAnimation}
-                  style={[styles.statNumber, { color: colors.text.primary }]}
-                />
-                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Gönderi</Text>
-              </View>
-
-              <View style={[styles.statDivider, { backgroundColor: colors.border.subtle }]} />
-
-              <Pressable
-                style={styles.statBox}
-                onPress={() => {
-                  if (profileUserId) {
-                    // @ts-expect-error - Navigation prop type mismatch
-                    navigateToFollowersList(navigation, { userId: profileUserId });
-                  }
-                }}>
-                <AnimatedCounter
-                  key={`follower-${stats.followerCount}`}
-                  value={stats.followerCount}
-                  duration={UNIFIED_TIMING.counterAnimation}
-                  style={[styles.statNumber, { color: colors.text.primary }]}
-                />
-                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Takipçi</Text>
-              </Pressable>
-
-              <View style={[styles.statDivider, { backgroundColor: colors.border.subtle }]} />
-
-              <Pressable
-                style={styles.statBox}
-                onPress={() => {
-                  if (profileUserId) {
-                    // @ts-expect-error - Navigation prop type mismatch
-                    navigateToFollowingList(navigation, { userId: profileUserId });
-                  }
-                }}>
-                <AnimatedCounter
-                  key={`following-${stats.followingCount}`}
-                  value={stats.followingCount}
-                  duration={UNIFIED_TIMING.counterAnimation}
-                  style={[styles.statNumber, { color: colors.text.primary }]}
-                />
-                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>Takip</Text>
-              </Pressable>
-            </Animated.View>
+            {/* Stats - Modern ProfileStats Component with Haptics */}
+            {profileUserId && (
+              <ProfileStats stats={stats} userId={profileUserId} interactive={true} />
+            )}
           </View>
         </View>
 
@@ -434,11 +387,13 @@ export const ProfileScreen: React.FC = memo(() => {
               <ActivityIndicator size="small" color={colors.interactive.default} />
             </View>
           ) : userPosts.length === 0 ? (
-            <View style={styles.emptyPosts}>
-              <Text style={[styles.emptyText, { color: colors.text.secondary }]}>
-                Henüz gönderi yok
-              </Text>
-            </View>
+            <UnifiedEmptyState
+              icon="newspaper-outline"
+              title="Henüz gönderi yok"
+              description={
+                isOwnProfile ? 'İlk gönderini paylaş' : 'Bu kullanıcı henüz gönderi paylaşmamış'
+              }
+            />
           ) : (
             <>
               {userPosts.map((post: Post, index: number) => {

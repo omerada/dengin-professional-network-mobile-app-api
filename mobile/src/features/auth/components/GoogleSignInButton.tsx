@@ -1,10 +1,9 @@
 // src/features/auth/components/GoogleSignInButton.tsx
 // Google Sign-In button component
-// Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART6.md
-
 import React, { memo, useCallback } from 'react';
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, View } from 'react-native';
+import { Text, StyleSheet, ActivityIndicator, View } from 'react-native';
 import { useColors } from '@contexts/ThemeContext';
+import { PressableScale } from '@shared/components';
 import { spacing, fontSize } from '@theme';
 import { useGoogleSignIn } from '../hooks';
 
@@ -48,29 +47,28 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = memo(
     }, [googleSignIn, onSuccess, onError]);
 
     return (
-      <TouchableOpacity
-        style={[
-          styles.button,
-          {
-            backgroundColor: colors.background.primary,
-            borderColor: colors.border.default,
-          },
-        ]}
-        onPress={handlePress}
-        disabled={googleSignIn.isPending}
-        activeOpacity={0.7}>
-        {googleSignIn.isPending ? (
-          <ActivityIndicator color={colors.text.primary} size="small" />
-        ) : (
-          <>
-            {/* Google "G" icon using custom color */}
-            <View style={styles.iconContainer}>
-              <Text style={styles.googleIcon}>G</Text>
-            </View>
-            <Text style={[styles.text, { color: colors.text.primary }]}>Google ile devam et</Text>
-          </>
-        )}
-      </TouchableOpacity>
+      <PressableScale onPress={handlePress} disabled={googleSignIn.isPending} hapticType="light">
+        <View
+          style={[
+            styles.button,
+            {
+              backgroundColor: colors.background.primary,
+              borderColor: colors.border.default,
+            },
+          ]}>
+          {googleSignIn.isPending ? (
+            <ActivityIndicator color={colors.text.primary} size="small" />
+          ) : (
+            <>
+              {/* Google "G" icon using custom color */}
+              <View style={styles.iconContainer}>
+                <Text style={styles.googleIcon}>G</Text>
+              </View>
+              <Text style={[styles.text, { color: colors.text.primary }]}>Google ile devam et</Text>
+            </>
+          )}
+        </View>
+      </PressableScale>
     );
   },
 );

@@ -111,13 +111,13 @@ export const PostCard: React.FC<PostCardProps> = memo(
     // Navigation handlers - Using type-safe helpers
     const handlePostPress = useCallback(() => {
       triggerNavigation('navigate');
-      navigation.navigate('PostDetail', { postId: String(postId) });
+      navigation.navigate('PostDetail', { postId });
     }, [postId, navigation, triggerNavigation]);
 
     const handleAuthorPress = useCallback(() => {
       triggerNavigation('navigate');
       const userId = post.author.userId ?? post.author.id;
-      navigation.navigate('Profile', { userId: String(userId) });
+      navigation.navigate('Profile', { userId });
     }, [post.author, navigation, triggerNavigation]);
 
     // Action handlers
