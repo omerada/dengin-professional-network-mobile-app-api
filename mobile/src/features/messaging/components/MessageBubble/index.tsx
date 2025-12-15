@@ -9,7 +9,7 @@ import Animated, {
   useSharedValue,
   withSpring,
   interpolate,
-  Extrapolate,
+  Extrapolation,
   runOnJS,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -118,7 +118,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
               clampedX,
               [0, SWIPE_THRESHOLD],
               [0, 1],
-              Extrapolate.CLAMP,
+              Extrapolation.CLAMP,
             );
 
             // Haptic at threshold - tracked via shared value

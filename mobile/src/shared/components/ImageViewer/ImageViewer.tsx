@@ -20,7 +20,7 @@ import Animated, {
   withSpring,
   withTiming,
   interpolate,
-  Extrapolate,
+  Extrapolation,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -164,7 +164,7 @@ export const ImageViewer = memo<ImageViewerProps>(function ImageViewer({
           Math.abs(event.translationY),
           [0, 200],
           [1, 0.3],
-          Extrapolate.CLAMP,
+          Extrapolation.CLAMP,
         );
       }
     })

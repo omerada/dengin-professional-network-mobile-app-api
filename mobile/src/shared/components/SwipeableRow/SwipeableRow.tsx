@@ -10,7 +10,7 @@ import Animated, {
   withSpring,
   withTiming,
   interpolate,
-  Extrapolate,
+  Extrapolation,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { scheduleOnRN } from 'react-native-worklets';
@@ -271,7 +271,7 @@ export const SwipeableRow = memo(
       const width = Math.max(0, translateX.value);
       return {
         width,
-        opacity: interpolate(translateX.value, [0, leftActionsWidth], [0, 1], Extrapolate.CLAMP),
+        opacity: interpolate(translateX.value, [0, leftActionsWidth], [0, 1], Extrapolation.CLAMP),
       };
     });
 
@@ -280,7 +280,12 @@ export const SwipeableRow = memo(
       const width = Math.max(0, -translateX.value);
       return {
         width,
-        opacity: interpolate(translateX.value, [-rightActionsWidth, 0], [1, 0], Extrapolate.CLAMP),
+        opacity: interpolate(
+          translateX.value,
+          [-rightActionsWidth, 0],
+          [1, 0],
+          Extrapolation.CLAMP,
+        ),
       };
     });
 

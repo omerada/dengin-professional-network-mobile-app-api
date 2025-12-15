@@ -140,7 +140,7 @@ jest.mock('react-native-reanimated', () => ({
   runOnUI: jest.fn((fn: Function) => fn),
   interpolate: jest.fn(),
   interpolateColor: jest.fn(),
-  Extrapolate: { CLAMP: 'clamp', EXTEND: 'extend', IDENTITY: 'identity' },
+  Extrapolation: { CLAMP: 'clamp', EXTEND: 'extend', IDENTITY: 'identity' },
   createAnimatedComponent: (component: any) => component,
   View: require('react-native').View,
   Text: require('react-native').Text,

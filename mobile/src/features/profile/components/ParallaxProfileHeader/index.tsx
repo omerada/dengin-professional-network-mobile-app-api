@@ -9,7 +9,7 @@ import Animated, {
   useSharedValue,
   withSpring,
   interpolate,
-  Extrapolate,
+  Extrapolation,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -87,7 +87,7 @@ export const ParallaxProfileHeader: React.FC<ParallaxProfileHeaderProps> = memo(
         scrollY.value,
         [0, HEADER_CONSTANTS.SCROLL_DISTANCE],
         [HEADER_CONSTANTS.MAX_HEIGHT, HEADER_CONSTANTS.MIN_HEIGHT],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
       return { height };
     });
@@ -98,9 +98,9 @@ export const ParallaxProfileHeader: React.FC<ParallaxProfileHeaderProps> = memo(
         scrollY.value,
         [0, HEADER_CONSTANTS.SCROLL_DISTANCE],
         [0, -HEADER_CONSTANTS.SCROLL_DISTANCE * 0.5],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
-      const scale = interpolate(scrollY.value, [-100, 0], [1.5, 1], Extrapolate.CLAMP);
+      const scale = interpolate(scrollY.value, [-100, 0], [1.5, 1], Extrapolation.CLAMP);
 
       return {
         transform: [{ translateY }, { scale }],
@@ -113,7 +113,7 @@ export const ParallaxProfileHeader: React.FC<ParallaxProfileHeaderProps> = memo(
         scrollY.value,
         [0, HEADER_CONSTANTS.SCROLL_DISTANCE],
         [0, 0.95],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
       return { opacity };
     });
@@ -124,7 +124,7 @@ export const ParallaxProfileHeader: React.FC<ParallaxProfileHeaderProps> = memo(
         scrollY.value,
         [HEADER_CONSTANTS.SCROLL_DISTANCE - 50, HEADER_CONSTANTS.SCROLL_DISTANCE],
         [0, 1],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
       return { opacity };
     });
@@ -135,19 +135,19 @@ export const ParallaxProfileHeader: React.FC<ParallaxProfileHeaderProps> = memo(
         scrollY.value,
         [0, HEADER_CONSTANTS.SCROLL_DISTANCE],
         [0, -30],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
       const scale = interpolate(
         scrollY.value,
         [0, HEADER_CONSTANTS.SCROLL_DISTANCE],
         [1, 0.5],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
       const translateX = interpolate(
         scrollY.value,
         [0, HEADER_CONSTANTS.SCROLL_DISTANCE],
         [0, -50],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
 
       return {
@@ -161,7 +161,7 @@ export const ParallaxProfileHeader: React.FC<ParallaxProfileHeaderProps> = memo(
         scrollY.value,
         [0, HEADER_CONSTANTS.SCROLL_DISTANCE * 0.5],
         [1, 0],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
       return { opacity };
     });

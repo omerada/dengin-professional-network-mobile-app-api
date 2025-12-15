@@ -7,7 +7,7 @@ import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   interpolate,
-  Extrapolate,
+  Extrapolation,
   SharedValue,
 } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -96,7 +96,7 @@ export const ProfileStickyHeader: React.FC<ProfileStickyHeaderProps> = memo(
         scrollY.value,
         [threshold - 50, threshold],
         [0, 1],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
 
       return {
@@ -111,7 +111,7 @@ export const ProfileStickyHeader: React.FC<ProfileStickyHeaderProps> = memo(
         scrollY.value,
         [threshold - 30, threshold],
         [0.8, 1],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
 
       return {
@@ -125,7 +125,7 @@ export const ProfileStickyHeader: React.FC<ProfileStickyHeaderProps> = memo(
         scrollY.value,
         [threshold - 20, threshold],
         [0, 1],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
 
       return { opacity };
