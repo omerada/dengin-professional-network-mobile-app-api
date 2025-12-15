@@ -39,6 +39,11 @@ interface EmptyFeedProps {
   icon?: string;
   /** Retry handler for error states */
   onRetry?: () => void;
+  /** Action configuration with label and handler */
+  action?: {
+    label: string;
+    onPress: () => void;
+  };
 }
 
 // ============================================================================
@@ -63,7 +68,7 @@ interface EmptyFeedProps {
  * ```
  */
 export const EmptyFeed: React.FC<EmptyFeedProps> = memo(
-  ({ type = 'no-posts', title, message, actionLabel, onAction, icon, onRetry }) => {
+  ({ type = 'no-posts', title, message, actionLabel, onAction, icon, onRetry, action }) => {
     const navigation = useNavigation<MainStackNavigationProp>();
 
     // State-specific configurations
@@ -117,20 +122,37 @@ export const EmptyFeed: React.FC<EmptyFeedProps> = memo(
 
     const config = configs[type];
 
+    // Support both action object and legacy actionLabel/onAction props
+    let finalAction:
+      | {
+          title: string;
+          onPress: () => void;
+          variant?: 'primary' | 'secondary' | 'ghost' | 'outline';
+        }
+      | undefined;
+
+    if (action) {
+      // New action object format
+      finalAction = {
+        title: action.label,
+        onPress: action.onPress,
+        variant: type === 'error' ? 'secondary' : 'primary',
+      };
+    } else if ((actionLabel || config.actionTitle) && (onAction || config.actionHandler)) {
+      // Legacy format
+      finalAction = {
+        title: actionLabel || config.actionTitle!,
+        onPress: onAction || config.actionHandler!,
+        variant: type === 'error' ? 'secondary' : 'primary',
+      };
+    }
+
     return (
       <EmptyState
         icon={icon || config.icon}
         title={title || config.title}
         description={message || config.description}
-        action={
-          (actionLabel || config.actionTitle) && (onAction || config.actionHandler)
-            ? {
-                title: actionLabel || config.actionTitle!,
-                onPress: onAction || config.actionHandler!,
-                variant: type === 'error' ? 'secondary' : 'primary',
-              }
-            : undefined
-        }
+        action={finalAction}
         floatingIcon
         animated
       />

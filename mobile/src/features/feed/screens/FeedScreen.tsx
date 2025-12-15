@@ -130,7 +130,7 @@ export const FeedScreen: React.FC = memo(() => {
       const dismissedAt = await asyncStorage.get(STORAGE_KEYS.VERIFICATION_PROMPT_DISMISSED_AT);
 
       // If dismissed recently (within 24 hours), don't show
-      if (dismissedAt) {
+      if (dismissedAt && typeof dismissedAt === 'string') {
         const daysPassed = (Date.now() - parseInt(dismissedAt, 10)) / (1000 * 60 * 60 * 24);
         if (daysPassed < 1) {
           setShowVerificationPrompt(false);

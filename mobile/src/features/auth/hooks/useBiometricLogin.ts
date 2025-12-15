@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { biometricService, authApi, tokenService } from '../services';
 import { useAuthStore } from '../stores';
 import { getErrorMessage } from '@core/utils/errorUtils';
-import { resetNavigation } from '@core/navigation/AppNavigator';
+// import { resetNavigation } from '@core/navigation/AppNavigator'; // Not used
 
 /**
  * Biometric login hook

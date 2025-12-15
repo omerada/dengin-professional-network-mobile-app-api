@@ -8,7 +8,7 @@ import { authApi, tokenService } from '../services';
 import { useAuthStore } from '../stores';
 import type { LoginFormData } from '../types';
 import { getErrorMessage } from '@core/utils/errorUtils';
-import { resetNavigation } from '@core/navigation/AppNavigator';
+// import { resetNavigation } from '@core/navigation/AppNavigator'; // Not used
 
 /**
  * Login hook with React Query mutation

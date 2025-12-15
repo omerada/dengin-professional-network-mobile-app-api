@@ -34,9 +34,10 @@
       "@constants": ["src/constants"],
       "@constants/*": ["src/constants/*"],
       "@assets/*": ["assets/*"]
-    }
+    },
+    "typeRoots": ["./node_modules/@types", "./src/types"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "src/types/**/*"],
   "exclude": [
     "node_modules",
     "babel.config.js",

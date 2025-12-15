@@ -86,6 +86,26 @@ export const PostImages: React.FC<PostImagesProps> = memo(
 
       if (count === 2) {
         return { type: 'grid' as const, columns: 2, rows: 1 };
+      }
+
+      if (count === 3) {
+        return { type: 'grid' as const, columns: 3, rows: 1 };
+      }
+
+      // 4+ images
+      return {
+        type: 'grid' as const,
+        columns: 2,
+        rows: 2,
+        overflow: Math.max(0, count - 4),
+      };
+    }, [images.length]);
+
+    if (images.length === 0) return null;
+
+    // Single image layout
+    if (layout.type === 'single') {
+      const image = images[0];
       const isLoading = loadingStates[0];
       const hasError = errorStates[0];
 
@@ -127,56 +147,13 @@ export const PostImages: React.FC<PostImagesProps> = memo(
                   onError={() => handleError(0)}
                 />
               )}
-    if (images.length === 0) return null;
-
-    // Single image layout
-    if (layout.type === 'single') {
-      const image = images[0];
-      return (
-        <View style={imageStyles.container} testID={testID}>
-          <Pressable onPress={() => handleImagePress(0)}>
-            <Animated.View entering={FadeIn.duration(300)}>
-              <Image
-                source={{ uri: image.thumbnailUrl ?? image.url }}
-                style={imageStyles.singleImage}
-                resizeMode="cover"
-                accessibilityLabel="Gönderi görseli"
-              />
             </Animated.View>
           </Pressable>
-        </View>{/* P3: Grid skeleton */}
-                {loadingStates[index] && !errorStates[index] && (
-                  <View
-                    style={[
-                      imageStyles.skeleton,
-                      imageStyles.gridImage,
-                      { backgroundColor: colors.background.tertiary },
-                    ]}>
-                    <ActivityIndicator size="small" color={colors.text.tertiary} />
-                  </View>
-                )}
-                {/* P3: Grid error placeholder */}
-                {errorStates[index] && (
-                  <View
-                    style={[
-                      imageStyles.errorPlaceholder,
-                      imageStyles.gridImage,
-                      { backgroundColor: colors.background.tertiary },
-                    ]}>
-                    <Text style={{ color: colors.text.tertiary, fontSize: 20 }}>❌</Text>
-                  </View>
-                )}
-                {/* P3: Optimized grid image */}
-                {!errorStates[index] && (
-                  <Image
-                    source={{ uri: image.thumbnailUrl ?? image.url }}
-                    style={imageStyles.gridImage}
-                    resizeMode="cover"
-                    onLoadStart={() => handleLoadStart(index)}
-                    onLoadEnd={() => handleLoadEnd(index)}
-                    onError={() => handleError(index)}
-                  />
-                )} (2, 3, 4+ images)
+        </View>
+      );
+    }
+
+    // Grid layout (2, 3, 4+ images)
     const displayImages = images.slice(0, 4);
 
     // Get appropriate style based on layout

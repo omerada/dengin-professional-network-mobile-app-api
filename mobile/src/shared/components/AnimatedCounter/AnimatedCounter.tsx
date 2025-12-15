@@ -4,7 +4,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Text, TextStyle, StyleProp } from 'react-native';
-import Animated, {
+import {
   useSharedValue,
   useAnimatedReaction,
   withTiming,
@@ -12,7 +12,7 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 
-const AnimatedText = Animated.createAnimatedComponent(Text);
+// const AnimatedText = Animated.createAnimatedComponent(Text); // Not used in current implementation
 
 interface AnimatedCounterProps {
   /** Counter value */

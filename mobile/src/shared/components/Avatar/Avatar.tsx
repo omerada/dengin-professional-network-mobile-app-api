@@ -178,7 +178,11 @@ export const Avatar: React.FC<AvatarProps> = memo(
         colors.interactive.default,
         selected,
         sizeConfig.dimension,
-       P3: Image load handlers
+        style,
+      ],
+    );
+
+    // P3: Image load handlers
     const handleLoadStart = useCallback(() => {
       setIsLoading(true);
       setHasError(false);
@@ -213,16 +217,10 @@ export const Avatar: React.FC<AvatarProps> = memo(
       }
 
       return (
-        <Animated.View
-          entering={animated ? FadeIn.duration(300) : undefined}
-          style={styles.image}>
+        <Animated.View entering={animated ? FadeIn.duration(300) : undefined} style={styles.image}>
           {/* P3: Loading skeleton */}
           {isLoading && (
-            <View
-              style={[
-                styles.skeleton,
-                { backgroundColor: colors.background.tertiary },
-              ]}>
+            <View style={[styles.skeleton, { backgroundColor: colors.background.tertiary }]}>
               <ActivityIndicator size="small" color={colors.text.tertiary} />
             </View>
           )}

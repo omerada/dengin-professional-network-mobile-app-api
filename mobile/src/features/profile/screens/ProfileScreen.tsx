@@ -3,7 +3,7 @@
 // Design: Instagram + BeReal inspired, Soft Orange Theme
 // Backend: GET /api/users/me, GET /api/users/{id}
 
-import React, { useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import {
   View,
   ScrollView,
@@ -17,12 +17,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {
-  SCREEN_ANIMATIONS,
-  SAFE_AREA_EDGES,
-  HAPTIC_TYPES,
-  UNIFIED_TIMING,
-} from '@constants';
+import { SCREEN_ANIMATIONS, SAFE_AREA_EDGES, HAPTIC_TYPES, UNIFIED_TIMING } from '@constants';
 import {
   navigateToPostDetail,
   navigateToEditProfile,
@@ -65,7 +60,7 @@ interface RouteParams {
  * - Skeleton loading states
  * - Staggered post animations
  */
-export const ProfileScreen: React.FC = () => {
+export const ProfileScreen: React.FC = memo(() => {
   const colors = useColors();
   const navigation = useNavigation();
   const route = useRoute();

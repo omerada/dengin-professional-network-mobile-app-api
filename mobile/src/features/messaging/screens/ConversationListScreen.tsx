@@ -203,7 +203,7 @@ export const ConversationListScreen: React.FC = () => {
             data={filteredConversations}
             renderItem={renderItem}
             keyExtractor={keyExtractor}
-            estimatedItemSize={80}
+            // estimatedItemSize removed - using automatic estimation
             ListEmptyComponent={ListEmptyComponent}
             ListFooterComponent={ListFooterComponent}
             onEndReached={handleLoadMore}

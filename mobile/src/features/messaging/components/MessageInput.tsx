@@ -181,26 +181,9 @@ export const MessageInput: React.FC<MessageInputProps> = memo(
         )}
       </View>
     );
-  mediaButton: {
-    alignItems: 'center',
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
   },
-  mediaButtons: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 4,
-  },
-  sendButton: {
-    alignItems: 'center',
-    borderRadius: 20,
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
-  },
-  voiceButton: {
-    alignItems: 'center'
+);
+
 MessageInput.displayName = 'MessageInput';
 
 const styles = StyleSheet.create({
@@ -232,9 +215,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: Platform.OS === 'ios' ? 10 : 6,
   },
+  mediaButton: {
+    alignItems: 'center',
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
+  },
+  mediaButtons: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 4,
+  },
   sendButton: {
     alignItems: 'center',
     borderRadius: 20,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
+  },
+  voiceButton: {
+    alignItems: 'center',
     height: 40,
     justifyContent: 'center',
     width: 40,
