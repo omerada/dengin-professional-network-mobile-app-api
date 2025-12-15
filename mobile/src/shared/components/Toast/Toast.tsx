@@ -178,9 +178,7 @@ export const Toast: React.FC<ToastProps> = memo(
           {toast.title && (
             <Text style={[styles.title, { color: colors.text.primary }]}>{toast.title}</Text>
           )}
-          <Text style={[styles.message, { color: colors.text.secondary }]} numberOfLines={2}>
-            {toast.message}
-          </Text>
+          <Text style={[styles.message, { color: colors.text.secondary }]}>{toast.message}</Text>
         </View>
 
         {/* Action Button */}

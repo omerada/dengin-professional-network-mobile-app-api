@@ -30,29 +30,38 @@ export interface GrayColorScale extends ColorScale {
 }
 
 /**
- * Warm Gray Color Scale (0-950 dahil)
+ * Slate Color Scale (0-950 dahil)
  */
-export interface WarmGrayColorScale extends ColorScale {
+export interface SlateColorScale extends ColorScale {
   0: string;
   950: string;
 }
 
 /**
- * Base Color Palette
+ * Base Color Palette - Anatolian Professional System
  */
 export interface ColorPalette {
-  copper: ColorScale;
-  indigo: ColorScale;
-  emerald: ColorScale;
-  orange: ColorScale;
-  ruby: ColorScale;
-  warmGray: WarmGrayColorScale;
-  gold: ColorScale;
-  // Legacy support
-  blue: ColorScale;
-  green: ColorScale;
-  red: ColorScale;
-  gray: GrayColorScale;
+  // Main colors (Anatolian Professional)
+  terracotta: ColorScale; // Primary - Terracotta #DC582A (özgün)
+  slate: SlateColorScale; // Neutral - Slate (modern profesyonel)
+  emerald: ColorScale; // Success - Emerald (güven)
+  orange: ColorScale; // Warning - Orange
+  red: ColorScale; // Error - Red
+  violet: ColorScale; // Premium - Violet
+  sky: ColorScale; // Accent - Sky Blue (service)
+  rose: ColorScale; // Creative - Rose
+  amber: ColorScale; // Education - Amber
+  indigo: ColorScale; // Secondary - Sage Green (kept for compatibility)
+  // Legacy support (backward compatibility)
+  blue: ColorScale; // Old primary - maps to terracotta
+  green: ColorScale; // Old success - maps to emerald
+  purple: ColorScale; // Old premium - maps to violet
+  copper: ColorScale; // Old copper - maps to terracotta
+  ruby: ColorScale; // Old error - maps to red
+  gold: ColorScale; // Old premium - maps to violet
+  gray: SlateColorScale; // Old neutral - maps to slate
+  warmGray: SlateColorScale; // Old warm gray - maps to slate
+  teal: ColorScale; // Info/legacy - kept for compatibility
 }
 
 /**

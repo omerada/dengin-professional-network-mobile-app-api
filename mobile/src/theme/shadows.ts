@@ -1,22 +1,23 @@
 // src/theme/shadows.ts
-// Meslektaş Design System v2.0 - Copper-Tinted Shadow Tokens
-// Oku: DESIGN-SYSTEM-DOCUMENTATION.md
+// Meslektaş Design System v3.0 - Modern Shadow Tokens
+// Profesyonel ve dengeli shadow sistemi
 
 import { Platform, ViewStyle } from 'react-native';
 import type { ShadowStyle, ShadowVariant, LayeredShadowVariant } from './types';
 
 /**
- * Copper-Tinted Shadow Generator
- * Creates platform-specific shadows with copper tint for premium feel
+ * Modern Shadow Generator
+ * Platform-specific shadows - neutral ve profesyonel
+ * Yeni tasarım: Copper tint yerine neutral shadow (daha dengeli)
  */
-const COPPER_SHADOW_COLOR = '#E08224'; // Copper 600
+const SHADOW_COLOR = '#1F2937'; // Cool gray 800 - dengeli ve profesyonel
 
 const createShadow = (
   offsetY: number,
   blur: number,
   opacity: number,
   elevation: number,
-  color: string = COPPER_SHADOW_COLOR,
+  color: string = SHADOW_COLOR,
 ): ShadowStyle => ({
   shadowColor: color,
   shadowOffset: { width: 0, height: offsetY },
@@ -26,7 +27,8 @@ const createShadow = (
 });
 
 /**
- * Base Shadow Scale - Copper Tinted
+ * Base Shadow Scale - Modern & Balanced
+ * Tüm platformlarda profesyonel görünüm
  */
 export const shadows: Record<ShadowVariant, ShadowStyle> = {
   none: createShadow(0, 0, 0, 0, 'transparent'),
@@ -66,13 +68,13 @@ export const shadows: Record<ShadowVariant, ShadowStyle> = {
 } as const;
 
 /**
- * Layered Shadows - Copper Tinted
- * More realistic multi-layer shadows with copper tint
+ * Layered Shadows - Modern & Professional
+ * Gerçekçi multi-layer shadows - dengeli ve profesyonel
  */
 export const layeredShadows: Record<LayeredShadowVariant, ViewStyle> = {
   card: Platform.select<ViewStyle>({
     ios: {
-      shadowColor: COPPER_SHADOW_COLOR,
+      shadowColor: SHADOW_COLOR,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.08,
       shadowRadius: 4,
@@ -85,7 +87,7 @@ export const layeredShadows: Record<LayeredShadowVariant, ViewStyle> = {
 
   cardHover: Platform.select<ViewStyle>({
     ios: {
-      shadowColor: COPPER_SHADOW_COLOR,
+      shadowColor: SHADOW_COLOR,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.1,
       shadowRadius: 8,
@@ -98,7 +100,7 @@ export const layeredShadows: Record<LayeredShadowVariant, ViewStyle> = {
 
   button: Platform.select<ViewStyle>({
     ios: {
-      shadowColor: COPPER_SHADOW_COLOR,
+      shadowColor: SHADOW_COLOR,
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.06,
       shadowRadius: 3,
@@ -111,7 +113,7 @@ export const layeredShadows: Record<LayeredShadowVariant, ViewStyle> = {
 
   modal: Platform.select<ViewStyle>({
     ios: {
-      shadowColor: COPPER_SHADOW_COLOR,
+      shadowColor: SHADOW_COLOR,
       shadowOffset: { width: 0, height: 12 },
       shadowOpacity: 0.14,
       shadowRadius: 24,
@@ -124,7 +126,7 @@ export const layeredShadows: Record<LayeredShadowVariant, ViewStyle> = {
 
   fab: Platform.select<ViewStyle>({
     ios: {
-      shadowColor: COPPER_SHADOW_COLOR,
+      shadowColor: SHADOW_COLOR,
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.12,
       shadowRadius: 16,
@@ -137,7 +139,7 @@ export const layeredShadows: Record<LayeredShadowVariant, ViewStyle> = {
 
   image: Platform.select<ViewStyle>({
     ios: {
-      shadowColor: COPPER_SHADOW_COLOR,
+      shadowColor: SHADOW_COLOR,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.08,
       shadowRadius: 6,

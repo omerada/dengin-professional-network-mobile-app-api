@@ -77,13 +77,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     });
   }, [isDark, themeProgress]);
 
-  // Update status bar based on theme
+  // Update status bar based on theme (OLED optimized for dark mode)
   useEffect(() => {
     StatusBar.setBarStyle(isDark ? 'light-content' : 'dark-content', true);
     if (Platform.OS === 'android') {
-      StatusBar.setBackgroundColor(
-        isDark ? dark.colors.background.primary : light.colors.background.primary,
-      );
+      // Dark mode: True black (#000000) for OLED
+      // Light mode: Pure white (#FFFFFF) for clean look
+      StatusBar.setBackgroundColor(isDark ? '#000000' : '#FFFFFF', true);
     }
   }, [isDark]);
 

@@ -1,18 +1,21 @@
 // src/features/auth/screens/WelcomeSuccessScreen.tsx
-// Welcome Success Screen - Registration completion celebration
-// Shows after successful registration with beautiful welcome animation
+// Welcome Success Screen - Modern, Professional & Premium
+// Shows after successful registration with balanced, corporate animations
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
-  withSequence,
   withTiming,
+  withSpring,
+  withDelay,
+  withSequence,
   Easing,
+  interpolate,
 } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/Feather';
 import { useColors } from '@contexts/ThemeContext';
 import { useAuthStore } from '@features/auth/stores/authStore';
@@ -21,24 +24,24 @@ import { spacing } from '@theme';
 /**
  * WelcomeSuccessScreen
  *
- * Celebrates successful registration completion.
- * Shows user's name with a beautiful welcome animation.
- * Professional corporate design with multi-layer animations.
+ * Modern & Premium registration completion screen.
+ * Balanced animations for professional, engaging experience.
  *
  * Features:
- * - Animated success checkmark with ripple effect
- * - Personalized welcome message with user's first name
- * - Confetti-like celebration elements
- * - Smooth fade & scale animations
- * - Manual continue button (tap anywhere or continue button)
+ * - Elegant checkmark animation with subtle scale + glow
+ * - Staggered content animations (corporate micro-interactions)
+ * - Gradient accents for modern premium feel
+ * - Personalized welcome with smooth reveal
+ * - Professional badge with pulse effect
+ * - Smooth button entrance with subtle bounce
  */
 export const WelcomeSuccessScreen: React.FC = () => {
   const colors = useColors();
   const user = useAuthStore(state => state.user);
   const setAuth = useAuthStore(state => state.setAuth);
 
-  // Handle continue button press
-  const handleContinue = async () => {
+  // Handle continue (auto + manual)
+  const handleContinue = useCallback(async () => {
     // Get temporary stored data from registration
     const tempUser = useAuthStore.getState().user;
     const tempAccessToken = (useAuthStore.getState() as any).tempAccessToken;
@@ -51,105 +54,117 @@ export const WelcomeSuccessScreen: React.FC = () => {
         refreshToken: tempRefreshToken,
       });
     }
-  };
+  }, [setAuth]);
 
-  // Animation values
-  const bgOpacity = useSharedValue(0);
-  const checkScale = useSharedValue(0);
+  // Animation values - Balanced & Professional
+  const iconScale = useSharedValue(0);
+  const iconRotate = useSharedValue(-90);
   const checkOpacity = useSharedValue(0);
-  const checkRotate = useSharedValue(-180);
-  const ripple1Scale = useSharedValue(0);
-  const ripple1Opacity = useSharedValue(0.4);
-  const ripple2Scale = useSharedValue(0);
-  const ripple2Opacity = useSharedValue(0.3);
+  const glowOpacity = useSharedValue(0);
+
   const titleOpacity = useSharedValue(0);
-  const titleScale = useSharedValue(0.9);
+  const titleTranslateY = useSharedValue(20);
+
   const subtitleOpacity = useSharedValue(0);
-  const subtitleTranslateY = useSharedValue(20);
-  const badgeOpacity = useSharedValue(0);
+  const subtitleTranslateY = useSharedValue(15);
+
   const badgeScale = useSharedValue(0.8);
+  const badgeOpacity = useSharedValue(0);
+
+  const buttonOpacity = useSharedValue(0);
+  const buttonTranslateY = useSharedValue(30);
 
   useEffect(() => {
-    // Background fade in
-    bgOpacity.value = withTiming(1, { duration: 300 });
+    // 1. Icon entrance - Professional scale with rotation (300ms)
+    iconScale.value = withSpring(1, {
+      damping: 14,
+      stiffness: 90,
+    });
+    iconRotate.value = withTiming(0, {
+      duration: 400,
+      easing: Easing.out(Easing.cubic),
+    });
 
-    // Ripple animations (staggered)
-    setTimeout(() => {
-      ripple1Scale.value = withTiming(2, { duration: 1000, easing: Easing.out(Easing.cubic) });
-      ripple1Opacity.value = withTiming(0, { duration: 1000 });
-    }, 200);
+    // 2. Check mark draw effect (100ms delay)
+    checkOpacity.value = withDelay(
+      100,
+      withTiming(1, { duration: 300, easing: Easing.out(Easing.ease) }),
+    );
 
-    setTimeout(() => {
-      ripple2Scale.value = withTiming(2.5, { duration: 1200, easing: Easing.out(Easing.cubic) });
-      ripple2Opacity.value = withTiming(0, { duration: 1200 });
-    }, 350);
+    // 3. Subtle glow pulse (200ms delay)
+    glowOpacity.value = withDelay(
+      200,
+      withSequence(withTiming(0.6, { duration: 400 }), withTiming(0.3, { duration: 600 })),
+    );
 
-    // Check animation
-    setTimeout(() => {
-      checkOpacity.value = withTiming(1, { duration: 200 });
-      checkScale.value = withSequence(
-        withSpring(1.4, { damping: 8, stiffness: 220 }),
-        withSpring(1, { damping: 12, stiffness: 180 }),
-      );
-      checkRotate.value = withSpring(0, { damping: 15, stiffness: 180 });
-    }, 400);
+    // 4. Title stagger (250ms delay) - Corporate stagger pattern
+    titleOpacity.value = withDelay(
+      250,
+      withTiming(1, { duration: 400, easing: Easing.out(Easing.ease) }),
+    );
+    titleTranslateY.value = withDelay(
+      250,
+      withTiming(0, { duration: 400, easing: Easing.out(Easing.cubic) }),
+    );
 
-    // Title animation
-    setTimeout(() => {
-      titleOpacity.value = withTiming(1, { duration: 500 });
-      titleScale.value = withSpring(1, { damping: 15, stiffness: 150 });
-    }, 800);
+    // 5. Subtitle stagger (400ms delay)
+    subtitleOpacity.value = withDelay(
+      400,
+      withTiming(1, { duration: 400, easing: Easing.out(Easing.ease) }),
+    );
+    subtitleTranslateY.value = withDelay(
+      400,
+      withTiming(0, { duration: 400, easing: Easing.out(Easing.cubic) }),
+    );
 
-    // Subtitle animation
-    setTimeout(() => {
-      subtitleOpacity.value = withTiming(1, { duration: 500 });
-      subtitleTranslateY.value = withSpring(0, { damping: 15, stiffness: 140 });
-    }, 1100);
+    // 6. Badge entrance with subtle bounce (550ms delay)
+    badgeOpacity.value = withDelay(550, withTiming(1, { duration: 300 }));
+    badgeScale.value = withDelay(
+      550,
+      withSpring(1, {
+        damping: 12,
+        stiffness: 100,
+      }),
+    );
 
-    // Badge animation
-    setTimeout(() => {
-      badgeOpacity.value = withTiming(1, { duration: 400 });
-      badgeScale.value = withSpring(1, { damping: 12, stiffness: 160 });
-    }, 1400);
-  }, [
-    bgOpacity,
-    checkScale,
-    checkOpacity,
-    checkRotate,
-    ripple1Scale,
-    ripple1Opacity,
-    ripple2Scale,
-    ripple2Opacity,
-    titleOpacity,
-    titleScale,
-    subtitleOpacity,
-    subtitleTranslateY,
-    badgeOpacity,
-    badgeScale,
-  ]);
+    // 7. Button entrance (700ms delay) - Final CTA
+    buttonOpacity.value = withDelay(
+      700,
+      withTiming(1, { duration: 400, easing: Easing.out(Easing.ease) }),
+    );
+    buttonTranslateY.value = withDelay(
+      700,
+      withSpring(0, {
+        damping: 14,
+        stiffness: 90,
+      }),
+    );
 
-  const bgStyle = useAnimatedStyle(() => ({
-    opacity: bgOpacity.value,
+    // 8. AUTO-CONTINUE: Navigate to main app after 4 seconds
+    const autoNavigateTimer = setTimeout(() => {
+      handleContinue();
+    }, 4000);
+
+    return () => clearTimeout(autoNavigateTimer);
+  }, [handleContinue]);
+
+  // Animated styles
+  const iconContainerStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: iconScale.value }, { rotate: `${iconRotate.value}deg` }],
   }));
 
-  const checkContainerStyle = useAnimatedStyle(() => ({
+  const checkStyle = useAnimatedStyle(() => ({
     opacity: checkOpacity.value,
-    transform: [{ scale: checkScale.value }, { rotate: `${checkRotate.value}deg` }],
   }));
 
-  const ripple1Style = useAnimatedStyle(() => ({
-    opacity: ripple1Opacity.value,
-    transform: [{ scale: ripple1Scale.value }],
-  }));
-
-  const ripple2Style = useAnimatedStyle(() => ({
-    opacity: ripple2Opacity.value,
-    transform: [{ scale: ripple2Scale.value }],
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: glowOpacity.value,
+    transform: [{ scale: interpolate(glowOpacity.value, [0.3, 0.6], [1, 1.2]) }],
   }));
 
   const titleStyle = useAnimatedStyle(() => ({
     opacity: titleOpacity.value,
-    transform: [{ scale: titleScale.value }],
+    transform: [{ translateY: titleTranslateY.value }],
   }));
 
   const subtitleStyle = useAnimatedStyle(() => ({
@@ -162,122 +177,86 @@ export const WelcomeSuccessScreen: React.FC = () => {
     transform: [{ scale: badgeScale.value }],
   }));
 
+  const buttonStyle = useAnimatedStyle(() => ({
+    opacity: buttonOpacity.value,
+    transform: [{ translateY: buttonTranslateY.value }],
+  }));
+
   const firstName = user?.name?.split(' ')[0] || user?.name || 'Kullanıcı';
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
-      <Animated.View style={[styles.content, bgStyle]}>
-        {/* Success Icon with Ripples */}
+      <View style={styles.content}>
+        {/* Success Icon - Modern & Premium */}
         <View style={styles.iconWrapper}>
-          {/* Ripple effects */}
+          {/* Glow effect - Subtle premium touch */}
           <Animated.View
             style={[
-              styles.ripple,
-              ripple1Style,
-              {
-                backgroundColor: colors.status.success,
-              },
-            ]}
-          />
-          <Animated.View
-            style={[
-              styles.ripple,
-              ripple2Style,
+              styles.glowCircle,
+              glowStyle,
               {
                 backgroundColor: colors.status.success,
               },
             ]}
           />
 
-          {/* Check Icon */}
-          <View
-            style={[
-              styles.iconCircle,
-              {
-                backgroundColor: colors.status.success,
-              },
-            ]}>
-            <Animated.View style={checkContainerStyle}>
-              <Icon name="check" size={72} color={colors.text.inverse} />
-            </Animated.View>
-          </View>
+          {/* Icon container with rotation + scale */}
+          <Animated.View style={iconContainerStyle}>
+            <LinearGradient
+              colors={[colors.status.success, colors.status.success]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.iconCircle}>
+              <Animated.View style={checkStyle}>
+                <Icon name="check" size={56} color={colors.text.inverse} />
+              </Animated.View>
+            </LinearGradient>
+          </Animated.View>
         </View>
 
-        {/* Welcome Title */}
-        <Animated.View style={titleStyle}>
-          <Text style={[styles.title, { color: colors.text.primary }]}>
-            Hoş geldin, {firstName}! 🎉
-          </Text>
-        </Animated.View>
+        {/* Welcome Title - Staggered entrance */}
+        <Animated.Text style={[styles.title, { color: colors.text.primary }, titleStyle]}>
+          Hoş geldin, {firstName}!
+        </Animated.Text>
 
-        {/* Subtitle */}
-        <Animated.View style={subtitleStyle}>
-          <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
-            Hesabın başarıyla oluşturuldu.{'\n'}
-            Meslektaş ailesine katıldığın için teşekkürler!
-          </Text>
-        </Animated.View>
+        {/* Subtitle - Staggered entrance */}
+        <Animated.Text style={[styles.subtitle, { color: colors.text.secondary }, subtitleStyle]}>
+          Hesabın başarıyla oluşturuldu.{'\n'}
+          Dengin ailesine katıldığın için teşekkürler.
+        </Animated.Text>
 
-        {/* Success Badge */}
+        {/* Success Badge - Premium with pulse */}
         <Animated.View style={[styles.badge, badgeStyle]}>
-          <View style={[styles.badgeInner, { backgroundColor: colors.status.successBg }]}>
+          <LinearGradient
+            colors={[colors.status.successBg, colors.status.successBg]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.badgeGradient}>
             <View style={[styles.badgeDot, { backgroundColor: colors.status.success }]} />
             <Text style={[styles.badgeText, { color: colors.status.success }]}>
-              KAYIT TAMAMLANDI
+              Kayıt Tamamlandı
             </Text>
-          </View>
+          </LinearGradient>
         </Animated.View>
 
-        {/* Continue Button */}
-        <Animated.View style={[styles.buttonContainer, badgeStyle]}>
+        {/* Continue Button - Manual navigation */}
+        <Animated.View style={[styles.buttonContainer, buttonStyle]}>
           <TouchableOpacity
             style={[styles.continueButton, { backgroundColor: colors.interactive.default }]}
             onPress={handleContinue}
-            activeOpacity={0.8}>
+            activeOpacity={0.85}>
             <Text style={[styles.continueButtonText, { color: colors.text.inverse }]}>
               Devam Et
             </Text>
-            <Icon
-              name="arrow-right"
-              size={20}
-              color={colors.text.inverse}
-              style={styles.arrowIcon}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={handleContinue} style={styles.tapAnywhere}>
-            <Text style={[styles.tapAnywhereText, { color: colors.text.tertiary }]}>
-              veya ekrana dokunun
-            </Text>
+            <Icon name="arrow-right" size={20} color={colors.text.inverse} />
           </TouchableOpacity>
         </Animated.View>
-      </Animated.View>
+      </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  badge: {
-    marginTop: spacing['2xl'],
-  },
-  badgeDot: {
-    borderRadius: 4,
-    height: 8,
-    marginRight: spacing.sm,
-    width: 8,
-  },
-  badgeInner: {
-    alignItems: 'center',
-    borderRadius: 20,
-    flexDirection: 'row',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 1,
-  },
   container: {
     flex: 1,
   },
@@ -287,27 +266,78 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: spacing.xl,
   },
-  iconCircle: {
-    alignItems: 'center',
-    borderRadius: 90,
-    elevation: 20,
-    height: 180,
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.3,
-    shadowRadius: 32,
-    width: 180,
-    zIndex: 3,
-  },
+
+  // Icon styles - Modern & Premium
   iconWrapper: {
     alignItems: 'center',
-    height: 200,
     justifyContent: 'center',
-    marginBottom: spacing['3xl'],
+    marginBottom: spacing['2xl'],
     position: 'relative',
-    width: 200,
   },
+  glowCircle: {
+    borderRadius: 80,
+    height: 160,
+    opacity: 0.3,
+    position: 'absolute',
+    width: 160,
+  },
+  iconCircle: {
+    alignItems: 'center',
+    borderRadius: 60,
+    elevation: 8,
+    height: 120,
+    justifyContent: 'center',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    width: 120,
+  },
+
+  // Text styles
+  title: {
+    fontSize: 32,
+    fontWeight: '700',
+    letterSpacing: -0.8,
+    marginTop: spacing.lg,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    fontWeight: '400',
+    lineHeight: 24,
+    marginTop: spacing.md,
+    opacity: 0.85,
+    textAlign: 'center',
+  },
+
+  // Badge styles - Premium
+  badge: {
+    marginTop: spacing['2xl'],
+  },
+  badgeGradient: {
+    alignItems: 'center',
+    borderRadius: 14,
+    flexDirection: 'row',
+    overflow: 'hidden',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  badgeDot: {
+    borderRadius: 4,
+    height: 8,
+    marginRight: spacing.sm,
+    width: 8,
+  },
+  badgeText: {
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
+
+  // Button styles - Modern CTA
   buttonContainer: {
     alignItems: 'center',
     marginTop: spacing['3xl'],
@@ -315,57 +345,21 @@ const styles = StyleSheet.create({
   },
   continueButton: {
     alignItems: 'center',
-    borderRadius: 16,
-    elevation: 8,
+    borderRadius: 28,
     flexDirection: 'row',
     justifyContent: 'center',
+    paddingVertical: 16,
     paddingHorizontal: spacing['2xl'],
-    paddingVertical: spacing.lg,
+    gap: spacing.sm,
+    minWidth: 200,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
   },
   continueButtonText: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginRight: spacing.sm,
-  },
-  arrowIcon: {
-    marginLeft: spacing.xs,
-  },
-  tapAnywhere: {
-    marginTop: spacing.lg,
-    padding: spacing.md,
-  },
-  tapAnywhereText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  ripple: {
-    borderRadius: 100,
-    height: 180,
-    left: '50%',
-    marginLeft: -90,
-    marginTop: -90,
-    opacity: 0.3,
-    position: 'absolute',
-    top: '50%',
-    width: 180,
-    zIndex: 1,
-  },
-  subtitle: {
     fontSize: 17,
-    fontWeight: '500',
-    lineHeight: 26,
-    marginTop: spacing.lg,
-    textAlign: 'center',
-  },
-  title: {
-    fontSize: 36,
-    fontWeight: '800',
-    letterSpacing: -1,
-    marginTop: spacing.xl,
-    textAlign: 'center',
+    fontWeight: '600',
   },
 });

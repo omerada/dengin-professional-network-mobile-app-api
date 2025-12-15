@@ -14,10 +14,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
+import FAIcon from 'react-native-vector-icons/FontAwesome';
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, SlideInRight, SlideOutLeft } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
 import { Button, Input } from '@shared/components';
 import { StepSuccess } from '@shared/components/StepSuccess';
@@ -241,8 +242,8 @@ export const RegisterScreenMultiStep: React.FC = () => {
         return (
           <Animated.View
             key="step-1"
-            entering={FadeIn.duration(300)}
-            exiting={FadeOut.duration(200)}
+            entering={FadeIn.duration(250)}
+            exiting={FadeOut.duration(150)}
             style={styles.stepContent}>
             {/* Step Header */}
             <View style={styles.stepHeader}>
@@ -330,8 +331,8 @@ export const RegisterScreenMultiStep: React.FC = () => {
         return (
           <Animated.View
             key="step-2"
-            entering={FadeIn.duration(300)}
-            exiting={FadeOut.duration(200)}
+            entering={FadeIn.duration(250)}
+            exiting={FadeOut.duration(150)}
             style={styles.stepContent}>
             {/* Step Header */}
             <View style={styles.stepHeader}>
@@ -434,8 +435,8 @@ export const RegisterScreenMultiStep: React.FC = () => {
         return (
           <Animated.View
             key="step-3"
-            entering={FadeIn.duration(300)}
-            exiting={FadeOut.duration(200)}
+            entering={FadeIn.duration(250)}
+            exiting={FadeOut.duration(150)}
             style={styles.stepContent}>
             {/* Step Header */}
             <View style={styles.stepHeader}>
@@ -656,15 +657,65 @@ export const RegisterScreenMultiStep: React.FC = () => {
                 rightIcon={<Icon name="arrow-right" size={20} color={colors.text.inverse} />}
               />
             ) : (
-              <Button
-                title="Hesap Oluştur"
-                onPress={handleFinalSubmit}
-                loading={isLoading}
-                disabled={isLoading}
-                size="lg"
-                fullWidth
-                rightIcon={<Icon name="check-circle" size={20} color={colors.text.inverse} />}
-              />
+              <>
+                <Button
+                  title="Hesap Oluştur"
+                  onPress={handleFinalSubmit}
+                  loading={isLoading}
+                  disabled={isLoading}
+                  size="lg"
+                  fullWidth
+                  rightIcon={<Icon name="check-circle" size={20} color={colors.text.inverse} />}
+                />
+
+                {/* Social Sign Up - Reference design */}
+                <View style={styles.divider}>
+                  <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
+                  <Text style={[styles.dividerText, { color: colors.text.secondary }]}>
+                    Or Sign in with
+                  </Text>
+                  <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
+                </View>
+
+                <View style={styles.socialButtonsRow}>
+                  {Platform.OS === 'ios' && (
+                    <TouchableOpacity
+                      style={[
+                        styles.socialButton,
+                        { backgroundColor: colors.background.secondary },
+                      ]}
+                      disabled={true}>
+                      <FAIcon name="apple" size={18} color={colors.text.secondary} />
+                      <Text style={[styles.socialButtonText, { color: colors.text.primary }]}>
+                        Apple
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {Platform.OS === 'android' && (
+                    <TouchableOpacity
+                      style={[
+                        styles.socialButton,
+                        { backgroundColor: colors.background.secondary },
+                      ]}
+                      disabled={true}>
+                      <FAIcon name="google" size={18} color={colors.text.secondary} />
+                      <Text style={[styles.socialButtonText, { color: colors.text.primary }]}>
+                        Google
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  <TouchableOpacity
+                    style={[styles.socialButton, { backgroundColor: colors.background.secondary }]}
+                    disabled={true}>
+                    <FAIcon name="facebook" size={18} color={colors.text.secondary} />
+                    <Text style={[styles.socialButtonText, { color: colors.text.primary }]}>
+                      Facebook
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </>
             )}
           </View>
 
@@ -810,6 +861,38 @@ const styles = StyleSheet.create({
   actions: {
     marginTop: spacing.xl,
     marginBottom: spacing.md,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: spacing.lg,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+  },
+  dividerText: {
+    marginHorizontal: spacing.md,
+    fontSize: 14,
+  },
+  socialButtonsRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  socialButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: 12,
+    gap: spacing.sm,
+  },
+  socialButtonText: {
+    fontSize: 15,
+    fontWeight: '500',
   },
   loginContainer: {
     flexDirection: 'row',

@@ -88,7 +88,7 @@ export async function sharePost(post: {
     post.content.length > maxLength ? `${post.content.substring(0, maxLength)}...` : post.content;
 
   const options: ShareContentOptions = {
-    title: `${authorName} - Meslektaş`,
+    title: `${authorName} - Dengin`,
     message: truncatedContent,
     url: postUrl,
   };
@@ -116,8 +116,8 @@ export async function shareProfile(profile: {
   const profileUrl = `meslektas://profile/${profile.userId}`;
 
   const message = profile.profession
-    ? `${profile.fullName} - ${profile.profession} | Meslektaş`
-    : `${profile.fullName} | Meslektaş`;
+    ? `${profile.fullName} - ${profile.profession} | Dengin`
+    : `${profile.fullName} | Dengin`;
 
   const options: ShareContentOptions = {
     title: profile.fullName,

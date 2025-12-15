@@ -126,11 +126,14 @@ export const RegisterScreen: React.FC = () => {
             </Text>
           </View>
 
-          {/* Error Message */}
+          {/* Error Message - Professional */}
           {isError && error && (
             <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
+              <Icon name="alert-circle" size={18} color={colors.status.error} />
               <Text style={[styles.errorText, { color: colors.status.error }]}>
-                {getErrorMessage(error)}
+                {error.message?.includes('email')
+                  ? 'Bu e-posta zaten kullanımda. Giriş yapmayı dener misiniz?'
+                  : 'Bir hata oluştu. Lütfen tekrar deneyin.'}
               </Text>
             </View>
           )}
@@ -394,9 +397,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   errorContainer: {
-    borderRadius: 8,
+    borderRadius: 12,
     marginBottom: spacing.xl,
     padding: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
   },
   errorSmall: {
     fontSize: 12,

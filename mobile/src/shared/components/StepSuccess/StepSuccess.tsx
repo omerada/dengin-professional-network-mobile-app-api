@@ -1,22 +1,23 @@
 // src/shared/components/StepSuccess/StepSuccess.tsx
-// Step completion success animation component
-// Shows a professional success animation when user completes a registration step
+// Step completion - Modern & Professional
+// Premium success indicator for registration step completion
 
 import React, { useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
+  withTiming,
   withSpring,
   withSequence,
-  withTiming,
   withDelay,
   runOnJS,
   Easing,
+  interpolate,
 } from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/Feather';
 import { useColors } from '@contexts/ThemeContext';
-import { spacing } from '@theme';
 
 export interface StepSuccessProps {
   /** Called when animation completes */
@@ -28,176 +29,165 @@ export interface StepSuccessProps {
 /**
  * StepSuccess Component
  *
- * Professional success animation shown between registration steps.
- * Creates a positive emotional response for step completion.
+ * Modern, professional success indicator for registration steps.
+ * Balanced feedback for engaging, corporate experience.
  *
  * Features:
- * - Multi-layer animation with ripple effect
- * - Professional checkmark with smooth transitions
- * - Success message with elegant typography
- * - Corporate-grade design matching app aesthetics
+ * - Elegant scale + fade animation
+ * - Subtle glow effect for premium feel
+ * - Professional checkmark with draw effect
+ * - Smooth entrance/exit for polish
+ * - Corporate-grade micro-interactions
  */
-export const StepSuccess: React.FC<StepSuccessProps> = ({ onComplete, duration = 1200 }) => {
+export const StepSuccess: React.FC<StepSuccessProps> = ({ onComplete, duration = 1000 }) => {
   const colors = useColors();
 
-  // Animation values
+  // Animation values - Balanced & Professional
   const overlayOpacity = useSharedValue(0);
-  const cardScale = useSharedValue(0.8);
-  const cardOpacity = useSharedValue(0);
-  const checkScale = useSharedValue(0);
-  const checkRotate = useSharedValue(-90);
+  const cardScale = useSharedValue(0.7);
   const checkOpacity = useSharedValue(0);
-  const rippleScale = useSharedValue(0);
-  const rippleOpacity = useSharedValue(0.6);
+  const checkScale = useSharedValue(0);
+  const glowOpacity = useSharedValue(0);
 
   useEffect(() => {
-    // 1. Overlay fade in
-    overlayOpacity.value = withTiming(1, { duration: 200, easing: Easing.out(Easing.cubic) });
+    // 1. Overlay fade in (200ms)
+    overlayOpacity.value = withTiming(1, {
+      duration: 200,
+      easing: Easing.out(Easing.ease),
+    });
 
-    // 2. Card entrance
-    cardOpacity.value = withDelay(100, withTiming(1, { duration: 300 }));
-    cardScale.value = withDelay(
+    // 2. Card entrance with subtle bounce (250ms)
+    cardScale.value = withSpring(1, {
+      damping: 12,
+      stiffness: 100,
+    });
+
+    // 3. Check mark draw (100ms delay, 300ms duration)
+    checkOpacity.value = withDelay(
+      100,
+      withTiming(1, { duration: 300, easing: Easing.out(Easing.ease) }),
+    );
+    checkScale.value = withDelay(
       100,
       withSpring(1, {
-        damping: 15,
-        stiffness: 200,
+        damping: 10,
+        stiffness: 120,
       }),
     );
 
-    // 3. Ripple effect
-    setTimeout(() => {
-      rippleScale.value = withTiming(1.5, { duration: 600, easing: Easing.out(Easing.cubic) });
-      rippleOpacity.value = withTiming(0, { duration: 600 });
-    }, 250);
+    // 4. Glow pulse effect (150ms delay)
+    glowOpacity.value = withDelay(
+      150,
+      withSequence(withTiming(0.5, { duration: 300 }), withTiming(0.2, { duration: 400 })),
+    );
 
-    // 4. Check animation
-    setTimeout(() => {
-      checkOpacity.value = withTiming(1, { duration: 200 });
-      checkScale.value = withSequence(
-        withSpring(1.3, { damping: 8, stiffness: 250 }),
-        withSpring(1, { damping: 12, stiffness: 200 }),
-      );
-      checkRotate.value = withSpring(0, { damping: 15, stiffness: 180 });
-    }, 300);
-
-    // 5. Exit animation - kartı ve checkmark'ı önce kaldır, sonra overlay
+    // Exit animation sequence
     const exitTimeout = setTimeout(() => {
-      cardScale.value = withTiming(0.9, { duration: 200 });
-      cardOpacity.value = withTiming(0, { duration: 200 });
+      // Fade out check and glow first
+      checkOpacity.value = withTiming(0, { duration: 200 });
+      glowOpacity.value = withTiming(0, { duration: 200 });
 
-      // Overlay'i card tamamen kaybolduktan sonra kaldır (gölge sorunu çözümü)
-      setTimeout(() => {
-        overlayOpacity.value = withTiming(0, { duration: 150 }, finished => {
+      // Scale down card
+      cardScale.value = withTiming(0.8, {
+        duration: 250,
+        easing: Easing.in(Easing.ease),
+      });
+
+      // Fade out overlay
+      overlayOpacity.value = withTiming(
+        0,
+        {
+          duration: 250,
+          easing: Easing.in(Easing.ease),
+        },
+        finished => {
           if (finished && onComplete) {
             runOnJS(onComplete)();
           }
-        });
-      }, 200);
-    }, duration - 400);
+        },
+      );
+    }, duration - 250);
 
     return () => clearTimeout(exitTimeout);
-  }, [
-    duration,
-    onComplete,
-    overlayOpacity,
-    cardScale,
-    cardOpacity,
-    checkScale,
-    checkRotate,
-    checkOpacity,
-    rippleScale,
-    rippleOpacity,
-  ]);
+  }, [duration, onComplete, overlayOpacity, cardScale, checkOpacity, checkScale, glowOpacity]);
 
   const overlayStyle = useAnimatedStyle(() => ({
     opacity: overlayOpacity.value,
   }));
 
   const cardStyle = useAnimatedStyle(() => ({
-    opacity: cardOpacity.value,
     transform: [{ scale: cardScale.value }],
   }));
 
-  const checkContainerStyle = useAnimatedStyle(() => ({
+  const checkStyle = useAnimatedStyle(() => ({
     opacity: checkOpacity.value,
-    transform: [{ scale: checkScale.value }, { rotate: `${checkRotate.value}deg` }],
+    transform: [{ scale: checkScale.value }],
   }));
 
-  const rippleStyle = useAnimatedStyle(() => ({
-    opacity: rippleOpacity.value,
-    transform: [{ scale: rippleScale.value }],
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: glowOpacity.value,
+    transform: [{ scale: interpolate(glowOpacity.value, [0.2, 0.5], [1, 1.15]) }],
   }));
 
   return (
     <Animated.View style={[styles.overlay, overlayStyle]}>
       <Animated.View style={[styles.card, cardStyle]}>
-        {/* Ripple effect */}
+        {/* Glow effect - Premium touch */}
         <Animated.View
-          style={[
-            styles.ripple,
-            rippleStyle,
-            {
-              backgroundColor: colors.status.success,
-            },
-          ]}
+          style={[styles.glowCircle, glowStyle, { backgroundColor: colors.status.success }]}
         />
 
-        {/* Check circle */}
-        <View
-          style={[
-            styles.checkCircle,
-            {
-              backgroundColor: colors.status.success,
-            },
-          ]}>
-          <Animated.View style={checkContainerStyle}>
-            <Icon name="check" size={56} color={colors.text.inverse} />
+        {/* Check circle with gradient */}
+        <LinearGradient
+          colors={[colors.status.success, colors.status.success]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.checkCircle}>
+          <Animated.View style={checkStyle}>
+            <Icon name="check" size={42} color={colors.text.inverse} />
           </Animated.View>
-        </View>
+        </LinearGradient>
       </Animated.View>
     </Animated.View>
   );
 };
 
+const OVERLAY_BG = 'rgba(0, 0, 0, 0.5)';
+const TRANSPARENT = 'transparent';
+const SHADOW_COLOR = '#000000';
+
 const styles = StyleSheet.create({
   card: {
     alignItems: 'center',
-    backgroundColor: 'transparent',
-    borderRadius: 24,
+    backgroundColor: TRANSPARENT,
     justifyContent: 'center',
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing['2xl'],
+    position: 'relative',
   },
   checkCircle: {
     alignItems: 'center',
-    borderRadius: 70,
-    elevation: 16,
-    height: 140,
+    borderRadius: 50,
+    elevation: 8,
+    height: 90,
     justifyContent: 'center',
-    marginBottom: spacing.xl,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 12 },
+    overflow: 'hidden',
+    shadowColor: SHADOW_COLOR,
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
-    shadowRadius: 24,
-    width: 140,
+    shadowRadius: 12,
+    width: 90,
+  },
+  glowCircle: {
+    borderRadius: 60,
+    height: 120,
+    opacity: 0.3,
+    position: 'absolute',
+    width: 120,
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: OVERLAY_BG,
     justifyContent: 'center',
     zIndex: 9999,
-  },
-  ripple: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: 100,
-    height: 200,
-    left: '50%',
-    marginLeft: -100,
-    marginTop: -100,
-    opacity: 0.3,
-    position: 'absolute',
-    top: '50%',
-    width: 200,
   },
 });
