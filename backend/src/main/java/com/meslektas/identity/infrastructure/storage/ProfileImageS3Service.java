@@ -53,7 +53,7 @@ public class ProfileImageS3Service {
     private long presignedUrlExpirationSeconds; // Default: 5 minutes
 
     @Value("${aws.s3.presigned-url-host:}")
-    private String presignedUrlHost; // Override for mobile access (e.g., http://192.168.1.101:4566)
+    private String presignedUrlHost; // Override for mobile access (e.g., http://192.168.1.50:4566)
 
     // Allowed content types (production security)
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
@@ -249,7 +249,7 @@ public class ProfileImageS3Service {
             
             // Use presignedUrlHost if configured (for LocalStack/dev), otherwise use standard S3 URL
             if (presignedUrlHost != null && !presignedUrlHost.isBlank()) {
-                // LocalStack path-style URL: http://192.168.1.101:4566/bucket/key
+                // LocalStack path-style URL: http://192.168.1.50:4566/bucket/key
                 return String.format("%s/%s/%s", presignedUrlHost, bucketName, s3Key);
             } else {
                 // Standard S3 URL: https://bucket.s3.amazonaws.com/key

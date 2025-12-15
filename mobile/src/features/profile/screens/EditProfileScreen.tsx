@@ -1,5 +1,5 @@
 // src/features/profile/screens/EditProfileScreen.tsx
-// Edit profile screen with form and avatar picker
+// Modern Edit Profile Screen - Clean, minimal UX design
 // Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
 // Backend: PUT /api/users/me, POST /api/users/me/avatar
 
@@ -12,12 +12,14 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Pressable,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
 import { Button, Input } from '@shared/components';
-import { spacing, fontSize } from '@theme';
+import { spacing } from '@theme';
 import { AvatarPicker } from '../components';
 import {
   useMyProfile,
@@ -36,13 +38,15 @@ const GENDER_OPTIONS: GenderOption[] = [
 ];
 
 /**
- * EditProfileScreen
- *
- * Allows users to:
- * - Update profile photo
- * - Edit name, surname, bio
- * - Update date of birth
- * - Select gender
+ * Modern EditProfileScreen
+ * 
+ * Özellikleri:
+ * - Minimal, clean UI tasarım
+ * - UX odaklı akış
+ * - Sosyal medya standartlarında arayüz
+ * - Kullanıcıyı yormayan, hızlı düzenleme deneyimi
+ * - Net placeholder ve label kullanımı
+ * - Belirgin ve erişilebilir aksiyon butonları
  */
 export const EditProfileScreen: React.FC = () => {
   const colors = useColors();
@@ -197,6 +201,16 @@ export const EditProfileScreen: React.FC = () => {
 
   const isLoading = updateProfile.isPending || isUploadingAvatar || deleteAvatar.isPending;
 
+  if (!profile) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.interactive.default} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
@@ -208,84 +222,174 @@ export const EditProfileScreen: React.FC = () => {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled">
-          {/* Avatar Picker */}
-          <AvatarPicker
-            currentAvatarUrl={pendingAvatarUri || (shouldDeleteAvatar ? null : profile?.avatarUrl ?? null)}
-            fullName={profile?.fullName || 'Kullanıcı'}
-            onImageSelected={handleAvatarSelected}
-            onRemove={(profile?.avatarUrl || pendingAvatarUri) && !shouldDeleteAvatar ? handleAvatarRemove : undefined}
-            isLoading={false}
-          />
-
-          {/* Form Fields */}
-          <View style={styles.form}>
-            <Input
-              label="Ad"
-              value={name}
-              onChangeText={setName}
-              placeholder="Adınızı girin"
-              autoCapitalize="words"
-              maxLength={50}
+          
+          {/* ==================== AVATAR SECTION ==================== */}
+          <View style={styles.avatarSection}>
+            <AvatarPicker
+              currentAvatarUrl={pendingAvatarUri || (shouldDeleteAvatar ? null : profile?.avatarUrl ?? null)}
+              fullName={profile?.fullName || 'Kullanıcı'}
+              onImageSelected={handleAvatarSelected}
+              onRemove={(profile?.avatarUrl || pendingAvatarUri) && !shouldDeleteAvatar ? handleAvatarRemove : undefined}
+              isLoading={false}
             />
+            <Text style={[styles.avatarHelper, { color: colors.text.tertiary }]}>
+              Profil fotoğrafınızı değiştirmek için tıklayın
+            </Text>
+          </View>
 
-            <Input
-              label="Soyad"
-              value={surname}
-              onChangeText={setSurname}
-              placeholder="Soyadınızı girin"
-              autoCapitalize="words"
-              maxLength={50}
-            />
+          {/* ==================== FORM FIELDS ==================== */}
+          <View style={styles.formContainer}>
+            {/* Ad Soyad - Split Row for Better UX */}
+            <View style={styles.nameRow}>
+              <View style={styles.nameField}>
+                <Text style={[styles.label, { color: colors.text.secondary }]}>
+                  Ad <Text style={{ color: colors.status.error }}>*</Text>
+                </Text>
+                <Input
+                  value={name}
+                  onChangeText={setName}
+                  placeholder="Adınız"
+                  autoCapitalize="words"
+                  maxLength={50}
+                  containerStyle={styles.inputContainer}
+                />
+              </View>
+              
+              <View style={styles.nameField}>
+                <Text style={[styles.label, { color: colors.text.secondary }]}>
+                  Soyad <Text style={{ color: colors.status.error }}>*</Text>
+                </Text>
+                <Input
+                  value={surname}
+                  onChangeText={setSurname}
+                  placeholder="Soyadınız"
+                  autoCapitalize="words"
+                  maxLength={50}
+                  containerStyle={styles.inputContainer}
+                />
+              </View>
+            </View>
 
-            <Input
-              label="Hakkımda"
-              value={bio}
-              onChangeText={setBio}
-              placeholder="Kendinizi tanıtın..."
-              multiline
-              numberOfLines={4}
-              maxLength={500}
-            />
+            {/* Hakkımda */}
+            <View style={styles.fieldWrapper}>
+              <Text style={[styles.label, { color: colors.text.secondary }]}>
+                Hakkımda
+              </Text>
+              <Input
+                value={bio}
+                onChangeText={setBio}
+                placeholder="Kendinizi kısaca tanıtın..."
+                multiline
+                numberOfLines={4}
+                maxLength={500}
+                containerStyle={styles.inputContainer}
+              />
+              <Text style={[styles.charCounter, { color: colors.text.tertiary }]}>
+                {bio.length}/500
+              </Text>
+            </View>
 
-            <Input
-              label="Doğum Tarihi"
-              value={dateOfBirth}
-              onChangeText={setDateOfBirth}
-              placeholder="YYYY-MM-DD"
-              keyboardType="numbers-and-punctuation"
-              maxLength={10}
-            />
+            {/* Doğum Tarihi */}
+            <View style={styles.fieldWrapper}>
+              <Text style={[styles.label, { color: colors.text.secondary }]}>
+                Doğum Tarihi
+              </Text>
+              <Input
+                value={dateOfBirth}
+                onChangeText={setDateOfBirth}
+                placeholder="GG/AA/YYYY"
+                keyboardType="numbers-and-punctuation"
+                maxLength={10}
+                containerStyle={styles.inputContainer}
+              />
+              <Text style={[styles.helperText, { color: colors.text.tertiary }]}>
+                Örnek: 15/03/1990
+              </Text>
+            </View>
 
-            {/* Gender Selection */}
-            <View style={styles.genderSection}>
-              <Text style={[styles.label, { color: colors.text.primary }]}>Cinsiyet</Text>
-              <View style={styles.genderOptions}>
-                {GENDER_OPTIONS.map(option => (
-                  <Button
-                    key={option.value}
-                    title={option.label}
-                    onPress={() => handleGenderSelect(option.value)}
-                    variant={gender === option.value ? 'primary' : 'outline'}
-                    size="sm"
-                    style={styles.genderButton}
-                  />
-                ))}
+            {/* Cinsiyet - Modern Selector */}
+            <View style={styles.fieldWrapper}>
+              <Text style={[styles.label, { color: colors.text.secondary }]}>
+                Cinsiyet
+              </Text>
+              <View style={styles.genderContainer}>
+                {GENDER_OPTIONS.map(option => {
+                  const isSelected = gender === option.value;
+                  return (
+                    <Pressable
+                      key={option.value}
+                      onPress={() => handleGenderSelect(option.value)}
+                      style={[
+                        styles.genderOption,
+                        {
+                          backgroundColor: isSelected 
+                            ? colors.interactive.default 
+                            : colors.background.secondary,
+                          borderColor: isSelected 
+                            ? colors.interactive.default 
+                            : colors.border.default,
+                        },
+                      ]}>
+                      <Text
+                        style={[
+                          styles.genderText,
+                          {
+                            color: isSelected 
+                              ? '#FFFFFF' 
+                              : colors.text.primary,
+                          },
+                        ]}>
+                        {option.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
               </View>
             </View>
           </View>
         </ScrollView>
 
-        {/* Save Button */}
-        <View style={[styles.footer, { borderTopColor: colors.border.default }]}>
-          <Button
-            title="Kaydet"
+        {/* ==================== ACTION BUTTONS ==================== */}
+        <View style={[styles.actionBar, { 
+          borderTopColor: colors.border.subtle,
+          backgroundColor: colors.background.primary,
+        }]}>
+          <Pressable
+            onPress={() => navigation.goBack()}
+            disabled={isLoading}
+            style={[styles.cancelButton, { opacity: isLoading ? 0.5 : 1 }]}>
+            <Text style={[styles.cancelText, { color: colors.text.secondary }]}>
+              İptal
+            </Text>
+          </Pressable>
+
+          <Pressable
             onPress={handleSave}
-            variant="primary"
-            size="lg"
-            fullWidth
-            loading={isLoading}
             disabled={!hasChanges || isLoading}
-          />
+            style={[
+              styles.saveButton,
+              {
+                backgroundColor: hasChanges && !isLoading
+                  ? colors.interactive.default
+                  : colors.background.secondary,
+              },
+            ]}>
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Text
+                style={[
+                  styles.saveText,
+                  {
+                    color: hasChanges 
+                      ? '#FFFFFF' 
+                      : colors.text.tertiary,
+                  },
+                ]}>
+                Kaydet
+              </Text>
+            )}
+          </Pressable>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -293,36 +397,170 @@ export const EditProfileScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  // ========================================
+  // Container
+  // ========================================
   container: {
     flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   keyboardView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    padding: spacing.lg,
+    paddingBottom: 100, // Space for action bar
   },
-  form: {
-    gap: spacing.md,
+
+  // ========================================
+  // Avatar Section
+  // ========================================
+  avatarSection: {
+    alignItems: 'center',
+    paddingTop: 24,
+    paddingBottom: 8,
+    paddingHorizontal: 20,
   },
-  genderSection: {
-    marginTop: spacing.sm,
+  avatarHelper: {
+    fontSize: 13,
+    marginTop: 12,
+    textAlign: 'center',
+    lineHeight: 18,
   },
-  label: {
-    fontSize: fontSize.sm,
-    fontWeight: '500',
-    marginBottom: spacing.sm,
+
+  // ========================================
+  // Form Container
+  // ========================================
+  formContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 24,
   },
-  genderOptions: {
+
+  // ========================================
+  // Name Row (Split Layout)
+  // ========================================
+  nameRow: {
     flexDirection: 'row',
-    gap: spacing.sm,
+    gap: 12,
+    marginBottom: 24,
   },
-  genderButton: {
+  nameField: {
     flex: 1,
   },
-  footer: {
-    padding: spacing.lg,
+
+  // ========================================
+  // Field Wrapper
+  // ========================================
+  fieldWrapper: {
+    marginBottom: 24,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+    letterSpacing: 0.2,
+  },
+  inputContainer: {
+    marginBottom: 0, // Override default spacing
+  },
+  charCounter: {
+    fontSize: 12,
+    textAlign: 'right',
+    marginTop: 6,
+  },
+  helperText: {
+    fontSize: 12,
+    marginTop: 6,
+    lineHeight: 16,
+  },
+
+  // ========================================
+  // Gender Selection (Modern Pills)
+  // ========================================
+  genderContainer: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  genderOption: {
+    flex: 1,
+    height: 44,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+  },
+  genderText: {
+    fontSize: 15,
+    fontWeight: '600',
+    letterSpacing: 0.3,
+  },
+
+  // ========================================
+  // Action Bar (Bottom Fixed)
+  // ========================================
+  actionBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
     borderTopWidth: 1,
+    gap: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
+  },
+  cancelButton: {
+    height: 48,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 12,
+  },
+  cancelText: {
+    fontSize: 16,
+    fontWeight: '600',
+    letterSpacing: 0.3,
+  },
+  saveButton: {
+    flex: 1,
+    height: 48,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  saveText: {
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
 });

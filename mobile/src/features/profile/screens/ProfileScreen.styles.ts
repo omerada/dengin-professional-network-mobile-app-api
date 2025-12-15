@@ -9,13 +9,13 @@ import { StyleSheet } from 'react-native';
  */
 export const styles = StyleSheet.create({
   avatarGlow: {
-    borderRadius: 70,
-    height: 140,
+    borderRadius: 60,
+    height: 120,
     left: -10,
-    opacity: 0.15,
+    opacity: 0.12,
     position: 'absolute',
     top: -10,
-    width: 140,
+    width: 120,
   },
 
   avatarGlowContainer: {
@@ -34,12 +34,24 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
+  blurredAvatarBackground: {
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    height: 140,
+    left: 0,
+    opacity: 0.4,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    width: '100%',
+  },
+
   blurredBackground: {
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
-    height: 180,
+    height: 140,
     left: 0,
-    opacity: 0.3,
+    opacity: 0.08,
     position: 'absolute',
     right: 0,
     top: 0,
@@ -80,14 +92,14 @@ export const styles = StyleSheet.create({
 
   premiumAvatar: {
     borderColor: '#fff',
-    borderRadius: 60,
-    borderWidth: 4,
-    height: 120,
+    borderRadius: 50,
+    borderWidth: 5,
+    height: 100,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    width: 120,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    width: 100,
   },
 
   premiumHeader: {
@@ -102,6 +114,20 @@ export const styles = StyleSheet.create({
     paddingTop: 40,
     width: '100%',
     zIndex: 1,
+  },
+
+  fullNameTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+
+  professionSubtitle: {
+    fontSize: 15,
+    fontWeight: '500',
+    marginBottom: 8,
   },
 
   professionTitle: {

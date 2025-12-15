@@ -1,5 +1,5 @@
 // src/features/profile/components/AvatarPicker.tsx
-// Avatar selection and upload component
+// Modern Avatar Picker - Instagram-style with Bottom Sheet
 // Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
 
 import React, { memo, useCallback, useState } from 'react';
@@ -11,6 +11,9 @@ import {
   Image,
   Alert,
   ActivityIndicator,
+  Modal,
+  Pressable,
+  Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
@@ -153,97 +156,186 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
       ]);
     }, [onRemove, haptic]);
 
-    // Show options
+    // Show bottom sheet
+    const [sheetVisible, setSheetVisible] = useState(false);
+
     const handlePress = useCallback(() => {
       haptic.light();
-      const options: {
-        text: string;
-        onPress?: () => void;
-        style?: 'cancel' | 'destructive' | 'default';
-      }[] = [
-        { text: 'Fotoğraf Çek', onPress: handleTakePhoto },
-        { text: 'Galeriden Seç', onPress: handleChooseFromGallery },
-      ];
+      setSheetVisible(true);
+    }, [haptic]);
 
-      if (displayUri && onRemove) {
-        options.push({
-          text: 'Fotoğrafı Kaldır',
-          style: 'destructive',
-          onPress: handleRemove,
-        });
-      }
+    const handleCloseSheet = useCallback(() => {
+      setSheetVisible(false);
+    }, []);
 
-      options.push({ text: 'İptal', style: 'cancel' });
+    const handleSelectCamera = useCallback(() => {
+      handleCloseSheet();
+      setTimeout(() => handleTakePhoto(), 300);
+    }, [handleTakePhoto, handleCloseSheet]);
 
-      Alert.alert('Profil Fotoğrafı', 'Bir seçenek seçin', options);
-    }, [displayUri, handleTakePhoto, handleChooseFromGallery, handleRemove, onRemove, haptic]);
+    const handleSelectGallery = useCallback(() => {
+      handleCloseSheet();
+      setTimeout(() => handleChooseFromGallery(), 300);
+    }, [handleChooseFromGallery, handleCloseSheet]);
+
+    const handleSelectRemove = useCallback(() => {
+      handleCloseSheet();
+      setTimeout(() => handleRemove(), 300);
+    }, [handleRemove, handleCloseSheet]);
 
     return (
-      <View style={styles.container}>
-        <TouchableOpacity
-          style={[styles.avatarContainer, { width: size, height: size, borderRadius: size / 2 }]}
-          onPress={handlePress}
-          disabled={isLoading}
-          activeOpacity={0.8}>
-          {displayUri ? (
-            <Image
-              source={{ uri: displayUri }}
-              style={[
-                styles.avatar,
-                {
-                  width: size,
-                  height: size,
-                  borderRadius: size / 2,
-                  borderColor: colors.border.default,
-                },
-              ]}
-            />
-          ) : (
+      <>
+        <View style={styles.container}>
+          <TouchableOpacity
+            style={[styles.avatarContainer, { width: size, height: size, borderRadius: size / 2 }]}
+            onPress={handlePress}
+            disabled={isLoading}
+            activeOpacity={0.8}>
+            {displayUri ? (
+              <Image
+                source={{ uri: displayUri }}
+                style={[
+                  styles.avatar,
+                  {
+                    width: size,
+                    height: size,
+                    borderRadius: size / 2,
+                    borderColor: colors.border.subtle,
+                  },
+                ]}
+              />
+            ) : (
+              <View
+                style={[
+                  styles.avatar,
+                  styles.avatarPlaceholder,
+                  {
+                    width: size,
+                    height: size,
+                    borderRadius: size / 2,
+                    backgroundColor: colors.interactive.subtle,
+                  },
+                ]}>
+                <Text
+                  style={[
+                    styles.initials,
+                    { color: colors.interactive.default, fontSize: size * 0.32 },
+                  ]}>
+                  {initials}
+                </Text>
+              </View>
+            )}
+
+            {/* Overlay */}
             <View
               style={[
-                styles.avatar,
-                styles.avatarPlaceholder,
+                styles.overlay,
                 {
-                  width: size,
-                  height: size,
+                  backgroundColor: colors.background.overlay,
                   borderRadius: size / 2,
-                  backgroundColor: colors.interactive.subtle,
                 },
               ]}>
-              <Text
-                style={[
-                  styles.initials,
-                  { color: colors.interactive.default, fontSize: size * 0.32 },
-                ]}>
-                {initials}
-              </Text>
+              {isLoading ? (
+                <ActivityIndicator color={colors.text.inverse} size="large" />
+              ) : (
+                <>
+                  <Icon name="camera" size={24} color={colors.text.inverse} />
+                  <Text style={[styles.overlayText, { color: colors.text.inverse }]}>Değiştir</Text>
+                </>
+              )}
             </View>
-          )}
+          </TouchableOpacity>
+        </View>
 
-          {/* Overlay */}
-          <View
-            style={[
-              styles.overlay,
-              {
-                backgroundColor: colors.background.overlay,
-                borderRadius: size / 2,
-              },
-            ]}>
-            {isLoading ? (
-              <ActivityIndicator color={colors.text.inverse} size="large" />
-            ) : (
-              <>
-                <Icon name="camera" size={24} color={colors.text.inverse} />
-                <Text style={[styles.overlayText, { color: colors.text.inverse }]}>Değiştir</Text>
-              </>
-            )}
-          </View>
-        </TouchableOpacity>
+        {/* Modern Bottom Sheet */}
+        <Modal
+          visible={sheetVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={handleCloseSheet}>
+          <Pressable style={styles.modalOverlay} onPress={handleCloseSheet}>
+            <Pressable
+              style={[styles.sheetContainer, { backgroundColor: colors.background.primary }]}
+              onPress={e => e.stopPropagation()}>
+              {/* Handle Bar */}
+              <View style={[styles.handleBar, { backgroundColor: colors.border.default }]} />
 
-        <Text style={[styles.hint, { color: colors.text.secondary }]}>
-          Profil fotoğrafı eklemek için dokunun
-        </Text>
-      </View>
+              {/* Title */}
+              <Text style={[styles.sheetTitle, { color: colors.text.primary }]}>
+                Profil Fotoğrafı
+              </Text>
+
+              {/* Options */}
+              <View style={styles.optionsContainer}>
+                {/* Camera */}
+                <Pressable
+                  style={[styles.option, { borderBottomColor: colors.border.subtle }]}
+                  onPress={handleSelectCamera}>
+                  <View style={[styles.optionIcon, { backgroundColor: colors.interactive.subtle }]}>
+                    <Icon name="camera" size={24} color={colors.interactive.default} />
+                  </View>
+                  <View style={styles.optionContent}>
+                    <Text style={[styles.optionTitle, { color: colors.text.primary }]}>
+                      Fotoğraf Çek
+                    </Text>
+                    <Text style={[styles.optionSubtitle, { color: colors.text.tertiary }]}>
+                      Kamera ile yeni fotoğraf çek
+                    </Text>
+                  </View>
+                  <Icon name="chevron-forward" size={20} color={colors.text.tertiary} />
+                </Pressable>
+
+                {/* Gallery */}
+                <Pressable
+                  style={[styles.option, { borderBottomColor: colors.border.subtle }]}
+                  onPress={handleSelectGallery}>
+                  <View style={[styles.optionIcon, { backgroundColor: colors.interactive.subtle }]}>
+                    <Icon name="images" size={24} color={colors.interactive.default} />
+                  </View>
+                  <View style={styles.optionContent}>
+                    <Text style={[styles.optionTitle, { color: colors.text.primary }]}>
+                      Galeriden Seç
+                    </Text>
+                    <Text style={[styles.optionSubtitle, { color: colors.text.tertiary }]}>
+                      Mevcut fotoğraflarından seç
+                    </Text>
+                  </View>
+                  <Icon name="chevron-forward" size={20} color={colors.text.tertiary} />
+                </Pressable>
+
+                {/* Remove (only if avatar exists) */}
+                {displayUri && onRemove && (
+                  <Pressable
+                    style={styles.option}
+                    onPress={handleSelectRemove}>
+                    <View style={[styles.optionIcon, { backgroundColor: '#FEE2E2' }]}>
+                      <Icon name="trash" size={24} color={colors.status.error} />
+                    </View>
+                    <View style={styles.optionContent}>
+                      <Text style={[styles.optionTitle, { color: colors.status.error }]}>
+                        Fotoğrafı Kaldır
+                      </Text>
+                      <Text style={[styles.optionSubtitle, { color: colors.text.tertiary }]}>
+                        Profil fotoğrafını sil
+                      </Text>
+                    </View>
+                    <Icon name="chevron-forward" size={20} color={colors.text.tertiary} />
+                  </Pressable>
+                )}
+              </View>
+
+              {/* Cancel Button */}
+              <Pressable
+                style={[styles.cancelButton, { backgroundColor: colors.background.secondary }]}
+                onPress={handleCloseSheet}>
+                <Text style={[styles.cancelText, { color: colors.text.secondary }]}>
+                  İptal
+                </Text>
+              </Pressable>
+            </Pressable>
+          </Pressable>
+        </Modal>
+      </>
     );
   },
 );
@@ -253,13 +345,13 @@ AvatarPicker.displayName = 'AvatarPicker';
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    paddingVertical: spacing.lg,
+    paddingVertical: 16,
   },
   avatarContainer: {
     position: 'relative',
   },
   avatar: {
-    borderWidth: 3,
+    borderWidth: 4,
   },
   avatarPlaceholder: {
     justifyContent: 'center',
@@ -275,12 +367,88 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   overlayText: {
-    fontSize: fontSize.xs,
+    fontSize: 12,
     fontWeight: '600',
-    marginTop: 2,
+    marginTop: 4,
   },
-  hint: {
-    fontSize: fontSize.sm,
-    marginTop: spacing.sm,
+
+  // ==================== BOTTOM SHEET ====================
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  sheetContainer: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingBottom: Platform.OS === 'ios' ? 34 : 20,
+    paddingTop: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+      },
+      android: {
+        elevation: 16,
+      },
+    }),
+  },
+  handleBar: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  sheetTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 20,
+    letterSpacing: 0.3,
+  },
+  optionsContainer: {
+    marginBottom: 16,
+  },
+  option: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+  },
+  optionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  optionContent: {
+    flex: 1,
+  },
+  optionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 2,
+    letterSpacing: 0.2,
+  },
+  optionSubtitle: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  cancelButton: {
+    height: 50,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  cancelText: {
+    fontSize: 16,
+    fontWeight: '600',
+    letterSpacing: 0.3,
   },
 });

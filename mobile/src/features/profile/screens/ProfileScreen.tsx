@@ -3,7 +3,7 @@
 // Design: Instagram + BeReal inspired, Soft Orange Theme
 // Backend: GET /api/users/me, GET /api/users/{id}
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { View, ScrollView, RefreshControl, Alert, Text, ActivityIndicator, Pressable, TouchableOpacity, Image } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -16,7 +16,7 @@ import { useLogout } from '@features/auth/hooks';
 import { useFollow, useUnfollow } from '@features/social/hooks/useFollow';
 import { useUserPosts } from '@features/feed/hooks';
 import { PostCard } from '@features/feed/components';
-import { Button, Loading, Skeleton } from '@shared/components';
+import { Button, Loading, Skeleton, ImageViewer } from '@shared/components';
 import { ProfileBio, ProfileActions } from '../components';
 import { useMyProfile, useProfile, useProfileStats } from '../hooks';
 import type { ProfileStats as ProfileStatsType } from '../types';
@@ -102,10 +102,15 @@ export const ProfileScreen: React.FC = () => {
     };
   }, [profile?.stats, profileStats]);
 
+  // Image viewer state
+  const [imageViewerVisible, setImageViewerVisible] = useState(false);
+
   // Handlers
   const handleAvatarPress = useCallback(() => {
-    navigation.navigate('EditProfile' as never);
-  }, [navigation]);
+    if (profile?.avatarUrl) {
+      setImageViewerVisible(true);
+    }
+  }, [profile?.avatarUrl]);
 
   const handleEditPress = useCallback(() => {
     navigation.navigate('EditProfile' as never);
@@ -199,9 +204,16 @@ export const ProfileScreen: React.FC = () => {
             tintColor={colors.interactive.default}
           />
         }>
-        {/* Modern Premium Header */}
+        {/* Modern Premium Header with Blurred Avatar Background */}
         <View style={styles.premiumHeader}>
-          {/* Blurred Background */}
+          {/* Blurred Avatar Background */}
+          {profile.avatarUrl && (
+            <Image
+              source={{ uri: profile.avatarUrl }}
+              style={[styles.blurredAvatarBackground, { opacity: 0.15 }]}
+              blurRadius={0.1}
+            />
+          )}
           <View style={[styles.blurredBackground, { backgroundColor: colors.interactive.focus }]} />
 
           {/* Settings Button */}
@@ -235,17 +247,17 @@ export const ProfileScreen: React.FC = () => {
               </Pressable>
             </Animated.View>
 
-            {/* Profession Name - Big Bold */}
+            {/* Full Name - Big Bold */}
             <Animated.View entering={FadeInDown.delay(200).duration(400)}>
-              <Text style={[styles.professionTitle, { color: colors.text.primary }]}>
-                {('professionName' in profile ? profile.professionName : profile.profession?.name) || profile.fullName}
+              <Text style={[styles.fullNameTitle, { color: colors.text.primary }]}>
+                {profile.fullName}
               </Text>
             </Animated.View>
 
-            {/* Username - Small */}
+            {/* Profession - Small */}
             <Animated.View entering={FadeInDown.delay(300).duration(400)}>
-              <Text style={[styles.usernameSmall, { color: colors.text.secondary }]}>
-                @{profile.fullName.toLowerCase().replace(/\s+/g, '_')}
+              <Text style={[styles.professionSubtitle, { color: colors.text.secondary }]}>
+                {('professionName' in profile ? profile.professionName : profile.profession?.name) || 'Meslek belirtilmemiş'}
               </Text>
             </Animated.View>
 
@@ -371,6 +383,16 @@ export const ProfileScreen: React.FC = () => {
           )}
         </Animated.View>
       </ScrollView>
+
+      {/* Image Viewer - Tam Ekran Avatar Görüntüleme */}
+      {profile?.avatarUrl && (
+        <ImageViewer
+          uri={profile.avatarUrl}
+          visible={imageViewerVisible}
+          onClose={() => setImageViewerVisible(false)}
+          alt={`${profile.fullName} profil fotoğrafı`}
+        />
+      )}
     </SafeAreaView>
   );
 };
