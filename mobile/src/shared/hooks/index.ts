@@ -138,3 +138,7 @@ export type { UseLoadingStateOptions, LoadingStateResult } from './useLoadingSta
 // Unified feedback hook - Production UX
 export { useFeedback } from './useFeedback';
 export type { FeedbackLevel, FeedbackOptions } from './useFeedback';
+
+// Loading timeout hook - Prevent infinite loading
+export { useLoadingTimeout } from './useLoadingTimeout';
+export type { UseLoadingTimeoutConfig, UseLoadingTimeoutReturn } from './useLoadingTimeout';

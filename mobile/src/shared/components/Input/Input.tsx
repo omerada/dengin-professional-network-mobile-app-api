@@ -14,6 +14,7 @@ import React, {
 } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import Animated, {
+  FadeInDown,
   interpolateColor,
   useAnimatedStyle,
   useSharedValue,
@@ -386,9 +387,11 @@ export const Input = memo(
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             {/* Error/Hint Text */}
             {(error || hint) && (
-              <Text style={[styles.helperText, { color: helperTextColor, flex: 1 }]}>
+              <AnimatedText
+                entering={FadeInDown.duration(200)}
+                style={[styles.helperText, { color: helperTextColor, flex: 1 }]}>
                 {error ?? hint}
-              </Text>
+              </AnimatedText>
             )}
 
             {/* Character Count */}

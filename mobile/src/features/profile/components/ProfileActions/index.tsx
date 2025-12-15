@@ -11,6 +11,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { Button } from '@shared/components';
 import { useHaptic } from '@shared/hooks/useHaptic';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
 import { useFollow, useUnfollow, useBlock, useUnblock } from '@features/social/hooks/useFollow';
 
 import { styles } from './ProfileActions.styles';
@@ -48,6 +49,7 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
   }) => {
     const navigation = useNavigation();
     const { trigger } = useHaptic();
+    const toast = useToast();
     const colors = useColors();
 
     // Mutations
@@ -66,22 +68,24 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
         unfollowMutation.mutate(userId, {
           onSuccess: () => {
             trigger('success');
+            toast.success('Takipten çıkıldı');
             onFollowChange?.(false);
           },
           onError: () => {
             trigger('error');
-            Alert.alert('Hata', 'Takipten çıkılamadı. Lütfen tekrar deneyin.');
+            toast.error('Takipten çıkılamadı');
           },
         });
       } else {
         followMutation.mutate(userId, {
           onSuccess: () => {
             trigger('success');
+            toast.success('Takip edildi');
             onFollowChange?.(true);
           },
           onError: () => {
             trigger('error');
-            Alert.alert('Hata', 'Takip edilemedi. Lütfen tekrar deneyin.');
+            toast.error('Takip edilemedi');
           },
         });
       }
@@ -121,22 +125,24 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
                       unblockMutation.mutate(userId, {
                         onSuccess: () => {
                           trigger('success');
+                          toast.success('Engel kaldırıldı');
                           onBlockChange?.(false);
                         },
                         onError: () => {
                           trigger('error');
-                          Alert.alert('Hata', 'Engel kaldırılamadı.');
+                          toast.error('Engel kaldırılamadı');
                         },
                       });
                     } else {
                       blockMutation.mutate(userId, {
                         onSuccess: () => {
                           trigger('warning');
+                          toast.success('Kullanıcı engellendi');
                           onBlockChange?.(true);
                         },
                         onError: () => {
                           trigger('error');
-                          Alert.alert('Hata', 'Engellenemedi.');
+                          toast.error('Engellenemedi');
                         },
                       });
                     }

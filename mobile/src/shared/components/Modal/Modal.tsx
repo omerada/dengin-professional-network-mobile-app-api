@@ -27,7 +27,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
-import { spacing, fontSize } from '@theme';
+import { spacing, fontSize, borderRadius } from '@theme';
 import { spring as springPresets } from '@theme/animations';
 import { useHaptic } from '@shared/hooks/useHaptic';
 import { UNIFIED_TIMING } from '@constants/unifiedTiming';
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   content: {
-    borderRadius: 16,
+    borderRadius: borderRadius.xl,
     maxHeight: SCREEN_HEIGHT * 0.8,
     overflow: 'hidden',
     width: SCREEN_WIDTH - 48,
@@ -364,8 +364,8 @@ const styles = StyleSheet.create({
   },
   // BottomSheet styles
   bottomSheetContent: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: borderRadius['2xl'],
+    borderTopRightRadius: borderRadius['2xl'],
     bottom: 0,
     left: 0,
     position: 'absolute',
@@ -373,7 +373,7 @@ const styles = StyleSheet.create({
   },
   handle: {
     alignSelf: 'center',
-    borderRadius: 2,
+    borderRadius: borderRadius.xs,
     height: 4,
     marginTop: spacing['2'],
     width: 40,

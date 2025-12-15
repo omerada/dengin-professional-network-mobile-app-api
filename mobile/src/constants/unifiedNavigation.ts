@@ -52,7 +52,7 @@ export const MODAL_NAVIGATION: NativeStackNavigationOptions = {
 export const FULLSCREEN_NAVIGATION: NativeStackNavigationOptions = {
   presentation: 'fullScreenModal',
   animation: 'fade',
-  animationDuration: UNIFIED_TIMING.componentEnter, // 200ms
+  animationDuration: UNIFIED_TIMING.screenEnter, // 300ms (standardized)
   gestureEnabled: false,
   headerShown: false,
 };
@@ -113,7 +113,7 @@ export const INTERACTIVE_MODAL_NAVIGATION: NativeStackNavigationOptions = {
 export const CRITICAL_MODAL_NAVIGATION: NativeStackNavigationOptions = {
   presentation: 'fullScreenModal',
   animation: 'fade',
-  animationDuration: UNIFIED_TIMING.componentEnter, // 200ms
+  animationDuration: UNIFIED_TIMING.screenEnter, // 300ms (standardized)
   gestureEnabled: false, // Kritik akışlarda kazara kapatmayı engelle
   headerShown: false,
 };

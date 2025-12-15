@@ -6,6 +6,7 @@ import React, { memo } from 'react';
 import { View, Image, StyleSheet, Pressable, ScrollView, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
+import { borderRadius } from '@theme';
 import type { LocalImage } from '../types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -66,7 +67,7 @@ ImagePreviewGrid.displayName = 'ImagePreviewGrid';
 const styles = StyleSheet.create({
   addButton: {
     alignItems: 'center',
-    borderRadius: 8,
+    borderRadius: borderRadius.md,
     borderStyle: 'dashed',
     borderWidth: 2,
     height: IMAGE_SIZE,
@@ -77,7 +78,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   image: {
-    borderRadius: 8,
+    borderRadius: borderRadius.md,
     height: IMAGE_SIZE,
     width: IMAGE_SIZE,
   },
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
   },
   removeButton: {
     alignItems: 'center',
-    borderRadius: 11,
+    borderRadius: borderRadius.lg,
     height: 22,
     justifyContent: 'center',
     position: 'absolute',

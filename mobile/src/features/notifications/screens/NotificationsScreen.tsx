@@ -4,7 +4,15 @@
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 import React, { useCallback, useEffect, useState, memo } from 'react';
-import { View, Text, StyleSheet, Pressable, Alert, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  Alert,
+  ActivityIndicator,
+  InteractionManager,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -74,6 +82,7 @@ export const NotificationsScreen: React.FC = memo(() => {
   /**
    * Handle notification press - smart navigation based on type
    * Backend NotificationType enum ile uyumlu
+   * Uses InteractionManager for smooth 300ms fade animations
    */
   const handleNotificationPress = useCallback(
     (notification: NotificationResponse) => {
@@ -81,58 +90,64 @@ export const NotificationsScreen: React.FC = memo(() => {
       const type = notification.type as NotificationType;
       const metadata = notification.metadata;
 
-      try {
-        switch (type) {
-          case 'NEW_MESSAGE':
-            if (metadata?.conversationId) {
-              navigateToChatFromTab(navigation, metadata.conversationId);
-            }
-            break;
+      // Use InteractionManager to ensure smooth animations
+      // Defers navigation until current interactions complete
+      InteractionManager.runAfterInteractions(() => {
+        try {
+          switch (type) {
+            case 'NEW_MESSAGE':
+              if (metadata?.conversationId) {
+                navigateToChatFromTab(navigation, metadata.conversationId);
+              }
+              break;
 
-          case 'POST_LIKED':
-          case 'POST_COMMENTED':
-          case 'MENTION':
-            if (metadata?.postId) {
-              navigateToPostDetail(navigation, {
-                postId: Number(metadata.postId),
-              });
-            }
-            break;
+            case 'POST_LIKED':
+            case 'POST_COMMENTED':
+            case 'MENTION':
+              if (metadata?.postId) {
+                navigateToPostDetail(navigation, {
+                  postId: Number(metadata.postId),
+                });
+              }
+              break;
 
-          case 'NEW_FOLLOWER':
-            if (metadata?.actorId) {
-              navigateToUserProfile(navigation, {
-                userId: Number(metadata.actorId),
-              });
-            }
-            break;
+            case 'NEW_FOLLOWER':
+              if (metadata?.actorId) {
+                navigateToUserProfile(navigation, {
+                  userId: Number(metadata.actorId),
+                });
+              }
+              break;
 
-          case 'VERIFICATION_APPROVED':
-          case 'VERIFICATION_REJECTED':
-          case 'VERIFICATION_PENDING_REVIEW':
-            navigation.navigate('VerificationStatus');
-            break;
+            case 'VERIFICATION_APPROVED':
+            case 'VERIFICATION_REJECTED':
+            case 'VERIFICATION_PENDING_REVIEW':
+              navigation.navigate('VerificationStatus');
+              break;
 
-          case 'POST_FLAGGED':
-          case 'CONTENT_REMOVED':
-          case 'WARNING_ISSUED':
-            Alert.alert(
-              notification.title || 'Bildirim',
-              notification.body || 'Detaylar için bildirime tıklayın.',
-              [{ text: 'Tamam' }],
-            );
-            break;
+            case 'POST_FLAGGED':
+            case 'CONTENT_REMOVED':
+            case 'WARNING_ISSUED':
+              Alert.alert(
+                notification.title || 'Bildirim',
+                notification.body || 'Detaylar için bildirime tıklayın.',
+                [{ text: 'Tamam' }],
+              );
+              break;
 
-          default:
-            if (notification.body) {
-              Alert.alert(notification.title || 'Bildirim', notification.body, [{ text: 'Tamam' }]);
-            }
-            break;
+            default:
+              if (notification.body) {
+                Alert.alert(notification.title || 'Bildirim', notification.body, [
+                  { text: 'Tamam' },
+                ]);
+              }
+              break;
+          }
+        } catch (error) {
+          console.error('[NotificationsScreen] Navigation error:', error);
+          Alert.alert('Hata', 'Bildirim açılırken bir hata oluştu.');
         }
-      } catch (error) {
-        console.error('[NotificationsScreen] Navigation error:', error);
-        Alert.alert('Hata', 'Bildirim açılırken bir hata oluştu.');
-      }
+      });
     },
     [navigation, trigger],
   );

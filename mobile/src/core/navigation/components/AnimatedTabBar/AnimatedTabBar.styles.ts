@@ -3,7 +3,7 @@
 // Oku: mobile-development-guide/ui-ux-modernization/06-MICRO-INTERACTIONS.md
 
 import { StyleSheet, Platform } from 'react-native';
-import { spacing } from '@theme';
+import { spacing, shadows } from '@theme';
 
 export const TAB_BAR_HEIGHT = Platform.select({ ios: 84, android: 68 }) ?? 68;
 export const TAB_ICON_SIZE = 26;
@@ -31,14 +31,10 @@ export const styles = StyleSheet.create({
   centerFabButton: {
     alignItems: 'center',
     borderRadius: CENTER_FAB_SIZE / 2,
-    elevation: 6,
     height: CENTER_FAB_SIZE,
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
     width: CENTER_FAB_SIZE,
+    ...shadows.md,
   },
   centerFabContainer: {
     alignItems: 'center',

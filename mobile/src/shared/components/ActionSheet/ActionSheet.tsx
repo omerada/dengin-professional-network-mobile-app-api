@@ -165,7 +165,7 @@ export const ActionSheet: React.FC<ActionSheetProps> = memo(
     const handleCancel = useCallback(() => {
       trigger('light');
       cancelScale.value = withSequence(
-        withSpring(0.97, spring.press),
+        withSpring(0.96, spring.press),
         withSpring(1, spring.snappy),
       );
       onClose();

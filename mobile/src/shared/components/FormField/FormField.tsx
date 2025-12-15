@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { View, TextInput, TextInputProps, StyleSheet, Pressable } from 'react-native';
 import Animated, {
   FadeIn,
+  FadeInDown,
   FadeOut,
   Layout,
   useAnimatedStyle,
@@ -251,7 +252,9 @@ export const FormField = React.forwardRef<TextInput, FormFieldProps>(
         {/* Helper / Error Text */}
         {(helper || showError) && (
           <Animated.View
-            entering={FadeIn.duration(UNIFIED_TIMING.componentEnter)}
+            entering={
+              showError ? FadeInDown.duration(200) : FadeIn.duration(UNIFIED_TIMING.componentEnter)
+            }
             exiting={FadeOut.duration(UNIFIED_TIMING.componentEnter)}
             layout={Layout.duration(UNIFIED_TIMING.componentEnter)}
             style={styles.helperContainer}>

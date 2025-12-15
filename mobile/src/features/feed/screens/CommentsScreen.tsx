@@ -3,7 +3,7 @@
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, StyleSheet, ActivityIndicator, RefreshControl, Alert } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
@@ -14,7 +14,7 @@ import { useHaptic } from '@shared/hooks/useHaptic';
 import { useAuthStore } from '@features/auth/stores';
 import { useCommentsData, useAddComment, useLikeComment, useDeleteComment } from '../hooks';
 import { CommentCard, AddCommentForm, EmptyFeed } from '../components';
-import { ActionSheet, ActionSheetOption } from '@shared/components';
+import { ActionSheet, ActionSheetOption, CustomRefreshControl } from '@shared/components';
 import type { Comment, AddCommentRequest } from '../types';
 import type { FeedStackParamList } from '@shared/types';
 
@@ -195,16 +195,8 @@ export const CommentsScreen: React.FC = () => {
   }, [isFetchingNextPage, colors.interactive.default]);
 
   const refreshControl = useMemo(
-    () => (
-      <RefreshControl
-        refreshing={isRefetching}
-        onRefresh={handleRefresh}
-        tintColor={colors.interactive.default}
-        colors={[colors.interactive.default]}
-        progressBackgroundColor={colors.background.primary}
-      />
-    ),
-    [isRefetching, handleRefresh, colors],
+    () => <CustomRefreshControl refreshing={isRefetching} onRefresh={handleRefresh} />,
+    [isRefetching, handleRefresh],
   );
 
   if (isLoading && comments.length === 0) {

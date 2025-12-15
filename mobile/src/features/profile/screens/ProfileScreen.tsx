@@ -20,9 +20,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import {
   SCREEN_ANIMATIONS,
   SAFE_AREA_EDGES,
-  UNIFIED_TIMING,
-  getListItemDelay,
   HAPTIC_TYPES,
+  UNIFIED_TIMING,
 } from '@constants';
 import {
   navigateToPostDetail,
@@ -47,6 +46,7 @@ import {
   CustomRefreshControl,
 } from '@shared/components';
 import { ProfileBio, ProfileActions } from '../components';
+import { ErrorBoundary } from '@core/components';
 import { useMyProfile, useProfile, useProfileStats } from '../hooks';
 import type { ProfileStats as ProfileStatsType } from '../types';
 import type { Post } from '@features/feed/types';
@@ -222,20 +222,17 @@ export const ProfileScreen: React.FC = () => {
     [viewedUserId, followMutation, unfollowMutation, trigger, toast],
   );
 
-  // Loading state
+  // Early returns for loading and error states
   if (isLoading && !profile) {
     return (
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.background.primary }]}
         edges={SAFE_AREA_EDGES.standard}>
-        <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={styles.container}>
-          <SkeletonProfileHeader />
-        </Animated.View>
+        <SkeletonProfileHeader />
       </SafeAreaView>
     );
   }
 
-  // No profile found
   if (!profile) {
     return (
       <SafeAreaView
@@ -453,14 +450,10 @@ export const ProfileScreen: React.FC = () => {
                 // Ensure post has all required fields for PostCard
                 if (!post || !post.postId) return null;
 
-                const animationDelay = getListItemDelay(index);
-
                 return (
                   <Animated.View
                     key={post.postId}
-                    entering={FadeInDown.delay(animationDelay).duration(
-                      UNIFIED_TIMING.listItemDuration,
-                    )}>
+                    entering={SCREEN_ANIMATIONS.listItemEnter(index)}>
                     <PostCard
                       post={post}
                       index={index}
@@ -490,10 +483,9 @@ export const ProfileScreen: React.FC = () => {
       </ScrollView>
     </SafeAreaView>
   );
-};
+});
 
-// Wrap with Error Boundary for production safety
-import { ErrorBoundary } from '@core/components';
+ProfileScreen.displayName = 'ProfileScreen';
 
 export default function ProfileScreenWithErrorBoundary() {
   return (

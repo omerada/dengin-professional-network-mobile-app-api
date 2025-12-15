@@ -4,7 +4,8 @@
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 import React, { memo } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { ProgressiveImage } from '@shared/components';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
 import type { NotificationResponse, NotificationType } from '../types';
@@ -121,7 +122,7 @@ export const NotificationItem: React.FC<NotificationItemProps> = memo(({ notific
       {/* Icon or Image */}
       <View style={styles.iconContainer}>
         {imageUrl ? (
-          <Image source={{ uri: imageUrl }} style={styles.image} />
+          <ProgressiveImage source={{ uri: imageUrl }} style={styles.image} showLoadingIndicator />
         ) : (
           <View style={[styles.iconCircle, { backgroundColor: `${iconConfig.color}20` }]}>
             <Icon name={iconConfig.name} size={20} color={iconConfig.color} />

@@ -3,12 +3,12 @@
 // Oku: MOBILE-APP-HOME-SCREEN.md, mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import React, { useCallback, useMemo, useState, memo, useEffect } from 'react';
-import { RefreshControl, ActivityIndicator, Alert, StyleSheet } from 'react-native';
+import { ActivityIndicator, Alert, StyleSheet } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { SCREEN_ANIMATIONS, HAPTIC_TYPES, getListItemDelay } from '@constants';
+import { SCREEN_ANIMATIONS, HAPTIC_TYPES } from '@constants';
 import {
   navigateToComments,
   navigateToReportContent,
@@ -17,13 +17,19 @@ import {
 } from '@core/navigation';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useToast } from '@contexts/ToastContext';
+import { useHaptic, useLoadingTimeout } from '@shared/hooks';
 import { useFeedPosts, useLikePost, useBookmarkPost, useDeletePost } from '../hooks';
 import { PostCard, FeedHeader, EmptyFeed, FeedSkeleton } from '../components';
 import { VerificationPromptCard } from '../components/VerificationPromptCard';
 import { AITrendInsightCard } from '../components/AITrendInsightCard';
 import { SuggestedExpertsCarousel } from '../components/SuggestedExpertsCarousel';
-import { ActionSheet, type ActionSheetOption } from '@shared/components';
+import {
+  ActionSheet,
+  type ActionSheetOption,
+  LoadingStateWrapper,
+  CustomRefreshControl,
+} from '@shared/components';
 import { sharePost, showShareError } from '@shared/utils/share';
 import { useAuthStore } from '@features/auth/stores';
 import { useFollow, useUnfollow } from '@features/social/hooks';
@@ -55,6 +61,7 @@ export const FeedScreen: React.FC = memo(() => {
   const colors = useColors();
   const navigation = useNavigation();
   const { trigger } = useHaptic();
+  const toast = useToast();
   const currentUserId = useAuthStore(state => state.user?.id);
   const user = useAuthStore(state => state.user);
   const { unreadCount } = useUnreadCount();
@@ -80,6 +87,21 @@ export const FeedScreen: React.FC = memo(() => {
     refetch,
     isRefetching,
   } = useFeedPosts();
+
+  // Loading timeout protection
+  const { hasTimedOut, retry } = useLoadingTimeout(isLoading && posts.length === 0, {
+    timeout: 30000,
+    onTimeout: () => {
+      Alert.alert(
+        'Yükleme Zaman Aşımı',
+        'Gönderiler yüklenirken bir sorun oluştu. Lütfen tekrar deneyin.',
+        [{ text: 'Tamam' }],
+      );
+    },
+    onRetry: async () => {
+      await refetch();
+    },
+  });
 
   // Mutations with optimistic updates
   const likePost = useLikePost();
@@ -139,13 +161,25 @@ export const FeedScreen: React.FC = memo(() => {
   // ============================================================================
 
   /**
-   * Handle like post with optimistic update
+   * Handle like with optimistic update + feedback
    */
   const handleLike = useCallback(
     (postId: number, isLiked: boolean) => {
-      likePost.mutate({ postId, isLiked });
+      likePost.mutate(
+        { postId, isLiked },
+        {
+          onSuccess: () => {
+            trigger('success');
+            toast.success(isLiked ? 'Beğeni geri alındı' : 'Gönderi beğenildi');
+          },
+          onError: () => {
+            trigger('error');
+            toast.error('İşlem başarısız oldu');
+          },
+        },
+      );
     },
-    [likePost],
+    [likePost, trigger, toast],
   );
 
   /**
@@ -180,13 +214,25 @@ export const FeedScreen: React.FC = memo(() => {
   );
 
   /**
-   * Handle bookmark with optimistic update
+   * Handle bookmark with optimistic update + feedback
    */
   const handleBookmark = useCallback(
     (postId: number, isSaved: boolean) => {
-      bookmarkPost.mutate({ postId, isSaved });
+      bookmarkPost.mutate(
+        { postId, isSaved },
+        {
+          onSuccess: () => {
+            trigger('success');
+            toast.success(isSaved ? 'Kayıtlardan kaldırıldı' : 'Gönderi kaydedildi');
+          },
+          onError: () => {
+            trigger('error');
+            toast.error('İşlem başarısız oldu');
+          },
+        },
+      );
     },
-    [bookmarkPost],
+    [bookmarkPost, trigger, toast],
   );
 
   /**
@@ -318,12 +364,8 @@ export const FeedScreen: React.FC = memo(() => {
    */
   const renderPost = useCallback(
     ({ item, index }: ListRenderItemInfo<Post>) => {
-      const animationDelay = getListItemDelay(index);
-
       return (
-        <Animated.View
-          entering={SCREEN_ANIMATIONS.fadeInList.entering.delay(animationDelay)}
-          style={{ flex: 1 }}>
+        <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(index)} style={{ flex: 1 }}>
           {/* P2: AI Trend Insight - Every 10th post */}
           {index > 0 && index % 10 === 0 && (
             <AITrendInsightCard
@@ -342,9 +384,27 @@ export const FeedScreen: React.FC = memo(() => {
               }}
               onFollowToggle={(expertId, isFollowing) => {
                 if (isFollowing) {
-                  unfollowMutation.mutate(expertId);
+                  unfollowMutation.mutate(expertId, {
+                    onSuccess: () => {
+                      trigger('success');
+                      toast.success('Takipten çıkıldı');
+                    },
+                    onError: () => {
+                      trigger('error');
+                      toast.error('İşlem başarısız oldu');
+                    },
+                  });
                 } else {
-                  followMutation.mutate(expertId);
+                  followMutation.mutate(expertId, {
+                    onSuccess: () => {
+                      trigger('success');
+                      toast.success('Takip edildi');
+                    },
+                    onError: () => {
+                      trigger('error');
+                      toast.error('İşlem başarısız oldu');
+                    },
+                  });
                 }
               }}
             />
@@ -421,21 +481,39 @@ export const FeedScreen: React.FC = memo(() => {
   }, [user, navigation, showVerificationPrompt, handleDismissVerificationPrompt]);
 
   /**
-   * Empty state component
+   * Empty state component with smooth crossfade transition
    */
   const ListEmptyComponent = useMemo(() => {
-    if (isLoading && posts.length === 0) {
-      return <FeedSkeleton count={3} showImages />;
+    // If timed out, show error state with retry
+    if (hasTimedOut) {
+      return (
+        <EmptyFeed
+          title="Yükleme Zaman Aşımı"
+          message="Gönderiler yüklenirken bir sorun oluştu. Lütfen tekrar deneyin."
+          icon="alert-circle-outline"
+          action={{
+            label: 'Tekrar Dene',
+            onPress: retry,
+          }}
+        />
+      );
     }
 
     return (
-      <EmptyFeed
-        title="Henüz gönderi yok"
-        message="Takip ettiğin kişilerin gönderilerini burada göreceksin."
-        icon="newspaper-outline"
+      <LoadingStateWrapper
+        isLoading={isLoading && posts.length === 0}
+        skeleton={<FeedSkeleton count={3} showImages />}
+        content={
+          <EmptyFeed
+            title="Henüz gönderi yok"
+            message="Takip ettiğin kişilerin gönderilerini burada göreceksin."
+            icon="newspaper-outline"
+          />
+        }
+        transition="crossfade"
       />
     );
-  }, [isLoading, posts.length]);
+  }, [isLoading, posts.length, hasTimedOut, retry]);
 
   /**
    * Footer component - loading more indicator
@@ -454,17 +532,8 @@ export const FeedScreen: React.FC = memo(() => {
    * Refresh control component
    */
   const refreshControl = useMemo(
-    () => (
-      <RefreshControl
-        refreshing={isRefetching}
-        onRefresh={handleRefresh}
-        tintColor={colors.interactive.default}
-        colors={[colors.interactive.default]}
-        progressBackgroundColor={colors.background.primary}
-        titleColor={colors.text.secondary}
-      />
-    ),
-    [isRefetching, handleRefresh, colors],
+    () => <CustomRefreshControl refreshing={isRefetching} onRefresh={handleRefresh} />,
+    [isRefetching, handleRefresh],
   );
 
   // ============================================================================

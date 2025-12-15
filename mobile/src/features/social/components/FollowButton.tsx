@@ -6,6 +6,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { StyleSheet, Text, ActivityIndicator, Pressable } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
 import { spacing, fontSize } from '@theme';
 import { spring } from '@theme/animations';
 import { HAPTIC_TYPES } from '@constants/hapticPresets';
@@ -53,6 +54,7 @@ export const FollowButton: React.FC<FollowButtonProps> = memo(
   ({ userId, isFollowing, onFollowChange, size = 'md' }) => {
     const colors = useColors();
     const haptic = useHaptic();
+    const toast = useToast();
     const follow = useFollow();
     const unfollow = useUnfollow();
 
@@ -70,17 +72,21 @@ export const FollowButton: React.FC<FollowButtonProps> = memo(
       try {
         if (isFollowing) {
           await unfollow.mutateAsync(userId);
+          toast.success('Takipten çıkıldı');
+          haptic.success();
           onFollowChange?.(userId, false);
         } else {
           await follow.mutateAsync(userId);
-          onFollowChange?.(userId, true);
+          toast.success('Takip edildi');
           haptic.success();
+          onFollowChange?.(userId, true);
         }
       } catch (error) {
         haptic.error();
+        toast.error('İşlem başarısız oldu');
         console.error('Follow/Unfollow error:', error);
       }
-    }, [userId, isFollowing, follow, unfollow, onFollowChange, haptic]);
+    }, [userId, isFollowing, follow, unfollow, onFollowChange, haptic, toast]);
 
     const buttonStyle = useMemo(
       () => [

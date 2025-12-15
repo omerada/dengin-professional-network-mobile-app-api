@@ -46,7 +46,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = memo(({ error, resetE
 
   const handleRetry = useCallback(() => {
     trigger('medium');
-    buttonScale.value = withSequence(withSpring(0.95, spring.press), withSpring(1, spring.snappy));
+    buttonScale.value = withSequence(withSpring(0.96, spring.press), withSpring(1, spring.snappy));
     setTimeout(() => resetError(), 150);
   }, [resetError, trigger, buttonScale]);
 

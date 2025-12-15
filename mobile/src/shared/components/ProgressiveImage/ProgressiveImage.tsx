@@ -6,6 +6,7 @@ import React, { memo, useState, useCallback } from 'react';
 import { Image, ImageProps, StyleSheet, View, ActivityIndicator } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
+import { borderRadius } from '@theme';
 import { UNIFIED_TIMING } from '@constants/unifiedTiming';
 
 export interface ProgressiveImageProps extends Omit<ImageProps, 'source'> {
@@ -167,7 +168,7 @@ const styles = StyleSheet.create({
   },
   placeholderIcon: {
     alignItems: 'center',
-    borderRadius: 8,
+    borderRadius: borderRadius.md,
     height: 48,
     justifyContent: 'center',
     width: 48,

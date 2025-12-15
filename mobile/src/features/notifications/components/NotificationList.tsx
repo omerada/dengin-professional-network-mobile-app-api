@@ -16,6 +16,7 @@ import {
   UnifiedLoadingState,
   CustomRefreshControl,
 } from '@shared/components';
+import { SCREEN_ANIMATIONS } from '@constants';
 import type { NotificationResponse } from '../types';
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<NotificationResponse>);
@@ -103,12 +104,14 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
 
     // Render item with AnimatedListItem wrapper for press animation
     const renderItem = useCallback(
-      ({ item }: { item: NotificationResponse }) => (
-        <AnimatedListItem
-          onPress={() => handleNotificationPress(item)}
-          onLongPress={() => handleDelete(item.notificationId)}>
-          <NotificationItem notification={item} />
-        </AnimatedListItem>
+      ({ item, index }: { item: NotificationResponse; index: number }) => (
+        <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(index)}>
+          <AnimatedListItem
+            onPress={() => handleNotificationPress(item)}
+            onLongPress={() => handleDelete(item.notificationId)}>
+            <NotificationItem notification={item} />
+          </AnimatedListItem>
+        </Animated.View>
       ),
       [handleNotificationPress, handleDelete],
     );

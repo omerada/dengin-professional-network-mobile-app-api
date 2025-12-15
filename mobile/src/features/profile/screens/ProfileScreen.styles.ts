@@ -3,6 +3,7 @@
 // Modern Premium Profile Design
 
 import { StyleSheet } from 'react-native';
+import { shadows } from '@theme';
 
 /**
  * ProfileScreen styles - Modern Premium Design
@@ -84,11 +85,8 @@ export const styles = StyleSheet.create({
     borderRadius: 60,
     borderWidth: 4,
     height: 120,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
     width: 120,
+    ...shadows.lg,
   },
 
   premiumHeader: {
