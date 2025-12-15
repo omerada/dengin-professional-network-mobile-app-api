@@ -129,7 +129,7 @@ const PaginationDot: React.FC<DotProps> = ({ active }) => {
 export const OnboardingScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation<AuthStackNavigationProp>();
-  const { trigger } = useHaptic();
+  const { triggerNavigation, triggerContent } = useSemanticHaptic();
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
@@ -140,7 +140,7 @@ export const OnboardingScreen: React.FC = () => {
   const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
     if (viewableItems.length > 0 && viewableItems[0].index !== null) {
       setCurrentIndex(viewableItems[0].index);
-      trigger(HAPTIC_TYPES.selection);
+      triggerContent('scroll');
     }
   }).current;
 
@@ -152,8 +152,8 @@ export const OnboardingScreen: React.FC = () => {
    * Handle Next
    */
   const handleNext = () => {
+    triggerNavigation('navigate');
     if (currentIndex < slides.length - 1) {
-      trigger(HAPTIC_TYPES.buttonPress);
       flatListRef.current?.scrollToIndex({
         index: currentIndex + 1,
         animated: true,
@@ -194,7 +194,7 @@ export const OnboardingScreen: React.FC = () => {
           <View style={styles.finalButtons}>
             <TouchableOpacity
               onPress={() => {
-                trigger(HAPTIC_TYPES.buttonPress);
+                triggerNavigation('navigate');
                 asyncStorage.set(STORAGE_KEYS.ONBOARDING_COMPLETED, true);
                 navigation.replace('Login');
               }}
@@ -204,7 +204,7 @@ export const OnboardingScreen: React.FC = () => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                trigger(HAPTIC_TYPES.buttonPress);
+                triggerNavigation('navigate');
                 asyncStorage.set(STORAGE_KEYS.ONBOARDING_COMPLETED, true);
                 navigation.replace('Register');
               }}

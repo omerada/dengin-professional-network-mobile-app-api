@@ -3,7 +3,7 @@
 // Oku: mobile-development-guide/ui-ux-modernization/07-EMPTY-STATES.md
 
 import React, { memo } from 'react';
-import { EmptyState } from '@shared/components';
+import { UnifiedEmptyState } from '@shared/components';
 import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 
@@ -122,39 +122,23 @@ export const EmptyFeed: React.FC<EmptyFeedProps> = memo(
 
     const config = configs[type];
 
-    // Support both action object and legacy actionLabel/onAction props
-    let finalAction:
-      | {
-          title: string;
-          onPress: () => void;
-          variant?: 'primary' | 'secondary' | 'ghost' | 'outline';
-        }
-      | undefined;
-
-    if (action) {
-      // New action object format
-      finalAction = {
-        title: action.label,
-        onPress: action.onPress,
-        variant: type === 'error' ? 'secondary' : 'primary',
-      };
-    } else if ((actionLabel || config.actionTitle) && (onAction || config.actionHandler)) {
-      // Legacy format
-      finalAction = {
-        title: actionLabel || config.actionTitle!,
-        onPress: onAction || config.actionHandler!,
-        variant: type === 'error' ? 'secondary' : 'primary',
-      };
-    }
+    // Determine primary action
+    const primaryAction =
+      action || ((actionLabel || config.actionTitle) && (onAction || config.actionHandler))
+        ? {
+            label: action?.label || actionLabel || config.actionTitle!,
+            icon: type === 'no-posts' ? 'add-circle-outline' : undefined,
+            onPress: action?.onPress || onAction || config.actionHandler!,
+          }
+        : undefined;
 
     return (
-      <EmptyState
+      <UnifiedEmptyState
         icon={icon || config.icon}
         title={title || config.title}
         description={message || config.description}
-        action={finalAction}
-        floatingIcon
-        animated
+        primaryAction={primaryAction}
+        testID={`empty-feed-${type}`}
       />
     );
   },

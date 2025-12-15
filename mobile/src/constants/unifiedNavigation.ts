@@ -134,6 +134,72 @@ export const UNIFIED_NAVIGATION = {
 } as const;
 
 /**
+ * Navigation Config Types
+ * Type-safe navigation configuration selector
+ */
+export type NavigationConfigType =
+  | 'screen'
+  | 'modal'
+  | 'interactiveModal'
+  | 'criticalModal'
+  | 'fullScreen'
+  | 'sheet'
+  | 'card'
+  | 'instant';
+
+/**
+ * Navigation Configuration Map
+ * Maps config types to their actual configurations
+ */
+const NAVIGATION_CONFIG_MAP: Record<NavigationConfigType, NativeStackNavigationOptions> = {
+  screen: STACK_NAVIGATION,
+  modal: MODAL_NAVIGATION,
+  interactiveModal: INTERACTIVE_MODAL_NAVIGATION,
+  criticalModal: CRITICAL_MODAL_NAVIGATION,
+  fullScreen: FULLSCREEN_NAVIGATION,
+  sheet: SHEET_NAVIGATION,
+  card: CARD_NAVIGATION,
+  instant: INSTANT_NAVIGATION,
+};
+
+/**
+ * Get Navigation Config - Type-safe configuration selector
+ *
+ * @param type - Navigation configuration type
+ * @param overrides - Optional overrides to merge with base config
+ * @returns Complete navigation options configuration
+ *
+ * @example
+ * // Basic usage
+ * <Stack.Screen
+ *   name="Login"
+ *   options={getNavigationConfig('screen')}
+ * />
+ *
+ * @example
+ * // With overrides
+ * <Stack.Screen
+ *   name="CreatePost"
+ *   options={getNavigationConfig('modal', { headerShown: true })}
+ * />
+ */
+export const getNavigationConfig = (
+  type: NavigationConfigType,
+  overrides?: Partial<NativeStackNavigationOptions>,
+): NativeStackNavigationOptions => {
+  const baseConfig = NAVIGATION_CONFIG_MAP[type];
+
+  if (!overrides) {
+    return baseConfig;
+  }
+
+  return {
+    ...baseConfig,
+    ...overrides,
+  };
+};
+
+/**
  * Navigation Type Guards
  * Navigation tipini kontrol etmek için yardımcı fonksiyonlar
  */
@@ -146,4 +212,52 @@ export const NavigationType = {
   isSheet: (options?: NativeStackNavigationOptions) => options?.presentation === 'transparentModal',
 
   hasGesture: (options?: NativeStackNavigationOptions) => options?.gestureEnabled === true,
+} as const;
+
+/**
+ * Navigation Config Presets for Common Scenarios
+ * Ready-to-use configurations for typical use cases
+ */
+export const NAVIGATION_PRESETS = {
+  /**
+   * User authentication flows
+   * No back gesture, clean transitions
+   */
+  auth: getNavigationConfig('screen', { gestureEnabled: false }),
+
+  /**
+   * Form with unsaved changes protection
+   * Modal with confirmation on dismiss attempt
+   */
+  form: getNavigationConfig('interactiveModal'),
+
+  /**
+   * Read-only content modal
+   * Modal presentation, easy dismiss
+   */
+  content: getNavigationConfig('modal'),
+
+  /**
+   * Critical process that shouldn't be interrupted
+   * No gesture dismiss, fullscreen
+   */
+  critical: getNavigationConfig('criticalModal'),
+
+  /**
+   * Camera, media picker, fullscreen experiences
+   * Fullscreen modal with fade
+   */
+  media: getNavigationConfig('fullScreen'),
+
+  /**
+   * Context menus, action sheets
+   * Transparent overlay, quick animations
+   */
+  overlay: getNavigationConfig('sheet'),
+
+  /**
+   * Standard detail view
+   * Card-style push from right
+   */
+  detail: getNavigationConfig('card'),
 } as const;

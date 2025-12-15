@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { View, StyleSheet, ActivityIndicator, Text, Image } from 'react-native';
-import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native-stack';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@shared/types';
 import { useAuthStore } from '@features/auth/stores/authStore';
@@ -13,7 +13,7 @@ import { linking } from './linking';
 import { AuthNavigator } from './AuthNavigator';
 import { MainNavigator } from './MainNavigator';
 import { VerificationNavigator } from './VerificationNavigator';
-import { UNIFIED_NAVIGATION } from '@constants/unifiedNavigation';
+import { getNavigationConfig, NAVIGATION_PRESETS } from '@constants/unifiedNavigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -103,14 +103,14 @@ export const AppNavigator: React.FC = () => {
 
   return (
     <NavigationContainer ref={navigationRef} linking={linking}>
-      <Stack.Navigator screenOptions={UNIFIED_NAVIGATION.stack}>
+      <Stack.Navigator screenOptions={getNavigationConfig('screen')}>
         {isAuthenticated ? (
           <>
             <Stack.Screen name="Main" component={MainNavigator} />
             <Stack.Screen
               name="Verification"
               component={VerificationNavigator}
-              options={UNIFIED_NAVIGATION.criticalModal} // Critical modal - prevent accidental dismissal
+              options={NAVIGATION_PRESETS.critical} // Critical flow - prevent accidental dismissal
             />
           </>
         ) : (

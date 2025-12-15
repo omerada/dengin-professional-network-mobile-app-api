@@ -9,9 +9,8 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing, typography, fontSize } from '@theme';
-import { HAPTIC_TYPES } from '@constants/hapticPresets';
 import { Button } from '@shared/components';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { useVerificationStore } from '../stores';
 import { StepIndicator } from '../components';
 import type { VerificationStackParamList } from '@shared/types/navigation.types';
@@ -53,14 +52,14 @@ InfoCard.displayName = 'InfoCard';
 export const VerificationIntroScreen: React.FC = memo(() => {
   const navigation = useNavigation<NavigationProp>();
   const colors = useColors();
-  const haptic = useHaptic();
+  const { triggerNavigation } = useSemanticHaptic();
   const { setStep, currentStep, reset } = useVerificationStore();
 
   /**
    * Doğrulamayı başlat
    */
   const handleStart = useCallback(() => {
-    haptic.trigger(HAPTIC_TYPES.buttonPressImportant);
+    triggerNavigation('navigate');
     reset(); // Önceki verileri temizle
     setStep('document_front');
     navigation.navigate('DocumentCapture', { documentType: 'diploma', side: 'front' });

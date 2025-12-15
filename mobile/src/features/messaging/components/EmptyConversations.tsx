@@ -3,8 +3,7 @@
 // Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
 
 import React, { memo } from 'react';
-import { EmptyState } from '@shared/components';
-import { EMPTY_STATE_PRESETS } from '@constants/emptyStatePresets';
+import { UnifiedEmptyState } from '@shared/components';
 
 interface EmptyConversationsProps {
   onStartConversation?: () => void;
@@ -18,22 +17,21 @@ interface EmptyConversationsProps {
  */
 export const EmptyConversations: React.FC<EmptyConversationsProps> = memo(
   ({ onStartConversation }) => {
-    const preset = EMPTY_STATE_PRESETS.emptyMessages;
-
     return (
-      <EmptyState
-        {...preset}
-        action={
+      <UnifiedEmptyState
+        icon="chatbubbles-outline"
+        title="Henüz Mesajınız Yok"
+        description="Profesyonellerle sohbet başlatın ve ağınızı genişletin"
+        primaryAction={
           onStartConversation
             ? {
-                title: 'Yeni Konuşma',
+                label: 'Yeni Konuşma',
+                icon: 'add-circle-outline',
                 onPress: onStartConversation,
-                variant: 'primary',
               }
             : undefined
         }
-        floatingIcon
-        animated
+        testID="empty-conversations"
       />
     );
   },

@@ -22,7 +22,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { useProfessions } from '@shared/hooks/useProfessions';
 import { useSectors } from '@shared/hooks/useSectors';
 import { Button, Input, BottomSheet } from '@shared/components';
@@ -61,7 +61,7 @@ export const EditProfileScreen: React.FC = () => {
   const colors = useColors();
   const toast = useToast();
   const navigation = useNavigation();
-  const { trigger } = useHaptic();
+  const { triggerForm, triggerSystem } = useSemanticHaptic();
 
   // Fetch current profile
   const { data: profile, isLoading: _isLoadingProfile, refetch } = useMyProfile();
@@ -224,7 +224,7 @@ export const EditProfileScreen: React.FC = () => {
       }
 
       // Success - Show toast with haptic
-      trigger(HAPTIC_TYPES.success);
+      triggerSystem('success');
       toast.success('Profil güncellendi');
 
       // Clear pending states
@@ -235,7 +235,7 @@ export const EditProfileScreen: React.FC = () => {
       refetch();
     } catch (error: any) {
       console.error('[EditProfileScreen] Save error:', error);
-      trigger(HAPTIC_TYPES.error);
+      triggerSystem('error');
       toast.error(error.message || 'Profil güncellenirken bir hata oluştu.');
     }
   }, [
@@ -255,12 +255,12 @@ export const EditProfileScreen: React.FC = () => {
     uploadAvatar,
     refetch,
     toast,
-    trigger,
+    triggerSystem,
   ]);
 
   // Date picker handlers
   const handleOpenDatePicker = useCallback(() => {
-    trigger(HAPTIC_TYPES.selection);
+    triggerForm('input');
     // Parse existing date if available
     if (dateOfBirth) {
       const parts = dateOfBirth.split('-');
@@ -269,7 +269,7 @@ export const EditProfileScreen: React.FC = () => {
       }
     }
     setShowDatePicker(true);
-  }, [trigger, dateOfBirth]);
+  }, [triggerForm, dateOfBirth]);
 
   const handleCloseDatePicker = useCallback(() => {
     setShowDatePicker(false);
@@ -285,9 +285,9 @@ export const EditProfileScreen: React.FC = () => {
 
   // Gender picker handlers
   const handleOpenGenderPicker = useCallback(() => {
-    trigger(HAPTIC_TYPES.selection);
+    triggerForm('input');
     setShowGenderPicker(true);
-  }, [trigger]);
+  }, [triggerForm]);
 
   const handleCloseGenderPicker = useCallback(() => {
     setShowGenderPicker(false);
@@ -295,18 +295,18 @@ export const EditProfileScreen: React.FC = () => {
 
   const handleGenderSelect = useCallback(
     (selectedGender: Gender) => {
-      trigger(HAPTIC_TYPES.selection);
+      triggerForm('select');
       setGender(selectedGender);
       handleCloseGenderPicker();
     },
-    [trigger, handleCloseGenderPicker],
+    [triggerForm, handleCloseGenderPicker],
   );
 
   // Sector picker handlers
   const handleOpenSectorPicker = useCallback(() => {
-    trigger(HAPTIC_TYPES.selection);
+    triggerForm('input');
     setShowSectorPicker(true);
-  }, [trigger]);
+  }, [triggerForm]);
 
   const handleCloseSectorPicker = useCallback(() => {
     setShowSectorPicker(false);
@@ -314,7 +314,7 @@ export const EditProfileScreen: React.FC = () => {
 
   const handleSectorSelect = useCallback(
     (sector: Sector) => {
-      trigger(HAPTIC_TYPES.selection);
+      triggerForm('select');
       setSelectedSector(sector);
       // Clear profession selection if sector changes
       if (selectedSector?.id !== sector.id) {
@@ -322,14 +322,14 @@ export const EditProfileScreen: React.FC = () => {
       }
       handleCloseSectorPicker();
     },
-    [trigger, handleCloseSectorPicker, selectedSector],
+    [triggerForm, handleCloseSectorPicker, selectedSector],
   );
 
   // Profession picker handlers
   const handleOpenProfessionPicker = useCallback(() => {
-    trigger(HAPTIC_TYPES.selection);
+    triggerForm('input');
     setShowProfessionPicker(true);
-  }, [trigger]);
+  }, [triggerForm]);
 
   const handleCloseProfessionPicker = useCallback(() => {
     setShowProfessionPicker(false);
@@ -338,11 +338,11 @@ export const EditProfileScreen: React.FC = () => {
 
   const handleProfessionSelect = useCallback(
     (profession: Profession) => {
-      trigger(HAPTIC_TYPES.selection);
+      triggerForm('select');
       setSelectedProfession(profession);
       handleCloseProfessionPicker();
     },
-    [trigger, handleCloseProfessionPicker],
+    [triggerForm, handleCloseProfessionPicker],
   );
 
   // Filter professions by selected sector AND search query

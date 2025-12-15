@@ -6,7 +6,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '@shared/types';
-import { UNIFIED_NAVIGATION } from '@constants/unifiedNavigation';
+import { getNavigationConfig, NAVIGATION_PRESETS } from '@constants/unifiedNavigation';
 
 // Auth Screens
 import { LoginScreen } from '@features/auth/screens/LoginScreen';
@@ -29,30 +29,42 @@ const Stack = createNativeStackNavigator<AuthStackParamList>();
  * Removed: Welcome screen (redundant step)
  * Result: 25% faster onboarding, reduced user friction
  *
- * Uses UNIFIED_NAVIGATION for consistent transitions (300ms)
+ * ✅ ENHANCED: Uses getNavigationConfig for type-safe, consistent navigation
  */
 export const AuthNavigator: React.FC = () => {
   return (
-    <Stack.Navigator initialRouteName="Onboarding" screenOptions={UNIFIED_NAVIGATION.stack}>
+    <Stack.Navigator initialRouteName="Onboarding" screenOptions={getNavigationConfig('screen')}>
       <Stack.Screen
         name="Onboarding"
         component={OnboardingScreen}
-        options={{
-          gestureEnabled: false,
-        }}
+        options={NAVIGATION_PRESETS.auth} // No back gesture
       />
-      <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Register" component={RegisterScreenOptimized} />
+      <Stack.Screen name="Login" component={LoginScreen} options={getNavigationConfig('screen')} />
+      <Stack.Screen
+        name="Register"
+        component={RegisterScreenOptimized}
+        options={getNavigationConfig('screen')}
+      />
       <Stack.Screen
         name="WelcomeSuccess"
         component={WelcomeSuccessScreen}
-        options={{
-          gestureEnabled: false,
-        }}
+        options={NAVIGATION_PRESETS.auth} // No back gesture
       />
-      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-      <Stack.Screen name="Terms" component={TermsScreen} options={UNIFIED_NAVIGATION.modal} />
-      <Stack.Screen name="Privacy" component={PrivacyScreen} options={UNIFIED_NAVIGATION.modal} />
+      <Stack.Screen
+        name="ForgotPassword"
+        component={ForgotPasswordScreen}
+        options={getNavigationConfig('screen')}
+      />
+      <Stack.Screen
+        name="Terms"
+        component={TermsScreen}
+        options={NAVIGATION_PRESETS.content} // Read-only modal
+      />
+      <Stack.Screen
+        name="Privacy"
+        component={PrivacyScreen}
+        options={NAVIGATION_PRESETS.content} // Read-only modal
+      />
     </Stack.Navigator>
   );
 };

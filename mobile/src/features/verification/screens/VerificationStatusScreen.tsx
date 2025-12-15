@@ -10,7 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import Animated from 'react-native-reanimated';
 import { SCREEN_ANIMATIONS } from '@constants/animationPresets';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { fontSize } from '@theme';
 
 /**
@@ -24,10 +24,10 @@ import { fontSize } from '@theme';
 export const VerificationStatusScreen: React.FC = memo(() => {
   const colors = useColors();
   const navigation = useNavigation();
-  const { trigger } = useHaptic();
+  const { triggerNavigation } = useSemanticHaptic();
 
   const handleBack = () => {
-    trigger('light');
+    triggerNavigation('navigate');
     navigation.goBack();
   };
 

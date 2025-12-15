@@ -1,6 +1,11 @@
 // src/shared/components/EmptyState/EmptyState.tsx
-// Dengin Design System - Modern EmptyState Component
-// Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
+// @deprecated This component is deprecated. Use UnifiedEmptyState instead.
+// UnifiedEmptyState provides a simpler, more consistent API with standardized semantics.
+// This file will be removed in a future version.
+//
+// Migration guide:
+// OLD: <EmptyState icon="x" title="y" message="z" action={{ title: "a", onPress: fn }} />
+// NEW: <UnifiedEmptyState icon="x" title="y" description="z" primaryAction={{ label: "a", onPress: fn }} />
 
 import React, { memo } from 'react';
 import { StyleSheet, ViewStyle, Image } from 'react-native';

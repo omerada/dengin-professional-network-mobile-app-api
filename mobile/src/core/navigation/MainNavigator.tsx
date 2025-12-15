@@ -14,7 +14,7 @@ import {
 } from '@shared/types';
 import { AnimatedTabBar, TabItem } from './components/AnimatedTabBar';
 import { TabScreenWrapper } from './components/TabScreenWrapper';
-import { UNIFIED_NAVIGATION } from '@constants/unifiedNavigation';
+import { getNavigationConfig, NAVIGATION_PRESETS } from '@constants/unifiedNavigation';
 
 // Screens
 import { FeedScreen } from '@features/feed/screens/FeedScreen';
@@ -83,25 +83,30 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 // Feed Stack
 const FeedStack = createNativeStackNavigator<FeedStackParamList>();
 const FeedStackNavigator: React.FC = () => (
-  <FeedStack.Navigator screenOptions={UNIFIED_NAVIGATION.stack}>
+  <FeedStack.Navigator screenOptions={getNavigationConfig('screen')}>
     <FeedStack.Screen name="Feed" component={FeedScreen} />
-    <FeedStack.Screen name="PostDetail" component={PostDetailScreen} />
+    <FeedStack.Screen
+      name="PostDetail"
+      component={PostDetailScreen}
+      options={NAVIGATION_PRESETS.detail}
+    />
     <FeedStack.Screen
       name="CreatePost"
       component={CreatePostScreen}
-      options={{
-        ...UNIFIED_NAVIGATION.interactiveModal,
-        headerShown: true, // Show header for post button
-      }}
+      options={getNavigationConfig('interactiveModal', { headerShown: true })}
     />
-    <FeedStack.Screen name="Comments" component={CommentsScreen} />
+    <FeedStack.Screen
+      name="Comments"
+      component={CommentsScreen}
+      options={getNavigationConfig('modal')}
+    />
     <FeedStack.Screen name="Notifications" component={NotificationsScreen} />
     <FeedStack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
     <FeedStack.Screen name="VerificationStatus" component={VerificationStatusScreen} />
     <FeedStack.Screen
       name="NewConversation"
       component={require('@features/messaging/screens/NewConversationScreen').NewConversationScreen}
-      options={UNIFIED_NAVIGATION.interactiveModal}
+      options={NAVIGATION_PRESETS.form}
     />
   </FeedStack.Navigator>
 );
@@ -109,13 +114,17 @@ const FeedStackNavigator: React.FC = () => (
 // Messaging Stack
 const MessagingStack = createNativeStackNavigator<MessagingStackParamList>();
 const MessagingStackNavigator: React.FC = () => (
-  <MessagingStack.Navigator screenOptions={UNIFIED_NAVIGATION.stack}>
+  <MessagingStack.Navigator screenOptions={getNavigationConfig('screen')}>
     <MessagingStack.Screen name="ConversationList" component={ConversationListScreen} />
-    <MessagingStack.Screen name="Chat" component={ChatScreen} />
+    <MessagingStack.Screen
+      name="Chat"
+      component={ChatScreen}
+      options={getNavigationConfig('screen')}
+    />
     <MessagingStack.Screen
       name="NewConversation"
       component={require('@features/messaging/screens/NewConversationScreen').NewConversationScreen}
-      options={UNIFIED_NAVIGATION.interactiveModal} // Interactive modal for user input
+      options={NAVIGATION_PRESETS.form}
     />
   </MessagingStack.Navigator>
 );
@@ -123,10 +132,14 @@ const MessagingStackNavigator: React.FC = () => (
 // Profile Stack
 const ProfileStack = createNativeStackNavigator<ProfileStackParamList>();
 const ProfileStackNavigator: React.FC = () => (
-  <ProfileStack.Navigator screenOptions={UNIFIED_NAVIGATION.stack}>
+  <ProfileStack.Navigator screenOptions={getNavigationConfig('screen')}>
     {/* Modern Premium Profile Screen */}
     <ProfileStack.Screen name="Profile" component={ProfileScreen} />
-    <ProfileStack.Screen name="EditProfile" component={EditProfileScreen} />
+    <ProfileStack.Screen
+      name="EditProfile"
+      component={EditProfileScreen}
+      options={NAVIGATION_PRESETS.form}
+    />
     <ProfileStack.Screen name="Settings" component={SettingsScreen} />
   </ProfileStack.Navigator>
 );

@@ -18,7 +18,7 @@ import {
 
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { useHaptic, useLoadingTimeout } from '@shared/hooks';
+import { useSemanticHaptic, useLoadingTimeout } from '@shared/hooks';
 import { useFeedPosts, useLikePost, useBookmarkPost, useDeletePost } from '../hooks';
 import { PostCard, FeedHeader, EmptyFeed, FeedSkeleton } from '../components';
 import { VerificationPromptCard } from '../components/VerificationPromptCard';
@@ -60,7 +60,7 @@ import type { Post } from '../types';
 export const FeedScreen: React.FC = memo(() => {
   const colors = useColors();
   const navigation = useNavigation();
-  const { trigger } = useHaptic();
+  const { triggerSocial, triggerContent, triggerSystem } = useSemanticHaptic();
   const toast = useToast();
   const currentUserId = useAuthStore(state => state.user?.id);
   const user = useAuthStore(state => state.user);
@@ -169,17 +169,17 @@ export const FeedScreen: React.FC = memo(() => {
         { postId, isLiked },
         {
           onSuccess: () => {
-            trigger('success');
+            triggerSystem('success');
             toast.success(isLiked ? 'Beğeni geri alındı' : 'Gönderi beğenildi');
           },
           onError: () => {
-            trigger('error');
+            triggerSystem('error');
             toast.error('İşlem başarısız oldu');
           },
         },
       );
     },
-    [likePost, trigger, toast],
+    [likePost, triggerSystem, toast],
   );
 
   /**
@@ -222,17 +222,17 @@ export const FeedScreen: React.FC = memo(() => {
         { postId, isSaved },
         {
           onSuccess: () => {
-            trigger('success');
+            triggerSystem('success');
             toast.success(isSaved ? 'Kayıtlardan kaldırıldı' : 'Gönderi kaydedildi');
           },
           onError: () => {
-            trigger('error');
+            triggerSystem('error');
             toast.error('İşlem başarısız oldu');
           },
         },
       );
     },
-    [bookmarkPost, trigger, toast],
+    [bookmarkPost, triggerSystem, toast],
   );
 
   /**
@@ -253,9 +253,9 @@ export const FeedScreen: React.FC = memo(() => {
    * Handle pull-to-refresh with haptic feedback
    */
   const handleRefresh = useCallback(() => {
-    trigger(HAPTIC_TYPES.pullToRefresh);
+    triggerContent('refresh');
     refetch();
-  }, [trigger, refetch]);
+  }, [triggerContent, refetch]);
 
   /**
    * Handle infinite scroll - load more posts

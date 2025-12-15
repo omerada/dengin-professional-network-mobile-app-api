@@ -9,7 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { Button } from '@shared/components';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import { useFollow, useUnfollow, useBlock, useUnblock } from '@features/social/hooks/useFollow';
@@ -48,7 +48,7 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
     testID,
   }) => {
     const navigation = useNavigation();
-    const { trigger } = useHaptic();
+    const { triggerSocial, triggerSystem } = useSemanticHaptic();
     const toast = useToast();
     const colors = useColors();
 
@@ -62,7 +62,7 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
 
     // Handle follow/unfollow
     const handleFollowPress = useCallback(() => {
-      trigger(isFollowing ? 'light' : 'medium');
+      triggerSocial(isFollowing ? 'unfollow' : 'follow');
 
       if (isFollowing) {
         unfollowMutation.mutate(userId, {

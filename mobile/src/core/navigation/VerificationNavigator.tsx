@@ -16,11 +16,15 @@ import { VerificationProgressIndicator } from '@features/verification/components
 import { useVerificationStore } from '@features/verification/stores';
 import { useColors } from '@contexts/ThemeContext';
 import { VerificationStackParamList } from '@shared/types';
+import { getNavigationConfig, NAVIGATION_PRESETS } from '@constants/unifiedNavigation';
 
 const Stack = createNativeStackNavigator<VerificationStackParamList>();
 
 /**
  * Verification Navigator with global progress indicator
+ *
+ * ✅ ENHANCED: Uses standardized navigation configs
+ * Critical flow - prevents accidental dismissal
  */
 export const VerificationNavigator: React.FC = () => {
   const colors = useColors();
@@ -29,9 +33,7 @@ export const VerificationNavigator: React.FC = () => {
     <Stack.Navigator
       screenOptions={{
         headerShown: true,
-        animation: 'slide_from_right',
-        gestureEnabled: true,
-        fullScreenGestureEnabled: true,
+        ...getNavigationConfig('criticalModal'),
         headerStyle: {
           backgroundColor: colors.background.primary,
         },
@@ -55,27 +57,25 @@ export const VerificationNavigator: React.FC = () => {
         name="DocumentCapture"
         component={DocumentCaptureScreen}
         options={{
+          ...NAVIGATION_PRESETS.media, // Fullscreen camera
           title: 'Kimlik Belgesi',
-          headerShown: false, // Kamera ekranı tam ekran
-          gestureEnabled: false,
         }}
       />
       <Stack.Screen
         name="SelfieCapture"
         component={SelfieCaptureScreen}
         options={{
+          ...NAVIGATION_PRESETS.media, // Fullscreen camera
           title: 'Selfie',
-          headerShown: false, // Kamera ekranı tam ekran
-          gestureEnabled: false,
         }}
       />
       <Stack.Screen
         name="VerificationReview"
         component={VerificationReviewScreen}
         options={{
+          ...NAVIGATION_PRESETS.critical, // Critical step - no dismiss
           title: 'İnceleme',
           headerBackVisible: true,
-          gestureEnabled: false,
         }}
       />
       <Stack.Screen

@@ -17,7 +17,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 
 import { PostHeader } from './PostHeader';
 import { PostContent } from './PostContent';
@@ -52,7 +52,7 @@ import type { PostCardProps } from './PostCard.types';
 export const PostCard: React.FC<PostCardProps> = memo(
   ({ post, index = 0, onLike, onComment, onShare, onBookmark, onMenuPress, style, testID }) => {
     const colors = useColors();
-    const { trigger } = useHaptic();
+    const { triggerSocial, triggerNavigation } = useSemanticHaptic();
     const navigation = useNavigation();
 
     // Animation values
@@ -88,7 +88,7 @@ export const PostCard: React.FC<PostCardProps> = memo(
     // Double-tap like handler - UNIFIED: Optimized timing (600ms → 320ms)
     const handleDoubleTapLike = useCallback(() => {
       if (!isLiked) {
-        trigger('success');
+        triggerSocial('like');
         // Animate heart - Scale up (180ms)
         heartScale.value = withSpring(1.2, { damping: 10, stiffness: 300 });
         heartOpacity.value = 1;
@@ -98,7 +98,7 @@ export const PostCard: React.FC<PostCardProps> = memo(
         // Trigger callback
         onLike?.(postId, isLiked);
       }
-    }, [isLiked, postId, onLike, trigger, heartScale, heartOpacity]);
+    }, [isLiked, postId, onLike, triggerSocial, heartScale, heartOpacity]);
 
     // Double-tap gesture - using .runOnJS(true) for modern pattern
     const doubleTapGesture = Gesture.Tap()
@@ -110,15 +110,15 @@ export const PostCard: React.FC<PostCardProps> = memo(
 
     // Navigation handlers - Using type-safe helpers
     const handlePostPress = useCallback(() => {
-      trigger('light');
+      triggerNavigation('navigate');
       navigation.navigate('PostDetail', { postId: String(postId) });
-    }, [postId, navigation, trigger]);
+    }, [postId, navigation, triggerNavigation]);
 
     const handleAuthorPress = useCallback(() => {
-      trigger('light');
+      triggerNavigation('navigate');
       const userId = post.author.userId ?? post.author.id;
       navigation.navigate('Profile', { userId: String(userId) });
-    }, [post.author, navigation, trigger]);
+    }, [post.author, navigation, triggerNavigation]);
 
     // Action handlers
     const handleLike = useCallback(() => {

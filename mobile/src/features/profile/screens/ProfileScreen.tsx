@@ -25,7 +25,7 @@ import {
   navigateToFollowersList,
   navigateToFollowingList,
 } from '@core/navigation';
-import { useHaptic } from '@shared/hooks';
+import { useSemanticHaptic } from '@shared/hooks';
 
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
@@ -66,7 +66,7 @@ export const ProfileScreen: React.FC = memo(() => {
   const route = useRoute();
   const params = route.params as RouteParams | undefined;
   const currentUser = useAuthStore(state => state.user);
-  const { trigger } = useHaptic();
+  const { triggerSocial, triggerNavigation, triggerSystem } = useSemanticHaptic();
   const toast = useToast();
 
   // Follow mutations

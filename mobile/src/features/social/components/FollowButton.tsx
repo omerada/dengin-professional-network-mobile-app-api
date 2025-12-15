@@ -10,7 +10,7 @@ import { useToast } from '@contexts/ToastContext';
 import { spacing, fontSize } from '@theme';
 import { spring } from '@theme/animations';
 import { HAPTIC_TYPES } from '@constants/hapticPresets';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { useFollow, useUnfollow } from '../hooks';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -53,7 +53,7 @@ export interface FollowButtonProps {
 export const FollowButton: React.FC<FollowButtonProps> = memo(
   ({ userId, isFollowing, onFollowChange, size = 'md' }) => {
     const colors = useColors();
-    const haptic = useHaptic();
+    const { triggerSocial } = useSemanticHaptic();
     const toast = useToast();
     const follow = useFollow();
     const unfollow = useUnfollow();
@@ -68,7 +68,7 @@ export const FollowButton: React.FC<FollowButtonProps> = memo(
     }));
 
     const handlePress = useCallback(async () => {
-      haptic.trigger(HAPTIC_TYPES.buttonPressImportant);
+      triggerSocial(isFollowing ? 'unfollow' : 'follow');
       try {
         if (isFollowing) {
           await unfollow.mutateAsync(userId);

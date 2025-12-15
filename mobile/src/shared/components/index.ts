@@ -24,6 +24,8 @@ export type { StepSuccessProps } from './StepSuccess';
 
 // Unified Loading State System
 export { UnifiedLoadingState } from './LoadingState/UnifiedLoadingState';
+export { LoadingStateManager } from './LoadingStateManager';
+export type { LoadingStateManagerProps, LoadingStrategy } from './LoadingStateManager';
 
 // Skeleton Components
 export { MessageListSkeleton } from './Skeleton/MessageListSkeleton';
@@ -51,8 +53,12 @@ export type { BadgeProps, BadgeVariant } from './Badge';
 export { Card } from './Card';
 export type { CardProps, CardVariant, CardPadding } from './Card';
 
+// @deprecated Use UnifiedEmptyState instead - EmptyState will be removed in future versions
 export { EmptyState } from './EmptyState';
 export type { EmptyStateProps } from './EmptyState';
+
+// Unified Empty State (PRODUCTION READY)
+export { UnifiedEmptyState } from './UnifiedEmptyState/UnifiedEmptyState';
 
 export { ProgressiveImage } from './ProgressiveImage';
 
