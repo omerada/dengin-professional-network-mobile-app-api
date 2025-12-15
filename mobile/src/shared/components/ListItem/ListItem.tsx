@@ -8,7 +8,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-na
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useColors, useTheme } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useHaptic } from '@shared/hooks';
 import { spring } from '@theme/animations';
 
 import { styles } from './ListItem.styles';

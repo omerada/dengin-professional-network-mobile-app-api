@@ -13,7 +13,7 @@ import Animated, {
 import { useNavigation } from '@react-navigation/native';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { spring } from '@theme/animations';
 
 import { styles } from './ProfileStats.styles';
@@ -26,7 +26,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
  */
 const StatItem: React.FC<StatItemProps> = memo(({ label, value, onPress, delay = 0 }) => {
   const colors = useColors();
-  const { trigger } = useHaptic();
+  const { triggerNavigation } = useSemanticHaptic();
 
   const scale = useSharedValue(1);
 
@@ -37,13 +37,13 @@ const StatItem: React.FC<StatItemProps> = memo(({ label, value, onPress, delay =
   const handlePress = useCallback(() => {
     if (!onPress) return;
 
-    trigger('light');
+    triggerNavigation('navigate'); // Stats tapping is navigation
     scale.value = withSpring(0.96, spring.press);
     setTimeout(() => {
       scale.value = withSpring(1, spring.snappy);
     }, 100);
     onPress();
-  }, [onPress, trigger, scale]);
+  }, [onPress, triggerNavigation, scale]);
 
   const formattedValue = formatStatValue(value);
 

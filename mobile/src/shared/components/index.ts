@@ -71,9 +71,18 @@ export { CustomRefreshControl } from './CustomRefreshControl';
 
 export { PulseLoader } from './PulseLoader';
 
-// ScreenHeader component
-export { ScreenHeader } from './ScreenHeader';
-export type { ScreenHeaderProps, ScreenHeaderVariant } from './ScreenHeader';
+// Unified Screen Header - PRODUCTION STANDARD
+export { UnifiedScreenHeader } from './UnifiedScreenHeader';
+export type {
+  UnifiedScreenHeaderProps,
+  UnifiedScreenHeaderVariant,
+  FeedHeaderProps as UnifiedFeedHeaderProps,
+  ChatHeaderProps as UnifiedChatHeaderProps,
+  SearchHeaderProps as UnifiedSearchHeaderProps,
+} from './UnifiedScreenHeader';
+
+// Keyboard Aware Screen - PRODUCTION STANDARD
+export { KeyboardAwareScreen, useKeyboardHeight } from './KeyboardAwareScreen';
 
 // Skeleton components
 export { Skeleton, SkeletonPost, SkeletonMessage } from './Skeleton';
@@ -166,12 +175,6 @@ export type { TabBarProps, TabItem } from './TabBar';
 // SwipeableRow component
 export { SwipeableRow } from './SwipeableRow';
 export type { SwipeableRowProps, SwipeableRowRef, SwipeAction } from './SwipeableRow';
-
-// LoadingStateWrapper component - DEPRECATED: Use UnifiedLoadingState instead
-/** @deprecated Use UnifiedLoadingState component instead */
-export { LoadingStateWrapper } from './LoadingStateWrapper';
-/** @deprecated Use UnifiedLoadingState component instead */
-export type { LoadingStateWrapperProps } from './LoadingStateWrapper';
 
 // FormField component - Real-time validation UX
 export { FormField, ValidationHelpers } from './FormField';

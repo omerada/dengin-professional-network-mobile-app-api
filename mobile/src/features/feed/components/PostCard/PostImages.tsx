@@ -8,7 +8,7 @@ import { Image, Pressable, Text, View, ActivityIndicator } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { useColors } from '@contexts/ThemeContext';
 
 import { imageStyles } from './PostCard.styles';
@@ -35,7 +35,7 @@ import type { PostImagesProps } from './PostCard.types';
  */
 export const PostImages: React.FC<PostImagesProps> = memo(
   ({ images, postId, onImagePress, testID }) => {
-    const { trigger } = useHaptic();
+    const { triggerNavigation } = useSemanticHaptic();
     const colors = useColors();
     const navigation = useNavigation();
 
@@ -61,7 +61,7 @@ export const PostImages: React.FC<PostImagesProps> = memo(
     // Handle image press
     const handleImagePress = useCallback(
       (index: number) => {
-        trigger('light');
+        triggerNavigation('navigate');
         if (onImagePress) {
           onImagePress(index);
         } else {
@@ -73,7 +73,7 @@ export const PostImages: React.FC<PostImagesProps> = memo(
           });
         }
       },
-      [onImagePress, images, postId, navigation, trigger],
+      [onImagePress, images, postId, navigation, triggerNavigation],
     );
 
     // Compute grid layout based on image count

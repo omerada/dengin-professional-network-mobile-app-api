@@ -22,7 +22,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useColors } from '@contexts/ThemeContext';
 import { useLocale } from '@contexts/LocaleContext';
-import { Button, Input, ShakeAnimation } from '@shared/components';
+import { Button, Input, ShakeAnimation, UnifiedScreenHeader } from '@shared/components';
 import { SAFE_AREA_EDGES } from '@constants';
 import { useLogin, useBiometricLogin } from '../hooks';
 import { useAuthStore } from '../stores';
@@ -91,33 +91,21 @@ export const LoginScreen: React.FC = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={SAFE_AREA_EDGES.full}>
+      <UnifiedScreenHeader
+        variant="default"
+        title="Giriş Yap"
+        showBackButton={false}
+        showBorder={false}
+      />
       <KeyboardAvoidingView
         style={styles.keyboardAvoid}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity
-              onPress={() => {
-                if (navigation.canGoBack()) {
-                  navigation.goBack();
-                } else {
-                  navigation.replace('Welcome');
-                }
-              }}
-              style={styles.backButton}
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-              <Icon name="arrow-left" size={24} color={colors.text.primary} />
-            </TouchableOpacity>
-            <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Giriş Yap</Text>
-            <View style={styles.headerSpacer} />
-          </View>
-
           {/* Hero Section - DENGIN Branding */}
           <View style={styles.heroSection}>
             <View style={styles.logoContainer}>
@@ -301,9 +289,6 @@ const styles = StyleSheet.create({
   actions: {
     marginBottom: spacing.xl,
   },
-  backButton: {
-    padding: spacing.sm,
-  },
   container: {
     flex: 1,
   },
@@ -347,20 +332,6 @@ const styles = StyleSheet.create({
   },
   form: {
     marginBottom: spacing.lg,
-  },
-  header: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: spacing.lg,
-    paddingHorizontal: spacing.xs,
-  },
-  headerSpacer: {
-    width: 40,
-  },
-  headerTitle: {
-    fontSize: fontSize.xl,
-    fontWeight: '600',
   },
   heroSection: {
     alignItems: 'center',

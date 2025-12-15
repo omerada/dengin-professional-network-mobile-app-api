@@ -3,14 +3,12 @@
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import React, { forwardRef, useMemo } from 'react';
-import { View, Text, StyleSheet, Pressable, Modal } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
+import { BottomSheet } from '@shared/components';
 import { spacing, fontSize, borderRadius } from '@theme';
-
-// TODO: Install @gorhom/bottom-sheet package
-// For now, using Modal as fallback
 
 // ============================================================================
 // Types
@@ -108,7 +106,7 @@ export const PostOptionsSheet = forwardRef<PostOptionsSheetRef, PostOptionsSheet
     ref,
   ) => {
     const colors = useColors();
-    const { trigger } = useHaptic();
+    const { triggerContent, triggerSocial, triggerSystem } = useSemanticHaptic();
     const [visible, setVisible] = React.useState(false);
 
     // Expose methods to parent
@@ -127,7 +125,7 @@ export const PostOptionsSheet = forwardRef<PostOptionsSheetRef, PostOptionsSheet
             icon: 'create-outline',
             label: 'Gönderiyi Düzenle',
             onPress: () => {
-              trigger('light');
+              triggerContent('edit');
               setVisible(false);
               onEdit?.();
             },
@@ -138,7 +136,7 @@ export const PostOptionsSheet = forwardRef<PostOptionsSheetRef, PostOptionsSheet
             label: 'Gönderiyi Sil',
             destructive: true,
             onPress: () => {
-              trigger('warning');
+              triggerContent('delete');
               setVisible(false);
               onDelete?.();
             },
@@ -148,7 +146,7 @@ export const PostOptionsSheet = forwardRef<PostOptionsSheetRef, PostOptionsSheet
             icon: 'link-outline',
             label: 'Bağlantıyı Kopyala',
             onPress: () => {
-              trigger('light');
+              triggerSystem('success');
               setVisible(false);
               onCopyLink();
             },
@@ -163,7 +161,7 @@ export const PostOptionsSheet = forwardRef<PostOptionsSheetRef, PostOptionsSheet
           icon: isBookmarked ? 'bookmark' : 'bookmark-outline',
           label: isBookmarked ? 'Kayıtlılardan Kaldır' : 'Kaydet',
           onPress: () => {
-            trigger('light');
+            triggerSocial(isBookmarked ? 'unlike' : 'like');
             setVisible(false);
             onToggleBookmark();
           },
@@ -173,7 +171,7 @@ export const PostOptionsSheet = forwardRef<PostOptionsSheetRef, PostOptionsSheet
           icon: isFollowing ? 'person-remove-outline' : 'person-add-outline',
           label: isFollowing ? 'Takibi Bırak' : 'Takip Et',
           onPress: () => {
-            trigger('light');
+            triggerSocial(isFollowing ? 'unfollow' : 'follow');
             setVisible(false);
             onToggleFollow();
           },
@@ -183,7 +181,7 @@ export const PostOptionsSheet = forwardRef<PostOptionsSheetRef, PostOptionsSheet
           icon: 'share-outline',
           label: 'Paylaş',
           onPress: () => {
-            trigger('light');
+            triggerSocial('share');
             setVisible(false);
             onShare();
           },
@@ -193,7 +191,7 @@ export const PostOptionsSheet = forwardRef<PostOptionsSheetRef, PostOptionsSheet
           icon: 'link-outline',
           label: 'Bağlantıyı Kopyala',
           onPress: () => {
-            trigger('light');
+            triggerSystem('success');
             setVisible(false);
             onCopyLink();
           },
@@ -204,7 +202,7 @@ export const PostOptionsSheet = forwardRef<PostOptionsSheetRef, PostOptionsSheet
           label: 'Şikayet Et',
           destructive: true,
           onPress: () => {
-            trigger('warning');
+            triggerSystem('alert');
             setVisible(false);
             onReport();
           },
@@ -221,57 +219,46 @@ export const PostOptionsSheet = forwardRef<PostOptionsSheetRef, PostOptionsSheet
       onEdit,
       onDelete,
       onCopyLink,
-      trigger,
+      triggerContent,
+      triggerSocial,
+      triggerSystem,
     ]);
 
     return (
-      <Modal
+      <BottomSheet
         visible={visible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setVisible(false)}>
-        <Pressable style={styles.backdrop} onPress={() => setVisible(false)}>
-          <View
-            style={[styles.modalContent, { backgroundColor: colors.background.primary }]}
-            onStartShouldSetResponder={() => true}>
-            {/* Header */}
-            <View style={styles.header}>
-              <Text style={[styles.title, { color: colors.text.secondary }]}>
-                {isOwnPost ? 'Gönderi Seçenekleri' : 'Eylemler'}
+        onClose={() => setVisible(false)}
+        title={isOwnPost ? 'Gönderi Seçenekleri' : 'Eylemler'}
+        height="auto"
+        swipeToDismiss={true}>
+        <View style={styles.optionsContainer}>
+          {options.map(option => (
+            <Pressable
+              key={option.id}
+              style={({ pressed }) => [
+                styles.option,
+                { backgroundColor: pressed ? colors.background.secondary : 'transparent' },
+              ]}
+              onPress={option.onPress}
+              android_ripple={{ color: colors.background.secondary }}>
+              <Icon
+                name={option.icon}
+                size={24}
+                color={option.destructive ? colors.status.error : colors.text.primary}
+              />
+              <Text
+                style={[
+                  styles.optionLabel,
+                  {
+                    color: option.destructive ? colors.status.error : colors.text.primary,
+                  },
+                ]}>
+                {option.label}
               </Text>
-            </View>
-
-            {/* Options */}
-            <View style={styles.optionsContainer}>
-              {options.map(option => (
-                <Pressable
-                  key={option.id}
-                  style={({ pressed }) => [
-                    styles.option,
-                    { backgroundColor: pressed ? colors.background.secondary : 'transparent' },
-                  ]}
-                  onPress={option.onPress}
-                  android_ripple={{ color: colors.background.secondary }}>
-                  <Icon
-                    name={option.icon}
-                    size={24}
-                    color={option.destructive ? colors.status.error : colors.text.primary}
-                  />
-                  <Text
-                    style={[
-                      styles.optionLabel,
-                      {
-                        color: option.destructive ? colors.status.error : colors.text.primary,
-                      },
-                    ]}>
-                    {option.label}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
-        </Pressable>
-      </Modal>
+            </Pressable>
+          ))}
+        </View>
+      </BottomSheet>
     );
   },
 );
@@ -283,29 +270,6 @@ PostOptionsSheet.displayName = 'PostOptionsSheet';
 // ============================================================================
 
 const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    borderTopLeftRadius: borderRadius.xl,
-    borderTopRightRadius: borderRadius.xl,
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.xl,
-  },
-  header: {
-    paddingVertical: spacing.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(0,0,0,0.1)',
-    marginBottom: spacing.sm,
-  },
-  title: {
-    fontSize: fontSize.sm,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
   optionsContainer: {
     gap: spacing.xs,
   },

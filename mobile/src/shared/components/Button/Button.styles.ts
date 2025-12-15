@@ -3,6 +3,7 @@
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import { StyleSheet } from 'react-native';
+import { spacing } from '@theme';
 import type { ThemeColors } from '@theme/types';
 import type { ButtonVariant, ButtonVariantStyles } from './Button.types';
 
@@ -112,11 +113,11 @@ export const styles = StyleSheet.create({
   },
 
   leftIcon: {
-    marginRight: 8,
+    marginRight: spacing['2'],
   },
 
   rightIcon: {
-    marginLeft: 8,
+    marginLeft: spacing['2'],
   },
 
   text: {

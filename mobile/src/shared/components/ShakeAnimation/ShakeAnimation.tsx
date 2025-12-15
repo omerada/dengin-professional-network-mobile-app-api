@@ -12,7 +12,7 @@ import Animated, {
   withRepeat,
   Easing,
 } from 'react-native-reanimated';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useHaptic } from '@shared/hooks';
 
 interface ShakeAnimationProps {
   /**

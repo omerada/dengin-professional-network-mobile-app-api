@@ -12,7 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 
 import { styles, getVariantStyles } from './Button.styles';
 import { ButtonProps, BUTTON_SIZE_CONFIG } from './Button.types';
@@ -64,7 +64,7 @@ export const Button = memo<ButtonProps>(
   }) => {
     // Hooks
     const { colors } = useTheme();
-    const { trigger } = useHaptic();
+    const { triggerSystem } = useSemanticHaptic();
 
     // Animation value
     const pressed = useSharedValue(0);
@@ -93,15 +93,22 @@ export const Button = memo<ButtonProps>(
 
     const handlePress = useCallback(() => {
       if (disabled || loading) return;
-      trigger(hapticType);
+      // Semantic mapping based on variant
+      if (variant === 'danger') {
+        triggerSystem('alert');
+      } else if (variant === 'success') {
+        triggerSystem('success');
+      } else {
+        triggerSystem('confirm');
+      }
       onPress?.();
-    }, [disabled, loading, trigger, hapticType, onPress]);
+    }, [disabled, loading, triggerSystem, variant, onPress]);
 
     const handleLongPress = useCallback(() => {
       if (disabled || loading || !onLongPress) return;
-      trigger('medium');
+      triggerSystem('confirm');
       onLongPress();
-    }, [disabled, loading, trigger, onLongPress]);
+    }, [disabled, loading, triggerSystem, onLongPress]);
 
     // Animated styles - PRODUCTION STANDARD: 0.96 scale
     const animatedContainerStyle = useAnimatedStyle(() => {

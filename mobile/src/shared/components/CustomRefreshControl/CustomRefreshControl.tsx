@@ -5,7 +5,7 @@
 import React, { memo, useCallback } from 'react';
 import { RefreshControl, RefreshControlProps } from 'react-native';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 
 interface CustomRefreshControlProps extends Omit<RefreshControlProps, 'tintColor' | 'colors'> {
   /** Override default brand color */
@@ -40,15 +40,15 @@ interface CustomRefreshControlProps extends Omit<RefreshControlProps, 'tintColor
 export const CustomRefreshControl = memo<CustomRefreshControlProps>(
   ({ color, refreshing, onRefresh, ...props }) => {
     const colors = useColors();
-    const { trigger } = useHaptic();
+    const { triggerContent } = useSemanticHaptic();
 
     const brandColor = color || colors.interactive.default;
 
     // PRODUCTION: Haptic feedback on pull-to-refresh
     const handleRefresh = useCallback(() => {
-      trigger('light'); // Subtle haptic feedback on refresh start
+      triggerContent('refresh'); // Content refresh feedback
       onRefresh?.();
-    }, [trigger, onRefresh]);
+    }, [triggerContent, onRefresh]);
 
     return (
       <RefreshControl

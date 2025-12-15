@@ -13,7 +13,7 @@ import Animated, {
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { shadows } from '@theme/shadows';
 import { spring } from '@theme/animations';
 
@@ -83,7 +83,7 @@ export const Card: React.FC<CardProps> = memo(
     footer,
   }) => {
     const colors = useColors();
-    const { trigger } = useHaptic();
+    const { triggerSystem } = useSemanticHaptic();
 
     // Animation values
     const pressed = useSharedValue(0);
@@ -129,15 +129,15 @@ export const Card: React.FC<CardProps> = memo(
 
     const handlePress = useCallback(() => {
       if (hapticType !== 'none') {
-        trigger(hapticType === 'medium' ? 'impactMedium' : 'impactLight');
+        triggerSystem('confirm');
       }
       onPress?.();
-    }, [hapticType, onPress, trigger]);
+    }, [hapticType, onPress, triggerSystem]);
 
     const handleLongPress = useCallback(() => {
-      trigger('impactMedium');
+      triggerSystem('confirm');
       onLongPress?.();
-    }, [onLongPress, trigger]);
+    }, [onLongPress, triggerSystem]);
 
     // Container styles
     const containerStyles = useMemo(

@@ -8,7 +8,7 @@ import Animated from 'react-native-reanimated';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { SCREEN_ANIMATIONS, HAPTIC_TYPES } from '@constants';
+import { SCREEN_ANIMATIONS } from '@constants';
 import {
   navigateToComments,
   navigateToReportContent,
@@ -20,7 +20,7 @@ import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import { useSemanticHaptic, useLoadingTimeout } from '@shared/hooks';
 import { useFeedPosts, useLikePost, useBookmarkPost, useDeletePost } from '../hooks';
-import { PostCard, FeedHeader, EmptyFeed, FeedSkeleton } from '../components';
+import { PostCard, EmptyFeed, FeedSkeleton } from '../components';
 import { VerificationPromptCard } from '../components/VerificationPromptCard';
 import { AITrendInsightCard } from '../components/AITrendInsightCard';
 import { SuggestedExpertsCarousel } from '../components/SuggestedExpertsCarousel';
@@ -29,6 +29,7 @@ import {
   type ActionSheetOption,
   UnifiedLoadingState,
   CustomRefreshControl,
+  UnifiedScreenHeader,
 } from '@shared/components';
 import { sharePost, showShareError } from '@shared/utils/share';
 import { useAuthStore } from '@features/auth/stores';
@@ -279,21 +280,21 @@ export const FeedScreen: React.FC = memo(() => {
    */
   const handleDeletePost = useCallback(() => {
     if (selectedPost) {
-      trigger(HAPTIC_TYPES.warning); // Critical action feedback
+      triggerSystem('alert'); // Critical action feedback
       Alert.alert('Gönderiyi Sil', 'Bu gönderiyi silmek istediğinize emin misiniz?', [
         { text: 'İptal', style: 'cancel' },
         {
           text: 'Sil',
           style: 'destructive',
           onPress: () => {
-            trigger(HAPTIC_TYPES.delete); // Confirm deletion feedback
+            triggerSystem('confirm'); // Confirm deletion feedback
             deletePost.mutate(selectedPost.id);
             handleCloseActionSheet();
           },
         },
       ]);
     }
-  }, [selectedPost, deletePost, handleCloseActionSheet, trigger]);
+  }, [selectedPost, deletePost, handleCloseActionSheet, triggerSystem]);
 
   /**
    * Report post
@@ -445,24 +446,26 @@ export const FeedScreen: React.FC = memo(() => {
   const ListHeaderComponent = useMemo(() => {
     return (
       <>
-        <FeedHeader
-          sector={
-            user?.sector
+        <UnifiedScreenHeader
+          variant="feed"
+          showBackButton={false}
+          feedProps={{
+            sector: user?.sector
               ? {
                   name: user.sector.name,
                   code: user.sector.code,
                 }
-              : undefined
-          }
-          unreadNotifications={unreadCount || 0}
-          onSectorPress={() => console.log('Sector detail pressed')}
-          onNotificationPress={() => {
-            // @ts-expect-error - Navigation prop type mismatch
-            navigateToNotifications(navigation);
-          }}
-          onSearchPress={() => {
-            // @ts-expect-error - Navigation prop type mismatch
-            navigation.navigate('NewConversation');
+              : undefined,
+            unreadCount: unreadCount || 0,
+            onSectorPress: () => console.log('Sector detail pressed'),
+            onSearchPress: () => {
+              // @ts-expect-error - Navigation prop type mismatch
+              navigation.navigate('NewConversation');
+            },
+            onNotificationPress: () => {
+              // @ts-expect-error - Navigation prop type mismatch
+              navigateToNotifications(navigation);
+            },
           }}
         />
         {/* P2 Optimized: Show verification prompt based on frequency logic */}

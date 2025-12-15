@@ -10,7 +10,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 
 import { styles } from './VerificationPromptCard.styles';
 import type { VerificationPromptCardProps } from './VerificationPromptCard.types';
@@ -43,13 +43,13 @@ import type { VerificationPromptCardProps } from './VerificationPromptCard.types
 export const VerificationPromptCard: React.FC<VerificationPromptCardProps> = memo(
   ({ onPress, testID = 'verification-prompt-card' }) => {
     const colors = useColors();
-    const { trigger } = useHaptic();
+    const { triggerNavigation } = useSemanticHaptic();
 
     // Handle button press with haptic feedback
     const handlePress = useCallback(() => {
-      trigger('medium');
+      triggerNavigation('navigate');
       onPress();
-    }, [onPress, trigger]);
+    }, [onPress, triggerNavigation]);
 
     return (
       <Animated.View

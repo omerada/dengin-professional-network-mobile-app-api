@@ -14,7 +14,7 @@ import Animated, {
   FadeOut,
 } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useHaptic } from '@shared/hooks';
 import { useColors } from '@contexts/ThemeContext';
 
 type CelebrationType = 'checkmark' | 'heart' | 'star' | 'trophy';

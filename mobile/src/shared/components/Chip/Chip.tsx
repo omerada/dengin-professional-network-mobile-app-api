@@ -14,7 +14,7 @@ import Animated, {
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { spring } from '@theme/animations';
 
 // ============================================================================
@@ -132,7 +132,7 @@ export const Chip = memo<ChipProps>(function Chip({
   animated = true,
 }) {
   const colors = useColors();
-  const { trigger: triggerHaptic } = useHaptic();
+  const { triggerSystem } = useSemanticHaptic();
   const pressed = useSharedValue(0);
 
   const sizeConfig = SIZE_CONFIG[size];
@@ -185,8 +185,8 @@ export const Chip = memo<ChipProps>(function Chip({
 
   const handlePressIn = useCallback(() => {
     pressed.value = withSpring(1, spring.stiff);
-    triggerHaptic('selection');
-  }, [triggerHaptic, pressed]);
+    triggerSystem('confirm');
+  }, [triggerSystem, pressed]);
 
   const handlePressOut = useCallback(() => {
     pressed.value = withSpring(0, spring.stiff);

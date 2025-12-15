@@ -7,7 +7,14 @@ import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { Avatar, UnifiedEmptyState, Loading, Button } from '@shared/components';
+import {
+  Avatar,
+  UnifiedEmptyState,
+  Loading,
+  Button,
+  UnifiedScreenHeader,
+} from '@shared/components';
+import { useLoadingTimeout } from '@shared/hooks';
 import { spacing, fontSize } from '@theme';
 import { useBlockedUsers } from '../hooks';
 import { useUnblock } from '@features/social';
@@ -21,8 +28,19 @@ import type { BlockedUser } from '../types';
 export const BlockedUsersScreen: React.FC = () => {
   const colors = useColors();
   const toast = useToast();
-  const { data: blockedUsers, isLoading, refetch } = useBlockedUsers();
+  const { data: blockedUsers = [], isLoading, refetch } = useBlockedUsers();
   const unblock = useUnblock();
+
+  // Loading timeout protection
+  useLoadingTimeout(isLoading && blockedUsers.length === 0, {
+    timeout: 30000,
+    onTimeout: () => {
+      toast.error('Yükleme zaman aşımına uğradı. Lütfen tekrar deneyin.');
+    },
+    onRetry: async () => {
+      await refetch();
+    },
+  });
 
   const handleUnblock = useCallback(
     async (user: BlockedUser) => {
@@ -69,6 +87,12 @@ export const BlockedUsersScreen: React.FC = () => {
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
+        <UnifiedScreenHeader
+          variant="default"
+          title="Engellenen Kullanıcılar"
+          showBackButton
+          showBorder
+        />
         <Loading message="Yükleniyor..." />
       </SafeAreaView>
     );
@@ -90,7 +114,7 @@ export const BlockedUsersScreen: React.FC = () => {
             description="Engellediğiniz kullanıcılar burada görünecektir"
           />
         }
-        contentContainerStyle={(!blockedUsers || blockedUsers.length === 0) && styles.emptyContent}
+        contentContainerStyle={blockedUsers.length === 0 ? styles.emptyContent : undefined}
       />
     </SafeAreaView>
   );

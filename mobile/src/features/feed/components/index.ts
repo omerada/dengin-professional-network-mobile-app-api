@@ -15,10 +15,6 @@ export { DoubleTapLike } from './DoubleTapLike';
 // Loading components
 export { FeedSkeleton, PostSkeleton } from './FeedSkeleton';
 
-// FeedHeader modular structure
-export { FeedHeader } from './FeedHeader/index';
-export type { FeedHeaderProps, ProfessionInfo } from './FeedHeader/FeedHeader.types';
-
 // EmptyFeed modular structure
 export { EmptyFeed } from './EmptyFeed';
 

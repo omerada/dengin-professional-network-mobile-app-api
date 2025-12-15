@@ -48,7 +48,7 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
     testID,
   }) => {
     const navigation = useNavigation();
-    const { triggerSocial, trigger } = useSemanticHaptic();
+    const { triggerSocial, triggerSystem, triggerNavigation } = useSemanticHaptic();
     const toast = useToast();
     const colors = useColors();
 
@@ -67,43 +67,51 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
       if (isFollowing) {
         unfollowMutation.mutate(userId, {
           onSuccess: () => {
-            trigger('success');
+            triggerSystem('success');
             toast.success('Takipten çıkıldı');
             onFollowChange?.(false);
           },
           onError: () => {
-            trigger('error');
+            triggerSystem('error');
             toast.error('Takipten çıkılamadı');
           },
         });
       } else {
         followMutation.mutate(userId, {
           onSuccess: () => {
-            trigger('success');
+            triggerSystem('success');
             toast.success('Takip edildi');
             onFollowChange?.(true);
           },
           onError: () => {
-            trigger('error');
+            triggerSystem('error');
             toast.error('Takip edilemedi');
           },
         });
       }
-    }, [userId, isFollowing, followMutation, unfollowMutation, onFollowChange, trigger]);
+    }, [
+      userId,
+      isFollowing,
+      followMutation,
+      unfollowMutation,
+      onFollowChange,
+      triggerSystem,
+      triggerSocial,
+    ]);
 
     // Handle message button
     const handleMessagePress = useCallback(() => {
-      trigger('light');
+      triggerNavigation('navigate'); // Navigating to conversation
       // @ts-expect-error - navigation types not fully typed
       navigation.navigate('Conversation', {
         userId,
         isNew: true,
       });
-    }, [navigation, userId, trigger]);
+    }, [navigation, userId, triggerNavigation]);
 
     // Handle more options
     const handleMorePress = useCallback(() => {
-      trigger('light');
+      triggerSystem('confirm'); // Opening options menu
 
       Alert.alert('Seçenekler', '', [
         {
@@ -124,24 +132,24 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
                     if (isBlocked) {
                       unblockMutation.mutate(userId, {
                         onSuccess: () => {
-                          trigger('success');
+                          triggerSystem('success');
                           toast.success('Engel kaldırıldı');
                           onBlockChange?.(false);
                         },
                         onError: () => {
-                          trigger('error');
+                          triggerSystem('error');
                           toast.error('Engel kaldırılamadı');
                         },
                       });
                     } else {
                       blockMutation.mutate(userId, {
                         onSuccess: () => {
-                          trigger('warning');
+                          triggerSystem('alert');
                           toast.success('Kullanıcı engellendi');
                           onBlockChange?.(true);
                         },
                         onError: () => {
-                          trigger('error');
+                          triggerSystem('error');
                           toast.error('Engellenemedi');
                         },
                       });
@@ -164,7 +172,15 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
         },
         { text: 'İptal', style: 'cancel' },
       ]);
-    }, [isBlocked, navigation, userId, blockMutation, unblockMutation, onBlockChange, trigger]);
+    }, [
+      isBlocked,
+      navigation,
+      userId,
+      blockMutation,
+      unblockMutation,
+      onBlockChange,
+      triggerSystem,
+    ]);
 
     return (
       <Animated.View

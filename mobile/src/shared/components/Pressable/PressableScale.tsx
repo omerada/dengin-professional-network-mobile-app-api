@@ -19,7 +19,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useHaptic } from '@shared/hooks';
 import { spring } from '@theme/animations';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);

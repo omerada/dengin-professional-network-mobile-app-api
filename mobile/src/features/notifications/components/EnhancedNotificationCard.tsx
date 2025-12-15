@@ -12,7 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { spacing, fontSize, borderRadius } from '@theme';
 import type { NotificationResponse, NotificationType } from '../types';
 
@@ -129,7 +129,7 @@ const getNotificationConfig = (
 export const EnhancedNotificationCard: React.FC<EnhancedNotificationCardProps> = memo(
   ({ notification, onPress, onAccept, onDecline, onDismiss, showActions = true }) => {
     const colors = useColors();
-    const { trigger } = useHaptic();
+    const { triggerNavigation, triggerSystem } = useSemanticHaptic();
 
     // Animation
     const scale = useSharedValue(1);
@@ -143,19 +143,19 @@ export const EnhancedNotificationCard: React.FC<EnhancedNotificationCardProps> =
     }, [scale]);
 
     const handlePress = useCallback(() => {
-      trigger('light');
+      triggerNavigation('navigate');
       onPress?.(notification);
-    }, [trigger, onPress, notification]);
+    }, [triggerNavigation, onPress, notification]);
 
     const handleAccept = useCallback(() => {
-      trigger('success');
+      triggerSystem('success');
       onAccept?.(notification);
-    }, [trigger, onAccept, notification]);
+    }, [triggerSystem, onAccept, notification]);
 
     const handleDecline = useCallback(() => {
-      trigger('light');
+      triggerSystem('cancel');
       onDecline?.(notification);
-    }, [trigger, onDecline, notification]);
+    }, [triggerSystem, onDecline, notification]);
 
     const animatedStyle = useAnimatedStyle(() => ({
       transform: [{ scale: scale.value }],

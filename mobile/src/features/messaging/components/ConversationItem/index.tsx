@@ -5,7 +5,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks';
+import { useSemanticHaptic } from '@shared/hooks';
 import { useMessagingStore } from '../../stores';
 import { styles } from './ConversationItem.styles';
 import { ConversationAvatar } from './ConversationAvatar';
@@ -66,7 +66,7 @@ const getLastMessagePreview = (
 export const ConversationItem: React.FC<ConversationItemProps> = memo(
   ({ conversation, onPress, onLongPress, style }) => {
     const colors = useColors();
-    const { trigger: triggerHaptic } = useHaptic();
+    const { triggerNavigation, triggerSystem } = useSemanticHaptic();
     const { typingUsers, onlineUsers } = useMessagingStore();
 
     // Typing and online status
@@ -85,21 +85,21 @@ export const ConversationItem: React.FC<ConversationItemProps> = memo(
     // Callbacks
     const handlePress = useCallback(() => {
       try {
-        triggerHaptic('selection');
+        triggerNavigation('navigate');
         onPress?.(conversation);
       } catch (error) {
         console.error('[ConversationItem] Error in handlePress:', error);
       }
-    }, [conversation, onPress, triggerHaptic]);
+    }, [conversation, onPress, triggerNavigation]);
 
     const handleLongPress = useCallback(() => {
       try {
-        triggerHaptic('medium');
+        triggerSystem('confirm');
         onLongPress?.(conversation);
       } catch (error) {
         console.error('[ConversationItem] Error in handleLongPress:', error);
       }
-    }, [conversation, onLongPress, triggerHaptic]);
+    }, [conversation, onLongPress, triggerSystem]);
 
     // Dynamic text styles
     const dynamicStyles = useMemo(

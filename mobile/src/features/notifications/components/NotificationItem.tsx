@@ -8,7 +8,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { ProgressiveImage, PressableScale } from '@shared/components';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks';
+import { useSemanticHaptic } from '@shared/hooks';
 import { spacing } from '@theme';
 import type { NotificationResponse, NotificationType } from '../types';
 
@@ -99,24 +99,24 @@ const formatRelativeTime = (dateString: string): string => {
 export const NotificationItem: React.FC<NotificationItemProps> = memo(
   ({ notification, onPress, onLongPress }) => {
     const colors = useColors();
-    const { trigger } = useHaptic();
+    const { triggerNavigation, triggerSystem } = useSemanticHaptic();
 
     // Backend: read field (boolean)
     const isUnread = !notification.read;
 
     const handlePress = useCallback(() => {
       if (onPress) {
-        trigger('light');
+        triggerNavigation('navigate');
         onPress(notification);
       }
-    }, [onPress, notification, trigger]);
+    }, [onPress, notification, triggerNavigation]);
 
     const handleLongPress = useCallback(() => {
       if (onLongPress) {
-        trigger('medium');
+        triggerSystem('alert');
         onLongPress(notification);
       }
-    }, [onLongPress, notification, trigger]);
+    }, [onLongPress, notification, triggerSystem]);
 
     // Backend icon field (derived) veya type'dan hesapla
     const iconConfig = notification.icon

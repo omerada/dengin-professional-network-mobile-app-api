@@ -3,7 +3,7 @@
 // Backend: ConversationController, MessageWebSocketController
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Alert, StyleSheet } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -12,10 +12,11 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import { SAFE_AREA_EDGES, SCREEN_ANIMATIONS } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks';
+import { useToast } from '@contexts/ToastContext';
+import { useSemanticHaptic, useLoadingTimeout } from '@shared/hooks';
 import { useAuthStore } from '@features/auth/stores';
+import { UnifiedScreenHeader, KeyboardAwareScreen } from '@shared/components';
 import {
-  ChatHeader,
   MessageList,
   MessageInput,
   MessageOptionsSheet,
@@ -35,7 +36,8 @@ export const ChatScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ChatRouteProp>();
-  const { trigger: triggerHaptic } = useHaptic();
+  const { triggerMedia, triggerSystem, triggerContent } = useSemanticHaptic();
+  const toast = useToast();
 
   // Route params - Backend Conversation yapısıyla uyumlu
   const routeParams = route.params as {
@@ -101,6 +103,17 @@ export const ChatScreen: React.FC = () => {
     fetchNextPage,
     markAsRead,
   } = useMessages(conversationId, currentUserId);
+
+  // Loading timeout protection
+  useLoadingTimeout(isLoading && messages.length === 0, {
+    timeout: 30000,
+    onTimeout: () => {
+      toast.error('Mesajlar yüklenirken zaman aşımı oluştu. Lütfen tekrar deneyin.');
+    },
+    onRetry: async () => {
+      await refetch();
+    },
+  });
 
   const {
     sendMessage,
@@ -175,7 +188,7 @@ export const ChatScreen: React.FC = () => {
     const trimmedText = messageText.trim();
     if (!trimmedText || !recipientId) return;
 
-    triggerHaptic('light');
+    triggerSystem('success'); // Send message
 
     sendMessage({
       content: trimmedText,
@@ -184,7 +197,7 @@ export const ChatScreen: React.FC = () => {
 
     setMessageText('');
     clearDraft(conversationId);
-  }, [conversationId, messageText, recipientId, sendMessage, clearDraft, triggerHaptic]);
+  }, [conversationId, messageText, recipientId, sendMessage, clearDraft, triggerSystem]);
 
   const handleTextChange = useCallback(
     (text: string) => {
@@ -200,27 +213,27 @@ export const ChatScreen: React.FC = () => {
 
   // P2: Media attachment handlers
   const handleImagePick = useCallback(() => {
-    triggerHaptic('light');
+    triggerMedia('select');
     Alert.alert('Resim Seç', 'Bu özellik yakında eklenecek');
-  }, [triggerHaptic]);
+  }, [triggerMedia]);
 
   const handleCameraOpen = useCallback(() => {
-    triggerHaptic('light');
+    triggerMedia('capture');
     Alert.alert('Kamera', 'Bu özellik yakında eklenecek');
-  }, [triggerHaptic]);
+  }, [triggerMedia]);
 
   const handleVoiceRecord = useCallback(() => {
-    triggerHaptic('medium');
+    triggerMedia('capture');
     Alert.alert('Sesli Mesaj', 'Bu özellik yakında eklenecek');
-  }, [triggerHaptic]);
+  }, [triggerMedia]);
 
   const handleMessageLongPress = useCallback(
     (message: Message | ClientMessage) => {
-      triggerHaptic('medium');
+      triggerContent('edit');
       setSelectedMessage(message as Message);
       messageOptionsRef.current?.open();
     },
-    [triggerHaptic],
+    [triggerContent],
   );
 
   const handleDeleteMessage = useCallback(
@@ -262,27 +275,6 @@ export const ChatScreen: React.FC = () => {
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Display data
-  const displayParticipant: Participant = participant || {
-    userId: 0,
-    fullName: 'Konuşma',
-    profession: '',
-    profileImageUrl: null,
-    verified: false,
-    online: false,
-    lastSeenAt: null,
-  };
-
-  // Create a conversation object for ChatHeader
-  const displayConversation: Conversation = {
-    conversationId,
-    participant: displayParticipant,
-    lastMessage: null,
-    unreadCount: 0,
-    updatedAt: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
-  };
-
   // Get typing users for this conversation
   const { typingUsers } = useMessagingStore();
   const conversationTypingUsers = typingUsers[conversationId] || [];
@@ -293,11 +285,17 @@ export const ChatScreen: React.FC = () => {
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.background.primary }]}
         edges={SAFE_AREA_EDGES.standard}>
-        <ChatHeader
-          conversation={displayConversation}
+        <UnifiedScreenHeader
+          variant="chat"
           onBackPress={handleBackPress}
-          onProfilePress={handleProfilePress}
-          onOptionsPress={handleOptionsPress}
+          chatProps={{
+            avatar: participant?.profileImageUrl || undefined,
+            name: participant?.fullName || 'Yükleniyor...',
+            subtitle: undefined,
+            isOnline: false,
+            onProfilePress: handleProfilePress,
+            onOptionsPress: handleOptionsPress,
+          }}
         />
         <ChatSkeleton count={8} />
       </SafeAreaView>
@@ -308,17 +306,21 @@ export const ChatScreen: React.FC = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={SAFE_AREA_EDGES.standard}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
+      <KeyboardAwareScreen mode="padding">
         <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={styles.content}>
-          {/* Header */}
-          <ChatHeader
-            conversation={displayConversation}
+          {/* Unified Header */}
+          <UnifiedScreenHeader
+            variant="chat"
             onBackPress={handleBackPress}
-            onProfilePress={handleProfilePress}
-            onOptionsPress={handleOptionsPress}
+            chatProps={{
+              avatar: participant?.profileImageUrl || undefined,
+              name: participant?.fullName || 'Kullanıcı',
+              subtitle: participant?.online ? 'çevrimiçi' : undefined,
+              isOnline: participant?.online || false,
+              isTyping: conversationTypingUsers.length > 0,
+              onProfilePress: handleProfilePress,
+              onOptionsPress: handleOptionsPress,
+            }}
           />
 
           {/* Messages */}
@@ -355,7 +357,7 @@ export const ChatScreen: React.FC = () => {
             onReport={handleReportMessage}
           />
         </Animated.View>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScreen>
     </SafeAreaView>
   );
 };

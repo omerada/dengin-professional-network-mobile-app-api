@@ -13,7 +13,7 @@ import Animated, {
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { spring } from '@theme/animations';
 
 import { styles } from './ProfileHeader.styles';
@@ -44,7 +44,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 export const ProfileHeader: React.FC<ProfileHeaderProps> = memo(
   ({ profile, isOwnProfile = false, onAvatarPress, testID }) => {
     const colors = useColors();
-    const { trigger } = useHaptic();
+    const { triggerMedia } = useSemanticHaptic();
 
     // Animation values
     const avatarScale = useSharedValue(1);
@@ -87,13 +87,13 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = memo(
     const handleAvatarPress = useCallback(() => {
       if (!isOwnProfile) return;
 
-      trigger('light');
+      triggerMedia('select');
       avatarScale.value = withSpring(0.96, spring.press);
       setTimeout(() => {
         avatarScale.value = withSpring(1, spring.snappy);
       }, 100);
       onAvatarPress?.();
-    }, [isOwnProfile, onAvatarPress, trigger, avatarScale]);
+    }, [isOwnProfile, onAvatarPress, triggerMedia, avatarScale]);
 
     return (
       <View style={styles.container} testID={testID}>

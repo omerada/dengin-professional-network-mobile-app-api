@@ -16,7 +16,7 @@ import Animated, {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { spring } from '@theme/animations';
 import { styles, TAB_ICON_SIZE, CENTER_FAB_ICON_SIZE } from './AnimatedTabBar.styles';
 import type { AnimatedTabBarProps, TabButtonProps } from './AnimatedTabBar.types';
@@ -29,7 +29,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const TabButton: React.FC<TabButtonProps> = memo(({ item, focused, onPress, onLongPress }) => {
   const colors = useColors();
-  const { trigger } = useHaptic();
+  const { triggerNavigation } = useSemanticHaptic();
 
   // Determine if this is the center FAB
   const isCenterFab = item.isCenterFab ?? false;
@@ -53,19 +53,19 @@ const TabButton: React.FC<TabButtonProps> = memo(({ item, focused, onPress, onLo
 
   // Handle press - UNIFIED: Standardized press scale (0.96)
   const handlePress = useCallback(() => {
-    trigger('selection');
+    triggerNavigation('navigate');
     scale.value = withSequence(
       withSpring(0.96, { damping: 15, stiffness: 500, mass: 0.5 }),
       withSpring(1, spring.snappy),
     );
     onPress();
-  }, [onPress, trigger, scale]);
+  }, [onPress, triggerNavigation, scale]);
 
   // Handle long press
   const handleLongPress = useCallback(() => {
-    trigger('heavy');
+    triggerNavigation('navigate');
     onLongPress();
-  }, [onLongPress, trigger]);
+  }, [onLongPress, triggerNavigation]);
 
   // Animated styles
   const containerStyle = useAnimatedStyle(() => ({

@@ -13,8 +13,7 @@ import Animated, {
   interpolate,
   Extrapolation,
 } from 'react-native-reanimated';
-import { useHaptic } from '@shared/hooks/useHaptic';
-import { HAPTIC_TYPES } from '@constants/hapticPresets';
+import { useSemanticHaptic } from '@shared/hooks';
 import { spring } from '@theme/animations';
 
 export interface SwipeableCardProps {
@@ -96,15 +95,15 @@ export const SwipeableCard: React.FC<SwipeableCardProps> = memo(
     renderRightAction,
     style,
   }) => {
-    const haptic = useHaptic();
+    const { triggerSystem } = useSemanticHaptic();
 
     const translateX = useSharedValue(0);
     const contextX = useSharedValue(0);
     const hasTriggeredHaptic = useRef(false);
 
     const triggerHaptic = useCallback(() => {
-      haptic.trigger(HAPTIC_TYPES.selection);
-    }, [haptic]);
+      triggerSystem('confirm');
+    }, [triggerSystem]);
 
     const resetPosition = useCallback(() => {
       translateX.value = withSpring(0, spring.press);

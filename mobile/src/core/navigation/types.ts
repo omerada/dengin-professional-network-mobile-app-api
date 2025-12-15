@@ -27,7 +27,7 @@ export type RootStackParamList = {
  * Auth Stack Parameter List
  */
 export type AuthStackParamList = {
-  Onboarding: undefined;
+  Onboarding: { initialSlide?: number } | undefined;
   Welcome: undefined;
   Login: undefined;
   Register: undefined;

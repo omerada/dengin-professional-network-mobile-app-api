@@ -14,9 +14,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { SAFE_AREA_EDGES, HAPTIC_TYPES } from '@constants';
+import { SAFE_AREA_EDGES } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { spacing } from '@theme';
 import { useAuthStore } from '@features/auth/stores';
 import {
@@ -47,7 +47,7 @@ type PostDetailNavigationProp = NativeStackNavigationProp<FeedStackParamList, 'P
 
 export const PostDetailScreen: React.FC = () => {
   const colors = useColors();
-  const { trigger } = useHaptic();
+  const { triggerContent } = useSemanticHaptic();
   const navigation = useNavigation<PostDetailNavigationProp>();
   const route = useRoute<PostDetailRouteProp>();
   const { postId } = route.params; // postId: number
@@ -102,9 +102,9 @@ export const PostDetailScreen: React.FC = () => {
   }, [bookmarkPost, post]);
 
   const handleRefresh = useCallback(() => {
-    trigger(HAPTIC_TYPES.pullToRefresh);
+    triggerContent('refresh');
     refetch();
-  }, [refetch, trigger]);
+  }, [refetch, triggerContent]);
 
   const handleMenuPress = useCallback(() => {
     setShowActionSheet(true);

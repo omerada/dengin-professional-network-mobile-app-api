@@ -27,7 +27,7 @@ import {
 import { SCREEN_ANIMATIONS } from '@constants';
 import { fontSize, spacing } from '@theme';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 
 import { NotificationList } from '../components/NotificationList';
 import { PermissionPrompt } from '../components/PermissionPrompt';
@@ -57,7 +57,7 @@ type NavigationProp = NativeStackNavigationProp<FeedStackParamList>;
 export const NotificationsScreen: React.FC = memo(() => {
   const colors = useColors();
   const navigation = useNavigation<NavigationProp>();
-  const { trigger } = useHaptic();
+  const { triggerNavigation, triggerSystem } = useSemanticHaptic();
   const { markAllAsRead, isPending: isMarkingAllAsRead } = useMarkAllAsRead();
   const { isPermissionGranted, requestPermission } = useNotificationPermission();
   const { unreadCount } = useUnreadCount();
@@ -86,7 +86,7 @@ export const NotificationsScreen: React.FC = memo(() => {
    */
   const handleNotificationPress = useCallback(
     (notification: NotificationResponse) => {
-      trigger('light');
+      triggerNavigation('navigate');
       const type = notification.type as NotificationType;
       const metadata = notification.metadata;
 
@@ -149,7 +149,7 @@ export const NotificationsScreen: React.FC = memo(() => {
         }
       });
     },
-    [navigation, trigger],
+    [navigation, triggerNavigation],
   );
 
   /**
@@ -158,7 +158,7 @@ export const NotificationsScreen: React.FC = memo(() => {
   const handleMarkAllAsRead = useCallback(() => {
     if (unreadCount === 0) return;
 
-    trigger('medium');
+    triggerSystem('alert');
     Alert.alert(
       'Tümünü Okundu İşaretle',
       `${unreadCount} okunmamış bildirim okundu olarak işaretlenecek.`,
@@ -169,28 +169,28 @@ export const NotificationsScreen: React.FC = memo(() => {
           style: 'default',
           onPress: () => {
             markAllAsRead();
-            trigger('success');
+            triggerSystem('success');
           },
         },
       ],
     );
-  }, [unreadCount, markAllAsRead, trigger]);
+  }, [unreadCount, markAllAsRead, triggerSystem]);
 
   /**
    * Navigate to notification settings
    */
   const handleSettingsPress = useCallback(() => {
-    trigger('light');
+    triggerNavigation('navigate');
     navigation.navigate('NotificationSettings');
-  }, [navigation, trigger]);
+  }, [navigation, triggerNavigation]);
 
   /**
    * Go back to previous screen
    */
   const handleBack = useCallback(() => {
-    trigger('light');
+    triggerNavigation('back');
     navigation.goBack();
-  }, [navigation, trigger]);
+  }, [navigation, triggerNavigation]);
 
   /**
    * Handle permission request

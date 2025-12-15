@@ -29,7 +29,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing, fontSize, borderRadius } from '@theme';
 import { spring as springPresets } from '@theme/animations';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { UNIFIED_TIMING } from '@constants/unifiedTiming';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -97,7 +97,7 @@ export const Modal: React.FC<ModalProps> = memo(
     testID,
   }) => {
     const colors = useColors();
-    const haptic = useHaptic();
+    const { triggerNavigation } = useSemanticHaptic();
 
     // Close button animation
     const closeButtonScale = useSharedValue(1);
@@ -107,9 +107,9 @@ export const Modal: React.FC<ModalProps> = memo(
     }));
 
     const handleClosePress = useCallback(() => {
-      haptic.light();
+      triggerNavigation('back');
       onClose();
-    }, [haptic, onClose]);
+    }, [triggerNavigation, onClose]);
 
     return (
       <RNModal
@@ -231,7 +231,7 @@ export interface BottomSheetProps {
 export const BottomSheet: React.FC<BottomSheetProps> = memo(
   ({ visible, onClose, title, children, height = 'auto', swipeToDismiss = true, testID }) => {
     const colors = useColors();
-    const haptic = useHaptic();
+    const { triggerNavigation } = useSemanticHaptic();
     const translateY = useSharedValue(0);
     const isClosing = useSharedValue(false);
 
@@ -244,9 +244,9 @@ export const BottomSheet: React.FC<BottomSheetProps> = memo(
     }, [visible, translateY, isClosing]);
 
     const handleClose = useCallback(() => {
-      haptic.light();
+      triggerNavigation('back');
       onClose();
-    }, [haptic, onClose]);
+    }, [triggerNavigation, onClose]);
 
     // Pan gesture for swipe to dismiss
     const panGesture = Gesture.Pan()

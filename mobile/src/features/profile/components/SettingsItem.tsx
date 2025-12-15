@@ -6,10 +6,9 @@ import React, { memo, useCallback } from 'react';
 import { View, Text, StyleSheet, Switch, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks';
+import { useSemanticHaptic } from '@shared/hooks';
 import { PressableScale } from '@shared/components';
 import { spacing, fontSize, borderRadius } from '@theme';
-import { HAPTIC_TYPES } from '@constants';
 import type { SettingsItemType } from '../types';
 
 interface SettingsItemProps extends SettingsItemType {
@@ -31,19 +30,19 @@ interface SettingsItemProps extends SettingsItemType {
 export const SettingsItem: React.FC<SettingsItemProps> = memo(
   ({ id: _id, title, subtitle, icon, type, value, onPress, onToggle, isLoading = false }) => {
     const colors = useColors();
-    const { trigger } = useHaptic();
+    const { triggerNavigation, triggerSystem } = useSemanticHaptic();
 
     const handlePress = useCallback(() => {
       if (!isLoading && onPress) {
         // Haptic feedback based on type
         if (type === 'danger') {
-          trigger(HAPTIC_TYPES.warning);
+          triggerSystem('alert');
         } else {
-          trigger(HAPTIC_TYPES.buttonPress);
+          triggerNavigation('navigate');
         }
         onPress();
       }
-    }, [isLoading, onPress, type, trigger]);
+    }, [isLoading, onPress, type, triggerNavigation, triggerSystem]);
 
     const handleToggle = useCallback(
       (newValue: boolean) => {

@@ -17,7 +17,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { shadows } from '@theme/shadows';
 import { spring } from '@theme/animations';
 
@@ -55,7 +55,7 @@ export const Toast: React.FC<ToastProps> = memo(
   ({ toast, onHide, position = 'top', animation = 'slide', style, testID }) => {
     const colors = useColors();
     const insets = useSafeAreaInsets();
-    const { trigger } = useHaptic();
+    const { triggerSystem } = useSemanticHaptic();
 
     // Animation values
     const translateY = useSharedValue(position === 'top' ? -100 : 100);
@@ -99,11 +99,11 @@ export const Toast: React.FC<ToastProps> = memo(
     useEffect(() => {
       // Trigger haptic based on type
       if (toast.type === 'error') {
-        trigger('notificationError');
+        triggerSystem('error');
       } else if (toast.type === 'success') {
-        trigger('notificationSuccess');
+        triggerSystem('success');
       } else {
-        trigger('impactLight');
+        triggerSystem('confirm');
       }
 
       // Show animation

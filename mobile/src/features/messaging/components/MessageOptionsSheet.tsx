@@ -1,13 +1,14 @@
 // src/features/messaging/components/MessageOptionsSheet.tsx
-// Mesaj seçenekleri alt sayfası - Clean Modal Solution
+// Mesaj seçenekleri alt sayfası - Modern BottomSheet Implementation
 // Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
 
 import React, { memo, useCallback, forwardRef, useImperativeHandle, useState } from 'react';
-import { View, Text, StyleSheet, Pressable, Modal } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
-import Animated, { SlideInDown } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
+import { BottomSheet } from '@shared/components';
+import { spacing } from '@theme';
 import type { Message } from '../types';
 
 interface MessageOptionsSheetProps {
@@ -100,95 +101,61 @@ export const MessageOptionsSheet = forwardRef<MessageOptionsSheetRef, MessageOpt
     }, [message, onReport, handleClose]);
 
     return (
-      <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
-        <Pressable style={styles.modalOverlay} onPress={handleClose}>
-          <Animated.View
-            entering={SlideInDown.duration(300).springify()}
-            style={[styles.modalContent, { backgroundColor: colors.background.primary }]}>
-            {/* Handle indicator */}
-            <View style={[styles.handleIndicator, { backgroundColor: colors.text.tertiary }]} />
-
-            <View style={styles.content}>
-              {/* Message preview */}
-              {message && (
-                <View style={[styles.preview, { backgroundColor: colors.background.secondary }]}>
-                  <Text
-                    style={[styles.previewText, { color: colors.text.secondary }]}
-                    numberOfLines={2}>
-                    {message.content}
-                  </Text>
-                </View>
-              )}
-
-              {/* Options */}
-              <View style={styles.options}>
-                <OptionItem icon="arrow-undo-outline" label="Yanıtla" onPress={handleReply} />
-
-                <OptionItem icon="copy-outline" label="Kopyala" onPress={handleCopy} />
-
-                {isOwn ? (
-                  <OptionItem icon="trash-outline" label="Sil" onPress={handleDelete} destructive />
-                ) : (
-                  <OptionItem
-                    icon="flag-outline"
-                    label="Bildir"
-                    onPress={handleReport}
-                    destructive
-                  />
-                )}
-              </View>
+      <BottomSheet visible={visible} onClose={handleClose} height="auto" swipeToDismiss={true}>
+        <View style={styles.content}>
+          {/* Message preview */}
+          {message && (
+            <View style={[styles.preview, { backgroundColor: colors.background.secondary }]}>
+              <Text
+                style={[styles.previewText, { color: colors.text.secondary }]}
+                numberOfLines={2}>
+                {message.content}
+              </Text>
             </View>
-          </Animated.View>
-        </Pressable>
-      </Modal>
+          )}
+
+          {/* Options */}
+          <View style={styles.options}>
+            <OptionItem icon="arrow-undo-outline" label="Yanıtla" onPress={handleReply} />
+
+            <OptionItem icon="copy-outline" label="Kopyala" onPress={handleCopy} />
+
+            {isOwn ? (
+              <OptionItem icon="trash-outline" label="Sil" onPress={handleDelete} destructive />
+            ) : (
+              <OptionItem icon="flag-outline" label="Bildir" onPress={handleReport} destructive />
+            )}
+          </View>
+        </View>
+      </BottomSheet>
     );
   },
 );
 
 MessageOptionsSheet.displayName = 'MessageOptionsSheet';
 
-const MODAL_OVERLAY_BG = 'rgba(0, 0, 0, 0.5)';
-
 const styles = StyleSheet.create({
   content: {
-    paddingBottom: 16,
-  },
-  handleIndicator: {
-    alignSelf: 'center',
-    borderRadius: 2,
-    height: 4,
-    marginBottom: 16,
-    marginTop: 8,
-    width: 40,
-  },
-  modalContent: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingBottom: 32,
-  },
-  modalOverlay: {
-    backgroundColor: MODAL_OVERLAY_BG,
-    flex: 1,
-    justifyContent: 'flex-end',
+    paddingBottom: spacing['4'],
   },
   optionItem: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    gap: spacing['4'],
+    paddingHorizontal: spacing['4'],
+    paddingVertical: spacing['3.5'],
   },
   optionLabel: {
     fontSize: 16,
   },
   options: {
-    paddingTop: 8,
+    paddingTop: spacing['2'],
   },
   preview: {
-    borderRadius: 8,
-    marginHorizontal: 16,
-    marginVertical: 8,
-    padding: 12,
+    borderRadius: spacing['2'],
+    marginHorizontal: spacing['4'],
+    marginVertical: spacing['2'],
+    padding: spacing['3'],
   },
   previewText: {
     fontSize: 14,

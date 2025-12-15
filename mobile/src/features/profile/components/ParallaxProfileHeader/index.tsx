@@ -16,7 +16,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { Button } from '@shared/components';
 import { spring } from '@theme/animations';
 
@@ -63,7 +63,7 @@ export const ParallaxProfileHeader: React.FC<ParallaxProfileHeaderProps> = memo(
   }) => {
     const colors = useColors();
     const insets = useSafeAreaInsets();
-    const { trigger } = useHaptic();
+    const { triggerMedia, triggerNavigation, triggerSocial } = useSemanticHaptic();
 
     // Local animation values
     const avatarScale = useSharedValue(1);
@@ -170,37 +170,37 @@ export const ParallaxProfileHeader: React.FC<ParallaxProfileHeaderProps> = memo(
 
     const handleAvatarPress = useCallback(() => {
       if (!onAvatarPress) return;
-      trigger('light');
+      triggerMedia('select');
       avatarScale.value = withSpring(0.96, spring.press);
       setTimeout(() => {
         avatarScale.value = withSpring(1, spring.snappy);
       }, 100);
       onAvatarPress();
-    }, [onAvatarPress, trigger, avatarScale]);
+    }, [onAvatarPress, triggerMedia, avatarScale]);
 
     const handleSettingsPress = useCallback(() => {
-      trigger('light');
+      triggerNavigation('navigate');
       onSettingsPress?.();
-    }, [onSettingsPress, trigger]);
+    }, [onSettingsPress, triggerNavigation]);
 
     const handleFollowPress = useCallback(() => {
-      trigger('medium');
+      triggerSocial('follow');
       buttonScale.value = withSpring(0.96, spring.press);
       setTimeout(() => {
         buttonScale.value = withSpring(1, spring.snappy);
       }, 100);
       onFollowPress?.();
-    }, [onFollowPress, trigger, buttonScale]);
+    }, [onFollowPress, triggerSocial, buttonScale]);
 
     const handleEditPress = useCallback(() => {
-      trigger('light');
+      triggerNavigation('navigate');
       onEditPress?.();
-    }, [onEditPress, trigger]);
+    }, [onEditPress, triggerNavigation]);
 
     const handleMessagePress = useCallback(() => {
-      trigger('light');
+      triggerNavigation('navigate');
       onMessagePress?.();
-    }, [onMessagePress, trigger]);
+    }, [onMessagePress, triggerNavigation]);
 
     return (
       <Animated.View

@@ -1,8 +1,8 @@
 // src/features/social/screens/FollowingListScreen.tsx
-// Following list screen
+// Following list screen with search
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART5.md
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { FlatList } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -15,6 +15,7 @@ import {
   UnifiedEmptyState,
   AnimatedListItem,
   CustomRefreshControl,
+  UnifiedScreenHeader,
 } from '@shared/components';
 import { ErrorBoundary } from '@core/components';
 import { spacing } from '@theme';
@@ -35,6 +36,7 @@ export const FollowingListScreen: React.FC = () => {
   const colors = useColors();
   const route = useRoute();
   const { userId } = route.params as { userId: number };
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, refetch, isRefetching } =
     useFollowing(userId);
@@ -42,6 +44,22 @@ export const FollowingListScreen: React.FC = () => {
   const users = useMemo(() => {
     return data?.pages.flatMap(page => page.content) || [];
   }, [data]);
+
+  // Filter users by search query
+  const filteredUsers = useMemo(() => {
+    if (!searchQuery.trim()) return users;
+    const query = searchQuery.toLowerCase();
+    return users.filter(user => {
+      const nameMatch = user.fullName.toLowerCase().includes(query);
+      const professionMatch =
+        user.profession && typeof user.profession === 'string'
+          ? (user.profession as string).toLowerCase().includes(query)
+          : user.profession && typeof user.profession === 'object'
+            ? (user.profession as any).name?.toLowerCase().includes(query)
+            : false;
+      return nameMatch || professionMatch;
+    });
+  }, [users, searchQuery]);
 
   const handleEndReached = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -73,6 +91,17 @@ export const FollowingListScreen: React.FC = () => {
 
   const ListEmptyComponent = useMemo(() => {
     if (isLoading) return null;
+
+    if (searchQuery.trim() && filteredUsers.length === 0) {
+      return (
+        <UnifiedEmptyState
+          icon="search-outline"
+          title="Sonuç Bulunamadı"
+          description={`"${searchQuery}" için takip edilen bulunamadı`}
+        />
+      );
+    }
+
     return (
       <UnifiedEmptyState
         icon="person-add-outline"
@@ -80,7 +109,7 @@ export const FollowingListScreen: React.FC = () => {
         description="Bu kullanıcı henüz kimseyi takip etmiyor"
       />
     );
-  }, [isLoading]);
+  }, [isLoading, searchQuery, filteredUsers]);
 
   const ItemSeparatorComponent = useCallback(
     () => <View style={[styles.separator, { backgroundColor: colors.border.default }]} />,
@@ -100,8 +129,18 @@ export const FollowingListScreen: React.FC = () => {
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['bottom']}>
       <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={{ flex: 1 }}>
+        <UnifiedScreenHeader
+          variant="search"
+          title="Takip Edilenler"
+          showBackButton
+          searchProps={{
+            placeholder: 'Takip edilenlerde ara...',
+            value: searchQuery,
+            onChangeText: setSearchQuery,
+          }}
+        />
         <FlatList
-          data={users}
+          data={filteredUsers}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           onEndReached={handleEndReached}

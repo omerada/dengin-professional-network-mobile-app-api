@@ -32,8 +32,8 @@ export const VerificationNavigator: React.FC = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: true,
         ...UNIFIED_NAVIGATION.SCREEN,
+        headerShown: true,
         headerStyle: {
           backgroundColor: colors.background.primary,
         },

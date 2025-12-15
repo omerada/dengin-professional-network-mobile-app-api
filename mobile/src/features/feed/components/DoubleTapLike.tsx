@@ -14,7 +14,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { useTheme } from '@contexts/ThemeContext';
 
 // ============================================================================
@@ -83,7 +83,7 @@ export const DoubleTapLike = memo<DoubleTapLikeProps>(
     testID,
   }) => {
     const { colors } = useTheme();
-    const { heavy } = useHaptic();
+    const { triggerSocial } = useSemanticHaptic();
 
     // Animation values
     const heartScale = useSharedValue(0);
@@ -101,7 +101,7 @@ export const DoubleTapLike = memo<DoubleTapLikeProps>(
     const showHeart = useCallback(() => {
       // Only trigger if not already liked
       if (!isLiked) {
-        heavy(); // Instagram-style heavy haptic
+        triggerSocial('like'); // Instagram-style heavy haptic
       }
 
       // Reset values
@@ -128,7 +128,15 @@ export const DoubleTapLike = memo<DoubleTapLikeProps>(
 
       // Trigger callback
       onDoubleTap();
-    }, [heavy, isLiked, heartScale, heartOpacity, heartRotation, heartDuration, onDoubleTap]);
+    }, [
+      triggerSocial,
+      isLiked,
+      heartScale,
+      heartOpacity,
+      heartRotation,
+      heartDuration,
+      onDoubleTap,
+    ]);
 
     // Handle single tap
     const handleSingleTap = useCallback(() => {

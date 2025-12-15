@@ -19,10 +19,10 @@ export const styles = StyleSheet.create({
     height: TAB_BADGE_SIZE,
     justifyContent: 'center',
     minWidth: TAB_BADGE_SIZE,
-    paddingHorizontal: 4,
+    paddingHorizontal: spacing['1'],
     position: 'absolute',
-    right: 6,
-    top: -4,
+    right: spacing['1.5'],
+    top: -spacing['1'],
   },
   badgeText: {
     fontSize: 10,
@@ -45,7 +45,7 @@ export const styles = StyleSheet.create({
   centerFabLabel: {
     fontSize: 9,
     fontWeight: '600',
-    marginTop: 4,
+    marginTop: spacing['1'],
     textAlign: 'center',
   },
   container: {

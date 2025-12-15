@@ -4,19 +4,25 @@
 // Oku: backend-development-guide/sprint-planning/26-SPRINT-7-8.md
 
 import React, { useCallback, useState } from 'react';
-import { View, StyleSheet, ActivityIndicator, TextInput, Pressable, Alert } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { SCREEN_ANIMATIONS, HAPTIC_TYPES } from '@constants';
+import { SCREEN_ANIMATIONS } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks';
+import { useToast } from '@contexts/ToastContext';
+import { useSemanticHaptic, useLoadingTimeout } from '@shared/hooks';
 import { ConversationItem, ConversationSkeleton } from '../components';
 import { useConversations, useSocket } from '../hooks';
-import { AnimatedListItem, UnifiedEmptyState, CustomRefreshControl } from '@shared/components';
+import {
+  AnimatedListItem,
+  UnifiedEmptyState,
+  CustomRefreshControl,
+  UnifiedScreenHeader,
+} from '@shared/components';
 import type { Conversation } from '../types';
 import type { MessagingStackParamList } from '@core/navigation/types';
 
@@ -25,7 +31,8 @@ type NavigationProp = NativeStackNavigationProp<MessagingStackParamList>;
 export const ConversationListScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation<NavigationProp>();
-  const { trigger } = useHaptic();
+  const { triggerNavigation } = useSemanticHaptic();
+  const toast = useToast();
 
   // State
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,6 +49,17 @@ export const ConversationListScreen: React.FC = () => {
     fetchNextPage,
   } = useConversations();
 
+  // Loading timeout protection
+  useLoadingTimeout(isLoading && conversations.length === 0, {
+    timeout: 30000,
+    onTimeout: () => {
+      toast.error('Konuşmalar yüklenirken zaman aşımı oluştu. Lütfen tekrar deneyin.');
+    },
+    onRetry: async () => {
+      await refetch();
+    },
+  });
+
   // Filtered conversations - participant.fullName ile arama
   const filteredConversations = searchQuery.trim()
     ? conversations.filter(
@@ -54,7 +72,7 @@ export const ConversationListScreen: React.FC = () => {
   // Handlers
   const handleConversationPress = useCallback(
     (conversation: Conversation) => {
-      trigger(HAPTIC_TYPES.listItemPress);
+      triggerNavigation('navigate');
       try {
         if (!conversation) {
           console.error('[ConversationList] Conversation is null/undefined');
@@ -84,7 +102,7 @@ export const ConversationListScreen: React.FC = () => {
         Alert.alert('Hata', 'Konuşma açılırken bir hata oluştu');
       }
     },
-    [navigation, trigger],
+    [navigation, triggerNavigation],
   );
 
   const handleConversationLongPress = useCallback(
@@ -166,33 +184,23 @@ export const ConversationListScreen: React.FC = () => {
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top']}>
       <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={{ flex: 1 }}>
+        {/* UnifiedScreenHeader with search variant */}
+        <UnifiedScreenHeader
+          variant="search"
+          title="Mesajlar"
+          searchProps={{
+            value: searchQuery,
+            onChangeText: setSearchQuery,
+            placeholder: 'Konuşmalarda ara...',
+          }}
+        />
+
         {/* Connection indicator */}
         {!isConnected && (
           <View style={[styles.connectionBar, { backgroundColor: colors.status.warning }]}>
             <Icon name="cloud-offline" size={16} color={colors.text.inverse} />
           </View>
         )}
-
-        {/* Search bar */}
-        <View style={[styles.searchContainer, { backgroundColor: colors.background.secondary }]}>
-          <View
-            style={[styles.searchInputContainer, { backgroundColor: colors.background.primary }]}>
-            <Icon name="search" size={18} color={colors.text.tertiary} />
-            <TextInput
-              style={[styles.searchInput, { color: colors.text.primary }]}
-              placeholder="Konuşmalarda ara..."
-              placeholderTextColor={colors.text.tertiary}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              returnKeyType="search"
-            />
-            {searchQuery.length > 0 && (
-              <Pressable onPress={() => setSearchQuery('')}>
-                <Icon name="close-circle" size={18} color={colors.text.tertiary} />
-              </Pressable>
-            )}
-          </View>
-        </View>
 
         {/* Loading state - Skeleton */}
         {isLoading && <ConversationSkeleton count={8} />}

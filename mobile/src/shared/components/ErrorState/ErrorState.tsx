@@ -8,7 +8,7 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { Button } from '../Button';
 import { spacing } from '@theme';
 
@@ -64,7 +64,7 @@ export const ErrorState = memo<ErrorStateProps>(
     testID = 'error-state',
   }) => {
     const colors = useColors();
-    const { trigger } = useHaptic();
+    const { triggerSystem } = useSemanticHaptic();
 
     // Get config for variant
     const config = ERROR_STATE_CONFIGS[variant];
@@ -77,10 +77,10 @@ export const ErrorState = memo<ErrorStateProps>(
     // Handle retry with haptic feedback
     const handleRetry = useCallback(() => {
       if (onRetry) {
-        trigger('light');
+        triggerSystem('retry');
         onRetry();
       }
-    }, [onRetry, trigger]);
+    }, [onRetry, triggerSystem]);
 
     return (
       <Animated.View

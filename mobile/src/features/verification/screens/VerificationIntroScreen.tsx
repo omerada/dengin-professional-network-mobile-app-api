@@ -9,7 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing, typography, fontSize } from '@theme';
-import { Button } from '@shared/components';
+import { Button, UnifiedScreenHeader } from '@shared/components';
 import { useSemanticHaptic } from '@shared/hooks';
 import { useVerificationStore } from '../stores';
 import { StepIndicator } from '../components';
@@ -69,6 +69,7 @@ export const VerificationIntroScreen: React.FC = memo(() => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top', 'bottom', 'left', 'right']}>
+      <UnifiedScreenHeader variant="default" title="Meslek Doğrulama" showBackButton showBorder />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}

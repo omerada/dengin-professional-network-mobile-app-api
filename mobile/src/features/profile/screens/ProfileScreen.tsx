@@ -9,9 +9,9 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { SCREEN_ANIMATIONS, SAFE_AREA_EDGES, HAPTIC_TYPES, UNIFIED_TIMING } from '@constants';
+import { SCREEN_ANIMATIONS, SAFE_AREA_EDGES, UNIFIED_TIMING } from '@constants';
 import { navigateToPostDetail, navigateToEditProfile, navigateToSettings } from '@core/navigation';
-import { useSemanticHaptic } from '@shared/hooks';
+import { useSemanticHaptic, useLoadingTimeout } from '@shared/hooks';
 
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
@@ -53,7 +53,7 @@ export const ProfileScreen: React.FC = memo(() => {
   const route = useRoute();
   const params = route.params as RouteParams | undefined;
   const currentUser = useAuthStore(state => state.user);
-  const { trigger } = useSemanticHaptic();
+  const { triggerNavigation, triggerSocial, triggerSystem } = useSemanticHaptic();
   const toast = useToast();
 
   // Follow mutations
@@ -84,6 +84,21 @@ export const ProfileScreen: React.FC = memo(() => {
   const isLoading = isOwnProfile ? isLoadingMyProfile : isLoadingOtherProfile;
   const isRefetching = isOwnProfile ? isRefetchingMyProfile : isRefetchingOtherProfile;
 
+  // Loading timeout protection
+  useLoadingTimeout(isLoading && !profile, {
+    timeout: 30000,
+    onTimeout: () => {
+      toast.error('Profil yüklenirken zaman aşımı oluştu. Lütfen tekrar deneyin.');
+    },
+    onRetry: async () => {
+      if (isOwnProfile) {
+        await refetchMyProfile();
+      } else {
+        await refetchOtherProfile();
+      }
+    },
+  });
+
   // Get user ID for stats
   const profileUserId = isOwnProfile ? (myProfile?.id ?? currentUser?.id) : viewedUserId;
 
@@ -109,37 +124,24 @@ export const ProfileScreen: React.FC = memo(() => {
         followingCount: 0,
       };
 
-    // Debug: Log stats with more details
-    if (__DEV__) {
-      console.log('═══════════════════════════════════════');
-      console.log('[ProfileScreen] 🔍 STATS DEBUG');
-      console.log('[ProfileScreen] profileUserId:', profileUserId);
-      console.log('[ProfileScreen] isOwnProfile:', isOwnProfile);
-      console.log('[ProfileScreen] Final stats:', result);
-      console.log('[ProfileScreen] Profile stats:', profile?.stats);
-      console.log('[ProfileScreen] Separate stats query:', profileStats);
-      console.log(
-        '[ProfileScreen] Profile object keys:',
-        profile ? Object.keys(profile) : 'no profile',
-      );
-      console.log('═══════════════════════════════════════');
-    }
-
     return result;
   }, [profile?.stats, profileStats, profileUserId, isOwnProfile]);
 
   // Handlers - UNIFIED: Navigation helpers with proper typing
   const handleAvatarPress = useCallback(() => {
+    triggerNavigation('navigate');
     navigateToEditProfile(navigation as any);
-  }, [navigation]);
+  }, [navigation, triggerNavigation]);
 
   const handleEditPress = useCallback(() => {
+    triggerNavigation('navigate');
     navigateToEditProfile(navigation as any);
-  }, [navigation]);
+  }, [navigation, triggerNavigation]);
 
   const handleSettingsPress = useCallback(() => {
+    triggerNavigation('navigate');
     navigateToSettings(navigation as any);
-  }, [navigation]);
+  }, [navigation, triggerNavigation]);
 
   const handleRefresh = useCallback(() => {
     if (isOwnProfile) {
@@ -152,11 +154,11 @@ export const ProfileScreen: React.FC = memo(() => {
 
   const handlePostPress = useCallback(
     (postId: number) => {
-      trigger(HAPTIC_TYPES.listItemPress);
+      triggerNavigation('navigate');
       // @ts-expect-error - Navigation prop type mismatch
       navigateToPostDetail(navigation, { postId });
     },
-    [navigation, trigger],
+    [navigation, triggerNavigation],
   );
 
   const handleLoadMorePosts = useCallback(() => {
@@ -169,18 +171,18 @@ export const ProfileScreen: React.FC = memo(() => {
     (isFollowing: boolean) => {
       if (!viewedUserId) return;
 
-      // Critical social action - stronger haptic feedback
-      trigger(isFollowing ? HAPTIC_TYPES.warning : HAPTIC_TYPES.buttonPressImportant);
+      // Critical social action
+      triggerSocial(isFollowing ? 'unfollow' : 'follow');
 
       if (isFollowing) {
         // Currently following, so unfollow
         unfollowMutation.mutate(viewedUserId, {
           onSuccess: () => {
-            trigger(HAPTIC_TYPES.success);
+            triggerSystem('success');
             toast.success('Takipten çıkıldı');
           },
           onError: () => {
-            trigger(HAPTIC_TYPES.error);
+            triggerSystem('error');
             toast.error('Takipten çıkılamadı. Lütfen tekrar deneyin.');
           },
         });
@@ -188,17 +190,17 @@ export const ProfileScreen: React.FC = memo(() => {
         // Not following, so follow
         followMutation.mutate(viewedUserId, {
           onSuccess: () => {
-            trigger(HAPTIC_TYPES.success);
+            triggerSystem('success');
             toast.success('Takip edildi');
           },
           onError: () => {
-            trigger(HAPTIC_TYPES.error);
+            triggerSystem('error');
             toast.error('Takip edilemedi. Lütfen tekrar deneyin.');
           },
         });
       }
     },
-    [viewedUserId, followMutation, unfollowMutation, trigger, toast],
+    [viewedUserId, followMutation, unfollowMutation, triggerSocial, triggerSystem, toast],
   );
 
   // Early returns for loading and error states
@@ -250,10 +252,7 @@ export const ProfileScreen: React.FC = memo(() => {
           {/* Settings Button */}
           {isOwnProfile && (
             <PressableScale
-              onPress={() => {
-                trigger(HAPTIC_TYPES.buttonPress);
-                handleSettingsPress();
-              }}
+              onPress={handleSettingsPress}
               activeScale={0.9}
               haptic
               hapticType="light"
@@ -270,14 +269,7 @@ export const ProfileScreen: React.FC = memo(() => {
               style={styles.avatarGlowContainer}>
               <View style={[styles.avatarGlow, { backgroundColor: colors.interactive.default }]} />
               <PressableScale
-                onPress={
-                  isOwnProfile
-                    ? () => {
-                        trigger(HAPTIC_TYPES.buttonPress);
-                        handleAvatarPress();
-                      }
-                    : undefined
-                }
+                onPress={isOwnProfile ? handleAvatarPress : undefined}
                 activeScale={0.95}
                 disabled={!isOwnProfile}>
                 {profile.avatarUrl ? (

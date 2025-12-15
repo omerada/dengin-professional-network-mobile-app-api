@@ -16,8 +16,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing, fontSize } from '@theme';
-import { HAPTIC_TYPES } from '@constants/hapticPresets';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 
 interface AvatarPickerProps {
   /**
@@ -60,7 +59,7 @@ interface AvatarPickerProps {
 export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
   ({ currentAvatarUrl, fullName, onImageSelected, onRemove, isLoading = false, size = 120 }) => {
     const colors = useColors();
-    const haptic = useHaptic();
+    const { triggerMedia, triggerSystem } = useSemanticHaptic();
     const [previewUri, setPreviewUri] = useState<string | null>(null);
 
     // Generate initials from full name
@@ -95,14 +94,14 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
           const uri = result.assets[0].uri;
           setPreviewUri(uri);
           onImageSelected(uri);
-          haptic.success();
+          triggerMedia('capture');
         }
       } catch (error) {
-        haptic.error();
+        triggerSystem('error');
         console.error('[AvatarPicker] Camera error:', error);
         Alert.alert('Hata', 'Kamera açılırken bir hata oluştu.');
       }
-    }, [onImageSelected]);
+    }, [onImageSelected, triggerMedia, triggerSystem]);
 
     // Open gallery
     const handleChooseFromGallery = useCallback(async () => {
@@ -128,18 +127,18 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
           const uri = result.assets[0].uri;
           setPreviewUri(uri);
           onImageSelected(uri);
-          haptic.success();
+          triggerMedia('capture');
         }
       } catch (error) {
-        haptic.error();
+        triggerSystem('error');
         console.error('[AvatarPicker] Gallery error:', error);
         Alert.alert('Hata', 'Galeri açılırken bir hata oluştu.');
       }
-    }, [onImageSelected]);
+    }, [onImageSelected, triggerMedia, triggerSystem]);
 
     // Remove avatar
     const handleRemove = useCallback(() => {
-      haptic.warning();
+      triggerSystem('alert');
       Alert.alert('Fotoğrafı Kaldır', 'Profil fotoğrafınızı kaldırmak istediğinize emin misiniz?', [
         { text: 'İptal', style: 'cancel' },
         {
@@ -148,15 +147,15 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
           onPress: () => {
             setPreviewUri(null);
             onRemove?.();
-            haptic.success();
+            triggerSystem('success');
           },
         },
       ]);
-    }, [onRemove, haptic]);
+    }, [onRemove, triggerSystem]);
 
     // Show options
     const handlePress = useCallback(() => {
-      haptic.trigger(HAPTIC_TYPES.buttonPress);
+      triggerMedia('select');
       const options: {
         text: string;
         onPress?: () => void;
@@ -177,7 +176,14 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
       options.push({ text: 'İptal', style: 'cancel' });
 
       Alert.alert('Profil Fotoğrafı', 'Bir seçenek seçin', options);
-    }, [displayUri, handleTakePhoto, handleChooseFromGallery, handleRemove, onRemove, haptic]);
+    }, [
+      displayUri,
+      handleTakePhoto,
+      handleChooseFromGallery,
+      handleRemove,
+      onRemove,
+      triggerMedia,
+    ]);
 
     return (
       <View style={styles.container}>

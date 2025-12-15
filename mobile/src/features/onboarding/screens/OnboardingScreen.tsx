@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   ViewToken,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Feather';
@@ -18,7 +18,7 @@ import { useColors } from '@contexts/ThemeContext';
 import { useSemanticHaptic } from '@shared/hooks';
 import { asyncStorage } from '@core/storage/asyncStorage';
 import { STORAGE_KEYS } from '@core/storage/keys';
-import type { AuthStackNavigationProp } from '@shared/types';
+import type { AuthStackNavigationProp, AuthStackParamList } from '@shared/types';
 
 const { width } = Dimensions.get('window');
 
@@ -128,9 +128,11 @@ const PaginationDot: React.FC<DotProps> = ({ active }) => {
 export const OnboardingScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation<AuthStackNavigationProp>();
+  const route = useRoute<RouteProp<AuthStackParamList, 'Onboarding'>>();
   const { triggerNavigation } = useSemanticHaptic();
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const initialSlide = route.params?.initialSlide ?? 0;
+  const [currentIndex, setCurrentIndex] = useState(initialSlide);
   const flatListRef = useRef<FlatList>(null);
 
   /**
@@ -146,6 +148,23 @@ export const OnboardingScreen: React.FC = () => {
   const viewabilityConfig = useRef({
     viewAreaCoveragePercentThreshold: 50,
   }).current;
+
+  /**
+   * Scroll to initial slide on mount
+   */
+  React.useEffect(() => {
+    if (initialSlide > 0 && flatListRef.current) {
+      // Delay scroll to ensure FlatList is ready
+      const timer = setTimeout(() => {
+        flatListRef.current?.scrollToIndex({
+          index: initialSlide,
+          animated: false,
+        });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [initialSlide]);
 
   /**
    * Handle Next

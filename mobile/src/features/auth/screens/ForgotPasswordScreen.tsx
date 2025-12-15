@@ -5,7 +5,6 @@
 
 import React, { useCallback } from 'react';
 import {
-  View,
   Text,
   StyleSheet,
   KeyboardAvoidingView,
@@ -21,11 +20,13 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useColors } from '@contexts/ThemeContext';
 import { useLocale } from '@contexts/LocaleContext';
-import { Button, Input } from '@shared/components';
+import { Button, Input, UnifiedScreenHeader } from '@shared/components';
+import { useSemanticHaptic } from '@shared/hooks';
+import { SCREEN_ANIMATIONS } from '@constants';
 import { useForgotPassword } from '../hooks';
 import { forgotPasswordSchema, ForgotPasswordSchemaType } from '../validation';
 import { AuthStackNavigationProp } from '@shared/types';
-import { spacing, fontSize } from '@theme';
+import { spacing } from '@theme';
 
 /**
  * Modern Forgot Password Screen
@@ -39,6 +40,7 @@ export const ForgotPasswordScreen: React.FC = () => {
   const colors = useColors();
   const { t } = useLocale();
   const navigation = useNavigation<AuthStackNavigationProp>();
+  const { triggerNavigation } = useSemanticHaptic();
   const { requestReset, isLoading, error, isError, isEmailSent, reset } = useForgotPassword();
 
   const {
@@ -62,12 +64,14 @@ export const ForgotPasswordScreen: React.FC = () => {
   );
 
   const handleBack = useCallback(() => {
+    triggerNavigation('back');
     navigation.goBack();
-  }, [navigation]);
+  }, [navigation, triggerNavigation]);
 
   const handleBackToLogin = useCallback(() => {
+    triggerNavigation('navigate');
     navigation.navigate('Login');
-  }, [navigation]);
+  }, [navigation, triggerNavigation]);
 
   // Success state
   if (isEmailSent) {
@@ -117,50 +121,46 @@ export const ForgotPasswordScreen: React.FC = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top', 'bottom', 'left', 'right']}>
+      <UnifiedScreenHeader
+        variant="default"
+        title="Şifremi Unuttum"
+        showBackButton
+        onBackPress={handleBack}
+      />
       <KeyboardAvoidingView
         style={styles.keyboardAvoid}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity
-              onPress={handleBack}
-              style={styles.backButton}
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-              <Icon name="arrow-left" size={24} color={colors.text.primary} />
-            </TouchableOpacity>
-            <Text style={[styles.headerTitle, { color: colors.text.primary }]}>
-              Şifremi Unuttum
-            </Text>
-            <View style={styles.headerSpacer} />
-          </View>
-
           {/* Subtitle */}
-          <View style={styles.subtitleContainer}>
+          <Animated.View
+            entering={SCREEN_ANIMATIONS.listItemEnter(0)}
+            style={styles.subtitleContainer}>
             <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
               E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.
             </Text>
-          </View>
+          </Animated.View>
 
           {/* Error Message */}
           {isError && error && (
-            <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
+            <Animated.View
+              entering={SCREEN_ANIMATIONS.listItemEnter(1)}
+              style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
               <Icon name="alert-circle" size={18} color={colors.status.error} />
               <Text style={[styles.errorText, { color: colors.status.error }]}>
                 {error.message?.includes('not found') || error.message?.includes('bulunamadı')
                   ? 'Bu e-posta adresi kayıtlı değil.'
                   : 'Bir hata oluştu. Lütfen tekrar deneyin.'}
               </Text>
-            </View>
+            </Animated.View>
           )}
 
           {/* Form */}
-          <View style={styles.form}>
+          <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(2)} style={styles.form}>
             <Controller
               control={control}
               name="email"
@@ -180,10 +180,10 @@ export const ForgotPasswordScreen: React.FC = () => {
                 />
               )}
             />
-          </View>
+          </Animated.View>
 
           {/* Submit Button */}
-          <View style={styles.actions}>
+          <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(3)} style={styles.actions}>
             <Button
               title="Sıfırlama Bağlantısı Gönder"
               onPress={handleSubmit(onSubmit)}
@@ -192,7 +192,7 @@ export const ForgotPasswordScreen: React.FC = () => {
               size="lg"
               fullWidth
             />
-          </View>
+          </Animated.View>
 
           {/* Back to Login */}
           <TouchableOpacity
@@ -212,9 +212,6 @@ export const ForgotPasswordScreen: React.FC = () => {
 const styles = StyleSheet.create({
   actions: {
     marginBottom: spacing.xl,
-  },
-  backButton: {
-    padding: spacing.sm,
   },
   backToLogin: {
     alignItems: 'center',
@@ -237,20 +234,6 @@ const styles = StyleSheet.create({
   },
   form: {
     marginBottom: spacing.lg,
-  },
-  header: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: spacing.lg,
-    paddingHorizontal: spacing.xs,
-  },
-  headerSpacer: {
-    width: 40,
-  },
-  headerTitle: {
-    fontSize: fontSize.xl,
-    fontWeight: '600',
   },
   keyboardAvoid: {
     flex: 1,

@@ -7,7 +7,6 @@ export { MessageInput } from './MessageInput';
 export { MessageList } from './MessageList';
 export { TypingIndicator } from './TypingIndicator';
 export { ConversationItem } from './ConversationItem';
-export { ChatHeader } from './ChatHeader';
 export { EmptyChat } from './EmptyChat';
 export { EmptyConversations } from './EmptyConversations';
 export {

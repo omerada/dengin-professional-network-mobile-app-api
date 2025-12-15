@@ -8,7 +8,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-na
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { Avatar } from '@shared/components';
 import { formatRelativeTime } from '@shared/utils/dateUtils';
 import { spring } from '@theme/animations';
@@ -41,7 +41,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 export const PostHeader: React.FC<PostHeaderProps> = memo(
   ({ author, createdAt, onAuthorPress, onMenuPress, testID }) => {
     const colors = useColors();
-    const { trigger } = useHaptic();
+    const { triggerNavigation, triggerSystem } = useSemanticHaptic();
 
     // Animation values
     const menuScale = useSharedValue(1);
@@ -71,19 +71,19 @@ export const PostHeader: React.FC<PostHeaderProps> = memo(
 
     // Author press handler
     const handleAuthorPress = useCallback(() => {
-      trigger('light');
+      triggerNavigation('navigate');
       onAuthorPress?.();
-    }, [onAuthorPress, trigger]);
+    }, [onAuthorPress, triggerNavigation]);
 
     // Menu press handler
     const handleMenuPress = useCallback(() => {
-      trigger('light');
+      triggerSystem('confirm');
       menuScale.value = withSpring(0.9, spring.press);
       setTimeout(() => {
         menuScale.value = withSpring(1, spring.snappy);
       }, 100);
       onMenuPress?.();
-    }, [onMenuPress, trigger, menuScale]);
+    }, [onMenuPress, triggerSystem, menuScale]);
 
     return (
       <View style={styles.header} testID={testID}>

@@ -14,7 +14,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useHaptic } from '@shared/hooks';
 import { HAPTIC_TYPES } from '@constants/hapticPresets';
 import { spring } from '@theme/animations';
 

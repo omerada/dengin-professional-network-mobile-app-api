@@ -14,7 +14,7 @@ import Animated, {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { spring } from '@theme/animations';
 import { BottomSheet } from '../Modal';
 
@@ -60,15 +60,15 @@ interface OptionButtonProps {
 
 const OptionButton: React.FC<OptionButtonProps> = memo(({ option, isFirst, isLast, onPress }) => {
   const colors = useColors();
-  const { trigger } = useHaptic();
+  const { triggerSystem } = useSemanticHaptic();
   const scale = useSharedValue(1);
 
   const handlePress = useCallback(() => {
     if (option.disabled) return;
-    trigger(option.destructive ? 'warning' : 'selection');
+    triggerSystem(option.destructive ? 'alert' : 'confirm');
     scale.value = withSequence(withSpring(0.97, spring.press), withSpring(1, spring.snappy));
     onPress();
-  }, [option, onPress, trigger, scale]);
+  }, [option, onPress, triggerSystem, scale]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -147,7 +147,7 @@ OptionButton.displayName = 'OptionButton';
 export const ActionSheet: React.FC<ActionSheetProps> = memo(
   ({ visible, onClose, title, message, options, cancelLabel = 'İptal', testID }) => {
     const colors = useColors();
-    const { trigger } = useHaptic();
+    const { triggerSystem } = useSemanticHaptic();
     const insets = useSafeAreaInsets();
 
     // Cancel button animation
@@ -163,13 +163,13 @@ export const ActionSheet: React.FC<ActionSheetProps> = memo(
     );
 
     const handleCancel = useCallback(() => {
-      trigger('light');
+      triggerSystem('cancel');
       cancelScale.value = withSequence(
         withSpring(0.96, spring.press),
         withSpring(1, spring.snappy),
       );
       onClose();
-    }, [onClose, trigger, cancelScale]);
+    }, [onClose, triggerSystem, cancelScale]);
 
     const cancelAnimatedStyle = useAnimatedStyle(() => ({
       transform: [{ scale: cancelScale.value }],

@@ -12,7 +12,7 @@ import Animated, {
   Extrapolation,
 } from 'react-native-reanimated';
 import { useTheme } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useHaptic } from '@shared/hooks';
 import { Spinner } from '../Loading';
 
 // ============================================================================

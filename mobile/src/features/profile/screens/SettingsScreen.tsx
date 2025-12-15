@@ -7,7 +7,7 @@ import { StyleSheet, ScrollView, useColorScheme } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { HAPTIC_TYPES, SCREEN_ANIMATIONS } from '@constants';
+import { SCREEN_ANIMATIONS } from '@constants';
 import {
   navigateToEditProfile,
   navigateToChangePassword,
@@ -19,11 +19,11 @@ import {
 } from '@core/navigation';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { spacing } from '@theme';
 import { asyncStorage, STORAGE_KEYS } from '@core/storage';
 import { SettingsSection } from '../components';
-import { CustomRefreshControl, ScreenHeader } from '@shared/components';
+import { CustomRefreshControl, UnifiedScreenHeader } from '@shared/components';
 import { useLogout } from '@features/auth/hooks';
 import type { SettingsSectionType } from '../types';
 import type { ThemeMode } from '@theme/types';
@@ -40,7 +40,7 @@ import type { ThemeMode } from '@theme/types';
  */
 export const SettingsScreen: React.FC = () => {
   const colors = useColors();
-  const { trigger } = useHaptic();
+  const { triggerNavigation, triggerSystem } = useSemanticHaptic();
   const toast = useToast();
   const navigation = useNavigation();
   const { logout, isLoading: isLoggingOut } = useLogout();
@@ -102,30 +102,30 @@ export const SettingsScreen: React.FC = () => {
   }, [navigation]);
 
   const handleHelp = useCallback(() => {
-    trigger(HAPTIC_TYPES.buttonPress);
+    triggerNavigation('navigate');
     // Open help center or FAQ
     toast.info('Yardım merkezi yakında eklenecek.');
-  }, [trigger, toast]);
+  }, [triggerNavigation, toast]);
 
   const handleContact = useCallback(() => {
-    trigger(HAPTIC_TYPES.buttonPress);
+    triggerNavigation('navigate');
     // Open contact support
     toast.info('İletişim: destek@dengin.app');
-  }, [trigger, toast]);
+  }, [triggerNavigation, toast]);
 
   const handleDeleteAccount = useCallback(() => {
-    trigger(HAPTIC_TYPES.warning);
+    triggerSystem('alert');
     navigateToAccountDeletion(navigation as any);
-  }, [navigation, trigger]);
+  }, [navigation, triggerSystem]);
 
   const handleLogout = useCallback(() => {
-    trigger(HAPTIC_TYPES.warning);
+    triggerSystem('alert');
     logout();
-  }, [logout, trigger]);
+  }, [logout, triggerSystem]);
 
   // Cycle through theme modes: system → light → dark → system
   const handleThemeCycle = useCallback(() => {
-    trigger(HAPTIC_TYPES.selection);
+    triggerSystem('success');
     const modes = ['system', 'light', 'dark'] as const;
     const currentIndex = modes.indexOf(themeMode);
     const nextMode = modes[(currentIndex + 1) % modes.length];
@@ -134,16 +134,16 @@ export const SettingsScreen: React.FC = () => {
     // User feedback with toast
     const labels = { system: 'Sistem', light: 'Açık', dark: 'Koyu' };
     toast.success(`Tema: ${labels[nextMode]}`);
-  }, [themeMode, setThemeMode, trigger, toast]);
+  }, [themeMode, setThemeMode, triggerSystem, toast]);
 
   const handleRefresh = useCallback(() => {
-    trigger(HAPTIC_TYPES.pullToRefresh);
+    triggerNavigation('navigate');
     setIsRefreshing(true);
     // Simulate settings refresh (in real app, refetch user preferences)
     setTimeout(() => {
       setIsRefreshing(false);
     }, 800);
-  }, [trigger]);
+  }, [triggerNavigation]);
 
   // Settings sections
   const sections: SettingsSectionType[] = useMemo(
@@ -302,7 +302,7 @@ export const SettingsScreen: React.FC = () => {
       style={[styles.container, { backgroundColor: colors.background.secondary }]}
       edges={['top', 'bottom']}>
       <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={{ flex: 1 }}>
-        <ScreenHeader title="Ayarlar" showBackButton={true} showBorder={true} />
+        <UnifiedScreenHeader variant="default" title="Ayarlar" showBackButton showBorder />
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}

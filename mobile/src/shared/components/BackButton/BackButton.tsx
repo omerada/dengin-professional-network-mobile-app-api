@@ -9,7 +9,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { spring } from '@theme/animations';
 
 import type { BackButtonProps } from './BackButton.types';
@@ -57,7 +57,7 @@ export const BackButton = memo<BackButtonProps>(
   }) => {
     const colors = useColors();
     const navigation = useNavigation();
-    const { trigger } = useHaptic();
+    const { triggerNavigation } = useSemanticHaptic();
 
     // Animation value
     const scale = useSharedValue(1);
@@ -66,14 +66,14 @@ export const BackButton = memo<BackButtonProps>(
     const handlePress = useCallback(() => {
       if (disabled) return;
 
-      trigger('light');
+      triggerNavigation('back');
 
       if (onPress) {
         onPress();
       } else if (navigation.canGoBack()) {
         navigation.goBack();
       }
-    }, [onPress, navigation, trigger, disabled]);
+    }, [onPress, navigation, triggerNavigation, disabled]);
 
     // Animated style
     const animatedStyle = useAnimatedStyle(() => ({

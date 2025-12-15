@@ -14,7 +14,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { spring } from '@theme/animations';
 
 import { styles } from './Avatar.styles';
@@ -86,7 +86,7 @@ export const Avatar: React.FC<AvatarProps> = memo(
     verified = false,
   }) => {
     const colors = useColors();
-    const { trigger } = useHaptic();
+    const { triggerNavigation, triggerSystem } = useSemanticHaptic();
 
     // P3: Image loading states
     const [isLoading, setIsLoading] = useState(!!uri || !!source);
@@ -147,15 +147,15 @@ export const Avatar: React.FC<AvatarProps> = memo(
 
     const handlePress = useCallback(() => {
       if (hapticType !== 'none') {
-        trigger(hapticType === 'medium' ? 'impactMedium' : 'impactLight');
+        triggerNavigation('navigate');
       }
       onPress?.();
-    }, [hapticType, onPress, trigger]);
+    }, [hapticType, onPress, triggerNavigation]);
 
     const handleLongPress = useCallback(() => {
-      trigger('impactMedium');
+      triggerSystem('confirm');
       onLongPress?.();
-    }, [onLongPress, trigger]);
+    }, [onLongPress, triggerSystem]);
 
     // Container styles
     const containerStyles = useMemo(

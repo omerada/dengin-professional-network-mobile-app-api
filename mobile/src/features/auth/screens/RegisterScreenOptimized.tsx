@@ -21,7 +21,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
-import { Button, Input } from '@shared/components';
+import { Button, Input, UnifiedScreenHeader } from '@shared/components';
 import { SectorSelector, ProfessionSelector } from '../components';
 import { useRegister } from '../hooks';
 import { registerOptimizedSchema, RegisterOptimizedSchemaType } from '../validation';
@@ -134,7 +134,12 @@ export const RegisterScreenOptimized: React.FC = () => {
     if (currentStep === Step.PROFESSIONAL) {
       setCurrentStep(Step.ESSENTIALS);
     } else {
-      navigation.goBack();
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      } else {
+        // Son onboarding sayfasına (CTA'lar) yönlendir
+        navigation.navigate('Onboarding', { initialSlide: 2 });
+      }
     }
   }, [currentStep, navigation]);
 
@@ -150,25 +155,21 @@ export const RegisterScreenOptimized: React.FC = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top', 'bottom', 'left', 'right']}>
+      <UnifiedScreenHeader
+        variant="default"
+        title={currentStep === Step.ESSENTIALS ? 'Hesap Oluştur' : 'Meslek Bilgileri'}
+        showBackButton={currentStep === Step.PROFESSIONAL}
+        onBackPress={handleBack}
+        showBorder={false}
+      />
       <KeyboardAvoidingView
         style={styles.keyboardAvoid}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-              <Icon name="arrow-left" size={24} color={colors.text.primary} />
-            </TouchableOpacity>
-            <Text style={[styles.headerTitle, { color: colors.text.primary }]}>
-              {currentStep === Step.ESSENTIALS ? 'Hesap Oluştur' : 'Meslek Bilgileri'}
-            </Text>
-            <View style={styles.headerSpacer} />
-          </View>
-
           {/* Progress Indicator */}
           <View style={styles.progressContainer}>
             <View style={[styles.progressBar, { backgroundColor: colors.border.default }]}>
@@ -440,9 +441,6 @@ export const RegisterScreenOptimized: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  backButton: {
-    padding: spacing.sm,
-  },
   buttonGroup: {
     gap: spacing.md,
     marginTop: spacing.xl,
@@ -475,20 +473,6 @@ const styles = StyleSheet.create({
   errorText: {
     flex: 1,
     fontSize: 14,
-  },
-  header: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: spacing.lg,
-    marginTop: spacing.md,
-  },
-  headerSpacer: {
-    width: 24,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
   },
   keyboardAvoid: {
     flex: 1,

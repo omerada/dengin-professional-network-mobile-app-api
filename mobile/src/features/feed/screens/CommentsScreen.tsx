@@ -8,9 +8,8 @@ import { FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { HAPTIC_TYPES } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { useAuthStore } from '@features/auth/stores';
 import { useCommentsData, useAddComment, useLikeComment, useDeleteComment } from '../hooks';
 import { CommentCard, AddCommentForm, EmptyFeed } from '../components';
@@ -23,7 +22,7 @@ type CommentsNavigationProp = NativeStackNavigationProp<FeedStackParamList, 'Com
 
 export const CommentsScreen: React.FC = () => {
   const colors = useColors();
-  const { trigger } = useHaptic();
+  const { triggerContent } = useSemanticHaptic();
   const navigation = useNavigation<CommentsNavigationProp>();
   const route = useRoute<CommentsRouteProp>();
   const { postId } = route.params; // postId: number
@@ -147,9 +146,9 @@ export const CommentsScreen: React.FC = () => {
   }, [selectedComment, currentUserId, deleteComment, navigation]);
 
   const handleRefresh = useCallback(() => {
-    trigger(HAPTIC_TYPES.pullToRefresh);
+    triggerContent('refresh');
     refetch();
-  }, [refetch, trigger]);
+  }, [refetch, triggerContent]);
 
   const handleEndReached = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {

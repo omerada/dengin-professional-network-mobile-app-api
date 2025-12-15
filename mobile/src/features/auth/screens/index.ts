@@ -1,5 +1,4 @@
 // src/features/auth/screens/index.ts
-export { WelcomeScreen } from './WelcomeScreen';
 export { LoginScreen } from './LoginScreen';
 // Production: RegisterScreenOptimized as default RegisterScreen
 export { RegisterScreenOptimized as RegisterScreen } from './RegisterScreenOptimized';

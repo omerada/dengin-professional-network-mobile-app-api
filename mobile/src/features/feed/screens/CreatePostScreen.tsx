@@ -21,14 +21,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { spacing } from '@theme';
 import { useFeedStore } from '../stores';
 import { useCreatePost } from '../hooks';
 import { imagePickerService } from '../services';
 import { PostTextInput, ImagePreviewGrid } from '../components';
 import { SuccessCelebration, ActionFeedback } from '@shared/components';
-import { HAPTIC_TYPES } from '@constants/hapticPresets';
 import { useAuthStore } from '@features/auth/stores';
 import type { UploadProgress, FeedStoreState } from '../types';
 
@@ -51,7 +50,7 @@ import type { UploadProgress, FeedStoreState } from '../types';
 export const CreatePostScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation();
-  const { medium, heavy, trigger } = useHaptic();
+  const { triggerContent, triggerSystem, triggerMedia } = useSemanticHaptic();
 
   // Auth state - needed for professionId
   const user = useAuthStore(state => state.user);
@@ -74,17 +73,17 @@ export const CreatePostScreen: React.FC = () => {
 
   const handleClose = useCallback(() => {
     if (draftContent.trim() || draftImages.length > 0) {
-      medium(); // Haptic feedback for alert
+      triggerSystem('alert'); // Haptic feedback for alert
       Alert.alert(
         'Taslağı Sil',
         'Değişiklikleriniz kaydedilmeyecek. Çıkmak istediğinizden emin misiniz?',
         [
-          { text: 'İptal', style: 'cancel', onPress: () => medium() },
+          { text: 'İptal', style: 'cancel', onPress: () => triggerSystem('success') },
           {
             text: 'Çık',
             style: 'destructive',
             onPress: () => {
-              heavy(); // Heavy haptic for destructive action
+              triggerContent('delete'); // Heavy haptic for destructive action
               clearDraft();
               navigation.goBack();
             },
@@ -92,10 +91,10 @@ export const CreatePostScreen: React.FC = () => {
         ],
       );
     } else {
-      medium();
+      triggerSystem('success');
       navigation.goBack();
     }
-  }, [navigation, draftContent, draftImages, clearDraft, medium, heavy]);
+  }, [navigation, draftContent, draftImages, clearDraft, triggerContent, triggerSystem]);
 
   const handlePost = useCallback(() => {
     if (!canPost || isPosting) return;
@@ -103,12 +102,12 @@ export const CreatePostScreen: React.FC = () => {
     // Get user's professionId - required by backend
     const professionId = user?.professionId;
     if (!professionId) {
-      trigger(HAPTIC_TYPES.error);
+      triggerSystem('error');
       Alert.alert('Hata', 'Meslek bilgisi bulunamadı. Lütfen profilinizi tamamlayın.');
       return;
     }
 
-    trigger('medium'); // Haptic feedback for important action
+    triggerContent('create'); // Haptic feedback for creating post
 
     createPost.mutate(
       {
@@ -123,16 +122,26 @@ export const CreatePostScreen: React.FC = () => {
       },
       {
         onSuccess: () => {
-          trigger(HAPTIC_TYPES.success); // Success haptic feedback
+          triggerSystem('success'); // Success haptic feedback
           clearDraft();
           setShowSuccess(true);
         },
         onError: () => {
-          trigger(HAPTIC_TYPES.error); // Error haptic feedback
+          triggerSystem('error'); // Error haptic feedback
         },
       },
     );
-  }, [canPost, isPosting, createPost, draftContent, draftImages, user, trigger, clearDraft]);
+  }, [
+    canPost,
+    isPosting,
+    createPost,
+    draftContent,
+    draftImages,
+    user,
+    triggerContent,
+    triggerSystem,
+    clearDraft,
+  ]);
 
   // Header buttons
   useLayoutEffect(() => {
@@ -180,11 +189,11 @@ export const CreatePostScreen: React.FC = () => {
 
   const handlePickImages = useCallback(async () => {
     if (!imagePickerService.validateImageCount(draftImages.length)) {
-      heavy(); // Error haptic
+      triggerSystem('error'); // Error haptic
       return;
     }
 
-    medium(); // Selection haptic
+    triggerMedia('select'); // Selection haptic
     const remainingSlots = 5 - draftImages.length;
     const images = await imagePickerService.pickFromGallery({
       mediaType: 'photo',
@@ -193,7 +202,7 @@ export const CreatePostScreen: React.FC = () => {
     });
 
     if (images.length > 0) {
-      trigger('light'); // Success haptic
+      triggerSystem('success'); // Success haptic
     }
 
     images.forEach(image => {
@@ -201,21 +210,21 @@ export const CreatePostScreen: React.FC = () => {
         addDraftImage(image);
       }
     });
-  }, [draftImages.length, addDraftImage, medium, heavy, trigger]);
+  }, [draftImages.length, addDraftImage, triggerMedia, triggerSystem]);
 
   const handleTakePhoto = useCallback(async () => {
     if (!imagePickerService.validateImageCount(draftImages.length)) {
-      heavy(); // Error haptic
+      triggerSystem('error'); // Error haptic
       return;
     }
 
-    medium(); // Camera open haptic
+    triggerMedia('capture'); // Camera open haptic
     const image = await imagePickerService.captureFromCamera();
     if (image && imagePickerService.validateFileSize(image.fileSize)) {
-      trigger('light'); // Success haptic
+      triggerSystem('success'); // Success haptic
       addDraftImage(image);
     }
-  }, [draftImages.length, addDraftImage, medium, heavy, trigger]);
+  }, [draftImages.length, addDraftImage, triggerMedia, triggerSystem]);
 
   return (
     <SafeAreaView

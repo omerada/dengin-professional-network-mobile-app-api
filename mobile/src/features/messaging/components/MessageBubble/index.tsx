@@ -15,7 +15,7 @@ import Animated, {
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks';
+import { useSemanticHaptic } from '@shared/hooks';
 import { styles, SWIPE_THRESHOLD } from './MessageBubble.styles';
 import { MessageStatusIcon } from './MessageStatusIcon';
 import { MessageAttachment } from './MessageAttachment';
@@ -59,7 +59,7 @@ const formatTime = (dateString: string | undefined | null): string => {
 export const MessageBubble: React.FC<MessageBubbleProps> = memo(
   ({ message, isOwn, showAvatar = false, onLongPress, onReply, onImagePress, onRetry, style }) => {
     const colors = useColors();
-    const { trigger: triggerHaptic } = useHaptic();
+    const { triggerContent, triggerSystem } = useSemanticHaptic();
 
     // sentByMe alanını kullan, yoksa isOwn prop'unu
     const isSentByMe = message.sentByMe ?? isOwn ?? false;
@@ -74,11 +74,11 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
     // Effect to handle reply callback
     useEffect(() => {
       if (shouldTriggerReply && onReply) {
-        triggerHaptic('medium');
+        triggerContent('create');
         onReply(message);
         setShouldTriggerReply(false);
       }
-    }, [shouldTriggerReply, onReply, message, triggerHaptic]);
+    }, [shouldTriggerReply, onReply, message, triggerContent]);
 
     // Colors
     const textColor = isSentByMe ? colors.text.inverse : colors.text.primary;
@@ -87,8 +87,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
     // Entry animation disabled for better performance
 
     const handleLongPressHaptic = useCallback(() => {
-      triggerHaptic('heavy');
-    }, [triggerHaptic]);
+      triggerSystem('confirm');
+    }, [triggerSystem]);
 
     const handleLongPressTrigger = useCallback(() => {
       if (onLongPress) {
@@ -98,10 +98,10 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
 
     const handleRetry = useCallback(() => {
       if (onRetry) {
-        triggerHaptic('light');
+        triggerSystem('retry');
         onRetry(message);
       }
-    }, [onRetry, message, triggerHaptic]);
+    }, [onRetry, message, triggerSystem]);
 
     // Swipe-to-reply gesture
     const panGesture = useMemo(
