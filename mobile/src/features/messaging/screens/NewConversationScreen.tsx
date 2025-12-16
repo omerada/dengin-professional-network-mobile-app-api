@@ -151,7 +151,14 @@ export const NewConversationScreen: React.FC = () => {
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top', 'bottom']}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.background.primary }]}>
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: colors.background.primary,
+            borderBottomColor: colors.border.default,
+          },
+        ]}>
         <Pressable
           onPress={handleBackPress}
           style={styles.backButton}
@@ -246,7 +253,6 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    borderBottomColor: 'rgba(0,0,0,0.1)',
     borderBottomWidth: StyleSheet.hairlineWidth,
     flexDirection: 'row',
     paddingBottom: 12,

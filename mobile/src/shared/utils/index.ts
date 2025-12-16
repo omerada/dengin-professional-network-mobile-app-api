@@ -116,3 +116,13 @@ export {
   combineValidators,
 } from './validationUtils';
 export type { ValidationResult, ValidationRule, PasswordStrength } from './validationUtils';
+
+// Unified feedback utilities
+export {
+  showSuccess,
+  showInfo,
+  showWarning,
+  showError,
+  useUnifiedFeedback,
+  UnifiedFeedbackUtils,
+} from './unifiedFeedback';

@@ -220,7 +220,9 @@ export const EnhancedNotificationCard: React.FC<EnhancedNotificationCardProps> =
                           { backgroundColor: colors.interactive.default },
                         ]}
                         onPress={handleAccept}>
-                        <Text style={styles.primaryActionText}>Takip Et</Text>
+                        <Text style={[styles.primaryActionText, { color: colors.text.inverse }]}>
+                          Takip Et
+                        </Text>
                       </Pressable>
                       <Pressable
                         style={[
@@ -245,7 +247,9 @@ export const EnhancedNotificationCard: React.FC<EnhancedNotificationCardProps> =
                         { backgroundColor: colors.interactive.default },
                       ]}
                       onPress={handleAccept}>
-                      <Text style={styles.primaryActionText}>Yanıtla</Text>
+                      <Text style={[styles.primaryActionText, { color: colors.text.inverse }]}>
+                        Yanıtla
+                      </Text>
                     </Pressable>
                   )}
 
@@ -257,7 +261,9 @@ export const EnhancedNotificationCard: React.FC<EnhancedNotificationCardProps> =
                         { backgroundColor: colors.interactive.default },
                       ]}
                       onPress={handleAccept}>
-                      <Text style={styles.primaryActionText}>Tekrar Dene</Text>
+                      <Text style={[styles.primaryActionText, { color: colors.text.inverse }]}>
+                        Tekrar Dene
+                      </Text>
                     </Pressable>
                   )}
 
@@ -269,7 +275,9 @@ export const EnhancedNotificationCard: React.FC<EnhancedNotificationCardProps> =
                         { backgroundColor: colors.interactive.default },
                       ]}
                       onPress={handleAccept}>
-                      <Text style={styles.primaryActionText}>Mesaj Gönder</Text>
+                      <Text style={[styles.primaryActionText, { color: colors.text.inverse }]}>
+                        Mesaj Gönder
+                      </Text>
                     </Pressable>
                   )}
                 </View>
@@ -350,7 +358,6 @@ const styles = StyleSheet.create({
     // backgroundColor set dynamically
   },
   primaryActionText: {
-    color: '#FFFFFF',
     fontSize: fontSize.sm,
     fontWeight: '600',
   },

@@ -129,6 +129,39 @@ export const UNIFIED_TIMING = {
   likeScaleDown: 140,
 
   /**
+   * Badge pulse animation cycle
+   * Use for: Notification badge, unread indicator
+   * Value: 2000ms (pulse every 2 seconds)
+   */
+  badgePulseCycle: 2000,
+
+  /**
+   * Badge pulse scale-up duration
+   * Value: 200ms
+   */
+  badgePulseUp: 200,
+
+  /**
+   * Badge pulse scale-down duration
+   * Value: 200ms
+   */
+  badgePulseDown: 200,
+
+  /**
+   * Input focus animation duration
+   * Use for: Input border, label color transition
+   * Value: 200ms
+   */
+  inputFocus: 200,
+
+  /**
+   * Input glow animation duration
+   * Use for: Focus glow effect
+   * Value: 300ms
+   */
+  inputGlow: 300,
+
+  /**
    * Swipe gesture haptic threshold
    * Use for: Message swipe-to-reply, swipe actions
    * Value: 70% (percentage of total swipe distance)

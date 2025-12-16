@@ -6,7 +6,7 @@ import React, { memo } from 'react';
 import { StyleSheet, View, Text, Dimensions } from 'react-native';
 import Svg, { Circle, Rect, Defs, Mask, G, Path } from 'react-native-svg';
 import { useColors } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, typography, borderRadius } from '@theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -69,7 +69,7 @@ export const SelfieGuide: React.FC<SelfieGuideProps> = memo(
           <Rect
             width={SCREEN_WIDTH}
             height={SCREEN_HEIGHT}
-            fill="rgba(0,0,0,0.6)"
+            fill={colors.overlay}
             mask="url(#selfie-mask)"
           />
 
@@ -155,13 +155,13 @@ const styles = StyleSheet.create({
   hintText: {
     ...typography.body,
     textAlign: 'center',
-    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
   instructionText: {
     ...typography.caption,
-    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
@@ -184,14 +184,14 @@ const styles = StyleSheet.create({
     right: 0,
   },
   statusIndicator: {
-    borderRadius: 6,
+    borderRadius: borderRadius.sm,
     height: 12,
     width: 12,
   },
   statusText: {
     ...typography.bodySmall,
     fontWeight: '600',
-    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },

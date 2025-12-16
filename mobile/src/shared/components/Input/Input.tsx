@@ -26,6 +26,7 @@ import Icon from 'react-native-vector-icons/Feather';
 
 import { useColors } from '@contexts/ThemeContext';
 import { spring, duration } from '@theme/animations';
+import { UNIFIED_TIMING } from '@constants';
 
 import { styles, getVariantStyles } from './Input.styles';
 import { INPUT_SIZE_CONFIG, type InputProps, type InputRef } from './Input.types';
@@ -184,7 +185,7 @@ export const Input = memo(
 
         const borderWidth = withTiming(
           focusProgress.value > 0 ? variantStyles.focusedBorderWidth : variantStyles.borderWidth,
-          { duration: duration.fast },
+          { duration: UNIFIED_TIMING.inputFocus },
         );
 
         return {
@@ -375,6 +376,17 @@ export const Input = memo(
                 accessibilityLabel="Temizle">
                 <Text style={{ color: colors.text.tertiary, fontSize: 18 }}>✕</Text>
               </Pressable>
+            )}
+
+            {/* Success Icon */}
+            {success && !error && !secureTextEntry && !clearable && !rightIcon && (
+              <View style={[styles.rightIcon, { width: sizeConfig.iconSize }]}>
+                <Icon
+                  name="check-circle"
+                  size={sizeConfig.iconSize}
+                  color={colors.status.success}
+                />
+              </View>
             )}
 
             {/* Right Icon */}

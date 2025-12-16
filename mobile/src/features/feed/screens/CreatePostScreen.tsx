@@ -12,7 +12,6 @@ import {
   Platform,
   Pressable,
   Text,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -21,13 +20,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
 import { useSemanticHaptic } from '@shared/hooks';
 import { spacing } from '@theme';
 import { useFeedStore } from '../stores';
 import { useCreatePost } from '../hooks';
 import { imagePickerService } from '../services';
 import { PostTextInput, ImagePreviewGrid } from '../components';
-import { SuccessCelebration, ActionFeedback } from '@shared/components';
+import { SuccessCelebration, ActionFeedback, ActionSheet } from '@shared/components';
+import { showSuccess, showError } from '@shared/utils';
 import { useAuthStore } from '@features/auth/stores';
 import type { UploadProgress, FeedStoreState } from '../types';
 
@@ -49,6 +50,7 @@ import type { UploadProgress, FeedStoreState } from '../types';
  */
 export const CreatePostScreen: React.FC = () => {
   const colors = useColors();
+  const toast = useToast();
   const navigation = useNavigation();
   const { triggerContent, triggerSystem, triggerMedia } = useSemanticHaptic();
 
@@ -66,6 +68,7 @@ export const CreatePostScreen: React.FC = () => {
   // Upload state
   const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showDiscardAlert, setShowDiscardAlert] = useState(false);
   const createPost = useCreatePost();
 
   const canPost = draftContent.trim().length > 0 || draftImages.length > 0;
@@ -74,27 +77,19 @@ export const CreatePostScreen: React.FC = () => {
   const handleClose = useCallback(() => {
     if (draftContent.trim() || draftImages.length > 0) {
       triggerSystem('alert'); // Haptic feedback for alert
-      Alert.alert(
-        'Taslağı Sil',
-        'Değişiklikleriniz kaydedilmeyecek. Çıkmak istediğinizden emin misiniz?',
-        [
-          { text: 'İptal', style: 'cancel', onPress: () => triggerSystem('success') },
-          {
-            text: 'Çık',
-            style: 'destructive',
-            onPress: () => {
-              triggerContent('delete'); // Heavy haptic for destructive action
-              clearDraft();
-              navigation.goBack();
-            },
-          },
-        ],
-      );
+      setShowDiscardAlert(true);
     } else {
       triggerSystem('success');
       navigation.goBack();
     }
-  }, [navigation, draftContent, draftImages, clearDraft, triggerContent, triggerSystem]);
+  }, [navigation, draftContent, draftImages, triggerSystem]);
+
+  const handleDiscardDraft = useCallback(() => {
+    triggerContent('delete'); // Heavy haptic for destructive action
+    clearDraft();
+    setShowDiscardAlert(false);
+    navigation.goBack();
+  }, [clearDraft, navigation, triggerContent]);
 
   const handlePost = useCallback(() => {
     if (!canPost || isPosting) return;
@@ -102,8 +97,11 @@ export const CreatePostScreen: React.FC = () => {
     // Get user's professionId - required by backend
     const professionId = user?.professionId;
     if (!professionId) {
-      triggerSystem('error');
-      Alert.alert('Hata', 'Meslek bilgisi bulunamadı. Lütfen profilinizi tamamlayın.');
+      showError(
+        toast,
+        { trigger: triggerSystem },
+        'Meslek bilgisi bulunamadı. Lütfen profilinizi tamamlayın.',
+      );
       return;
     }
 
@@ -178,9 +176,9 @@ export const CreatePostScreen: React.FC = () => {
           }
           accessibilityState={{ disabled: !canPost || isPosting }}>
           {isPosting ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
+            <ActivityIndicator size="small" color={colors.text.onPrimary} />
           ) : (
-            <Text style={styles.postButtonText}>Paylaş</Text>
+            <Text style={[styles.postButtonText, { color: colors.text.onPrimary }]}>Paylaş</Text>
           )}
         </Pressable>
       ),
@@ -366,6 +364,28 @@ export const CreatePostScreen: React.FC = () => {
           navigation.goBack();
         }}
       />
+
+      {/* Discard Draft Confirmation */}
+      <ActionSheet
+        visible={showDiscardAlert}
+        onClose={() => {
+          setShowDiscardAlert(false);
+          triggerSystem('success');
+        }}
+        title="Taslağı Sil"
+        message="Değişiklikleriniz kaydedilmeyecek. Çıkmak istediğinizden emin misiniz?"
+        options={[
+          {
+            id: 'discard',
+            label: 'Çık',
+            icon: 'trash-outline',
+            destructive: true,
+            onPress: handleDiscardDraft,
+          },
+        ]}
+        cancelLabel="İptal"
+        testID="discard-draft-sheet"
+      />
     </SafeAreaView>
   );
 };
@@ -391,7 +411,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   postButtonText: {
-    color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '600',
   },

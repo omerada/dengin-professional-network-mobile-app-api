@@ -82,7 +82,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = memo(
 
     // Colors
     const textColor = isSentByMe ? colors.text.inverse : colors.text.primary;
-    const metaColor = isSentByMe ? 'rgba(255,255,255,0.7)' : colors.text.tertiary;
+    const metaColor = isSentByMe ? colors.text.inverse : colors.text.tertiary;
 
     // Entry animation disabled for better performance
 

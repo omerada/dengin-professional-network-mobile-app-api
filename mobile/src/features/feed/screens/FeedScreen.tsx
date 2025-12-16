@@ -3,7 +3,7 @@
 // Oku: MOBILE-APP-HOME-SCREEN.md, mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import React, { useCallback, useMemo, useState, memo, useEffect } from 'react';
-import { ActivityIndicator, Alert, StyleSheet } from 'react-native';
+import { ActivityIndicator, StyleSheet } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -31,7 +31,7 @@ import {
   CustomRefreshControl,
   UnifiedScreenHeader,
 } from '@shared/components';
-import { sharePost, showShareError } from '@shared/utils/share';
+import { sharePost, showShareError, showSuccess, showError } from '@shared/utils';
 import { useAuthStore } from '@features/auth/stores';
 import { useFollow, useUnfollow } from '@features/social/hooks';
 import { useUnreadCount } from '@features/notifications/hooks';
@@ -70,6 +70,8 @@ export const FeedScreen: React.FC = memo(() => {
   // Action sheet state
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [actionSheetVisible, setActionSheetVisible] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<Post | null>(null);
 
   // P2 Addition: Engagement card visibility state
   const [showVerificationPrompt, setShowVerificationPrompt] = useState(false);
@@ -170,12 +172,14 @@ export const FeedScreen: React.FC = memo(() => {
         { postId, isLiked },
         {
           onSuccess: () => {
-            triggerSystem('success');
-            toast.success(isLiked ? 'Beğeni geri alındı' : 'Gönderi beğenildi');
+            showSuccess(
+              toast,
+              { trigger: triggerSystem },
+              isLiked ? 'Beğeni geri alındı' : 'Gönderi beğenildi',
+            );
           },
           onError: () => {
-            triggerSystem('error');
-            toast.error('İşlem başarısız oldu');
+            showError(toast, { trigger: triggerSystem }, 'İşlem başarısız oldu');
           },
         },
       );
@@ -223,12 +227,14 @@ export const FeedScreen: React.FC = memo(() => {
         { postId, isSaved },
         {
           onSuccess: () => {
-            triggerSystem('success');
-            toast.success(isSaved ? 'Kayıtlardan kaldırıldı' : 'Gönderi kaydedildi');
+            showSuccess(
+              toast,
+              { trigger: triggerSystem },
+              isSaved ? 'Kayıtlardan kaldırıldı' : 'Gönderi kaydedildi',
+            );
           },
           onError: () => {
-            triggerSystem('error');
-            toast.error('İşlem başarısız oldu');
+            showError(toast, { trigger: triggerSystem }, 'İşlem başarısız oldu');
           },
         },
       );
@@ -276,25 +282,28 @@ export const FeedScreen: React.FC = memo(() => {
   }, []);
 
   /**
-   * Delete post with confirmation
+   * Delete post with confirmation - show confirmation action sheet
    */
   const handleDeletePost = useCallback(() => {
     if (selectedPost) {
       triggerSystem('alert'); // Critical action feedback
-      Alert.alert('Gönderiyi Sil', 'Bu gönderiyi silmek istediğinize emin misiniz?', [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Sil',
-          style: 'destructive',
-          onPress: () => {
-            triggerSystem('confirm'); // Confirm deletion feedback
-            deletePost.mutate(selectedPost.id);
-            handleCloseActionSheet();
-          },
-        },
-      ]);
+      setShowDeleteConfirm(true);
+      setPostToDelete(selectedPost);
+      handleCloseActionSheet();
     }
-  }, [selectedPost, deletePost, handleCloseActionSheet, triggerSystem]);
+  }, [selectedPost, handleCloseActionSheet, triggerSystem]);
+
+  /**
+   * Confirm delete action
+   */
+  const handleConfirmDelete = useCallback(() => {
+    if (postToDelete) {
+      triggerSystem('confirm'); // Confirm deletion feedback
+      deletePost.mutate(postToDelete.id);
+      setShowDeleteConfirm(false);
+      setPostToDelete(null);
+    }
+  }, [postToDelete, deletePost, triggerSystem]);
 
   /**
    * Report post
@@ -387,23 +396,19 @@ export const FeedScreen: React.FC = memo(() => {
                 if (isFollowing) {
                   unfollowMutation.mutate(expertId, {
                     onSuccess: () => {
-                      trigger('success');
-                      toast.success('Takipten çıkıldı');
+                      showSuccess(toast, { trigger }, 'Takipten çıkıldı');
                     },
                     onError: () => {
-                      trigger('error');
-                      toast.error('İşlem başarısız oldu');
+                      showError(toast, { trigger }, 'İşlem başarısız oldu');
                     },
                   });
                 } else {
                   followMutation.mutate(expertId, {
                     onSuccess: () => {
-                      trigger('success');
-                      toast.success('Takip edildi');
+                      showSuccess(toast, { trigger }, 'Takip edildi');
                     },
                     onError: () => {
-                      trigger('error');
-                      toast.error('İşlem başarısız oldu');
+                      showError(toast, { trigger }, 'İşlem başarısız oldu');
                     },
                   });
                 }
@@ -580,6 +585,31 @@ export const FeedScreen: React.FC = memo(() => {
           visible={actionSheetVisible}
           onClose={handleCloseActionSheet}
           options={actionSheetOptions}
+        />
+
+        {/* Delete Confirmation Action Sheet */}
+        <ActionSheet
+          visible={showDeleteConfirm}
+          onClose={() => {
+            setShowDeleteConfirm(false);
+            setPostToDelete(null);
+          }}
+          title="Gönderiyi Sil"
+          message="Bu gönderiyi silmek istediğinize emin misiniz?"
+          options={[
+            {
+              label: 'Sil',
+              destructive: true,
+              onPress: handleConfirmDelete,
+            },
+            {
+              label: 'İptal',
+              onPress: () => {
+                setShowDeleteConfirm(false);
+                setPostToDelete(null);
+              },
+            },
+          ]}
         />
       </Animated.View>
     </SafeAreaView>

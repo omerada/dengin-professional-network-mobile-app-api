@@ -13,7 +13,8 @@ export { SearchBar } from './SearchBar';
 export type { SearchBarProps, SearchBarSize } from './SearchBar';
 
 // Loading & Feedback components
-export { Loading, LoadingOverlay, Spinner, DotsLoading } from './Loading';
+// @deprecated Use UnifiedLoadingState instead
+// export { Loading, LoadingOverlay, Spinner, DotsLoading } from './Loading';
 export { ErrorFallback } from './ErrorFallback';
 export { OfflineNotice } from './OfflineNotice';
 export { ErrorBoundary } from './ErrorBoundary';
@@ -38,7 +39,8 @@ export { ActivityScreenSkeleton } from './Skeleton/ActivityScreenSkeleton';
 // Animated Components
 export { AnimatedListItem } from './AnimatedListItem';
 export { AnimatedCounter } from './AnimatedCounter';
-export { AnimatedBadge } from './AnimatedBadge';
+// @deprecated Use Badge with animated prop instead
+// export { AnimatedBadge } from './AnimatedBadge';
 export { AnimatedCheckmark } from './AnimatedCheckmark';
 export { SuccessCelebration } from './SuccessCelebration';
 export { ShakeAnimation } from './ShakeAnimation';

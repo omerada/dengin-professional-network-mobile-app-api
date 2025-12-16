@@ -18,6 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 
 import { useColors } from '@contexts/ThemeContext';
 import { useSemanticHaptic } from '@shared/hooks';
+import { UNIFIED_TIMING } from '@constants';
 
 import { PostHeader } from './PostHeader';
 import { PostContent } from './PostContent';
@@ -89,12 +90,15 @@ export const PostCard: React.FC<PostCardProps> = memo(
     const handleDoubleTapLike = useCallback(() => {
       if (!isLiked) {
         triggerSocial('like');
-        // Animate heart - Scale up (180ms)
+        // Animate heart - Scale up (UNIFIED_TIMING.likeScaleUp = 180ms)
         heartScale.value = withSpring(1.2, { damping: 10, stiffness: 300 });
         heartOpacity.value = 1;
-        // Hide after optimized delay (180ms + 140ms = 320ms total)
-        heartScale.value = withDelay(180, withSpring(0, { damping: 15, stiffness: 400 }));
-        heartOpacity.value = withDelay(180, withSpring(0, { damping: 15 }));
+        // Hide after delay (UNIFIED_TIMING.likeScaleUp + likeScaleDown = 320ms total)
+        heartScale.value = withDelay(
+          UNIFIED_TIMING.likeScaleUp,
+          withSpring(0, { damping: 15, stiffness: 400 }),
+        );
+        heartOpacity.value = withDelay(UNIFIED_TIMING.likeScaleUp, withSpring(0, { damping: 15 }));
         // Trigger callback
         onLike?.(postId, isLiked);
       }

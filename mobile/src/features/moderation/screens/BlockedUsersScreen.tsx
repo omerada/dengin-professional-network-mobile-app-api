@@ -10,7 +10,7 @@ import { useToast } from '@contexts/ToastContext';
 import {
   Avatar,
   UnifiedEmptyState,
-  Loading,
+  UnifiedLoadingState,
   Button,
   UnifiedScreenHeader,
 } from '@shared/components';
@@ -93,7 +93,7 @@ export const BlockedUsersScreen: React.FC = () => {
           showBackButton
           showBorder
         />
-        <Loading message="Yükleniyor..." />
+        <UnifiedLoadingState strategy="spinner" message="Yükleniyor..." variant="screen" />
       </SafeAreaView>
     );
   }

@@ -161,7 +161,13 @@ export const CameraPermissionGate: React.FC<CameraPermissionGateProps> = memo(
 
     // Loading state - checking permission
     if (isChecking) {
-      return <Loading fullScreen message="Kamera izni kontrol ediliyor..." />;
+      return (
+        <UnifiedLoadingState
+          strategy="spinner"
+          message="Kamera izni kontrol ediliyor..."
+          variant="screen"
+        />
+      );
     }
 
     // Permission denied - needs settings

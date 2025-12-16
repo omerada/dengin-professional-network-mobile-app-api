@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Feather';
 import FAIcon from 'react-native-vector-icons/FontAwesome';
 
@@ -23,7 +24,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useColors } from '@contexts/ThemeContext';
 import { useLocale } from '@contexts/LocaleContext';
 import { Button, Input, ShakeAnimation, UnifiedScreenHeader } from '@shared/components';
-import { SAFE_AREA_EDGES } from '@constants';
+import { SAFE_AREA_EDGES, SCREEN_ANIMATIONS } from '@constants';
 import { useLogin, useBiometricLogin } from '../hooks';
 import { useAuthStore } from '../stores';
 import { loginSchema, LoginSchemaType } from '../validation';
@@ -107,7 +108,7 @@ export const LoginScreen: React.FC = () => {
           keyboardDismissMode="on-drag"
           showsVerticalScrollIndicator={false}>
           {/* Hero Section - DENGIN Branding */}
-          <View style={styles.heroSection}>
+          <Animated.View entering={SCREEN_ANIMATIONS.heroEnter} style={styles.heroSection}>
             <View style={styles.logoContainer}>
               <Text style={[styles.logoText, { color: colors.interactive.default }]}>DENGIN</Text>
             </View>
@@ -116,10 +117,10 @@ export const LoginScreen: React.FC = () => {
             <Text style={[styles.slogan, { color: colors.text.secondary }]}>
               Profesyoneller için güvenli sosyal ağ
             </Text>
-          </View>
+          </Animated.View>
 
           {/* Social Login - Priority (Üstte) */}
-          <View style={styles.socialSection}>
+          <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(0)} style={styles.socialSection}>
             <Text style={[styles.socialTitle, { color: colors.text.primary }]}>Hızlı Giriş</Text>
             <View style={styles.socialButtonsColumn}>
               {Platform.OS === 'ios' && (
@@ -157,11 +158,11 @@ export const LoginScreen: React.FC = () => {
           </View>
 
           {/* Divider */}
-          <View style={styles.divider}>
+          <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(1)} style={styles.divider}>
             <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
             <Text style={[styles.dividerText, { color: colors.text.tertiary }]}>veya</Text>
             <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
-          </View>
+          </Animated.View>
 
           {/* Error Message - Professional */}
           {isError && error && (
@@ -187,7 +188,7 @@ export const LoginScreen: React.FC = () => {
           )}
 
           {/* Form */}
-          <View style={styles.form}>
+          <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(2)} style={styles.form}>
             <Controller
               control={control}
               name="email"
@@ -238,10 +239,10 @@ export const LoginScreen: React.FC = () => {
                 {t('auth.forgotPassword')}
               </Text>
             </TouchableOpacity>
-          </View>
+          </Animated.View>
 
           {/* Login Button */}
-          <View style={styles.actions}>
+          <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(3)} style={styles.actions}>
             <Button
               title={isLoading ? 'Giriş yapılıyor...' : t('auth.login')}
               onPress={handleSubmit(onSubmit)}
@@ -264,10 +265,10 @@ export const LoginScreen: React.FC = () => {
                 style={{ marginTop: spacing.md }}
               />
             )}
-          </View>
+          </Animated.View>
 
           {/* Register Link */}
-          <View style={styles.registerContainer}>
+          <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(4)} style={styles.registerContainer}>
             <Text style={{ color: colors.text.secondary }}>Hesabınız yok mu? </Text>
             <TouchableOpacity
               onPress={() => navigation.navigate('Register')}
@@ -278,7 +279,7 @@ export const LoginScreen: React.FC = () => {
                 {t('auth.register')}
               </Text>
             </TouchableOpacity>
-          </View>
+          </Animated.View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

@@ -4,17 +4,8 @@
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 import React, { useCallback, useEffect, useState, memo } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  Alert,
-  ActivityIndicator,
-  InteractionManager,
-} from 'react-native';
+import { View, StyleSheet, ActivityIndicator, InteractionManager } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useNavigation } from '@react-navigation/native';
@@ -24,10 +15,11 @@ import {
   navigateToPostDetail,
   navigateToUserProfile,
 } from '@core/navigation';
-import { SCREEN_ANIMATIONS } from '@constants';
-import { fontSize, spacing } from '@theme';
+import { spacing } from '@theme';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
 import { useSemanticHaptic } from '@shared/hooks';
+import { UnifiedScreenHeader, ActionSheet } from '@shared/components';
 
 import { NotificationList } from '../components/NotificationList';
 import { PermissionPrompt } from '../components/PermissionPrompt';
@@ -57,12 +49,14 @@ type NavigationProp = NativeStackNavigationProp<FeedStackParamList>;
 export const NotificationsScreen: React.FC = memo(() => {
   const colors = useColors();
   const navigation = useNavigation<NavigationProp>();
+  const toast = useToast();
   const { triggerNavigation, triggerSystem } = useSemanticHaptic();
   const { markAllAsRead, isPending: isMarkingAllAsRead } = useMarkAllAsRead();
   const { isPermissionGranted, requestPermission } = useNotificationPermission();
   const { unreadCount } = useUnreadCount();
 
   const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
+  const [showMarkAllReadConfirm, setShowMarkAllReadConfirm] = useState(false);
 
   // Check permission on mount - Disabled in development (Expo Go)
   // Expo Go'da FCM çalışmadığı için izin popup'ı gösterilmiyor
@@ -137,15 +131,13 @@ export const NotificationsScreen: React.FC = memo(() => {
 
             default:
               if (notification.body) {
-                Alert.alert(notification.title || 'Bildirim', notification.body, [
-                  { text: 'Tamam' },
-                ]);
+                toast.info(notification.body);
               }
               break;
           }
         } catch (error) {
           console.error('[NotificationsScreen] Navigation error:', error);
-          Alert.alert('Hata', 'Bildirim açılırken bir hata oluştu.');
+          toast.error('Bildirim açılırken bir hata oluştu.');
         }
       });
     },
@@ -159,22 +151,18 @@ export const NotificationsScreen: React.FC = memo(() => {
     if (unreadCount === 0) return;
 
     triggerSystem('alert');
-    Alert.alert(
-      'Tümünü Okundu İşaretle',
-      `${unreadCount} okunmamış bildirim okundu olarak işaretlenecek.`,
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Okundu İşaretle',
-          style: 'default',
-          onPress: () => {
-            markAllAsRead();
-            triggerSystem('success');
-          },
-        },
-      ],
-    );
-  }, [unreadCount, markAllAsRead, triggerSystem]);
+    setShowMarkAllReadConfirm(true);
+  }, [unreadCount, triggerSystem]);
+
+  /**
+   * Confirm mark all as read
+   */
+  const handleConfirmMarkAllRead = useCallback(() => {
+    markAllAsRead();
+    triggerSystem('success');
+    setShowMarkAllReadConfirm(false);
+    toast.success('Tüm bildirimler okundu işaretlendi');
+  }, [markAllAsRead, triggerSystem, toast]);
 
   /**
    * Navigate to notification settings
@@ -204,56 +192,44 @@ export const NotificationsScreen: React.FC = memo(() => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top']}>
-      {/* Modern Header with Back Button */}
-      <Animated.View
-        entering={SCREEN_ANIMATIONS.headerEnter}
-        style={[styles.header, { borderBottomColor: colors.border.subtle }]}>
-        <View style={styles.headerLeft}>
-          <Pressable
-            onPress={handleBack}
-            style={({ pressed }) => [styles.backButton, pressed && { opacity: 0.7 }]}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Icon name="arrow-back" size={24} color={colors.text.primary} />
-          </Pressable>
-          <View>
-            <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Bildirimler</Text>
+      {/* Unified Header */}
+      <UnifiedScreenHeader
+        variant="default"
+        title="Bildirimler"
+        subtitle={unreadCount > 0 ? `${unreadCount} okunmamış` : undefined}
+        showBackButton={true}
+        onBackPress={handleBack}
+        rightElement={
+          <View style={styles.headerActions}>
+            {/* Mark All Read Button */}
             {unreadCount > 0 && (
-              <Text style={[styles.headerSubtitle, { color: colors.text.tertiary }]}>
-                {unreadCount} okunmamış
-              </Text>
+              <View
+                style={[styles.iconButton, { backgroundColor: colors.interactive.default + '15' }]}>
+                {isMarkingAllAsRead ? (
+                  <ActivityIndicator size="small" color={colors.interactive.default} />
+                ) : (
+                  <Icon
+                    name="checkmark-done"
+                    size={20}
+                    color={colors.interactive.default}
+                    onPress={handleMarkAllAsRead}
+                  />
+                )}
+              </View>
             )}
+
+            {/* Settings Button */}
+            <View style={styles.iconButton}>
+              <Icon
+                name="settings-outline"
+                size={22}
+                color={colors.text.primary}
+                onPress={handleSettingsPress}
+              />
+            </View>
           </View>
-        </View>
-
-        <View style={styles.headerActions}>
-          {/* Mark All Read Button */}
-          {unreadCount > 0 && (
-            <Pressable
-              onPress={handleMarkAllAsRead}
-              disabled={isMarkingAllAsRead}
-              style={({ pressed }) => [
-                styles.headerButton,
-                { backgroundColor: colors.interactive.default + '15' },
-                pressed && styles.headerButtonPressed,
-              ]}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              {isMarkingAllAsRead ? (
-                <ActivityIndicator size="small" color={colors.interactive.default} />
-              ) : (
-                <Icon name="checkmark-done" size={20} color={colors.interactive.default} />
-              )}
-            </Pressable>
-          )}
-
-          {/* Settings Button */}
-          <Pressable
-            onPress={handleSettingsPress}
-            style={({ pressed }) => [styles.headerButton, pressed && styles.headerButtonPressed]}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Icon name="settings-outline" size={22} color={colors.text.primary} />
-          </Pressable>
-        </View>
-      </Animated.View>
+        }
+      />
 
       {/* Notification List */}
       <NotificationList onNotificationPress={handleNotificationPress} />
@@ -265,6 +241,24 @@ export const NotificationsScreen: React.FC = memo(() => {
         onDismiss={() => setShowPermissionPrompt(false)}
         permissionDenied={!isPermissionGranted}
       />
+
+      {/* Mark All Read Confirmation ActionSheet */}
+      <ActionSheet
+        visible={showMarkAllReadConfirm}
+        onClose={() => setShowMarkAllReadConfirm(false)}
+        title="Tümünü Okundu İşaretle"
+        message={`${unreadCount} okunmamış bildirim okundu olarak işaretlenecek.`}
+        options={[
+          {
+            label: 'Okundu İşaretle',
+            onPress: handleConfirmMarkAllRead,
+          },
+          {
+            label: 'İptal',
+            onPress: () => setShowMarkAllReadConfirm(false),
+          },
+        ]}
+      />
     </SafeAreaView>
   );
 });
@@ -272,52 +266,19 @@ export const NotificationsScreen: React.FC = memo(() => {
 NotificationsScreen.displayName = 'NotificationsScreen';
 
 const styles = StyleSheet.create({
-  backButton: {
-    alignItems: 'center',
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
-  },
   container: {
     flex: 1,
-  },
-  header: {
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
   },
   headerActions: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 8,
+    gap: spacing.sm,
   },
-  headerButton: {
+  iconButton: {
     alignItems: 'center',
     borderRadius: 20,
     height: 40,
     justifyContent: 'center',
     width: 40,
-  },
-  headerButtonPressed: {
-    opacity: 0.6,
-  },
-  headerLeft: {
-    alignItems: 'center',
-    flex: 1,
-    flexDirection: 'row',
-    gap: spacing.sm + spacing.xs, // 12
-  },
-  headerSubtitle: {
-    fontSize: 12,
-    fontWeight: '500',
-    marginTop: 2,
-  },
-  headerTitle: {
-    fontSize: fontSize.xl,
-    fontWeight: '700',
-    letterSpacing: 0.2,
   },
 });

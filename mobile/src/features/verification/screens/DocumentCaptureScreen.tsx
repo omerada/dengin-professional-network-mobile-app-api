@@ -14,7 +14,7 @@ import {
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, typography, borderRadius } from '@theme';
 import { Button, Loading } from '@shared/components';
 import { useVerificationStore } from '../stores';
 import { cameraService, imageProcessor } from '../services';
@@ -227,7 +227,9 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
       </SafeAreaView>
 
       {/* Yükleniyor göstergesi */}
-      {isCapturing && <Loading fullScreen message="İşleniyor..." />}
+      {isCapturing && (
+        <UnifiedLoadingState strategy="spinner" message="İşleniyor..." variant="screen" />
+      )}
     </View>
   );
 });
@@ -281,9 +283,9 @@ const styles = StyleSheet.create({
   },
   stepText: {
     ...typography.bodySmall,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    borderRadius: 16,
-    color: 'white',
+    backgroundColor: colors.overlay,
+    borderRadius: borderRadius.lg,
+    color: colors.text.inverse,
     fontWeight: '600',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,

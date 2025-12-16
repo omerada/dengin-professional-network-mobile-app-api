@@ -8,3 +8,5 @@ export * from './safeAreaConfig';
 export * from './loadingStrategy';
 export * from './unifiedNavigation';
 export * from './layoutConstants';
+export * from './unifiedGestures';
+export * from './unifiedFeedback';

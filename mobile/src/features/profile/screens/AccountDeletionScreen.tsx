@@ -10,7 +10,6 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,7 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { Button, Input } from '@shared/components';
+import { Button, Input, ActionSheet } from '@shared/components';
 import { spacing, typography } from '@theme';
 import { useDeleteAccount } from '../hooks';
 import { getErrorMessage } from '@core/utils/errorUtils';
@@ -64,6 +63,7 @@ export const AccountDeletionScreen: React.FC = () => {
   const [customReason, setCustomReason] = useState('');
   const [confirmText, setConfirmText] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showFinalConfirmation, setShowFinalConfirmation] = useState(false);
 
   // Error state
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -99,44 +99,36 @@ export const AccountDeletionScreen: React.FC = () => {
     return reason?.label;
   }, [selectedReason, customReason]);
 
-  // Handle account deletion
-  const handleDeleteAccount = useCallback(async () => {
+  // Execute account deletion
+  const executeAccountDeletion = useCallback(async () => {
+    const request: DeleteAccountRequest = {
+      password,
+      reason: getFinalReason(),
+    };
+
+    try {
+      await deleteAccount.mutateAsync(request);
+      // User will be logged out automatically by the hook
+      setShowFinalConfirmation(false);
+    } catch (error: any) {
+      const errorMessage = getErrorMessage(error);
+      setShowFinalConfirmation(false);
+
+      if (errorMessage.toLowerCase().includes('password')) {
+        setErrors(prev => ({ ...prev, password: 'Şifre yanlış' }));
+      } else {
+        toast.error(errorMessage, 'Hesap Silinemedi');
+      }
+    }
+  }, [password, getFinalReason, deleteAccount, toast]);
+
+  // Handle account deletion - show final confirmation
+  const handleDeleteAccount = useCallback(() => {
     if (!validateForm()) {
       return;
     }
-
-    // Final confirmation
-    Alert.alert(
-      '⚠️ Son Onay',
-      'Bu işlem geri alınamaz. Hesabınız ve tüm verileriniz kalıcı olarak silinecektir. Devam etmek istediğinize emin misiniz?',
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Evet, Hesabımı Sil',
-          style: 'destructive',
-          onPress: async () => {
-            const request: DeleteAccountRequest = {
-              password,
-              reason: getFinalReason(),
-            };
-
-            try {
-              await deleteAccount.mutateAsync(request);
-              // User will be logged out automatically by the hook
-            } catch (error: any) {
-              const errorMessage = getErrorMessage(error);
-
-              if (errorMessage.toLowerCase().includes('password')) {
-                setErrors(prev => ({ ...prev, password: 'Şifre yanlış' }));
-              } else {
-                toast.error(errorMessage, 'Hesap Silinemedi');
-              }
-            }
-          },
-        },
-      ],
-    );
-  }, [validateForm, password, getFinalReason, deleteAccount]);
+    setShowFinalConfirmation(true);
+  }, [validateForm]);
 
   // Reason button component
   const ReasonButton: React.FC<{ id: string; label: string }> = ({ id, label }) => {
@@ -299,6 +291,25 @@ export const AccountDeletionScreen: React.FC = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Final Confirmation ActionSheet */}
+      <ActionSheet
+        visible={showFinalConfirmation}
+        onClose={() => setShowFinalConfirmation(false)}
+        title="⚠️ Son Onay"
+        message="Bu işlem geri alınamaz. Hesabınız ve tüm verileriniz kalıcı olarak silinecektir. Devam etmek istediğinize emin misiniz?"
+        options={[
+          {
+            id: 'delete',
+            label: 'Evet, Hesabımı Sil',
+            icon: 'trash-outline',
+            destructive: true,
+            onPress: executeAccountDeletion,
+          },
+        ]}
+        cancelLabel="İptal"
+        testID="final-delete-confirmation"
+      />
     </SafeAreaView>
   );
 };

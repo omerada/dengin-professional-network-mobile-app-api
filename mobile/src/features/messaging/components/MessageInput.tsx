@@ -107,7 +107,14 @@ export const MessageInput: React.FC<MessageInputProps> = memo(
     }, [canSend]);
 
     return (
-      <View style={[styles.container, { backgroundColor: colors.background.primary }]}>
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: colors.background.primary,
+            borderTopColor: colors.border.default,
+          },
+        ]}>
         {/* P2: Media attachment buttons (shown when no text) */}
         {!hasText && (
           <View style={styles.mediaButtons}>
@@ -189,7 +196,6 @@ MessageInput.displayName = 'MessageInput';
 const styles = StyleSheet.create({
   container: {
     alignItems: 'flex-end',
-    borderTopColor: 'rgba(0,0,0,0.1)',
     borderTopWidth: StyleSheet.hairlineWidth,
     flexDirection: 'row',
     gap: 8,

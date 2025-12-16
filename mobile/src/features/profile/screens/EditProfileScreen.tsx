@@ -545,7 +545,14 @@ export const EditProfileScreen: React.FC = () => {
         <View style={styles.bottomSheetContent}>
           {/* Sector Info */}
           {selectedSector && (
-            <View style={styles.sectorInfoBanner}>
+            <View
+              style={[
+                styles.sectorInfoBanner,
+                {
+                  backgroundColor: colors.background.tertiary,
+                  borderBottomColor: colors.border.subtle,
+                },
+              ]}>
               <Text style={[styles.sectorInfoText, { color: colors.text.secondary }]}>
                 {selectedSector.name} alanındaki meslekler gösteriliyor
               </Text>
@@ -918,11 +925,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   sectorInfoBanner: {
-    backgroundColor: 'rgba(220, 88, 42, 0.1)',
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(220, 88, 42, 0.2)',
   },
   sectorInfoText: {
     fontSize: fontSize.sm,

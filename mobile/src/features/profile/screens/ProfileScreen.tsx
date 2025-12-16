@@ -21,7 +21,7 @@ import { useUserPosts } from '@features/feed/hooks';
 import { PostCard } from '@features/feed/components';
 import {
   Button,
-  Loading,
+  UnifiedLoadingState,
   SkeletonProfileHeader,
   CustomRefreshControl,
   PressableScale,
@@ -219,7 +219,7 @@ export const ProfileScreen: React.FC = memo(() => {
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.background.primary }]}
         edges={SAFE_AREA_EDGES.standard}>
-        <Loading message="Profil bulunamadı" />
+        <UnifiedLoadingState strategy="spinner" message="Profil bulunamadı" variant="screen" />
       </SafeAreaView>
     );
   }
@@ -256,8 +256,8 @@ export const ProfileScreen: React.FC = memo(() => {
               activeScale={0.9}
               haptic
               hapticType="light"
-              style={[styles.settingsButtonTop, { backgroundColor: 'rgba(255,255,255,0.3)' }]}>
-              <Icon name="settings-outline" size={22} color="#fff" />
+              style={[styles.settingsButtonTop, { backgroundColor: colors.overlay.light }]}>
+              <Icon name="settings-outline" size={22} color={colors.text.onPrimary} />
             </PressableScale>
           )}
 
@@ -336,11 +336,7 @@ export const ProfileScreen: React.FC = memo(() => {
 
         {/* Bio */}
         {'bio' in profile && profile.bio && (
-          <Animated.View
-            entering={FadeInDown.delay(UNIFIED_TIMING.bioFadeDelay).duration(
-              UNIFIED_TIMING.bioFadeDuration,
-            )}
-            style={styles.bioSection}>
+          <Animated.View entering={SCREEN_ANIMATIONS.contentEnter} style={styles.bioSection}>
             <ProfileBio bio={profile.bio} />
           </Animated.View>
         )}
@@ -359,7 +355,7 @@ export const ProfileScreen: React.FC = memo(() => {
         {/* Own profile action - Edit Profile */}
         {isOwnProfile && (
           <Animated.View
-            entering={FadeInDown.delay(350).duration(400)}
+            entering={SCREEN_ANIMATIONS.listItemEnter(2)}
             style={styles.editProfileButton}>
             <Button
               title="Profili Düzenle"
@@ -372,7 +368,7 @@ export const ProfileScreen: React.FC = memo(() => {
         )}
 
         {/* Posts section */}
-        <Animated.View entering={FadeInDown.delay(400).duration(400)} style={styles.postsSection}>
+        <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(3)} style={styles.postsSection}>
           <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Gönderiler</Text>
           {isLoadingPosts && userPosts.length === 0 ? (
             <View style={styles.postsLoading}>

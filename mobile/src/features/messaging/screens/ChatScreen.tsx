@@ -3,7 +3,7 @@
 // Backend: ConversationController, MessageWebSocketController
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -15,7 +15,7 @@ import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import { useSemanticHaptic, useLoadingTimeout } from '@shared/hooks';
 import { useAuthStore } from '@features/auth/stores';
-import { UnifiedScreenHeader, KeyboardAwareScreen } from '@shared/components';
+import { UnifiedScreenHeader, KeyboardAwareScreen, ActionSheet } from '@shared/components';
 import {
   MessageList,
   MessageInput,
@@ -73,15 +73,18 @@ export const ChatScreen: React.FC = () => {
   useEffect(() => {
     if (!conversationId) {
       console.error('[ChatScreen] Missing conversationId, navigating back');
-      Alert.alert('Hata', 'Konuşma ID bulunamadı', [
-        { text: 'Tamam', onPress: () => navigation.goBack() },
-      ]);
+      toast.error('Konuşma ID bulunamadı');
+      navigation.goBack();
     }
-  }, [conversationId, navigation]);
+  }, [conversationId, navigation, toast]);
 
   // State
   const [messageText, setMessageText] = useState('');
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showReportConfirm, setShowReportConfirm] = useState(false);
+  const [messageToDelete, setMessageToDelete] = useState<Message | null>(null);
+  const [messageToReport, setMessageToReport] = useState<Message | null>(null);
 
   // Refs
   const messageOptionsRef = useRef<MessageOptionsSheetRef>(null);
@@ -181,8 +184,8 @@ export const ChatScreen: React.FC = () => {
   }, [navigation, participant]);
 
   const handleOptionsPress = useCallback(() => {
-    Alert.alert('Konuşma Seçenekleri', 'Bu özellik yakında eklenecek');
-  }, []);
+    toast.info('Bu özellik yakında eklenecek');
+  }, [toast]);
 
   const handleSend = useCallback(() => {
     const trimmedText = messageText.trim();
@@ -214,18 +217,18 @@ export const ChatScreen: React.FC = () => {
   // P2: Media attachment handlers
   const handleImagePick = useCallback(() => {
     triggerMedia('select');
-    Alert.alert('Resim Seç', 'Bu özellik yakında eklenecek');
-  }, [triggerMedia]);
+    toast.info('Bu özellik yakında eklenecek');
+  }, [triggerMedia, toast]);
 
   const handleCameraOpen = useCallback(() => {
     triggerMedia('capture');
-    Alert.alert('Kamera', 'Bu özellik yakında eklenecek');
-  }, [triggerMedia]);
+    toast.info('Bu özellik yakında eklenecek');
+  }, [triggerMedia, toast]);
 
   const handleVoiceRecord = useCallback(() => {
     triggerMedia('capture');
-    Alert.alert('Sesli Mesaj', 'Bu özellik yakında eklenecek');
-  }, [triggerMedia]);
+    toast.info('Bu özellik yakında eklenecek');
+  }, [triggerMedia, toast]);
 
   const handleMessageLongPress = useCallback(
     (message: Message | ClientMessage) => {
@@ -237,37 +240,47 @@ export const ChatScreen: React.FC = () => {
   );
 
   const handleDeleteMessage = useCallback(
-    async (message: Message) => {
-      Alert.alert('Mesajı Sil', 'Bu mesajı silmek istediğinize emin misiniz?', [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Sil',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await messagingService.deleteMessage(conversationId, message.messageId);
-              refetch();
-            } catch (error) {
-              Alert.alert('Hata', 'Mesaj silinemedi');
-            }
-          },
-        },
-      ]);
+    (message: Message) => {
+      setMessageToDelete(message);
+      setShowDeleteConfirm(true);
     },
-    [conversationId, refetch],
+    [],
   );
 
-  const handleReportMessage = useCallback((_message: Message) => {
-    Alert.alert('Mesajı Bildir', 'Bu mesajı bildirmek istediğinize emin misiniz?', [
-      { text: 'İptal', style: 'cancel' },
-      {
-        text: 'Bildir',
-        onPress: () => {
-          Alert.alert('Bilgi', 'Mesaj bildirildi');
-        },
-      },
-    ]);
-  }, []);
+  const executeDeleteMessage = useCallback(async () => {
+    if (!messageToDelete) return;
+
+    try {
+      await messagingService.deleteMessage(conversationId, messageToDelete.messageId);
+      triggerSystem('success');
+      toast.success('Mesaj silindi');
+      refetch();
+    } catch (error) {
+      triggerSystem('error');
+      toast.error('Mesaj silinemedi');
+    } finally {
+      setShowDeleteConfirm(false);
+      setMessageToDelete(null);
+    }
+  }, [messageToDelete, conversationId, refetch, triggerSystem, toast]);
+
+  const handleReportMessage = useCallback(
+    (message: Message) => {
+      setMessageToReport(message);
+      setShowReportConfirm(true);
+    },
+    [],
+  );
+
+  const executeReportMessage = useCallback(() => {
+    if (!messageToReport) return;
+
+    // TODO: Implement actual report API call
+    triggerSystem('success');
+    toast.success('Mesaj bildirildi');
+    setShowReportConfirm(false);
+    setMessageToReport(null);
+  }, [messageToReport, triggerSystem, toast]);
 
   const handleLoadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -358,6 +371,50 @@ export const ChatScreen: React.FC = () => {
           />
         </Animated.View>
       </KeyboardAwareScreen>
+
+      {/* Delete Message Confirmation */}
+      <ActionSheet
+        visible={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setMessageToDelete(null);
+        }}
+        title="Mesajı Sil"
+        message="Bu mesajı silmek istediğinize emin misiniz?"
+        options={[
+          {
+            id: 'delete',
+            label: 'Sil',
+            icon: 'trash-outline',
+            destructive: true,
+            onPress: executeDeleteMessage,
+          },
+        ]}
+        cancelLabel="İptal"
+        testID="delete-message-sheet"
+      />
+
+      {/* Report Message Confirmation */}
+      <ActionSheet
+        visible={showReportConfirm}
+        onClose={() => {
+          setShowReportConfirm(false);
+          setMessageToReport(null);
+        }}
+        title="Mesajı Bildir"
+        message="Bu mesajı bildirmek istediğinize emin misiniz?"
+        options={[
+          {
+            id: 'report',
+            label: 'Bildir',
+            icon: 'flag-outline',
+            destructive: true,
+            onPress: executeReportMessage,
+          },
+        ]}
+        cancelLabel="İptal"
+        testID="report-message-sheet"
+      />
     </SafeAreaView>
   );
 };

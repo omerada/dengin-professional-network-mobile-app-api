@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
-import { spacing, typography, fontSize } from '@theme';
+import { spacing, typography, fontSize, borderRadius } from '@theme';
 import { Button, UnifiedScreenHeader } from '@shared/components';
 import { useSemanticHaptic } from '@shared/hooks';
 import { useVerificationStore } from '../stores';
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   infoCard: {
-    borderRadius: 12,
+    borderRadius: borderRadius.lg,
     flexDirection: 'row',
     marginBottom: spacing.sm,
     padding: spacing.md,
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   requirementsList: {
-    borderRadius: 12,
+    borderRadius: borderRadius.lg,
     padding: spacing.md,
   },
   requirementsSection: {
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
   },
   securityNote: {
     alignItems: 'flex-start',
-    borderRadius: 12,
+    borderRadius: borderRadius.lg,
     flexDirection: 'row',
     padding: spacing.md,
   },

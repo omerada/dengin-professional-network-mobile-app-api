@@ -3,17 +3,19 @@
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
 import { useSemanticHaptic } from '@shared/hooks';
 import { useAuthStore } from '@features/auth/stores';
 import { useCommentsData, useAddComment, useLikeComment, useDeleteComment } from '../hooks';
 import { CommentCard, AddCommentForm, EmptyFeed } from '../components';
 import { ActionSheet, ActionSheetOption, CustomRefreshControl } from '@shared/components';
+import { showSuccess, showError } from '@shared/utils';
 import type { Comment, AddCommentRequest } from '../types';
 import type { FeedStackParamList } from '@shared/types';
 
@@ -22,7 +24,8 @@ type CommentsNavigationProp = NativeStackNavigationProp<FeedStackParamList, 'Com
 
 export const CommentsScreen: React.FC = () => {
   const colors = useColors();
-  const { triggerContent } = useSemanticHaptic();
+  const toast = useToast();
+  const { triggerContent, triggerSystem } = useSemanticHaptic();
   const navigation = useNavigation<CommentsNavigationProp>();
   const route = useRoute<CommentsRouteProp>();
   const { postId } = route.params; // postId: number
@@ -103,6 +106,24 @@ export const CommentsScreen: React.FC = () => {
     [comments],
   );
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Delete confirmation handler
+  const handleDeleteConfirm = useCallback(() => {
+    if (!selectedComment) return;
+    triggerSystem('confirm');
+    deleteComment.mutate(selectedComment.id, {
+      onSuccess: () => {
+        showSuccess(toast, { trigger: triggerSystem }, 'Yorum silindi');
+      },
+      onError: () => {
+        showError(toast, { trigger: triggerSystem }, 'Yorum silinemedi');
+      },
+    });
+    setShowDeleteConfirm(false);
+    setShowActionSheet(false);
+  }, [selectedComment, deleteComment, triggerSystem, toast]);
+
   // Action Sheet Options
   const getActionSheetOptions = useCallback((): ActionSheetOption[] => {
     if (!selectedComment) return [];
@@ -117,14 +138,9 @@ export const CommentsScreen: React.FC = () => {
         icon: 'trash-outline',
         destructive: true,
         onPress: () => {
-          Alert.alert('Yorumu Sil', 'Bu yorumu silmek istediğinize emin misiniz?', [
-            { text: 'İptal', style: 'cancel' },
-            {
-              text: 'Sil',
-              style: 'destructive',
-              onPress: () => deleteComment.mutate(selectedComment.id),
-            },
-          ]);
+          triggerSystem('alert');
+          setShowActionSheet(false);
+          setShowDeleteConfirm(true);
         },
       });
     } else {
@@ -133,17 +149,14 @@ export const CommentsScreen: React.FC = () => {
         label: 'Yorumu Şikayet Et',
         icon: 'flag-outline',
         onPress: () => {
-          // Report screen is in root navigator, use untyped navigation
-          (navigation as any).navigate('Report', {
-            type: 'COMMENT',
-            targetId: selectedComment.id,
-          });
+          showSuccess(toast, { trigger: triggerSystem }, 'Yorum şikayet edildi');
+          setShowActionSheet(false);
         },
       });
     }
 
     return options;
-  }, [selectedComment, currentUserId, deleteComment, navigation]);
+  }, [selectedComment, currentUserId, triggerSystem, toast]);
 
   const handleRefresh = useCallback(() => {
     triggerContent('refresh');
@@ -242,6 +255,25 @@ export const CommentsScreen: React.FC = () => {
         }}
         options={getActionSheetOptions()}
         title="Yorum Seçenekleri"
+      />
+
+      {/* Delete Confirmation ActionSheet */}
+      <ActionSheet
+        visible={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        title="Yorumu Sil"
+        message="Bu yorumu silmek istediğinize emin misiniz?"
+        options={[
+          {
+            label: 'Sil',
+            destructive: true,
+            onPress: handleDeleteConfirm,
+          },
+          {
+            label: 'İptal',
+            onPress: () => setShowDeleteConfirm(false),
+          },
+        ]}
       />
     </SafeAreaView>
   );

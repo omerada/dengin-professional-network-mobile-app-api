@@ -3,19 +3,13 @@
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
 import React, { useCallback, useState, useMemo } from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator,
-  RefreshControl,
-  Alert,
-} from 'react-native';
+import { View, StyleSheet, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SAFE_AREA_EDGES } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
 import { useSemanticHaptic } from '@shared/hooks';
 import { spacing } from '@theme';
 import { useAuthStore } from '@features/auth/stores';
@@ -29,7 +23,7 @@ import {
   useDeletePost,
 } from '../hooks';
 import { ActionSheet, ActionSheetOption } from '@shared/components';
-import { sharePost } from '@shared/utils/share';
+import { sharePost, showSuccess, showError, showInfo } from '@shared/utils';
 import {
   PostHeader,
   PostContent,
@@ -47,7 +41,8 @@ type PostDetailNavigationProp = NativeStackNavigationProp<FeedStackParamList, 'P
 
 export const PostDetailScreen: React.FC = () => {
   const colors = useColors();
-  const { triggerContent } = useSemanticHaptic();
+  const toast = useToast();
+  const { triggerContent, triggerSystem } = useSemanticHaptic();
   const navigation = useNavigation<PostDetailNavigationProp>();
   const route = useRoute<PostDetailRouteProp>();
   const { postId } = route.params; // postId: number
@@ -150,6 +145,24 @@ export const PostDetailScreen: React.FC = () => {
     [addComment, postId],
   );
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Delete confirmation handler
+  const handleDeleteConfirm = useCallback(() => {
+    if (!post) return;
+    triggerSystem('confirm');
+    deletePost.mutate(post.id, {
+      onSuccess: () => {
+        showSuccess(toast, { trigger: triggerSystem }, 'Gönderi silindi');
+        navigation.goBack();
+      },
+      onError: () => {
+        showError(toast, { trigger: triggerSystem }, 'Gönderi silinemedi');
+      },
+    });
+    setShowDeleteConfirm(false);
+  }, [post, deletePost, triggerSystem, toast, navigation]);
+
   // Action Sheet Options
   const getActionSheetOptions = useCallback((): ActionSheetOption[] => {
     if (!post) return [];
@@ -164,14 +177,9 @@ export const PostDetailScreen: React.FC = () => {
         icon: 'trash-outline',
         destructive: true,
         onPress: () => {
-          Alert.alert('Gönderiyi Sil', 'Bu gönderiyi silmek istediğinize emin misiniz?', [
-            { text: 'İptal', style: 'cancel' },
-            {
-              text: 'Sil',
-              style: 'destructive',
-              onPress: () => deletePost.mutate(post.id),
-            },
-          ]);
+          triggerSystem('alert');
+          setShowDeleteConfirm(true);
+          setActionSheetVisible(false);
         },
       });
     } else {
@@ -181,8 +189,8 @@ export const PostDetailScreen: React.FC = () => {
           label: 'Gönderiyi Şikayet Et',
           icon: 'flag-outline',
           onPress: () => {
-            // Report screen not in FeedStackParamList - show alert instead
-            Alert.alert('Şikayet', 'Gönderi şikayet edildi.');
+            showSuccess(toast, { trigger: triggerSystem }, 'Gönderi şikayet edildi');
+            setActionSheetVisible(false);
           },
         },
         {
@@ -190,14 +198,15 @@ export const PostDetailScreen: React.FC = () => {
           label: 'Bu Gönderiyi Gizle',
           icon: 'eye-off-outline',
           onPress: () => {
-            Alert.alert('Bilgi', 'Bu gönderi artık akışınızda görünmeyecek.');
+            showInfo(toast, { trigger: triggerSystem }, 'Bu gönderi artık akışınızda görünmeyecek');
+            setActionSheetVisible(false);
           },
         },
       );
     }
 
     return options;
-  }, [post, currentUserId, deletePost]);
+  }, [post, currentUserId, triggerSystem, toast]);
 
   const refreshControl = useMemo(
     () => (
@@ -305,6 +314,25 @@ export const PostDetailScreen: React.FC = () => {
         onClose={() => setShowActionSheet(false)}
         options={getActionSheetOptions()}
         title="Gönderi Seçenekleri"
+      />
+
+      {/* Delete Confirmation ActionSheet */}
+      <ActionSheet
+        visible={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        title="Gönderiyi Sil"
+        message="Bu gönderiyi silmek istediğinize emin misiniz?"
+        options={[
+          {
+            label: 'Sil',
+            destructive: true,
+            onPress: handleDeleteConfirm,
+          },
+          {
+            label: 'İptal',
+            onPress: () => setShowDeleteConfirm(false),
+          },
+        ]}
       />
     </SafeAreaView>
   );

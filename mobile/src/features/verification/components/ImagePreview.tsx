@@ -6,7 +6,7 @@ import React, { memo } from 'react';
 import { StyleSheet, View, Image, Text, Dimensions, ViewStyle } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, typography, borderRadius } from '@theme';
 import { PressableScale } from '@shared/components';
 import type { CapturedImage } from '../types';
 
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   imageContainer: {
-    borderRadius: 12,
+    borderRadius: borderRadius.lg,
     borderWidth: 2,
     overflow: 'hidden',
   },
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     alignItems: 'center',
-    borderRadius: 12,
+    borderRadius: borderRadius.lg,
     borderStyle: 'dashed',
     borderWidth: 2,
     justifyContent: 'center',
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     ...typography.bodySmall,
   },
   retakeButton: {
-    borderRadius: 16,
+    borderRadius: borderRadius.xl,
     marginTop: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,

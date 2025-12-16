@@ -14,6 +14,7 @@ import Animated, {
   ZoomOut,
 } from 'react-native-reanimated';
 import { useTheme } from '@contexts/ThemeContext';
+import { UNIFIED_TIMING } from '@constants';
 
 // ============================================================================
 // Types
@@ -137,15 +138,15 @@ export const Badge: React.FC<BadgeProps> = memo(
       }
     }, [count, animated, scale]);
 
-    // Pulse animation
+    // Pulse animation - UNIFIED_TIMING for consistency
     useEffect(() => {
       if (pulse) {
         const interval = setInterval(() => {
           pulseScale.value = withSequence(
-            withTiming(1.15, { duration: 200 }),
-            withTiming(1, { duration: 200 }),
+            withTiming(1.15, { duration: UNIFIED_TIMING.badgePulseUp }),
+            withTiming(1, { duration: UNIFIED_TIMING.badgePulseDown }),
           );
-        }, 2000);
+        }, UNIFIED_TIMING.badgePulseCycle);
 
         return () => clearInterval(interval);
       }

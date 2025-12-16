@@ -11,7 +11,7 @@ import { useRoute } from '@react-navigation/native';
 import { SCREEN_ANIMATIONS } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
 import {
-  Loading,
+  UnifiedLoadingState,
   UnifiedEmptyState,
   AnimatedListItem,
   CustomRefreshControl,
@@ -119,7 +119,7 @@ export const FollowersListScreen: React.FC = () => {
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
-        <Loading message="Yükleniyor..." />
+        <UnifiedLoadingState strategy="spinner" message="Yükleniyor..." variant="screen" />
       </SafeAreaView>
     );
   }

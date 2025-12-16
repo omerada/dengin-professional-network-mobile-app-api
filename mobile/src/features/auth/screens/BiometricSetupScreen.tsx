@@ -172,7 +172,7 @@ export const BiometricSetupScreen: React.FC = () => {
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.background.primary }]}
         edges={['bottom']}>
-        <Loading size="large" message="Kontrol ediliyor..." />
+        <UnifiedLoadingState strategy="spinner" message="Kontrol ediliyor..." variant="screen" />
       </SafeAreaView>
     );
   }

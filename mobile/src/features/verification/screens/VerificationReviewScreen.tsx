@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
-import { spacing, typography, fontSize } from '@theme';
+import { spacing, typography, fontSize, borderRadius } from '@theme';
 import { Button, SuccessCelebration } from '@shared/components';
 import { useVerificationStore } from '../stores';
 import { StepIndicator, ImagePreview } from '../components';
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   checklistContainer: {
-    borderRadius: 12,
+    borderRadius: borderRadius.lg,
     marginBottom: spacing.lg,
     padding: spacing.md,
   },
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   },
   warningContainer: {
     alignItems: 'flex-start',
-    borderRadius: 12,
+    borderRadius: borderRadius.lg,
     flexDirection: 'row',
     padding: spacing.md,
   },

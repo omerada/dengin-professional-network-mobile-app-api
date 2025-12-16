@@ -3,14 +3,14 @@
 // Modern Premium Profile Design
 
 import { StyleSheet } from 'react-native';
-import { shadows } from '@theme';
+import { shadows, spacing, borderRadius } from '@theme';
 
 /**
  * ProfileScreen styles - Modern Premium Design
  */
 export const styles = StyleSheet.create({
   avatarGlow: {
-    borderRadius: 70,
+    borderRadius: borderRadius.full,
     height: 140,
     left: -10,
     opacity: 0.15,
@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
   avatarGlowContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: spacing.xl,
   },
 
   avatarInitials: {
@@ -36,8 +36,8 @@ export const styles = StyleSheet.create({
   },
 
   blurredBackground: {
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
+    borderBottomLeftRadius: borderRadius.xxl,
+    borderBottomRightRadius: borderRadius.xxl,
     height: 180,
     left: 0,
     opacity: 0.8,
@@ -52,28 +52,28 @@ export const styles = StyleSheet.create({
   },
 
   editProfileButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
   },
 
   loadMoreButton: {
-    marginVertical: 16,
+    marginVertical: spacing.lg,
   },
 
   postsLoading: {
     alignItems: 'center',
-    paddingVertical: 32,
+    paddingVertical: spacing.xxl,
   },
 
   postsSection: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 24,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xl,
   },
 
   premiumAvatar: {
     borderColor: '#fff',
-    borderRadius: 60,
+    borderRadius: borderRadius.full,
     borderWidth: 4,
     height: 120,
     width: 120,
@@ -82,8 +82,8 @@ export const styles = StyleSheet.create({
 
   premiumHeader: {
     alignItems: 'center',
-    paddingBottom: 24,
-    paddingTop: 40,
+    paddingBottom: spacing.xl,
+    paddingTop: spacing.xxl,
     position: 'relative',
   },
 
@@ -112,13 +112,13 @@ export const styles = StyleSheet.create({
   },
 
   bioSection: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
   },
 
   profileContent: {
     alignItems: 'center',
-    paddingTop: 40,
+    paddingTop: spacing.xxl,
     width: '100%',
     zIndex: 1,
   },
@@ -130,17 +130,17 @@ export const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
 
   settingsButtonTop: {
     alignItems: 'center',
-    borderRadius: 20,
+    borderRadius: borderRadius.xl,
     height: 40,
     justifyContent: 'center',
     position: 'absolute',
-    right: 16,
-    top: 12,
+    right: spacing.lg,
+    top: spacing.md,
     width: 40,
     zIndex: 10,
   },

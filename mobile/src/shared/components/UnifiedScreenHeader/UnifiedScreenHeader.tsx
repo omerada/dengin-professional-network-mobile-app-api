@@ -13,7 +13,7 @@ import { useSemanticHaptic } from '@shared/hooks';
 import { UNIFIED_HEADER } from '@constants/layoutConstants';
 import { UNIFIED_TIMING } from '@constants/unifiedTiming';
 import { BackButton } from '../BackButton';
-import { AnimatedBadge } from '../AnimatedBadge';
+import { Badge } from '../Badge';
 import { SearchBar } from '../SearchBar';
 
 import { styles } from './UnifiedScreenHeader.styles';
@@ -221,12 +221,12 @@ export const UnifiedScreenHeader = memo<UnifiedScreenHeaderProps>(
               <Icon name="notifications-outline" size={24} color={colors.text.primary} />
               {feedProps.unreadCount > 0 && (
                 <View style={styles.badgeContainer}>
-                  <AnimatedBadge
+                  <Badge
                     count={feedProps.unreadCount}
                     variant="error"
                     size="md"
                     pulse
-                    animateOnChange
+                    animated
                   />
                 </View>
               )}
