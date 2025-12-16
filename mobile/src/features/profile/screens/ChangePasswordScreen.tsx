@@ -3,21 +3,13 @@
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-COMPLETION.md
 
 import React, { useState, useCallback } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-} from 'react-native';
+import { StyleSheet, View, Text, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { Button, Input } from '@shared/components';
+import { Button, Input, KeyboardAwareScreen } from '@shared/components';
 import { spacing, typography } from '@theme';
 import { useChangePassword } from '../hooks';
 import { getErrorMessage } from '@core/utils/errorUtils';
@@ -196,184 +188,178 @@ export const ChangePasswordScreen: React.FC = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['bottom']}>
-      <KeyboardAvoidingView
-        style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}>
-          {/* Header Info */}
-          <View style={styles.infoCard}>
-            <Text style={[styles.infoText, { color: colors.text.secondary }]}>
-              Güvenliğiniz için düzenli olarak şifrenizi değiştirmenizi öneririz. Yeni şifreniz en
-              az 8 karakter olmalı ve büyük/küçük harf, rakam ve özel karakter içermelidir.
-            </Text>
-          </View>
+      <KeyboardAwareScreen
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
+        {/* Header Info */}
+        <View style={styles.infoCard}>
+          <Text style={[styles.infoText, { color: colors.text.secondary }]}>
+            Güvenliğiniz için düzenli olarak şifrenizi değiştirmenizi öneririz. Yeni şifreniz en az
+            8 karakter olmalı ve büyük/küçük harf, rakam ve özel karakter içermelidir.
+          </Text>
+        </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={[styles.label, { color: colors.text.primary }]}>Mevcut Şifre</Text>
-            <Input
-              value={currentPassword}
-              onChangeText={text => {
-                setCurrentPassword(text);
-                setErrors(prev => ({ ...prev, currentPassword: '' }));
-              }}
-              placeholder="Mevcut şifrenizi girin"
-              secureTextEntry={!showCurrentPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-              error={errors.currentPassword}
-              rightIcon={
-                <Pressable onPress={() => setShowCurrentPassword(!showCurrentPassword)}>
-                  <Icon
-                    name={showCurrentPassword ? 'eye-off-outline' : 'eye-outline'}
-                    size={20}
-                    color={colors.text.secondary}
+        <View style={styles.inputContainer}>
+          <Text style={[styles.label, { color: colors.text.primary }]}>Mevcut Şifre</Text>
+          <Input
+            value={currentPassword}
+            onChangeText={text => {
+              setCurrentPassword(text);
+              setErrors(prev => ({ ...prev, currentPassword: '' }));
+            }}
+            placeholder="Mevcut şifrenizi girin"
+            secureTextEntry={!showCurrentPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            error={errors.currentPassword}
+            rightIcon={
+              <Pressable onPress={() => setShowCurrentPassword(!showCurrentPassword)}>
+                <Icon
+                  name={showCurrentPassword ? 'eye-off-outline' : 'eye-outline'}
+                  size={20}
+                  color={colors.text.secondary}
+                />
+              </Pressable>
+            }
+          />
+        </View>
+
+        {/* New Password */}
+        <View style={styles.inputContainer}>
+          <Text style={[styles.label, { color: colors.text.primary }]}>Yeni Şifre</Text>
+          <Input
+            value={newPassword}
+            onChangeText={text => {
+              setNewPassword(text);
+              setErrors(prev => ({ ...prev, newPassword: '' }));
+            }}
+            placeholder="Yeni şifrenizi girin"
+            secureTextEntry={!showNewPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            error={errors.newPassword}
+            rightIcon={
+              <Pressable onPress={() => setShowNewPassword(!showNewPassword)}>
+                <Icon
+                  name={showNewPassword ? 'eye-off-outline' : 'eye-outline'}
+                  size={20}
+                  color={colors.text.secondary}
+                />
+              </Pressable>
+            }
+          />
+
+          {/* Password Strength Indicator */}
+          {newPassword.length > 0 && (
+            <View style={styles.strengthContainer}>
+              <View style={styles.strengthBars}>
+                {[1, 2, 3, 4].map(level => (
+                  <View
+                    key={level}
+                    style={[
+                      styles.strengthBar,
+                      {
+                        backgroundColor:
+                          level <= passwordStrength.level
+                            ? passwordStrength.color
+                            : colors.border.default,
+                      },
+                    ]}
                   />
-                </Pressable>
-              }
-            />
-          </View>
+                ))}
+              </View>
+              <Text style={[styles.strengthText, { color: passwordStrength.color }]}>
+                {passwordStrength.text}
+              </Text>
+            </View>
+          )}
+        </View>
 
-          {/* New Password */}
-          <View style={styles.inputContainer}>
-            <Text style={[styles.label, { color: colors.text.primary }]}>Yeni Şifre</Text>
-            <Input
-              value={newPassword}
-              onChangeText={text => {
-                setNewPassword(text);
-                setErrors(prev => ({ ...prev, newPassword: '' }));
-              }}
-              placeholder="Yeni şifrenizi girin"
-              secureTextEntry={!showNewPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-              error={errors.newPassword}
-              rightIcon={
-                <Pressable onPress={() => setShowNewPassword(!showNewPassword)}>
-                  <Icon
-                    name={showNewPassword ? 'eye-off-outline' : 'eye-outline'}
-                    size={20}
-                    color={colors.text.secondary}
-                  />
-                </Pressable>
-              }
-            />
+        {/* Confirm Password */}
+        <View style={styles.inputContainer}>
+          <Text style={[styles.label, { color: colors.text.primary }]}>Yeni Şifre (Tekrar)</Text>
+          <Input
+            value={confirmPassword}
+            onChangeText={text => {
+              setConfirmPassword(text);
+              setErrors(prev => ({ ...prev, confirmPassword: '' }));
+            }}
+            placeholder="Yeni şifrenizi tekrar girin"
+            secureTextEntry={!showConfirmPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            error={errors.confirmPassword}
+            rightIcon={
+              <Pressable onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                <Icon
+                  name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
+                  size={20}
+                  color={colors.text.secondary}
+                />
+              </Pressable>
+            }
+          />
+        </View>
 
-            {/* Password Strength Indicator */}
-            {newPassword.length > 0 && (
-              <View style={styles.strengthContainer}>
-                <View style={styles.strengthBars}>
-                  {[1, 2, 3, 4].map(level => (
-                    <View
-                      key={level}
-                      style={[
-                        styles.strengthBar,
-                        {
-                          backgroundColor:
-                            level <= passwordStrength.level
-                              ? passwordStrength.color
-                              : colors.border.default,
-                        },
-                      ]}
-                    />
-                  ))}
-                </View>
-                <Text style={[styles.strengthText, { color: passwordStrength.color }]}>
-                  {passwordStrength.text}
+        {/* Password Requirements */}
+        <View style={[styles.requirementsCard, { backgroundColor: colors.background.secondary }]}>
+          <Text style={[styles.requirementsTitle, { color: colors.text.primary }]}>
+            Şifre Gereksinimleri:
+          </Text>
+          <View style={styles.requirementsList}>
+            {[
+              { text: 'En az 8 karakter', valid: newPassword.length >= 8 },
+              { text: 'Bir büyük harf (A-Z)', valid: /[A-Z]/.test(newPassword) },
+              { text: 'Bir küçük harf (a-z)', valid: /[a-z]/.test(newPassword) },
+              { text: 'Bir rakam (0-9)', valid: /\d/.test(newPassword) },
+              {
+                text: 'Bir özel karakter (!@#$%)',
+                valid: /[!@#$%^&*(),.?":{}|<>]/.test(newPassword),
+              },
+            ].map((req, index) => (
+              <View key={index} style={styles.requirementItem}>
+                <Text
+                  style={[
+                    styles.requirementIcon,
+                    {
+                      color:
+                        newPassword.length === 0
+                          ? colors.text.tertiary
+                          : req.valid
+                            ? colors.status.success
+                            : colors.status.error,
+                    },
+                  ]}>
+                  {newPassword.length === 0 ? '○' : req.valid ? '✓' : '✗'}
+                </Text>
+                <Text
+                  style={[
+                    styles.requirementText,
+                    {
+                      color:
+                        newPassword.length === 0
+                          ? colors.text.tertiary
+                          : req.valid
+                            ? colors.text.secondary
+                            : colors.status.error,
+                    },
+                  ]}>
+                  {req.text}
                 </Text>
               </View>
-            )}
+            ))}
           </View>
+        </View>
 
-          {/* Confirm Password */}
-          <View style={styles.inputContainer}>
-            <Text style={[styles.label, { color: colors.text.primary }]}>Yeni Şifre (Tekrar)</Text>
-            <Input
-              value={confirmPassword}
-              onChangeText={text => {
-                setConfirmPassword(text);
-                setErrors(prev => ({ ...prev, confirmPassword: '' }));
-              }}
-              placeholder="Yeni şifrenizi tekrar girin"
-              secureTextEntry={!showConfirmPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-              error={errors.confirmPassword}
-              rightIcon={
-                <Pressable onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-                  <Icon
-                    name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
-                    size={20}
-                    color={colors.text.secondary}
-                  />
-                </Pressable>
-              }
-            />
-          </View>
-
-          {/* Password Requirements */}
-          <View style={[styles.requirementsCard, { backgroundColor: colors.background.secondary }]}>
-            <Text style={[styles.requirementsTitle, { color: colors.text.primary }]}>
-              Şifre Gereksinimleri:
-            </Text>
-            <View style={styles.requirementsList}>
-              {[
-                { text: 'En az 8 karakter', valid: newPassword.length >= 8 },
-                { text: 'Bir büyük harf (A-Z)', valid: /[A-Z]/.test(newPassword) },
-                { text: 'Bir küçük harf (a-z)', valid: /[a-z]/.test(newPassword) },
-                { text: 'Bir rakam (0-9)', valid: /\d/.test(newPassword) },
-                {
-                  text: 'Bir özel karakter (!@#$%)',
-                  valid: /[!@#$%^&*(),.?":{}|<>]/.test(newPassword),
-                },
-              ].map((req, index) => (
-                <View key={index} style={styles.requirementItem}>
-                  <Text
-                    style={[
-                      styles.requirementIcon,
-                      {
-                        color:
-                          newPassword.length === 0
-                            ? colors.text.tertiary
-                            : req.valid
-                              ? colors.status.success
-                              : colors.status.error,
-                      },
-                    ]}>
-                    {newPassword.length === 0 ? '○' : req.valid ? '✓' : '✗'}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.requirementText,
-                      {
-                        color:
-                          newPassword.length === 0
-                            ? colors.text.tertiary
-                            : req.valid
-                              ? colors.text.secondary
-                              : colors.status.error,
-                      },
-                    ]}>
-                    {req.text}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          </View>
-
-          {/* Submit Button */}
-          <Button
-            title="Şifreyi Değiştir"
-            onPress={handleChangePassword}
-            loading={changePassword.isPending}
-            disabled={!currentPassword || !newPassword || !confirmPassword}
-            style={styles.submitButton}
-          />
-        </ScrollView>
-      </KeyboardAvoidingView>
+        {/* Submit Button */}
+        <Button
+          title="Şifreyi Değiştir"
+          onPress={handleChangePassword}
+          loading={changePassword.isPending}
+          disabled={!currentPassword || !newPassword || !confirmPassword}
+          style={styles.submitButton}
+        />
+      </KeyboardAwareScreen>
     </SafeAreaView>
   );
 };

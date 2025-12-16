@@ -13,7 +13,6 @@ import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import { useLoadingTimeout } from '@shared/hooks';
 import {
-  UnifiedLoadingState,
   UnifiedEmptyState,
   AnimatedListItem,
   CustomRefreshControl,
@@ -21,7 +20,7 @@ import {
 } from '@shared/components';
 import { ErrorBoundary } from '@core/components';
 import { spacing } from '@theme';
-import { UserListItem } from '../components';
+import { UserListItem, UserSkeleton } from '../components';
 import { useFollowers } from '../hooks';
 import type { FollowUser } from '../types';
 import type { StyleProp, ViewStyle } from 'react-native';
@@ -133,7 +132,8 @@ export const FollowersListScreen: React.FC = () => {
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
-        <UnifiedLoadingState strategy="spinner" message="Yükleniyor..." variant="screen" />
+        <UnifiedScreenHeader variant="default" title="Takipçiler" showBackButton />
+        <UserSkeleton count={12} showFollowButton />
       </SafeAreaView>
     );
   }

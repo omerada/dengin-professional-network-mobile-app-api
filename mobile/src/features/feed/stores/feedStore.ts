@@ -19,7 +19,7 @@ export const MAX_CONTENT_LENGTH = 500;
 
 type FeedStorePersist = (
   config: StateCreator<FeedStoreState>,
-  options: PersistOptions<FeedStoreState, Partial<FeedStoreState>>
+  options: PersistOptions<FeedStoreState, Partial<FeedStoreState>>,
 ) => StateCreator<FeedStoreState>;
 
 /**
@@ -62,6 +62,13 @@ export const useFeedStore = create<FeedStoreState>()(
           draftImages: [],
         });
       },
+
+      // Verification prompt tracking (session-based)
+      verificationPromptShown: false,
+
+      setVerificationPromptShown: (shown: boolean) => {
+        set({ verificationPromptShown: shown });
+      },
     }),
     {
       name: 'feed-storage',
@@ -70,9 +77,10 @@ export const useFeedStore = create<FeedStoreState>()(
         filter: state.filter,
         draftContent: state.draftContent,
         // Images are not persisted (file URIs may become invalid)
+        // verificationPromptShown is NOT persisted (session-only)
       }),
-    }
-  )
+    },
+  ),
 );
 
 /**

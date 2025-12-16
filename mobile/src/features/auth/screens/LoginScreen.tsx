@@ -4,14 +4,7 @@
 // Oku: mobile-development-guide/ui-ux-modernization/07-SCREEN-REDESIGNS.md
 
 import React, { useCallback, useEffect } from 'react';
-import {
-  View,
-  Text,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, Platform, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Feather';
@@ -23,7 +16,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useColors } from '@contexts/ThemeContext';
 import { useLocale } from '@contexts/LocaleContext';
 import { useSemanticHaptic } from '@shared/hooks';
-import { Button, Input, ShakeAnimation, UnifiedScreenHeader } from '@shared/components';
+import {
+  Button,
+  Input,
+  ShakeAnimation,
+  UnifiedScreenHeader,
+  KeyboardAwareScreen,
+} from '@shared/components';
 import { SAFE_AREA_EDGES, SCREEN_ANIMATIONS } from '@constants';
 import { useLogin, useBiometricLogin } from '../hooks';
 import { useAuthStore } from '../stores';
@@ -102,48 +101,24 @@ export const LoginScreen: React.FC = () => {
         showBackButton={false}
         showBorder={false}
       />
-      <KeyboardAvoidingView
-        style={styles.keyboardAvoid}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
-          showsVerticalScrollIndicator={false}>
-          {/* Hero Section - DENGIN Branding */}
-          <Animated.View entering={SCREEN_ANIMATIONS.heroEnter} style={styles.heroSection}>
-            <View style={styles.logoContainer}>
-              <Text style={[styles.logoText, { color: colors.interactive.default }]}>DENGIN</Text>
-            </View>
+      <KeyboardAwareScreen mode="padding">
+        {/* Hero Section - DENGIN Branding */}
+        <Animated.View entering={SCREEN_ANIMATIONS.heroEnter} style={styles.heroSection}>
+          <View style={styles.logoContainer}>
+            <Text style={[styles.logoText, { color: colors.interactive.default }]}>DENGIN</Text>
+          </View>
 
-            {/* Slogan */}
-            <Text style={[styles.slogan, { color: colors.text.secondary }]}>
-              Profesyoneller için güvenli sosyal ağ
-            </Text>
-          </Animated.View>
+          {/* Slogan */}
+          <Text style={[styles.slogan, { color: colors.text.secondary }]}>
+            Profesyoneller için güvenli sosyal ağ
+          </Text>
+        </Animated.View>
 
-          {/* Social Login - Priority (Üstte) */}
-          <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(0)} style={styles.socialSection}>
-            <Text style={[styles.socialTitle, { color: colors.text.primary }]}>Hızlı Giriş</Text>
-            <View style={styles.socialButtonsColumn}>
-              {Platform.OS === 'ios' && (
-                <TouchableOpacity
-                  style={[
-                    styles.socialButtonLarge,
-                    {
-                      backgroundColor: colors.background.secondary,
-                      borderColor: colors.border.default,
-                    },
-                  ]}
-                  disabled={true}>
-                  <FAIcon name="apple" size={20} color={colors.text.primary} />
-                  <Text style={[styles.socialButtonLargeText, { color: colors.text.primary }]}>
-                    Apple ile Giriş Yap
-                  </Text>
-                </TouchableOpacity>
-              )}
-
+        {/* Social Login - Priority (Üstte) */}
+        <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(0)} style={styles.socialSection}>
+          <Text style={[styles.socialTitle, { color: colors.text.primary }]}>Hızlı Giriş</Text>
+          <View style={styles.socialButtonsColumn}>
+            {Platform.OS === 'ios' && (
               <TouchableOpacity
                 style={[
                   styles.socialButtonLarge,
@@ -153,145 +128,158 @@ export const LoginScreen: React.FC = () => {
                   },
                 ]}
                 disabled={true}>
-                <FAIcon name="google" size={20} color={colors.text.primary} />
+                <FAIcon name="apple" size={20} color={colors.text.primary} />
                 <Text style={[styles.socialButtonLargeText, { color: colors.text.primary }]}>
-                  Google ile Giriş Yap
+                  Apple ile Giriş Yap
                 </Text>
               </TouchableOpacity>
-            </View>
-          </Animated.View>
+            )}
 
-          {/* Divider */}
-          <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(1)} style={styles.divider}>
-            <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
-            <Text style={[styles.dividerText, { color: colors.text.tertiary }]}>
-              veya email ile
-            </Text>
-            <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
-          </Animated.View>
-
-          {/* Error Message - Professional */}
-          {isError && error && (
-            <ShakeAnimation trigger={isError}>
-              <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
-                <Icon name="alert-circle" size={18} color={colors.status.error} />
-                <View style={styles.errorContent}>
-                  <Text style={[styles.errorText, { color: colors.status.error }]}>
-                    {error.message?.includes('credentials') || error.message?.includes('password')
-                      ? 'E-posta veya şifre hatalı. Lütfen tekrar deneyin.'
-                      : error.message?.includes('network') || error.message?.includes('connection')
-                        ? 'Bağlantı sorunu. İnternet bağlantınızı kontrol edin.'
-                        : 'Bir hata oluştu. Lütfen tekrar deneyin.'}
-                  </Text>
-                  <TouchableOpacity onPress={handleForgotPassword}>
-                    <Text style={[styles.errorAction, { color: colors.interactive.default }]}>
-                      Şifremi Unuttum
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </ShakeAnimation>
-          )}
-
-          {/* Form */}
-          <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(2)} style={styles.form}>
-            <Controller
-              control={control}
-              name="email"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label={t('auth.email')}
-                  placeholder="ornek@email.com"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                  autoCorrect={false}
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.email?.message}
-                  required
-                />
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="password"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label={t('auth.password')}
-                  placeholder="••••••••"
-                  secureTextEntry
-                  autoCapitalize="none"
-                  autoComplete="password"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.password?.message}
-                  required
-                />
-              )}
-            />
-
-            {/* Forgot Password */}
             <TouchableOpacity
-              onPress={handleForgotPassword}
+              style={[
+                styles.socialButtonLarge,
+                {
+                  backgroundColor: colors.background.secondary,
+                  borderColor: colors.border.default,
+                },
+              ]}
+              disabled={true}>
+              <FAIcon name="google" size={20} color={colors.text.primary} />
+              <Text style={[styles.socialButtonLargeText, { color: colors.text.primary }]}>
+                Google ile Giriş Yap
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+
+        {/* Divider */}
+        <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(1)} style={styles.divider}>
+          <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
+          <Text style={[styles.dividerText, { color: colors.text.tertiary }]}>veya email ile</Text>
+          <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
+        </Animated.View>
+
+        {/* Error Message - Professional */}
+        {isError && error && (
+          <ShakeAnimation trigger={isError}>
+            <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
+              <Icon name="alert-circle" size={18} color={colors.status.error} />
+              <View style={styles.errorContent}>
+                <Text style={[styles.errorText, { color: colors.status.error }]}>
+                  {error.message?.includes('credentials') || error.message?.includes('password')
+                    ? 'E-posta veya şifre hatalı. Lütfen tekrar deneyin.'
+                    : error.message?.includes('network') || error.message?.includes('connection')
+                      ? 'Bağlantı sorunu. İnternet bağlantınızı kontrol edin.'
+                      : 'Bir hata oluştu. Lütfen tekrar deneyin.'}
+                </Text>
+                <TouchableOpacity onPress={handleForgotPassword}>
+                  <Text style={[styles.errorAction, { color: colors.interactive.default }]}>
+                    Şifremi Unuttum
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ShakeAnimation>
+        )}
+
+        {/* Form */}
+        <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(2)} style={styles.form}>
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label={t('auth.email')}
+                placeholder="ornek@email.com"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                autoCorrect={false}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={errors.email?.message}
+                required
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label={t('auth.password')}
+                placeholder="••••••••"
+                secureTextEntry
+                autoCapitalize="none"
+                autoComplete="password"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={errors.password?.message}
+                required
+              />
+            )}
+          />
+
+          {/* Forgot Password */}
+          <TouchableOpacity
+            onPress={handleForgotPassword}
+            accessible={true}
+            accessibilityRole="link"
+            accessibilityLabel="Şifremi unuttum"
+            style={styles.forgotPassword}>
+            <Text style={{ color: colors.interactive.default, fontSize: 14 }}>
+              {t('auth.forgotPassword')}
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/* Login Button */}
+        <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(1)} style={styles.actions}>
+          <Button
+            title={isLoading ? 'Giriş yapılıyor...' : t('auth.login')}
+            onPress={handleSubmit(onSubmit)}
+            loading={isLoading}
+            disabled={isLoading || isBiometricLoading}
+            size="lg"
+            fullWidth
+          />
+
+          {/* Biometric Login */}
+          {isBiometricAvailable && (
+            <Button
+              title={`${biometricName} ile Giriş`}
+              onPress={loginWithBiometric}
+              loading={isBiometricLoading}
+              disabled={isLoading || isBiometricLoading}
+              variant="ghost"
+              size="md"
+              fullWidth
+              style={{ marginTop: spacing.md }}
+            />
+          )}
+        </Animated.View>
+
+        {/* Footer: Register CTA */}
+        <View style={styles.footer}>
+          <Animated.View
+            entering={SCREEN_ANIMATIONS.listItemEnter(4)}
+            style={styles.registerContainer}>
+            <Text style={{ color: colors.text.secondary }}>Hesabınız yok mu? </Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Register')}
               accessible={true}
               accessibilityRole="link"
-              accessibilityLabel="Şifremi unuttum"
-              style={styles.forgotPassword}>
-              <Text style={{ color: colors.interactive.default, fontSize: 14 }}>
-                {t('auth.forgotPassword')}
+              accessibilityLabel="Kayıt ol">
+              <Text style={{ color: colors.interactive.default, fontWeight: '600' }}>
+                {t('auth.register')}
               </Text>
             </TouchableOpacity>
           </Animated.View>
-
-          {/* Login Button */}
-          <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(1)} style={styles.actions}>
-            <Button
-              title={isLoading ? 'Giriş yapılıyor...' : t('auth.login')}
-              onPress={handleSubmit(onSubmit)}
-              loading={isLoading}
-              disabled={isLoading || isBiometricLoading}
-              size="lg"
-              fullWidth
-            />
-
-            {/* Biometric Login */}
-            {isBiometricAvailable && (
-              <Button
-                title={`${biometricName} ile Giriş`}
-                onPress={loginWithBiometric}
-                loading={isBiometricLoading}
-                disabled={isLoading || isBiometricLoading}
-                variant="ghost"
-                size="md"
-                fullWidth
-                style={{ marginTop: spacing.md }}
-              />
-            )}
-          </Animated.View>
-
-          {/* Footer: Register CTA */}
-          <View style={styles.footer}>
-            <Animated.View
-              entering={SCREEN_ANIMATIONS.listItemEnter(4)}
-              style={styles.registerContainer}>
-              <Text style={{ color: colors.text.secondary }}>Hesabınız yok mu? </Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('Register')}
-                accessible={true}
-                accessibilityRole="link"
-                accessibilityLabel="Kayıt ol">
-                <Text style={{ color: colors.interactive.default, fontWeight: '600' }}>
-                  {t('auth.register')}
-                </Text>
-              </TouchableOpacity>
-            </Animated.View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </View>
+      </KeyboardAwareScreen>
     </SafeAreaView>
   );
 };

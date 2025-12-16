@@ -4,15 +4,7 @@
 // Step 2: Sector + Profession (Optional - "Atla" button)
 
 import React, { useCallback, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Feather';
 import FAIcon from 'react-native-vector-icons/FontAwesome';
@@ -22,7 +14,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
 import { useSemanticHaptic } from '@shared/hooks';
-import { Button, Input, UnifiedScreenHeader } from '@shared/components';
+import { Button, Input, UnifiedScreenHeader, KeyboardAwareScreen } from '@shared/components';
 import { SectorSelector, ProfessionSelector } from '../components';
 import { useRegister } from '../hooks';
 import { registerOptimizedSchema, RegisterOptimizedSchemaType } from '../validation';
@@ -169,65 +161,42 @@ export const RegisterScreenOptimized: React.FC = () => {
         onBackPress={handleBack}
         showBorder={false}
       />
-      <KeyboardAvoidingView
-        style={styles.keyboardAvoid}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}>
-          {/* Progress Indicator */}
-          <View style={styles.progressContainer}>
-            <View style={[styles.progressBar, { backgroundColor: colors.border.default }]}>
-              <View
-                style={[
-                  styles.progressFill,
-                  { backgroundColor: colors.interactive.default },
-                  currentStep === Step.ESSENTIALS ? styles.progressHalf : styles.progressFull,
-                ]}
-              />
-            </View>
-            <Text style={[styles.progressText, { color: colors.text.tertiary }]}>
-              Adım {currentStep} / 2
+      <KeyboardAwareScreen contentContainerStyle={styles.scrollContent}>
+        {/* Progress Indicator */}
+        <View style={styles.progressContainer}>
+          <View style={[styles.progressBar, { backgroundColor: colors.border.default }]}>
+            <View
+              style={[
+                styles.progressFill,
+                { backgroundColor: colors.interactive.default },
+                currentStep === Step.ESSENTIALS ? styles.progressHalf : styles.progressFull,
+              ]}
+            />
+          </View>
+          <Text style={[styles.progressText, { color: colors.text.tertiary }]}>
+            Adım {currentStep} / 2
+          </Text>
+        </View>
+
+        {/* Error Message - Professional */}
+        {isError && error && (
+          <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
+            <Icon name="alert-circle" size={18} color={colors.status.error} />
+            <Text style={[styles.errorText, { color: colors.status.error }]}>
+              {error.message?.includes('email')
+                ? 'Bu e-posta zaten kullanımda. Giriş yapmayı dener misiniz?'
+                : 'Bir hata oluştu. Lütfen tekrar deneyin.'}
             </Text>
           </View>
+        )}
 
-          {/* Error Message - Professional */}
-          {isError && error && (
-            <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
-              <Icon name="alert-circle" size={18} color={colors.status.error} />
-              <Text style={[styles.errorText, { color: colors.status.error }]}>
-                {error.message?.includes('email')
-                  ? 'Bu e-posta zaten kullanımda. Giriş yapmayı dener misiniz?'
-                  : 'Bir hata oluştu. Lütfen tekrar deneyin.'}
-              </Text>
-            </View>
-          )}
-
-          {/* Step Content */}
-          {currentStep === Step.ESSENTIALS ? (
-            <Animated.View key="step-1" entering={FadeIn} exiting={FadeOut}>
-              {/* Social Login Priority */}
-              <View style={styles.socialSection}>
-                <View style={styles.socialButtonsColumn}>
-                  {Platform.OS === 'ios' && (
-                    <TouchableOpacity
-                      style={[
-                        styles.socialButtonLarge,
-                        {
-                          backgroundColor: colors.background.secondary,
-                          borderColor: colors.border.default,
-                        },
-                      ]}
-                      disabled={true}>
-                      <FAIcon name="apple" size={20} color={colors.text.primary} />
-                      <Text style={[styles.socialButtonLargeText, { color: colors.text.primary }]}>
-                        Apple ile Kayıt Ol
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-
+        {/* Step Content */}
+        {currentStep === Step.ESSENTIALS ? (
+          <Animated.View key="step-1" entering={FadeIn} exiting={FadeOut}>
+            {/* Social Login Priority */}
+            <View style={styles.socialSection}>
+              <View style={styles.socialButtonsColumn}>
+                {Platform.OS === 'ios' && (
                   <TouchableOpacity
                     style={[
                       styles.socialButtonLarge,
@@ -237,212 +206,225 @@ export const RegisterScreenOptimized: React.FC = () => {
                       },
                     ]}
                     disabled={true}>
-                    <FAIcon name="google" size={20} color={colors.text.primary} />
+                    <FAIcon name="apple" size={20} color={colors.text.primary} />
                     <Text style={[styles.socialButtonLargeText, { color: colors.text.primary }]}>
-                      Google ile Kayıt Ol
+                      Apple ile Kayıt Ol
                     </Text>
                   </TouchableOpacity>
-                </View>
-              </View>
-
-              {/* Divider */}
-              <View style={styles.divider}>
-                <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
-                <Text style={[styles.dividerText, { color: colors.text.tertiary }]}>veya</Text>
-                <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
-              </View>
-
-              {/* Name Fields - Side by Side */}
-              <View style={styles.nameRow}>
-                <View style={styles.nameField}>
-                  <Controller
-                    control={control}
-                    name="firstName"
-                    render={({ field: { onChange, onBlur, value } }) => (
-                      <Input
-                        label="Ad"
-                        placeholder="Adınız"
-                        autoCapitalize="words"
-                        autoComplete="given-name"
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        error={errors.firstName?.message}
-                        required
-                      />
-                    )}
-                  />
-                </View>
-                <View style={styles.nameField}>
-                  <Controller
-                    control={control}
-                    name="lastName"
-                    render={({ field: { onChange, onBlur, value } }) => (
-                      <Input
-                        label="Soyad"
-                        placeholder="Soyadınız"
-                        autoCapitalize="words"
-                        autoComplete="family-name"
-                        value={value}
-                        onChangeText={onChange}
-                        onBlur={onBlur}
-                        error={errors.lastName?.message}
-                        required
-                      />
-                    )}
-                  />
-                </View>
-              </View>
-
-              {/* Email */}
-              <Controller
-                control={control}
-                name="email"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    label="E-posta"
-                    placeholder="ornek@email.com"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoComplete="email"
-                    autoCorrect={false}
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    error={errors.email?.message}
-                    required
-                    leftIcon={<Icon name="mail" size={20} color={colors.text.tertiary} />}
-                  />
                 )}
-              />
 
-              {/* Password with Strength Indicator */}
-              <Controller
-                control={control}
-                name="password"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <View>
+                <TouchableOpacity
+                  style={[
+                    styles.socialButtonLarge,
+                    {
+                      backgroundColor: colors.background.secondary,
+                      borderColor: colors.border.default,
+                    },
+                  ]}
+                  disabled={true}>
+                  <FAIcon name="google" size={20} color={colors.text.primary} />
+                  <Text style={[styles.socialButtonLargeText, { color: colors.text.primary }]}>
+                    Google ile Kayıt Ol
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Divider */}
+            <View style={styles.divider}>
+              <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
+              <Text style={[styles.dividerText, { color: colors.text.tertiary }]}>veya</Text>
+              <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
+            </View>
+
+            {/* Name Fields - Side by Side */}
+            <View style={styles.nameRow}>
+              <View style={styles.nameField}>
+                <Controller
+                  control={control}
+                  name="firstName"
+                  render={({ field: { onChange, onBlur, value } }) => (
                     <Input
-                      label="Şifre"
-                      placeholder="En az 8 karakter"
-                      secureTextEntry={!showPassword}
-                      autoCapitalize="none"
-                      autoComplete="new-password"
+                      label="Ad"
+                      placeholder="Adınız"
+                      autoCapitalize="words"
+                      autoComplete="given-name"
                       value={value}
                       onChangeText={onChange}
                       onBlur={onBlur}
-                      error={errors.password?.message}
+                      error={errors.firstName?.message}
                       required
-                      leftIcon={<Icon name="lock" size={20} color={colors.text.tertiary} />}
-                      rightIcon={
-                        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                          <Icon
-                            name={showPassword ? 'eye-off' : 'eye'}
-                            size={20}
-                            color={colors.text.tertiary}
-                          />
-                        </TouchableOpacity>
-                      }
-                    />
-                    <PasswordStrength password={value} />
-                  </View>
-                )}
-              />
-
-              {/* Terms - Compact */}
-              <View style={styles.termsContainer}>
-                <Text style={[styles.termsText, { color: colors.text.tertiary }]}>
-                  Kaydol&apos;a tıklayarak{' '}
-                  <Text
-                    style={[styles.termsLink, { color: colors.interactive.default }]}
-                    onPress={handleTermsPress}>
-                    Kullanım Koşulları
-                  </Text>
-                  {' ve '}
-                  <Text
-                    style={[styles.termsLink, { color: colors.interactive.default }]}
-                    onPress={handlePrivacyPress}>
-                    Gizlilik Politikası
-                  </Text>
-                  &apos;nı kabul etmiş olursunuz.
-                </Text>
-              </View>
-
-              {/* Next Button */}
-              <Button
-                title="İleri"
-                onPress={handleNextStep}
-                size="lg"
-                fullWidth
-                rightIcon={<Icon name="arrow-right" size={20} color={colors.text.inverse} />}
-              />
-            </Animated.View>
-          ) : (
-            <Animated.View key="step-2" entering={FadeIn} exiting={FadeOut}>
-              {/* Professional Info (Required) */}
-              <View style={styles.stepHeader}>
-                <Text style={[styles.stepSubtitle, { color: colors.text.secondary }]}>
-                  Mesleğinizi belirtin ve profesyonel ağınıza katılın
-                </Text>
-                <Text style={[styles.stepDescription, { color: colors.text.tertiary }]}>
-                  Sektörünüzden profesyonellerle bağlantı kurun
-                </Text>
-              </View>
-
-              <Controller
-                control={control}
-                name="sectorId"
-                render={({ field: { onChange, value } }) => (
-                  <SectorSelector
-                    value={value}
-                    onSelect={onChange}
-                    error={errors.sectorId?.message}
-                  />
-                )}
-              />
-
-              {sectorId && (
-                <Controller
-                  control={control}
-                  name="professionId"
-                  render={({ field: { onChange, value } }) => (
-                    <ProfessionSelector
-                      sectorCode={sectorCode}
-                      value={value}
-                      onSelect={onChange}
-                      error={errors.professionId?.message}
                     />
                   )}
                 />
-              )}
-
-              {/* Buttons */}
-              <View style={styles.buttonGroup}>
-                <Button
-                  title={isLoading ? 'Hesap oluşturuluyor...' : 'Hesap Oluştur'}
-                  onPress={handleSubmit(onSubmit)}
-                  size="lg"
-                  fullWidth
-                  loading={isLoading}
-                  disabled={isLoading}
+              </View>
+              <View style={styles.nameField}>
+                <Controller
+                  control={control}
+                  name="lastName"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <Input
+                      label="Soyad"
+                      placeholder="Soyadınız"
+                      autoCapitalize="words"
+                      autoComplete="family-name"
+                      value={value}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      error={errors.lastName?.message}
+                      required
+                    />
+                  )}
                 />
               </View>
-            </Animated.View>
-          )}
+            </View>
 
-          {/* Login Link */}
-          <View style={styles.loginContainer}>
-            <Text style={[styles.loginText, { color: colors.text.secondary }]}>
-              Zaten hesabın var mı?{' '}
-            </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text style={[styles.loginLink, { color: colors.interactive.default }]}>
-                Giriş Yap
+            {/* Email */}
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label="E-posta"
+                  placeholder="ornek@email.com"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  autoCorrect={false}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={errors.email?.message}
+                  required
+                  leftIcon={<Icon name="mail" size={20} color={colors.text.tertiary} />}
+                />
+              )}
+            />
+
+            {/* Password with Strength Indicator */}
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <View>
+                  <Input
+                    label="Şifre"
+                    placeholder="En az 8 karakter"
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    autoComplete="new-password"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    error={errors.password?.message}
+                    required
+                    leftIcon={<Icon name="lock" size={20} color={colors.text.tertiary} />}
+                    rightIcon={
+                      <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                        <Icon
+                          name={showPassword ? 'eye-off' : 'eye'}
+                          size={20}
+                          color={colors.text.tertiary}
+                        />
+                      </TouchableOpacity>
+                    }
+                  />
+                  <PasswordStrength password={value} />
+                </View>
+              )}
+            />
+
+            {/* Terms - Compact */}
+            <View style={styles.termsContainer}>
+              <Text style={[styles.termsText, { color: colors.text.tertiary }]}>
+                Kaydol&apos;a tıklayarak{' '}
+                <Text
+                  style={[styles.termsLink, { color: colors.interactive.default }]}
+                  onPress={handleTermsPress}>
+                  Kullanım Koşulları
+                </Text>
+                {' ve '}
+                <Text
+                  style={[styles.termsLink, { color: colors.interactive.default }]}
+                  onPress={handlePrivacyPress}>
+                  Gizlilik Politikası
+                </Text>
+                &apos;nı kabul etmiş olursunuz.
               </Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+            </View>
+
+            {/* Next Button */}
+            <Button
+              title="İleri"
+              onPress={handleNextStep}
+              size="lg"
+              fullWidth
+              rightIcon={<Icon name="arrow-right" size={20} color={colors.text.inverse} />}
+            />
+          </Animated.View>
+        ) : (
+          <Animated.View key="step-2" entering={FadeIn} exiting={FadeOut}>
+            {/* Professional Info (Required) */}
+            <View style={styles.stepHeader}>
+              <Text style={[styles.stepSubtitle, { color: colors.text.secondary }]}>
+                Mesleğinizi belirtin ve profesyonel ağınıza katılın
+              </Text>
+              <Text style={[styles.stepDescription, { color: colors.text.tertiary }]}>
+                Sektörünüzden profesyonellerle bağlantı kurun
+              </Text>
+            </View>
+
+            <Controller
+              control={control}
+              name="sectorId"
+              render={({ field: { onChange, value } }) => (
+                <SectorSelector
+                  value={value}
+                  onSelect={onChange}
+                  error={errors.sectorId?.message}
+                />
+              )}
+            />
+
+            {sectorId && (
+              <Controller
+                control={control}
+                name="professionId"
+                render={({ field: { onChange, value } }) => (
+                  <ProfessionSelector
+                    sectorCode={sectorCode}
+                    value={value}
+                    onSelect={onChange}
+                    error={errors.professionId?.message}
+                  />
+                )}
+              />
+            )}
+
+            {/* Buttons */}
+            <View style={styles.buttonGroup}>
+              <Button
+                title={isLoading ? 'Hesap oluşturuluyor...' : 'Hesap Oluştur'}
+                onPress={handleSubmit(onSubmit)}
+                size="lg"
+                fullWidth
+                loading={isLoading}
+                disabled={isLoading}
+              />
+            </View>
+          </Animated.View>
+        )}
+
+        {/* Login Link */}
+        <View style={styles.loginContainer}>
+          <Text style={[styles.loginText, { color: colors.text.secondary }]}>
+            Zaten hesabın var mı?{' '}
+          </Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text style={[styles.loginLink, { color: colors.interactive.default }]}>Giriş Yap</Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAwareScreen>
     </SafeAreaView>
   );
 };

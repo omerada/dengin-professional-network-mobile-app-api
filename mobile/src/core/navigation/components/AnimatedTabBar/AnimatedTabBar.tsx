@@ -17,6 +17,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@contexts/ThemeContext';
 import { spring } from '@theme/animations';
+import { PRESS_ANIMATION_CONFIG } from '@constants/unifiedGestures';
 import { styles, TAB_ICON_SIZE, CENTER_FAB_ICON_SIZE } from './AnimatedTabBar.styles';
 import type { AnimatedTabBarProps, TabButtonProps } from './AnimatedTabBar.types';
 
@@ -48,10 +49,11 @@ const TabButton: React.FC<TabButtonProps> = memo(({ item, focused, onPress, onLo
     }
   }, [focused, focusProgress, scale]);
 
-  // Handle press - UNIFIED: Standardized press scale (0.96)
+  // Handle press - PRODUCTION STANDARD: Unified press animation
   const handlePress = useCallback(() => {
+    const config = PRESS_ANIMATION_CONFIG.STANDARD;
     scale.value = withSequence(
-      withSpring(0.96, { damping: 15, stiffness: 500, mass: 0.5 }),
+      withSpring(config.scale, config.spring),
       withSpring(1, spring.snappy),
     );
     onPress();

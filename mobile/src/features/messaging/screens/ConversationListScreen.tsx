@@ -4,8 +4,8 @@
 // Oku: backend-development-guide/sprint-planning/26-SPRINT-7-8.md
 
 import React, { useCallback, useState } from 'react';
-import { View, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import Animated from 'react-native-reanimated';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
+import Animated, { useSharedValue, useAnimatedScrollHandler } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -23,6 +23,7 @@ import {
   UnifiedEmptyState,
   CustomRefreshControl,
   UnifiedScreenHeader,
+  ActionSheet,
 } from '@shared/components';
 import type { Conversation } from '../types';
 import type { MessagingStackParamList } from '@core/navigation/types';
@@ -37,6 +38,14 @@ export const ConversationListScreen: React.FC = () => {
 
   // State
   const [searchQuery, setSearchQuery] = useState('');
+  const scrollY = useSharedValue(0);
+
+  // Scroll handler for collapsible header
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: event => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
 
   // Hooks
   const { isConnected } = useSocket();
@@ -110,20 +119,22 @@ export const ConversationListScreen: React.FC = () => {
     [navigation, triggerNavigation],
   );
 
-  const handleConversationLongPress = useCallback(
-    (conversation: Conversation) => {
-      Alert.alert(conversation.participant.fullName, 'Konuşma seçenekleri', [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Profili Görüntüle',
-          onPress: () => {
-            (navigation as any).navigate('Profile', { userId: conversation.participant.userId });
-          },
-        },
-      ]);
-    },
-    [navigation],
-  );
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+
+  const handleConversationLongPress = useCallback((conversation: Conversation) => {
+    setSelectedConversation(conversation);
+  }, []);
+
+  const handleCloseActionSheet = useCallback(() => {
+    setSelectedConversation(null);
+  }, []);
+
+  const handleViewProfile = useCallback(() => {
+    if (selectedConversation) {
+      (navigation as any).navigate('Profile', { userId: selectedConversation.participant.userId });
+      setSelectedConversation(null);
+    }
+  }, [navigation, selectedConversation]);
 
   const handleNewConversation = useCallback(() => {
     navigation.navigate('NewConversation');
@@ -184,15 +195,18 @@ export const ConversationListScreen: React.FC = () => {
     );
   }, [isLoading, handleNewConversation]);
 
+  // Render
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top']}>
       <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={{ flex: 1 }}>
-        {/* UnifiedScreenHeader with search variant */}
+        {/* UnifiedScreenHeader with search variant - collapsible */}
         <UnifiedScreenHeader
           variant="search"
           title="Mesajlar"
+          collapsible
+          scrollY={scrollY}
           searchProps={{
             value: searchQuery,
             onChangeText: setSearchQuery,
@@ -228,9 +242,31 @@ export const ConversationListScreen: React.FC = () => {
             ]}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
+            // Collapsible header scroll handler
+            onScroll={scrollHandler}
+            scrollEventThrottle={16}
           />
         )}
       </Animated.View>
+
+      {/* Conversation Options ActionSheet */}
+      {selectedConversation && (
+        <ActionSheet
+          visible={!!selectedConversation}
+          onClose={handleCloseActionSheet}
+          title={selectedConversation.participant.fullName}
+          message="Konuşma seçenekleri"
+          options={[
+            {
+              id: 'view-profile',
+              label: 'Profili Görüntüle',
+              icon: 'person',
+              onPress: handleViewProfile,
+            },
+          ]}
+          cancelLabel="İptal"
+        />
+      )}
     </SafeAreaView>
   );
 };

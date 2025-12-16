@@ -13,15 +13,11 @@ export { SearchBar } from './SearchBar';
 export type { SearchBarProps, SearchBarSize } from './SearchBar';
 
 // Loading & Feedback components
-// @deprecated Use UnifiedLoadingState instead
-// export { Loading, LoadingOverlay, Spinner, DotsLoading } from './Loading';
 export { ErrorFallback } from './ErrorFallback';
-export { OfflineNotice } from './OfflineNotice';
+
 export { ErrorBoundary } from './ErrorBoundary';
 export { NetworkErrorBoundary } from './NetworkErrorBoundary';
 export { PullToRefresh, useRefreshControl } from './PullToRefresh';
-export { StepSuccess } from './StepSuccess';
-export type { StepSuccessProps } from './StepSuccess';
 
 // Unified Loading State System - PRODUCTION STANDARD
 export { UnifiedLoadingState } from './Loading/UnifiedLoadingState';
@@ -31,18 +27,9 @@ export type {
   LoadingVariant,
 } from './Loading/UnifiedLoadingState';
 
-// Skeleton Components
-// TODO: Implement these skeleton components
-// export { MessageListSkeleton } from './Skeleton/MessageListSkeleton';
-// export { NotificationListSkeleton } from './Skeleton/NotificationListSkeleton';
-// export { ActivityScreenSkeleton } from './Skeleton/ActivityScreenSkeleton';
-
 // Animated Components
 export { AnimatedListItem } from './AnimatedListItem';
 export { AnimatedCounter } from './AnimatedCounter';
-// @deprecated Use Badge with animated prop instead
-// export { AnimatedBadge } from './AnimatedBadge';
-export { AnimatedCheckmark } from './AnimatedCheckmark';
 export { SuccessCelebration } from './SuccessCelebration';
 export { ShakeAnimation } from './ShakeAnimation';
 

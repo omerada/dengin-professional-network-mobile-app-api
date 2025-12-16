@@ -8,9 +8,6 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
   TouchableOpacity,
   TextInput,
   FlatList,
@@ -26,7 +23,13 @@ import { useSemanticHaptic, useHaptic, useSuccessCelebration } from '@shared/hoo
 import { showSuccess, showProfileUpdateError, showValidationError } from '@shared/utils';
 import { useProfessions } from '@shared/hooks/useProfessions';
 import { useSectors } from '@shared/hooks/useSectors';
-import { Button, Input, BottomSheet, UnifiedEmptyState } from '@shared/components';
+import {
+  Button,
+  Input,
+  BottomSheet,
+  UnifiedEmptyState,
+  KeyboardAwareScreen,
+} from '@shared/components';
 import { spacing, fontSize } from '@theme';
 import { AvatarPicker } from '../components';
 import {
@@ -369,166 +372,161 @@ export const EditProfileScreen: React.FC = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top', 'bottom']}>
-      <KeyboardAvoidingView
-        style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled">
-          {/* Avatar Picker */}
-          <AvatarPicker
-            currentAvatarUrl={
-              pendingAvatarUri || (shouldDeleteAvatar ? null : (profile?.avatarUrl ?? null))
-            }
-            fullName={profile?.fullName || 'Kullanıcı'}
-            onImageSelected={handleAvatarSelected}
-            onRemove={
-              (profile?.avatarUrl || pendingAvatarUri) && !shouldDeleteAvatar
-                ? handleAvatarRemove
-                : undefined
-            }
-            isLoading={false}
+      <KeyboardAwareScreen
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
+        {/* Avatar Picker */}
+        <AvatarPicker
+          currentAvatarUrl={
+            pendingAvatarUri || (shouldDeleteAvatar ? null : (profile?.avatarUrl ?? null))
+          }
+          fullName={profile?.fullName || 'Kullanıcı'}
+          onImageSelected={handleAvatarSelected}
+          onRemove={
+            (profile?.avatarUrl || pendingAvatarUri) && !shouldDeleteAvatar
+              ? handleAvatarRemove
+              : undefined
+          }
+          isLoading={false}
+        />
+
+        {/* Form Fields */}
+        <View style={styles.form}>
+          <Input
+            label="Ad"
+            value={name}
+            onChangeText={setName}
+            placeholder="Adınızı girin"
+            autoCapitalize="words"
+            maxLength={50}
           />
 
-          {/* Form Fields */}
-          <View style={styles.form}>
-            <Input
-              label="Ad"
-              value={name}
-              onChangeText={setName}
-              placeholder="Adınızı girin"
-              autoCapitalize="words"
-              maxLength={50}
-            />
+          <Input
+            label="Soyad"
+            value={surname}
+            onChangeText={setSurname}
+            placeholder="Soyadınızı girin"
+            autoCapitalize="words"
+            maxLength={50}
+          />
 
-            <Input
-              label="Soyad"
-              value={surname}
-              onChangeText={setSurname}
-              placeholder="Soyadınızı girin"
-              autoCapitalize="words"
-              maxLength={50}
-            />
+          <Input
+            label="Hakkımda"
+            value={bio}
+            onChangeText={setBio}
+            placeholder="Kendinizi tanıtın..."
+            multiline
+            numberOfLines={4}
+            maxLength={500}
+          />
 
-            <Input
-              label="Hakkımda"
-              value={bio}
-              onChangeText={setBio}
-              placeholder="Kendinizi tanıtın..."
-              multiline
-              numberOfLines={4}
-              maxLength={500}
-            />
-
-            {/* Date of Birth Selection */}
-            <View style={styles.selectorSection}>
-              <Text style={[styles.label, { color: colors.text.primary }]}>Doğum Tarihi</Text>
-              <TouchableOpacity
+          {/* Date of Birth Selection */}
+          <View style={styles.selectorSection}>
+            <Text style={[styles.label, { color: colors.text.primary }]}>Doğum Tarihi</Text>
+            <TouchableOpacity
+              style={[
+                styles.selectorButton,
+                {
+                  backgroundColor: colors.background.secondary,
+                  borderColor: colors.border.default,
+                },
+              ]}
+              onPress={handleOpenDatePicker}>
+              <Text
                 style={[
-                  styles.selectorButton,
+                  styles.selectorButtonText,
                   {
-                    backgroundColor: colors.background.secondary,
-                    borderColor: colors.border.default,
+                    color: dateOfBirth ? colors.text.primary : colors.text.tertiary,
                   },
-                ]}
-                onPress={handleOpenDatePicker}>
-                <Text
-                  style={[
-                    styles.selectorButtonText,
-                    {
-                      color: dateOfBirth ? colors.text.primary : colors.text.tertiary,
-                    },
-                  ]}>
-                  {dateOfBirth || 'Doğum tarihi seçin'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Sector Selection */}
-            <View style={styles.selectorSection}>
-              <Text style={[styles.label, { color: colors.text.primary }]}>Çalışma Alanı</Text>
-              <TouchableOpacity
-                style={[
-                  styles.selectorButton,
-                  {
-                    backgroundColor: colors.background.secondary,
-                    borderColor: colors.border.default,
-                  },
-                ]}
-                onPress={handleOpenSectorPicker}>
-                <Text
-                  style={[
-                    styles.selectorButtonText,
-                    {
-                      color: selectedSector ? colors.text.primary : colors.text.tertiary,
-                    },
-                  ]}>
-                  {selectedSector ? selectedSector.name : 'Çalışma alanı seçin'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Profession Selection */}
-            <View style={styles.selectorSection}>
-              <Text style={[styles.label, { color: colors.text.primary }]}>Meslek</Text>
-              <TouchableOpacity
-                style={[
-                  styles.selectorButton,
-                  {
-                    backgroundColor: !selectedSector
-                      ? colors.background.tertiary
-                      : colors.background.secondary,
-                    borderColor: colors.border.default,
-                    opacity: !selectedSector ? 0.5 : 1,
-                  },
-                ]}
-                onPress={handleOpenProfessionPicker}
-                disabled={!selectedSector}>
-                <Text
-                  style={[
-                    styles.selectorButtonText,
-                    {
-                      color: selectedProfession ? colors.text.primary : colors.text.tertiary,
-                    },
-                  ]}>
-                  {selectedProfession ? selectedProfession.name : 'Meslek seçin'}
-                </Text>
-              </TouchableOpacity>
-              {!selectedSector && (
-                <Text style={[styles.helperText, { color: colors.text.tertiary }]}>
-                  Önce çalışma alanı seçin
-                </Text>
-              )}
-            </View>
-
-            {/* Gender Selection */}
-            <View style={styles.selectorSection}>
-              <Text style={[styles.label, { color: colors.text.primary }]}>Cinsiyet</Text>
-              <TouchableOpacity
-                style={[
-                  styles.selectorButton,
-                  {
-                    backgroundColor: colors.background.secondary,
-                    borderColor: colors.border.default,
-                  },
-                ]}
-                onPress={handleOpenGenderPicker}>
-                <Text
-                  style={[
-                    styles.selectorButtonText,
-                    {
-                      color: gender ? colors.text.primary : colors.text.tertiary,
-                    },
-                  ]}>
-                  {gender
-                    ? GENDER_OPTIONS.find(g => g.value === gender)?.label || 'Cinsiyet seçin'
-                    : 'Cinsiyet seçin'}
-                </Text>
-              </TouchableOpacity>
-            </View>
+                ]}>
+                {dateOfBirth || 'Doğum tarihi seçin'}
+              </Text>
+            </TouchableOpacity>
           </View>
-        </ScrollView>
+
+          {/* Sector Selection */}
+          <View style={styles.selectorSection}>
+            <Text style={[styles.label, { color: colors.text.primary }]}>Çalışma Alanı</Text>
+            <TouchableOpacity
+              style={[
+                styles.selectorButton,
+                {
+                  backgroundColor: colors.background.secondary,
+                  borderColor: colors.border.default,
+                },
+              ]}
+              onPress={handleOpenSectorPicker}>
+              <Text
+                style={[
+                  styles.selectorButtonText,
+                  {
+                    color: selectedSector ? colors.text.primary : colors.text.tertiary,
+                  },
+                ]}>
+                {selectedSector ? selectedSector.name : 'Çalışma alanı seçin'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Profession Selection */}
+          <View style={styles.selectorSection}>
+            <Text style={[styles.label, { color: colors.text.primary }]}>Meslek</Text>
+            <TouchableOpacity
+              style={[
+                styles.selectorButton,
+                {
+                  backgroundColor: !selectedSector
+                    ? colors.background.tertiary
+                    : colors.background.secondary,
+                  borderColor: colors.border.default,
+                  opacity: !selectedSector ? 0.5 : 1,
+                },
+              ]}
+              onPress={handleOpenProfessionPicker}
+              disabled={!selectedSector}>
+              <Text
+                style={[
+                  styles.selectorButtonText,
+                  {
+                    color: selectedProfession ? colors.text.primary : colors.text.tertiary,
+                  },
+                ]}>
+                {selectedProfession ? selectedProfession.name : 'Meslek seçin'}
+              </Text>
+            </TouchableOpacity>
+            {!selectedSector && (
+              <Text style={[styles.helperText, { color: colors.text.tertiary }]}>
+                Önce çalışma alanı seçin
+              </Text>
+            )}
+          </View>
+
+          {/* Gender Selection */}
+          <View style={styles.selectorSection}>
+            <Text style={[styles.label, { color: colors.text.primary }]}>Cinsiyet</Text>
+            <TouchableOpacity
+              style={[
+                styles.selectorButton,
+                {
+                  backgroundColor: colors.background.secondary,
+                  borderColor: colors.border.default,
+                },
+              ]}
+              onPress={handleOpenGenderPicker}>
+              <Text
+                style={[
+                  styles.selectorButtonText,
+                  {
+                    color: gender ? colors.text.primary : colors.text.tertiary,
+                  },
+                ]}>
+                {gender
+                  ? GENDER_OPTIONS.find(g => g.value === gender)?.label || 'Cinsiyet seçin'
+                  : 'Cinsiyet seçin'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
 
         {/* Save Button */}
         <View style={[styles.footer, { borderTopColor: colors.border.default }]}>
@@ -542,7 +540,7 @@ export const EditProfileScreen: React.FC = () => {
             disabled={!hasChanges || isLoading}
           />
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScreen>
 
       {/* Profession Picker - P2 Optimized: BottomSheet */}
       <BottomSheet

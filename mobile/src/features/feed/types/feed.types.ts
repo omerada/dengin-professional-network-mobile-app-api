@@ -26,7 +26,7 @@ export interface PostAuthor {
   verified: boolean;
   /** Backward compatibility alias */
   isVerified?: boolean;
-  /** @deprecated Use professionName instead */
+  /** Legacy field - backward compatibility */
   profession?: string;
 }
 
@@ -84,17 +84,16 @@ export interface Post {
   /** Feed algorithm relevance score (optional) */
   relevanceScore?: number;
   createdAt: string;
-  /** @deprecated Backend FeedPostResponse'da yok, opsiyonel */
+  /** Legacy field - backward compatibility */
   updatedAt?: string;
-  /** @deprecated Use flat likeCount, commentCount instead */
+  /** Legacy field - backward compatibility */
   stats?: PostStats;
-  /** @deprecated Use liked instead */
+  /** Legacy field - backward compatibility */
   userInteraction?: UserInteraction;
 }
 
 /**
- * Post özeti (liste için)
- * @deprecated Yeni API ile Post tipini doğrudan kullanın
+ * Post özeti (liste için) - legacy type
  */
 export interface PostSummary {
   /** Primary ID (Long) */
@@ -307,6 +306,10 @@ export interface FeedStoreState {
   addDraftImage: (image: LocalImage) => void;
   removeDraftImage: (index: number) => void;
   clearDraft: () => void;
+
+  // Verification prompt (session-based)
+  verificationPromptShown: boolean;
+  setVerificationPromptShown: (shown: boolean) => void;
 }
 
 /**

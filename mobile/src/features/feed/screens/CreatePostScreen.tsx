@@ -4,16 +4,7 @@
 // Oku: MOBILE-APP-HOME-SCREEN.md
 
 import React, { useCallback, useState, useLayoutEffect } from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  Text,
-  ActivityIndicator,
-} from 'react-native';
+import { View, StyleSheet, Pressable, Text, ActivityIndicator } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { SCREEN_ANIMATIONS } from '@constants/animationPresets';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -27,7 +18,12 @@ import { useFeedStore } from '../stores';
 import { useCreatePost } from '../hooks';
 import { imagePickerService } from '../services';
 import { PostTextInput, ImagePreviewGrid } from '../components';
-import { SuccessCelebration, ActionFeedback, ActionSheet } from '@shared/components';
+import {
+  SuccessCelebration,
+  ActionFeedback,
+  ActionSheet,
+  KeyboardAwareScreen,
+} from '@shared/components';
 import { showError } from '@shared/utils';
 import { useAuthStore } from '@features/auth/stores';
 import type { UploadProgress, FeedStoreState } from '../types';
@@ -232,75 +228,66 @@ export const CreatePostScreen: React.FC = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top', 'bottom']}>
-      <KeyboardAvoidingView
-        style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 20}>
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          accessible
-          accessibilityLabel="Gönderi içeriği alanı">
-          {/* Text Input */}
-          <PostTextInput
-            value={draftContent}
-            onChangeText={setDraftContent}
-            placeholder="Ne düşünüyorsunuz?"
-            autoFocus
-          />
+      <KeyboardAwareScreen
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
+        {/* Text Input */}
+        <PostTextInput
+          value={draftContent}
+          onChangeText={setDraftContent}
+          placeholder="Ne düşünüyorsunuz?"
+          autoFocus
+        />
 
-          {/* Image Preview with animation */}
-          {draftImages.length > 0 && (
-            <Animated.View
-              entering={SCREEN_ANIMATIONS.cardEnter}
-              exiting={SCREEN_ANIMATIONS.cardExit}>
-              <ImagePreviewGrid
-                images={draftImages}
-                onRemove={removeDraftImage}
-                onAdd={handlePickImages}
-                maxImages={5}
+        {/* Image Preview with animation */}
+        {draftImages.length > 0 && (
+          <Animated.View
+            entering={SCREEN_ANIMATIONS.cardEnter}
+            exiting={SCREEN_ANIMATIONS.cardExit}>
+            <ImagePreviewGrid
+              images={draftImages}
+              onRemove={removeDraftImage}
+              onAdd={handlePickImages}
+              maxImages={5}
+            />
+          </Animated.View>
+        )}
+
+        {/* Upload Progress with animation */}
+        {uploadProgress && (
+          <Animated.View
+            entering={SCREEN_ANIMATIONS.modalEnter}
+            exiting={SCREEN_ANIMATIONS.modalExit}
+            style={styles.progressContainer}>
+            <Text
+              style={[styles.progressText, { color: colors.text.secondary }]}
+              accessible
+              accessibilityRole="text"
+              accessibilityLabel={`Görsel yükleniyor ${uploadProgress.imageIndex + 1} / ${uploadProgress.totalImages}`}>
+              Görsel yükleniyor ({uploadProgress.imageIndex + 1}/{uploadProgress.totalImages})...
+            </Text>
+            <View
+              style={[styles.progressBar, { backgroundColor: colors.background.secondary }]}
+              accessible
+              accessibilityRole="progressbar"
+              accessibilityValue={{
+                min: 0,
+                max: 100,
+                now: uploadProgress.progress,
+              }}>
+              <Animated.View
+                entering={SCREEN_ANIMATIONS.quickFadeIn}
+                style={[
+                  styles.progressFill,
+                  {
+                    backgroundColor: colors.interactive.default,
+                    width: `${uploadProgress.progress}%`,
+                  },
+                ]}
               />
-            </Animated.View>
-          )}
-
-          {/* Upload Progress with animation */}
-          {uploadProgress && (
-            <Animated.View
-              entering={SCREEN_ANIMATIONS.modalEnter}
-              exiting={SCREEN_ANIMATIONS.modalExit}
-              style={styles.progressContainer}>
-              <Text
-                style={[styles.progressText, { color: colors.text.secondary }]}
-                accessible
-                accessibilityRole="text"
-                accessibilityLabel={`Görsel yükleniyor ${uploadProgress.imageIndex + 1} / ${uploadProgress.totalImages}`}>
-                Görsel yükleniyor ({uploadProgress.imageIndex + 1}/{uploadProgress.totalImages})...
-              </Text>
-              <View
-                style={[styles.progressBar, { backgroundColor: colors.background.secondary }]}
-                accessible
-                accessibilityRole="progressbar"
-                accessibilityValue={{
-                  min: 0,
-                  max: 100,
-                  now: uploadProgress.progress,
-                }}>
-                <Animated.View
-                  entering={SCREEN_ANIMATIONS.quickFadeIn}
-                  style={[
-                    styles.progressFill,
-                    {
-                      backgroundColor: colors.interactive.default,
-                      width: `${uploadProgress.progress}%`,
-                    },
-                  ]}
-                />
-              </View>
-            </Animated.View>
-          )}
-        </ScrollView>
+            </View>
+          </Animated.View>
+        )}
 
         {/* Bottom Toolbar with animation */}
         <Animated.View
@@ -346,7 +333,7 @@ export const CreatePostScreen: React.FC = () => {
             {draftImages.length}/5 görsel
           </Text>
         </Animated.View>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScreen>
 
       {/* Success Feedback */}
       <ActionFeedback

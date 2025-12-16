@@ -81,12 +81,9 @@ export interface User {
   avatarUrl?: string;
   verificationStatus: BackendVerificationStatus;
 
-  // Legacy profession fields (deprecated, use sector instead)
-  /** @deprecated Use sectorId instead */
+  // Legacy profession fields - backward compatibility
   professionId?: number;
-  /** @deprecated Use sectorName instead */
   professionName?: string;
-  /** @deprecated Use sector object instead */
   profession?: Profession;
 
   // New sector fields (Sprint 1)
@@ -119,8 +116,7 @@ export interface UserStats {
 }
 
 /**
- * Profession entity
- * @deprecated Use Sector and ProfessionGroup instead (Sprint 1)
+ * Legacy profession type - backward compatibility
  */
 export interface Profession {
   id: number;
@@ -132,9 +128,7 @@ export interface Profession {
 }
 
 /**
- * Profession category enum - Backend ProfessionCategory.java ile %100 uyumlu
- * @see backend/src/main/java/com/dengin/identity/domain/model/ProfessionCategory.java
- * @deprecated Use Sector codes instead (Sprint 1)
+ * Legacy profession category - backward compatibility
  */
 export type ProfessionCategory =
   | 'MEDICAL' // Sağlık
@@ -195,7 +189,7 @@ export interface Sector {
   /** Number of users in this sector */
   memberCount: number;
 
-  /** @deprecated Use memberCount instead */
+  /** Legacy field - backward compatibility */
   userCount?: number;
 }
 

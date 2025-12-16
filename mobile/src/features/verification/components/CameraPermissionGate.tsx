@@ -3,11 +3,12 @@
 // Oku: mobile-development-guide/ui-ux-modernization/07-SCREEN-REDESIGNS.md
 
 import React, { memo, ReactNode, useCallback } from 'react';
-import { View, Text, StyleSheet, Linking, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, Linking, Platform } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
 import { Button, UnifiedLoadingState } from '@shared/components';
 import { spacing, fontSize, borderRadius } from '@theme';
 import { useCameraPermission } from '../hooks';
@@ -122,42 +123,23 @@ PermissionScreen.displayName = 'PermissionScreen';
 export const CameraPermissionGate: React.FC<CameraPermissionGateProps> = memo(
   ({ children, testID }) => {
     const { hasPermission, requestPermission, isDenied, isChecking } = useCameraPermission();
+    const toast = useToast();
 
     const handleOpenSettings = useCallback(() => {
-      Alert.alert(
-        'Ayarlara Git',
-        'Kamera izni vermek için ayarlar sayfasına yönlendirileceksiniz.',
-        [
-          {
-            text: 'İptal',
-            style: 'cancel',
-          },
-          {
-            text: 'Ayarlar',
-            onPress: () => {
-              Linking.openSettings().catch(() => {
-                Alert.alert(
-                  'Hata',
-                  'Ayarlar sayfası açılamadı. Lütfen manuel olarak Ayarlar > Dengin > Kamera izni verin.',
-                );
-              });
-            },
-          },
-        ],
-      );
-    }, []);
+      Linking.openSettings().catch(() => {
+        toast.error(
+          'Ayarlar sayfası açılamadı. Lütfen manuel olarak Ayarlar > Dengin > Kamera izni verin.',
+        );
+      });
+    }, [toast]);
 
     const handleRequestPermission = useCallback(async () => {
       const granted = await requestPermission();
 
       if (!granted) {
-        Alert.alert(
-          'İzin Reddedildi',
-          'Kamera izni verilmedi. Kimlik doğrulama için kamera erişimi gerekiyor.',
-          [{ text: 'Tamam' }],
-        );
+        toast.error('Kamera izni verilmedi. Kimlik doğrulama için kamera erişimi gerekiyor.');
       }
-    }, [requestPermission]);
+    }, [requestPermission, toast]);
 
     // Loading state - checking permission
     if (isChecking) {

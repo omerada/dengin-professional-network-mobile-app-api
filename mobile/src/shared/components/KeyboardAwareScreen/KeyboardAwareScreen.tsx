@@ -21,6 +21,10 @@ interface KeyboardAwareScreenProps {
   showSpacer?: boolean;
   /** Custom safe area bottom (for devices with notch) */
   safeAreaBottom?: number;
+  /** Custom content container style */
+  contentContainerStyle?: any;
+  /** Show scroll indicator */
+  showsVerticalScrollIndicator?: boolean;
 }
 
 /**

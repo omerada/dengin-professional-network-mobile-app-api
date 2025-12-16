@@ -373,10 +373,26 @@ export const ProfileScreen: React.FC = memo(() => {
             </View>
           ) : userPosts.length === 0 ? (
             <UnifiedEmptyState
-              icon="newspaper-outline"
-              title="Henüz gönderi yok"
+              icon="images-outline"
+              title={isOwnProfile ? 'Henüz Gönderi Paylaşmadınız' : 'Henüz Gönderi Yok'}
               description={
-                isOwnProfile ? 'İlk gönderini paylaş' : 'Bu kullanıcı henüz gönderi paylaşmamış'
+                isOwnProfile
+                  ? 'İlk gönderinizi oluşturarak ağınızla paylaşın'
+                  : 'Bu kullanıcı henüz gönderi paylaşmamış'
+              }
+              primaryAction={
+                isOwnProfile
+                  ? {
+                      label: 'Gönderi Oluştur',
+                      icon: 'add-circle-outline',
+                      onPress: () => {
+                        triggerNavigation('navigate');
+                        (navigation as any).navigate('FeedTab', {
+                          screen: 'CreatePost',
+                        });
+                      },
+                    }
+                  : undefined
               }
             />
           ) : (

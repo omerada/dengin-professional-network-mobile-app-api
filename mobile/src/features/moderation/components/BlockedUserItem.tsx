@@ -3,10 +3,10 @@
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART5.md
 
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, AccessibilityInfo } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, AccessibilityInfo } from 'react-native';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { Avatar, Button } from '@shared/components';
+import { Avatar, Button, ActionSheet } from '@shared/components';
 import { spacing, fontSize, borderRadius } from '@theme';
 import { showUnblockError } from '@shared/utils';
 import { useHaptic } from '@shared/hooks';
@@ -53,19 +53,16 @@ export const BlockedUserItem = React.memo<BlockedUserItemProps>(({ user, onUnblo
     },
   });
 
+  const [showUnblockConfirm, setShowUnblockConfirm] = useState(false);
+
   const handleUnblock = useCallback(() => {
-    Alert.alert(
-      'Engeli Kaldır',
-      `${user.fullName} kullanıcısının engelini kaldırmak istiyor musunuz?`,
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Engeli Kaldır',
-          onPress: () => unblockMutation.mutate(),
-        },
-      ],
-    );
-  }, [user.fullName, unblockMutation]);
+    setShowUnblockConfirm(true);
+  }, []);
+
+  const confirmUnblock = useCallback(() => {
+    unblockMutation.mutate();
+    setShowUnblockConfirm(false);
+  }, [unblockMutation]);
 
   // Format blocked date
   const blockedTimeAgo = formatDistanceToNow(new Date(user.blockedAt), {
@@ -123,6 +120,22 @@ export const BlockedUserItem = React.memo<BlockedUserItemProps>(({ user, onUnblo
         loading={unblockMutation.isPending}
         disabled={unblockMutation.isPending}
         testID={`unblock-button-${user.id}`}
+      />
+
+      {/* Unblock Confirmation ActionSheet */}
+      <ActionSheet
+        visible={showUnblockConfirm}
+        onClose={() => setShowUnblockConfirm(false)}
+        title="Engeli Kaldır"
+        message={`${user.fullName} kullanıcısının engelini kaldırmak istiyor musunuz?`}
+        options={[
+          {
+            id: 'confirm-unblock',
+            label: 'Engeli Kaldır',
+            onPress: confirmUnblock,
+          },
+        ]}
+        cancelLabel="İptal"
       />
     </View>
   );

@@ -5,7 +5,12 @@
 
 import React, { memo, useCallback } from 'react';
 import { View, Text, Pressable, Image } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  useAnimatedStyle,
+  interpolate,
+  Extrapolate,
+} from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useColors } from '@contexts/ThemeContext';
@@ -85,6 +90,9 @@ export const UnifiedScreenHeader = memo<UnifiedScreenHeaderProps>(
     feedProps,
     chatProps,
     searchProps,
+    // Collapsible props
+    collapsible = false,
+    scrollY,
     style,
     testID = 'unified-screen-header',
   }) => {
@@ -333,14 +341,45 @@ export const UnifiedScreenHeader = memo<UnifiedScreenHeaderProps>(
     }
 
     // ========================================================================
-    // Search Variant (100px total: 56px header + 44px search bar)
+    // Search Variant
+    // With optional collapsible behavior
     // ========================================================================
     if (variant === 'search' && searchProps) {
+      // Collapsible header animation
+      const headerAnimatedStyle = useAnimatedStyle(() => {
+        if (!collapsible || !scrollY) {
+          return { height: UNIFIED_HEADER.HEIGHT_WITH_SEARCH };
+        }
+
+        // Collapse search bar on scroll
+        const searchBarHeight = interpolate(
+          scrollY.value,
+          [0, 50], // Collapse after 50px scroll
+          [44, 0],
+          Extrapolate.CLAMP,
+        );
+
+        return {
+          height: UNIFIED_HEADER.HEIGHT + searchBarHeight,
+        };
+      });
+
+      // Search bar opacity animation
+      const searchBarAnimatedStyle = useAnimatedStyle(() => {
+        if (!collapsible || !scrollY) {
+          return { opacity: 1 };
+        }
+
+        const opacity = interpolate(scrollY.value, [0, 50], [1, 0], Extrapolate.CLAMP);
+
+        return { opacity };
+      });
+
       return (
         <Animated.View
           entering={FadeIn.duration(UNIFIED_TIMING.headerEnter)}
           style={[
-            styles.searchContainer,
+            headerAnimatedStyle,
             {
               backgroundColor: bgColor,
               borderBottomColor: colors.border.subtle,
@@ -364,8 +403,8 @@ export const UnifiedScreenHeader = memo<UnifiedScreenHeaderProps>(
             <View style={styles.rightSection}>{rightElement}</View>
           </View>
 
-          {/* Bottom Row: Search Bar (44px) */}
-          <View style={styles.searchBarContainer}>
+          {/* Bottom Row: Search Bar (44px) - with optional collapse */}
+          <Animated.View style={[styles.searchBarContainer, searchBarAnimatedStyle]}>
             <SearchBar
               placeholder={searchProps.placeholder || 'Ara...'}
               value={searchProps.value || ''}
@@ -375,7 +414,7 @@ export const UnifiedScreenHeader = memo<UnifiedScreenHeaderProps>(
               showFilter={searchProps.showFilter}
               autoFocus={searchProps.autoFocus}
             />
-          </View>
+          </Animated.View>
         </Animated.View>
       );
     }

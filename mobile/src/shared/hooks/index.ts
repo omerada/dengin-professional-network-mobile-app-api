@@ -141,3 +141,10 @@ export type { FeedbackLevel, FeedbackOptions } from './useFeedback';
 // Loading timeout hook - Prevent infinite loading
 export { useLoadingTimeout } from './useLoadingTimeout';
 export type { UseLoadingTimeoutConfig, UseLoadingTimeoutReturn } from './useLoadingTimeout';
+
+// Loading transition hook - Smooth crossfade
+export { useLoadingTransition } from './useLoadingTransition';
+export type {
+  UseLoadingTransitionOptions,
+  UseLoadingTransitionResult,
+} from './useLoadingTransition';

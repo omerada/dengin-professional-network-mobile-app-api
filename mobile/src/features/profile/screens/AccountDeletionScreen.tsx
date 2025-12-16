@@ -3,21 +3,13 @@
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-COMPLETION.md
 
 import React, { useState, useCallback } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-} from 'react-native';
+import { StyleSheet, View, Text, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { Button, Input, ActionSheet } from '@shared/components';
+import { Button, Input, ActionSheet, KeyboardAwareScreen } from '@shared/components';
 import { spacing, typography } from '@theme';
 import { useDeleteAccount } from '../hooks';
 import { getErrorMessage } from '@core/utils/errorUtils';
@@ -151,149 +143,139 @@ export const AccountDeletionScreen: React.FC = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['bottom']}>
-      <KeyboardAvoidingView
-        style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}>
-          {/* Warning Card */}
-          <View style={[styles.warningCard, { backgroundColor: colors.status.errorBg }]}>
-            <Text style={styles.warningIcon}>⚠️</Text>
-            <Text style={[styles.warningTitle, { color: colors.status.error }]}>
-              Dikkat! Bu işlem geri alınamaz
-            </Text>
-            <Text style={[styles.warningText, { color: colors.status.error }]}>
-              Hesabınızı sildiğinizde:
-            </Text>
-            <View style={styles.warningList}>
-              {[
-                'Tüm paylaşımlarınız silinecek',
-                'Takipçileriniz ve takip ettikleriniz kaldırılacak',
-                'Mesajlarınız erişilemez olacak',
-                'Doğrulanmış meslek bilginiz geçersiz olacak',
-                'Bu e-posta ile 30 gün boyunca yeni hesap açılamayacak',
-              ].map((item, index) => (
-                <View key={index} style={styles.warningItem}>
-                  <Text style={[styles.warningBullet, { color: colors.status.error }]}>•</Text>
-                  <Text style={[styles.warningItemText, { color: colors.status.error }]}>
-                    {item}
-                  </Text>
-                </View>
-              ))}
-            </View>
+      <KeyboardAwareScreen
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
+        {/* Warning Card */}
+        <View style={[styles.warningCard, { backgroundColor: colors.status.errorBg }]}>
+          <Text style={styles.warningIcon}>⚠️</Text>
+          <Text style={[styles.warningTitle, { color: colors.status.error }]}>
+            Dikkat! Bu işlem geri alınamaz
+          </Text>
+          <Text style={[styles.warningText, { color: colors.status.error }]}>
+            Hesabınızı sildiğinizde:
+          </Text>
+          <View style={styles.warningList}>
+            {[
+              'Tüm paylaşımlarınız silinecek',
+              'Takipçileriniz ve takip ettikleriniz kaldırılacak',
+              'Mesajlarınız erişilemez olacak',
+              'Doğrulanmış meslek bilginiz geçersiz olacak',
+              'Bu e-posta ile 30 gün boyunca yeni hesap açılamayacak',
+            ].map((item, index) => (
+              <View key={index} style={styles.warningItem}>
+                <Text style={[styles.warningBullet, { color: colors.status.error }]}>•</Text>
+                <Text style={[styles.warningItemText, { color: colors.status.error }]}>{item}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* Reason Selection */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>
+            Neden ayrılıyorsunuz? (Opsiyonel)
+          </Text>
+          <Text style={[styles.sectionSubtitle, { color: colors.text.secondary }]}>
+            Geri bildiriminiz uygulamamızı geliştirmemize yardımcı olur
+          </Text>
+          <View style={styles.reasonsContainer}>
+            {DELETION_REASONS.map(reason => (
+              <ReasonButton key={reason.id} {...reason} />
+            ))}
           </View>
 
-          {/* Reason Selection */}
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>
-              Neden ayrılıyorsunuz? (Opsiyonel)
-            </Text>
-            <Text style={[styles.sectionSubtitle, { color: colors.text.secondary }]}>
-              Geri bildiriminiz uygulamamızı geliştirmemize yardımcı olur
-            </Text>
-            <View style={styles.reasonsContainer}>
-              {DELETION_REASONS.map(reason => (
-                <ReasonButton key={reason.id} {...reason} />
-              ))}
-            </View>
-
-            {/* Custom Reason Input */}
-            {selectedReason === 'other' && (
-              <Input
-                value={customReason}
-                onChangeText={setCustomReason}
-                placeholder="Nedeninizi yazın..."
-                multiline
-                numberOfLines={3}
-                containerStyle={styles.customReasonInput}
-              />
-            )}
-          </View>
-
-          {/* Password Verification */}
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>
-              Şifrenizi Girin
-            </Text>
-            <Text style={[styles.sectionSubtitle, { color: colors.text.secondary }]}>
-              Kimliğinizi doğrulamak için şifrenizi girin
-            </Text>
+          {/* Custom Reason Input */}
+          {selectedReason === 'other' && (
             <Input
-              value={password}
-              onChangeText={text => {
-                setPassword(text);
-                setErrors(prev => ({ ...prev, password: '' }));
-              }}
-              placeholder="Şifreniz"
-              secureTextEntry={!showPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-              error={errors.password}
-              rightIcon={
-                <Pressable onPress={() => setShowPassword(!showPassword)}>
-                  <Icon
-                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                    size={20}
-                    color={colors.text.secondary}
-                  />
-                </Pressable>
-              }
+              value={customReason}
+              onChangeText={setCustomReason}
+              placeholder="Nedeninizi yazın..."
+              multiline
+              numberOfLines={3}
+              containerStyle={styles.customReasonInput}
             />
-          </View>
+          )}
+        </View>
 
-          {/* Confirmation Text */}
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Onay Metni</Text>
-            <Text style={[styles.sectionSubtitle, { color: colors.text.secondary }]}>
-              Devam etmek için aşağıya{' '}
-              <Text style={[styles.confirmTextHighlight, { color: colors.status.error }]}>
-                {CONFIRM_TEXT}
-              </Text>{' '}
-              yazın
-            </Text>
-            <Input
-              value={confirmText}
-              onChangeText={text => {
-                setConfirmText(text.toUpperCase());
-                setErrors(prev => ({ ...prev, confirmText: '' }));
-              }}
-              placeholder={CONFIRM_TEXT}
-              autoCapitalize="characters"
-              autoCorrect={false}
-              error={errors.confirmText}
-            />
-          </View>
+        {/* Password Verification */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Şifrenizi Girin</Text>
+          <Text style={[styles.sectionSubtitle, { color: colors.text.secondary }]}>
+            Kimliğinizi doğrulamak için şifrenizi girin
+          </Text>
+          <Input
+            value={password}
+            onChangeText={text => {
+              setPassword(text);
+              setErrors(prev => ({ ...prev, password: '' }));
+            }}
+            placeholder="Şifreniz"
+            secureTextEntry={!showPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            error={errors.password}
+            rightIcon={
+              <Pressable onPress={() => setShowPassword(!showPassword)}>
+                <Icon
+                  name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                  size={20}
+                  color={colors.text.secondary}
+                />
+              </Pressable>
+            }
+          />
+        </View>
 
-          {/* Action Buttons */}
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Hesabımı Kalıcı Olarak Sil"
-              variant="danger"
-              onPress={handleDeleteAccount}
-              loading={deleteAccount.isPending}
-              disabled={!password || confirmText !== CONFIRM_TEXT}
-              style={styles.deleteButton}
-            />
-            <Button
-              title="Vazgeç"
-              variant="ghost"
-              onPress={() => navigation.goBack()}
-              style={styles.cancelButton}
-            />
-          </View>
+        {/* Confirmation Text */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Onay Metni</Text>
+          <Text style={[styles.sectionSubtitle, { color: colors.text.secondary }]}>
+            Devam etmek için aşağıya{' '}
+            <Text style={[styles.confirmTextHighlight, { color: colors.status.error }]}>
+              {CONFIRM_TEXT}
+            </Text>{' '}
+            yazın
+          </Text>
+          <Input
+            value={confirmText}
+            onChangeText={text => {
+              setConfirmText(text.toUpperCase());
+              setErrors(prev => ({ ...prev, confirmText: '' }));
+            }}
+            placeholder={CONFIRM_TEXT}
+            autoCapitalize="characters"
+            autoCorrect={false}
+            error={errors.confirmText}
+          />
+        </View>
 
-          {/* Info Note */}
-          <View style={[styles.infoCard, { backgroundColor: colors.background.secondary }]}>
-            <Text style={[styles.infoText, { color: colors.text.secondary }]}>
-              ℹ️ Hesabınız 30 gün boyunca geri alınabilir durumda kalacaktır. Bu süre içinde tekrar
-              giriş yaparsanız hesabınız yeniden aktifleştirilir.
-            </Text>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        {/* Action Buttons */}
+        <View style={styles.buttonContainer}>
+          <Button
+            title="Hesabımı Kalıcı Olarak Sil"
+            variant="danger"
+            onPress={handleDeleteAccount}
+            loading={deleteAccount.isPending}
+            disabled={!password || confirmText !== CONFIRM_TEXT}
+            style={styles.deleteButton}
+          />
+          <Button
+            title="Vazgeç"
+            variant="ghost"
+            onPress={() => navigation.goBack()}
+            style={styles.cancelButton}
+          />
+        </View>
+
+        {/* Info Note */}
+        <View style={[styles.infoCard, { backgroundColor: colors.background.secondary }]}>
+          <Text style={[styles.infoText, { color: colors.text.secondary }]}>
+            ℹ️ Hesabınız 30 gün boyunca geri alınabilir durumda kalacaktır. Bu süre içinde tekrar
+            giriş yaparsanız hesabınız yeniden aktifleştirilir.
+          </Text>
+        </View>
+      </KeyboardAwareScreen>
 
       {/* Final Confirmation ActionSheet */}
       <ActionSheet

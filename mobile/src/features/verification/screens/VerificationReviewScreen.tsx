@@ -3,11 +3,13 @@
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import React, { memo, useCallback } from 'react';
-import { StyleSheet, View, Text, ScrollView, Alert } from 'react-native';
+import { StyleSheet, View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
+import { useSemanticHaptic } from '@shared/hooks';
 import { spacing, typography, fontSize, borderRadius } from '@theme';
 import { Button, SuccessCelebration } from '@shared/components';
 import { useVerificationStore } from '../stores';
@@ -22,6 +24,8 @@ type NavigationProp = NativeStackNavigationProp<VerificationStackParamList, 'Ver
 export const VerificationReviewScreen: React.FC = memo(() => {
   const navigation = useNavigation<NavigationProp>();
   const colors = useColors();
+  const toast = useToast();
+  const { triggerSystem } = useSemanticHaptic();
 
   const { data, currentStep, setStep, setDocumentFront, setDocumentBack, setSelfie } =
     useVerificationStore();
@@ -61,33 +65,25 @@ export const VerificationReviewScreen: React.FC = memo(() => {
   const handleSubmit = useCallback(() => {
     // Tüm görüntülerin mevcut olduğunu kontrol et
     if (!data.documentFront || !data.documentBack || !data.selfie) {
-      Alert.alert('Eksik Belge', 'Lütfen tüm belgeleri çekin.', [{ text: 'Tamam' }]);
+      triggerSystem('error');
+      toast.error('Lütfen tüm belgeleri çekin');
       return;
     }
 
     setStep('uploading');
     setShowSuccess(true);
-  }, [data, setStep]);
+  }, [data, setStep, toast, triggerSystem]);
 
   /**
-   * İptal et
+   * İptal et - UNIFIED_FEEDBACK pattern
    */
   const handleCancel = useCallback(() => {
-    Alert.alert(
-      'İptal Et',
-      'Doğrulama işlemini iptal etmek istediğinizden emin misiniz? Çekilen fotoğraflar silinecek.',
-      [
-        { text: 'Hayır', style: 'cancel' },
-        {
-          text: 'Evet, İptal Et',
-          style: 'destructive',
-          onPress: () => {
-            navigation.popToTop();
-          },
-        },
-      ],
-    );
-  }, [navigation]);
+    triggerSystem('cancel');
+    toast.error('Doğrulama iptal edildi. Çekilen fotoğraflar silindi.', { duration: 4000 });
+    setTimeout(() => {
+      navigation.popToTop();
+    }, 300);
+  }, [navigation, toast, triggerSystem]);
 
   const isComplete = data.documentFront && data.documentBack && data.selfie;
 

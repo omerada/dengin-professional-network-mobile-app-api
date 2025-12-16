@@ -97,6 +97,42 @@ export const UNIFIED_GESTURES = {
 } as const;
 
 /**
+ * Press Animation Configuration
+ * Standardized press/tap animations for ALL interactive elements
+ */
+interface PressAnimationConfig {
+  scale: number;
+  spring: {
+    damping: number;
+    stiffness: number;
+    mass: number;
+  };
+}
+
+export const PRESS_ANIMATION_CONFIG = {
+  /**
+   * Standard press scale - ALL interactive elements
+   * Target: 0.96 scale (4% shrink)
+   * Spring config: Fast & snappy
+   * Use for: Buttons, Tab bar items, Cards, List items
+   */
+  STANDARD: {
+    scale: 0.96,
+    spring: { damping: 15, stiffness: 500, mass: 0.5 },
+  } as PressAnimationConfig,
+
+  /**
+   * Heavy press scale - Destructive actions
+   * Target: 0.92 scale (8% shrink) - more dramatic
+   * Use for: Delete buttons, Danger actions
+   */
+  DESTRUCTIVE: {
+    scale: 0.92,
+    spring: { damping: 12, stiffness: 600, mass: 0.6 },
+  } as PressAnimationConfig,
+} as const;
+
+/**
  * Gesture Type Guards
  */
 export type GestureName = keyof typeof UNIFIED_GESTURES;

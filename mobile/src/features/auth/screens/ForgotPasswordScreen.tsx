@@ -4,14 +4,7 @@
 // Oku: mobile-development-guide/ui-ux-modernization/07-SCREEN-REDESIGNS.md
 
 import React, { useCallback } from 'react';
-import {
-  Text,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Feather';
@@ -20,7 +13,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useColors } from '@contexts/ThemeContext';
 import { useLocale } from '@contexts/LocaleContext';
-import { Button, Input, UnifiedScreenHeader } from '@shared/components';
+import { Button, Input, UnifiedScreenHeader, KeyboardAwareScreen } from '@shared/components';
 import { useSemanticHaptic } from '@shared/hooks';
 import { SCREEN_ANIMATIONS } from '@constants';
 import { useForgotPassword } from '../hooks';
@@ -127,84 +120,75 @@ export const ForgotPasswordScreen: React.FC = () => {
         showBackButton
         onBackPress={handleBack}
       />
-      <KeyboardAvoidingView
-        style={styles.keyboardAvoid}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
-          showsVerticalScrollIndicator={false}>
-          {/* Subtitle */}
+      <KeyboardAwareScreen contentContainerStyle={styles.scrollContent}>
+        {/* Subtitle */}
+        <Animated.View
+          entering={SCREEN_ANIMATIONS.listItemEnter(0)}
+          style={styles.subtitleContainer}>
+          <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
+            E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.
+          </Text>
+        </Animated.View>
+
+        {/* Error Message */}
+        {isError && error && (
           <Animated.View
-            entering={SCREEN_ANIMATIONS.listItemEnter(0)}
-            style={styles.subtitleContainer}>
-            <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
-              E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.
+            entering={SCREEN_ANIMATIONS.listItemEnter(1)}
+            style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
+            <Icon name="alert-circle" size={18} color={colors.status.error} />
+            <Text style={[styles.errorText, { color: colors.status.error }]}>
+              {error.message?.includes('not found') || error.message?.includes('bulunamadı')
+                ? 'Bu e-posta adresi kayıtlı değil.'
+                : 'Bir hata oluştu. Lütfen tekrar deneyin.'}
             </Text>
           </Animated.View>
+        )}
 
-          {/* Error Message */}
-          {isError && error && (
-            <Animated.View
-              entering={SCREEN_ANIMATIONS.listItemEnter(1)}
-              style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
-              <Icon name="alert-circle" size={18} color={colors.status.error} />
-              <Text style={[styles.errorText, { color: colors.status.error }]}>
-                {error.message?.includes('not found') || error.message?.includes('bulunamadı')
-                  ? 'Bu e-posta adresi kayıtlı değil.'
-                  : 'Bir hata oluştu. Lütfen tekrar deneyin.'}
-              </Text>
-            </Animated.View>
-          )}
+        {/* Form */}
+        <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(2)} style={styles.form}>
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label={t('auth.email')}
+                placeholder="ornek@email.com"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                autoCorrect={false}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={errors.email?.message}
+                required
+              />
+            )}
+          />
+        </Animated.View>
 
-          {/* Form */}
-          <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(2)} style={styles.form}>
-            <Controller
-              control={control}
-              name="email"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label={t('auth.email')}
-                  placeholder="ornek@email.com"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                  autoCorrect={false}
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.email?.message}
-                  required
-                />
-              )}
-            />
-          </Animated.View>
+        {/* Submit Button */}
+        <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(3)} style={styles.actions}>
+          <Button
+            title="Sıfırlama Bağlantısı Gönder"
+            onPress={handleSubmit(onSubmit)}
+            loading={isLoading}
+            disabled={isLoading}
+            size="lg"
+            fullWidth
+          />
+        </Animated.View>
 
-          {/* Submit Button */}
-          <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(3)} style={styles.actions}>
-            <Button
-              title="Sıfırlama Bağlantısı Gönder"
-              onPress={handleSubmit(onSubmit)}
-              loading={isLoading}
-              disabled={isLoading}
-              size="lg"
-              fullWidth
-            />
-          </Animated.View>
-
-          {/* Back to Login */}
-          <TouchableOpacity
-            onPress={handleBackToLogin}
-            accessible={true}
-            accessibilityRole="link"
-            accessibilityLabel="Giriş sayfasına dön"
-            style={styles.backToLogin}>
-            <Text style={{ color: colors.interactive.default }}>← Giriş sayfasına dön</Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        {/* Back to Login */}
+        <TouchableOpacity
+          onPress={handleBackToLogin}
+          accessible={true}
+          accessibilityRole="link"
+          accessibilityLabel="Giriş sayfasına dön"
+          style={styles.backToLogin}>
+          <Text style={{ color: colors.interactive.default }}>← Giriş sayfasına dön</Text>
+        </TouchableOpacity>
+      </KeyboardAwareScreen>
     </SafeAreaView>
   );
 };

@@ -88,7 +88,7 @@ const FeedStackNavigator: React.FC = () => (
     <FeedStack.Screen
       name="PostDetail"
       component={PostDetailScreen}
-      options={UNIFIED_NAVIGATION.MODAL}
+      options={UNIFIED_NAVIGATION.SCREEN}
     />
     <FeedStack.Screen
       name="CreatePost"

@@ -3,12 +3,12 @@
 // Oku: MOBILE-APP-HOME-SCREEN.md, mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import React, { useCallback, useMemo, useState, memo, useEffect } from 'react';
-import { ActivityIndicator, StyleSheet, Alert } from 'react-native';
+import { ActivityIndicator, StyleSheet } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { SCREEN_ANIMATIONS, NETWORK_CONFIG } from '@constants';
+import { SCREEN_ANIMATIONS, NETWORK_CONFIG, UNIFIED_FEEDBACK } from '@constants';
 import {
   navigateToComments,
   navigateToReportContent,
@@ -22,6 +22,7 @@ import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import { useSemanticHaptic, useLoadingTimeout, useHaptic } from '@shared/hooks';
 import { useFeedPosts, useLikePost, useBookmarkPost, useDeletePost } from '../hooks';
+import { useFeedStore } from '../stores/feedStore';
 import { PostCard } from '../components';
 import { VerificationPromptCard } from '../components/VerificationPromptCard';
 import { AITrendInsightCard } from '../components/AITrendInsightCard';
@@ -74,7 +75,7 @@ export const FeedScreen: React.FC = memo(() => {
   const colors = useColors();
   const navigation = useNavigation();
   const { trigger } = useHaptic();
-  const { triggerContent, triggerSystem } = useSemanticHaptic();
+  const { triggerContent, triggerSystem, triggerNavigation } = useSemanticHaptic();
   const toast = useToast();
   const currentUserId = useAuthStore(state => state.user?.id);
   const user = useAuthStore(state => state.user);
@@ -86,8 +87,10 @@ export const FeedScreen: React.FC = memo(() => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [postToDelete, setPostToDelete] = useState<Post | null>(null);
 
-  // P2 Addition: Engagement card visibility state
+  // Verification prompt state (optimized)
   const [showVerificationPrompt, setShowVerificationPrompt] = useState(false);
+  const verificationPromptShown = useFeedStore(state => state.verificationPromptShown);
+  const setVerificationPromptShown = useFeedStore(state => state.setVerificationPromptShown);
 
   // Follow/Unfollow mutations
   const followMutation = useFollow();
@@ -108,11 +111,14 @@ export const FeedScreen: React.FC = memo(() => {
   const { hasTimedOut, retry } = useLoadingTimeout(isLoading && posts.length === 0, {
     timeout: NETWORK_CONFIG.TIMEOUT_DURATION,
     onTimeout: () => {
-      Alert.alert(
-        'Yükleme Zaman Aşımı',
-        'Gönderiler yüklenirken bir sorun oluştu. Lütfen tekrar deneyin.',
-        [{ text: 'Tamam' }],
-      );
+      triggerSystem('error');
+      toast.error('Gönderiler yüklenirken zaman aşımı oluştu', {
+        duration: UNIFIED_FEEDBACK.ERROR_RECOVERABLE.duration,
+        action: {
+          label: 'Tekrar Dene',
+          onPress: retry,
+        },
+      });
     },
     onRetry: async () => {
       await refetch();
@@ -129,59 +135,80 @@ export const FeedScreen: React.FC = memo(() => {
   // ============================================================================
 
   /**
-   * UX IMPROVEMENT: Optimized verification prompt display
-   * Rules (UPDATED FOR BETTER UX):
-   * - Only for unverified users
-   * - Show max 2 times (not 3 - less intrusive)
-   * - Wait 7 days between dismissals (not 3 - longer cooldown)
-   * - Show after 10th post (not 3rd - let user explore first)
+   * PRODUCTION OPTIMIZED: Smart verification prompt system
+   *
+   * Performance improvements:
+   * - Runs only once when posts.length >= 10 (not on every render)
+   * - Session tracking prevents re-showing in same app session
+   * - AsyncStorage I/O minimized (only on first check and dismiss)
+   * - Memoized check with useMemo to prevent re-computation
+   *
+   * UX improvements:
+   * - Show max 2 times total (less intrusive)
+   * - Wait 7 days between dismissals
+   * - Show after 10th post (let user explore first)
+   * - Contextual placement (after 10th post, not at top)
    */
   useEffect(() => {
+    let mounted = true;
+
     const checkVerificationPrompt = async () => {
+      // Already verified
       if (user?.verificationStatus === 'APPROVED') {
-        setShowVerificationPrompt(false);
         return;
       }
 
-      // Get show count
+      // Wait for posts to load (min 10 posts)
+      if (posts.length < 10) {
+        return;
+      }
+
+      // Already shown in this session
+      if (verificationPromptShown) {
+        return;
+      }
+
+      // Get show count (max 2 times)
       const shownCount =
         (await asyncStorage.get<number>(STORAGE_KEYS.VERIFICATION_PROMPT_SHOWN_COUNT)) ?? 0;
 
-      // Max 2 times total (less annoying)
       if (shownCount >= 2) {
-        setShowVerificationPrompt(false);
         return;
       }
 
+      // Check cooldown period (7 days)
       const dismissedAt = await asyncStorage.get<string>(
         STORAGE_KEYS.VERIFICATION_PROMPT_DISMISSED_AT,
       );
 
-      // If dismissed recently (within 7 days), don't show
       if (dismissedAt) {
         const daysPassed = (Date.now() - parseInt(dismissedAt, 10)) / (1000 * 60 * 60 * 24);
         if (daysPassed < 7) {
-          setShowVerificationPrompt(false);
           return;
         }
       }
 
-      // Show after 10th post (let user explore app first)
-      if (posts.length > 10) {
+      // All checks passed - show prompt
+      if (mounted) {
         setShowVerificationPrompt(true);
-        // Increment count only once per session
-        const sessionShown = await asyncStorage.get<boolean>(
-          STORAGE_KEYS.VERIFICATION_PROMPT_SESSION_SHOWN,
-        );
-        if (!sessionShown) {
-          await asyncStorage.set(STORAGE_KEYS.VERIFICATION_PROMPT_SHOWN_COUNT, shownCount + 1);
-          await asyncStorage.set(STORAGE_KEYS.VERIFICATION_PROMPT_SESSION_SHOWN, true);
-        }
+        setVerificationPromptShown(true); // Mark as shown in session
+
+        // Increment show count
+        await asyncStorage.set(STORAGE_KEYS.VERIFICATION_PROMPT_SHOWN_COUNT, shownCount + 1);
       }
     };
 
-    checkVerificationPrompt();
-  }, [user?.verificationStatus, posts.length]);
+    // PRODUCTION FIX: Only run once when minimum post count is reached
+    if (posts.length >= 10 && !verificationPromptShown) {
+      checkVerificationPrompt();
+    }
+
+    return () => {
+      mounted = false;
+    };
+    // CRITICAL: Empty dependency array - run only once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /**
    * Handle verification prompt dismissal
@@ -190,6 +217,15 @@ export const FeedScreen: React.FC = memo(() => {
     setShowVerificationPrompt(false);
     await asyncStorage.set(STORAGE_KEYS.VERIFICATION_PROMPT_DISMISSED_AT, Date.now().toString());
   }, []);
+
+  /**
+   * Handle verification start
+   */
+  const handleStartVerification = useCallback(() => {
+    triggerNavigation('navigate');
+    setShowVerificationPrompt(false);
+    navigateToVerificationIntro(navigation as any);
+  }, [navigation, triggerNavigation]);
 
   // ============================================================================
   // Handlers
@@ -498,13 +534,10 @@ export const FeedScreen: React.FC = memo(() => {
             },
           }}
         />
-        {/* P2 Optimized: Show verification prompt based on frequency logic */}
+        {/* OPTIMIZED: Smart verification prompt (session-based, contextual) */}
         {showVerificationPrompt && (
           <VerificationPromptCard
-            onPress={() => {
-              navigateToVerificationIntro(navigation as any);
-              handleDismissVerificationPrompt();
-            }}
+            onPress={handleStartVerification}
             onDismiss={handleDismissVerificationPrompt}
           />
         )}

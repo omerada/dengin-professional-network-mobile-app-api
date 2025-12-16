@@ -13,6 +13,7 @@ import Animated, {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '@contexts/ThemeContext';
 import { useSemanticHaptic } from '@shared/hooks';
+import { PRESS_ANIMATION_CONFIG } from '@constants/unifiedGestures';
 
 import { styles, getVariantStyles } from './Button.styles';
 import { ButtonProps, BUTTON_SIZE_CONFIG } from './Button.types';
@@ -82,13 +83,16 @@ export const Button = memo<ButtonProps>(
       return '#FFFFFF';
     }, [loadingColor, variant, colors]);
 
-    // Animation handlers - UNIFIED: Standardized spring config (0.96 scale)
+    // Animation handlers - PRODUCTION STANDARD: Unified press animation
     const handlePressIn = useCallback(() => {
-      pressed.value = withSpring(1, { damping: 15, stiffness: 500, mass: 0.5 });
-    }, [pressed]);
+      const config =
+        variant === 'danger' ? PRESS_ANIMATION_CONFIG.DESTRUCTIVE : PRESS_ANIMATION_CONFIG.STANDARD;
+      pressed.value = withSpring(config.scale, config.spring);
+    }, [pressed, variant]);
 
     const handlePressOut = useCallback(() => {
-      pressed.value = withSpring(0, { damping: 15, stiffness: 500, mass: 0.5 });
+      const config = PRESS_ANIMATION_CONFIG.STANDARD;
+      pressed.value = withSpring(1, config.spring);
     }, [pressed]);
 
     const handlePress = useCallback(() => {
@@ -110,11 +114,12 @@ export const Button = memo<ButtonProps>(
       onLongPress();
     }, [disabled, loading, triggerSystem, onLongPress]);
 
-    // Animated styles - PRODUCTION STANDARD: 0.96 scale
+    // Animated styles - PRODUCTION STANDARD: Dynamic scale based on variant
     const animatedContainerStyle = useAnimatedStyle(() => {
-      const scaleValue = interpolate(pressed.value, [0, 1], [1, 0.96]);
+      // pressed.value: 0 = not pressed, 1 = pressed
+      // When pressed, use scale from config; when not pressed, use 1
       return {
-        transform: [{ scale: scaleValue }],
+        transform: [{ scale: pressed.value }],
       };
     });
 

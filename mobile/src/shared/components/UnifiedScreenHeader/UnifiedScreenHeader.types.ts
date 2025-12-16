@@ -105,6 +105,12 @@ export interface UnifiedScreenHeaderProps {
   /** Profile variant props */
   profileProps?: ProfileHeaderProps;
 
+  /** Enable collapsible behavior (for search variant) */
+  collapsible?: boolean;
+
+  /** Scroll Y shared value (required for collapsible) */
+  scrollY?: any; // Animated.SharedValue<number>
+
   /** Additional container styles */
   style?: ViewStyle;
 

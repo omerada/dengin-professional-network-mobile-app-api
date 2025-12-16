@@ -3,19 +3,12 @@
 // Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
 
 import React, { memo, useCallback, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
+import { ActionSheet } from '@shared/components';
 import { spacing, fontSize } from '@theme';
 import { useSemanticHaptic, useHaptic } from '@shared/hooks';
 import {
@@ -68,6 +61,8 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
     const toast = useToast();
     const { trigger } = useHaptic();
     const { triggerMedia, triggerSystem } = useSemanticHaptic();
+    const [showActionSheet, setShowActionSheet] = useState(false);
+    const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
     const [previewUri, setPreviewUri] = useState<string | null>(null);
 
     // Generate initials from full name
@@ -142,51 +137,21 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
     // Remove avatar
     const handleRemove = useCallback(() => {
       triggerSystem('alert');
-      Alert.alert('Fotoğrafı Kaldır', 'Profil fotoğrafınızı kaldırmak istediğinize emin misiniz?', [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Kaldır',
-          style: 'destructive',
-          onPress: () => {
-            setPreviewUri(null);
-            onRemove?.();
-            triggerSystem('success');
-          },
-        },
-      ]);
+      setShowRemoveConfirm(true);
+    }, [triggerSystem]);
+
+    const confirmRemove = useCallback(() => {
+      setPreviewUri(null);
+      onRemove?.();
+      triggerSystem('success');
+      setShowRemoveConfirm(false);
     }, [onRemove, triggerSystem]);
 
     // Show options
     const handlePress = useCallback(() => {
       triggerMedia('select');
-      const options: {
-        text: string;
-        onPress?: () => void;
-        style?: 'cancel' | 'destructive' | 'default';
-      }[] = [
-        { text: 'Fotoğraf Çek', onPress: handleTakePhoto },
-        { text: 'Galeriden Seç', onPress: handleChooseFromGallery },
-      ];
-
-      if (displayUri && onRemove) {
-        options.push({
-          text: 'Fotoğrafı Kaldır',
-          style: 'destructive',
-          onPress: handleRemove,
-        });
-      }
-
-      options.push({ text: 'İptal', style: 'cancel' });
-
-      Alert.alert('Profil Fotoğrafı', 'Bir seçenek seçin', options);
-    }, [
-      displayUri,
-      handleTakePhoto,
-      handleChooseFromGallery,
-      handleRemove,
-      onRemove,
-      triggerMedia,
-    ]);
+      setShowActionSheet(true);
+    }, [triggerMedia]);
 
     return (
       <View style={styles.container}>
@@ -253,6 +218,65 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
         <Text style={[styles.hint, { color: colors.text.secondary }]}>
           Profil fotoğrafı eklemek için dokunun
         </Text>
+
+        {/* Avatar options ActionSheet */}
+        <ActionSheet
+          visible={showActionSheet}
+          onClose={() => setShowActionSheet(false)}
+          title="Profil Fotoğrafı"
+          message="Bir seçenek seçin"
+          options={[
+            {
+              id: 'take-photo',
+              label: 'Fotoğraf Çek',
+              icon: 'camera',
+              onPress: () => {
+                setShowActionSheet(false);
+                handleTakePhoto();
+              },
+            },
+            {
+              id: 'choose-gallery',
+              label: 'Galeriden Seç',
+              icon: 'images',
+              onPress: () => {
+                setShowActionSheet(false);
+                handleChooseFromGallery();
+              },
+            },
+            ...(displayUri && onRemove
+              ? [
+                  {
+                    id: 'remove-photo',
+                    label: 'Fotoğrafı Kaldır',
+                    icon: 'trash',
+                    destructive: true,
+                    onPress: () => {
+                      setShowActionSheet(false);
+                      handleRemove();
+                    },
+                  },
+                ]
+              : []),
+          ]}
+        />
+
+        {/* Remove confirmation ActionSheet */}
+        <ActionSheet
+          visible={showRemoveConfirm}
+          onClose={() => setShowRemoveConfirm(false)}
+          title="Fotoğrafı Kaldır"
+          message="Profil fotoğrafınızı kaldırmak istediğinize emin misiniz?"
+          options={[
+            {
+              id: 'confirm-remove',
+              label: 'Kaldır',
+              destructive: true,
+              onPress: confirmRemove,
+            },
+          ]}
+          cancelLabel="İptal"
+        />
       </View>
     );
   },
