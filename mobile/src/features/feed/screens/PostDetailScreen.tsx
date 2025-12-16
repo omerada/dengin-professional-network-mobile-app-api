@@ -3,14 +3,14 @@
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
 import React, { useCallback, useState, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SAFE_AREA_EDGES } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { useSemanticHaptic } from '@shared/hooks';
+import { useSemanticHaptic, useHaptic } from '@shared/hooks';
 import { spacing } from '@theme';
 import { useAuthStore } from '@features/auth/stores';
 import {
@@ -22,7 +22,7 @@ import {
   useLikeComment,
   useDeletePost,
 } from '../hooks';
-import { ActionSheet, ActionSheetOption } from '@shared/components';
+import { ActionSheet, ActionSheetOption, UnifiedLoadingState } from '@shared/components';
 import { sharePost, showSuccess, showError, showInfo } from '@shared/utils';
 import {
   PostHeader,
@@ -30,6 +30,7 @@ import {
   PostImages,
   PostActions,
   CommentCard,
+  CommentListSkeleton,
   AddCommentForm,
   EmptyFeed,
 } from '../components';
@@ -42,6 +43,7 @@ type PostDetailNavigationProp = NativeStackNavigationProp<FeedStackParamList, 'P
 export const PostDetailScreen: React.FC = () => {
   const colors = useColors();
   const toast = useToast();
+  const { trigger } = useHaptic();
   const { triggerContent, triggerSystem } = useSemanticHaptic();
   const navigation = useNavigation<PostDetailNavigationProp>();
   const route = useRoute<PostDetailRouteProp>();
@@ -153,11 +155,11 @@ export const PostDetailScreen: React.FC = () => {
     triggerSystem('confirm');
     deletePost.mutate(post.id, {
       onSuccess: () => {
-        showSuccess(toast, { trigger: triggerSystem }, 'Gönderi silindi');
+        showSuccess(toast, { trigger }, 'Gönderi silindi');
         navigation.goBack();
       },
       onError: () => {
-        showError(toast, { trigger: triggerSystem }, 'Gönderi silinemedi');
+        showError(toast, { trigger }, 'Gönderi silinemedi');
       },
     });
     setShowDeleteConfirm(false);
@@ -179,7 +181,7 @@ export const PostDetailScreen: React.FC = () => {
         onPress: () => {
           triggerSystem('alert');
           setShowDeleteConfirm(true);
-          setActionSheetVisible(false);
+          setShowActionSheet(false);
         },
       });
     } else {
@@ -189,8 +191,8 @@ export const PostDetailScreen: React.FC = () => {
           label: 'Gönderiyi Şikayet Et',
           icon: 'flag-outline',
           onPress: () => {
-            showSuccess(toast, { trigger: triggerSystem }, 'Gönderi şikayet edildi');
-            setActionSheetVisible(false);
+            showSuccess(toast, { trigger }, 'Gönderi şikayet edildi');
+            setShowActionSheet(false);
           },
         },
         {
@@ -198,8 +200,8 @@ export const PostDetailScreen: React.FC = () => {
           label: 'Bu Gönderiyi Gizle',
           icon: 'eye-off-outline',
           onPress: () => {
-            showInfo(toast, { trigger: triggerSystem }, 'Bu gönderi artık akışınızda görünmeyecek');
-            setActionSheetVisible(false);
+            showInfo(toast, { trigger }, 'Bu gönderi artık akışınızda görünmeyecek');
+            setShowActionSheet(false);
           },
         },
       );
@@ -224,9 +226,9 @@ export const PostDetailScreen: React.FC = () => {
   if (isLoading || !post) {
     return (
       <SafeAreaView
-        style={[styles.loadingContainer, { backgroundColor: colors.background.primary }]}
+        style={[styles.container, { backgroundColor: colors.background.primary }]}
         edges={['bottom']}>
-        <ActivityIndicator size="large" color={colors.interactive.default} />
+        <UnifiedLoadingState strategy="spinner" message="Yükleniyor..." variant="screen" />
       </SafeAreaView>
     );
   }
@@ -273,12 +275,10 @@ export const PostDetailScreen: React.FC = () => {
         {/* Divider */}
         <View style={[styles.divider, { backgroundColor: colors.border.default }]} />
 
-        {/* Comments */}
+        {/* Comments - P3: Skeleton loader for consistent UX */}
         <View style={styles.commentsContainer}>
           {commentsLoading ? (
-            <View style={styles.commentsLoading}>
-              <ActivityIndicator size="small" color={colors.interactive.default} />
-            </View>
+            <CommentListSkeleton count={3} />
           ) : comments.length === 0 ? (
             <EmptyFeed
               title="Henüz yorum yok"
@@ -324,11 +324,13 @@ export const PostDetailScreen: React.FC = () => {
         message="Bu gönderiyi silmek istediğinize emin misiniz?"
         options={[
           {
+            id: 'delete',
             label: 'Sil',
             destructive: true,
             onPress: handleDeleteConfirm,
           },
           {
+            id: 'cancel',
             label: 'İptal',
             onPress: () => setShowDeleteConfirm(false),
           },

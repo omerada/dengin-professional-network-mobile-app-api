@@ -69,7 +69,7 @@ export const SelfieGuide: React.FC<SelfieGuideProps> = memo(
           <Rect
             width={SCREEN_WIDTH}
             height={SCREEN_HEIGHT}
-            fill={colors.overlay}
+            fill={colors.background.overlay}
             mask="url(#selfie-mask)"
           />
 

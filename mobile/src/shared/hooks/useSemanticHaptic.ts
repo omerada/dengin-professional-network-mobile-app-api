@@ -41,6 +41,11 @@ import {
  * const { triggerNavigation } = useSemanticHaptic();
  * triggerNavigation('tabSwitch'); // ✅ Consistent tab switching
  */
+/**
+ * Haptic trigger function type
+ */
+export type HapticTrigger = ReturnType<typeof useHaptic>['trigger'];
+
 export const useSemanticHaptic = () => {
   const { trigger } = useHaptic();
 

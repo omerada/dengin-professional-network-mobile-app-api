@@ -9,9 +9,16 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { Button, ActionSheet } from '@shared/components';
-import { useSemanticHaptic } from '@shared/hooks';
+import { useSemanticHaptic, useHaptic } from '@shared/hooks';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
+import {
+  showSuccess,
+  showFollowError,
+  showUnfollowError,
+  showBlockError,
+  showUnblockError,
+} from '@shared/utils';
 import { useFollow, useUnfollow, useBlock, useUnblock } from '@features/social/hooks/useFollow';
 
 import { styles } from './ProfileActions.styles';
@@ -48,6 +55,7 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
     testID,
   }) => {
     const navigation = useNavigation();
+    const { trigger } = useHaptic();
     const { triggerSocial, triggerSystem, triggerNavigation } = useSemanticHaptic();
     const toast = useToast();
     const colors = useColors();
@@ -71,25 +79,21 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
       if (isFollowing) {
         unfollowMutation.mutate(userId, {
           onSuccess: () => {
-            triggerSystem('success');
-            toast.success('Takipten çıkıldı');
+            showSuccess(toast, { trigger }, 'Takipten çıkıldı');
             onFollowChange?.(false);
           },
           onError: () => {
-            triggerSystem('error');
-            toast.error('Takipten çıkılamadı');
+            showUnfollowError(toast, { trigger }, () => unfollowMutation.mutate(userId));
           },
         });
       } else {
         followMutation.mutate(userId, {
           onSuccess: () => {
-            triggerSystem('success');
-            toast.success('Takip edildi');
+            showSuccess(toast, { trigger }, 'Takip edildi');
             onFollowChange?.(true);
           },
           onError: () => {
-            triggerSystem('error');
-            toast.error('Takip edilemedi');
+            showFollowError(toast, { trigger }, () => followMutation.mutate(userId));
           },
         });
       }
@@ -118,28 +122,24 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
       if (isBlocked) {
         unblockMutation.mutate(userId, {
           onSuccess: () => {
-            triggerSystem('success');
-            toast.success('Engel kaldırıldı');
+            showSuccess(toast, { trigger }, 'Engel kaldırıldı');
             onBlockChange?.(false);
             setShowBlockConfirmSheet(false);
           },
           onError: () => {
-            triggerSystem('error');
-            toast.error('Engel kaldırılamadı');
+            showUnblockError(toast, { trigger });
             setShowBlockConfirmSheet(false);
           },
         });
       } else {
         blockMutation.mutate(userId, {
           onSuccess: () => {
-            triggerSystem('alert');
-            toast.success('Kullanıcı engellendi');
+            showSuccess(toast, { trigger }, 'Kullanıcı engellendi');
             onBlockChange?.(true);
             setShowBlockConfirmSheet(false);
           },
           onError: () => {
-            triggerSystem('error');
-            toast.error('Engellenemedi');
+            showBlockError(toast, { trigger });
             setShowBlockConfirmSheet(false);
           },
         });

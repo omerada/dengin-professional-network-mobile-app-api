@@ -79,7 +79,8 @@ export const NewConversationScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
 
-  const debouncedSearch = useDebounce(searchQuery, 300);
+  // P3: Optimized debounce 300ms → 200ms for snappier UX
+  const debouncedSearch = useDebounce(searchQuery, 200);
 
   // Hooks
   const { startConversation } = useStartConversation();
@@ -104,7 +105,7 @@ export const NewConversationScreen: React.FC = () => {
       } catch (error) {
         // Show backend error message with modern toast
         const errorMessage = getErrorMessage(error);
-        toast.error(errorMessage, 'Konuşma Başlatılamadı');
+        toast.error(errorMessage);
       } finally {
         setLoadingUserId(null);
       }

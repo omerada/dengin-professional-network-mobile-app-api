@@ -5,8 +5,11 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, AccessibilityInfo } from 'react-native';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
 import { Avatar, Button } from '@shared/components';
 import { spacing, fontSize, borderRadius } from '@theme';
+import { showUnblockError } from '@shared/utils';
+import { useHaptic } from '@shared/hooks';
 import { socialApi } from '@features/social/services';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
@@ -32,6 +35,8 @@ interface BlockedUserItemProps {
  */
 export const BlockedUserItem = React.memo<BlockedUserItemProps>(({ user, onUnblock, testID }) => {
   const colors = useColors();
+  const toast = useToast();
+  const { trigger } = useHaptic();
   const queryClient = useQueryClient();
   const [isUnblocked, setIsUnblocked] = useState(false);
 
@@ -44,7 +49,7 @@ export const BlockedUserItem = React.memo<BlockedUserItemProps>(({ user, onUnblo
       AccessibilityInfo.announceForAccessibility(`${user.fullName} engeli kaldırıldı`);
     },
     onError: () => {
-      Alert.alert('Hata', 'Engel kaldırılırken bir hata oluştu');
+      showUnblockError(toast, { trigger });
     },
   });
 

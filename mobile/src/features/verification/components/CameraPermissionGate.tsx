@@ -8,7 +8,7 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useColors } from '@contexts/ThemeContext';
-import { Button, Loading } from '@shared/components';
+import { Button, UnifiedLoadingState } from '@shared/components';
 import { spacing, fontSize, borderRadius } from '@theme';
 import { useCameraPermission } from '../hooks';
 

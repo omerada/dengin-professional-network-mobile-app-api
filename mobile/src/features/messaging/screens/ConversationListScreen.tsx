@@ -15,6 +15,7 @@ import { SCREEN_ANIMATIONS } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import { useSemanticHaptic, useLoadingTimeout } from '@shared/hooks';
+import { showOperationError } from '@shared/utils';
 import { ConversationItem, ConversationSkeleton } from '../components';
 import { useConversations, useSocket } from '../hooks';
 import {
@@ -76,19 +77,19 @@ export const ConversationListScreen: React.FC = () => {
       try {
         if (!conversation) {
           console.error('[ConversationList] Conversation is null/undefined');
-          Alert.alert('Hata', 'Konuşma bilgisi bulunamadı');
+          showOperationError(toast, { trigger: triggerNavigation }, 'Konuşma bilgisi bulunamadı');
           return;
         }
 
         if (!conversation.conversationId) {
           console.error('[ConversationList] Missing conversationId');
-          Alert.alert('Hata', 'Konuşma ID bulunamadı');
+          showOperationError(toast, { trigger: triggerNavigation }, 'Konuşma ID bulunamadı');
           return;
         }
 
         if (!conversation.participant) {
           console.error('[ConversationList] Missing participant');
-          Alert.alert('Hata', 'Katılımcı bilgisi bulunamadı');
+          showOperationError(toast, { trigger: triggerNavigation }, 'Katılımcı bilgisi bulunamadı');
           return;
         }
 
@@ -99,7 +100,11 @@ export const ConversationListScreen: React.FC = () => {
         });
       } catch (error) {
         console.error('[ConversationList] Error opening conversation:', error);
-        Alert.alert('Hata', 'Konuşma açılırken bir hata oluştu');
+        showOperationError(
+          toast,
+          { trigger: triggerNavigation },
+          'Konuşma açılırken bir hata oluştu',
+        );
       }
     },
     [navigation, triggerNavigation],

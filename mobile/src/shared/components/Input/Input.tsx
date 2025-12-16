@@ -25,7 +25,7 @@ import Animated, {
 import Icon from 'react-native-vector-icons/Feather';
 
 import { useColors } from '@contexts/ThemeContext';
-import { spring, duration } from '@theme/animations';
+import { spring } from '@theme/animations';
 import { UNIFIED_TIMING } from '@constants';
 
 import { styles, getVariantStyles } from './Input.styles';

@@ -21,6 +21,8 @@ import { Button, Input } from '@shared/components';
 import { spacing, typography } from '@theme';
 import { useChangePassword } from '../hooks';
 import { getErrorMessage } from '@core/utils/errorUtils';
+import { showSuccess, showPasswordChangeError } from '@shared/utils';
+import { useHaptic } from '@shared/hooks';
 import type { ChangePasswordRequest } from '../types';
 
 /**
@@ -78,6 +80,7 @@ export const ChangePasswordScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation();
   const toast = useToast();
+  const { trigger } = useHaptic();
   const changePassword = useChangePassword();
 
   // Form state
@@ -142,7 +145,7 @@ export const ChangePasswordScreen: React.FC = () => {
 
     try {
       await changePassword.mutateAsync(request);
-      toast.success('Şifreniz başarıyla değiştirildi');
+      showSuccess(toast, { trigger }, 'Şifreniz başarıyla değiştirildi');
       navigation.goBack();
     } catch (error: any) {
       const errorMessage = getErrorMessage(error);
@@ -150,7 +153,7 @@ export const ChangePasswordScreen: React.FC = () => {
       if (errorMessage.toLowerCase().includes('current password')) {
         setErrors(prev => ({ ...prev, currentPassword: 'Mevcut şifre yanlış' }));
       } else {
-        toast.error(errorMessage);
+        showPasswordChangeError(toast, { trigger });
       }
     }
   }, [

@@ -4,8 +4,6 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { authApi } from '../services';
 import type { RegisterFormData } from '../types';
 import { getErrorMessage } from '@core/utils/errorUtils';
@@ -21,7 +19,6 @@ import { useRegistrationStore } from '../stores/registrationStore';
  * Response: LoginResponse { user, accessToken, refreshToken, tokenType, expiresIn }
  */
 export const useRegister = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const setLastLoginEmail = useAuthStore(state => state.setLastLoginEmail);
   const resetRegistration = useRegistrationStore(state => state.reset);
 
@@ -45,18 +42,14 @@ export const useRegister = () => {
       console.log('[useRegister] ✅ Registration successful');
       console.log('[useRegister] User data:', data.user);
 
-      // Store tokens temporarily in auth store WITHOUT triggering isAuthenticated
-      // This allows WelcomeSuccess screen to access user data and tokens
-      // User will manually continue, then setAuth will be called
-      console.log('[useRegister] 💾 Storing tokens temporarily');
-      const tempStore = useAuthStore.getState() as any;
-      tempStore.user = data.user;
-      tempStore.tempAccessToken = data.accessToken;
-      tempStore.tempRefreshToken = data.refreshToken;
-
-      // Navigate to WelcomeSuccess - user will manually continue from there
-      console.log('[useRegister] 🎉 Navigating to WelcomeSuccess screen');
-      navigation.navigate('WelcomeSuccess');
+      // UX IMPROVEMENT: Direct login after registration (no WelcomeSuccess screen)
+      // Set auth state immediately to trigger navigation to Main
+      console.log('[useRegister] 🔐 Setting auth state - automatic login');
+      const setAuth = useAuthStore.getState().setAuth;
+      await setAuth(data.user, {
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+      });
 
       // Remember email for future logins
       await setLastLoginEmail(variables.email);
@@ -64,7 +57,7 @@ export const useRegister = () => {
       // Clear registration form data
       resetRegistration();
 
-      console.log('[useRegister] ✅ Registration flow completed - waiting for user to continue');
+      console.log('[useRegister] ✅ Registration & auto-login completed - navigating to Main');
     },
 
     onError: (error: Error) => {

@@ -27,7 +27,6 @@ export {
   navigateToBiometricSettings,
   navigateToAccountDeletion,
   navigateToVerificationIntro,
-  navigateToChatFromTab,
   navigateToNewConversation,
   safeNavigate,
   goBackWithFallback,

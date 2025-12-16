@@ -2,14 +2,7 @@
 // Global toast notification context
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART7.md
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useMemo,
-  ReactNode,
-} from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Toast, ToastData, ToastType } from '@shared/components';
 
@@ -24,9 +17,17 @@ export interface ToastConfig {
 }
 
 /**
+ * Toast options
+ */
+export interface ToastOptions {
+  duration?: number;
+  action?: any;
+}
+
+/**
  * Toast context value
  */
-interface ToastContextValue {
+export interface ToastContextValue {
   /**
    * Show a toast with custom configuration
    */
@@ -34,19 +35,19 @@ interface ToastContextValue {
   /**
    * Show a success toast
    */
-  success: (message: string, title?: string) => void;
+  success: (message: string, options?: ToastOptions) => void;
   /**
    * Show an error toast
    */
-  error: (message: string, title?: string) => void;
+  error: (message: string, options?: ToastOptions) => void;
   /**
    * Show a warning toast
    */
-  warning: (message: string, title?: string) => void;
+  warning: (message: string, options?: ToastOptions) => void;
   /**
    * Show an info toast
    */
-  info: (message: string, title?: string) => void;
+  info: (message: string, options?: ToastOptions) => void;
   /**
    * Hide current toast
    */
@@ -96,48 +97,48 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
       message: config.message,
       duration: config.duration,
     };
-    setToasts((prev) => [...prev, newToast]);
+    setToasts(prev => [...prev, newToast]);
   }, []);
 
   const hide = useCallback(() => {
-    setToasts((prev) => prev.slice(1));
+    setToasts(prev => prev.slice(1));
   }, []);
 
   const removeToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    setToasts(prev => prev.filter(toast => toast.id !== id));
   }, []);
 
   const showWithType = useCallback(
-    (type: ToastType, message: string, _title?: string) => {
-      show({ type, message });
+    (type: ToastType, message: string, options?: ToastOptions) => {
+      show({ type, message, duration: options?.duration });
     },
     [show],
   );
 
   const success = useCallback(
-    (message: string, title?: string) => {
-      showWithType('success', message, title);
+    (message: string, options?: ToastOptions) => {
+      showWithType('success', message, options);
     },
     [showWithType],
   );
 
   const error = useCallback(
-    (message: string, title?: string) => {
-      showWithType('error', message, title);
+    (message: string, options?: ToastOptions) => {
+      showWithType('error', message, options);
     },
     [showWithType],
   );
 
   const warning = useCallback(
-    (message: string, title?: string) => {
-      showWithType('warning', message, title);
+    (message: string, options?: ToastOptions) => {
+      showWithType('warning', message, options);
     },
     [showWithType],
   );
 
   const info = useCallback(
-    (message: string, title?: string) => {
-      showWithType('info', message, title);
+    (message: string, options?: ToastOptions) => {
+      showWithType('info', message, options);
     },
     [showWithType],
   );
@@ -158,7 +159,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
     <ToastContext.Provider value={contextValue}>
       {children}
       <View style={styles.container} pointerEvents="box-none">
-        {toasts.map((toast) => (
+        {toasts.map(toast => (
           <Toast key={toast.id} toast={toast} onHide={removeToast} />
         ))}
       </View>

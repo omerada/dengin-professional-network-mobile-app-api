@@ -3,7 +3,7 @@
 // Oku: MOBILE-APP-HOME-SCREEN.md, mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import React, { useCallback, useMemo, useState, memo, useEffect } from 'react';
-import { ActivityIndicator, StyleSheet } from 'react-native';
+import { ActivityIndicator, StyleSheet, Alert } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,11 +14,13 @@ import {
   navigateToReportContent,
   navigateToNotifications,
   navigateToVerificationIntro,
+  navigateToNewConversation,
+  navigateToUserProfile,
 } from '@core/navigation';
 
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { useSemanticHaptic, useLoadingTimeout } from '@shared/hooks';
+import { useSemanticHaptic, useLoadingTimeout, useHaptic } from '@shared/hooks';
 import { useFeedPosts, useLikePost, useBookmarkPost, useDeletePost } from '../hooks';
 import { PostCard, EmptyFeed, FeedSkeleton } from '../components';
 import { VerificationPromptCard } from '../components/VerificationPromptCard';
@@ -31,7 +33,15 @@ import {
   CustomRefreshControl,
   UnifiedScreenHeader,
 } from '@shared/components';
-import { sharePost, showShareError, showSuccess, showError } from '@shared/utils';
+import {
+  sharePost,
+  showSuccess,
+  showLikeError,
+  showBookmarkError,
+  showFollowError,
+  showUnfollowError,
+  showOperationError,
+} from '@shared/utils';
 import { useAuthStore } from '@features/auth/stores';
 import { useFollow, useUnfollow } from '@features/social/hooks';
 import { useUnreadCount } from '@features/notifications/hooks';
@@ -61,7 +71,8 @@ import type { Post } from '../types';
 export const FeedScreen: React.FC = memo(() => {
   const colors = useColors();
   const navigation = useNavigation();
-  const { triggerContent, triggerSystem, trigger } = useSemanticHaptic();
+  const { trigger } = useHaptic();
+  const { triggerContent, triggerSystem } = useSemanticHaptic();
   const toast = useToast();
   const currentUserId = useAuthStore(state => state.user?.id);
   const user = useAuthStore(state => state.user);
@@ -116,11 +127,12 @@ export const FeedScreen: React.FC = memo(() => {
   // ============================================================================
 
   /**
-   * Check if verification prompt should be shown
-   * Rules:
+   * UX IMPROVEMENT: Optimized verification prompt display
+   * Rules (UPDATED FOR BETTER UX):
    * - Only for unverified users
-   * - Show once per session (until dismissed)
-   * - Don't show if dismissed within last 24 hours
+   * - Show max 2 times (not 3 - less intrusive)
+   * - Wait 7 days between dismissals (not 3 - longer cooldown)
+   * - Show after 10th post (not 3rd - let user explore first)
    */
   useEffect(() => {
     const checkVerificationPrompt = async () => {
@@ -129,27 +141,45 @@ export const FeedScreen: React.FC = memo(() => {
         return;
       }
 
-      const promptShown = await asyncStorage.get(STORAGE_KEYS.VERIFICATION_PROMPT_SHOWN);
-      const dismissedAt = await asyncStorage.get(STORAGE_KEYS.VERIFICATION_PROMPT_DISMISSED_AT);
+      // Get show count
+      const shownCount =
+        (await asyncStorage.get<number>(STORAGE_KEYS.VERIFICATION_PROMPT_SHOWN_COUNT)) ?? 0;
 
-      // If dismissed recently (within 24 hours), don't show
-      if (dismissedAt && typeof dismissedAt === 'string') {
+      // Max 2 times total (less annoying)
+      if (shownCount >= 2) {
+        setShowVerificationPrompt(false);
+        return;
+      }
+
+      const dismissedAt = await asyncStorage.get<string>(
+        STORAGE_KEYS.VERIFICATION_PROMPT_DISMISSED_AT,
+      );
+
+      // If dismissed recently (within 7 days), don't show
+      if (dismissedAt) {
         const daysPassed = (Date.now() - parseInt(dismissedAt, 10)) / (1000 * 60 * 60 * 24);
-        if (daysPassed < 1) {
+        if (daysPassed < 7) {
           setShowVerificationPrompt(false);
           return;
         }
       }
 
-      // Show if not shown in current session
-      if (!promptShown) {
+      // Show after 10th post (let user explore app first)
+      if (posts.length > 10) {
         setShowVerificationPrompt(true);
-        await asyncStorage.set(STORAGE_KEYS.VERIFICATION_PROMPT_SHOWN, true);
+        // Increment count only once per session
+        const sessionShown = await asyncStorage.get<boolean>(
+          STORAGE_KEYS.VERIFICATION_PROMPT_SESSION_SHOWN,
+        );
+        if (!sessionShown) {
+          await asyncStorage.set(STORAGE_KEYS.VERIFICATION_PROMPT_SHOWN_COUNT, shownCount + 1);
+          await asyncStorage.set(STORAGE_KEYS.VERIFICATION_PROMPT_SESSION_SHOWN, true);
+        }
       }
     };
 
     checkVerificationPrompt();
-  }, [user?.verificationStatus]);
+  }, [user?.verificationStatus, posts.length]);
 
   /**
    * Handle verification prompt dismissal
@@ -172,19 +202,15 @@ export const FeedScreen: React.FC = memo(() => {
         { postId, isLiked },
         {
           onSuccess: () => {
-            showSuccess(
-              toast,
-              { trigger: triggerSystem },
-              isLiked ? 'Beğeni geri alındı' : 'Gönderi beğenildi',
-            );
+            showSuccess(toast, { trigger }, isLiked ? 'Beğeni geri alındı' : 'Gönderi beğenildi');
           },
           onError: () => {
-            showError(toast, { trigger: triggerSystem }, 'İşlem başarısız oldu');
+            showLikeError(toast, { trigger }, () => handleLike(postId, isLiked));
           },
         },
       );
     },
-    [likePost, triggerSystem, toast],
+    [likePost, triggerSystem, toast, trigger],
   );
 
   /**
@@ -192,8 +218,7 @@ export const FeedScreen: React.FC = memo(() => {
    */
   const handleComment = useCallback(
     (postId: number) => {
-      // @ts-expect-error - Navigation prop type mismatch
-      navigateToComments(navigation, { postId });
+      navigateToComments(navigation as any, { postId });
     },
     [navigation],
   );
@@ -211,7 +236,7 @@ export const FeedScreen: React.FC = memo(() => {
           author: post.author,
         });
         if (!result.success && result.error !== 'dismissed') {
-          showShareError();
+          showOperationError(toast, { trigger }, 'Paylaşım');
         }
       }
     },
@@ -229,17 +254,17 @@ export const FeedScreen: React.FC = memo(() => {
           onSuccess: () => {
             showSuccess(
               toast,
-              { trigger: triggerSystem },
+              { trigger },
               isSaved ? 'Kayıtlardan kaldırıldı' : 'Gönderi kaydedildi',
             );
           },
           onError: () => {
-            showError(toast, { trigger: triggerSystem }, 'İşlem başarısız oldu');
+            showBookmarkError(toast, { trigger }, () => handleBookmark(postId, isSaved));
           },
         },
       );
     },
-    [bookmarkPost, triggerSystem, toast],
+    [bookmarkPost, triggerSystem, toast, trigger],
   );
 
   /**
@@ -311,8 +336,7 @@ export const FeedScreen: React.FC = memo(() => {
   const handleReportPost = useCallback(() => {
     if (selectedPost) {
       handleCloseActionSheet();
-      // @ts-expect-error - Navigation prop type mismatch
-      navigateToReportContent(navigation, {
+      navigateToReportContent(navigation as any, {
         contentId: selectedPost.id,
         contentType: 'post',
       });
@@ -367,8 +391,8 @@ export const FeedScreen: React.FC = memo(() => {
   /**
    * Render single post item with engagement cards
    * P2 Optimized: Strategic placement based on index
-   * - AI Trend: Every 10th post
-   * - Suggested Experts: Every 20th post
+   * - AI Trend: After 5th post
+   * - Suggested Experts: After 10th post
    * Memoized for FlashList performance
    * Uses UNIFIED_TIMING for consistent list animations (40ms delay)
    */
@@ -376,8 +400,8 @@ export const FeedScreen: React.FC = memo(() => {
     ({ item, index }: ListRenderItemInfo<Post>) => {
       return (
         <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(index)} style={{ flex: 1 }}>
-          {/* P2: AI Trend Insight - Every 10th post */}
-          {index > 0 && index % 10 === 0 && (
+          {/* P2: AI Trend Insight - After 5th post */}
+          {index === 5 && (
             <AITrendInsightCard
               professionCategory={user?.sector?.code}
               onTrendPress={trend => console.log('Trend pressed:', trend)}
@@ -385,12 +409,11 @@ export const FeedScreen: React.FC = memo(() => {
             />
           )}
 
-          {/* P2: Suggested Experts - Every 20th post */}
-          {index > 0 && index % 20 === 0 && (
+          {/* P2: Suggested Experts - After 10th post */}
+          {index === 10 && (
             <SuggestedExpertsCarousel
               onExpertPress={expertId => {
-                // @ts-expect-error - UserProfile route not yet defined in types
-                navigation.navigate('UserProfile', { userId: expertId });
+                navigateToUserProfile(navigation as any, { userId: expertId });
               }}
               onFollowToggle={(expertId, isFollowing) => {
                 if (isFollowing) {
@@ -399,7 +422,9 @@ export const FeedScreen: React.FC = memo(() => {
                       showSuccess(toast, { trigger }, 'Takipten çıkıldı');
                     },
                     onError: () => {
-                      showError(toast, { trigger }, 'İşlem başarısız oldu');
+                      showUnfollowError(toast, { trigger }, () =>
+                        unfollowMutation.mutate(expertId),
+                      );
                     },
                   });
                 } else {
@@ -408,7 +433,7 @@ export const FeedScreen: React.FC = memo(() => {
                       showSuccess(toast, { trigger }, 'Takip edildi');
                     },
                     onError: () => {
-                      showError(toast, { trigger }, 'İşlem başarısız oldu');
+                      showFollowError(toast, { trigger }, () => followMutation.mutate(expertId));
                     },
                   });
                 }
@@ -464,12 +489,10 @@ export const FeedScreen: React.FC = memo(() => {
             unreadCount: unreadCount || 0,
             onSectorPress: () => console.log('Sector detail pressed'),
             onSearchPress: () => {
-              // @ts-expect-error - Navigation prop type mismatch
-              navigation.navigate('NewConversation');
+              navigateToNewConversation(navigation as any);
             },
             onNotificationPress: () => {
-              // @ts-expect-error - Navigation prop type mismatch
-              navigateToNotifications(navigation);
+              navigateToNotifications(navigation as any);
             },
           }}
         />
@@ -477,8 +500,7 @@ export const FeedScreen: React.FC = memo(() => {
         {showVerificationPrompt && (
           <VerificationPromptCard
             onPress={() => {
-              // @ts-expect-error - Navigation prop type mismatch
-              navigateToVerificationIntro(navigation);
+              navigateToVerificationIntro(navigation as any);
               handleDismissVerificationPrompt();
             }}
             onDismiss={handleDismissVerificationPrompt}
@@ -598,11 +620,13 @@ export const FeedScreen: React.FC = memo(() => {
           message="Bu gönderiyi silmek istediğinize emin misiniz?"
           options={[
             {
+              id: 'delete',
               label: 'Sil',
               destructive: true,
               onPress: handleConfirmDelete,
             },
             {
+              id: 'cancel',
               label: 'İptal',
               onPress: () => {
                 setShowDeleteConfirm(false);

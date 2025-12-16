@@ -4,16 +4,12 @@
 
 import { UNIFIED_FEEDBACK } from '@constants/unifiedFeedback';
 import type { HapticType } from '@theme/types';
+import type { ToastContextValue } from '@contexts/ToastContext';
 
 /**
  * Toast Interface (matches ToastContext)
  */
-interface ToastInterface {
-  success: (message: string, options?: { duration?: number }) => void;
-  error: (message: string, options?: { duration?: number; action?: any }) => void;
-  warning: (message: string, options?: { duration?: number }) => void;
-  info: (message: string, options?: { duration?: number }) => void;
-}
+type ToastInterface = ToastContextValue;
 
 /**
  * Haptic Interface (matches useHaptic)

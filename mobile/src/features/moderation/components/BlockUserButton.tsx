@@ -15,6 +15,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import { spacing, fontSize, borderRadius } from '@theme';
+import { showSuccess, showBlockError, showUnblockError } from '@shared/utils';
+import { useHaptic } from '@shared/hooks';
 import { socialApi } from '@features/social/services';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -59,6 +61,7 @@ export const BlockUserButton = React.memo<BlockUserButtonProps>(
   }) => {
     const colors = useColors();
     const toast = useToast();
+    const { trigger } = useHaptic();
     const queryClient = useQueryClient();
     const [isBlocked, setIsBlocked] = useState(initialIsBlocked);
 
@@ -70,10 +73,10 @@ export const BlockUserButton = React.memo<BlockUserButtonProps>(
         onToggle?.(true);
         queryClient.invalidateQueries({ queryKey: ['blocked-users'] });
         AccessibilityInfo.announceForAccessibility(`${userName} engellendi`);
-        toast.success(`${userName} engellendi`);
+        showSuccess(toast, { trigger }, `${userName} engellendi`);
       },
       onError: () => {
-        toast.error('Kullanıcı engellenirken bir hata oluştu');
+        showBlockError(toast, { trigger });
       },
     });
 
@@ -85,10 +88,10 @@ export const BlockUserButton = React.memo<BlockUserButtonProps>(
         onToggle?.(false);
         queryClient.invalidateQueries({ queryKey: ['blocked-users'] });
         AccessibilityInfo.announceForAccessibility(`${userName} engeli kaldırıldı`);
-        toast.success('Engel kaldırıldı');
+        showSuccess(toast, { trigger }, 'Engel kaldırıldı');
       },
       onError: () => {
-        toast.error('Engel kaldırılırken bir hata oluştu');
+        showUnblockError(toast, { trigger });
       },
     });
 

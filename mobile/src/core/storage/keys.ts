@@ -15,9 +15,10 @@ export const STORAGE_KEYS = {
   USER_CACHE: 'dengin_user_cache',
   FEED_CACHE: 'dengin_feed_cache',
 
-  // P2 Addition: Feed engagement tracking
-  VERIFICATION_PROMPT_SHOWN: 'dengin_verification_prompt_shown',
+  // UX IMPROVEMENT: Feed engagement tracking (optimized)
+  VERIFICATION_PROMPT_SHOWN_COUNT: 'dengin_verification_prompt_shown_count',
   VERIFICATION_PROMPT_DISMISSED_AT: 'dengin_verification_prompt_dismissed_at',
+  VERIFICATION_PROMPT_SESSION_SHOWN: 'dengin_verification_prompt_session_shown',
 
   // Offline data
   OFFLINE_MESSAGES: 'dengin_offline_messages',

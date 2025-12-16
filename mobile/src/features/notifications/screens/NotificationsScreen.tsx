@@ -10,16 +10,13 @@ import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import {
-  navigateToChatFromTab,
-  navigateToPostDetail,
-  navigateToUserProfile,
-} from '@core/navigation';
+import { navigateToChat, navigateToPostDetail, navigateToUserProfile } from '@core/navigation';
 import { spacing } from '@theme';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import { useSemanticHaptic } from '@shared/hooks';
 import { UnifiedScreenHeader, ActionSheet } from '@shared/components';
+import { showOperationError } from '@shared/utils';
 
 import { NotificationList } from '../components/NotificationList';
 import { PermissionPrompt } from '../components/PermissionPrompt';
@@ -91,7 +88,9 @@ export const NotificationsScreen: React.FC = memo(() => {
           switch (type) {
             case 'NEW_MESSAGE':
               if (metadata?.conversationId) {
-                navigateToChatFromTab(navigation, metadata.conversationId);
+                navigateToChat(navigation as any, {
+                  conversationId: Number(metadata.conversationId),
+                });
               }
               break;
 
@@ -122,11 +121,11 @@ export const NotificationsScreen: React.FC = memo(() => {
             case 'POST_FLAGGED':
             case 'CONTENT_REMOVED':
             case 'WARNING_ISSUED':
-              Alert.alert(
-                notification.title || 'Bildirim',
-                notification.body || 'Detaylar için bildirime tıklayın.',
-                [{ text: 'Tamam' }],
-              );
+              toast.show({
+                message: notification.body || 'Detaylar için bildirime tıklayın.',
+                type: 'info',
+                duration: 5000,
+              });
               break;
 
             default:
@@ -137,7 +136,11 @@ export const NotificationsScreen: React.FC = memo(() => {
           }
         } catch (error) {
           console.error('[NotificationsScreen] Navigation error:', error);
-          toast.error('Bildirim açılırken bir hata oluştu.');
+          showOperationError(
+            toast,
+            { trigger: triggerNavigation },
+            'Bildirim açılırken bir hata oluştu.',
+          );
         }
       });
     },
@@ -250,10 +253,12 @@ export const NotificationsScreen: React.FC = memo(() => {
         message={`${unreadCount} okunmamış bildirim okundu olarak işaretlenecek.`}
         options={[
           {
+            id: 'mark-read',
             label: 'Okundu İşaretle',
             onPress: handleConfirmMarkAllRead,
           },
           {
+            id: 'cancel',
             label: 'İptal',
             onPress: () => setShowMarkAllReadConfirm(false),
           },

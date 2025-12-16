@@ -10,12 +10,9 @@ import { NotificationItem } from './NotificationItem';
 import { EmptyNotifications } from './EmptyNotifications';
 import { useNotifications, useMarkAsRead, useDeleteNotification } from '../hooks';
 import { useColors } from '@contexts/ThemeContext';
-import {
-  AnimatedListItem,
-  NotificationListSkeleton,
-  UnifiedLoadingState,
-  CustomRefreshControl,
-} from '@shared/components';
+import { useToast } from '@contexts/ToastContext';
+import { useLoadingTimeout } from '@shared/hooks';
+import { AnimatedListItem, UnifiedLoadingState, CustomRefreshControl } from '@shared/components';
 import { SCREEN_ANIMATIONS } from '@constants';
 import { spacing, fontSize } from '@theme';
 import { groupNotificationsByTime } from '../utils/groupNotifications';
@@ -36,6 +33,7 @@ interface NotificationListProps {
 export const NotificationList: React.FC<NotificationListProps> = memo(
   ({ onNotificationPress, unreadOnly = false }) => {
     const colors = useColors();
+    const toast = useToast();
 
     // Backend page-based pagination hook
     const {
@@ -50,6 +48,17 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
 
     const { markAsRead } = useMarkAsRead();
     const { deleteNotification } = useDeleteNotification();
+
+    // Loading timeout protection
+    useLoadingTimeout(isLoading && notifications.length === 0, {
+      timeout: 30000,
+      onTimeout: () => {
+        toast.error('Bildirimler yüklenirken zaman aşımı. Lütfen tekrar deneyin.');
+      },
+      onRetry: async () => {
+        await refetch();
+      },
+    });
 
     // Group notifications by time (Today, This Week, Earlier)
     const groupedData = useMemo(() => {
@@ -171,9 +180,7 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
 
     // Loading state - show unified skeleton
     if (isLoading) {
-      return (
-        <UnifiedLoadingState strategy="skeleton" customSkeleton={<NotificationListSkeleton />} />
-      );
+      return <UnifiedLoadingState strategy="skeleton" variant="screen" />;
     }
 
     return (

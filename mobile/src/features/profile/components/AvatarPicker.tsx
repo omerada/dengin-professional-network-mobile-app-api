@@ -15,8 +15,14 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
 import { spacing, fontSize } from '@theme';
-import { useSemanticHaptic } from '@shared/hooks';
+import { useSemanticHaptic, useHaptic } from '@shared/hooks';
+import {
+  showCameraPermissionError,
+  showGalleryPermissionError,
+  showOperationError,
+} from '@shared/utils';
 
 interface AvatarPickerProps {
   /**
@@ -59,6 +65,8 @@ interface AvatarPickerProps {
 export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
   ({ currentAvatarUrl, fullName, onImageSelected, onRemove, isLoading = false, size = 120 }) => {
     const colors = useColors();
+    const toast = useToast();
+    const { trigger } = useHaptic();
     const { triggerMedia, triggerSystem } = useSemanticHaptic();
     const [previewUri, setPreviewUri] = useState<string | null>(null);
 
@@ -80,7 +88,7 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
 
         if (status !== 'granted') {
-          Alert.alert('İzin Gerekli', 'Fotoğraf çekmek için kamera iznine ihtiyacımız var.');
+          showCameraPermissionError(toast, { trigger });
           return;
         }
 
@@ -97,11 +105,10 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
           triggerMedia('capture');
         }
       } catch (error) {
-        triggerSystem('error');
         console.error('[AvatarPicker] Camera error:', error);
-        Alert.alert('Hata', 'Kamera açılırken bir hata oluştu.');
+        showOperationError(toast, { trigger }, 'Kamera açılırken bir hata oluştu.');
       }
-    }, [onImageSelected, triggerMedia, triggerSystem]);
+    }, [onImageSelected, triggerMedia, trigger]);
 
     // Open gallery
     const handleChooseFromGallery = useCallback(async () => {
@@ -110,10 +117,7 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
         if (status !== 'granted') {
-          Alert.alert(
-            'İzin Gerekli',
-            'Galeriden fotoğraf seçmek için medya kütüphanesi iznine ihtiyacımız var.',
-          );
+          showGalleryPermissionError(toast, { trigger });
           return;
         }
 
@@ -130,9 +134,8 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
           triggerMedia('capture');
         }
       } catch (error) {
-        triggerSystem('error');
         console.error('[AvatarPicker] Gallery error:', error);
-        Alert.alert('Hata', 'Galeri açılırken bir hata oluştu.');
+        showOperationError(toast, { trigger }, 'Galeri açılırken bir hata oluştu.');
       }
     }, [onImageSelected, triggerMedia, triggerSystem]);
 

@@ -36,8 +36,8 @@ export const styles = StyleSheet.create({
   },
 
   blurredBackground: {
-    borderBottomLeftRadius: borderRadius.xxl,
-    borderBottomRightRadius: borderRadius.xxl,
+    borderBottomLeftRadius: borderRadius.xl,
+    borderBottomRightRadius: borderRadius.xl,
     height: 180,
     left: 0,
     opacity: 0.8,

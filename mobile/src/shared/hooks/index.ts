@@ -60,6 +60,7 @@ export {
 // UI/UX Modernization hooks
 export { useHaptic, useHapticPress, useHapticLike } from './useHaptic';
 export { useSemanticHaptic } from './useSemanticHaptic';
+export type { HapticTrigger } from './useSemanticHaptic';
 export {
   useDebounce as useDebounceValue,
   useDebouncedCallback,

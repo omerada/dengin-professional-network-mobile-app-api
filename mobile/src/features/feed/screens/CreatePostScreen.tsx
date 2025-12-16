@@ -21,14 +21,14 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { useSemanticHaptic } from '@shared/hooks';
+import { useSemanticHaptic, useHaptic } from '@shared/hooks';
 import { spacing } from '@theme';
 import { useFeedStore } from '../stores';
 import { useCreatePost } from '../hooks';
 import { imagePickerService } from '../services';
 import { PostTextInput, ImagePreviewGrid } from '../components';
 import { SuccessCelebration, ActionFeedback, ActionSheet } from '@shared/components';
-import { showSuccess, showError } from '@shared/utils';
+import { showError } from '@shared/utils';
 import { useAuthStore } from '@features/auth/stores';
 import type { UploadProgress, FeedStoreState } from '../types';
 
@@ -52,6 +52,7 @@ export const CreatePostScreen: React.FC = () => {
   const colors = useColors();
   const toast = useToast();
   const navigation = useNavigation();
+  const { trigger } = useHaptic();
   const { triggerContent, triggerSystem, triggerMedia } = useSemanticHaptic();
 
   // Auth state - needed for professionId
@@ -97,11 +98,7 @@ export const CreatePostScreen: React.FC = () => {
     // Get user's professionId - required by backend
     const professionId = user?.professionId;
     if (!professionId) {
-      showError(
-        toast,
-        { trigger: triggerSystem },
-        'Meslek bilgisi bulunamadı. Lütfen profilinizi tamamlayın.',
-      );
+      showError(toast, { trigger }, 'Meslek bilgisi bulunamadı. Lütfen profilinizi tamamlayın.');
       return;
     }
 
@@ -176,9 +173,9 @@ export const CreatePostScreen: React.FC = () => {
           }
           accessibilityState={{ disabled: !canPost || isPosting }}>
           {isPosting ? (
-            <ActivityIndicator size="small" color={colors.text.onPrimary} />
+            <ActivityIndicator size="small" color={colors.text.inverse} />
           ) : (
-            <Text style={[styles.postButtonText, { color: colors.text.onPrimary }]}>Paylaş</Text>
+            <Text style={[styles.postButtonText, { color: colors.text.inverse }]}>Paylaş</Text>
           )}
         </Pressable>
       ),

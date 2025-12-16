@@ -10,7 +10,6 @@ import { UNIFIED_NAVIGATION } from '@constants/unifiedNavigation';
 // Auth Screens
 import { LoginScreen } from '@features/auth/screens/LoginScreen';
 import { RegisterScreenOptimized } from '@features/auth/screens/RegisterScreenOptimized';
-import { WelcomeSuccessScreen } from '@features/auth/screens/WelcomeSuccessScreen';
 import { ForgotPasswordScreen } from '@features/auth/screens/ForgotPasswordScreen';
 
 // Onboarding
@@ -30,8 +29,11 @@ export const AuthNavigator: React.FC = () => {
     <Stack.Navigator initialRouteName="Onboarding" screenOptions={UNIFIED_NAVIGATION.SCREEN}>
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
-      <Stack.Screen name="Register" component={RegisterScreenOptimized} />
-      <Stack.Screen name="WelcomeSuccess" component={WelcomeSuccessScreen} />
+      <Stack.Screen
+        name="Register"
+        component={RegisterScreenOptimized}
+        options={UNIFIED_NAVIGATION.MODAL}
+      />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
       <Stack.Screen name="Terms" component={TermsScreen} options={UNIFIED_NAVIGATION.MODAL} />
       <Stack.Screen name="Privacy" component={PrivacyScreen} options={UNIFIED_NAVIGATION.MODAL} />

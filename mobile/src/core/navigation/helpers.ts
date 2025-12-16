@@ -204,63 +204,63 @@ export function navigateToCreatePost(navigation: NavigationProp<any>): void {
  * Navigate to Edit Profile screen
  */
 export function navigateToEditProfile(navigation: NavigationProp<any>): void {
-  (navigation as any).navigate('EditProfile');
+  navigation.navigate('EditProfile' as never);
 }
 
 /**
  * Navigate to Settings screen
  */
 export function navigateToSettings(navigation: NavigationProp<any>): void {
-  (navigation as any).navigate('Settings');
+  navigation.navigate('Settings' as never);
 }
 
 /**
  * Navigate to Notifications screen
  */
 export function navigateToNotifications(navigation: NavigationProp<any>): void {
-  (navigation as any).navigate('Notifications');
+  navigation.navigate('Notifications' as never);
 }
 
 /**
  * Navigate to Notification Settings screen
  */
 export function navigateToNotificationSettings(navigation: NavigationProp<any>): void {
-  (navigation as any).navigate('NotificationSettings');
+  navigation.navigate('NotificationSettings' as never);
 }
 
 /**
  * Navigate to Change Password screen
  */
 export function navigateToChangePassword(navigation: NavigationProp<any>): void {
-  (navigation as any).navigate('ChangePassword');
+  navigation.navigate('ChangePassword' as never);
 }
 
 /**
  * Navigate to Blocked Users screen
  */
 export function navigateToBlockedUsers(navigation: NavigationProp<any>): void {
-  (navigation as any).navigate('BlockedUsers');
+  navigation.navigate('BlockedUsers' as never);
 }
 
 /**
  * Navigate to Privacy Settings screen
  */
 export function navigateToPrivacySettings(navigation: NavigationProp<any>): void {
-  (navigation as any).navigate('PrivacySettings');
+  navigation.navigate('PrivacySettings' as never);
 }
 
 /**
  * Navigate to Biometric Settings screen
  */
 export function navigateToBiometricSettings(navigation: NavigationProp<any>): void {
-  (navigation as any).navigate('BiometricSettings');
+  navigation.navigate('BiometricSettings' as never);
 }
 
 /**
  * Navigate to Account Deletion screen
  */
 export function navigateToAccountDeletion(navigation: NavigationProp<any>): void {
-  (navigation as any).navigate('AccountDeletion');
+  navigation.navigate('AccountDeletion' as never);
 }
 
 /**
@@ -271,21 +271,89 @@ export function navigateToVerificationIntro(navigation: NavigationProp<any>): vo
 }
 
 /**
- * Navigate to Chat screen from another tab (e.g., from notifications)
+ * ============================================================================
+ * CROSS-STACK NAVIGATION
+ * Type-safe navigation between different tab stacks
+ * ============================================================================
+ */
+
+/**
+ * Navigate to Post Detail from any screen (cross-stack)
+ * Works from Profile, Chat, or any other screen
+ *
+ * @param navigation - Navigation prop
+ * @param params - Post detail parameters
+ *
+ * @example
+ * navigateToPostDetailCrossStack(navigation, { postId: 123 });
+ */
+export function navigateToPostDetailCrossStack(
+  navigation: NavigationProp<any>,
+  params: PostDetailParams,
+): void {
+  const validated = PostDetailParamsSchema.parse(params);
+  (navigation as any).navigate('FeedTab', {
+    screen: 'PostDetail',
+    params: validated,
+  });
+}
+
+/**
+ * Navigate to User Profile from any screen (cross-stack)
+ *
+ * @param navigation - Navigation prop
+ * @param params - User profile parameters
+ *
+ * @example
+ * navigateToUserProfileCrossStack(navigation, { userId: 456 });
+ */
+export function navigateToUserProfileCrossStack(
+  navigation: NavigationProp<any>,
+  params: UserProfileParams,
+): void {
+  const validated = UserProfileParamsSchema.parse(params);
+  (navigation as any).navigate('ProfileTab', {
+    screen: 'Profile',
+    params: validated,
+  });
+}
+
+/**
+ * Navigate to Chat from any screen (cross-stack)
  *
  * @param navigation - Navigation prop
  * @param conversationId - Conversation ID
  *
  * @example
- * navigateToChatFromTab(navigation, '123');
+ * navigateToChatCrossStack(navigation, '123');
  */
-export function navigateToChatFromTab(
+export function navigateToChatCrossStack(
   navigation: NavigationProp<any>,
   conversationId: string,
 ): void {
-  navigation.navigate('MessagingTab', {
+  (navigation as any).navigate('MessagingTab', {
     screen: 'Chat',
     params: { conversationId },
+  });
+}
+
+/**
+ * Navigate to Comments from any screen (cross-stack)
+ *
+ * @param navigation - Navigation prop
+ * @param params - Comments parameters
+ *
+ * @example
+ * navigateToCommentsCrossStack(navigation, { postId: 789 });
+ */
+export function navigateToCommentsCrossStack(
+  navigation: NavigationProp<any>,
+  params: CommentsParams,
+): void {
+  const validated = CommentsParamsSchema.parse(params);
+  (navigation as any).navigate('FeedTab', {
+    screen: 'Comments',
+    params: validated,
   });
 }
 
@@ -293,7 +361,7 @@ export function navigateToChatFromTab(
  * Navigate to New Conversation screen
  */
 export function navigateToNewConversation(navigation: NavigationProp<any>): void {
-  navigation.navigate('NewConversation');
+  navigation.navigate('NewConversation' as never);
 }
 
 /**

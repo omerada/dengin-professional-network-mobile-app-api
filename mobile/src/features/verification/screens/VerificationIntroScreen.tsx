@@ -3,17 +3,17 @@
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import React, { memo, useCallback } from 'react';
-import { StyleSheet, View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
-import { spacing, typography, fontSize, borderRadius } from '@theme';
 import { Button, UnifiedScreenHeader } from '@shared/components';
 import { useSemanticHaptic } from '@shared/hooks';
 import { useVerificationStore } from '../stores';
 import { StepIndicator } from '../components';
 import type { VerificationStackParamList } from '@shared/types/navigation.types';
+import { styles } from './VerificationIntroScreen.styles';
 
 type NavigationProp = NativeStackNavigationProp<VerificationStackParamList, 'VerificationIntro'>;
 
@@ -160,98 +160,6 @@ export const VerificationIntroScreen: React.FC = memo(() => {
 });
 
 VerificationIntroScreen.displayName = 'VerificationIntroScreen';
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  footer: {
-    borderTopWidth: 1,
-    padding: spacing.lg,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-  },
-  headerIcon: {
-    fontSize: 64,
-    marginBottom: spacing.md,
-  },
-  infoCard: {
-    borderRadius: borderRadius.lg,
-    flexDirection: 'row',
-    marginBottom: spacing.sm,
-    padding: spacing.md,
-  },
-  infoContent: {
-    flex: 1,
-  },
-  infoDescription: {
-    ...typography.bodySmall,
-  },
-  infoIcon: {
-    fontSize: 32,
-    marginRight: spacing.md,
-  },
-  infoTitle: {
-    ...typography.body,
-    fontWeight: '600',
-    marginBottom: spacing.xs,
-  },
-  requirementItem: {
-    ...typography.bodySmall,
-    marginBottom: spacing.xs,
-  },
-  requirementsList: {
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
-  },
-  requirementsSection: {
-    marginBottom: spacing.xl,
-  },
-  scrollContent: {
-    paddingBottom: spacing.xxl,
-    paddingHorizontal: spacing.lg,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  sectionTitle: {
-    ...typography.h3,
-    marginBottom: spacing.md,
-  },
-  securityIcon: {
-    fontSize: fontSize.xl,
-    marginRight: spacing.sm,
-  },
-  securityNote: {
-    alignItems: 'flex-start',
-    borderRadius: borderRadius.lg,
-    flexDirection: 'row',
-    padding: spacing.md,
-  },
-  securityText: {
-    ...typography.bodySmall,
-    flex: 1,
-  },
-  stepIndicator: {
-    marginBottom: spacing.lg,
-    marginTop: spacing.md,
-  },
-  stepsSection: {
-    marginBottom: spacing.xl,
-  },
-  subtitle: {
-    ...typography.body,
-    paddingHorizontal: spacing.md,
-    textAlign: 'center',
-  },
-  title: {
-    ...typography.h1,
-    marginBottom: spacing.sm,
-    textAlign: 'center',
-  },
-});
 
 // Wrap with Error Boundary for production safety
 import { ErrorBoundary } from '@core/components';

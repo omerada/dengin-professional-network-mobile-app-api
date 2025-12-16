@@ -21,6 +21,8 @@ import { Button, Input, ActionSheet } from '@shared/components';
 import { spacing, typography } from '@theme';
 import { useDeleteAccount } from '../hooks';
 import { getErrorMessage } from '@core/utils/errorUtils';
+import { showAccountDeletionError } from '@shared/utils';
+import { useHaptic } from '@shared/hooks';
 import type { DeleteAccountRequest } from '../types';
 
 /**
@@ -55,6 +57,7 @@ export const AccountDeletionScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation();
   const toast = useToast();
+  const { trigger } = useHaptic();
   const deleteAccount = useDeleteAccount();
 
   // Form state
@@ -117,7 +120,7 @@ export const AccountDeletionScreen: React.FC = () => {
       if (errorMessage.toLowerCase().includes('password')) {
         setErrors(prev => ({ ...prev, password: 'Şifre yanlış' }));
       } else {
-        toast.error(errorMessage, 'Hesap Silinemedi');
+        showAccountDeletionError(toast, { trigger });
       }
     }
   }, [password, getFinalReason, deleteAccount, toast]);

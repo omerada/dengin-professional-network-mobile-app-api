@@ -7,7 +7,6 @@ import React, { useCallback, useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -29,7 +28,8 @@ import { useLogin, useBiometricLogin } from '../hooks';
 import { useAuthStore } from '../stores';
 import { loginSchema, LoginSchemaType } from '../validation';
 import { AuthStackNavigationProp } from '@shared/types';
-import { spacing, fontSize } from '@theme';
+import { spacing } from '@theme';
+import { styles } from './LoginScreen.styles';
 
 /**
  * Modern Login Screen
@@ -155,12 +155,14 @@ export const LoginScreen: React.FC = () => {
                 </Text>
               </TouchableOpacity>
             </View>
-          </View>
+          </Animated.View>
 
           {/* Divider */}
           <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(1)} style={styles.divider}>
             <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
-            <Text style={[styles.dividerText, { color: colors.text.tertiary }]}>veya</Text>
+            <Text style={[styles.dividerText, { color: colors.text.tertiary }]}>
+              veya email ile
+            </Text>
             <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
           </Animated.View>
 
@@ -242,7 +244,7 @@ export const LoginScreen: React.FC = () => {
           </Animated.View>
 
           {/* Login Button */}
-          <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(3)} style={styles.actions}>
+          <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(1)} style={styles.actions}>
             <Button
               title={isLoading ? 'Giriş yapılıyor...' : t('auth.login')}
               onPress={handleSubmit(onSubmit)}
@@ -267,128 +269,25 @@ export const LoginScreen: React.FC = () => {
             )}
           </Animated.View>
 
-          {/* Register Link */}
-          <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(4)} style={styles.registerContainer}>
-            <Text style={{ color: colors.text.secondary }}>Hesabınız yok mu? </Text>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('Register')}
-              accessible={true}
-              accessibilityRole="link"
-              accessibilityLabel="Kayıt ol">
-              <Text style={{ color: colors.interactive.default, fontWeight: '600' }}>
-                {t('auth.register')}
-              </Text>
-            </TouchableOpacity>
-          </Animated.View>
+          {/* Footer: Register CTA */}
+          <View style={styles.footer}>
+            <Animated.View
+              entering={SCREEN_ANIMATIONS.listItemEnter(4)}
+              style={styles.registerContainer}>
+              <Text style={{ color: colors.text.secondary }}>Hesabınız yok mu? </Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Register')}
+                accessible={true}
+                accessibilityRole="link"
+                accessibilityLabel="Kayıt ol">
+                <Text style={{ color: colors.interactive.default, fontWeight: '600' }}>
+                  {t('auth.register')}
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  actions: {
-    marginBottom: spacing.xl,
-  },
-  container: {
-    flex: 1,
-  },
-  divider: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    marginVertical: spacing.xl,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-  },
-  dividerText: {
-    fontSize: 13,
-    fontWeight: '500',
-    marginHorizontal: spacing.lg,
-  },
-  errorAction: {
-    fontSize: 14,
-    fontWeight: '600',
-    textDecorationLine: 'underline',
-  },
-  errorContainer: {
-    alignItems: 'flex-start',
-    borderRadius: 12,
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginBottom: spacing.lg,
-    padding: spacing.md,
-  },
-  errorContent: {
-    flex: 1,
-  },
-  errorText: {
-    fontSize: 14,
-    marginBottom: spacing.xs,
-  },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginTop: -spacing.sm,
-  },
-  form: {
-    marginBottom: spacing.lg,
-  },
-  heroSection: {
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-  },
-  keyboardAvoid: {
-    flex: 1,
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  logoText: {
-    fontSize: 36,
-    fontWeight: '700',
-    letterSpacing: 1,
-  },
-  registerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: spacing.xl,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: spacing.xl,
-    paddingTop: spacing.md,
-  },
-  slogan: {
-    fontSize: 15,
-    fontWeight: '500',
-    marginTop: spacing.sm,
-    textAlign: 'center',
-  },
-  socialButtonLarge: {
-    alignItems: 'center',
-    borderRadius: 12,
-    borderWidth: 1,
-    flexDirection: 'row',
-    gap: spacing.md,
-    justifyContent: 'center',
-    paddingVertical: spacing.lg,
-  },
-  socialButtonLargeText: {
-    fontSize: fontSize.base,
-    fontWeight: '600',
-  },
-  socialButtonsColumn: {
-    gap: spacing.md,
-  },
-  socialSection: {
-    marginBottom: spacing.lg,
-  },
-  socialTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    marginBottom: spacing.md,
-    textAlign: 'center',
-  },
-});

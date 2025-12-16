@@ -65,7 +65,7 @@ export const DocumentGuide: React.FC<DocumentGuideProps> = memo(
           <Rect
             width={SCREEN_WIDTH}
             height={SCREEN_HEIGHT}
-            fill={colors.overlay}
+            fill={colors.background.overlay}
             mask="url(#guide-mask)"
           />
 

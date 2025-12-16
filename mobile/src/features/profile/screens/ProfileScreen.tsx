@@ -5,17 +5,18 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { View, ScrollView, Text, ActivityIndicator, Image } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { SCREEN_ANIMATIONS, SAFE_AREA_EDGES, UNIFIED_TIMING } from '@constants';
+import { SCREEN_ANIMATIONS, SAFE_AREA_EDGES } from '@constants';
 import { navigateToPostDetail, navigateToEditProfile, navigateToSettings } from '@core/navigation';
-import { useSemanticHaptic, useLoadingTimeout } from '@shared/hooks';
+import { useSemanticHaptic, useLoadingTimeout, useHaptic } from '@shared/hooks';
 
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import { useAuthStore } from '@features/auth/stores';
+import { showSuccess, showFollowError, showUnfollowError } from '@shared/utils';
 import { useFollow, useUnfollow } from '@features/social/hooks/useFollow';
 import { useUserPosts } from '@features/feed/hooks';
 import { PostCard } from '@features/feed/components';
@@ -53,6 +54,7 @@ export const ProfileScreen: React.FC = memo(() => {
   const route = useRoute();
   const params = route.params as RouteParams | undefined;
   const currentUser = useAuthStore(state => state.user);
+  const { trigger } = useHaptic();
   const { triggerNavigation, triggerSocial, triggerSystem } = useSemanticHaptic();
   const toast = useToast();
 
@@ -155,8 +157,7 @@ export const ProfileScreen: React.FC = memo(() => {
   const handlePostPress = useCallback(
     (postId: number) => {
       triggerNavigation('navigate');
-      // @ts-expect-error - Navigation prop type mismatch
-      navigateToPostDetail(navigation, { postId });
+      navigateToPostDetail(navigation as any, { postId });
     },
     [navigation, triggerNavigation],
   );
@@ -178,24 +179,20 @@ export const ProfileScreen: React.FC = memo(() => {
         // Currently following, so unfollow
         unfollowMutation.mutate(viewedUserId, {
           onSuccess: () => {
-            triggerSystem('success');
-            toast.success('Takipten çıkıldı');
+            showSuccess(toast, { trigger }, 'Takipten çıkıldı');
           },
           onError: () => {
-            triggerSystem('error');
-            toast.error('Takipten çıkılamadı. Lütfen tekrar deneyin.');
+            showUnfollowError(toast, { trigger }, () => unfollowMutation.mutate(viewedUserId));
           },
         });
       } else {
         // Not following, so follow
         followMutation.mutate(viewedUserId, {
           onSuccess: () => {
-            triggerSystem('success');
-            toast.success('Takip edildi');
+            showSuccess(toast, { trigger }, 'Takip edildi');
           },
           onError: () => {
-            triggerSystem('error');
-            toast.error('Takip edilemedi. Lütfen tekrar deneyin.');
+            showFollowError(toast, { trigger }, () => followMutation.mutate(viewedUserId));
           },
         });
       }
@@ -256,8 +253,8 @@ export const ProfileScreen: React.FC = memo(() => {
               activeScale={0.9}
               haptic
               hapticType="light"
-              style={[styles.settingsButtonTop, { backgroundColor: colors.overlay.light }]}>
-              <Icon name="settings-outline" size={22} color={colors.text.onPrimary} />
+              style={[styles.settingsButtonTop, { backgroundColor: colors.background.overlay }]}>
+              <Icon name="settings-outline" size={22} color={colors.text.inverse} />
             </PressableScale>
           )}
 

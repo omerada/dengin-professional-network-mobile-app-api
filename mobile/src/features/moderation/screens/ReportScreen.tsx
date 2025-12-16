@@ -11,6 +11,8 @@ import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import { Button, Input } from '@shared/components';
 import { spacing, fontSize } from '@theme';
+import { showSuccess, showValidationError, showOperationError } from '@shared/utils';
+import { useSemanticHaptic, useHaptic } from '@shared/hooks';
 import { useCreateReport } from '../hooks';
 import { REPORT_REASONS } from '../types';
 import type { ReportReason, ReportType } from '../types';
@@ -24,6 +26,8 @@ import type { ReportReason, ReportType } from '../types';
 export const ReportScreen: React.FC = () => {
   const colors = useColors();
   const toast = useToast();
+  const { trigger } = useHaptic();
+  const { triggerSystem } = useSemanticHaptic();
   const navigation = useNavigation();
   const route = useRoute();
 
@@ -39,7 +43,7 @@ export const ReportScreen: React.FC = () => {
 
   const handleSubmit = useCallback(async () => {
     if (!selectedReason) {
-      toast.warning('Lütfen bir neden seçin');
+      showValidationError(toast, 'Lütfen bir neden seçin', { trigger });
       return;
     }
 
@@ -51,12 +55,16 @@ export const ReportScreen: React.FC = () => {
         description: description.trim() || undefined,
       });
 
-      toast.success('Şikayetiniz alındı. Ekibimiz en kısa sürede inceleyecektir.');
+      showSuccess(
+        toast,
+        { trigger },
+        'Şikayetiniz alındı. Ekibimiz en kısa sürede inceleyecektir.',
+      );
       navigation.goBack();
     } catch (error) {
-      toast.error('Şikayet gönderilirken bir hata oluştu');
+      showOperationError(toast, { trigger }, 'Şikayet gönderilirken bir hata oluştu');
     }
-  }, [selectedReason, description, type, targetId, createReport, navigation, toast]);
+  }, [selectedReason, description, type, targetId, createReport, navigation, toast, triggerSystem]);
 
   return (
     <SafeAreaView

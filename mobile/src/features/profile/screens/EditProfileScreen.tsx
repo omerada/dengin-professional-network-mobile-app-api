@@ -22,7 +22,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { useSemanticHaptic } from '@shared/hooks';
+import { useSemanticHaptic, useHaptic } from '@shared/hooks';
+import { showSuccess, showProfileUpdateError, showValidationError } from '@shared/utils';
 import { useProfessions } from '@shared/hooks/useProfessions';
 import { useSectors } from '@shared/hooks/useSectors';
 import { Button, Input, BottomSheet } from '@shared/components';
@@ -60,6 +61,7 @@ export const EditProfileScreen: React.FC = () => {
   const colors = useColors();
   const toast = useToast();
   const navigation = useNavigation();
+  const { trigger } = useHaptic();
   const { triggerForm, triggerSystem } = useSemanticHaptic();
 
   // Fetch current profile
@@ -169,11 +171,11 @@ export const EditProfileScreen: React.FC = () => {
 
     // Validation
     if (!name.trim()) {
-      toast.error('Ad alanı boş bırakılamaz.');
+      showValidationError(toast, 'Ad alanı boş bırakılamaz.', { trigger });
       return;
     }
     if (!surname.trim()) {
-      toast.error('Soyad alanı boş bırakılamaz.');
+      showValidationError(toast, 'Soyad alanı boş bırakılamaz.', { trigger });
       return;
     }
 
@@ -223,8 +225,7 @@ export const EditProfileScreen: React.FC = () => {
       }
 
       // Success - Show toast with haptic
-      triggerSystem('success');
-      toast.success('Profil güncellendi');
+      showSuccess(toast, { trigger }, 'Profil güncellendi');
 
       // Clear pending states
       setPendingAvatarUri(null);
@@ -234,8 +235,7 @@ export const EditProfileScreen: React.FC = () => {
       refetch();
     } catch (error: any) {
       console.error('[EditProfileScreen] Save error:', error);
-      triggerSystem('error');
-      toast.error(error.message || 'Profil güncellenirken bir hata oluştu.');
+      showProfileUpdateError(toast, { trigger }, () => handleSave());
     }
   }, [
     hasChanges,

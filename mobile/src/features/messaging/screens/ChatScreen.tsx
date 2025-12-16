@@ -13,7 +13,8 @@ import type { RouteProp } from '@react-navigation/native';
 import { SAFE_AREA_EDGES, SCREEN_ANIMATIONS } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { useSemanticHaptic, useLoadingTimeout } from '@shared/hooks';
+import { useSemanticHaptic, useLoadingTimeout, useHaptic } from '@shared/hooks';
+import { showMessageDeleteError, showSuccess } from '@shared/utils';
 import { useAuthStore } from '@features/auth/stores';
 import { UnifiedScreenHeader, KeyboardAwareScreen, ActionSheet } from '@shared/components';
 import {
@@ -36,6 +37,7 @@ export const ChatScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ChatRouteProp>();
+  const { trigger } = useHaptic();
   const { triggerMedia, triggerSystem, triggerContent } = useSemanticHaptic();
   const toast = useToast();
 
@@ -249,12 +251,10 @@ export const ChatScreen: React.FC = () => {
 
     try {
       await messagingService.deleteMessage(conversationId, messageToDelete.messageId);
-      triggerSystem('success');
-      toast.success('Mesaj silindi');
+      showSuccess(toast, { trigger }, 'Mesaj silindi');
       refetch();
     } catch (error) {
-      triggerSystem('error');
-      toast.error('Mesaj silinemedi');
+      showMessageDeleteError(toast, { trigger });
     } finally {
       setShowDeleteConfirm(false);
       setMessageToDelete(null);

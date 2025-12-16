@@ -2,74 +2,20 @@
 // Performance optimization utilities
 // Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
 
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useRef, useEffect, useState } from 'react';
 import { InteractionManager, Platform, Image } from 'react-native';
+
+// Re-export from useDebounce hook to avoid duplication
+export { useDebouncedCallback, useThrottledCallback } from '../hooks/useDebounce';
 
 /**
  * Custom comparison function for React.memo
  * Compares specific keys for shallow equality
  */
-export function createMemoComparator<T extends Record<string, unknown>>(
-  keys: (keyof T)[]
-) {
+export function createMemoComparator<T extends Record<string, unknown>>(keys: (keyof T)[]) {
   return (prevProps: T, nextProps: T): boolean => {
-    return keys.every((key) => prevProps[key] === nextProps[key]);
+    return keys.every(key => prevProps[key] === nextProps[key]);
   };
-}
-
-/**
- * Debounce hook - delays function execution
- */
-export function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
-  callback: T,
-  delay: number
-): (...args: Parameters<T>) => void {
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const callbackRef = useRef(callback);
-
-  // Update callback ref on each render
-  useEffect(() => {
-    callbackRef.current = callback;
-  }, [callback]);
-
-  return useCallback(
-    (...args: Parameters<T>) => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-
-      timeoutRef.current = setTimeout(() => {
-        callbackRef.current(...args);
-      }, delay);
-    },
-    [delay]
-  );
-}
-
-/**
- * Throttle hook - limits function execution rate
- */
-export function useThrottledCallback<T extends (...args: unknown[]) => unknown>(
-  callback: T,
-  delay: number
-): (...args: Parameters<T>) => void {
-  const lastCallRef = useRef<number>(0);
-  const callbackRef = useRef(callback);
-
-  useEffect(() => {
-    callbackRef.current = callback;
-  }, [callback]);
-
-  return useCallback(
-    (...args: Parameters<T>) => {
-      const now = Date.now();
-      if (now - lastCallRef.current >= delay) {
-        lastCallRef.current = now;
-        callbackRef.current(...args);
-      }
-    },
-    [delay]
-  );
 }
 
 /**
@@ -102,8 +48,6 @@ export function useDeferredValue<T>(value: T, delay: number = 0): T {
 
   return deferredValue;
 }
-
-import { useState } from 'react';
 
 /**
  * Lazy initialization hook
@@ -174,7 +118,9 @@ export function measureRenderTime(componentName: string) {
     const startTime = performance.now();
     return () => {
       const endTime = performance.now();
-      console.log(`[Performance] ${componentName} rendered in ${(endTime - startTime).toFixed(2)}ms`);
+      console.log(
+        `[Performance] ${componentName} rendered in ${(endTime - startTime).toFixed(2)}ms`,
+      );
     };
   }
   return () => {};
@@ -201,12 +147,9 @@ export function useListPerformance(): {
     frameRate: 60,
   });
 
-  const onViewableItemsChanged = useCallback(
-    (info: { viewableItems: unknown[] }) => {
-      metricsRef.current.viewableItems = info.viewableItems.length;
-    },
-    []
-  );
+  const onViewableItemsChanged = useCallback((info: { viewableItems: unknown[] }) => {
+    metricsRef.current.viewableItems = info.viewableItems.length;
+  }, []);
 
   const getMetrics = useCallback(() => metricsRef.current, []);
 
@@ -219,13 +162,13 @@ export function useListPerformance(): {
 export function preloadImages(urls: string[]): Promise<void[]> {
   return Promise.all(
     urls.map(
-      (url) =>
-        new Promise<void>((resolve) => {
+      url =>
+        new Promise<void>(resolve => {
           Image.prefetch(url)
             .then(() => resolve())
             .catch(() => resolve()); // Don't fail on individual image errors
-        })
-    )
+        }),
+    ),
   );
 }
 

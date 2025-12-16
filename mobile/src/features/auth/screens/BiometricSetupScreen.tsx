@@ -9,8 +9,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { Button, Loading } from '@shared/components';
+import { Button, UnifiedLoadingState } from '@shared/components';
 import { spacing, typography } from '@theme';
+import { showOperationError, showSuccess, showInfo } from '@shared/utils';
+import { useSemanticHaptic, useHaptic } from '@shared/hooks';
 import { secureStorage, SECURE_KEYS } from '@core/storage';
 import { biometricService } from '../services/biometricService';
 import { useAuthStore } from '../stores';
@@ -41,6 +43,8 @@ export const BiometricSetupScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation();
   const toast = useToast();
+  const { trigger } = useHaptic();
+  const { triggerSystem } = useSemanticHaptic();
 
   // Auth store
   const { user } = useAuthStore();
@@ -84,14 +88,22 @@ export const BiometricSetupScreen: React.FC = () => {
   // Handle enable biometric
   const handleEnableBiometric = useCallback(async () => {
     if (!user?.email) {
-      Alert.alert('Hata', 'Biyometrik kimlik doğrulama için giriş yapmalısınız.');
+      showOperationError(
+        toast,
+        { trigger },
+        'Biyometrik kimlik doğrulama için giriş yapmalısınız.',
+      );
       return;
     }
 
     // Get refresh token from secure storage
     const refreshTokenValue = await secureStorage.get(SECURE_KEYS.REFRESH_TOKEN);
     if (!refreshTokenValue) {
-      Alert.alert('Hata', 'Biyometrik kimlik doğrulama için giriş yapmalısınız.');
+      showOperationError(
+        toast,
+        { trigger },
+        'Biyometrik kimlik doğrulama için giriş yapmalısınız.',
+      );
       return;
     }
 
@@ -104,7 +116,7 @@ export const BiometricSetupScreen: React.FC = () => {
       );
 
       if (!success) {
-        Alert.alert('Doğrulama Başarısız', error || 'Biyometrik doğrulama başarısız oldu.');
+        showOperationError(toast, { trigger }, error || 'Biyometrik doğrulama başarısız oldu.');
         return;
       }
 
@@ -113,17 +125,17 @@ export const BiometricSetupScreen: React.FC = () => {
 
       if (enabled) {
         setIsEnabled(true);
-        toast.success(`${biometricName} ile giriş etkinleştirildi`, 'Başarılı');
+        showSuccess(toast, { trigger }, `${biometricName} ile giriş etkinleştirildi`);
       } else {
-        Alert.alert('Hata', 'Biyometrik giriş etkinleştirilemedi.');
+        showOperationError(toast, { trigger }, 'Biyometrik giriş etkinleştirilemedi.');
       }
     } catch (error) {
       console.error('[BiometricSetupScreen] Enable error:', error);
-      Alert.alert('Hata', 'Bir hata oluştu. Lütfen tekrar deneyin.');
+      showOperationError(toast, { trigger }, 'Bir hata oluştu. Lütfen tekrar deneyin.');
     } finally {
       setIsProcessing(false);
     }
-  }, [user, biometricName, toast]);
+  }, [user, biometricName, toast, triggerSystem]);
 
   // Handle disable biometric
   const handleDisableBiometric = useCallback(async () => {
@@ -143,13 +155,13 @@ export const BiometricSetupScreen: React.FC = () => {
 
               if (disabled) {
                 setIsEnabled(false);
-                toast.info(`${biometricName} ile giriş devre dışı bırakıldı`, 'Devre Dışı');
+                showInfo(toast, { trigger }, `${biometricName} ile giriş devre dışı bırakıldı`);
               } else {
-                Alert.alert('Hata', 'Biyometrik giriş devre dışı bırakılamadı.');
+                showOperationError(toast, { trigger }, 'Biyometrik giriş devre dışı bırakılamadı.');
               }
             } catch (error) {
               console.error('[BiometricSetupScreen] Disable error:', error);
-              Alert.alert('Hata', 'Bir hata oluştu.');
+              showOperationError(toast, { trigger }, 'Bir hata oluştu.');
             } finally {
               setIsProcessing(false);
             }

@@ -9,7 +9,8 @@ import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import { spacing, fontSize } from '@theme';
 import { spring } from '@theme/animations';
-import { useSemanticHaptic } from '@shared/hooks';
+import { useSemanticHaptic, useHaptic } from '@shared/hooks';
+import { showFollowError, showUnfollowError, showSuccess } from '@shared/utils';
 import { useFollow, useUnfollow } from '../hooks';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -52,6 +53,7 @@ export interface FollowButtonProps {
 export const FollowButton: React.FC<FollowButtonProps> = memo(
   ({ userId, isFollowing, onFollowChange, size = 'md' }) => {
     const colors = useColors();
+    const { trigger } = useHaptic();
     const { triggerSocial, triggerSystem } = useSemanticHaptic();
     const toast = useToast();
     const follow = useFollow();
@@ -71,19 +73,20 @@ export const FollowButton: React.FC<FollowButtonProps> = memo(
       try {
         if (isFollowing) {
           await unfollow.mutateAsync(userId);
-          toast.success('Takipten çıkıldı');
-          triggerSystem('success');
+          showSuccess(toast, { trigger }, 'Takipten çıkıldı');
           onFollowChange?.(userId, false);
         } else {
           await follow.mutateAsync(userId);
-          toast.success('Takip edildi');
-          triggerSystem('success');
+          showSuccess(toast, { trigger }, 'Takip edildi');
           onFollowChange?.(userId, true);
         }
       } catch (error) {
-        triggerSystem('error');
-        toast.error('İşlem başarısız oldu');
         console.error('Follow/Unfollow error:', error);
+        if (isFollowing) {
+          showUnfollowError(toast, { trigger }, () => handlePress());
+        } else {
+          showFollowError(toast, { trigger }, () => handlePress());
+        }
       }
     }, [
       userId,

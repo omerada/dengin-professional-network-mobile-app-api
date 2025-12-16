@@ -10,11 +10,16 @@ import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { useSemanticHaptic } from '@shared/hooks';
+import { useSemanticHaptic, useHaptic } from '@shared/hooks';
 import { useAuthStore } from '@features/auth/stores';
 import { useCommentsData, useAddComment, useLikeComment, useDeleteComment } from '../hooks';
 import { CommentCard, AddCommentForm, EmptyFeed } from '../components';
-import { ActionSheet, ActionSheetOption, CustomRefreshControl } from '@shared/components';
+import {
+  ActionSheet,
+  ActionSheetOption,
+  CustomRefreshControl,
+  UnifiedLoadingState,
+} from '@shared/components';
 import { showSuccess, showError } from '@shared/utils';
 import type { Comment, AddCommentRequest } from '../types';
 import type { FeedStackParamList } from '@shared/types';
@@ -25,6 +30,7 @@ type CommentsNavigationProp = NativeStackNavigationProp<FeedStackParamList, 'Com
 export const CommentsScreen: React.FC = () => {
   const colors = useColors();
   const toast = useToast();
+  const { trigger } = useHaptic();
   const { triggerContent, triggerSystem } = useSemanticHaptic();
   const navigation = useNavigation<CommentsNavigationProp>();
   const route = useRoute<CommentsRouteProp>();
@@ -114,10 +120,10 @@ export const CommentsScreen: React.FC = () => {
     triggerSystem('confirm');
     deleteComment.mutate(selectedComment.id, {
       onSuccess: () => {
-        showSuccess(toast, { trigger: triggerSystem }, 'Yorum silindi');
+        showSuccess(toast, { trigger }, 'Yorum silindi');
       },
       onError: () => {
-        showError(toast, { trigger: triggerSystem }, 'Yorum silinemedi');
+        showError(toast, { trigger }, 'Yorum silinemedi');
       },
     });
     setShowDeleteConfirm(false);
@@ -149,7 +155,7 @@ export const CommentsScreen: React.FC = () => {
         label: 'Yorumu Şikayet Et',
         icon: 'flag-outline',
         onPress: () => {
-          showSuccess(toast, { trigger: triggerSystem }, 'Yorum şikayet edildi');
+          showSuccess(toast, { trigger }, 'Yorum şikayet edildi');
           setShowActionSheet(false);
         },
       });
@@ -214,9 +220,9 @@ export const CommentsScreen: React.FC = () => {
   if (isLoading && comments.length === 0) {
     return (
       <SafeAreaView
-        style={[styles.loadingContainer, { backgroundColor: colors.background.primary }]}
+        style={[styles.container, { backgroundColor: colors.background.primary }]}
         edges={['bottom']}>
-        <ActivityIndicator size="large" color={colors.interactive.default} />
+        <UnifiedLoadingState strategy="spinner" message="Yorumlar yükleniyor..." variant="screen" />
       </SafeAreaView>
     );
   }
@@ -265,11 +271,13 @@ export const CommentsScreen: React.FC = () => {
         message="Bu yorumu silmek istediğinize emin misiniz?"
         options={[
           {
+            id: 'delete',
             label: 'Sil',
             destructive: true,
             onPress: handleDeleteConfirm,
           },
           {
+            id: 'cancel',
             label: 'İptal',
             onPress: () => setShowDeleteConfirm(false),
           },
