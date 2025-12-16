@@ -221,13 +221,7 @@ export const UnifiedScreenHeader = memo<UnifiedScreenHeaderProps>(
               <Icon name="notifications-outline" size={24} color={colors.text.primary} />
               {feedProps.unreadCount > 0 && (
                 <View style={styles.badgeContainer}>
-                  <Badge
-                    count={feedProps.unreadCount}
-                    variant="error"
-                    size="md"
-                    pulse
-                    animated
-                  />
+                  <Badge count={feedProps.unreadCount} variant="error" size="md" pulse animated />
                 </View>
               )}
             </Pressable>

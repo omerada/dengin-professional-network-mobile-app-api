@@ -239,13 +239,10 @@ export const ChatScreen: React.FC = () => {
     [triggerContent],
   );
 
-  const handleDeleteMessage = useCallback(
-    (message: Message) => {
-      setMessageToDelete(message);
-      setShowDeleteConfirm(true);
-    },
-    [],
-  );
+  const handleDeleteMessage = useCallback((message: Message) => {
+    setMessageToDelete(message);
+    setShowDeleteConfirm(true);
+  }, []);
 
   const executeDeleteMessage = useCallback(async () => {
     if (!messageToDelete) return;
@@ -264,13 +261,10 @@ export const ChatScreen: React.FC = () => {
     }
   }, [messageToDelete, conversationId, refetch, triggerSystem, toast]);
 
-  const handleReportMessage = useCallback(
-    (message: Message) => {
-      setMessageToReport(message);
-      setShowReportConfirm(true);
-    },
-    [],
-  );
+  const handleReportMessage = useCallback((message: Message) => {
+    setMessageToReport(message);
+    setShowReportConfirm(true);
+  }, []);
 
   const executeReportMessage = useCallback(() => {
     if (!messageToReport) return;
