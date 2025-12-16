@@ -10,6 +10,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
 import { SCREEN_ANIMATIONS } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
+import { useLoadingTimeout } from '@shared/hooks';
 import {
   UnifiedLoadingState,
   UnifiedEmptyState,
@@ -34,6 +36,7 @@ type ContentStyle = StyleProp<ViewStyle>;
  */
 export const FollowingListScreen: React.FC = () => {
   const colors = useColors();
+  const toast = useToast();
   const route = useRoute();
   const { userId } = route.params as { userId: number };
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,6 +47,17 @@ export const FollowingListScreen: React.FC = () => {
   const users = useMemo(() => {
     return data?.pages.flatMap(page => page.content) || [];
   }, [data]);
+
+  // Loading timeout protection
+  useLoadingTimeout(isLoading && users.length === 0, {
+    timeout: 30000,
+    onTimeout: () => {
+      toast.error('Takip edilenler yüklenirken zaman aşımı. Lütfen tekrar deneyin.');
+    },
+    onRetry: async () => {
+      await refetch();
+    },
+  });
 
   // Filter users by search query
   const filteredUsers = useMemo(() => {

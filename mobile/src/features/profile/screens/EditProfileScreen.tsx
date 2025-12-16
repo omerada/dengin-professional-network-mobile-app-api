@@ -22,11 +22,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { useSemanticHaptic, useHaptic } from '@shared/hooks';
+import { useSemanticHaptic, useHaptic, useSuccessCelebration } from '@shared/hooks';
 import { showSuccess, showProfileUpdateError, showValidationError } from '@shared/utils';
 import { useProfessions } from '@shared/hooks/useProfessions';
 import { useSectors } from '@shared/hooks/useSectors';
-import { Button, Input, BottomSheet } from '@shared/components';
+import { Button, Input, BottomSheet, UnifiedEmptyState } from '@shared/components';
 import { spacing, fontSize } from '@theme';
 import { AvatarPicker } from '../components';
 import {
@@ -63,6 +63,7 @@ export const EditProfileScreen: React.FC = () => {
   const navigation = useNavigation();
   const { trigger } = useHaptic();
   const { triggerForm, triggerSystem } = useSemanticHaptic();
+  const { celebrate } = useSuccessCelebration();
 
   // Fetch current profile
   const { data: profile, isLoading: _isLoadingProfile, refetch } = useMyProfile();
@@ -226,6 +227,13 @@ export const EditProfileScreen: React.FC = () => {
 
       // Success - Show toast with haptic
       showSuccess(toast, { trigger }, 'Profil güncellendi');
+
+      // P2.3: Celebration animation for profile update
+      celebrate({
+        message: 'Profil güncellendi!',
+        duration: 1500,
+        enableHaptic: false, // Already triggered success haptic above
+      });
 
       // Clear pending states
       setPendingAvatarUri(null);
@@ -604,20 +612,21 @@ export const EditProfileScreen: React.FC = () => {
               </TouchableOpacity>
             )}
             ListEmptyComponent={
-              <View style={styles.emptyState}>
-                <Text style={[styles.emptyStateText, { color: colors.text.secondary }]}>
-                  {isLoadingProfessions
+              <UnifiedEmptyState
+                icon="briefcase"
+                title={
+                  isLoadingProfessions
                     ? 'Meslekler yükleniyor...'
                     : selectedSector
                       ? `${selectedSector.name} alanında meslek bulunamadı`
-                      : 'Meslek bulunamadı'}
-                </Text>
-                {!selectedSector && !isLoadingProfessions && (
-                  <Text style={[styles.emptyStateHint, { color: colors.text.tertiary }]}>
-                    Önce bir çalışma alanı seçin
-                  </Text>
-                )}
-              </View>
+                      : 'Meslek bulunamadı'
+                }
+                description={
+                  !selectedSector && !isLoadingProfessions
+                    ? 'Önce bir çalışma alanı seçin'
+                    : undefined
+                }
+              />
             }
             contentContainerStyle={styles.professionList}
           />
@@ -657,11 +666,12 @@ export const EditProfileScreen: React.FC = () => {
               </TouchableOpacity>
             )}
             ListEmptyComponent={
-              <View style={styles.emptyState}>
-                <Text style={[styles.emptyStateText, { color: colors.text.secondary }]}>
-                  {isLoadingSectors ? 'Çalışma alanları yükleniyor...' : 'Çalışma alanı bulunamadı'}
-                </Text>
-              </View>
+              <UnifiedEmptyState
+                icon="book-open"
+                title={
+                  isLoadingSectors ? 'Çalışma alanları yükleniyor...' : 'Çalışma alanı bulunamadı'
+                }
+              />
             }
             contentContainerStyle={styles.professionList}
           />
@@ -910,19 +920,6 @@ const styles = StyleSheet.create({
   professionItemCategory: {
     fontSize: fontSize.sm,
     marginTop: spacing.xs,
-  },
-  emptyState: {
-    paddingVertical: spacing.xl * 2,
-    alignItems: 'center',
-  },
-  emptyStateText: {
-    fontSize: fontSize.md,
-    textAlign: 'center',
-  },
-  emptyStateHint: {
-    fontSize: fontSize.sm,
-    marginTop: spacing.sm,
-    textAlign: 'center',
   },
   sectorInfoBanner: {
     paddingVertical: spacing.sm,

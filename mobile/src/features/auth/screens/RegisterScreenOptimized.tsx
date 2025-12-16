@@ -21,6 +21,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
+import { useSemanticHaptic } from '@shared/hooks';
 import { Button, Input, UnifiedScreenHeader } from '@shared/components';
 import { SectorSelector, ProfessionSelector } from '../components';
 import { useRegister } from '../hooks';
@@ -79,6 +80,7 @@ enum Step {
 export const RegisterScreenOptimized: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation<AuthStackNavigationProp>();
+  const { triggerSystem, triggerNavigation } = useSemanticHaptic();
   const { register, isLoading, error, isError } = useRegister();
   const { data: sectors } = useSectors();
 
@@ -116,21 +118,24 @@ export const RegisterScreenOptimized: React.FC = () => {
   const handleNextStep = useCallback(async () => {
     const isValid = await trigger(['email', 'password', 'firstName', 'lastName']);
     if (isValid) {
+      triggerNavigation('navigate');
       setCurrentStep(Step.PROFESSIONAL);
     }
-  }, [trigger]);
+  }, [trigger, triggerNavigation]);
 
   /**
    * Final Submit (with professional info)
    */
   const onSubmit = useCallback(
     (data: RegisterOptimizedSchemaType) => {
+      triggerSystem('confirm');
       register(data);
     },
-    [register],
+    [register, triggerSystem],
   );
 
   const handleBack = useCallback(() => {
+    triggerNavigation('back');
     if (currentStep === Step.PROFESSIONAL) {
       setCurrentStep(Step.ESSENTIALS);
     } else {
@@ -141,15 +146,17 @@ export const RegisterScreenOptimized: React.FC = () => {
         navigation.navigate('Onboarding', { initialSlide: 2 });
       }
     }
-  }, [currentStep, navigation]);
+  }, [currentStep, navigation, triggerNavigation]);
 
   const handleTermsPress = useCallback(() => {
+    triggerNavigation('navigate');
     navigation.navigate('Terms');
-  }, [navigation]);
+  }, [navigation, triggerNavigation]);
 
   const handlePrivacyPress = useCallback(() => {
+    triggerNavigation('navigate');
     navigation.navigate('Privacy');
-  }, [navigation]);
+  }, [navigation, triggerNavigation]);
 
   return (
     <SafeAreaView

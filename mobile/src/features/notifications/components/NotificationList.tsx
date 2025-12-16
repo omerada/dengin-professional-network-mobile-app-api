@@ -12,7 +12,12 @@ import { useNotifications, useMarkAsRead, useDeleteNotification } from '../hooks
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import { useLoadingTimeout } from '@shared/hooks';
-import { AnimatedListItem, UnifiedLoadingState, CustomRefreshControl } from '@shared/components';
+import {
+  AnimatedListItem,
+  CustomRefreshControl,
+  SkeletonList,
+  SkeletonNotificationItem,
+} from '@shared/components';
 import { SCREEN_ANIMATIONS } from '@constants';
 import { spacing, fontSize } from '@theme';
 import { groupNotificationsByTime } from '../utils/groupNotifications';
@@ -178,9 +183,9 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
       return <EmptyNotifications />;
     }, [isLoading]);
 
-    // Loading state - show unified skeleton
+    // Loading state - content-aware skeleton
     if (isLoading) {
-      return <UnifiedLoadingState strategy="skeleton" variant="screen" />;
+      return <SkeletonList count={10} ItemSkeleton={SkeletonNotificationItem} />;
     }
 
     return (

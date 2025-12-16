@@ -15,6 +15,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import { SCREEN_ANIMATIONS } from '@constants/animationPresets';
 
 import { useColors } from '@contexts/ThemeContext';
+import { typography } from '@theme';
 import { useSemanticHaptic } from '@shared/hooks';
 import { asyncStorage } from '@core/storage/asyncStorage';
 import { STORAGE_KEYS } from '@core/storage/keys';
@@ -268,12 +269,10 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   ctaButtonOutlineText: {
-    fontSize: 17,
-    fontWeight: '600',
+    ...typography.button,
   },
   ctaButtonText: {
-    fontSize: 17,
-    fontWeight: '600',
+    ...typography.button,
     marginRight: 8,
   },
   ctaIcon: {
@@ -312,8 +311,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   skipText: {
-    fontSize: 15,
-    fontWeight: '500',
+    ...typography.button,
   },
   slide: {
     alignItems: 'center',
@@ -321,14 +319,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   slideDescription: {
-    fontSize: 15,
-    fontWeight: '400',
+    ...typography.body1,
     lineHeight: 22,
     textAlign: 'center',
   },
   slideTitle: {
-    fontSize: 26,
-    fontWeight: '700',
+    ...typography.h4,
     letterSpacing: -0.5,
     marginBottom: 16,
     textAlign: 'center',

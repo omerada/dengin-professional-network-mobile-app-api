@@ -3,7 +3,7 @@
 // Oku: UX-FLOW-IYILESTIRME-RAPORU.md Phase 1
 
 import { StyleSheet } from 'react-native';
-import { spacing, fontSize } from '@theme';
+import { spacing, typography } from '@theme';
 
 export const styles = StyleSheet.create({
   container: {
@@ -28,13 +28,11 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   logoText: {
-    fontSize: 36,
-    fontWeight: '700',
+    ...typography.h1,
     letterSpacing: 1,
   },
   slogan: {
-    fontSize: 15,
-    fontWeight: '500',
+    ...typography.body1,
     marginTop: spacing.sm,
     textAlign: 'center',
   },
@@ -74,8 +72,7 @@ export const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   socialTitle: {
-    fontSize: 15,
-    fontWeight: '600',
+    ...typography.subtitle2,
     marginBottom: spacing.md,
     textAlign: 'center',
   },
@@ -92,8 +89,7 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
   },
   socialButtonLargeText: {
-    fontSize: fontSize.base,
-    fontWeight: '600',
+    ...typography.button,
   },
 
   // Error Message
@@ -109,11 +105,11 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   errorText: {
-    fontSize: 14,
+    ...typography.body2,
     marginBottom: spacing.xs,
   },
   errorAction: {
-    fontSize: 14,
+    ...typography.body2,
     fontWeight: '600',
     textDecorationLine: 'underline',
   },

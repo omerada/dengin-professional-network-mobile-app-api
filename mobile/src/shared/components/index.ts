@@ -24,12 +24,12 @@ export { StepSuccess } from './StepSuccess';
 export type { StepSuccessProps } from './StepSuccess';
 
 // Unified Loading State System - PRODUCTION STANDARD
-export { UnifiedLoadingState } from './LoadingState/UnifiedLoadingState';
+export { UnifiedLoadingState } from './Loading/UnifiedLoadingState';
 export type {
   UnifiedLoadingStateProps,
   LoadingStrategy,
   LoadingVariant,
-} from './LoadingState/UnifiedLoadingState';
+} from './Loading/UnifiedLoadingState';
 
 // Skeleton Components
 // TODO: Implement these skeleton components

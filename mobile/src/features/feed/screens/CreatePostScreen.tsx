@@ -21,7 +21,7 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { useSemanticHaptic, useHaptic } from '@shared/hooks';
+import { useSemanticHaptic, useHaptic, useSuccessCelebration } from '@shared/hooks';
 import { spacing } from '@theme';
 import { useFeedStore } from '../stores';
 import { useCreatePost } from '../hooks';
@@ -54,6 +54,7 @@ export const CreatePostScreen: React.FC = () => {
   const navigation = useNavigation();
   const { trigger } = useHaptic();
   const { triggerContent, triggerSystem, triggerMedia } = useSemanticHaptic();
+  const { celebrate } = useSuccessCelebration();
 
   // Auth state - needed for professionId
   const user = useAuthStore(state => state.user);
@@ -120,6 +121,12 @@ export const CreatePostScreen: React.FC = () => {
           triggerSystem('success'); // Success haptic feedback
           clearDraft();
           setShowSuccess(true);
+          // P2.3: Celebration animation for post creation
+          celebrate({
+            message: 'Gönderi yayınlandı!',
+            duration: 2000,
+            enableHaptic: false, // Already triggered success haptic above
+          });
         },
         onError: () => {
           triggerSystem('error'); // Error haptic feedback

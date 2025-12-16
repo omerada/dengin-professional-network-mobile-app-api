@@ -22,7 +22,12 @@ import {
   useLikeComment,
   useDeletePost,
 } from '../hooks';
-import { ActionSheet, ActionSheetOption, UnifiedLoadingState } from '@shared/components';
+import {
+  ActionSheet,
+  ActionSheetOption,
+  UnifiedLoadingState,
+  UnifiedEmptyState,
+} from '@shared/components';
 import { sharePost, showSuccess, showError, showInfo } from '@shared/utils';
 import {
   PostHeader,
@@ -32,7 +37,6 @@ import {
   CommentCard,
   CommentListSkeleton,
   AddCommentForm,
-  EmptyFeed,
 } from '../components';
 import type { FeedStackParamList } from '@shared/types';
 import type { Comment } from '../types';
@@ -280,10 +284,10 @@ export const PostDetailScreen: React.FC = () => {
           {commentsLoading ? (
             <CommentListSkeleton count={3} />
           ) : comments.length === 0 ? (
-            <EmptyFeed
-              title="Henüz yorum yok"
-              message="İlk yorumu siz yapın!"
+            <UnifiedEmptyState
               icon="chatbubble-outline"
+              title="Henüz yorum yok"
+              description="İlk yorumu siz yapın!"
             />
           ) : (
             comments.map((comment: Comment) => (
@@ -344,21 +348,12 @@ const styles = StyleSheet.create({
   commentsContainer: {
     paddingBottom: 16,
   },
-  commentsLoading: {
-    alignItems: 'center',
-    padding: 24,
-  },
   container: {
     flex: 1,
   },
   divider: {
     height: 8,
     marginVertical: 8,
-  },
-  loadingContainer: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
   },
   postContainer: {
     paddingTop: spacing.md, // 12

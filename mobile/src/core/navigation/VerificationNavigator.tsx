@@ -81,6 +81,7 @@ export const VerificationNavigator: React.FC = () => {
         name="VerificationStatus"
         component={UploadStatusScreen}
         options={{
+          ...UNIFIED_NAVIGATION.SCREEN,
           title: 'Doğrulama Durumu',
           headerBackVisible: false,
           gestureEnabled: false,

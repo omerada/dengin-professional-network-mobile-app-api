@@ -10,7 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
-import { SAFE_AREA_EDGES, SCREEN_ANIMATIONS } from '@constants';
+import { SAFE_AREA_EDGES, SCREEN_ANIMATIONS, NETWORK_CONFIG } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import { useSemanticHaptic, useLoadingTimeout, useHaptic } from '@shared/hooks';
@@ -111,7 +111,7 @@ export const ChatScreen: React.FC = () => {
 
   // Loading timeout protection
   useLoadingTimeout(isLoading && messages.length === 0, {
-    timeout: 30000,
+    timeout: NETWORK_CONFIG.TIMEOUT_DURATION,
     onTimeout: () => {
       toast.error('Mesajlar yüklenirken zaman aşımı oluştu. Lütfen tekrar deneyin.');
     },

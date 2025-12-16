@@ -13,11 +13,12 @@ import { useToast } from '@contexts/ToastContext';
 import { useSemanticHaptic, useHaptic } from '@shared/hooks';
 import { useAuthStore } from '@features/auth/stores';
 import { useCommentsData, useAddComment, useLikeComment, useDeleteComment } from '../hooks';
-import { CommentCard, AddCommentForm, EmptyFeed } from '../components';
+import { CommentCard, AddCommentForm } from '../components';
 import {
   ActionSheet,
   ActionSheetOption,
   CustomRefreshControl,
+  UnifiedEmptyState,
   UnifiedLoadingState,
 } from '@shared/components';
 import { showSuccess, showError } from '@shared/utils';
@@ -194,10 +195,10 @@ export const CommentsScreen: React.FC = () => {
     if (isLoading) return null;
 
     return (
-      <EmptyFeed
-        title="Henüz yorum yok"
-        message="Bu gönderiye ilk yorumu siz yapın!"
+      <UnifiedEmptyState
         icon="chatbubble-outline"
+        title="Henüz yorum yok"
+        description="Bu gönderiye ilk yorumu siz yapın!"
       />
     );
   }, [isLoading]);
@@ -294,11 +295,6 @@ const styles = StyleSheet.create({
   footer: {
     alignItems: 'center',
     paddingVertical: 20,
-  },
-  loadingContainer: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
   },
 });
 

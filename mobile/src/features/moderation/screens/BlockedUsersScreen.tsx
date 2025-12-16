@@ -5,6 +5,8 @@
 import React, { useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated from 'react-native-reanimated';
+import { SCREEN_ANIMATIONS } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import {
@@ -56,23 +58,25 @@ export const BlockedUsersScreen: React.FC = () => {
   );
 
   const renderItem = useCallback(
-    ({ item }: { item: BlockedUser }) => (
-      <View style={[styles.item, { backgroundColor: colors.background.primary }]}>
-        <Avatar uri={item.avatarUrl} name={item.fullName} size="lg" />
-        <View style={styles.info}>
-          <Text style={[styles.name, { color: colors.text.primary }]}>{item.fullName}</Text>
-          <Text style={[styles.date, { color: colors.text.secondary }]}>
-            {new Date(item.blockedAt).toLocaleDateString('tr-TR')}
-          </Text>
+    ({ item, index }: { item: BlockedUser; index: number }) => (
+      <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(index)}>
+        <View style={[styles.item, { backgroundColor: colors.background.primary }]}>
+          <Avatar uri={item.avatarUrl} name={item.fullName} size="lg" />
+          <View style={styles.info}>
+            <Text style={[styles.name, { color: colors.text.primary }]}>{item.fullName}</Text>
+            <Text style={[styles.date, { color: colors.text.secondary }]}>
+              {new Date(item.blockedAt).toLocaleDateString('tr-TR')}
+            </Text>
+          </View>
+          <Button
+            title="Engeli Kaldır"
+            variant="outline"
+            size="sm"
+            onPress={() => handleUnblock(item)}
+            loading={unblock.isPending}
+          />
         </View>
-        <Button
-          title="Engeli Kaldır"
-          variant="outline"
-          size="sm"
-          onPress={() => handleUnblock(item)}
-          loading={unblock.isPending}
-        />
-      </View>
+      </Animated.View>
     ),
     [colors, handleUnblock, unblock.isPending],
   );

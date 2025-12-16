@@ -85,7 +85,11 @@ const FeedStack = createNativeStackNavigator<FeedStackParamList>();
 const FeedStackNavigator: React.FC = () => (
   <FeedStack.Navigator screenOptions={UNIFIED_NAVIGATION.SCREEN}>
     <FeedStack.Screen name="Feed" component={FeedScreen} />
-    <FeedStack.Screen name="PostDetail" component={PostDetailScreen} />
+    <FeedStack.Screen
+      name="PostDetail"
+      component={PostDetailScreen}
+      options={UNIFIED_NAVIGATION.MODAL}
+    />
     <FeedStack.Screen
       name="CreatePost"
       component={CreatePostScreen}

@@ -23,7 +23,7 @@ interface UnifiedEmptyStateProps {
   /** Title text */
   title: string;
   /** Description text */
-  description: string;
+  description?: string;
   /** Primary action button */
   primaryAction?: ActionConfig;
   /** Secondary action button */
@@ -87,7 +87,9 @@ export const UnifiedEmptyState: React.FC<UnifiedEmptyStateProps> = ({
       <Text style={[styles.title, { color: colors.text.primary }]}>{title}</Text>
 
       {/* Description */}
-      <Text style={[styles.description, { color: colors.text.secondary }]}>{description}</Text>
+      {description && (
+        <Text style={[styles.description, { color: colors.text.secondary }]}>{description}</Text>
+      )}
 
       {/* Actions */}
       {primaryAction && (

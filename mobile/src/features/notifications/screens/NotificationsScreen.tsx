@@ -5,11 +5,13 @@
 
 import React, { useCallback, useEffect, useState, memo } from 'react';
 import { View, StyleSheet, ActivityIndicator, InteractionManager } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SCREEN_ANIMATIONS } from '@constants';
 import { navigateToChat, navigateToPostDetail, navigateToUserProfile } from '@core/navigation';
 import { spacing } from '@theme';
 import { useColors } from '@contexts/ThemeContext';
@@ -192,85 +194,93 @@ export const NotificationsScreen: React.FC = memo(() => {
   }, [requestPermission]);
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background.primary }]}
-      edges={['top']}>
-      {/* Unified Header */}
-      <UnifiedScreenHeader
-        variant="default"
-        title="Bildirimler"
-        subtitle={unreadCount > 0 ? `${unreadCount} okunmamış` : undefined}
-        showBackButton={true}
-        onBackPress={handleBack}
-        rightElement={
-          <View style={styles.headerActions}>
-            {/* Mark All Read Button */}
-            {unreadCount > 0 && (
-              <View
-                style={[styles.iconButton, { backgroundColor: colors.interactive.default + '15' }]}>
-                {isMarkingAllAsRead ? (
-                  <ActivityIndicator size="small" color={colors.interactive.default} />
-                ) : (
-                  <Icon
-                    name="checkmark-done"
-                    size={20}
-                    color={colors.interactive.default}
-                    onPress={handleMarkAllAsRead}
-                  />
-                )}
+    <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={styles.wrapper}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background.primary }]}
+        edges={['top']}>
+        {/* Unified Header */}
+        <UnifiedScreenHeader
+          variant="default"
+          title="Bildirimler"
+          subtitle={unreadCount > 0 ? `${unreadCount} okunmamış` : undefined}
+          showBackButton={true}
+          onBackPress={handleBack}
+          rightElement={
+            <View style={styles.headerActions}>
+              {/* Mark All Read Button */}
+              {unreadCount > 0 && (
+                <View
+                  style={[
+                    styles.iconButton,
+                    { backgroundColor: colors.interactive.default + '15' },
+                  ]}>
+                  {isMarkingAllAsRead ? (
+                    <ActivityIndicator size="small" color={colors.interactive.default} />
+                  ) : (
+                    <Icon
+                      name="checkmark-done"
+                      size={20}
+                      color={colors.interactive.default}
+                      onPress={handleMarkAllAsRead}
+                    />
+                  )}
+                </View>
+              )}
+
+              {/* Settings Button */}
+              <View style={styles.iconButton}>
+                <Icon
+                  name="settings-outline"
+                  size={22}
+                  color={colors.text.primary}
+                  onPress={handleSettingsPress}
+                />
               </View>
-            )}
-
-            {/* Settings Button */}
-            <View style={styles.iconButton}>
-              <Icon
-                name="settings-outline"
-                size={22}
-                color={colors.text.primary}
-                onPress={handleSettingsPress}
-              />
             </View>
-          </View>
-        }
-      />
+          }
+        />
 
-      {/* Notification List */}
-      <NotificationList onNotificationPress={handleNotificationPress} />
+        {/* Notification List */}
+        <NotificationList onNotificationPress={handleNotificationPress} />
 
-      {/* Permission Prompt Modal */}
-      <PermissionPrompt
-        visible={showPermissionPrompt}
-        onRequestPermission={handleRequestPermission}
-        onDismiss={() => setShowPermissionPrompt(false)}
-        permissionDenied={!isPermissionGranted}
-      />
+        {/* Permission Prompt Modal */}
+        <PermissionPrompt
+          visible={showPermissionPrompt}
+          onRequestPermission={handleRequestPermission}
+          onDismiss={() => setShowPermissionPrompt(false)}
+          permissionDenied={!isPermissionGranted}
+        />
 
-      {/* Mark All Read Confirmation ActionSheet */}
-      <ActionSheet
-        visible={showMarkAllReadConfirm}
-        onClose={() => setShowMarkAllReadConfirm(false)}
-        title="Tümünü Okundu İşaretle"
-        message={`${unreadCount} okunmamış bildirim okundu olarak işaretlenecek.`}
-        options={[
-          {
-            id: 'mark-read',
-            label: 'Okundu İşaretle',
-            onPress: handleConfirmMarkAllRead,
-          },
-          {
-            id: 'cancel',
-            label: 'İptal',
-            onPress: () => setShowMarkAllReadConfirm(false),
-          },
-        ]}
-      />
-    </SafeAreaView>
+        {/* Mark All Read Confirmation ActionSheet */}
+        <ActionSheet
+          visible={showMarkAllReadConfirm}
+          onClose={() => setShowMarkAllReadConfirm(false)}
+          title="Tümünü Okundu İşaretle"
+          message={`${unreadCount} okunmamış bildirim okundu olarak işaretlenecek.`}
+          options={[
+            {
+              id: 'mark-read',
+              label: 'Okundu İşaretle',
+              onPress: handleConfirmMarkAllRead,
+            },
+            {
+              id: 'cancel',
+              label: 'İptal',
+              onPress: () => setShowMarkAllReadConfirm(false),
+            },
+          ]}
+        />
+      </SafeAreaView>
+    </Animated.View>
   );
 });
 
 NotificationsScreen.displayName = 'NotificationsScreen';
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+  },
   container: {
     flex: 1,
   },

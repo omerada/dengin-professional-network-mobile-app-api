@@ -84,14 +84,15 @@ const TabButton: React.FC<TabButtonProps> = memo(({ item, focused, onPress, onLo
     opacity: 0.8 + focusProgress.value * 0.2,
   }));
 
+  // FAB container style - always define hooks at top level
+  const fabContainerStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
   const iconColor = focused ? colors.interactive.default : colors.text.secondary;
 
   // Center FAB rendering (elevated button)
   if (isCenterFab) {
-    const fabContainerStyle = useAnimatedStyle(() => ({
-      transform: [{ scale: scale.value }],
-    }));
-
     return (
       <View style={styles.centerFabContainer}>
         <AnimatedPressable

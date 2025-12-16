@@ -16,9 +16,6 @@ export { DoubleTapLike } from './DoubleTapLike';
 export { FeedSkeleton, PostSkeleton } from './FeedSkeleton';
 export { CommentListSkeleton } from './CommentListSkeleton';
 
-// EmptyFeed modular structure
-export { EmptyFeed } from './EmptyFeed';
-
 // Other components
 export { CommentCard } from './CommentCard';
 export { AddCommentForm } from './AddCommentForm';

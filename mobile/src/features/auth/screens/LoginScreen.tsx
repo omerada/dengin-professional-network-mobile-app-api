@@ -22,6 +22,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useColors } from '@contexts/ThemeContext';
 import { useLocale } from '@contexts/LocaleContext';
+import { useSemanticHaptic } from '@shared/hooks';
 import { Button, Input, ShakeAnimation, UnifiedScreenHeader } from '@shared/components';
 import { SAFE_AREA_EDGES, SCREEN_ANIMATIONS } from '@constants';
 import { useLogin, useBiometricLogin } from '../hooks';
@@ -44,6 +45,7 @@ export const LoginScreen: React.FC = () => {
   const colors = useColors();
   const { t } = useLocale();
   const navigation = useNavigation<AuthStackNavigationProp>();
+  const { triggerSystem, triggerNavigation } = useSemanticHaptic();
 
   const lastLoginEmail = useAuthStore(state => state.lastLoginEmail);
   const { login, isLoading, error, isError, reset } = useLogin();
@@ -78,15 +80,17 @@ export const LoginScreen: React.FC = () => {
 
   const onSubmit = useCallback(
     (data: LoginSchemaType) => {
+      triggerSystem('confirm');
       reset();
       login(data);
     },
-    [login, reset],
+    [login, reset, triggerSystem],
   );
 
   const handleForgotPassword = useCallback(() => {
+    triggerNavigation('navigate');
     navigation.navigate('ForgotPassword');
-  }, [navigation]);
+  }, [navigation, triggerNavigation]);
 
   return (
     <SafeAreaView

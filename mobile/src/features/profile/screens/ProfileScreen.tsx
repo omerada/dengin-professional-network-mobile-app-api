@@ -9,7 +9,7 @@ import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { SCREEN_ANIMATIONS, SAFE_AREA_EDGES } from '@constants';
+import { SCREEN_ANIMATIONS, SAFE_AREA_EDGES, NETWORK_CONFIG } from '@constants';
 import { navigateToPostDetail, navigateToEditProfile, navigateToSettings } from '@core/navigation';
 import { useSemanticHaptic, useLoadingTimeout, useHaptic } from '@shared/hooks';
 
@@ -88,7 +88,7 @@ export const ProfileScreen: React.FC = memo(() => {
 
   // Loading timeout protection
   useLoadingTimeout(isLoading && !profile, {
-    timeout: 30000,
+    timeout: NETWORK_CONFIG.TIMEOUT_DURATION,
     onTimeout: () => {
       toast.error('Profil yüklenirken zaman aşımı oluştu. Lütfen tekrar deneyin.');
     },

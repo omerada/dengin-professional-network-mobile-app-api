@@ -8,7 +8,7 @@ import Animated from 'react-native-reanimated';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { SCREEN_ANIMATIONS } from '@constants';
+import { SCREEN_ANIMATIONS, NETWORK_CONFIG } from '@constants';
 import {
   navigateToComments,
   navigateToReportContent,
@@ -22,16 +22,18 @@ import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
 import { useSemanticHaptic, useLoadingTimeout, useHaptic } from '@shared/hooks';
 import { useFeedPosts, useLikePost, useBookmarkPost, useDeletePost } from '../hooks';
-import { PostCard, EmptyFeed, FeedSkeleton } from '../components';
+import { PostCard } from '../components';
 import { VerificationPromptCard } from '../components/VerificationPromptCard';
 import { AITrendInsightCard } from '../components/AITrendInsightCard';
 import { SuggestedExpertsCarousel } from '../components/SuggestedExpertsCarousel';
 import {
   ActionSheet,
   type ActionSheetOption,
-  UnifiedLoadingState,
+  UnifiedEmptyState,
   CustomRefreshControl,
   UnifiedScreenHeader,
+  SkeletonList,
+  SkeletonPostCard,
 } from '@shared/components';
 import {
   sharePost,
@@ -104,7 +106,7 @@ export const FeedScreen: React.FC = memo(() => {
 
   // Loading timeout protection
   const { hasTimedOut, retry } = useLoadingTimeout(isLoading && posts.length === 0, {
-    timeout: 30000,
+    timeout: NETWORK_CONFIG.TIMEOUT_DURATION,
     onTimeout: () => {
       Alert.alert(
         'Yükleme Zaman Aşımı',
@@ -517,11 +519,11 @@ export const FeedScreen: React.FC = memo(() => {
     // If timed out, show error state with retry
     if (hasTimedOut) {
       return (
-        <EmptyFeed
-          title="Yükleme Zaman Aşımı"
-          message="Gönderiler yüklenirken bir sorun oluştu. Lütfen tekrar deneyin."
+        <UnifiedEmptyState
           icon="alert-circle-outline"
-          action={{
+          title="Yükleme Zaman Aşımı"
+          description="Gönderiler yüklenirken bir sorun oluştu. Lütfen tekrar deneyin."
+          primaryAction={{
             label: 'Tekrar Dene',
             onPress: retry,
           }}
@@ -529,22 +531,16 @@ export const FeedScreen: React.FC = memo(() => {
       );
     }
 
-    // Unified loading state: skeleton → empty content
+    // Content-aware skeleton loading
     if (isLoading && posts.length === 0) {
-      return (
-        <UnifiedLoadingState
-          strategy="skeleton"
-          variant="list"
-          customSkeleton={<FeedSkeleton count={3} showImages />}
-        />
-      );
+      return <SkeletonList count={5} ItemSkeleton={SkeletonPostCard} />;
     }
 
     return (
-      <EmptyFeed
-        title="Henüz gönderi yok"
-        message="Takip ettiğin kişilerin gönderilerini burada göreceksin."
+      <UnifiedEmptyState
         icon="newspaper-outline"
+        title="Henüz gönderi yok"
+        description="Takip ettiğin kişilerin gönderilerini burada göreceksin."
       />
     );
   }, [isLoading, posts.length, hasTimedOut, retry]);
@@ -653,12 +649,6 @@ const styles = StyleSheet.create({
   footer: {
     alignItems: 'center',
     paddingVertical: 20,
-  },
-  skeletonContainer: {
-    flex: 1,
-  },
-  skeletonItem: {
-    marginBottom: 16,
   },
 });
 

@@ -6,6 +6,9 @@ import { StyleSheet } from 'react-native';
 import { spacing, typography, fontSize, borderRadius } from '@theme';
 
 export const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+  },
   container: {
     flex: 1,
   },
