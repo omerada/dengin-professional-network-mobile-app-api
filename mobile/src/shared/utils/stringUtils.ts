@@ -1,12 +1,12 @@
 // src/shared/utils/stringUtils.ts
-// Meslektaş Design System - String Utilities
+// Dengin Design System - String Utilities
 // Oku: mobile-development-guide/ui-ux-modernization/14-SPRINT-IMPLEMENTATION-PLAN.md
 
 /**
  * Truncate text with ellipsis
  *
  * @example
- * truncate('Meslektaş uygulaması', 10) // "Meslektaş…"
+ * truncate('Dengin uygulaması', 10) // "Dengin…"
  */
 export function truncate(text: string, maxLength: number, suffix: string = '…'): string {
   if (!text || text.length <= maxLength) {

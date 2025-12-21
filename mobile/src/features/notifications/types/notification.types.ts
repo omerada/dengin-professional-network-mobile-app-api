@@ -1,7 +1,7 @@
 // src/features/notifications/types/notification.types.ts
 // Notification type definitions - Backend DTO'larına %100 uyumlu
-// Backend: com.meslektas.notification.application.dto.*
-// Backend: com.meslektas.notification.domain.model.*
+// Backend: com.dengin.notification.application.dto.*
+// Backend: com.dengin.notification.domain.model.*
 
 // =============================================================================
 // ENUMS - Backend ile uyumlu

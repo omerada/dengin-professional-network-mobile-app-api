@@ -1,15 +1,15 @@
-package com.meslektas.moderation.domain.model;
+package com.dengin.moderation.domain.model;
 
-import com.meslektas.moderation.domain.event.ContentReportedEvent;
-import com.meslektas.moderation.domain.event.ContentReviewedEvent;
-import com.meslektas.moderation.domain.event.ContentRemovedEvent;
-import com.meslektas.moderation.domain.event.UserSanctionedEvent;
+import com.dengin.moderation.domain.event.ContentReportedEvent;
+import com.dengin.moderation.domain.event.ContentReviewedEvent;
+import com.dengin.moderation.domain.event.ContentRemovedEvent;
+import com.dengin.moderation.domain.event.UserSanctionedEvent;
+import com.dengin.moderation.domain.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;

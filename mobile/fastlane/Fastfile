@@ -8,15 +8,15 @@ platform :ios do
   desc "Push a new beta build to TestFlight"
   lane :beta do
     # Increment build number
-    increment_build_number(xcodeproj: "ios/MeslektasApp.xcodeproj")
+    increment_build_number(xcodeproj: "ios/DenginApp.xcodeproj")
     
     # Install pods
     cocoapods(podfile: "./ios/Podfile")
     
     # Build app
     build_app(
-      workspace: "ios/MeslektasApp.xcworkspace",
-      scheme: "MeslektasApp",
+      workspace: "ios/DenginApp.xcworkspace",
+      scheme: "DenginApp",
       export_method: "app-store",
       clean: true
     )
@@ -37,15 +37,15 @@ platform :ios do
   desc "Push a new release build to App Store"
   lane :release do
     # Increment build number
-    increment_build_number(xcodeproj: "ios/MeslektasApp.xcodeproj")
+    increment_build_number(xcodeproj: "ios/DenginApp.xcodeproj")
     
     # Install pods
     cocoapods(podfile: "./ios/Podfile")
     
     # Build app
     build_app(
-      workspace: "ios/MeslektasApp.xcworkspace",
-      scheme: "MeslektasApp",
+      workspace: "ios/DenginApp.xcworkspace",
+      scheme: "DenginApp",
       export_method: "app-store",
       clean: true
     )
@@ -77,7 +77,7 @@ platform :ios do
   desc "Take screenshots for App Store"
   lane :screenshots do
     capture_screenshots(
-      scheme: "MeslektasAppUITests",
+      scheme: "DenginAppUITests",
       devices: [
         "iPhone 15 Pro Max",
         "iPhone 15",
@@ -166,7 +166,7 @@ platform :android do
   desc "Take screenshots for Play Store"
   lane :screenshots do
     capture_android_screenshots(
-      app_package_name: "com.meslektas.app",
+      app_package_name: "com.dengin.app",
       app_apk_path: "android/app/build/outputs/apk/debug/app-debug.apk",
       tests_apk_path: "android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk",
       locales: ["tr-TR"],
@@ -202,7 +202,7 @@ lane :bump do |options|
   # Update iOS version
   increment_version_number(
     version_number: version,
-    xcodeproj: "ios/MeslektasApp.xcodeproj"
+    xcodeproj: "ios/DenginApp.xcodeproj"
   )
   
   # Update Android version

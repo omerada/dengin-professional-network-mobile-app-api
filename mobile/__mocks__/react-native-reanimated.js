@@ -10,7 +10,7 @@ const Reanimated = {
     cond: jest.fn(),
     interpolate: jest.fn(),
     View: require('react-native').View,
-    Extrapolate: { CLAMP: 'clamp' },
+    Extrapolation: { CLAMP: 'clamp' },
     Transition: {
       Together: 'together',
       Out: 'out',
@@ -59,7 +59,7 @@ const Reanimated = {
   runOnUI: jest.fn(fn => fn),
   interpolate: jest.fn(),
   interpolateColor: jest.fn(),
-  Extrapolate: { CLAMP: 'clamp', EXTEND: 'extend', IDENTITY: 'identity' },
+  Extrapolation: { CLAMP: 'clamp', EXTEND: 'extend', IDENTITY: 'identity' },
   createAnimatedComponent: component => component,
   View: require('react-native').View,
   Text: require('react-native').Text,

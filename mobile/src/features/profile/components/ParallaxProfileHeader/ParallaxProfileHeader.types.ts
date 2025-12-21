@@ -1,5 +1,5 @@
 // src/features/profile/components/ParallaxProfileHeader/ParallaxProfileHeader.types.ts
-// Meslektaş Design System - ParallaxProfileHeader Type Definitions
+// Dengin Design System - ParallaxProfileHeader Type Definitions
 // Oku: mobile-development-guide/ui-ux-modernization/10-PROFILE-EXPERIENCE.md
 
 import type { ViewStyle } from 'react-native';

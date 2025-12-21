@@ -1,5 +1,5 @@
 // src/shared/components/Chip/Chip.tsx
-// Meslektaş Design System - Chip/Tag Component
+// Dengin Design System - Chip/Tag Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback, useMemo } from 'react';
@@ -14,7 +14,7 @@ import Animated, {
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { spring } from '@theme/animations';
 
 // ============================================================================
@@ -132,7 +132,7 @@ export const Chip = memo<ChipProps>(function Chip({
   animated = true,
 }) {
   const colors = useColors();
-  const { trigger: triggerHaptic } = useHaptic();
+  const { triggerSystem } = useSemanticHaptic();
   const pressed = useSharedValue(0);
 
   const sizeConfig = SIZE_CONFIG[size];
@@ -185,8 +185,8 @@ export const Chip = memo<ChipProps>(function Chip({
 
   const handlePressIn = useCallback(() => {
     pressed.value = withSpring(1, spring.stiff);
-    triggerHaptic('selection');
-  }, [triggerHaptic, pressed]);
+    triggerSystem('confirm');
+  }, [triggerSystem, pressed]);
 
   const handlePressOut = useCallback(() => {
     pressed.value = withSpring(0, spring.stiff);
@@ -312,19 +312,10 @@ export const ChipGroup = memo<ChipGroupProps>(function ChipGroup({ children, spa
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     alignSelf: 'flex-start',
-  },
-  label: {
-    fontWeight: '500',
-  },
-  leftIcon: {
-    marginRight: 4,
-  },
-  rightIcon: {
-    marginLeft: 4,
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   deleteButton: {
     marginLeft: 4,
@@ -335,5 +326,14 @@ const styles = StyleSheet.create({
   group: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+  },
+  label: {
+    fontWeight: '500',
+  },
+  leftIcon: {
+    marginRight: 4,
+  },
+  rightIcon: {
+    marginLeft: 4,
   },
 });

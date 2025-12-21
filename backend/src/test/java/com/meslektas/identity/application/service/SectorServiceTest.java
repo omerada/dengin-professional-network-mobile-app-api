@@ -1,11 +1,12 @@
-package com.meslektas.identity.application.service;
+package com.dengin.identity.application.service;
 
-import com.meslektas.common.exception.ResourceNotFoundException;
-import com.meslektas.identity.application.dto.response.SectorResponse;
-import com.meslektas.identity.application.dto.response.SectorStatsResponse;
-import com.meslektas.identity.application.mapper.SectorMapper;
-import com.meslektas.identity.domain.model.Sector;
-import com.meslektas.identity.domain.repository.SectorRepository;
+import com.dengin.common.exception.ResourceNotFoundException;
+import com.dengin.identity.application.dto.response.SectorResponse;
+import com.dengin.identity.application.dto.response.SectorStatsResponse;
+import com.dengin.identity.application.mapper.SectorMapper;
+import com.dengin.identity.application.service.SectorService;
+import com.dengin.identity.domain.model.Sector;
+import com.dengin.identity.domain.repository.SectorRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

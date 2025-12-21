@@ -1,5 +1,5 @@
 // src/features/profile/screens/EditProfileScreen.tsx
-// Modern Edit Profile Screen - Clean, minimal UX design
+// Edit profile screen with form and avatar picker
 // Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
 // Backend: PUT /api/users/me, POST /api/users/me/avatar
 
@@ -8,18 +8,29 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
-  Pressable,
-  ActivityIndicator,
+  TouchableOpacity,
+  TextInput,
+  FlatList,
+  Dimensions,
 } from 'react-native';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
-import { Button, Input } from '@shared/components';
-import { spacing } from '@theme';
+import { useToast } from '@contexts/ToastContext';
+import { useSemanticHaptic, useHaptic, useSuccessCelebration } from '@shared/hooks';
+import { showSuccess, showProfileUpdateError, showValidationError } from '@shared/utils';
+import { useProfessions } from '@shared/hooks/useProfessions';
+import { useSectors } from '@shared/hooks/useSectors';
+import {
+  Button,
+  Input,
+  BottomSheet,
+  UnifiedEmptyState,
+  KeyboardAwareScreen,
+} from '@shared/components';
+import { spacing, fontSize } from '@theme';
 import { AvatarPicker } from '../components';
 import {
   useMyProfile,
@@ -27,7 +38,10 @@ import {
   useUploadAvatarWithPresignedUrl,
   useDeleteAvatar,
 } from '../hooks';
-import type { UpdateProfileRequest, Gender } from '../types';
+import { profileApi } from '../services';
+import { useAuthStore } from '@features/auth/stores';
+import type { UpdateProfileRequest, Gender, Profession } from '../types';
+import type { Sector } from '@shared/types/api.types';
 
 type GenderOption = { label: string; value: Gender };
 
@@ -38,22 +52,28 @@ const GENDER_OPTIONS: GenderOption[] = [
 ];
 
 /**
- * Modern EditProfileScreen
- * 
- * Özellikleri:
- * - Minimal, clean UI tasarım
- * - UX odaklı akış
- * - Sosyal medya standartlarında arayüz
- * - Kullanıcıyı yormayan, hızlı düzenleme deneyimi
- * - Net placeholder ve label kullanımı
- * - Belirgin ve erişilebilir aksiyon butonları
+ * EditProfileScreen
+ *
+ * Allows users to:
+ * - Update profile photo
+ * - Edit name, surname, bio
+ * - Update date of birth
+ * - Select gender
  */
 export const EditProfileScreen: React.FC = () => {
   const colors = useColors();
+  const toast = useToast();
   const navigation = useNavigation();
+  const { trigger } = useHaptic();
+  const { triggerForm, triggerSystem } = useSemanticHaptic();
+  const { celebrate } = useSuccessCelebration();
 
   // Fetch current profile
   const { data: profile, isLoading: _isLoadingProfile, refetch } = useMyProfile();
+
+  // Fetch professions and sectors
+  const { data: professions = [], isLoading: isLoadingProfessions } = useProfessions();
+  const { data: sectors = [], isLoading: isLoadingSectors } = useSectors();
 
   // Mutations
   const updateProfile = useUpdateProfile();
@@ -66,10 +86,26 @@ export const EditProfileScreen: React.FC = () => {
   const [bio, setBio] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [gender, setGender] = useState<Gender | null>(null);
-  
+  const [selectedProfession, setSelectedProfession] = useState<Profession | null>(null);
+  const [selectedSector, setSelectedSector] = useState<Sector | null>(null);
+
   // Avatar state - pending upload
   const [pendingAvatarUri, setPendingAvatarUri] = useState<string | null>(null);
   const [shouldDeleteAvatar, setShouldDeleteAvatar] = useState(false);
+
+  // Profession picker state
+  const [showProfessionPicker, setShowProfessionPicker] = useState(false);
+  const [professionSearchQuery, setProfessionSearchQuery] = useState('');
+
+  // Sector picker state
+  const [showSectorPicker, setShowSectorPicker] = useState(false);
+
+  // Gender picker state
+  const [showGenderPicker, setShowGenderPicker] = useState(false);
+
+  // Date picker state
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [tempDate, setTempDate] = useState({ day: '', month: '', year: '' });
 
   // Track changes for save button
   const [hasChanges, setHasChanges] = useState(false);
@@ -81,12 +117,15 @@ export const EditProfileScreen: React.FC = () => {
         avatarUrl: profile.avatarUrl,
         name: profile.name,
         surname: profile.surname,
+        profession: profile.profession,
       });
       setName(profile.name || '');
       setSurname(profile.surname || '');
       setBio(profile.bio || '');
       setDateOfBirth(profile.dateOfBirth || '');
       setGender(profile.gender || null);
+      setSelectedProfession(profile.profession || null);
+      setSelectedSector(profile.sector || null);
     }
   }, [profile]);
 
@@ -99,20 +138,30 @@ export const EditProfileScreen: React.FC = () => {
         bio !== (profile.bio || '') ||
         dateOfBirth !== (profile.dateOfBirth || '') ||
         gender !== (profile.gender || null) ||
+        selectedProfession?.id !== profile.profession?.id ||
+        selectedSector?.id !== profile.sector?.id ||
         pendingAvatarUri !== null ||
         shouldDeleteAvatar;
       setHasChanges(changed);
     }
-  }, [name, surname, bio, dateOfBirth, gender, profile, pendingAvatarUri, shouldDeleteAvatar]);
+  }, [
+    name,
+    surname,
+    bio,
+    dateOfBirth,
+    gender,
+    selectedProfession,
+    selectedSector,
+    profile,
+    pendingAvatarUri,
+    shouldDeleteAvatar,
+  ]);
 
   // Handle avatar selection (just set pending, don't upload yet)
-  const handleAvatarSelected = useCallback(
-    (uri: string) => {
-      setPendingAvatarUri(uri);
-      setShouldDeleteAvatar(false); // Cancel any pending delete
-    },
-    [],
-  );
+  const handleAvatarSelected = useCallback((uri: string) => {
+    setPendingAvatarUri(uri);
+    setShouldDeleteAvatar(false); // Cancel any pending delete
+  }, []);
 
   // Handle avatar removal (just mark for deletion, don't delete yet)
   const handleAvatarRemove = useCallback(() => {
@@ -126,11 +175,11 @@ export const EditProfileScreen: React.FC = () => {
 
     // Validation
     if (!name.trim()) {
-      Alert.alert('Hata', 'Ad alanı boş bırakılamaz.');
+      showValidationError(toast, 'Ad alanı boş bırakılamaz.', { trigger });
       return;
     }
     if (!surname.trim()) {
-      Alert.alert('Hata', 'Soyad alanı boş bırakılamaz.');
+      showValidationError(toast, 'Soyad alanı boş bırakılamaz.', { trigger });
       return;
     }
 
@@ -150,7 +199,12 @@ export const EditProfileScreen: React.FC = () => {
         });
       }
 
-      // Step 2: Update profile data if there are field changes
+      // Step 2: Handle profession change
+      if (selectedProfession && selectedProfession.id !== profile?.profession?.id) {
+        await profileApi.changeProfession({ professionId: selectedProfession.id });
+      }
+
+      // Step 3: Update profile data if there are field changes
       const updateData: UpdateProfileRequest = {};
       if (name !== profile?.name) updateData.name = name.trim();
       if (surname !== profile?.surname) updateData.surname = surname.trim();
@@ -162,20 +216,37 @@ export const EditProfileScreen: React.FC = () => {
         await updateProfile.mutateAsync(updateData);
       }
 
-      // Success
-      Alert.alert('Başarılı', 'Profiliniz güncellendi.', [
-        { text: 'Tamam', onPress: () => navigation.goBack() },
-      ]);
-      
+      // Step 4: Update authStore with latest profession and sector
+      const authStore = useAuthStore.getState();
+      if (authStore.user) {
+        authStore.setUser({
+          ...authStore.user,
+          name: name.trim(),
+          surname: surname.trim(),
+          profession: (selectedProfession || authStore.user.profession) as any,
+          sector: (selectedSector || authStore.user.sector) as any,
+        });
+      }
+
+      // Success - Show toast with haptic
+      showSuccess(toast, { trigger }, 'Profil güncellendi');
+
+      // P2.3: Celebration animation for profile update
+      celebrate({
+        message: 'Profil güncellendi!',
+        duration: 1500,
+        enableHaptic: false, // Already triggered success haptic above
+      });
+
       // Clear pending states
       setPendingAvatarUri(null);
       setShouldDeleteAvatar(false);
-      
-      // Refetch to update UI
+
+      // Refetch to update UI in background
       refetch();
     } catch (error: any) {
       console.error('[EditProfileScreen] Save error:', error);
-      Alert.alert('Hata', error.message || 'Profil güncellenirken bir hata oluştu.');
+      showProfileUpdateError(toast, { trigger }, () => handleSave());
     }
   }, [
     hasChanges,
@@ -184,6 +255,7 @@ export const EditProfileScreen: React.FC = () => {
     bio,
     dateOfBirth,
     gender,
+    selectedProfession,
     profile,
     updateProfile,
     navigation,
@@ -192,375 +264,699 @@ export const EditProfileScreen: React.FC = () => {
     deleteAvatar,
     uploadAvatar,
     refetch,
+    toast,
+    triggerSystem,
   ]);
 
-  // Gender selector
-  const handleGenderSelect = useCallback((selectedGender: Gender) => {
-    setGender(prev => (prev === selectedGender ? null : selectedGender));
+  // Date picker handlers
+  const handleOpenDatePicker = useCallback(() => {
+    triggerForm('input');
+    // Parse existing date if available
+    if (dateOfBirth) {
+      const parts = dateOfBirth.split('-');
+      if (parts.length === 3) {
+        setTempDate({ year: parts[0], month: parts[1], day: parts[2] });
+      }
+    }
+    setShowDatePicker(true);
+  }, [triggerForm, dateOfBirth]);
+
+  const handleCloseDatePicker = useCallback(() => {
+    setShowDatePicker(false);
   }, []);
 
-  const isLoading = updateProfile.isPending || isUploadingAvatar || deleteAvatar.isPending;
+  const handleDateConfirm = useCallback(() => {
+    if (tempDate.day && tempDate.month && tempDate.year) {
+      const formatted = `${tempDate.year}-${tempDate.month.padStart(2, '0')}-${tempDate.day.padStart(2, '0')}`;
+      setDateOfBirth(formatted);
+    }
+    handleCloseDatePicker();
+  }, [tempDate, handleCloseDatePicker]);
 
-  if (!profile) {
-    return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.interactive.default} />
-        </View>
-      </SafeAreaView>
-    );
-  }
+  // Gender picker handlers
+  const handleOpenGenderPicker = useCallback(() => {
+    triggerForm('input');
+    setShowGenderPicker(true);
+  }, [triggerForm]);
+
+  const handleCloseGenderPicker = useCallback(() => {
+    setShowGenderPicker(false);
+  }, []);
+
+  const handleGenderSelect = useCallback(
+    (selectedGender: Gender) => {
+      triggerForm('select');
+      setGender(selectedGender);
+      handleCloseGenderPicker();
+    },
+    [triggerForm, handleCloseGenderPicker],
+  );
+
+  // Sector picker handlers
+  const handleOpenSectorPicker = useCallback(() => {
+    triggerForm('input');
+    setShowSectorPicker(true);
+  }, [triggerForm]);
+
+  const handleCloseSectorPicker = useCallback(() => {
+    setShowSectorPicker(false);
+  }, []);
+
+  const handleSectorSelect = useCallback(
+    (sector: Sector) => {
+      triggerForm('select');
+      setSelectedSector(sector);
+      // Clear profession selection if sector changes
+      if (selectedSector?.id !== sector.id) {
+        setSelectedProfession(null);
+      }
+      handleCloseSectorPicker();
+    },
+    [triggerForm, handleCloseSectorPicker, selectedSector],
+  );
+
+  // Profession picker handlers
+  const handleOpenProfessionPicker = useCallback(() => {
+    triggerForm('input');
+    setShowProfessionPicker(true);
+  }, [triggerForm]);
+
+  const handleCloseProfessionPicker = useCallback(() => {
+    setShowProfessionPicker(false);
+    setProfessionSearchQuery('');
+  }, []);
+
+  const handleProfessionSelect = useCallback(
+    (profession: Profession) => {
+      triggerForm('select');
+      setSelectedProfession(profession);
+      handleCloseProfessionPicker();
+    },
+    [triggerForm, handleCloseProfessionPicker],
+  );
+
+  // Filter professions by selected sector AND search query
+  const filteredProfessions = professions.filter(profession => {
+    // First filter by sector category
+    const matchesSector = selectedSector ? profession.category === selectedSector.code : true;
+    // Then filter by search query
+    const matchesSearch = profession.name
+      .toLowerCase()
+      .includes(professionSearchQuery.toLowerCase());
+    return matchesSector && matchesSearch;
+  });
+
+  const isLoading = updateProfile.isPending || isUploadingAvatar || deleteAvatar.isPending;
 
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
-      edges={['bottom']}>
-      <KeyboardAvoidingView
-        style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled">
-          
-          {/* ==================== AVATAR SECTION ==================== */}
-          <View style={styles.avatarSection}>
-            <AvatarPicker
-              currentAvatarUrl={pendingAvatarUri || (shouldDeleteAvatar ? null : profile?.avatarUrl ?? null)}
-              fullName={profile?.fullName || 'Kullanıcı'}
-              onImageSelected={handleAvatarSelected}
-              onRemove={(profile?.avatarUrl || pendingAvatarUri) && !shouldDeleteAvatar ? handleAvatarRemove : undefined}
-              isLoading={false}
-            />
-            <Text style={[styles.avatarHelper, { color: colors.text.tertiary }]}>
-              Profil fotoğrafınızı değiştirmek için tıklayın
-            </Text>
-          </View>
+      edges={['top', 'bottom']}>
+      <KeyboardAwareScreen
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
+        {/* Avatar Picker */}
+        <AvatarPicker
+          currentAvatarUrl={
+            pendingAvatarUri || (shouldDeleteAvatar ? null : (profile?.avatarUrl ?? null))
+          }
+          fullName={profile?.fullName || 'Kullanıcı'}
+          onImageSelected={handleAvatarSelected}
+          onRemove={
+            (profile?.avatarUrl || pendingAvatarUri) && !shouldDeleteAvatar
+              ? handleAvatarRemove
+              : undefined
+          }
+          isLoading={false}
+        />
 
-          {/* ==================== FORM FIELDS ==================== */}
-          <View style={styles.formContainer}>
-            {/* Ad Soyad - Split Row for Better UX */}
-            <View style={styles.nameRow}>
-              <View style={styles.nameField}>
-                <Text style={[styles.label, { color: colors.text.secondary }]}>
-                  Ad <Text style={{ color: colors.status.error }}>*</Text>
-                </Text>
-                <Input
-                  value={name}
-                  onChangeText={setName}
-                  placeholder="Adınız"
-                  autoCapitalize="words"
-                  maxLength={50}
-                  containerStyle={styles.inputContainer}
-                />
-              </View>
-              
-              <View style={styles.nameField}>
-                <Text style={[styles.label, { color: colors.text.secondary }]}>
-                  Soyad <Text style={{ color: colors.status.error }}>*</Text>
-                </Text>
-                <Input
-                  value={surname}
-                  onChangeText={setSurname}
-                  placeholder="Soyadınız"
-                  autoCapitalize="words"
-                  maxLength={50}
-                  containerStyle={styles.inputContainer}
-                />
-              </View>
-            </View>
+        {/* Form Fields */}
+        <View style={styles.form}>
+          <Input
+            label="Ad"
+            value={name}
+            onChangeText={setName}
+            placeholder="Adınızı girin"
+            autoCapitalize="words"
+            maxLength={50}
+          />
 
-            {/* Hakkımda */}
-            <View style={styles.fieldWrapper}>
-              <Text style={[styles.label, { color: colors.text.secondary }]}>
-                Hakkımda
-              </Text>
-              <Input
-                value={bio}
-                onChangeText={setBio}
-                placeholder="Kendinizi kısaca tanıtın..."
-                multiline
-                numberOfLines={4}
-                maxLength={500}
-                containerStyle={styles.inputContainer}
-              />
-              <Text style={[styles.charCounter, { color: colors.text.tertiary }]}>
-                {bio.length}/500
-              </Text>
-            </View>
+          <Input
+            label="Soyad"
+            value={surname}
+            onChangeText={setSurname}
+            placeholder="Soyadınızı girin"
+            autoCapitalize="words"
+            maxLength={50}
+          />
 
-            {/* Doğum Tarihi */}
-            <View style={styles.fieldWrapper}>
-              <Text style={[styles.label, { color: colors.text.secondary }]}>
-                Doğum Tarihi
-              </Text>
-              <Input
-                value={dateOfBirth}
-                onChangeText={setDateOfBirth}
-                placeholder="GG/AA/YYYY"
-                keyboardType="numbers-and-punctuation"
-                maxLength={10}
-                containerStyle={styles.inputContainer}
-              />
-              <Text style={[styles.helperText, { color: colors.text.tertiary }]}>
-                Örnek: 15/03/1990
-              </Text>
-            </View>
+          <Input
+            label="Hakkımda"
+            value={bio}
+            onChangeText={setBio}
+            placeholder="Kendinizi tanıtın..."
+            multiline
+            numberOfLines={4}
+            maxLength={500}
+          />
 
-            {/* Cinsiyet - Modern Selector */}
-            <View style={styles.fieldWrapper}>
-              <Text style={[styles.label, { color: colors.text.secondary }]}>
-                Cinsiyet
-              </Text>
-              <View style={styles.genderContainer}>
-                {GENDER_OPTIONS.map(option => {
-                  const isSelected = gender === option.value;
-                  return (
-                    <Pressable
-                      key={option.value}
-                      onPress={() => handleGenderSelect(option.value)}
-                      style={[
-                        styles.genderOption,
-                        {
-                          backgroundColor: isSelected 
-                            ? colors.interactive.default 
-                            : colors.background.secondary,
-                          borderColor: isSelected 
-                            ? colors.interactive.default 
-                            : colors.border.default,
-                        },
-                      ]}>
-                      <Text
-                        style={[
-                          styles.genderText,
-                          {
-                            color: isSelected 
-                              ? '#FFFFFF' 
-                              : colors.text.primary,
-                          },
-                        ]}>
-                        {option.label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </View>
-          </View>
-        </ScrollView>
-
-        {/* ==================== ACTION BUTTONS ==================== */}
-        <View style={[styles.actionBar, { 
-          borderTopColor: colors.border.subtle,
-          backgroundColor: colors.background.primary,
-        }]}>
-          <Pressable
-            onPress={() => navigation.goBack()}
-            disabled={isLoading}
-            style={[styles.cancelButton, { opacity: isLoading ? 0.5 : 1 }]}>
-            <Text style={[styles.cancelText, { color: colors.text.secondary }]}>
-              İptal
-            </Text>
-          </Pressable>
-
-          <Pressable
-            onPress={handleSave}
-            disabled={!hasChanges || isLoading}
-            style={[
-              styles.saveButton,
-              {
-                backgroundColor: hasChanges && !isLoading
-                  ? colors.interactive.default
-                  : colors.background.secondary,
-              },
-            ]}>
-            {isLoading ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
-            ) : (
+          {/* Date of Birth Selection */}
+          <View style={styles.selectorSection}>
+            <Text style={[styles.label, { color: colors.text.primary }]}>Doğum Tarihi</Text>
+            <TouchableOpacity
+              style={[
+                styles.selectorButton,
+                {
+                  backgroundColor: colors.background.secondary,
+                  borderColor: colors.border.default,
+                },
+              ]}
+              onPress={handleOpenDatePicker}>
               <Text
                 style={[
-                  styles.saveText,
+                  styles.selectorButtonText,
                   {
-                    color: hasChanges 
-                      ? '#FFFFFF' 
-                      : colors.text.tertiary,
+                    color: dateOfBirth ? colors.text.primary : colors.text.tertiary,
                   },
                 ]}>
-                Kaydet
+                {dateOfBirth || 'Doğum tarihi seçin'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Sector Selection */}
+          <View style={styles.selectorSection}>
+            <Text style={[styles.label, { color: colors.text.primary }]}>Çalışma Alanı</Text>
+            <TouchableOpacity
+              style={[
+                styles.selectorButton,
+                {
+                  backgroundColor: colors.background.secondary,
+                  borderColor: colors.border.default,
+                },
+              ]}
+              onPress={handleOpenSectorPicker}>
+              <Text
+                style={[
+                  styles.selectorButtonText,
+                  {
+                    color: selectedSector ? colors.text.primary : colors.text.tertiary,
+                  },
+                ]}>
+                {selectedSector ? selectedSector.name : 'Çalışma alanı seçin'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Profession Selection */}
+          <View style={styles.selectorSection}>
+            <Text style={[styles.label, { color: colors.text.primary }]}>Meslek</Text>
+            <TouchableOpacity
+              style={[
+                styles.selectorButton,
+                {
+                  backgroundColor: !selectedSector
+                    ? colors.background.tertiary
+                    : colors.background.secondary,
+                  borderColor: colors.border.default,
+                  opacity: !selectedSector ? 0.5 : 1,
+                },
+              ]}
+              onPress={handleOpenProfessionPicker}
+              disabled={!selectedSector}>
+              <Text
+                style={[
+                  styles.selectorButtonText,
+                  {
+                    color: selectedProfession ? colors.text.primary : colors.text.tertiary,
+                  },
+                ]}>
+                {selectedProfession ? selectedProfession.name : 'Meslek seçin'}
+              </Text>
+            </TouchableOpacity>
+            {!selectedSector && (
+              <Text style={[styles.helperText, { color: colors.text.tertiary }]}>
+                Önce çalışma alanı seçin
               </Text>
             )}
-          </Pressable>
+          </View>
+
+          {/* Gender Selection */}
+          <View style={styles.selectorSection}>
+            <Text style={[styles.label, { color: colors.text.primary }]}>Cinsiyet</Text>
+            <TouchableOpacity
+              style={[
+                styles.selectorButton,
+                {
+                  backgroundColor: colors.background.secondary,
+                  borderColor: colors.border.default,
+                },
+              ]}
+              onPress={handleOpenGenderPicker}>
+              <Text
+                style={[
+                  styles.selectorButtonText,
+                  {
+                    color: gender ? colors.text.primary : colors.text.tertiary,
+                  },
+                ]}>
+                {gender
+                  ? GENDER_OPTIONS.find(g => g.value === gender)?.label || 'Cinsiyet seçin'
+                  : 'Cinsiyet seçin'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </KeyboardAvoidingView>
+
+        {/* Save Button */}
+        <View style={[styles.footer, { borderTopColor: colors.border.default }]}>
+          <Button
+            title="Kaydet"
+            onPress={handleSave}
+            variant="primary"
+            size="lg"
+            fullWidth
+            loading={isLoading}
+            disabled={!hasChanges || isLoading}
+          />
+        </View>
+      </KeyboardAwareScreen>
+
+      {/* Profession Picker - P2 Optimized: BottomSheet */}
+      <BottomSheet
+        visible={showProfessionPicker}
+        onClose={handleCloseProfessionPicker}
+        title="Meslek Seç"
+        height={SCREEN_HEIGHT * 0.8}>
+        <View style={styles.bottomSheetContent}>
+          {/* Sector Info */}
+          {selectedSector && (
+            <View
+              style={[
+                styles.sectorInfoBanner,
+                {
+                  backgroundColor: colors.background.tertiary,
+                  borderBottomColor: colors.border.subtle,
+                },
+              ]}>
+              <Text style={[styles.sectorInfoText, { color: colors.text.secondary }]}>
+                {selectedSector.name} alanındaki meslekler gösteriliyor
+              </Text>
+            </View>
+          )}
+
+          {/* Search Input */}
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={[
+                styles.searchInput,
+                {
+                  backgroundColor: colors.background.secondary,
+                  color: colors.text.primary,
+                  borderColor: colors.border.default,
+                },
+              ]}
+              placeholder="Meslek ara..."
+              placeholderTextColor={colors.text.tertiary}
+              value={professionSearchQuery}
+              onChangeText={setProfessionSearchQuery}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </View>
+
+          {/* Profession List */}
+          <FlatList
+            data={filteredProfessions}
+            keyExtractor={item => item.id.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[
+                  styles.professionItem,
+                  {
+                    backgroundColor:
+                      selectedProfession?.id === item.id
+                        ? colors.background.tertiary
+                        : colors.background.primary,
+                  },
+                ]}
+                onPress={() => handleProfessionSelect(item)}>
+                <Text style={[styles.professionItemName, { color: colors.text.primary }]}>
+                  {item.name}
+                </Text>
+                <Text style={[styles.professionItemCategory, { color: colors.text.secondary }]}>
+                  {item.category}
+                </Text>
+              </TouchableOpacity>
+            )}
+            ListEmptyComponent={
+              <UnifiedEmptyState
+                icon="briefcase"
+                title={
+                  isLoadingProfessions
+                    ? 'Meslekler yükleniyor...'
+                    : selectedSector
+                      ? `${selectedSector.name} alanında meslek bulunamadı`
+                      : 'Meslek bulunamadı'
+                }
+                description={
+                  !selectedSector && !isLoadingProfessions
+                    ? 'Önce bir çalışma alanı seçin'
+                    : undefined
+                }
+              />
+            }
+            contentContainerStyle={styles.professionList}
+          />
+        </View>
+      </BottomSheet>
+
+      {/* Sector Picker - P2 Optimized: BottomSheet */}
+      <BottomSheet
+        visible={showSectorPicker}
+        onClose={handleCloseSectorPicker}
+        title="Çalışma Alanı Seç"
+        height={SCREEN_HEIGHT * 0.7}>
+        <View style={styles.bottomSheetContent}>
+          <FlatList
+            data={sectors}
+            keyExtractor={item => item.id.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[
+                  styles.listItem,
+                  {
+                    backgroundColor:
+                      selectedSector?.id === item.id
+                        ? colors.background.tertiary
+                        : colors.background.primary,
+                  },
+                ]}
+                onPress={() => handleSectorSelect(item)}>
+                <Text style={[styles.listItemName, { color: colors.text.primary }]}>
+                  {item.name}
+                </Text>
+                {item.description && (
+                  <Text style={[styles.listItemDescription, { color: colors.text.secondary }]}>
+                    {item.description}
+                  </Text>
+                )}
+              </TouchableOpacity>
+            )}
+            ListEmptyComponent={
+              <UnifiedEmptyState
+                icon="book-open"
+                title={
+                  isLoadingSectors ? 'Çalışma alanları yükleniyor...' : 'Çalışma alanı bulunamadı'
+                }
+              />
+            }
+            contentContainerStyle={styles.professionList}
+          />
+        </View>
+      </BottomSheet>
+
+      {/* Gender Picker - P2 Optimized: BottomSheet */}
+      <BottomSheet
+        visible={showGenderPicker}
+        onClose={handleCloseGenderPicker}
+        title="Cinsiyet Seç"
+        height={SCREEN_HEIGHT * 0.4}>
+        <View style={styles.bottomSheetContent}>
+          <FlatList
+            data={GENDER_OPTIONS}
+            keyExtractor={item => item.value}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[
+                  styles.listItem,
+                  {
+                    backgroundColor:
+                      gender === item.value
+                        ? colors.background.tertiary
+                        : colors.background.primary,
+                  },
+                ]}
+                onPress={() => handleGenderSelect(item.value)}>
+                <Text style={[styles.listItemName, { color: colors.text.primary }]}>
+                  {item.label}
+                </Text>
+              </TouchableOpacity>
+            )}
+            contentContainerStyle={styles.professionList}
+          />
+        </View>
+      </BottomSheet>
+
+      {/* Date Picker - P2 Optimized: BottomSheet */}
+      <BottomSheet
+        visible={showDatePicker}
+        onClose={handleCloseDatePicker}
+        title="Doğum Tarihi"
+        height={SCREEN_HEIGHT * 0.6}>
+        <View style={styles.bottomSheetContent}>
+          <View style={styles.datePickerContent}>
+            <View style={styles.datePickerRow}>
+              <View style={styles.datePickerItem}>
+                <Text style={[styles.datePickerLabel, { color: colors.text.secondary }]}>Gün</Text>
+                <TextInput
+                  style={[
+                    styles.datePickerInput,
+                    {
+                      backgroundColor: colors.background.secondary,
+                      color: colors.text.primary,
+                      borderColor: colors.border.default,
+                    },
+                  ]}
+                  value={tempDate.day}
+                  onChangeText={text => setTempDate(prev => ({ ...prev, day: text }))}
+                  placeholder="01"
+                  placeholderTextColor={colors.text.tertiary}
+                  keyboardType="number-pad"
+                  maxLength={2}
+                />
+              </View>
+
+              <View style={styles.datePickerItem}>
+                <Text style={[styles.datePickerLabel, { color: colors.text.secondary }]}>Ay</Text>
+                <TextInput
+                  style={[
+                    styles.datePickerInput,
+                    {
+                      backgroundColor: colors.background.secondary,
+                      color: colors.text.primary,
+                      borderColor: colors.border.default,
+                    },
+                  ]}
+                  value={tempDate.month}
+                  onChangeText={text => setTempDate(prev => ({ ...prev, month: text }))}
+                  placeholder="01"
+                  placeholderTextColor={colors.text.tertiary}
+                  keyboardType="number-pad"
+                  maxLength={2}
+                />
+              </View>
+
+              <View style={styles.datePickerItem}>
+                <Text style={[styles.datePickerLabel, { color: colors.text.secondary }]}>Yıl</Text>
+                <TextInput
+                  style={[
+                    styles.datePickerInput,
+                    {
+                      backgroundColor: colors.background.secondary,
+                      color: colors.text.primary,
+                      borderColor: colors.border.default,
+                    },
+                  ]}
+                  value={tempDate.year}
+                  onChangeText={text => setTempDate(prev => ({ ...prev, year: text }))}
+                  placeholder="1990"
+                  placeholderTextColor={colors.text.tertiary}
+                  keyboardType="number-pad"
+                  maxLength={4}
+                />
+              </View>
+            </View>
+
+            <View style={styles.datePickerFooter}>
+              <Button
+                title="Onayla"
+                onPress={handleDateConfirm}
+                variant="primary"
+                size="lg"
+                fullWidth
+                disabled={!tempDate.day || !tempDate.month || !tempDate.year}
+              />
+            </View>
+          </View>
+        </View>
+      </BottomSheet>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  // ========================================
-  // Container
-  // ========================================
+  // P2 Addition: BottomSheet content styling
+  bottomSheetContent: {
+    flex: 1,
+    paddingTop: spacing.sm,
+  },
   container: {
     flex: 1,
   },
-  loadingContainer: {
+  footer: {
+    borderTopWidth: 1,
+    padding: spacing.lg,
+  },
+  form: {
+    gap: spacing.md,
+  },
+  genderButton: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  },
+  genderOptions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  genderSection: {
+    marginTop: spacing.sm,
   },
   keyboardView: {
     flex: 1,
   },
+  label: {
+    fontSize: fontSize.sm,
+    fontWeight: '500',
+    marginBottom: spacing.sm,
+  },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 100, // Space for action bar
+    padding: spacing.lg,
   },
-
-  // ========================================
-  // Avatar Section
-  // ========================================
-  avatarSection: {
-    alignItems: 'center',
-    paddingTop: 24,
-    paddingBottom: 8,
-    paddingHorizontal: 20,
+  selectorSection: {
+    marginTop: spacing.sm,
   },
-  avatarHelper: {
-    fontSize: 13,
-    marginTop: 12,
-    textAlign: 'center',
-    lineHeight: 18,
+  selectorButton: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    minHeight: 48,
+    justifyContent: 'center',
   },
-
-  // ========================================
-  // Form Container
-  // ========================================
-  formContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 24,
+  selectorButtonText: {
+    fontSize: fontSize.md,
   },
-
-  // ========================================
-  // Name Row (Split Layout)
-  // ========================================
-  nameRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 24,
-  },
-  nameField: {
-    flex: 1,
-  },
-
-  // ========================================
-  // Field Wrapper
-  // ========================================
-  fieldWrapper: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
-    letterSpacing: 0.2,
-  },
-  inputContainer: {
-    marginBottom: 0, // Override default spacing
-  },
-  charCounter: {
-    fontSize: 12,
-    textAlign: 'right',
-    marginTop: 6,
+  professionCategory: {
+    fontSize: fontSize.xs,
+    marginTop: spacing.xs,
   },
   helperText: {
-    fontSize: 12,
-    marginTop: 6,
-    lineHeight: 16,
+    fontSize: fontSize.xs,
+    marginTop: spacing.xs,
+    fontStyle: 'italic',
   },
-
-  // ========================================
-  // Gender Selection (Modern Pills)
-  // ========================================
-  genderContainer: {
-    flexDirection: 'row',
-    gap: 10,
+  listItem: {
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    borderRadius: 8,
+    marginBottom: spacing.sm,
   },
-  genderOption: {
+  listItemName: {
+    fontSize: fontSize.md,
+    fontWeight: '500',
+  },
+  listItemDescription: {
+    fontSize: fontSize.sm,
+    marginTop: spacing.xs,
+  },
+  modalContainer: {
     flex: 1,
-    height: 44,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 16,
   },
-  genderText: {
-    fontSize: 15,
-    fontWeight: '600',
-    letterSpacing: 0.3,
-  },
-
-  // ========================================
-  // Action Bar (Bottom Fixed)
-  // ========================================
-  actionBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+  modalHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderTopWidth: 1,
-    gap: 12,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.05,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 8,
-      },
-    }),
-  },
-  cancelButton: {
-    height: 48,
-    paddingHorizontal: 24,
     alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 12,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
   },
-  cancelText: {
-    fontSize: 16,
+  modalTitle: {
+    fontSize: fontSize.xl,
     fontWeight: '600',
-    letterSpacing: 0.3,
   },
-  saveButton: {
+  modalCloseButton: {
+    padding: spacing.sm,
+  },
+  modalCloseText: {
+    fontSize: fontSize.md,
+  },
+  searchContainer: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    fontSize: fontSize.md,
+  },
+  professionList: {
+    paddingHorizontal: spacing.lg,
+  },
+  professionItem: {
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    borderRadius: 8,
+    marginBottom: spacing.sm,
+  },
+  professionItemName: {
+    fontSize: fontSize.md,
+    fontWeight: '500',
+  },
+  professionItemCategory: {
+    fontSize: fontSize.sm,
+    marginTop: spacing.xs,
+  },
+  sectorInfoBanner: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    borderBottomWidth: 1,
+  },
+  sectorInfoText: {
+    fontSize: fontSize.sm,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  datePickerContent: {
     flex: 1,
-    height: 48,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xl,
   },
-  saveText: {
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.5,
+  datePickerRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  datePickerItem: {
+    flex: 1,
+  },
+  datePickerLabel: {
+    fontSize: fontSize.sm,
+    fontWeight: '500',
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  datePickerInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    fontSize: fontSize.lg,
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+  datePickerFooter: {
+    marginTop: spacing.xl * 2,
   },
 });

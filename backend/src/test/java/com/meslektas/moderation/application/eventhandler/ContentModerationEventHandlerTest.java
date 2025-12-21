@@ -1,14 +1,13 @@
-package com.meslektas.moderation.application.eventhandler;
+package com.dengin.moderation.application.eventhandler;
 
-import com.meslektas.moderation.application.service.ReportContentService;
-import com.meslektas.moderation.domain.model.ModerationScore;
-import com.meslektas.moderation.domain.model.ReportReason;
-import com.meslektas.moderation.domain.model.ReportType;
-import com.meslektas.moderation.domain.model.RiskLevel;
-import com.meslektas.moderation.domain.service.AutomatedModerationService;
-import com.meslektas.social.domain.model.PostCreatedEvent;
-import com.meslektas.social.domain.model.PostId;
-import org.junit.jupiter.api.BeforeEach;
+import com.dengin.moderation.application.eventhandler.ContentModerationEventHandler;
+import com.dengin.moderation.application.service.ReportContentService;
+import com.dengin.moderation.domain.model.ModerationScore;
+import com.dengin.moderation.domain.model.ReportReason;
+import com.dengin.moderation.domain.model.ReportType;
+import com.dengin.moderation.domain.service.AutomatedModerationService;
+import com.dengin.social.domain.model.PostCreatedEvent;
+import com.dengin.social.domain.model.PostId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

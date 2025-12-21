@@ -36,8 +36,8 @@ describe('Navigation Linking', () => {
   });
 
   describe('URL Handling', () => {
-    it('meslektas:// scheme desteklenmeli', () => {
-      expect(linkingConfig.prefixes).toContain('meslektas://');
+    it('dengin:// scheme desteklenmeli', () => {
+      expect(linkingConfig.prefixes).toContain('dengin://');
     });
 
     it('https deep link desteklenmeli', () => {

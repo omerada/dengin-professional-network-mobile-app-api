@@ -1,6 +1,6 @@
 // src/features/profile/services/professionApi.ts
 // Profession API service - Backend ProfessionController ile %100 uyumlu
-// Backend: com.meslektas.identity.api.ProfessionController
+// Backend: com.dengin.identity.api.ProfessionController
 
 import { apiClient, API_ENDPOINTS } from '@core/api';
 
@@ -16,7 +16,7 @@ interface ApiResponse<T> {
 
 /**
  * Profession Category - Backend ProfessionCategory enum ile %100 uyumlu
- * @see backend/src/main/java/com/meslektas/identity/domain/model/ProfessionCategory.java
+ * @see backend/src/main/java/com/dengin/identity/domain/model/ProfessionCategory.java
  */
 export type ProfessionCategory =
   | 'MEDICAL' // Sağlık

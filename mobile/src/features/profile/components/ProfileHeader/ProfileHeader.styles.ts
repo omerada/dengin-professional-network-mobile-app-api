@@ -1,5 +1,5 @@
 // src/features/profile/components/ProfileHeader/ProfileHeader.styles.ts
-// Meslektaş Design System - ProfileHeader Styles
+// Dengin Design System - ProfileHeader Styles
 // Oku: mobile-development-guide/ui-ux-modernization/09-PROFILE-REDESIGN.md
 
 import { StyleSheet } from 'react-native';

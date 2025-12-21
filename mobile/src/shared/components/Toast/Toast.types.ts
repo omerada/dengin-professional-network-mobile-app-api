@@ -1,5 +1,5 @@
 // src/shared/components/Toast/Toast.types.ts
-// Meslektaş Design System - Toast Type Definitions
+// Dengin Design System - Toast Type Definitions
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import type { ViewStyle } from 'react-native';

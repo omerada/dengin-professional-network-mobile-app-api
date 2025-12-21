@@ -1,5 +1,5 @@
 // src/shared/components/ImageViewer/ImageViewer.tsx
-// Meslektaş Design System - Full Screen Image Viewer
+// Dengin Design System - Full Screen Image Viewer
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback, useState } from 'react';
@@ -20,7 +20,7 @@ import Animated, {
   withSpring,
   withTiming,
   interpolate,
-  Extrapolate,
+  Extrapolation,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -28,7 +28,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useHaptic } from '@shared/hooks';
 import { spring } from '@theme/animations';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -164,7 +164,7 @@ export const ImageViewer = memo<ImageViewerProps>(function ImageViewer({
           Math.abs(event.translationY),
           [0, 200],
           [1, 0.3],
-          Extrapolate.CLAMP,
+          Extrapolation.CLAMP,
         );
       }
     })

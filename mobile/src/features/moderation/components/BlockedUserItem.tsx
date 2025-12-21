@@ -3,10 +3,13 @@
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART5.md
 
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, AccessibilityInfo } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, AccessibilityInfo } from 'react-native';
 import { useColors } from '@contexts/ThemeContext';
-import { Avatar, Button } from '@shared/components';
+import { useToast } from '@contexts/ToastContext';
+import { Avatar, Button, ActionSheet } from '@shared/components';
 import { spacing, fontSize, borderRadius } from '@theme';
+import { showUnblockError } from '@shared/utils';
+import { useHaptic } from '@shared/hooks';
 import { socialApi } from '@features/social/services';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatDistanceToNow } from 'date-fns';
@@ -32,6 +35,8 @@ interface BlockedUserItemProps {
  */
 export const BlockedUserItem = React.memo<BlockedUserItemProps>(({ user, onUnblock, testID }) => {
   const colors = useColors();
+  const toast = useToast();
+  const { trigger } = useHaptic();
   const queryClient = useQueryClient();
   const [isUnblocked, setIsUnblocked] = useState(false);
 
@@ -44,23 +49,20 @@ export const BlockedUserItem = React.memo<BlockedUserItemProps>(({ user, onUnblo
       AccessibilityInfo.announceForAccessibility(`${user.fullName} engeli kaldırıldı`);
     },
     onError: () => {
-      Alert.alert('Hata', 'Engel kaldırılırken bir hata oluştu');
+      showUnblockError(toast, { trigger });
     },
   });
 
+  const [showUnblockConfirm, setShowUnblockConfirm] = useState(false);
+
   const handleUnblock = useCallback(() => {
-    Alert.alert(
-      'Engeli Kaldır',
-      `${user.fullName} kullanıcısının engelini kaldırmak istiyor musunuz?`,
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Engeli Kaldır',
-          onPress: () => unblockMutation.mutate(),
-        },
-      ],
-    );
-  }, [user.fullName, unblockMutation]);
+    setShowUnblockConfirm(true);
+  }, []);
+
+  const confirmUnblock = useCallback(() => {
+    unblockMutation.mutate();
+    setShowUnblockConfirm(false);
+  }, [unblockMutation]);
 
   // Format blocked date
   const blockedTimeAgo = formatDistanceToNow(new Date(user.blockedAt), {
@@ -119,6 +121,22 @@ export const BlockedUserItem = React.memo<BlockedUserItemProps>(({ user, onUnblo
         disabled={unblockMutation.isPending}
         testID={`unblock-button-${user.id}`}
       />
+
+      {/* Unblock Confirmation ActionSheet */}
+      <ActionSheet
+        visible={showUnblockConfirm}
+        onClose={() => setShowUnblockConfirm(false)}
+        title="Engeli Kaldır"
+        message={`${user.fullName} kullanıcısının engelini kaldırmak istiyor musunuz?`}
+        options={[
+          {
+            id: 'confirm-unblock',
+            label: 'Engeli Kaldır',
+            onPress: confirmUnblock,
+          },
+        ]}
+        cancelLabel="İptal"
+      />
     </View>
   );
 });
@@ -126,39 +144,39 @@ export const BlockedUserItem = React.memo<BlockedUserItemProps>(({ user, onUnblo
 BlockedUserItem.displayName = 'BlockedUserItem';
 
 const styles = StyleSheet.create({
+  blockedDate: {
+    fontSize: fontSize.sm,
+    marginTop: spacing.xs,
+  },
   container: {
-    flexDirection: 'row',
     alignItems: 'center',
+    borderRadius: borderRadius.md,
+    flexDirection: 'row',
     justifyContent: 'space-between',
     padding: spacing.md,
-    borderRadius: borderRadius.md,
-  },
-  userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    marginRight: spacing.md,
-  },
-  textContainer: {
-    marginLeft: spacing.md,
-    flex: 1,
   },
   name: {
     fontSize: fontSize.md,
     fontWeight: '600',
   },
-  blockedDate: {
-    fontSize: fontSize.sm,
-    marginTop: spacing.xs,
+  textContainer: {
+    flex: 1,
+    marginLeft: spacing.md,
   },
   unblocked: {
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
     padding: spacing.lg,
   },
   unblockedText: {
     fontSize: fontSize.md,
     fontWeight: '500',
+  },
+  userInfo: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flex: 1,
+    marginRight: spacing.md,
   },
 });
 

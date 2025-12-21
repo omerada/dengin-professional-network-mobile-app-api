@@ -3,7 +3,7 @@
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import React, { memo, useCallback, useRef, useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Alert, StatusBar } from 'react-native';
+import { StyleSheet, View, Text, StatusBar, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Camera,
@@ -14,8 +14,11 @@ import {
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
-import { Button, Loading } from '@shared/components';
+import { useToast } from '@contexts/ToastContext';
+import { spacing, typography, borderRadius } from '@theme';
+import { Button, UnifiedLoadingState } from '@shared/components';
+import { showOperationError, showValidationError } from '@shared/utils';
+import { useHaptic } from '@shared/hooks';
 import { useVerificationStore } from '../stores';
 import { cameraService, imageProcessor } from '../services';
 import { DocumentGuide, CaptureButton, CameraControls } from '../components';
@@ -33,6 +36,8 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RouteProps>();
   const colors = useColors();
+  const toast = useToast();
+  const { trigger } = useHaptic();
 
   const { side } = route.params;
   const isBackSide = side === 'back';
@@ -43,6 +48,8 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
 
   const [isCapturing, setIsCapturing] = useState(false);
   const [settings, setSettings] = useState<CameraSettings>(cameraService.getDefaultSettings());
+  const [capturedPhoto, setCapturedPhoto] = useState<CapturedImage | null>(null);
+  const [isValidating, setIsValidating] = useState(false);
 
   const {
     setDocumentFront,
@@ -68,7 +75,7 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
   }, []);
 
   /**
-   * Fotoğraf çek
+   * Fotoğraf çek ve preview göster
    */
   const handleCapture = useCallback(async () => {
     if (!cameraRef.current || isCapturing) return;
@@ -85,33 +92,55 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
       // Görüntüyü işle
       const compressedImage = await imageProcessor.compress(`file://${photo.path}`);
 
+      // P2: Preview için state'e kaydet
+      const capturedImage: CapturedImage = {
+        ...compressedImage,
+        type: isBackSide ? 'back' : 'front',
+      };
+
+      setCapturedPhoto(capturedImage);
+    } catch (error) {
+      console.error('Capture error:', error);
+      showOperationError(
+        toast,
+        { trigger },
+        'Fotoğraf çekilirken bir hata oluştu. Lütfen tekrar deneyin.',
+      );
+    } finally {
+      setIsCapturing(false);
+    }
+  }, [isCapturing, settings.flash, isBackSide]);
+
+  /**
+   * P2: Fotoğrafı onayla ve devam et
+   */
+  const handleConfirm = useCallback(async () => {
+    if (!capturedPhoto) return;
+
+    try {
+      setIsValidating(true);
+
       // Görüntüyü doğrula
-      const validation = await imageProcessor.validate(compressedImage.uri);
+      const validation = await imageProcessor.validate(capturedPhoto.uri);
 
       if (!validation.isValid) {
         const errorMessages = validation.errors
           .map(err => imageProcessor.getErrorMessage(err))
           .join('\n');
 
-        Alert.alert('Görüntü Kalitesi Düşük', errorMessages + '\n\nLütfen tekrar deneyin.', [
-          { text: 'Tamam' },
-        ]);
-        setIsCapturing(false);
+        showValidationError(toast, errorMessages + '\n\nLütfen tekrar çekin.', { trigger });
+        setCapturedPhoto(null);
+        setIsValidating(false);
         return;
       }
 
-      // Görüntüyü kaydet
-      const capturedImage: CapturedImage = {
-        ...compressedImage,
-        type: isBackSide ? 'back' : 'front',
-      };
-
+      // Görüntüyü kaydet ve sonraki adıma geç
       if (isBackSide) {
-        setDocumentBack(capturedImage);
+        setDocumentBack(capturedPhoto);
         setStep('selfie');
         navigation.navigate('SelfieCapture');
       } else {
-        setDocumentFront(capturedImage);
+        setDocumentFront(capturedPhoto);
         setStep('document_back');
         navigation.navigate('DocumentCapture', {
           documentType: route.params.documentType,
@@ -119,22 +148,23 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
         });
       }
     } catch (error) {
-      console.error('Capture error:', error);
-      Alert.alert('Hata', 'Fotoğraf çekilirken bir hata oluştu. Lütfen tekrar deneyin.', [
-        { text: 'Tamam' },
-      ]);
-    } finally {
-      setIsCapturing(false);
+      console.error('Validation error:', error);
+      showOperationError(
+        toast,
+        { trigger },
+        'Doğrulama sırasında bir hata oluştu. Lütfen tekrar deneyin.',
+      );
+      setCapturedPhoto(null);
+      setIsValidating(false);
     }
-  }, [
-    isCapturing,
-    settings.flash,
-    isBackSide,
-    setDocumentFront,
-    setDocumentBack,
-    setStep,
-    navigation,
-  ]);
+  }, [capturedPhoto, isBackSide, setDocumentFront, setDocumentBack, setStep, navigation, route]);
+
+  /**
+   * P2: Fotoğrafı reddet ve tekrar çek
+   */
+  const handleRetake = useCallback(() => {
+    setCapturedPhoto(null);
+  }, []);
 
   /**
    * İzin yok ekranı
@@ -179,6 +209,64 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
     );
   }
 
+  // P2: Preview ekranı - Fotoğraf çekildiğinde göster
+  if (capturedPhoto) {
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" />
+
+        {/* Çekilen fotoğraf önizlemesi */}
+        <Image
+          source={{ uri: capturedPhoto.uri }}
+          style={StyleSheet.absoluteFill}
+          resizeMode="cover"
+        />
+
+        {/* Üst bilgi çubuğu */}
+        <SafeAreaView style={styles.topBar} edges={['top']}>
+          <View style={styles.topBarContent}>
+            <Text style={styles.stepText}>{isBackSide ? 'Adım 2/3' : 'Adım 1/3'}</Text>
+          </View>
+        </SafeAreaView>
+
+        {/* Preview alt butonlar */}
+        <SafeAreaView style={styles.previewControls} edges={['bottom']}>
+          <View style={styles.previewButtonsContainer}>
+            <TouchableOpacity
+              style={[styles.previewButton, styles.retakeButton]}
+              onPress={handleRetake}
+              disabled={isValidating}>
+              <Text style={styles.previewButtonText}>Tekrar Çek</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.previewButton,
+                styles.confirmButton,
+                { backgroundColor: colors.interactive.default },
+              ]}
+              onPress={handleConfirm}
+              disabled={isValidating}>
+              <Text style={[styles.previewButtonText, styles.confirmButtonText]}>
+                {isValidating ? 'Doğrulanıyor...' : 'Devam Et'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.previewHint}>
+            Belge net görünüyor mu? Doğrulama için "Devam Et" butonuna basın.
+          </Text>
+        </SafeAreaView>
+
+        {/* Doğrulama loading */}
+        {isValidating && (
+          <UnifiedLoadingState strategy="spinner" message="Doğrulanıyor..." variant="screen" />
+        )}
+      </View>
+    );
+  }
+
+  // Kamera modu - Varsayılan
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -188,7 +276,7 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
         ref={cameraRef}
         style={StyleSheet.absoluteFill}
         device={device}
-        isActive={true}
+        isActive={!capturedPhoto}
         photo={true}
         enableZoomGesture
         zoom={settings.zoom}
@@ -227,7 +315,9 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
       </SafeAreaView>
 
       {/* Yükleniyor göstergesi */}
-      {isCapturing && <Loading fullScreen message="İşleniyor..." />}
+      {isCapturing && (
+        <UnifiedLoadingState strategy="spinner" message="İşleniyor..." variant="screen" />
+      )}
     </View>
   );
 });
@@ -235,59 +325,10 @@ export const DocumentCaptureScreen: React.FC = memo(() => {
 DocumentCaptureScreen.displayName = 'DocumentCaptureScreen';
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  permissionContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xl,
-  },
-  permissionIcon: {
-    fontSize: 64,
-    marginBottom: spacing.lg,
-  },
-  permissionTitle: {
-    ...typography.h2,
-    textAlign: 'center',
-    marginBottom: spacing.sm,
-  },
-  permissionText: {
-    ...typography.body,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
-  },
-  permissionButton: {
-    minWidth: 200,
-  },
-  topBar: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 20,
-  },
-  topBarContent: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.md,
-  },
-  stepText: {
-    ...typography.bodySmall,
-    color: 'white',
-    fontWeight: '600',
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: 16,
-  },
   bottomControls: {
-    position: 'absolute',
     bottom: 0,
     left: 0,
+    position: 'absolute',
     right: 0,
     zIndex: 20,
   },
@@ -298,9 +339,109 @@ const styles = StyleSheet.create({
   captureHint: {
     ...typography.bodySmall,
     color: 'white',
-    textAlign: 'center',
     marginBottom: spacing.lg,
+    textAlign: 'center',
+  },
+  confirmButton: {
+    flex: 1,
+  },
+  confirmButtonText: {
+    color: 'white',
+  },
+  container: {
+    backgroundColor: '#000',
+    flex: 1,
+  },
+  permissionButton: {
+    minWidth: 200,
+  },
+  permissionContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    padding: spacing.xl,
+  },
+  permissionIcon: {
+    fontSize: 64,
+    marginBottom: spacing.lg,
+  },
+  permissionText: {
+    ...typography.body,
+    marginBottom: spacing.xl,
+    textAlign: 'center',
+  },
+  permissionTitle: {
+    ...typography.h2,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  previewButton: {
+    alignItems: 'center',
+    borderRadius: borderRadius.lg,
+    justifyContent: 'center',
+    minHeight: 56,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  previewButtonText: {
+    ...typography.button,
+    fontWeight: '600',
+  },
+  previewButtonsContainer: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+  },
+  previewControls: {
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    zIndex: 20,
+  },
+  previewHint: {
+    ...typography.bodySmall,
+    color: 'white',
+    marginBottom: spacing.lg,
+    marginTop: spacing.md,
+    paddingHorizontal: spacing.lg,
+    textAlign: 'center',
+  },
+  retakeButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    flex: 1,
+  },
+  stepText: {
+    ...typography.bodySmall,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: borderRadius.lg,
+    color: 'white',
+    fontWeight: '600',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  topBar: {
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    zIndex: 20,
+  },
+  topBarContent: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    padding: spacing.md,
   },
 });
 
-export default DocumentCaptureScreen;
+// Wrap with Error Boundary for production safety
+import { ErrorBoundary } from '@core/components';
+
+export default function DocumentCaptureScreenWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <DocumentCaptureScreen />
+    </ErrorBoundary>
+  );
+}

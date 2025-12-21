@@ -1,10 +1,11 @@
-package com.meslektas.verification.domain.model;
+package com.dengin.verification.domain.model;
 
+import com.dengin.verification.domain.model.ConfidenceScore;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import com.meslektas.verification.domain.model.ConfidenceScore.VerificationDecision;
+import com.dengin.verification.domain.model.ConfidenceScore.VerificationDecision;
 
 import static org.assertj.core.api.Assertions.*;
 

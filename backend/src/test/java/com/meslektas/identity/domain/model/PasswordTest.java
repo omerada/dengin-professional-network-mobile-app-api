@@ -1,5 +1,6 @@
-package com.meslektas.identity.domain.model;
+package com.dengin.identity.domain.model;
 
+import com.dengin.identity.domain.model.Password;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -121,7 +122,7 @@ class PasswordTest {
         @ParameterizedTest
         @ValueSource(strings = {
             "password123AAA!!!",
-            "meslektas123AAA!!!"
+            "dengin123AAA!!!"
         })
         @DisplayName("should throw exception for common passwords")
         void shouldThrowForCommonPasswords(String commonPassword) {

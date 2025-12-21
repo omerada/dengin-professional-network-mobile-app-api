@@ -1,13 +1,15 @@
 // src/features/feed/components/PostCard/PostImages.tsx
-// Meslektaş Design System - Modern PostImages Component
+// Dengin Design System - Modern PostImages Component
+// P3: Optimized with skeleton loading and error handling
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
-import React, { memo, useCallback, useMemo } from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { Image, Pressable, Text, View, ActivityIndicator } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
+import { useColors } from '@contexts/ThemeContext';
 
 import { imageStyles } from './PostCard.styles';
 import type { PostImagesProps } from './PostCard.types';
@@ -33,13 +35,33 @@ import type { PostImagesProps } from './PostCard.types';
  */
 export const PostImages: React.FC<PostImagesProps> = memo(
   ({ images, postId, onImagePress, testID }) => {
-    const { trigger } = useHaptic();
+    const { triggerNavigation } = useSemanticHaptic();
+    const colors = useColors();
     const navigation = useNavigation();
+
+    // P3: Track loading state for each image
+    const [loadingStates, setLoadingStates] = useState<Record<number, boolean>>({});
+    const [errorStates, setErrorStates] = useState<Record<number, boolean>>({});
+
+    // P3: Image loading handlers
+    const handleLoadStart = useCallback((index: number) => {
+      setLoadingStates(prev => ({ ...prev, [index]: true }));
+      setErrorStates(prev => ({ ...prev, [index]: false }));
+    }, []);
+
+    const handleLoadEnd = useCallback((index: number) => {
+      setLoadingStates(prev => ({ ...prev, [index]: false }));
+    }, []);
+
+    const handleError = useCallback((index: number) => {
+      setLoadingStates(prev => ({ ...prev, [index]: false }));
+      setErrorStates(prev => ({ ...prev, [index]: true }));
+    }, []);
 
     // Handle image press
     const handleImagePress = useCallback(
       (index: number) => {
-        trigger('light');
+        triggerNavigation('navigate');
         if (onImagePress) {
           onImagePress(index);
         } else {
@@ -51,7 +73,7 @@ export const PostImages: React.FC<PostImagesProps> = memo(
           });
         }
       },
-      [onImagePress, images, postId, navigation, trigger],
+      [onImagePress, images, postId, navigation, triggerNavigation],
     );
 
     // Compute grid layout based on image count
@@ -70,8 +92,13 @@ export const PostImages: React.FC<PostImagesProps> = memo(
         return { type: 'grid' as const, columns: 3, rows: 1 };
       }
 
-      // 4 or more: 2x2 grid with "+X" overlay on last
-      return { type: 'grid' as const, columns: 2, rows: 2, overflow: count - 4 };
+      // 4+ images
+      return {
+        type: 'grid' as const,
+        columns: 2,
+        rows: 2,
+        overflow: Math.max(0, count - 4),
+      };
     }, [images.length]);
 
     if (images.length === 0) return null;
@@ -79,16 +106,47 @@ export const PostImages: React.FC<PostImagesProps> = memo(
     // Single image layout
     if (layout.type === 'single') {
       const image = images[0];
+      const isLoading = loadingStates[0];
+      const hasError = errorStates[0];
+
       return (
         <View style={imageStyles.container} testID={testID}>
           <Pressable onPress={() => handleImagePress(0)}>
             <Animated.View entering={FadeIn.duration(300)}>
-              <Image
-                source={{ uri: image.thumbnailUrl ?? image.url }}
-                style={imageStyles.singleImage}
-                resizeMode="cover"
-                accessibilityLabel="Gönderi görseli"
-              />
+              {/* P3: Loading skeleton */}
+              {isLoading && !hasError && (
+                <View
+                  style={[
+                    imageStyles.skeleton,
+                    imageStyles.singleImage,
+                    { backgroundColor: colors.background.tertiary },
+                  ]}>
+                  <ActivityIndicator size="large" color={colors.text.tertiary} />
+                </View>
+              )}
+              {/* P3: Error placeholder */}
+              {hasError && (
+                <View
+                  style={[
+                    imageStyles.errorPlaceholder,
+                    imageStyles.singleImage,
+                    { backgroundColor: colors.background.tertiary },
+                  ]}>
+                  <Text style={{ color: colors.text.tertiary }}>❌</Text>
+                </View>
+              )}
+              {/* P3: Optimized image with handlers */}
+              {!hasError && (
+                <Image
+                  source={{ uri: image.thumbnailUrl ?? image.url }}
+                  style={imageStyles.singleImage}
+                  resizeMode="cover"
+                  accessibilityLabel="Gönderi görseli"
+                  onLoadStart={() => handleLoadStart(0)}
+                  onLoadEnd={() => handleLoadEnd(0)}
+                  onError={() => handleError(0)}
+                />
+              )}
             </Animated.View>
           </Pressable>
         </View>

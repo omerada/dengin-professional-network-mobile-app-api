@@ -129,49 +129,49 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.sm,
-  },
-  stepsWrapper: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    position: 'relative',
-    marginBottom: spacing.md,
-  },
-  stepItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    position: 'relative',
-  },
-  stepCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    borderWidth: 3,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
   connector: {
-    position: 'absolute',
-    top: 28,
-    left: '50%',
-    right: '-50%',
     height: 3,
+    left: '50%',
+    position: 'absolute',
+    right: '-50%',
+    top: 28,
     zIndex: -1,
+  },
+  container: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.lg,
+  },
+  label: {
+    flex: 1,
+    fontSize: 13,
+    marginTop: spacing.xs,
+    textAlign: 'center',
   },
   labelsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: spacing.sm,
   },
-  label: {
-    fontSize: 13,
-    textAlign: 'center',
-    marginTop: spacing.xs,
+  stepCircle: {
+    alignItems: 'center',
+    borderRadius: 28,
+    borderWidth: 3,
+    height: 56,
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
+    width: 56,
+  },
+  stepItem: {
+    alignItems: 'center',
     flex: 1,
+    justifyContent: 'flex-start',
+    position: 'relative',
+  },
+  stepsWrapper: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: spacing.md,
+    position: 'relative',
   },
 });

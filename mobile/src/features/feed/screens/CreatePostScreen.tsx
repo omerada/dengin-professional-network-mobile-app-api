@@ -4,27 +4,28 @@
 // Oku: MOBILE-APP-HOME-SCREEN.md
 
 import React, { useCallback, useState, useLayoutEffect } from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  Text,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
-import Animated, { FadeIn, FadeOut, SlideInDown } from 'react-native-reanimated';
+import { View, StyleSheet, Pressable, Text, ActivityIndicator } from 'react-native';
+import Animated from 'react-native-reanimated';
+import { SCREEN_ANIMATIONS } from '@constants/animationPresets';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useToast } from '@contexts/ToastContext';
+import { useSemanticHaptic, useHaptic, useSuccessCelebration } from '@shared/hooks';
+import { spacing } from '@theme';
 import { useFeedStore } from '../stores';
 import { useCreatePost } from '../hooks';
 import { imagePickerService } from '../services';
 import { PostTextInput, ImagePreviewGrid } from '../components';
+import {
+  SuccessCelebration,
+  ActionFeedback,
+  ActionSheet,
+  KeyboardAwareScreen,
+} from '@shared/components';
+import { showError } from '@shared/utils';
+import { useAuthStore } from '@features/auth/stores';
 import type { UploadProgress, FeedStoreState } from '../types';
 
 /**
@@ -45,8 +46,14 @@ import type { UploadProgress, FeedStoreState } from '../types';
  */
 export const CreatePostScreen: React.FC = () => {
   const colors = useColors();
+  const toast = useToast();
   const navigation = useNavigation();
-  const { medium, heavy, trigger } = useHaptic();
+  const { trigger } = useHaptic();
+  const { triggerContent, triggerSystem, triggerMedia } = useSemanticHaptic();
+  const { celebrate } = useSuccessCelebration();
+
+  // Auth state - needed for professionId
+  const user = useAuthStore(state => state.user);
 
   // Store state
   const draftContent = useFeedStore((state: FeedStoreState) => state.draftContent);
@@ -58,6 +65,8 @@ export const CreatePostScreen: React.FC = () => {
 
   // Upload state
   const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showDiscardAlert, setShowDiscardAlert] = useState(false);
   const createPost = useCreatePost();
 
   const canPost = draftContent.trim().length > 0 || draftImages.length > 0;
@@ -65,44 +74,72 @@ export const CreatePostScreen: React.FC = () => {
 
   const handleClose = useCallback(() => {
     if (draftContent.trim() || draftImages.length > 0) {
-      medium(); // Haptic feedback for alert
-      Alert.alert(
-        'Taslağı Sil',
-        'Değişiklikleriniz kaydedilmeyecek. Çıkmak istediğinizden emin misiniz?',
-        [
-          { text: 'İptal', style: 'cancel', onPress: () => medium() },
-          {
-            text: 'Çık',
-            style: 'destructive',
-            onPress: () => {
-              heavy(); // Heavy haptic for destructive action
-              clearDraft();
-              navigation.goBack();
-            },
-          },
-        ],
-      );
+      triggerSystem('alert'); // Haptic feedback for alert
+      setShowDiscardAlert(true);
     } else {
-      medium();
+      triggerSystem('success');
       navigation.goBack();
     }
-  }, [navigation, draftContent, draftImages, clearDraft, medium, heavy]);
+  }, [navigation, draftContent, draftImages, triggerSystem]);
+
+  const handleDiscardDraft = useCallback(() => {
+    triggerContent('delete'); // Heavy haptic for destructive action
+    clearDraft();
+    setShowDiscardAlert(false);
+    navigation.goBack();
+  }, [clearDraft, navigation, triggerContent]);
 
   const handlePost = useCallback(() => {
     if (!canPost || isPosting) return;
 
-    trigger('medium'); // Haptic feedback for important action
+    // Get user's professionId - required by backend
+    const professionId = user?.professionId;
+    if (!professionId) {
+      showError(toast, { trigger }, 'Meslek bilgisi bulunamadı. Lütfen profilinizi tamamlayın.');
+      return;
+    }
 
-    createPost.mutate({
-      data: {
-        content: draftContent.trim(),
-        images: draftImages,
+    triggerContent('create'); // Haptic feedback for creating post
+
+    createPost.mutate(
+      {
+        data: {
+          content: draftContent.trim(),
+          images: draftImages,
+          professionId, // Backend requires this field
+        },
+        onProgress: (progress: UploadProgress) => {
+          setUploadProgress(progress);
+        },
       },
-      onProgress: (progress: UploadProgress) => {
-        setUploadProgress(progress);
+      {
+        onSuccess: () => {
+          triggerSystem('success'); // Success haptic feedback
+          clearDraft();
+          setShowSuccess(true);
+          // P2.3: Celebration animation for post creation
+          celebrate({
+            message: 'Gönderi yayınlandı!',
+            duration: 2000,
+            enableHaptic: false, // Already triggered success haptic above
+          });
+        },
+        onError: () => {
+          triggerSystem('error'); // Error haptic feedback
+        },
       },
-    });
-  }, [canPost, isPosting, createPost, draftContent, draftImages, trigger]);
+    );
+  }, [
+    canPost,
+    isPosting,
+    createPost,
+    draftContent,
+    draftImages,
+    user,
+    triggerContent,
+    triggerSystem,
+    clearDraft,
+  ]);
 
   // Header buttons
   useLayoutEffect(() => {
@@ -139,9 +176,9 @@ export const CreatePostScreen: React.FC = () => {
           }
           accessibilityState={{ disabled: !canPost || isPosting }}>
           {isPosting ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
+            <ActivityIndicator size="small" color={colors.text.inverse} />
           ) : (
-            <Text style={styles.postButtonText}>Paylaş</Text>
+            <Text style={[styles.postButtonText, { color: colors.text.inverse }]}>Paylaş</Text>
           )}
         </Pressable>
       ),
@@ -150,11 +187,11 @@ export const CreatePostScreen: React.FC = () => {
 
   const handlePickImages = useCallback(async () => {
     if (!imagePickerService.validateImageCount(draftImages.length)) {
-      heavy(); // Error haptic
+      triggerSystem('error'); // Error haptic
       return;
     }
 
-    medium(); // Selection haptic
+    triggerMedia('select'); // Selection haptic
     const remainingSlots = 5 - draftImages.length;
     const images = await imagePickerService.pickFromGallery({
       mediaType: 'photo',
@@ -163,7 +200,7 @@ export const CreatePostScreen: React.FC = () => {
     });
 
     if (images.length > 0) {
-      trigger('light'); // Success haptic
+      triggerSystem('success'); // Success haptic
     }
 
     images.forEach(image => {
@@ -171,97 +208,90 @@ export const CreatePostScreen: React.FC = () => {
         addDraftImage(image);
       }
     });
-  }, [draftImages.length, addDraftImage, medium, heavy, trigger]);
+  }, [draftImages.length, addDraftImage, triggerMedia, triggerSystem]);
 
   const handleTakePhoto = useCallback(async () => {
     if (!imagePickerService.validateImageCount(draftImages.length)) {
-      heavy(); // Error haptic
+      triggerSystem('error'); // Error haptic
       return;
     }
 
-    medium(); // Camera open haptic
+    triggerMedia('capture'); // Camera open haptic
     const image = await imagePickerService.captureFromCamera();
     if (image && imagePickerService.validateFileSize(image.fileSize)) {
-      trigger('light'); // Success haptic
+      triggerSystem('success'); // Success haptic
       addDraftImage(image);
     }
-  }, [draftImages.length, addDraftImage, medium, heavy, trigger]);
+  }, [draftImages.length, addDraftImage, triggerMedia, triggerSystem]);
 
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top', 'bottom']}>
-      <KeyboardAvoidingView
-        style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 20}>
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          accessible
-          accessibilityLabel="Gönderi içeriği alanı">
-          {/* Text Input */}
-          <PostTextInput
-            value={draftContent}
-            onChangeText={setDraftContent}
-            placeholder="Ne düşünüyorsunuz?"
-            autoFocus
-          />
+      <KeyboardAwareScreen
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
+        {/* Text Input */}
+        <PostTextInput
+          value={draftContent}
+          onChangeText={setDraftContent}
+          placeholder="Ne düşünüyorsunuz?"
+          autoFocus
+        />
 
-          {/* Image Preview with animation */}
-          {draftImages.length > 0 && (
-            <Animated.View entering={FadeIn.duration(300)} exiting={FadeOut.duration(200)}>
-              <ImagePreviewGrid
-                images={draftImages}
-                onRemove={removeDraftImage}
-                onAdd={handlePickImages}
-                maxImages={5}
+        {/* Image Preview with animation */}
+        {draftImages.length > 0 && (
+          <Animated.View
+            entering={SCREEN_ANIMATIONS.cardEnter}
+            exiting={SCREEN_ANIMATIONS.cardExit}>
+            <ImagePreviewGrid
+              images={draftImages}
+              onRemove={removeDraftImage}
+              onAdd={handlePickImages}
+              maxImages={5}
+            />
+          </Animated.View>
+        )}
+
+        {/* Upload Progress with animation */}
+        {uploadProgress && (
+          <Animated.View
+            entering={SCREEN_ANIMATIONS.modalEnter}
+            exiting={SCREEN_ANIMATIONS.modalExit}
+            style={styles.progressContainer}>
+            <Text
+              style={[styles.progressText, { color: colors.text.secondary }]}
+              accessible
+              accessibilityRole="text"
+              accessibilityLabel={`Görsel yükleniyor ${uploadProgress.imageIndex + 1} / ${uploadProgress.totalImages}`}>
+              Görsel yükleniyor ({uploadProgress.imageIndex + 1}/{uploadProgress.totalImages})...
+            </Text>
+            <View
+              style={[styles.progressBar, { backgroundColor: colors.background.secondary }]}
+              accessible
+              accessibilityRole="progressbar"
+              accessibilityValue={{
+                min: 0,
+                max: 100,
+                now: uploadProgress.progress,
+              }}>
+              <Animated.View
+                entering={SCREEN_ANIMATIONS.quickFadeIn}
+                style={[
+                  styles.progressFill,
+                  {
+                    backgroundColor: colors.interactive.default,
+                    width: `${uploadProgress.progress}%`,
+                  },
+                ]}
               />
-            </Animated.View>
-          )}
-
-          {/* Upload Progress with animation */}
-          {uploadProgress && (
-            <Animated.View
-              entering={SlideInDown.springify()}
-              exiting={FadeOut.duration(200)}
-              style={styles.progressContainer}>
-              <Text
-                style={[styles.progressText, { color: colors.text.secondary }]}
-                accessible
-                accessibilityRole="text"
-                accessibilityLabel={`Görsel yükleniyor ${uploadProgress.imageIndex + 1} / ${uploadProgress.totalImages}`}>
-                Görsel yükleniyor ({uploadProgress.imageIndex + 1}/{uploadProgress.totalImages})...
-              </Text>
-              <View
-                style={[styles.progressBar, { backgroundColor: colors.background.secondary }]}
-                accessible
-                accessibilityRole="progressbar"
-                accessibilityValue={{
-                  min: 0,
-                  max: 100,
-                  now: uploadProgress.progress,
-                }}>
-                <Animated.View
-                  entering={FadeIn}
-                  style={[
-                    styles.progressFill,
-                    {
-                      backgroundColor: colors.interactive.default,
-                      width: `${uploadProgress.progress}%`,
-                    },
-                  ]}
-                />
-              </View>
-            </Animated.View>
-          )}
-        </ScrollView>
+            </View>
+          </Animated.View>
+        )}
 
         {/* Bottom Toolbar with animation */}
         <Animated.View
-          entering={SlideInDown.delay(200).springify()}
+          entering={SCREEN_ANIMATIONS.contentEnter}
           style={[
             styles.toolbar,
             {
@@ -303,7 +333,50 @@ export const CreatePostScreen: React.FC = () => {
             {draftImages.length}/5 görsel
           </Text>
         </Animated.View>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScreen>
+
+      {/* Success Feedback */}
+      <ActionFeedback
+        type="success"
+        visible={showSuccess}
+        duration={1200}
+        onDismiss={() => {
+          setShowSuccess(false);
+          navigation.goBack();
+        }}
+      />
+
+      {/* Success Celebration */}
+      <SuccessCelebration
+        visible={showSuccess}
+        type="checkmark"
+        onComplete={() => {
+          setShowSuccess(false);
+          navigation.goBack();
+        }}
+      />
+
+      {/* Discard Draft Confirmation */}
+      <ActionSheet
+        visible={showDiscardAlert}
+        onClose={() => {
+          setShowDiscardAlert(false);
+          triggerSystem('success');
+        }}
+        title="Taslağı Sil"
+        message="Değişiklikleriniz kaydedilmeyecek. Çıkmak istediğinizden emin misiniz?"
+        options={[
+          {
+            id: 'discard',
+            label: 'Çık',
+            icon: 'trash-outline',
+            destructive: true,
+            onPress: handleDiscardDraft,
+          },
+        ]}
+        cancelLabel="İptal"
+        testID="discard-draft-sheet"
+      />
     </SafeAreaView>
   );
 };
@@ -312,69 +385,68 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 16,
-  },
   headerButton: {
     padding: 8,
   },
+  imageCount: {
+    fontSize: 13,
+  },
+  keyboardView: {
+    flex: 1,
+  },
   postButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    alignItems: 'center',
     borderRadius: 20,
     minWidth: 70,
-    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
   postButtonText: {
-    color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '600',
+  },
+  progressBar: {
+    borderRadius: 2,
+    height: 4,
+    overflow: 'hidden',
   },
   progressContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
+  progressFill: {
+    borderRadius: 2,
+    height: '100%',
+  },
   progressText: {
     fontSize: 13,
-    marginBottom: 8,
+    marginBottom: spacing.sm, // 8
   },
-  progressBar: {
-    height: 4,
-    borderRadius: 2,
-    overflow: 'hidden',
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: spacing.md, // 16
   },
-  progressFill: {
-    height: '100%',
-    borderRadius: 2,
+  scrollView: {
+    flex: 1,
   },
   toolbar: {
-    flexDirection: 'row',
     alignItems: 'center',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    flexDirection: 'row',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderTopWidth: StyleSheet.hairlineWidth,
   },
   toolbarButton: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     marginRight: 24,
   },
   toolbarLabel: {
-    marginLeft: 6,
     fontSize: 14,
     fontWeight: '500',
+    marginLeft: 6,
   },
   toolbarSpacer: {
     flex: 1,
-  },
-  imageCount: {
-    fontSize: 13,
   },
 });

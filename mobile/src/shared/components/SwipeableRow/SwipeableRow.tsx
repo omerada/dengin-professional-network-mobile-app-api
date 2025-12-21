@@ -1,5 +1,5 @@
 // src/shared/components/SwipeableRow/SwipeableRow.tsx
-// Meslektaş Design System - Swipeable Row Component
+// Dengin Design System - Swipeable Row Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback, useImperativeHandle, forwardRef } from 'react';
@@ -10,14 +10,14 @@ import Animated, {
   withSpring,
   withTiming,
   interpolate,
-  Extrapolate,
+  Extrapolation,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { scheduleOnRN } from 'react-native-worklets';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useHaptic } from '@shared/hooks';
 import { spring } from '@theme/animations';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -271,7 +271,7 @@ export const SwipeableRow = memo(
       const width = Math.max(0, translateX.value);
       return {
         width,
-        opacity: interpolate(translateX.value, [0, leftActionsWidth], [0, 1], Extrapolate.CLAMP),
+        opacity: interpolate(translateX.value, [0, leftActionsWidth], [0, 1], Extrapolation.CLAMP),
       };
     });
 
@@ -280,7 +280,12 @@ export const SwipeableRow = memo(
       const width = Math.max(0, -translateX.value);
       return {
         width,
-        opacity: interpolate(translateX.value, [-rightActionsWidth, 0], [1, 0], Extrapolate.CLAMP),
+        opacity: interpolate(
+          translateX.value,
+          [-rightActionsWidth, 0],
+          [1, 0],
+          Extrapolation.CLAMP,
+        ),
       };
     });
 
@@ -371,35 +376,35 @@ const ActionButton = memo<ActionButtonProps>(function ActionButton({
 // ============================================================================
 
 const styles = StyleSheet.create({
-  container: {
-    overflow: 'hidden',
-  },
-  content: {
-    backgroundColor: 'transparent',
-  },
-  actionsContainer: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    flexDirection: 'row',
-    overflow: 'hidden',
-  },
-  leftActions: {
-    left: 0,
-    justifyContent: 'flex-start',
-  },
-  rightActions: {
-    right: 0,
-    justifyContent: 'flex-end',
-  },
   actionButton: {
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 8,
   },
   actionLabel: {
     fontSize: 12,
     fontWeight: '600',
     marginTop: 4,
+  },
+  actionsContainer: {
+    bottom: 0,
+    flexDirection: 'row',
+    overflow: 'hidden',
+    position: 'absolute',
+    top: 0,
+  },
+  container: {
+    overflow: 'hidden',
+  },
+  content: {
+    backgroundColor: 'transparent',
+  },
+  leftActions: {
+    justifyContent: 'flex-start',
+    left: 0,
+  },
+  rightActions: {
+    justifyContent: 'flex-end',
+    right: 0,
   },
 });

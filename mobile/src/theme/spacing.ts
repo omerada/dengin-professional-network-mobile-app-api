@@ -1,5 +1,5 @@
 // src/theme/spacing.ts
-// Meslektaş Design System v3.0 - Spacing & Layout Tokens
+// Dengin Design System v3.0 - Spacing & Layout Tokens
 // Modern, tutarlı ve ölçeklenebilir spacing sistemi
 
 import type { SpacingKey, BorderRadiusKey, BorderWidthKey, ZIndexKey } from './types';

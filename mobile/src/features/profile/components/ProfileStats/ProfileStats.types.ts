@@ -1,5 +1,5 @@
 // src/features/profile/components/ProfileStats/ProfileStats.types.ts
-// Meslektaş Design System - ProfileStats Type Definitions
+// Dengin Design System - ProfileStats Type Definitions
 // Oku: mobile-development-guide/ui-ux-modernization/09-PROFILE-REDESIGN.md
 
 import type { ProfileStats as ProfileStatsType } from '../../types';

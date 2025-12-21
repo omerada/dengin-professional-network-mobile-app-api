@@ -113,70 +113,6 @@ export const CommentCard: React.FC<CommentCardProps> = memo(
 CommentCard.displayName = 'CommentCard';
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  replyContainer: {
-    paddingLeft: 56,
-  },
-  avatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-  },
-  replyAvatar: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-  },
-  avatarPlaceholder: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  content: {
-    flex: 1,
-    marginLeft: 8,
-  },
-  bubble: {
-    backgroundColor: '#F0F2F5',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  authorName: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  verifiedIcon: {
-    marginLeft: 4,
-  },
-  commentText: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginTop: 2,
-  },
-  actions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-    paddingLeft: 4,
-  },
-  time: {
-    fontSize: 12,
-  },
   actionButton: {
     marginLeft: 16,
   },
@@ -184,9 +120,73 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
+  actions: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginTop: 4,
+    paddingLeft: 4,
+  },
+  authorName: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  avatar: {
+    borderRadius: 18,
+    height: 36,
+    width: 36,
+  },
+  avatarPlaceholder: {
+    alignItems: 'center',
+    borderRadius: 18,
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
+  },
+  avatarText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  bubble: {
+    backgroundColor: '#F0F2F5',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  commentText: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 2,
+  },
+  container: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  content: {
+    flex: 1,
+    marginLeft: 8,
+  },
+  header: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
   menuButton: {
     marginLeft: 'auto',
     padding: 4,
+  },
+  replyAvatar: {
+    borderRadius: 14,
+    height: 28,
+    width: 28,
+  },
+  replyContainer: {
+    paddingLeft: 56,
+  },
+  time: {
+    fontSize: 12,
+  },
+  verifiedIcon: {
+    marginLeft: 4,
   },
 });
 

@@ -1,5 +1,5 @@
 // src/shared/components/Card/Card.types.ts
-// Meslektaş Design System - Card Type Definitions
+// Dengin Design System - Card Type Definitions
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import type { ReactNode } from 'react';

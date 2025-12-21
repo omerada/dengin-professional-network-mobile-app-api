@@ -59,20 +59,20 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: spacing.xl,
   },
-  title: {
-    fontSize: fontSize.sm,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: spacing.sm,
-    marginHorizontal: spacing.lg,
-  },
   itemsContainer: {
-    borderTopWidth: 1,
     borderBottomWidth: 1,
+    borderTopWidth: 1,
   },
   separator: {
     height: 1,
     marginLeft: 66, // icon width + padding
+  },
+  title: {
+    fontSize: fontSize.sm,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    marginBottom: spacing.sm,
+    marginHorizontal: spacing.lg,
+    textTransform: 'uppercase',
   },
 });

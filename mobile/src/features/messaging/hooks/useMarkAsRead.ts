@@ -4,7 +4,6 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef, useEffect } from 'react';
-import { stompClient } from '@core/socket';
 import { messagingService } from '../services';
 import { CONVERSATIONS_QUERY_KEY } from './useConversations';
 
@@ -39,25 +38,23 @@ export function useMarkAsRead(conversationId?: string) {
       lastMarkedRef.current = targetId;
       mutation.mutate(targetId);
 
-      // STOMP socket üzerinden de bildir
-      if (stompClient.isConnected()) {
-        stompClient.markAsRead(targetId, []);
-      }
+      // Note: Real-time read receipts are handled by WebSocket server
+      // No need to send additional socket message here
     },
     [conversationId, mutation],
   );
 
   /**
    * Belirli mesajları okundu olarak işaretle
+   * Currently unused - kept for future WebSocket integration
    */
   const markMessagesAsRead = useCallback(
     (messageIds: string[], convId?: string) => {
       const targetId = convId || conversationId;
       if (!targetId || messageIds.length === 0) return;
 
-      if (stompClient.isConnected()) {
-        stompClient.markAsRead(targetId, messageIds);
-      }
+      // Future: Send read receipts via WebSocket
+      // Currently handled by REST API only
     },
     [conversationId],
   );

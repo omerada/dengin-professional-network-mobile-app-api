@@ -231,85 +231,85 @@ export const ReportForm = React.memo<ReportFormProps>(
 ReportForm.displayName = 'ReportForm';
 
 const styles = StyleSheet.create({
+  actions: {
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    gap: spacing.md,
+    padding: spacing.lg,
+  },
+  cancelButton: {
+    flex: 1,
+  },
+  charCount: {
+    fontSize: fontSize.xs,
+    marginTop: spacing.xs,
+    textAlign: 'right',
+  },
   container: {
     flex: 1,
   },
   content: {
     padding: spacing.lg,
   },
-  header: {
-    marginBottom: spacing.lg,
-  },
-  title: {
-    fontSize: fontSize.xl,
-    fontWeight: '600',
-    marginBottom: spacing.xs,
-  },
-  subtitle: {
-    fontSize: fontSize.sm,
-  },
-  errorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    marginBottom: spacing.md,
-    gap: spacing.sm,
-  },
-  errorText: {
-    fontSize: fontSize.sm,
-    flex: 1,
-  },
-  reasonsContainer: {
-    gap: spacing.sm,
-    marginBottom: spacing.lg,
-  },
-  reasonItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    borderWidth: 1.5,
-  },
-  reasonLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    flex: 1,
-  },
-  reasonLabel: {
-    fontSize: fontSize.md,
-    fontWeight: '500',
-  },
   descriptionContainer: {
     marginBottom: spacing.md,
+  },
+  descriptionInput: {
+    minHeight: 100,
+    textAlignVertical: 'top',
   },
   descriptionLabel: {
     fontSize: fontSize.sm,
     fontWeight: '500',
     marginBottom: spacing.sm,
   },
-  descriptionInput: {
-    minHeight: 100,
-    textAlignVertical: 'top',
-  },
-  charCount: {
-    fontSize: fontSize.xs,
-    textAlign: 'right',
-    marginTop: spacing.xs,
-  },
-  actions: {
+  errorContainer: {
+    alignItems: 'center',
+    borderRadius: borderRadius.md,
     flexDirection: 'row',
-    padding: spacing.lg,
-    gap: spacing.md,
-    borderTopWidth: 1,
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+    padding: spacing.md,
   },
-  cancelButton: {
+  errorText: {
     flex: 1,
+    fontSize: fontSize.sm,
+  },
+  header: {
+    marginBottom: spacing.lg,
+  },
+  reasonItem: {
+    alignItems: 'center',
+    borderRadius: borderRadius.md,
+    borderWidth: 1.5,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: spacing.md,
+  },
+  reasonLabel: {
+    fontSize: fontSize.md,
+    fontWeight: '500',
+  },
+  reasonLeft: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flex: 1,
+    gap: spacing.md,
+  },
+  reasonsContainer: {
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
   },
   submitButton: {
     flex: 2,
+  },
+  subtitle: {
+    fontSize: fontSize.sm,
+  },
+  title: {
+    fontSize: fontSize.xl,
+    fontWeight: '600',
+    marginBottom: spacing.xs,
   },
 });
 

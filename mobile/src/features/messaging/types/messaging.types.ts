@@ -1,7 +1,7 @@
 // src/features/messaging/types/messaging.types.ts
 // Messaging modülü tip tanımlamaları - Backend DTO'larına %100 uyumlu
-// Backend: com.meslektas.messaging.api.dto.*
-// WebSocket: com.meslektas.messaging.infrastructure.websocket.dto.*
+// Backend: com.dengin.messaging.api.dto.*
+// WebSocket: com.dengin.messaging.infrastructure.websocket.dto.*
 
 import { type UUID, isValidUUID, toUUID } from '@shared/types/common.types';
 

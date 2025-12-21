@@ -1,9 +1,10 @@
 // src/shared/components/Avatar/Avatar.tsx
-// Meslektaş Design System - Modern Avatar Component
+// Dengin Design System - Modern Avatar Component
+// P3: Optimized with skeleton loading and error handling
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
-import React, { memo, useCallback, useMemo } from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { Image, Pressable, Text, View, ActivityIndicator } from 'react-native';
 import Animated, {
   FadeIn,
   interpolate,
@@ -13,7 +14,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { spring } from '@theme/animations';
 
 import { styles } from './Avatar.styles';
@@ -82,9 +83,14 @@ export const Avatar: React.FC<AvatarProps> = memo(
     accessibilityLabel,
     selected = false,
     hapticType = 'light',
+    verified = false,
   }) => {
     const colors = useColors();
-    const { trigger } = useHaptic();
+    const { triggerNavigation, triggerSystem } = useSemanticHaptic();
+
+    // P3: Image loading states
+    const [isLoading, setIsLoading] = useState(!!uri || !!source);
+    const [hasError, setHasError] = useState(false);
 
     // Animation values
     const pressed = useSharedValue(0);
@@ -125,7 +131,7 @@ export const Avatar: React.FC<AvatarProps> = memo(
         return {};
       }
 
-      const scale = interpolate(pressed.value, [0, 1], [1, 0.95]);
+      const scale = interpolate(pressed.value, [0, 1], [1, 0.96]);
       return { transform: [{ scale }] };
     });
 
@@ -141,15 +147,15 @@ export const Avatar: React.FC<AvatarProps> = memo(
 
     const handlePress = useCallback(() => {
       if (hapticType !== 'none') {
-        trigger(hapticType === 'medium' ? 'impactMedium' : 'impactLight');
+        triggerNavigation('navigate');
       }
       onPress?.();
-    }, [hapticType, onPress, trigger]);
+    }, [hapticType, onPress, triggerNavigation]);
 
     const handleLongPress = useCallback(() => {
-      trigger('impactMedium');
+      triggerSystem('confirm');
       onLongPress?.();
-    }, [onLongPress, trigger]);
+    }, [onLongPress, triggerSystem]);
 
     // Container styles
     const containerStyles = useMemo(
@@ -176,30 +182,58 @@ export const Avatar: React.FC<AvatarProps> = memo(
       ],
     );
 
+    // P3: Image load handlers
+    const handleLoadStart = useCallback(() => {
+      setIsLoading(true);
+      setHasError(false);
+    }, []);
+
+    const handleLoadEnd = useCallback(() => {
+      setIsLoading(false);
+    }, []);
+
+    const handleError = useCallback(() => {
+      setIsLoading(false);
+      setHasError(true);
+    }, []);
+
     // Render image or initials
     const renderContent = () => {
       const imageSource = source ?? (uri ? { uri } : null);
 
-      if (imageSource) {
+      // P3: Show initials if error or no image
+      if (!imageSource || hasError) {
         return (
-          <Animated.View
-            entering={animated ? FadeIn.duration(300) : undefined}
-            style={styles.image}>
-            <Image source={imageSource} style={styles.image} resizeMode="cover" />
-          </Animated.View>
+          <View style={[styles.placeholder, { backgroundColor }]}>
+            <Text
+              style={[
+                styles.initials,
+                { color: colors.text.inverse, fontSize: sizeConfig.fontSize },
+              ]}>
+              {initials}
+            </Text>
+          </View>
         );
       }
 
       return (
-        <View style={[styles.placeholder, { backgroundColor }]}>
-          <Text
-            style={[
-              styles.initials,
-              { color: colors.text.inverse, fontSize: sizeConfig.fontSize },
-            ]}>
-            {initials}
-          </Text>
-        </View>
+        <Animated.View entering={animated ? FadeIn.duration(300) : undefined} style={styles.image}>
+          {/* P3: Loading skeleton */}
+          {isLoading && (
+            <View style={[styles.skeleton, { backgroundColor: colors.background.tertiary }]}>
+              <ActivityIndicator size="small" color={colors.text.tertiary} />
+            </View>
+          )}
+          {/* P3: Optimized Image with error handling */}
+          <Image
+            source={imageSource}
+            style={styles.image}
+            resizeMode="cover"
+            onLoadStart={handleLoadStart}
+            onLoadEnd={handleLoadEnd}
+            onError={handleError}
+          />
+        </Animated.View>
       );
     };
 
@@ -253,6 +287,37 @@ export const Avatar: React.FC<AvatarProps> = memo(
       );
     };
 
+    // Render verification badge
+    const renderVerificationBadge = () => {
+      if (!verified) return null;
+
+      const verificationSize = sizeConfig.badgeSize * 1.8;
+
+      return (
+        <View
+          style={[
+            styles.verificationBadge,
+            {
+              backgroundColor: '#1DA1F2', // Twitter blue
+              borderColor: colors.background.primary,
+              borderRadius: verificationSize / 2,
+              borderWidth: sizeConfig.badgeBorderWidth,
+              height: verificationSize,
+              width: verificationSize,
+            },
+          ]}>
+          <Text
+            style={{
+              color: '#FFFFFF',
+              fontSize: sizeConfig.fontSize * 0.65,
+              fontWeight: '700',
+            }}>
+            ✓
+          </Text>
+        </View>
+      );
+    };
+
     // Accessibility label
     const a11yLabel =
       accessibilityLabel ?? (name ? `${name} profil fotoğrafı` : 'Profil fotoğrafı');
@@ -273,6 +338,7 @@ export const Avatar: React.FC<AvatarProps> = memo(
           {renderContent()}
           {renderEditOverlay()}
           {renderBadge()}
+          {renderVerificationBadge()}
         </AnimatedPressable>
       );
     }
@@ -287,6 +353,7 @@ export const Avatar: React.FC<AvatarProps> = memo(
         {renderContent()}
         {renderEditOverlay()}
         {renderBadge()}
+        {renderVerificationBadge()}
       </Animated.View>
     );
   },

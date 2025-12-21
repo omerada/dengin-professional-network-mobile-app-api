@@ -8,3 +8,7 @@ export type { UserProperties } from './analytics';
 // Haptic Feedback Service
 export { hapticService } from './HapticService';
 export { default as HapticService } from './HapticService';
+
+// Image Optimization Service
+export { imageOptimizationService, IMAGE_OPTIMIZATION_PRESETS } from './imageOptimizationService';
+export type { OptimizationResult } from './imageOptimizationService';

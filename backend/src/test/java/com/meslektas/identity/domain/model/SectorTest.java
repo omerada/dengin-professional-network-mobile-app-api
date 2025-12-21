@@ -1,5 +1,7 @@
-package com.meslektas.identity.domain.model;
+package com.dengin.identity.domain.model;
 
+import com.dengin.identity.domain.model.ProfessionCategory;
+import com.dengin.identity.domain.model.Sector;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

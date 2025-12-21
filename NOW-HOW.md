@@ -9,7 +9,7 @@ Ne Yapar: Kullanıcılara Bronze, Silver ve Gold gibi bir rozet sistemi yerine, 
 
 Merak Uyandıran: Kullanıcılar, alanlarının en üst düzey uzmanlarının (Gold/Patentli/Yayıncı Onaylı) içeriklerini ve bağlantılarını görmeye can atar.
 
-2. 🤫 Gizli Oturumlar: "Anonim Meslektaş Danışma Odası"
+2. 🤫 Gizli Oturumlar: "Anonim Dengin Danışma Odası"
    Profesyonellerin en çok ihtiyacı olan şey, mesleki etik ve hassas konuları güvenli bir alanda konuşabilmektir.
 
 Fark: Kullanıcılar, kimlikleri doğrulanmış olsa bile, hassas ve etik konuları (örneğin hukuk/tıp vakaları, gizlilik gerektiren durumlar) tamamen anonim olarak paylaşabilecekleri ve meslektaşlarından sadece doğrulanmış uzman görüşü alabilecekleri bir kanal.

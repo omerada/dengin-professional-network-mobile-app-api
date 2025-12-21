@@ -1,6 +1,8 @@
-package com.meslektas.moderation.domain.model;
+package com.dengin.moderation.domain.model;
 
-import org.junit.jupiter.api.BeforeEach;
+import com.dengin.moderation.domain.model.ReportReason;
+import com.dengin.moderation.domain.model.SanctionType;
+import com.dengin.moderation.domain.model.UserSanction;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

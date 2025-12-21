@@ -16,6 +16,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing, typography } from '@theme';
+import { UNIFIED_TIMING } from '@constants';
 import { Button } from '@shared/components';
 import { useVerificationStore } from '../stores';
 import { uploadService } from '../services';
@@ -47,12 +48,15 @@ export const UploadStatusScreen: React.FC = memo(() => {
   const scale = useSharedValue(1);
 
   /**
-   * Pulse animasyonu
+   * Pulse animasyonu - P2 Optimized: 800ms → 600ms (UNIFIED_TIMING)
    */
   useEffect(() => {
     if (isUploading) {
       scale.value = withRepeat(
-        withSequence(withTiming(1.1, { duration: 800 }), withTiming(1, { duration: 800 })),
+        withSequence(
+          withTiming(1.1, { duration: UNIFIED_TIMING.pulseAnimation }),
+          withTiming(1, { duration: UNIFIED_TIMING.pulseAnimation }),
+        ),
         -1,
         true,
       );
@@ -239,17 +243,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: spacing.lg,
   },
-  uploadingContainer: {
-    alignItems: 'center',
-  },
-  uploadingIcon: {
-    fontSize: 64,
-    marginBottom: spacing.lg,
-  },
-  uploadingTitle: {
-    ...typography.h2,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
+  footer: {
+    borderTopWidth: 1,
+    padding: spacing.lg,
   },
   resultContainer: {
     alignItems: 'center',
@@ -259,20 +255,37 @@ const styles = StyleSheet.create({
     fontSize: 80,
     marginBottom: spacing.lg,
   },
-  resultTitle: {
-    ...typography.h2,
-    textAlign: 'center',
-    marginBottom: spacing.md,
-  },
   resultText: {
     ...typography.body,
-    textAlign: 'center',
     paddingHorizontal: spacing.lg,
+    textAlign: 'center',
   },
-  footer: {
-    padding: spacing.lg,
-    borderTopWidth: 1,
+  resultTitle: {
+    ...typography.h2,
+    marginBottom: spacing.md,
+    textAlign: 'center',
+  },
+  uploadingContainer: {
+    alignItems: 'center',
+  },
+  uploadingIcon: {
+    fontSize: 64,
+    marginBottom: spacing.lg,
+  },
+  uploadingTitle: {
+    ...typography.h2,
+    marginBottom: spacing.xl,
+    textAlign: 'center',
   },
 });
 
-export default UploadStatusScreen;
+// Wrap with Error Boundary for production safety
+import { ErrorBoundary } from '@core/components';
+
+export default function UploadStatusScreenWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <UploadStatusScreen />
+    </ErrorBoundary>
+  );
+}

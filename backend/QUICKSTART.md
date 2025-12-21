@@ -1,4 +1,4 @@
-# 🚀 Meslektaş Backend - Quick Start Guide
+# 🚀 Dengin Backend - Quick Start Guide
 
 ## Geliştirme Ortamını Başlatma
 
@@ -17,10 +17,10 @@ docker-compose ps
 
 Beklenen çıktı:
 
-- ✅ meslektas-postgres (port 5432)
-- ✅ meslektas-redis (port 6379)
-- ✅ meslektas-pgadmin (port 5050)
-- ✅ meslektas-localstack (port 4566)
+- ✅ dengin-postgres (port 5432)
+- ✅ dengin-redis (port 6379)
+- ✅ dengin-pgadmin (port 5050)
+- ✅ dengin-localstack (port 4566)
 
 ### 2. Maven Build
 
@@ -42,7 +42,7 @@ mvn clean package -DskipTests
 mvn spring-boot:run
 
 # Ya da JAR ile
-java -jar target/meslektas-backend-1.0.0-SNAPSHOT.jar
+java -jar target/dengin-backend-1.0.0-SNAPSHOT.jar
 ```
 
 Uygulama başarıyla başladığında:
@@ -54,7 +54,7 @@ Uygulama başarıyla başladığında:
  | |  | |  __/\__ \ |  __/ |   <| || (_| \__ \
  |_|  |_|\___||___/_|\___| |_|\_\\__\__,_|___/
 
-:: Meslektaş Backend :: (v1.0.0)
+:: Dengin Backend :: (v1.0.0)
 ```
 
 ### 4. Test Et
@@ -104,7 +104,7 @@ curl http://localhost:8080/api/users/me `
 ## 📦 Proje Yapısı
 
 ```
-src/main/java/com/meslektas/
+src/main/java/com/dengin/
 ├── common/                    # Shared Kernel (DDD)
 │   ├── domain/                # Base classes, events
 │   ├── exception/             # Common exceptions
@@ -135,14 +135,14 @@ src/main/java/com/meslektas/
 pgAdmin'e erişim:
 
 - URL: http://localhost:5050
-- Email: admin@meslektas.com
+- Email: admin@dengin.com
 - Password: admin
 
 PostgreSQL bağlantı bilgileri:
 
 - Host: postgres (container) veya localhost
 - Port: 5432
-- Database: meslektas_dev
+- Database: dengin_dev
 - Username: postgres
 - Password: postgres
 

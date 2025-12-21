@@ -1,5 +1,5 @@
 // src/features/profile/components/ProfileBio/ProfileBio.styles.ts
-// Meslektaş Design System - ProfileBio Styles
+// Dengin Design System - ProfileBio Styles
 // Oku: mobile-development-guide/ui-ux-modernization/09-PROFILE-REDESIGN.md
 
 import { StyleSheet } from 'react-native';

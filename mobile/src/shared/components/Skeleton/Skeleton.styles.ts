@@ -1,5 +1,5 @@
 // src/shared/components/Skeleton/Skeleton.styles.ts
-// Meslektaş Design System - Skeleton Styles
+// Dengin Design System - Skeleton Styles
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import { StyleSheet } from 'react-native';

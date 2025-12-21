@@ -1,5 +1,5 @@
 // src/theme/shadows.ts
-// Meslektaş Design System v3.0 - Modern Shadow Tokens
+// Dengin Design System v3.0 - Modern Shadow Tokens
 // Profesyonel ve dengeli shadow sistemi
 
 import { Platform, ViewStyle } from 'react-native';
@@ -51,17 +51,8 @@ export const shadows: Record<ShadowVariant, ShadowStyle> = {
   // 2XL - Maximum elevation
   '2xl': createShadow(16, 32, 0.16, 16),
 
-  // Button - Subtle lift
-  button: createShadow(1, 3, 0.06, 1),
-
-  // Modal - Strong elevation
-  modal: createShadow(12, 24, 0.14, 12),
-
-  // Dropdown - Medium elevation
-  dropdown: createShadow(4, 8, 0.1, 4),
-
-  // Tooltip - Light elevation
-  tooltip: createShadow(2, 4, 0.08, 2),
+  // Card - Card elevation
+  card: createShadow(2, 4, 0.08, 2),
 
   // Toast - Elevated notification
   toast: createShadow(6, 12, 0.12, 6),

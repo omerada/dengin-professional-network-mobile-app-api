@@ -1,5 +1,5 @@
 // src/shared/components/Skeleton/Skeleton.tsx
-// Meslektaş Design System - Modern Skeleton Component
+// Dengin Design System - Modern Skeleton Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useEffect, useMemo } from 'react';

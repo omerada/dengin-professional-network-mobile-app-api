@@ -18,6 +18,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing, borderRadius } from '@theme';
+import { UNIFIED_HEADER } from '@constants';
 import { NotificationSettingsToggle } from '../components/NotificationSettingsToggle';
 import { useNotificationSettings, useNotificationPermission } from '../hooks';
 import type { NotificationType } from '../types';
@@ -197,9 +198,9 @@ export const NotificationSettingsScreen: React.FC = () => {
           hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
           <View
             style={{
-              width: 56,
-              height: 56,
-              borderRadius: 28,
+              width: UNIFIED_HEADER.HEIGHT,
+              height: UNIFIED_HEADER.HEIGHT,
+              borderRadius: UNIFIED_HEADER.HEIGHT / 2,
               backgroundColor: colors.background.secondary,
               justifyContent: 'center',
               alignItems: 'center',
@@ -320,29 +321,27 @@ export const NotificationSettingsScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    marginTop: 8,
-    paddingLeft: 8,
-  },
   backButton: {
-    justifyContent: 'center',
     alignItems: 'flex-start',
+    justifyContent: 'center',
   },
   buttonPressed: {
     opacity: 0.7,
+  },
+  container: {
+    flex: 1,
+  },
+  header: {
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    marginTop: 8,
+    paddingHorizontal: 16,
+    paddingLeft: 8,
+    paddingVertical: 12,
+  },
+  headerSpacer: {
+    width: 56,
   },
   headerTitle: {
     flex: 1,
@@ -350,75 +349,86 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
-  headerSpacer: {
-    width: 56,
+  helpText: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginHorizontal: spacing['4'],
+    marginTop: spacing['6'],
+    textAlign: 'center',
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  permissionWarning: {
+    alignItems: 'center',
+    borderRadius: borderRadius.lg,
+    flexDirection: 'row',
+    marginHorizontal: spacing['4'],
+    marginTop: spacing['4'],
+    padding: spacing['4'],
+  },
+  quietHoursInfo: {
+    alignItems: 'center',
+    borderRadius: borderRadius.md,
+    flexDirection: 'row',
+    marginHorizontal: spacing['4'],
+    marginTop: spacing['4'],
+    padding: spacing['3'],
+  },
+  quietHoursText: {
+    flex: 1,
+    fontSize: 14,
+  },
+  scrollContent: {
+    paddingBottom: spacing['8'],
+    paddingTop: spacing['4'],
   },
   scrollView: {
     flex: 1,
   },
-  scrollContent: {
-    paddingTop: spacing['4'],
-    paddingBottom: spacing['8'],
-  },
-  permissionWarning: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing['4'],
-    marginHorizontal: spacing['4'],
-    marginTop: spacing['4'],
+  section: {
     borderRadius: borderRadius.lg,
-  },
-  quietHoursInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing['3'],
     marginHorizontal: spacing['4'],
-    marginTop: spacing['4'],
-    borderRadius: borderRadius.md,
-  },
-  quietHoursText: {
-    fontSize: 14,
-    flex: 1,
-  },
-  warningIcon: {
-    marginRight: spacing['3'],
-  },
-  warningContent: {
-    flex: 1,
-  },
-  warningTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  warningText: {
-    fontSize: 13,
-    marginTop: 2,
+    overflow: 'hidden',
   },
   sectionTitle: {
     fontSize: 13,
     fontWeight: '600',
-    textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginTop: spacing['6'],
     marginBottom: spacing['2'],
     marginHorizontal: spacing['4'],
-  },
-  section: {
-    marginHorizontal: spacing['4'],
-    borderRadius: borderRadius.lg,
-    overflow: 'hidden',
+    marginTop: spacing['6'],
+    textTransform: 'uppercase',
   },
   separator: {
     height: 1,
     marginLeft: 68,
   },
-  helpText: {
+  warningContent: {
+    flex: 1,
+  },
+  warningIcon: {
+    marginRight: spacing['3'],
+  },
+  warningText: {
     fontSize: 13,
-    lineHeight: 18,
-    marginTop: spacing['6'],
-    marginHorizontal: spacing['4'],
-    textAlign: 'center',
+    marginTop: 2,
+  },
+  warningTitle: {
+    fontSize: 15,
+    fontWeight: '600',
   },
 });
 
-export default NotificationSettingsScreen;
+// Wrap with Error Boundary for production safety
+import { ErrorBoundary } from '@core/components';
+
+export default function NotificationSettingsScreenWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <NotificationSettingsScreen />
+    </ErrorBoundary>
+  );
+}

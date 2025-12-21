@@ -9,8 +9,8 @@
 ### 1. Domain Model Oluştur
 
 ```java
-// src/main/java/com/meslektas/{context}/domain/model/YourEntity.java
-package com.meslektas.social.domain.model;
+// src/main/java/com/dengin/{context}/domain/model/YourEntity.java
+package com.dengin.social.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -43,8 +43,8 @@ public class YourEntity {
 ### 2. Repository Oluştur
 
 ```java
-// src/main/java/com/meslektas/{context}/domain/repository/YourRepository.java
-package com.meslektas.social.domain.repository;
+// src/main/java/com/dengin/{context}/domain/repository/YourRepository.java
+package com.dengin.social.domain.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -65,7 +65,7 @@ public interface YourRepository extends JpaRepository<YourEntity, Long> {
 
 ```java
 // Request DTO
-package com.meslektas.social.application.dto;
+package com.dengin.social.application.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -97,8 +97,8 @@ public class YourEntityResponse {
 ### 4. Service Oluştur
 
 ```java
-// src/main/java/com/meslektas/{context}/application/service/YourService.java
-package com.meslektas.social.application.service;
+// src/main/java/com/dengin/{context}/application/service/YourService.java
+package com.dengin.social.application.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -160,10 +160,10 @@ public class YourService {
 ### 5. Controller Oluştur
 
 ```java
-// src/main/java/com/meslektas/{context}/api/YourController.java
-package com.meslektas.social.api;
+// src/main/java/com/dengin/{context}/api/YourController.java
+package com.dengin.social.api;
 
-import com.meslektas.common.dto.ApiResponse;
+import com.dengin.common.dto.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -490,10 +490,10 @@ class YourControllerTest {
 ```yaml
 spring:
   application:
-    name: meslektas-backend
+    name: dengin-backend
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:5432/${DB_NAME:meslektas}
+    url: jdbc:postgresql://${DB_HOST:localhost}:5432/${DB_NAME:dengin}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
     hikari:
@@ -539,7 +539,7 @@ app:
 # Logging
 logging:
   level:
-    com.meslektas: INFO
+    com.dengin: INFO
     org.springframework.web: DEBUG
     org.hibernate.SQL: DEBUG
 ```

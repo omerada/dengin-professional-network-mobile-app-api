@@ -1,5 +1,5 @@
 // src/shared/utils/validationUtils.ts
-// Meslektaş Design System - Validation Utilities
+// Dengin Design System - Validation Utilities
 // Oku: mobile-development-guide/ui-ux-modernization/14-SPRINT-IMPLEMENTATION-PLAN.md
 
 /**

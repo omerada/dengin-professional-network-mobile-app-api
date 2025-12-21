@@ -1,5 +1,5 @@
 // src/shared/components/Toast/index.ts
-// Meslektaş Design System - Toast Component Exports
+// Dengin Design System - Toast Component Exports
 
 export { Toast } from './Toast';
 export type {

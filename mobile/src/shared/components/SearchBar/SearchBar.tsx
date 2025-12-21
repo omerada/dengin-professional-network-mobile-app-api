@@ -1,5 +1,5 @@
 // src/shared/components/SearchBar/SearchBar.tsx
-// Meslektaş Design System - Modern SearchBar Component
+// Dengin Design System - Modern SearchBar Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback, useRef, useState } from 'react';
@@ -15,7 +15,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { spring } from '@theme/animations';
 import { styles } from './SearchBar.styles';
 import { SearchBarProps, SEARCH_BAR_SIZES } from './SearchBar.types';
@@ -62,7 +62,7 @@ export const SearchBar: React.FC<SearchBarProps> = memo(
     ...inputProps
   }) => {
     const colors = useColors();
-    const { trigger } = useHaptic();
+    const { triggerSystem } = useSemanticHaptic();
     const inputRef = useRef<TextInput>(null);
     const [isFocused, setIsFocused] = useState(false);
 
@@ -71,7 +71,7 @@ export const SearchBar: React.FC<SearchBarProps> = memo(
 
     // Animation values
     const focusProgress = useSharedValue(0);
-    const clearButtonScale = useSharedValue(value.length > 0 ? 1 : 0);
+    const clearButtonScale = useSharedValue((value || '').length > 0 ? 1 : 0);
 
     // Handle focus
     const handleFocus = useCallback(() => {
@@ -96,27 +96,27 @@ export const SearchBar: React.FC<SearchBarProps> = memo(
 
     // Handle clear
     const handleClear = useCallback(() => {
-      trigger('light');
+      triggerSystem('cancel');
       onChangeText('');
       clearButtonScale.value = withTiming(0, { duration: 150 });
       onClear?.();
       inputRef.current?.focus();
-    }, [onChangeText, clearButtonScale, onClear, trigger]);
+    }, [onChangeText, clearButtonScale, onClear, triggerSystem]);
 
     // Handle cancel
     const handleCancel = useCallback(() => {
-      trigger('light');
+      triggerSystem('cancel');
       onChangeText('');
       clearButtonScale.value = withTiming(0, { duration: 150 });
       inputRef.current?.blur();
       onCancel?.();
-    }, [onChangeText, clearButtonScale, onCancel, trigger]);
+    }, [onChangeText, clearButtonScale, onCancel, triggerSystem]);
 
     // Handle submit
     const handleSubmit = useCallback(() => {
-      trigger('light');
-      onSubmit?.(value);
-    }, [onSubmit, value, trigger]);
+      triggerSystem('confirm');
+      onSubmit?.(value || '');
+    }, [onSubmit, value, triggerSystem]);
 
     // Animated styles
     const containerAnimatedStyle = useAnimatedStyle(() => ({
@@ -184,7 +184,7 @@ export const SearchBar: React.FC<SearchBarProps> = memo(
           )}
 
           {/* Clear Button */}
-          {value.length > 0 && !loading && (
+          {(value || '').length > 0 && !loading && (
             <AnimatedPressable
               style={[styles.clearButton, clearButtonAnimatedStyle]}
               onPress={handleClear}

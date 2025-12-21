@@ -6,3 +6,5 @@ export { CameraControls } from './CameraControls';
 export { StepIndicator } from './StepIndicator';
 export { ImagePreview } from './ImagePreview';
 export { UploadProgress } from './UploadProgress';
+export { VerificationProgressIndicator } from './VerificationProgressIndicator';
+export { CameraPermissionGate } from './CameraPermissionGate';

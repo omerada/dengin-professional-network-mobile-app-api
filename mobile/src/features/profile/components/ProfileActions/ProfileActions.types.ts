@@ -1,5 +1,5 @@
 // src/features/profile/components/ProfileActions/ProfileActions.types.ts
-// Meslektaş Design System - ProfileActions Type Definitions
+// Dengin Design System - ProfileActions Type Definitions
 // Oku: mobile-development-guide/ui-ux-modernization/09-PROFILE-REDESIGN.md
 
 /**

@@ -3,21 +3,33 @@
 // Design: Instagram + BeReal inspired, Soft Orange Theme
 // Backend: GET /api/users/me, GET /api/users/{id}
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { View, ScrollView, RefreshControl, Alert, Text, ActivityIndicator, Pressable, TouchableOpacity, Image } from 'react-native';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import React, { memo, useCallback, useMemo } from 'react';
+import { View, ScrollView, Text, ActivityIndicator, Image } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { SCREEN_ANIMATIONS, SAFE_AREA_EDGES, NETWORK_CONFIG } from '@constants';
+import { navigateToPostDetail, navigateToEditProfile, navigateToSettings } from '@core/navigation';
+import { useSemanticHaptic, useLoadingTimeout, useHaptic } from '@shared/hooks';
 
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
 import { useAuthStore } from '@features/auth/stores';
-import { useLogout } from '@features/auth/hooks';
+import { showSuccess, showFollowError, showUnfollowError } from '@shared/utils';
 import { useFollow, useUnfollow } from '@features/social/hooks/useFollow';
 import { useUserPosts } from '@features/feed/hooks';
 import { PostCard } from '@features/feed/components';
-import { Button, Loading, Skeleton, ImageViewer } from '@shared/components';
-import { ProfileBio, ProfileActions } from '../components';
+import {
+  Button,
+  UnifiedLoadingState,
+  SkeletonProfileHeader,
+  CustomRefreshControl,
+  PressableScale,
+  UnifiedEmptyState,
+} from '@shared/components';
+import { ProfileBio, ProfileActions, ProfileStats } from '../components';
+import { ErrorBoundary } from '@core/components';
 import { useMyProfile, useProfile, useProfileStats } from '../hooks';
 import type { ProfileStats as ProfileStatsType } from '../types';
 import type { Post } from '@features/feed/types';
@@ -36,12 +48,15 @@ interface RouteParams {
  * - Skeleton loading states
  * - Staggered post animations
  */
-export const ProfileScreen: React.FC = () => {
+export const ProfileScreen: React.FC = memo(() => {
   const colors = useColors();
   const navigation = useNavigation();
   const route = useRoute();
   const params = route.params as RouteParams | undefined;
   const currentUser = useAuthStore(state => state.user);
+  const { trigger } = useHaptic();
+  const { triggerNavigation, triggerSocial, triggerSystem } = useSemanticHaptic();
+  const toast = useToast();
 
   // Follow mutations
   const followMutation = useFollow();
@@ -71,6 +86,21 @@ export const ProfileScreen: React.FC = () => {
   const isLoading = isOwnProfile ? isLoadingMyProfile : isLoadingOtherProfile;
   const isRefetching = isOwnProfile ? isRefetchingMyProfile : isRefetchingOtherProfile;
 
+  // Loading timeout protection
+  useLoadingTimeout(isLoading && !profile, {
+    timeout: NETWORK_CONFIG.TIMEOUT_DURATION,
+    onTimeout: () => {
+      toast.error('Profil yüklenirken zaman aşımı oluştu. Lütfen tekrar deneyin.');
+    },
+    onRetry: async () => {
+      if (isOwnProfile) {
+        await refetchMyProfile();
+      } else {
+        await refetchOtherProfile();
+      }
+    },
+  });
+
   // Get user ID for stats
   const profileUserId = isOwnProfile ? (myProfile?.id ?? currentUser?.id) : viewedUserId;
 
@@ -89,36 +119,31 @@ export const ProfileScreen: React.FC = () => {
 
   // Combine stats from profile or separate query
   const stats: ProfileStatsType = useMemo(() => {
-    if (profile?.stats) {
-      return profile.stats;
-    }
-    if (profileStats) {
-      return profileStats;
-    }
-    return {
-      postCount: 0,
-      followerCount: 0,
-      followingCount: 0,
-    };
-  }, [profile?.stats, profileStats]);
+    const result = profile?.stats ||
+      profileStats || {
+        postCount: 0,
+        followerCount: 0,
+        followingCount: 0,
+      };
 
-  // Image viewer state
-  const [imageViewerVisible, setImageViewerVisible] = useState(false);
+    return result;
+  }, [profile?.stats, profileStats, profileUserId, isOwnProfile]);
 
-  // Handlers
+  // Handlers - UNIFIED: Navigation helpers with proper typing
   const handleAvatarPress = useCallback(() => {
-    if (profile?.avatarUrl) {
-      setImageViewerVisible(true);
-    }
-  }, [profile?.avatarUrl]);
+    triggerNavigation('navigate');
+    navigateToEditProfile(navigation as any);
+  }, [navigation, triggerNavigation]);
 
   const handleEditPress = useCallback(() => {
-    navigation.navigate('EditProfile' as never);
-  }, [navigation]);
+    triggerNavigation('navigate');
+    navigateToEditProfile(navigation as any);
+  }, [navigation, triggerNavigation]);
 
   const handleSettingsPress = useCallback(() => {
-    navigation.navigate('Settings' as never);
-  }, [navigation]);
+    triggerNavigation('navigate');
+    navigateToSettings(navigation as any);
+  }, [navigation, triggerNavigation]);
 
   const handleRefresh = useCallback(() => {
     if (isOwnProfile) {
@@ -131,10 +156,10 @@ export const ProfileScreen: React.FC = () => {
 
   const handlePostPress = useCallback(
     (postId: number) => {
-      // @ts-expect-error - navigation types not fully typed
-      navigation.navigate('PostDetail', { postId });
+      triggerNavigation('navigate');
+      navigateToPostDetail(navigation as any, { postId });
     },
-    [navigation],
+    [navigation, triggerNavigation],
   );
 
   const handleLoadMorePosts = useCallback(() => {
@@ -147,45 +172,51 @@ export const ProfileScreen: React.FC = () => {
     (isFollowing: boolean) => {
       if (!viewedUserId) return;
 
+      // Critical social action
+      triggerSocial(isFollowing ? 'unfollow' : 'follow');
+
       if (isFollowing) {
         // Currently following, so unfollow
         unfollowMutation.mutate(viewedUserId, {
+          onSuccess: () => {
+            showSuccess(toast, { trigger }, 'Takipten çıkıldı');
+          },
           onError: () => {
-            Alert.alert('Hata', 'Takipten çıkılamadı. Lütfen tekrar deneyin.');
+            showUnfollowError(toast, { trigger }, () => unfollowMutation.mutate(viewedUserId));
           },
         });
       } else {
         // Not following, so follow
         followMutation.mutate(viewedUserId, {
+          onSuccess: () => {
+            showSuccess(toast, { trigger }, 'Takip edildi');
+          },
           onError: () => {
-            Alert.alert('Hata', 'Takip edilemedi. Lütfen tekrar deneyin.');
+            showFollowError(toast, { trigger }, () => followMutation.mutate(viewedUserId));
           },
         });
       }
     },
-    [viewedUserId, followMutation, unfollowMutation],
+    [viewedUserId, followMutation, unfollowMutation, triggerSocial, triggerSystem, toast],
   );
 
-  // Loading state
+  // Early returns for loading and error states
   if (isLoading && !profile) {
     return (
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.background.primary }]}
-        edges={['top']}>
-        <Animated.View entering={FadeIn.duration(300)} style={styles.container}>
-          <Skeleton variant="rectangular" />
-        </Animated.View>
+        edges={SAFE_AREA_EDGES.standard}>
+        <SkeletonProfileHeader />
       </SafeAreaView>
     );
   }
 
-  // No profile found
   if (!profile) {
     return (
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.background.primary }]}
-        edges={['top']}>
-        <Loading message="Profil bulunamadı" />
+        edges={SAFE_AREA_EDGES.standard}>
+        <UnifiedLoadingState strategy="spinner" message="Profil bulunamadı" variant="screen" />
       </SafeAreaView>
     );
   }
@@ -193,122 +224,119 @@ export const ProfileScreen: React.FC = () => {
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
-      edges={['top']}>
+      edges={SAFE_AREA_EDGES.standard}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={handleRefresh}
-            tintColor={colors.interactive.default}
-          />
+          <CustomRefreshControl refreshing={isRefetching} onRefresh={handleRefresh} />
         }>
-        {/* Modern Premium Header with Blurred Avatar Background */}
+        {/* Modern Premium Header */}
         <View style={styles.premiumHeader}>
-          {/* Blurred Avatar Background */}
-          {profile.avatarUrl && (
+          {/* Blurred Background with Avatar */}
+          {profile.avatarUrl ? (
             <Image
               source={{ uri: profile.avatarUrl }}
-              style={[styles.blurredAvatarBackground, { opacity: 0.15 }]}
-              blurRadius={0.1}
+              style={styles.blurredBackground}
+              blurRadius={8}
+            />
+          ) : (
+            <View
+              style={[styles.blurredBackground, { backgroundColor: colors.interactive.focus }]}
             />
           )}
-          <View style={[styles.blurredBackground, { backgroundColor: colors.interactive.focus }]} />
 
           {/* Settings Button */}
           {isOwnProfile && (
-            <TouchableOpacity
+            <PressableScale
               onPress={handleSettingsPress}
-              style={[styles.settingsButtonTop, { backgroundColor: 'rgba(255,255,255,0.3)' }]}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Icon name="settings-outline" size={22} color="#fff" />
-            </TouchableOpacity>
+              activeScale={0.9}
+              haptic
+              hapticType="light"
+              style={[styles.settingsButtonTop, { backgroundColor: colors.background.overlay }]}>
+              <Icon name="settings-outline" size={22} color={colors.text.inverse} />
+            </PressableScale>
           )}
 
           {/* Centered Profile Content */}
           <View style={styles.profileContent}>
             {/* Avatar with Glow */}
-            <Animated.View entering={FadeIn.duration(500)} style={styles.avatarGlowContainer}>
+            <Animated.View
+              entering={SCREEN_ANIMATIONS.heroEnter}
+              style={styles.avatarGlowContainer}>
               <View style={[styles.avatarGlow, { backgroundColor: colors.interactive.default }]} />
-              <Pressable onPress={isOwnProfile ? handleAvatarPress : undefined}>
+              <PressableScale
+                onPress={isOwnProfile ? handleAvatarPress : undefined}
+                activeScale={0.95}
+                disabled={!isOwnProfile}>
                 {profile.avatarUrl ? (
-                  <Image
-                    source={{ uri: profile.avatarUrl }}
-                    style={styles.premiumAvatar}
-                  />
+                  <Image source={{ uri: profile.avatarUrl }} style={styles.premiumAvatar} />
                 ) : (
-                  <View style={[styles.premiumAvatar, styles.avatarPlaceholder, { backgroundColor: colors.interactive.focus }]}>
+                  <View
+                    style={[
+                      styles.premiumAvatar,
+                      styles.avatarPlaceholder,
+                      { backgroundColor: colors.interactive.focus },
+                    ]}>
                     <Text style={[styles.avatarInitials, { color: colors.interactive.default }]}>
-                      {profile.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                      {profile.fullName
+                        .split(' ')
+                        .map(n => n[0])
+                        .join('')
+                        .toUpperCase()
+                        .slice(0, 2)}
                     </Text>
                   </View>
                 )}
-              </Pressable>
+              </PressableScale>
             </Animated.View>
 
             {/* Full Name - Big Bold */}
-            <Animated.View entering={FadeInDown.delay(200).duration(400)}>
-              <Text style={[styles.fullNameTitle, { color: colors.text.primary }]}>
+            <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(0)}>
+              <Text style={[styles.professionTitle, { color: colors.text.primary }]}>
                 {profile.fullName}
               </Text>
             </Animated.View>
 
-            {/* Profession - Small */}
-            <Animated.View entering={FadeInDown.delay(300).duration(400)}>
-              <Text style={[styles.professionSubtitle, { color: colors.text.secondary }]}>
-                {('professionName' in profile ? profile.professionName : profile.profession?.name) || 'Meslek belirtilmemiş'}
-              </Text>
-            </Animated.View>
+            {/* Profession - Subtitle with Icon */}
+            {('professionName' in profile && profile.professionName) ||
+            ('profession' in profile && profile.profession?.name) ? (
+              <Animated.View
+                entering={SCREEN_ANIMATIONS.listItemEnter(1)}
+                style={styles.professionRow}>
+                <Icon
+                  name="briefcase"
+                  size={14}
+                  color={colors.text.secondary}
+                  style={styles.professionIcon}
+                />
+                <Text style={[styles.professionSubtitle, { color: colors.text.secondary }]}>
+                  {'professionName' in profile ? profile.professionName : profile.profession?.name}
+                </Text>
+                {profile.isProfessionVerified && (
+                  <Icon
+                    name="checkmark-circle"
+                    size={16}
+                    color={colors.status.success}
+                    style={{ marginLeft: 4 }}
+                  />
+                )}
+              </Animated.View>
+            ) : null}
 
-            {/* Stats - Horizontal Big Numbers */}
-            <Animated.View entering={FadeInDown.delay(400).duration(400)} style={styles.statsRow}>
-              <View style={styles.statBox}>
-                <Text style={[styles.statNumber, { color: colors.text.primary }]}>
-                  {stats.postCount}
-                </Text>
-                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>
-                  Gönderi
-                </Text>
-              </View>
-
-              <View style={[styles.statDivider, { backgroundColor: colors.border.subtle }]} />
-
-              <Pressable 
-                style={styles.statBox}
-                onPress={() => {
-                  // @ts-expect-error - navigation types
-                  navigation.navigate('FollowersList', { userId: profileUserId });
-                }}>
-                <Text style={[styles.statNumber, { color: colors.text.primary }]}>
-                  {stats.followerCount >= 1000 ? `${(stats.followerCount / 1000).toFixed(1)}k` : stats.followerCount}
-                </Text>
-                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>
-                  Takipçi
-                </Text>
-              </Pressable>
-
-              <View style={[styles.statDivider, { backgroundColor: colors.border.subtle }]} />
-
-              <Pressable 
-                style={styles.statBox}
-                onPress={() => {
-                  // @ts-expect-error - navigation types
-                  navigation.navigate('FollowingList', { userId: profileUserId });
-                }}>
-                <Text style={[styles.statNumber, { color: colors.text.primary }]}>
-                  {stats.followingCount >= 1000 ? `${(stats.followingCount / 1000).toFixed(1)}k` : stats.followingCount}
-                </Text>
-                <Text style={[styles.statLabel, { color: colors.text.secondary }]}>
-                  Takip
-                </Text>
-              </Pressable>
-            </Animated.View>
+            {/* Stats - Modern ProfileStats Component with Haptics */}
+            {profileUserId && (
+              <ProfileStats stats={stats} userId={profileUserId} interactive={true} />
+            )}
           </View>
         </View>
 
         {/* Bio */}
-        {'bio' in profile && profile.bio && <ProfileBio bio={profile.bio} />}
+        {'bio' in profile && profile.bio && (
+          <Animated.View entering={SCREEN_ANIMATIONS.contentEnter} style={styles.bioSection}>
+            <ProfileBio bio={profile.bio} />
+          </Animated.View>
+        )}
 
         {/* Actions for other users */}
         {!isOwnProfile && 'userId' in profile && profile.userId && (
@@ -324,7 +352,7 @@ export const ProfileScreen: React.FC = () => {
         {/* Own profile action - Edit Profile */}
         {isOwnProfile && (
           <Animated.View
-            entering={FadeInDown.delay(350).duration(400)}
+            entering={SCREEN_ANIMATIONS.listItemEnter(2)}
             style={styles.editProfileButton}>
             <Button
               title="Profili Düzenle"
@@ -337,18 +365,36 @@ export const ProfileScreen: React.FC = () => {
         )}
 
         {/* Posts section */}
-        <Animated.View entering={FadeInDown.delay(400).duration(400)} style={styles.postsSection}>
+        <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(3)} style={styles.postsSection}>
           <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Gönderiler</Text>
           {isLoadingPosts && userPosts.length === 0 ? (
             <View style={styles.postsLoading}>
               <ActivityIndicator size="small" color={colors.interactive.default} />
             </View>
           ) : userPosts.length === 0 ? (
-            <View style={styles.emptyPosts}>
-              <Text style={[styles.emptyText, { color: colors.text.secondary }]}>
-                Henüz gönderi yok
-              </Text>
-            </View>
+            <UnifiedEmptyState
+              icon="images-outline"
+              title={isOwnProfile ? 'Henüz Gönderi Paylaşmadınız' : 'Henüz Gönderi Yok'}
+              description={
+                isOwnProfile
+                  ? 'İlk gönderinizi oluşturarak ağınızla paylaşın'
+                  : 'Bu kullanıcı henüz gönderi paylaşmamış'
+              }
+              primaryAction={
+                isOwnProfile
+                  ? {
+                      label: 'Gönderi Oluştur',
+                      icon: 'add-circle-outline',
+                      onPress: () => {
+                        triggerNavigation('navigate');
+                        (navigation as any).navigate('FeedTab', {
+                          screen: 'CreatePost',
+                        });
+                      },
+                    }
+                  : undefined
+              }
+            />
           ) : (
             <>
               {userPosts.map((post: Post, index: number) => {
@@ -356,16 +402,19 @@ export const ProfileScreen: React.FC = () => {
                 if (!post || !post.postId) return null;
 
                 return (
-                  <PostCard
+                  <Animated.View
                     key={post.postId}
-                    post={post}
-                    index={index}
-                    onLike={() => {}}
-                    onComment={() => handlePostPress(Number(post.postId))}
-                    onShare={() => {}}
-                    onBookmark={() => {}}
-                    onMenuPress={() => {}}
-                  />
+                    entering={SCREEN_ANIMATIONS.listItemEnter(index)}>
+                    <PostCard
+                      post={post}
+                      index={index}
+                      onLike={() => {}}
+                      onComment={() => handlePostPress(Number(post.postId))}
+                      onShare={() => {}}
+                      onBookmark={() => {}}
+                      onMenuPress={() => {}}
+                    />
+                  </Animated.View>
                 );
               })}
               {hasNextPage && (
@@ -383,18 +432,16 @@ export const ProfileScreen: React.FC = () => {
           )}
         </Animated.View>
       </ScrollView>
-
-      {/* Image Viewer - Tam Ekran Avatar Görüntüleme */}
-      {profile?.avatarUrl && (
-        <ImageViewer
-          uri={profile.avatarUrl}
-          visible={imageViewerVisible}
-          onClose={() => setImageViewerVisible(false)}
-          alt={`${profile.fullName} profil fotoğrafı`}
-        />
-      )}
     </SafeAreaView>
   );
-};
+});
 
-export default ProfileScreen;
+ProfileScreen.displayName = 'ProfileScreen';
+
+export default function ProfileScreenWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <ProfileScreen />
+    </ErrorBoundary>
+  );
+}

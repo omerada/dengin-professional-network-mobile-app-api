@@ -1,5 +1,5 @@
 // src/features/profile/components/ProfileBio/index.tsx
-// Meslektaş Design System - Modern ProfileBio Component
+// Dengin Design System - Modern ProfileBio Component
 // Oku: mobile-development-guide/ui-ux-modernization/09-PROFILE-REDESIGN.md
 
 import React, { memo, useState, useCallback } from 'react';
@@ -12,7 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { spring } from '@theme/animations';
 
 import { styles } from './ProfileBio.styles';
@@ -38,7 +38,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
  */
 export const ProfileBio: React.FC<ProfileBioProps> = memo(({ bio, maxLines = 3, testID }) => {
   const colors = useColors();
-  const { trigger } = useHaptic();
+  const { triggerNavigation } = useSemanticHaptic();
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [shouldShowMore, setShouldShowMore] = useState(false);
@@ -62,13 +62,13 @@ export const ProfileBio: React.FC<ProfileBioProps> = memo(({ bio, maxLines = 3, 
 
   // Toggle expanded state
   const toggleExpanded = useCallback(() => {
-    trigger('selection');
-    buttonScale.value = withSpring(0.95, spring.press);
+    triggerNavigation('navigate');
+    buttonScale.value = withSpring(0.96, spring.press);
     setTimeout(() => {
       buttonScale.value = withSpring(1, spring.snappy);
     }, 100);
     setIsExpanded(prev => !prev);
-  }, [trigger, buttonScale]);
+  }, [triggerNavigation, buttonScale]);
 
   if (!bio) {
     return null;

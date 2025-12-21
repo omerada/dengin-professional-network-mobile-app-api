@@ -3,7 +3,8 @@
 // Instagram kalitesinde medya görüntüleme
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { View, Text, Pressable, Image, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { ProgressiveImage } from '@shared/components';
 import Animated, {
   FadeIn,
   useAnimatedStyle,
@@ -42,7 +43,7 @@ export const MessageAttachment: React.FC<MessageAttachmentProps> = memo(
     const isImage = contentType?.startsWith('image/');
 
     const handlePressIn = useCallback(() => {
-      scale.value = withSpring(0.97, { damping: 15 });
+      scale.value = withSpring(0.96, { damping: 15 });
     }, [scale]);
 
     const handlePressOut = useCallback(() => {
@@ -91,7 +92,12 @@ export const MessageAttachment: React.FC<MessageAttachmentProps> = memo(
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
             style={styles.imageContainer}>
-            <Image source={{ uri: url }} style={styles.image} resizeMode="cover" />
+            <ProgressiveImage
+              source={{ uri: url }}
+              style={styles.image}
+              resizeMode="cover"
+              showLoadingIndicator
+            />
           </Pressable>
         </Animated.View>
       );

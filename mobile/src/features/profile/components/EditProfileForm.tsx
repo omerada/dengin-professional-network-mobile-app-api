@@ -344,49 +344,49 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
 };
 
 const styles = StyleSheet.create({
+  bioInput: {
+    minHeight: 100,
+    textAlignVertical: 'top',
+  },
+  buttonContainer: {
+    gap: spacing.md,
+    marginTop: spacing.xl,
+  },
+  cancelButton: {
+    // Ghost variant styling
+  },
+  charCount: {
+    ...typography.caption,
+    marginTop: spacing.xs,
+    textAlign: 'right',
+  },
   container: {
     flex: 1,
-  },
-  scrollContent: {
-    padding: spacing.lg,
   },
   fieldContainer: {
     marginBottom: spacing.lg,
   },
-  label: {
-    ...typography.subtitle2,
+  genderButton: {
     marginBottom: spacing.xs,
-  },
-  charCount: {
-    ...typography.caption,
-    textAlign: 'right',
-    marginTop: spacing.xs,
-  },
-  helperText: {
-    ...typography.caption,
-    marginTop: spacing.xs,
-  },
-  bioInput: {
-    minHeight: 100,
-    textAlignVertical: 'top',
   },
   genderContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
   },
-  genderButton: {
+  helperText: {
+    ...typography.caption,
+    marginTop: spacing.xs,
+  },
+  label: {
+    ...typography.subtitle2,
     marginBottom: spacing.xs,
   },
-  buttonContainer: {
-    marginTop: spacing.xl,
-    gap: spacing.md,
+  scrollContent: {
+    padding: spacing.lg,
   },
   submitButton: {
     // Default styling
-  },
-  cancelButton: {
-    // Ghost variant styling
   },
 });
 

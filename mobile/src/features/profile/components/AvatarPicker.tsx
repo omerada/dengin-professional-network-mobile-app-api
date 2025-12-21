@@ -1,25 +1,21 @@
 // src/features/profile/components/AvatarPicker.tsx
-// Modern Avatar Picker - Instagram-style with Bottom Sheet
+// Avatar selection and upload component
 // Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
 
 import React, { memo, useCallback, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  Alert,
-  ActivityIndicator,
-  Modal,
-  Pressable,
-  Platform,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
+import { ActionSheet } from '@shared/components';
 import { spacing, fontSize } from '@theme';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic, useHaptic } from '@shared/hooks';
+import {
+  showCameraPermissionError,
+  showGalleryPermissionError,
+  showOperationError,
+} from '@shared/utils';
 
 interface AvatarPickerProps {
   /**
@@ -62,7 +58,11 @@ interface AvatarPickerProps {
 export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
   ({ currentAvatarUrl, fullName, onImageSelected, onRemove, isLoading = false, size = 120 }) => {
     const colors = useColors();
-    const haptic = useHaptic();
+    const toast = useToast();
+    const { trigger } = useHaptic();
+    const { triggerMedia, triggerSystem } = useSemanticHaptic();
+    const [showActionSheet, setShowActionSheet] = useState(false);
+    const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
     const [previewUri, setPreviewUri] = useState<string | null>(null);
 
     // Generate initials from full name
@@ -83,7 +83,7 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
 
         if (status !== 'granted') {
-          Alert.alert('İzin Gerekli', 'Fotoğraf çekmek için kamera iznine ihtiyacımız var.');
+          showCameraPermissionError(toast, { trigger });
           return;
         }
 
@@ -97,14 +97,13 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
           const uri = result.assets[0].uri;
           setPreviewUri(uri);
           onImageSelected(uri);
-          haptic.success();
+          triggerMedia('capture');
         }
       } catch (error) {
-        haptic.error();
         console.error('[AvatarPicker] Camera error:', error);
-        Alert.alert('Hata', 'Kamera açılırken bir hata oluştu.');
+        showOperationError(toast, { trigger }, 'Kamera açılırken bir hata oluştu.');
       }
-    }, [onImageSelected]);
+    }, [onImageSelected, triggerMedia, trigger]);
 
     // Open gallery
     const handleChooseFromGallery = useCallback(async () => {
@@ -113,10 +112,7 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
         if (status !== 'granted') {
-          Alert.alert(
-            'İzin Gerekli',
-            'Galeriden fotoğraf seçmek için medya kütüphanesi iznine ihtiyacımız var.',
-          );
+          showGalleryPermissionError(toast, { trigger });
           return;
         }
 
@@ -130,212 +126,158 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
           const uri = result.assets[0].uri;
           setPreviewUri(uri);
           onImageSelected(uri);
-          haptic.success();
+          triggerMedia('capture');
         }
       } catch (error) {
-        haptic.error();
         console.error('[AvatarPicker] Gallery error:', error);
-        Alert.alert('Hata', 'Galeri açılırken bir hata oluştu.');
+        showOperationError(toast, { trigger }, 'Galeri açılırken bir hata oluştu.');
       }
-    }, [onImageSelected]);
+    }, [onImageSelected, triggerMedia, triggerSystem]);
 
     // Remove avatar
     const handleRemove = useCallback(() => {
-      haptic.warning();
-      Alert.alert('Fotoğrafı Kaldır', 'Profil fotoğrafınızı kaldırmak istediğinize emin misiniz?', [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Kaldır',
-          style: 'destructive',
-          onPress: () => {
-            setPreviewUri(null);
-            onRemove?.();
-            haptic.success();
-          },
-        },
-      ]);
-    }, [onRemove, haptic]);
+      triggerSystem('alert');
+      setShowRemoveConfirm(true);
+    }, [triggerSystem]);
 
-    // Show bottom sheet
-    const [sheetVisible, setSheetVisible] = useState(false);
+    const confirmRemove = useCallback(() => {
+      setPreviewUri(null);
+      onRemove?.();
+      triggerSystem('success');
+      setShowRemoveConfirm(false);
+    }, [onRemove, triggerSystem]);
 
+    // Show options
     const handlePress = useCallback(() => {
-      haptic.light();
-      setSheetVisible(true);
-    }, [haptic]);
-
-    const handleCloseSheet = useCallback(() => {
-      setSheetVisible(false);
-    }, []);
-
-    const handleSelectCamera = useCallback(() => {
-      handleCloseSheet();
-      setTimeout(() => handleTakePhoto(), 300);
-    }, [handleTakePhoto, handleCloseSheet]);
-
-    const handleSelectGallery = useCallback(() => {
-      handleCloseSheet();
-      setTimeout(() => handleChooseFromGallery(), 300);
-    }, [handleChooseFromGallery, handleCloseSheet]);
-
-    const handleSelectRemove = useCallback(() => {
-      handleCloseSheet();
-      setTimeout(() => handleRemove(), 300);
-    }, [handleRemove, handleCloseSheet]);
+      triggerMedia('select');
+      setShowActionSheet(true);
+    }, [triggerMedia]);
 
     return (
-      <>
-        <View style={styles.container}>
-          <TouchableOpacity
-            style={[styles.avatarContainer, { width: size, height: size, borderRadius: size / 2 }]}
-            onPress={handlePress}
-            disabled={isLoading}
-            activeOpacity={0.8}>
-            {displayUri ? (
-              <Image
-                source={{ uri: displayUri }}
-                style={[
-                  styles.avatar,
-                  {
-                    width: size,
-                    height: size,
-                    borderRadius: size / 2,
-                    borderColor: colors.border.subtle,
-                  },
-                ]}
-              />
-            ) : (
-              <View
-                style={[
-                  styles.avatar,
-                  styles.avatarPlaceholder,
-                  {
-                    width: size,
-                    height: size,
-                    borderRadius: size / 2,
-                    backgroundColor: colors.interactive.subtle,
-                  },
-                ]}>
-                <Text
-                  style={[
-                    styles.initials,
-                    { color: colors.interactive.default, fontSize: size * 0.32 },
-                  ]}>
-                  {initials}
-                </Text>
-              </View>
-            )}
-
-            {/* Overlay */}
+      <View style={styles.container}>
+        <TouchableOpacity
+          style={[styles.avatarContainer, { width: size, height: size, borderRadius: size / 2 }]}
+          onPress={handlePress}
+          disabled={isLoading}
+          activeOpacity={0.8}>
+          {displayUri ? (
+            <Image
+              source={{ uri: displayUri }}
+              style={[
+                styles.avatar,
+                {
+                  width: size,
+                  height: size,
+                  borderRadius: size / 2,
+                  borderColor: colors.border.default,
+                },
+              ]}
+            />
+          ) : (
             <View
               style={[
-                styles.overlay,
+                styles.avatar,
+                styles.avatarPlaceholder,
                 {
-                  backgroundColor: colors.background.overlay,
+                  width: size,
+                  height: size,
                   borderRadius: size / 2,
+                  backgroundColor: colors.interactive.subtle,
                 },
               ]}>
-              {isLoading ? (
-                <ActivityIndicator color={colors.text.inverse} size="large" />
-              ) : (
-                <>
-                  <Icon name="camera" size={24} color={colors.text.inverse} />
-                  <Text style={[styles.overlayText, { color: colors.text.inverse }]}>Değiştir</Text>
-                </>
-              )}
-            </View>
-          </TouchableOpacity>
-        </View>
-
-        {/* Modern Bottom Sheet */}
-        <Modal
-          visible={sheetVisible}
-          transparent
-          animationType="fade"
-          onRequestClose={handleCloseSheet}>
-          <Pressable style={styles.modalOverlay} onPress={handleCloseSheet}>
-            <Pressable
-              style={[styles.sheetContainer, { backgroundColor: colors.background.primary }]}
-              onPress={e => e.stopPropagation()}>
-              {/* Handle Bar */}
-              <View style={[styles.handleBar, { backgroundColor: colors.border.default }]} />
-
-              {/* Title */}
-              <Text style={[styles.sheetTitle, { color: colors.text.primary }]}>
-                Profil Fotoğrafı
+              <Text
+                style={[
+                  styles.initials,
+                  { color: colors.interactive.default, fontSize: size * 0.32 },
+                ]}>
+                {initials}
               </Text>
+            </View>
+          )}
 
-              {/* Options */}
-              <View style={styles.optionsContainer}>
-                {/* Camera */}
-                <Pressable
-                  style={[styles.option, { borderBottomColor: colors.border.subtle }]}
-                  onPress={handleSelectCamera}>
-                  <View style={[styles.optionIcon, { backgroundColor: colors.interactive.subtle }]}>
-                    <Icon name="camera" size={24} color={colors.interactive.default} />
-                  </View>
-                  <View style={styles.optionContent}>
-                    <Text style={[styles.optionTitle, { color: colors.text.primary }]}>
-                      Fotoğraf Çek
-                    </Text>
-                    <Text style={[styles.optionSubtitle, { color: colors.text.tertiary }]}>
-                      Kamera ile yeni fotoğraf çek
-                    </Text>
-                  </View>
-                  <Icon name="chevron-forward" size={20} color={colors.text.tertiary} />
-                </Pressable>
+          {/* Overlay */}
+          <View
+            style={[
+              styles.overlay,
+              {
+                backgroundColor: colors.background.overlay,
+                borderRadius: size / 2,
+              },
+            ]}>
+            {isLoading ? (
+              <ActivityIndicator color={colors.text.inverse} size="large" />
+            ) : (
+              <>
+                <Icon name="camera" size={24} color={colors.text.inverse} />
+                <Text style={[styles.overlayText, { color: colors.text.inverse }]}>Değiştir</Text>
+              </>
+            )}
+          </View>
+        </TouchableOpacity>
 
-                {/* Gallery */}
-                <Pressable
-                  style={[styles.option, { borderBottomColor: colors.border.subtle }]}
-                  onPress={handleSelectGallery}>
-                  <View style={[styles.optionIcon, { backgroundColor: colors.interactive.subtle }]}>
-                    <Icon name="images" size={24} color={colors.interactive.default} />
-                  </View>
-                  <View style={styles.optionContent}>
-                    <Text style={[styles.optionTitle, { color: colors.text.primary }]}>
-                      Galeriden Seç
-                    </Text>
-                    <Text style={[styles.optionSubtitle, { color: colors.text.tertiary }]}>
-                      Mevcut fotoğraflarından seç
-                    </Text>
-                  </View>
-                  <Icon name="chevron-forward" size={20} color={colors.text.tertiary} />
-                </Pressable>
+        <Text style={[styles.hint, { color: colors.text.secondary }]}>
+          Profil fotoğrafı eklemek için dokunun
+        </Text>
 
-                {/* Remove (only if avatar exists) */}
-                {displayUri && onRemove && (
-                  <Pressable
-                    style={styles.option}
-                    onPress={handleSelectRemove}>
-                    <View style={[styles.optionIcon, { backgroundColor: '#FEE2E2' }]}>
-                      <Icon name="trash" size={24} color={colors.status.error} />
-                    </View>
-                    <View style={styles.optionContent}>
-                      <Text style={[styles.optionTitle, { color: colors.status.error }]}>
-                        Fotoğrafı Kaldır
-                      </Text>
-                      <Text style={[styles.optionSubtitle, { color: colors.text.tertiary }]}>
-                        Profil fotoğrafını sil
-                      </Text>
-                    </View>
-                    <Icon name="chevron-forward" size={20} color={colors.text.tertiary} />
-                  </Pressable>
-                )}
-              </View>
+        {/* Avatar options ActionSheet */}
+        <ActionSheet
+          visible={showActionSheet}
+          onClose={() => setShowActionSheet(false)}
+          title="Profil Fotoğrafı"
+          message="Bir seçenek seçin"
+          options={[
+            {
+              id: 'take-photo',
+              label: 'Fotoğraf Çek',
+              icon: 'camera',
+              onPress: () => {
+                setShowActionSheet(false);
+                handleTakePhoto();
+              },
+            },
+            {
+              id: 'choose-gallery',
+              label: 'Galeriden Seç',
+              icon: 'images',
+              onPress: () => {
+                setShowActionSheet(false);
+                handleChooseFromGallery();
+              },
+            },
+            ...(displayUri && onRemove
+              ? [
+                  {
+                    id: 'remove-photo',
+                    label: 'Fotoğrafı Kaldır',
+                    icon: 'trash',
+                    destructive: true,
+                    onPress: () => {
+                      setShowActionSheet(false);
+                      handleRemove();
+                    },
+                  },
+                ]
+              : []),
+          ]}
+        />
 
-              {/* Cancel Button */}
-              <Pressable
-                style={[styles.cancelButton, { backgroundColor: colors.background.secondary }]}
-                onPress={handleCloseSheet}>
-                <Text style={[styles.cancelText, { color: colors.text.secondary }]}>
-                  İptal
-                </Text>
-              </Pressable>
-            </Pressable>
-          </Pressable>
-        </Modal>
-      </>
+        {/* Remove confirmation ActionSheet */}
+        <ActionSheet
+          visible={showRemoveConfirm}
+          onClose={() => setShowRemoveConfirm(false)}
+          title="Fotoğrafı Kaldır"
+          message="Profil fotoğrafınızı kaldırmak istediğinize emin misiniz?"
+          options={[
+            {
+              id: 'confirm-remove',
+              label: 'Kaldır',
+              destructive: true,
+              onPress: confirmRemove,
+            },
+          ]}
+          cancelLabel="İptal"
+        />
+      </View>
     );
   },
 );
@@ -343,112 +285,36 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
 AvatarPicker.displayName = 'AvatarPicker';
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    paddingVertical: 16,
+  avatar: {
+    borderWidth: 3,
   },
   avatarContainer: {
     position: 'relative',
   },
-  avatar: {
-    borderWidth: 4,
-  },
   avatarPlaceholder: {
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  container: {
+    alignItems: 'center',
+    paddingVertical: spacing.lg,
+  },
+  hint: {
+    fontSize: fontSize.sm,
+    marginTop: spacing.sm,
   },
   initials: {
     fontWeight: '700',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
     opacity: 0.7,
   },
   overlayText: {
-    fontSize: 12,
+    fontSize: fontSize.xs,
     fontWeight: '600',
-    marginTop: 4,
-  },
-
-  // ==================== BOTTOM SHEET ====================
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  sheetContainer: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingHorizontal: 20,
-    paddingBottom: Platform.OS === 'ios' ? 34 : 20,
-    paddingTop: 12,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.15,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 16,
-      },
-    }),
-  },
-  handleBar: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: 20,
-  },
-  sheetTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 20,
-    letterSpacing: 0.3,
-  },
-  optionsContainer: {
-    marginBottom: 16,
-  },
-  option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-  },
-  optionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 16,
-  },
-  optionContent: {
-    flex: 1,
-  },
-  optionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 2,
-    letterSpacing: 0.2,
-  },
-  optionSubtitle: {
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  cancelButton: {
-    height: 50,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
-  },
-  cancelText: {
-    fontSize: 16,
-    fontWeight: '600',
-    letterSpacing: 0.3,
+    marginTop: 2,
   },
 });

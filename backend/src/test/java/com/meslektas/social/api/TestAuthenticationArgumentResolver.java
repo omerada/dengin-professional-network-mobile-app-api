@@ -1,6 +1,6 @@
-package com.meslektas.social.api;
+package com.dengin.social.api;
 
-import com.meslektas.identity.infrastructure.security.UserDetailsImpl;
+import com.dengin.identity.infrastructure.security.UserDetailsImpl;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -39,7 +39,7 @@ public class TestAuthenticationArgumentResolver implements HandlerMethodArgument
             WebDataBinderFactory binderFactory) {
         return new UserDetailsImpl(
                 userId,
-                "test@meslektas.com",
+                "test@dengin.com",
                 "Test",
                 "User",
                 "password",

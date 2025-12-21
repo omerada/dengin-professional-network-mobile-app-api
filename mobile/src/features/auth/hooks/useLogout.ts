@@ -5,7 +5,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { authApi, tokenService } from '../services';
 import { useAuthStore } from '../stores';
-import { resetNavigation } from '@core/navigation/AppNavigator';
+import { resetNavigation } from '@core/navigation';
 
 /**
  * Logout hook

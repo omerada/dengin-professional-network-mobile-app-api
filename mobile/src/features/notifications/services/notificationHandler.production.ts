@@ -216,32 +216,24 @@ class NotificationHandler {
   }
 
   private navigateToProfile(userId: string): void {
-    navigationRef.navigate('Main', {
-      screen: 'FeedTab',
-      params: {
-        screen: 'Profile',
-        params: { userId },
-      },
-    });
+    // Navigate to Profile (top-level route)
+    const userIdNum = parseInt(userId, 10);
+    if (!isNaN(userIdNum)) {
+      navigationRef.navigate('Profile', { userId: userIdNum });
+    }
   }
 
   private navigateToVerification(): void {
-    navigationRef.navigate('Main', {
-      screen: 'NotificationsTab',
-      params: {
-        screen: 'VerificationStatus',
-      },
-    });
+    // Navigate to Verification Status (top-level route)
+    navigationRef.navigate('VerificationStatus');
   }
 
   private navigateToPost(postId: string): void {
-    navigationRef.navigate('Main', {
-      screen: 'FeedTab',
-      params: {
-        screen: 'PostDetail',
-        params: { postId },
-      },
-    });
+    // Navigate to PostDetail (top-level route)
+    const postIdNum = parseInt(postId, 10);
+    if (!isNaN(postIdNum)) {
+      navigationRef.navigate('PostDetail', { postId: postIdNum });
+    }
   }
 
   private navigateToFeed(): void {

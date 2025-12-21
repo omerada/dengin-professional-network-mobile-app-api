@@ -1,5 +1,5 @@
 // src/shared/types/animation.types.ts
-// Meslektaş Design System - Animation Types
+// Dengin Design System - Animation Types
 // Oku: mobile-development-guide/ui-ux-modernization/14-SPRINT-IMPLEMENTATION-PLAN.md
 
 import { Easing as ReanimatedEasing } from 'react-native-reanimated';

@@ -6,6 +6,7 @@ import React, { memo } from 'react';
 import { View, Image, StyleSheet, Pressable, ScrollView, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
+import { borderRadius } from '@theme';
 import type { LocalImage } from '../types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -64,39 +65,39 @@ export const ImagePreviewGrid: React.FC<ImagePreviewGridProps> = memo(
 ImagePreviewGrid.displayName = 'ImagePreviewGrid';
 
 const styles = StyleSheet.create({
+  addButton: {
+    alignItems: 'center',
+    borderRadius: borderRadius.md,
+    borderStyle: 'dashed',
+    borderWidth: 2,
+    height: IMAGE_SIZE,
+    justifyContent: 'center',
+    width: IMAGE_SIZE,
+  },
   container: {
     paddingVertical: 12,
   },
-  scrollContent: {
-    paddingHorizontal: 16,
+  image: {
+    borderRadius: borderRadius.md,
+    height: IMAGE_SIZE,
+    width: IMAGE_SIZE,
   },
   imageWrapper: {
     marginRight: 8,
     position: 'relative',
   },
-  image: {
-    width: IMAGE_SIZE,
-    height: IMAGE_SIZE,
-    borderRadius: 8,
-  },
   removeButton: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    width: 22,
+    alignItems: 'center',
+    borderRadius: borderRadius.lg,
     height: 22,
-    borderRadius: 11,
     justifyContent: 'center',
-    alignItems: 'center',
+    position: 'absolute',
+    right: 4,
+    top: 4,
+    width: 22,
   },
-  addButton: {
-    width: IMAGE_SIZE,
-    height: IMAGE_SIZE,
-    borderRadius: 8,
-    borderWidth: 2,
-    borderStyle: 'dashed',
-    justifyContent: 'center',
-    alignItems: 'center',
+  scrollContent: {
+    paddingHorizontal: 16,
   },
 });
 

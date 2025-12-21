@@ -1,15 +1,15 @@
-package com.meslektas.identity.api;
+package com.dengin.identity.api;
 
+import com.dengin.identity.api.AuthController;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.meslektas.identity.application.dto.request.LoginRequest;
-import com.meslektas.identity.application.dto.request.PasswordResetConfirmRequest;
-import com.meslektas.identity.application.dto.request.PasswordResetRequest;
-import com.meslektas.identity.application.dto.request.RegisterRequest;
-import com.meslektas.identity.application.dto.response.LoginResponse;
-import com.meslektas.identity.application.dto.response.UserResponse;
-import com.meslektas.identity.application.service.AuthService;
-import com.meslektas.identity.application.service.PasswordResetService;
-import com.meslektas.common.exception.BusinessException;
+import com.dengin.identity.application.dto.request.LoginRequest;
+import com.dengin.identity.application.dto.request.PasswordResetConfirmRequest;
+import com.dengin.identity.application.dto.request.PasswordResetRequest;
+import com.dengin.identity.application.dto.request.RegisterRequest;
+import com.dengin.identity.application.dto.response.LoginResponse;
+import com.dengin.identity.application.dto.response.UserResponse;
+import com.dengin.identity.application.service.AuthService;
+import com.dengin.identity.application.service.PasswordResetService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

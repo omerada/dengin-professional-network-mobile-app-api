@@ -140,7 +140,7 @@ jest.mock('react-native-reanimated', () => ({
   runOnUI: jest.fn((fn: Function) => fn),
   interpolate: jest.fn(),
   interpolateColor: jest.fn(),
-  Extrapolate: { CLAMP: 'clamp', EXTEND: 'extend', IDENTITY: 'identity' },
+  Extrapolation: { CLAMP: 'clamp', EXTEND: 'extend', IDENTITY: 'identity' },
   createAnimatedComponent: (component: any) => component,
   View: require('react-native').View,
   Text: require('react-native').Text,
@@ -285,7 +285,7 @@ jest.mock('@react-native-async-storage/async-storage', () => {
     ...mockStorage,
     getItem: jest.fn().mockImplementation((key: string) => {
       // Return null immediately for theme to avoid loading state
-      if (key === 'meslektas_theme') {
+      if (key === 'dengin_theme') {
         return Promise.resolve(null);
       }
       return mockStorage.getItem(key);

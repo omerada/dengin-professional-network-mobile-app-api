@@ -1,5 +1,5 @@
 // src/features/profile/components/ParallaxProfileHeader/index.tsx
-// Meslektaş Design System - ParallaxProfileHeader Component
+// Dengin Design System - ParallaxProfileHeader Component
 // Oku: mobile-development-guide/ui-ux-modernization/10-PROFILE-EXPERIENCE.md
 
 import React, { memo, useCallback, useMemo } from 'react';
@@ -9,14 +9,14 @@ import Animated, {
   useSharedValue,
   withSpring,
   interpolate,
-  Extrapolate,
+  Extrapolation,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { Button } from '@shared/components';
 import { spring } from '@theme/animations';
 
@@ -63,7 +63,7 @@ export const ParallaxProfileHeader: React.FC<ParallaxProfileHeaderProps> = memo(
   }) => {
     const colors = useColors();
     const insets = useSafeAreaInsets();
-    const { trigger } = useHaptic();
+    const { triggerMedia, triggerNavigation, triggerSocial } = useSemanticHaptic();
 
     // Local animation values
     const avatarScale = useSharedValue(1);
@@ -87,7 +87,7 @@ export const ParallaxProfileHeader: React.FC<ParallaxProfileHeaderProps> = memo(
         scrollY.value,
         [0, HEADER_CONSTANTS.SCROLL_DISTANCE],
         [HEADER_CONSTANTS.MAX_HEIGHT, HEADER_CONSTANTS.MIN_HEIGHT],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
       return { height };
     });
@@ -98,9 +98,9 @@ export const ParallaxProfileHeader: React.FC<ParallaxProfileHeaderProps> = memo(
         scrollY.value,
         [0, HEADER_CONSTANTS.SCROLL_DISTANCE],
         [0, -HEADER_CONSTANTS.SCROLL_DISTANCE * 0.5],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
-      const scale = interpolate(scrollY.value, [-100, 0], [1.5, 1], Extrapolate.CLAMP);
+      const scale = interpolate(scrollY.value, [-100, 0], [1.5, 1], Extrapolation.CLAMP);
 
       return {
         transform: [{ translateY }, { scale }],
@@ -113,7 +113,7 @@ export const ParallaxProfileHeader: React.FC<ParallaxProfileHeaderProps> = memo(
         scrollY.value,
         [0, HEADER_CONSTANTS.SCROLL_DISTANCE],
         [0, 0.95],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
       return { opacity };
     });
@@ -124,7 +124,7 @@ export const ParallaxProfileHeader: React.FC<ParallaxProfileHeaderProps> = memo(
         scrollY.value,
         [HEADER_CONSTANTS.SCROLL_DISTANCE - 50, HEADER_CONSTANTS.SCROLL_DISTANCE],
         [0, 1],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
       return { opacity };
     });
@@ -135,19 +135,19 @@ export const ParallaxProfileHeader: React.FC<ParallaxProfileHeaderProps> = memo(
         scrollY.value,
         [0, HEADER_CONSTANTS.SCROLL_DISTANCE],
         [0, -30],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
       const scale = interpolate(
         scrollY.value,
         [0, HEADER_CONSTANTS.SCROLL_DISTANCE],
         [1, 0.5],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
       const translateX = interpolate(
         scrollY.value,
         [0, HEADER_CONSTANTS.SCROLL_DISTANCE],
         [0, -50],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
 
       return {
@@ -161,7 +161,7 @@ export const ParallaxProfileHeader: React.FC<ParallaxProfileHeaderProps> = memo(
         scrollY.value,
         [0, HEADER_CONSTANTS.SCROLL_DISTANCE * 0.5],
         [1, 0],
-        Extrapolate.CLAMP,
+        Extrapolation.CLAMP,
       );
       return { opacity };
     });
@@ -170,37 +170,37 @@ export const ParallaxProfileHeader: React.FC<ParallaxProfileHeaderProps> = memo(
 
     const handleAvatarPress = useCallback(() => {
       if (!onAvatarPress) return;
-      trigger('light');
-      avatarScale.value = withSpring(0.95, spring.press);
+      triggerMedia('select');
+      avatarScale.value = withSpring(0.96, spring.press);
       setTimeout(() => {
         avatarScale.value = withSpring(1, spring.snappy);
       }, 100);
       onAvatarPress();
-    }, [onAvatarPress, trigger, avatarScale]);
+    }, [onAvatarPress, triggerMedia, avatarScale]);
 
     const handleSettingsPress = useCallback(() => {
-      trigger('light');
+      triggerNavigation('navigate');
       onSettingsPress?.();
-    }, [onSettingsPress, trigger]);
+    }, [onSettingsPress, triggerNavigation]);
 
     const handleFollowPress = useCallback(() => {
-      trigger('medium');
-      buttonScale.value = withSpring(0.95, spring.press);
+      triggerSocial('follow');
+      buttonScale.value = withSpring(0.96, spring.press);
       setTimeout(() => {
         buttonScale.value = withSpring(1, spring.snappy);
       }, 100);
       onFollowPress?.();
-    }, [onFollowPress, trigger, buttonScale]);
+    }, [onFollowPress, triggerSocial, buttonScale]);
 
     const handleEditPress = useCallback(() => {
-      trigger('light');
+      triggerNavigation('navigate');
       onEditPress?.();
-    }, [onEditPress, trigger]);
+    }, [onEditPress, triggerNavigation]);
 
     const handleMessagePress = useCallback(() => {
-      trigger('light');
+      triggerNavigation('navigate');
       onMessagePress?.();
-    }, [onMessagePress, trigger]);
+    }, [onMessagePress, triggerNavigation]);
 
     return (
       <Animated.View

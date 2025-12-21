@@ -1,9 +1,9 @@
-package com.meslektas.messaging.domain.model;
+package com.dengin.messaging.domain.model;
 
-import com.meslektas.messaging.domain.event.ConversationCreatedEvent;
-import com.meslektas.messaging.domain.event.MessageReadEvent;
-import com.meslektas.messaging.domain.event.MessageSentEvent;
-import org.junit.jupiter.api.BeforeEach;
+import com.dengin.messaging.domain.event.ConversationCreatedEvent;
+import com.dengin.messaging.domain.event.MessageReadEvent;
+import com.dengin.messaging.domain.event.MessageSentEvent;
+import com.dengin.messaging.domain.model.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

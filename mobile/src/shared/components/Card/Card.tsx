@@ -1,5 +1,5 @@
 // src/shared/components/Card/Card.tsx
-// Meslektaş Design System - Modern Card Component
+// Dengin Design System - Modern Card Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback, useMemo } from 'react';
@@ -13,7 +13,7 @@ import Animated, {
 import { LinearGradient } from 'expo-linear-gradient';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { shadows } from '@theme/shadows';
 import { spring } from '@theme/animations';
 
@@ -71,7 +71,7 @@ export const Card: React.FC<CardProps> = memo(
     onLongPress,
     disabled = false,
     animated = true,
-    pressScale = 0.98,
+    pressScale = 0.96,
     style,
     testID,
     accessibilityLabel,
@@ -83,7 +83,7 @@ export const Card: React.FC<CardProps> = memo(
     footer,
   }) => {
     const colors = useColors();
-    const { trigger } = useHaptic();
+    const { triggerSystem } = useSemanticHaptic();
 
     // Animation values
     const pressed = useSharedValue(0);
@@ -93,8 +93,9 @@ export const Card: React.FC<CardProps> = memo(
     const paddingValue = CARD_PADDING_VALUES[padding];
     const borderRadius = CARD_RADIUS_VALUES[size];
 
-    // Default gradient colors
-    const defaultGradientColors = gradientColors ?? colors.gradient.primary;
+    // Default gradient colors - ensure at least 2 colors
+    const gradientArray = gradientColors ?? colors.gradient.primary;
+    const defaultGradientColors = gradientArray.filter(Boolean) as [string, string, ...string[]];
 
     // Shadow styles (only for elevated and gradient variants)
     const shadowStyle = useMemo(() => {
@@ -128,15 +129,15 @@ export const Card: React.FC<CardProps> = memo(
 
     const handlePress = useCallback(() => {
       if (hapticType !== 'none') {
-        trigger(hapticType === 'medium' ? 'impactMedium' : 'impactLight');
+        triggerSystem('confirm');
       }
       onPress?.();
-    }, [hapticType, onPress, trigger]);
+    }, [hapticType, onPress, triggerSystem]);
 
     const handleLongPress = useCallback(() => {
-      trigger('impactMedium');
+      triggerSystem('confirm');
       onLongPress?.();
-    }, [onLongPress, trigger]);
+    }, [onLongPress, triggerSystem]);
 
     // Container styles
     const containerStyles = useMemo(

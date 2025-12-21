@@ -1,5 +1,5 @@
 // src/features/feed/components/PostCard/PostCard.tsx
-// Meslektaş Design System - Modern PostCard Component
+// Dengin Design System - Modern PostCard Component
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import React, { memo, useCallback } from 'react';
@@ -17,7 +17,8 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
+import { UNIFIED_TIMING } from '@constants';
 
 import { PostHeader } from './PostHeader';
 import { PostContent } from './PostContent';
@@ -52,7 +53,7 @@ import type { PostCardProps } from './PostCard.types';
 export const PostCard: React.FC<PostCardProps> = memo(
   ({ post, index = 0, onLike, onComment, onShare, onBookmark, onMenuPress, style, testID }) => {
     const colors = useColors();
-    const { trigger } = useHaptic();
+    const { triggerSocial, triggerNavigation } = useSemanticHaptic();
     const navigation = useNavigation();
 
     // Animation values
@@ -85,20 +86,23 @@ export const PostCard: React.FC<PostCardProps> = memo(
       transform: [{ scale: heartScale.value }],
     }));
 
-    // Double-tap like handler
+    // Double-tap like handler - UNIFIED: Optimized timing (600ms → 320ms)
     const handleDoubleTapLike = useCallback(() => {
       if (!isLiked) {
-        trigger('success');
-        // Animate heart
+        triggerSocial('like');
+        // Animate heart - Scale up (UNIFIED_TIMING.likeScaleUp = 180ms)
         heartScale.value = withSpring(1.2, { damping: 10, stiffness: 300 });
         heartOpacity.value = 1;
-        // Hide after delay
-        heartScale.value = withDelay(600, withSpring(0, { damping: 15 }));
-        heartOpacity.value = withDelay(600, withSpring(0));
+        // Hide after delay (UNIFIED_TIMING.likeScaleUp + likeScaleDown = 320ms total)
+        heartScale.value = withDelay(
+          UNIFIED_TIMING.likeScaleUp,
+          withSpring(0, { damping: 15, stiffness: 400 }),
+        );
+        heartOpacity.value = withDelay(UNIFIED_TIMING.likeScaleUp, withSpring(0, { damping: 15 }));
         // Trigger callback
         onLike?.(postId, isLiked);
       }
-    }, [isLiked, postId, onLike, trigger, heartScale, heartOpacity]);
+    }, [isLiked, postId, onLike, triggerSocial, heartScale, heartOpacity]);
 
     // Double-tap gesture - using .runOnJS(true) for modern pattern
     const doubleTapGesture = Gesture.Tap()
@@ -108,19 +112,17 @@ export const PostCard: React.FC<PostCardProps> = memo(
         handleDoubleTapLike();
       });
 
-    // Navigation handlers
+    // Navigation handlers - Using type-safe helpers
     const handlePostPress = useCallback(() => {
-      trigger('light');
-      // @ts-expect-error - navigation types not fully typed
+      triggerNavigation('navigate');
       navigation.navigate('PostDetail', { postId });
-    }, [postId, navigation, trigger]);
+    }, [postId, navigation, triggerNavigation]);
 
     const handleAuthorPress = useCallback(() => {
-      trigger('light');
+      triggerNavigation('navigate');
       const userId = post.author.userId ?? post.author.id;
-      // @ts-expect-error - navigation types not fully typed
-      navigation.navigate('UserProfile', { userId });
-    }, [post.author, navigation, trigger]);
+      navigation.navigate('Profile', { userId });
+    }, [post.author, navigation, triggerNavigation]);
 
     // Action handlers
     const handleLike = useCallback(() => {

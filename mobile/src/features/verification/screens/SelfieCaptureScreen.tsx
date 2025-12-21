@@ -3,7 +3,7 @@
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import React, { memo, useCallback, useRef, useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Alert, StatusBar } from 'react-native';
+import { StyleSheet, View, Text, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Camera,
@@ -14,8 +14,11 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
-import { Button, Loading } from '@shared/components';
+import { useToast } from '@contexts/ToastContext';
+import { spacing, typography, borderRadius } from '@theme';
+import { Button, UnifiedLoadingState } from '@shared/components';
+import { showOperationError, showValidationError } from '@shared/utils';
+import { useHaptic } from '@shared/hooks';
 import { useVerificationStore } from '../stores';
 import { cameraService, imageProcessor } from '../services';
 import { SelfieGuide, CaptureButton, CameraControls } from '../components';
@@ -30,6 +33,8 @@ type NavigationProp = NativeStackNavigationProp<VerificationStackParamList, 'Sel
 export const SelfieCaptureScreen: React.FC = memo(() => {
   const navigation = useNavigation<NavigationProp>();
   const colors = useColors();
+  const toast = useToast();
+  const { trigger } = useHaptic();
 
   const { hasPermission, requestPermission } = useCameraPermission();
   const device = useCameraDevice('front');
@@ -81,10 +86,10 @@ export const SelfieCaptureScreen: React.FC = memo(() => {
     if (!cameraRef.current || isCapturing) return;
 
     if (!faceDetected) {
-      Alert.alert(
-        'Yüz Tespit Edilemedi',
-        'Lütfen yüzünüzü çerçeve içine yerleştirin ve tekrar deneyin.',
-        [{ text: 'Tamam' }],
+      showValidationError(
+        toast,
+        'Yüz tespit edilemedi. Lütfen yüzünüzü çerçeve içine yerleştirin.',
+        { trigger },
       );
       return;
     }
@@ -109,9 +114,7 @@ export const SelfieCaptureScreen: React.FC = memo(() => {
           .map(err => imageProcessor.getErrorMessage(err))
           .join('\n');
 
-        Alert.alert('Görüntü Kalitesi Düşük', errorMessages + '\n\nLütfen tekrar deneyin.', [
-          { text: 'Tamam' },
-        ]);
+        showValidationError(toast, errorMessages + '\n\nLütfen tekrar deneyin.', { trigger });
         setIsCapturing(false);
         return;
       }
@@ -127,9 +130,11 @@ export const SelfieCaptureScreen: React.FC = memo(() => {
       navigation.navigate('VerificationReview');
     } catch (error) {
       console.error('Selfie capture error:', error);
-      Alert.alert('Hata', 'Selfie çekilirken bir hata oluştu. Lütfen tekrar deneyin.', [
-        { text: 'Tamam' },
-      ]);
+      showOperationError(
+        toast,
+        { trigger },
+        'Selfie çekilirken bir hata oluştu. Lütfen tekrar deneyin.',
+      );
     } finally {
       setIsCapturing(false);
     }
@@ -228,7 +233,9 @@ export const SelfieCaptureScreen: React.FC = memo(() => {
       </SafeAreaView>
 
       {/* Yükleniyor göstergesi */}
-      {isCapturing && <Loading fullScreen message="İşleniyor..." />}
+      {isCapturing && (
+        <UnifiedLoadingState strategy="spinner" message="İşleniyor..." variant="screen" />
+      )}
     </View>
   );
 });
@@ -236,59 +243,10 @@ export const SelfieCaptureScreen: React.FC = memo(() => {
 SelfieCaptureScreen.displayName = 'SelfieCaptureScreen';
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  permissionContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xl,
-  },
-  permissionIcon: {
-    fontSize: 64,
-    marginBottom: spacing.lg,
-  },
-  permissionTitle: {
-    ...typography.h2,
-    textAlign: 'center',
-    marginBottom: spacing.sm,
-  },
-  permissionText: {
-    ...typography.body,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
-  },
-  permissionButton: {
-    minWidth: 200,
-  },
-  topBar: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 20,
-  },
-  topBarContent: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.md,
-  },
-  stepText: {
-    ...typography.bodySmall,
-    color: 'white',
-    fontWeight: '600',
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    borderRadius: 16,
-  },
   bottomControls: {
-    position: 'absolute',
     bottom: 0,
     left: 0,
+    position: 'absolute',
     right: 0,
     zIndex: 20,
   },
@@ -299,9 +257,67 @@ const styles = StyleSheet.create({
   captureHint: {
     ...typography.bodySmall,
     color: 'white',
-    textAlign: 'center',
     marginBottom: spacing.lg,
+    textAlign: 'center',
+  },
+  container: {
+    backgroundColor: '#000',
+    flex: 1,
+  },
+  permissionButton: {
+    minWidth: 200,
+  },
+  permissionContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    padding: spacing.xl,
+  },
+  permissionIcon: {
+    fontSize: 64,
+    marginBottom: spacing.lg,
+  },
+  permissionText: {
+    ...typography.body,
+    marginBottom: spacing.xl,
+    textAlign: 'center',
+  },
+  permissionTitle: {
+    ...typography.h2,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  stepText: {
+    ...typography.bodySmall,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderRadius: borderRadius.lg,
+    color: '#FFFFFF',
+    fontWeight: '600',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+  },
+  topBar: {
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    zIndex: 20,
+  },
+  topBarContent: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    padding: spacing.md,
   },
 });
 
-export default SelfieCaptureScreen;
+// Wrap with Error Boundary for production safety
+import { ErrorBoundary } from '@core/components';
+
+export default function SelfieCaptureScreenWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <SelfieCaptureScreen />
+    </ErrorBoundary>
+  );
+}

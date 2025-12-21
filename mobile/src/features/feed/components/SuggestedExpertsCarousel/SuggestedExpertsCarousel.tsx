@@ -8,7 +8,7 @@ import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { useSuggestedUsers } from '../../hooks/useSuggestedUsers';
 
 import { ExpertCard } from './ExpertCard';
@@ -59,7 +59,7 @@ import type {
 export const SuggestedExpertsCarousel: React.FC<SuggestedExpertsCarouselProps> = memo(
   ({ onExpertPress, onFollowToggle, testID = 'suggested-experts-carousel' }) => {
     const colors = useColors();
-    const { trigger } = useHaptic();
+    const { triggerNavigation, triggerSocial } = useSemanticHaptic();
 
     // Fetch suggested users from backend API
     const { data: suggestedUsers, isLoading, isError } = useSuggestedUsers(8);
@@ -84,16 +84,16 @@ export const SuggestedExpertsCarousel: React.FC<SuggestedExpertsCarouselProps> =
     // Handle expert card press
     const handleExpertPress = useCallback(
       (userId: number) => {
-        trigger('light');
+        triggerNavigation('navigate');
         onExpertPress(userId);
       },
-      [onExpertPress, trigger],
+      [onExpertPress, triggerNavigation],
     );
 
     // Handle follow/unfollow toggle
     const handleFollowToggle = useCallback(
       (userId: number, currentFollowState: boolean) => {
-        trigger('medium');
+        triggerSocial(currentFollowState ? 'unfollow' : 'follow');
 
         // Optimistic update
         setOptimisticExperts(prev =>
@@ -105,7 +105,7 @@ export const SuggestedExpertsCarousel: React.FC<SuggestedExpertsCarouselProps> =
         // Notify parent
         onFollowToggle(userId, !currentFollowState);
       },
-      [onFollowToggle, trigger],
+      [onFollowToggle, triggerSocial],
     );
 
     // Use optimistic experts if available, otherwise use fetched experts

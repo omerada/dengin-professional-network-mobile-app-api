@@ -1,5 +1,5 @@
 // src/shared/components/Divider/Divider.tsx
-// Meslektaş Design System - Modern Divider Component
+// Dengin Design System - Modern Divider Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useMemo } from 'react';

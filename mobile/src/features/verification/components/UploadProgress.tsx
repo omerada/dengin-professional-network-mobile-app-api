@@ -195,55 +195,40 @@ const styles = StyleSheet.create({
   container: {
     padding: spacing.lg,
   },
-  statusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.lg,
-  },
-  statusDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: spacing.sm,
-  },
-  statusDotAnimated: {
-    // Animasyon için - native driver ile pulse efekti
-  },
-  statusText: {
-    ...typography.h3,
-  },
-  totalProgress: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.lg,
-    gap: spacing.md,
-  },
-  totalProgressBackground: {
-    flex: 1,
-    height: 8,
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  totalProgressFill: {
-    height: '100%',
-    borderRadius: 4,
-  },
-  totalProgressText: {
-    ...typography.body,
-    fontWeight: '700',
-    minWidth: 45,
-    textAlign: 'right',
-  },
   detailsContainer: {
     gap: spacing.md,
   },
-  progressItem: {
-    gap: spacing.xs,
+  processingInfo: {
+    alignItems: 'center',
+    borderRadius: 12,
+    marginTop: spacing.lg,
+    padding: spacing.md,
+  },
+  processingSubtext: {
+    ...typography.caption,
+    marginTop: spacing.xs,
+    textAlign: 'center',
+  },
+  processingText: {
+    ...typography.body,
+    textAlign: 'center',
+  },
+  progressBarBackground: {
+    borderRadius: 3,
+    height: 6,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    borderRadius: 3,
+    height: '100%',
   },
   progressHeader: {
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+  },
+  progressItem: {
+    gap: spacing.xs,
   },
   progressLabel: {
     ...typography.bodySmall,
@@ -252,29 +237,44 @@ const styles = StyleSheet.create({
     ...typography.bodySmall,
     fontWeight: '600',
   },
-  progressBarBackground: {
-    height: 6,
-    borderRadius: 3,
+  statusContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginBottom: spacing.lg,
+  },
+  statusDot: {
+    borderRadius: 6,
+    height: 12,
+    marginRight: spacing.sm,
+    width: 12,
+  },
+  statusDotAnimated: {
+    // Animasyon için - native driver ile pulse efekti
+  },
+  statusText: {
+    ...typography.h3,
+  },
+  totalProgress: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  totalProgressBackground: {
+    borderRadius: 4,
+    flex: 1,
+    height: 8,
     overflow: 'hidden',
   },
-  progressBarFill: {
+  totalProgressFill: {
+    borderRadius: 4,
     height: '100%',
-    borderRadius: 3,
   },
-  processingInfo: {
-    marginTop: spacing.lg,
-    padding: spacing.md,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  processingText: {
+  totalProgressText: {
     ...typography.body,
-    textAlign: 'center',
-  },
-  processingSubtext: {
-    ...typography.caption,
-    marginTop: spacing.xs,
-    textAlign: 'center',
+    fontWeight: '700',
+    minWidth: 45,
+    textAlign: 'right',
   },
 });
 

@@ -3,13 +3,16 @@
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART5.md
 
 import React, { useCallback, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
 import { Button, Input } from '@shared/components';
 import { spacing, fontSize } from '@theme';
+import { showSuccess, showValidationError, showOperationError } from '@shared/utils';
+import { useSemanticHaptic, useHaptic } from '@shared/hooks';
 import { useCreateReport } from '../hooks';
 import { REPORT_REASONS } from '../types';
 import type { ReportReason, ReportType } from '../types';
@@ -22,6 +25,9 @@ import type { ReportReason, ReportType } from '../types';
  */
 export const ReportScreen: React.FC = () => {
   const colors = useColors();
+  const toast = useToast();
+  const { trigger } = useHaptic();
+  const { triggerSystem } = useSemanticHaptic();
   const navigation = useNavigation();
   const route = useRoute();
 
@@ -37,7 +43,7 @@ export const ReportScreen: React.FC = () => {
 
   const handleSubmit = useCallback(async () => {
     if (!selectedReason) {
-      Alert.alert('Hata', 'Lütfen bir neden seçin');
+      showValidationError(toast, 'Lütfen bir neden seçin', { trigger });
       return;
     }
 
@@ -49,13 +55,16 @@ export const ReportScreen: React.FC = () => {
         description: description.trim() || undefined,
       });
 
-      Alert.alert('Teşekkürler', 'Şikayetiniz alındı. Ekibimiz en kısa sürede inceleyecektir.', [
-        { text: 'Tamam', onPress: () => navigation.goBack() },
-      ]);
+      showSuccess(
+        toast,
+        { trigger },
+        'Şikayetiniz alındı. Ekibimiz en kısa sürede inceleyecektir.',
+      );
+      navigation.goBack();
     } catch (error) {
-      Alert.alert('Hata', 'Şikayet gönderilirken bir hata oluştu');
+      showOperationError(toast, { trigger }, 'Şikayet gönderilirken bir hata oluştu');
     }
-  }, [selectedReason, description, type, targetId, createReport, navigation]);
+  }, [selectedReason, description, type, targetId, createReport, navigation, toast, triggerSystem]);
 
   return (
     <SafeAreaView
@@ -150,30 +159,28 @@ export const ReportScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  checkIcon: {
+    marginLeft: spacing.sm,
+  },
   container: {
     flex: 1,
   },
   content: {
     padding: spacing.lg,
   },
-  title: {
-    fontSize: fontSize.xl,
-    fontWeight: '700',
-    marginBottom: spacing.xs,
+  descriptionSection: {
+    marginTop: spacing.xl,
   },
-  subtitle: {
-    fontSize: fontSize.base,
-    marginBottom: spacing.xl,
-  },
-  reasons: {
-    gap: spacing.sm,
+  footer: {
+    borderTopWidth: 1,
+    padding: spacing.lg,
   },
   reasonItem: {
-    flexDirection: 'row',
     alignItems: 'center',
-    padding: spacing.md,
     borderRadius: 12,
     borderWidth: 1,
+    flexDirection: 'row',
+    padding: spacing.md,
   },
   reasonText: {
     flex: 1,
@@ -181,14 +188,16 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginLeft: spacing.md,
   },
-  checkIcon: {
-    marginLeft: spacing.sm,
+  reasons: {
+    gap: spacing.sm,
   },
-  descriptionSection: {
-    marginTop: spacing.xl,
+  subtitle: {
+    fontSize: fontSize.base,
+    marginBottom: spacing.xl,
   },
-  footer: {
-    padding: spacing.lg,
-    borderTopWidth: 1,
+  title: {
+    fontSize: fontSize.xl,
+    fontWeight: '700',
+    marginBottom: spacing.xs,
   },
 });

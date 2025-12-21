@@ -1,18 +1,31 @@
 // src/features/notifications/components/NotificationList.tsx
-// Notification list with infinite scroll and pull-to-refresh
+// Notification list with infinite scroll, pull-to-refresh, and time-based grouping
 // Backend: GET /api/notifications (page-based pagination)
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
-import React, { memo, useCallback } from 'react';
-import { FlatList, StyleSheet, RefreshControl, ActivityIndicator, View } from 'react-native';
-import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
+import React, { memo, useCallback, useMemo } from 'react';
+import { FlatList, StyleSheet, ActivityIndicator, View, Text } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { NotificationItem } from './NotificationItem';
 import { EmptyNotifications } from './EmptyNotifications';
 import { useNotifications, useMarkAsRead, useDeleteNotification } from '../hooks';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
+import { useLoadingTimeout } from '@shared/hooks';
+import {
+  AnimatedListItem,
+  CustomRefreshControl,
+  SkeletonList,
+  SkeletonNotificationItem,
+} from '@shared/components';
+import { SCREEN_ANIMATIONS } from '@constants';
+import { spacing, fontSize } from '@theme';
+import { groupNotificationsByTime } from '../utils/groupNotifications';
 import type { NotificationResponse } from '../types';
 
-const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<NotificationResponse>);
+type ListItem = NotificationResponse | { type: 'header'; title: string };
+
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<ListItem>);
 
 const ITEM_HEIGHT = 80;
 const PAGE_SIZE = 20;
@@ -25,6 +38,7 @@ interface NotificationListProps {
 export const NotificationList: React.FC<NotificationListProps> = memo(
   ({ onNotificationPress, unreadOnly = false }) => {
     const colors = useColors();
+    const toast = useToast();
 
     // Backend page-based pagination hook
     const {
@@ -39,6 +53,32 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
 
     const { markAsRead } = useMarkAsRead();
     const { deleteNotification } = useDeleteNotification();
+
+    // Loading timeout protection
+    useLoadingTimeout(isLoading && notifications.length === 0, {
+      timeout: 30000,
+      onTimeout: () => {
+        toast.error('Bildirimler yüklenirken zaman aşımı. Lütfen tekrar deneyin.');
+      },
+      onRetry: async () => {
+        await refetch();
+      },
+    });
+
+    // Group notifications by time (Today, This Week, Earlier)
+    const groupedData = useMemo(() => {
+      if (notifications.length === 0) return [];
+
+      const groups = groupNotificationsByTime(notifications);
+      const flatData: ListItem[] = [];
+
+      groups.forEach(group => {
+        flatData.push({ type: 'header', title: group.title });
+        flatData.push(...group.notifications);
+      });
+
+      return flatData;
+    }, [notifications]);
 
     // Handle notification press
     const handleNotificationPress = useCallback(
@@ -89,27 +129,41 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
       [],
     );
 
-    // Extract key - backend notificationId with fallback
-    const keyExtractor = useCallback(
-      (item: NotificationResponse) => item.notificationId ?? `temp-${Date.now()}-${Math.random()}`,
-      [],
-    );
+    // Extract key
+    const keyExtractor = useCallback((item: ListItem, index: number) => {
+      if ('type' in item && item.type === 'header') {
+        return `header-${item.title}`;
+      }
+      return (item as NotificationResponse).notificationId ?? `temp-${index}`;
+    }, []);
 
-    // Render item
+    // Render item (header or notification)
     const renderItem = useCallback(
-      ({ item }: { item: NotificationResponse }) => (
-        <Animated.View
-          entering={FadeIn.duration(200)}
-          exiting={FadeOut.duration(150)}
-          layout={Layout.springify()}>
-          <NotificationItem
-            notification={item}
-            onPress={handleNotificationPress}
-            onLongPress={() => handleDelete(item.notificationId)}
-          />
-        </Animated.View>
-      ),
-      [handleNotificationPress, handleDelete],
+      ({ item, index }: { item: ListItem; index: number }) => {
+        // Section header
+        if ('type' in item && item.type === 'header') {
+          return (
+            <View style={[styles.sectionHeader, { backgroundColor: colors.background.secondary }]}>
+              <Text style={[styles.sectionHeaderText, { color: colors.text.secondary }]}>
+                {item.title}
+              </Text>
+            </View>
+          );
+        }
+
+        // Notification item
+        const notification = item as NotificationResponse;
+        return (
+          <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(index)}>
+            <AnimatedListItem
+              onPress={() => handleNotificationPress(notification)}
+              onLongPress={() => handleDelete(notification.notificationId)}>
+              <NotificationItem notification={notification} />
+            </AnimatedListItem>
+          </Animated.View>
+        );
+      },
+      [handleNotificationPress, handleDelete, colors],
     );
 
     // Render footer (loading indicator for next page)
@@ -129,30 +183,19 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
       return <EmptyNotifications />;
     }, [isLoading]);
 
-    // Loading state
+    // Loading state - content-aware skeleton
     if (isLoading) {
-      return (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.interactive.default} />
-        </View>
-      );
+      return <SkeletonList count={10} ItemSkeleton={SkeletonNotificationItem} />;
     }
 
     return (
       <AnimatedFlatList
-        data={notifications}
+        data={groupedData}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         getItemLayout={getItemLayout}
-        contentContainerStyle={notifications.length === 0 ? styles.emptyContainer : undefined}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={refetch}
-            colors={[colors.interactive.default]}
-            tintColor={colors.interactive.default}
-          />
-        }
+        contentContainerStyle={groupedData.length === 0 ? styles.emptyContainer : undefined}
+        refreshControl={<CustomRefreshControl refreshing={isRefreshing} onRefresh={refetch} />}
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.5}
         ListFooterComponent={renderFooter}
@@ -170,17 +213,27 @@ export const NotificationList: React.FC<NotificationListProps> = memo(
 NotificationList.displayName = 'NotificationList';
 
 const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   emptyContainer: {
     flex: 1,
   },
   footer: {
-    paddingVertical: 20,
     alignItems: 'center',
+    paddingVertical: 20,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  sectionHeader: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+  },
+  sectionHeaderText: {
+    fontSize: fontSize.sm,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
 });
 

@@ -80,32 +80,37 @@ export const PostTextInput: React.FC<PostTextInputProps> = memo(
 PostTextInput.displayName = 'PostTextInput';
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingTop: 16,
+  avatar: {
+    borderRadius: 22,
+    height: 44,
+    width: 44,
   },
   avatarContainer: {
     marginRight: 12,
   },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-  },
   avatarPlaceholder: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 22,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
   },
   avatarText: {
     fontSize: 16,
     fontWeight: '600',
   },
-  inputContainer: {
-    flex: 1,
+  container: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+  },
+  counter: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  counterContainer: {
+    alignItems: 'flex-end',
+    marginTop: 8,
   },
   input: {
     fontSize: 16,
@@ -113,13 +118,8 @@ const styles = StyleSheet.create({
     minHeight: 120,
     padding: 0,
   },
-  counterContainer: {
-    alignItems: 'flex-end',
-    marginTop: 8,
-  },
-  counter: {
-    fontSize: 12,
-    fontWeight: '500',
+  inputContainer: {
+    flex: 1,
   },
 });
 

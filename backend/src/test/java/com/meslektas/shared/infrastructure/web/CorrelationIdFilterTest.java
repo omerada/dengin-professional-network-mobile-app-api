@@ -1,5 +1,6 @@
-package com.meslektas.shared.infrastructure.web;
+package com.dengin.shared.infrastructure.web;
 
+import com.dengin.shared.infrastructure.web.CorrelationIdFilter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

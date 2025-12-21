@@ -1,5 +1,5 @@
 // src/shared/components/Skeleton/index.ts
-// Meslektaş Design System - Skeleton Component Exports
+// Dengin Design System - Skeleton Component Exports
 
 export {
   Skeleton,
@@ -19,3 +19,14 @@ export type {
   SkeletonProps,
   SkeletonVariant,
 } from './Skeleton.types';
+
+// Production-ready skeleton presets
+export {
+  SkeletonPostCard,
+  SkeletonProfileHeader,
+  SkeletonConversationItem,
+  SkeletonNotificationItem,
+  SkeletonCommentItem,
+  SkeletonUserListItem,
+  SkeletonList,
+} from './SkeletonPresets';

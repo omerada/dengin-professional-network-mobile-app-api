@@ -186,7 +186,7 @@ Authorization: Bearer {token}
   "name": "Ahmet",
   "surname": "Yılmaz",
   "profession": "DOCTOR",
-  "avatarUrl": "https://cdn.meslektas.com/users/1/avatar.jpg",
+  "avatarUrl": "https://cdn.dengin.com/users/1/avatar.jpg",
   "verified": true,
   "profileVerified": true,
   "createdAt": "2025-01-15T10:30:00Z"
@@ -224,7 +224,7 @@ POST /api/users/me/avatar/presigned-url
 {
   "success": true,
   "data": {
-    "url": "https://meslektas-prod.s3.eu-central-1.amazonaws.com/users/1/avatar-uuid.jpg?X-Amz-...",
+    "url": "https://dengin-prod.s3.eu-central-1.amazonaws.com/users/1/avatar-uuid.jpg?X-Amz-...",
     "key": "users/1/avatar-uuid.jpg",
     "expiresIn": 300,  // 5 minutes
     "contentType": "image/jpeg",

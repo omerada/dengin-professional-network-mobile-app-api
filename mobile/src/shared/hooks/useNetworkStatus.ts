@@ -11,6 +11,7 @@ export interface NetworkStatus {
   type: NetInfoStateType;
   isWifi: boolean;
   isCellular: boolean;
+  isOffline: boolean;
   details: NetInfoState['details'];
 }
 
@@ -24,30 +25,37 @@ export function useNetworkStatus(): NetworkStatus {
     type: NetInfoStateType.unknown,
     isWifi: false,
     isCellular: false,
+    isOffline: false,
     details: null,
   });
 
   useEffect(() => {
     // Fetch initial network state
-    NetInfo.fetch().then((state) => {
+    NetInfo.fetch().then(state => {
+      const isConnected = state.isConnected ?? false;
+      const isInternetReachable = state.isInternetReachable;
       setNetworkStatus({
-        isConnected: state.isConnected ?? false,
-        isInternetReachable: state.isInternetReachable,
+        isConnected,
+        isInternetReachable,
         type: state.type,
         isWifi: state.type === NetInfoStateType.wifi,
         isCellular: state.type === NetInfoStateType.cellular,
+        isOffline: !isConnected || isInternetReachable === false,
         details: state.details,
       });
     });
 
     // Subscribe to network state changes
-    const unsubscribe = NetInfo.addEventListener((state) => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      const isConnected = state.isConnected ?? false;
+      const isInternetReachable = state.isInternetReachable;
       setNetworkStatus({
-        isConnected: state.isConnected ?? false,
-        isInternetReachable: state.isInternetReachable,
+        isConnected,
+        isInternetReachable,
         type: state.type,
         isWifi: state.type === NetInfoStateType.wifi,
         isCellular: state.type === NetInfoStateType.cellular,
+        isOffline: !isConnected || isInternetReachable === false,
         details: state.details,
       });
     });
@@ -91,7 +99,7 @@ export function useRetryOnReconnect<T>(
   options?: {
     enabled?: boolean;
     retryDelay?: number;
-  }
+  },
 ): {
   data: T | null;
   error: Error | null;
@@ -118,7 +126,7 @@ export function useRetryOnReconnect<T>(
       setShouldRetry(false);
     } catch (err) {
       setError(err as Error);
-      
+
       // Mark for retry if offline
       if (isOffline) {
         setShouldRetry(true);

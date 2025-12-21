@@ -36,10 +36,7 @@
     "extra": {
       "eas": {
         "projectId": "your-expo-project-id"
-      },
-      "_comment": "API configuration - using local network IP for both emulator and real device",
-      "API_BASE_URL": "http://192.168.1.50:8080",
-      "WS_URL": "ws://192.168.1.50:8080/ws"
+      }
     }
   }
 }

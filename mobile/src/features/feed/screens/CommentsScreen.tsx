@@ -3,16 +3,25 @@
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { View, StyleSheet, ActivityIndicator, RefreshControl, Alert } from 'react-native';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
+import { useSemanticHaptic, useHaptic } from '@shared/hooks';
 import { useAuthStore } from '@features/auth/stores';
 import { useCommentsData, useAddComment, useLikeComment, useDeleteComment } from '../hooks';
-import { CommentCard, AddCommentForm, EmptyFeed } from '../components';
-import { ActionSheet, ActionSheetOption } from '@shared/components';
+import { CommentCard, AddCommentForm } from '../components';
+import {
+  ActionSheet,
+  ActionSheetOption,
+  CustomRefreshControl,
+  UnifiedEmptyState,
+  UnifiedLoadingState,
+} from '@shared/components';
+import { showSuccess, showError } from '@shared/utils';
 import type { Comment, AddCommentRequest } from '../types';
 import type { FeedStackParamList } from '@shared/types';
 
@@ -21,6 +30,9 @@ type CommentsNavigationProp = NativeStackNavigationProp<FeedStackParamList, 'Com
 
 export const CommentsScreen: React.FC = () => {
   const colors = useColors();
+  const toast = useToast();
+  const { trigger } = useHaptic();
+  const { triggerContent, triggerSystem } = useSemanticHaptic();
   const navigation = useNavigation<CommentsNavigationProp>();
   const route = useRoute<CommentsRouteProp>();
   const { postId } = route.params; // postId: number
@@ -101,6 +113,24 @@ export const CommentsScreen: React.FC = () => {
     [comments],
   );
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Delete confirmation handler
+  const handleDeleteConfirm = useCallback(() => {
+    if (!selectedComment) return;
+    triggerSystem('confirm');
+    deleteComment.mutate(selectedComment.id, {
+      onSuccess: () => {
+        showSuccess(toast, { trigger }, 'Yorum silindi');
+      },
+      onError: () => {
+        showError(toast, { trigger }, 'Yorum silinemedi');
+      },
+    });
+    setShowDeleteConfirm(false);
+    setShowActionSheet(false);
+  }, [selectedComment, deleteComment, triggerSystem, toast]);
+
   // Action Sheet Options
   const getActionSheetOptions = useCallback((): ActionSheetOption[] => {
     if (!selectedComment) return [];
@@ -115,14 +145,9 @@ export const CommentsScreen: React.FC = () => {
         icon: 'trash-outline',
         destructive: true,
         onPress: () => {
-          Alert.alert('Yorumu Sil', 'Bu yorumu silmek istediğinize emin misiniz?', [
-            { text: 'İptal', style: 'cancel' },
-            {
-              text: 'Sil',
-              style: 'destructive',
-              onPress: () => deleteComment.mutate(selectedComment.id),
-            },
-          ]);
+          triggerSystem('alert');
+          setShowActionSheet(false);
+          setShowDeleteConfirm(true);
         },
       });
     } else {
@@ -131,17 +156,19 @@ export const CommentsScreen: React.FC = () => {
         label: 'Yorumu Şikayet Et',
         icon: 'flag-outline',
         onPress: () => {
-          // Report screen is in root navigator, use untyped navigation
-          (navigation as any).navigate('Report', {
-            type: 'COMMENT',
-            targetId: selectedComment.id,
-          });
+          showSuccess(toast, { trigger }, 'Yorum şikayet edildi');
+          setShowActionSheet(false);
         },
       });
     }
 
     return options;
-  }, [selectedComment, currentUserId, deleteComment, navigation]);
+  }, [selectedComment, currentUserId, triggerSystem, toast]);
+
+  const handleRefresh = useCallback(() => {
+    triggerContent('refresh');
+    refetch();
+  }, [refetch, triggerContent]);
 
   const handleEndReached = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -168,10 +195,10 @@ export const CommentsScreen: React.FC = () => {
     if (isLoading) return null;
 
     return (
-      <EmptyFeed
-        title="Henüz yorum yok"
-        message="Bu gönderiye ilk yorumu siz yapın!"
+      <UnifiedEmptyState
         icon="chatbubble-outline"
+        title="Henüz yorum yok"
+        description="Bu gönderiye ilk yorumu siz yapın!"
       />
     );
   }, [isLoading]);
@@ -186,12 +213,17 @@ export const CommentsScreen: React.FC = () => {
     );
   }, [isFetchingNextPage, colors.interactive.default]);
 
+  const refreshControl = useMemo(
+    () => <CustomRefreshControl refreshing={isRefetching} onRefresh={handleRefresh} />,
+    [isRefetching, handleRefresh],
+  );
+
   if (isLoading && comments.length === 0) {
     return (
       <SafeAreaView
-        style={[styles.loadingContainer, { backgroundColor: colors.background.primary }]}
+        style={[styles.container, { backgroundColor: colors.background.primary }]}
         edges={['bottom']}>
-        <ActivityIndicator size="large" color={colors.interactive.default} />
+        <UnifiedLoadingState strategy="spinner" message="Yorumlar yükleniyor..." variant="screen" />
       </SafeAreaView>
     );
   }
@@ -208,13 +240,7 @@ export const CommentsScreen: React.FC = () => {
         ListFooterComponent={ListFooterComponent}
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.5}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={refetch}
-            tintColor={colors.interactive.default}
-          />
-        }
+        refreshControl={refreshControl}
         showsVerticalScrollIndicator={false}
       />
 
@@ -237,6 +263,27 @@ export const CommentsScreen: React.FC = () => {
         options={getActionSheetOptions()}
         title="Yorum Seçenekleri"
       />
+
+      {/* Delete Confirmation ActionSheet */}
+      <ActionSheet
+        visible={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        title="Yorumu Sil"
+        message="Bu yorumu silmek istediğinize emin misiniz?"
+        options={[
+          {
+            id: 'delete',
+            label: 'Sil',
+            destructive: true,
+            onPress: handleDeleteConfirm,
+          },
+          {
+            id: 'cancel',
+            label: 'İptal',
+            onPress: () => setShowDeleteConfirm(false),
+          },
+        ]}
+      />
     </SafeAreaView>
   );
 };
@@ -245,14 +292,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   footer: {
-    paddingVertical: 20,
     alignItems: 'center',
+    paddingVertical: 20,
   },
 });
 

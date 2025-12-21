@@ -1,16 +1,16 @@
-# Meslektaş - Play Store Metadata (Turkish)
+# Dengin - Play Store Metadata (Turkish)
 # Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
 
 ---
 # Title (50 characters max)
-title: Meslektaş - Profesyonel Network
+title: Dengin - Profesyonel Network
 
 # Short Description (80 characters max)
 short_description: Kimlik doğrulamalı, güvenilir profesyonel ağ platformu.
 
 # Full Description (4000 characters max)
 full_description: |
-  Meslektaş, Türkiye'deki profesyoneller için tasarlanmış yeni nesil sosyal ağ platformudur. Kimlik doğrulama sistemi sayesinde gerçek profesyonellerle güvenli bir ortamda tanışın.
+  Dengin, Türkiye'deki profesyoneller için tasarlanmış yeni nesil sosyal ağ platformudur. Kimlik doğrulama sistemi sayesinde gerçek profesyonellerle güvenli bir ortamda tanışın.
 
   🔐 KİMLİK DOĞRULAMA
   Her kullanıcı kimlik belgesi ve yüz tanıma ile doğrulanır. Spam hesaplar ve sahte profiller yok!
@@ -19,7 +19,7 @@ full_description: |
   Aynı sektörden veya farklı alanlardan profesyonellerle tanışın. Kariyerinizi geliştirmek için doğru kişilerle bağlantı kurun.
 
   💬 GERÇEK ZAMANLI MESAJLAŞMA
-  Meslektaşlarınızla anında mesajlaşın. End-to-end şifreleme ile güvenli iletişim.
+  Denginlarınızla anında mesajlaşın. End-to-end şifreleme ile güvenli iletişim.
 
   📱 SOSYAL AKIŞ
   Sektörünüzle ilgili güncellemeleri paylaşın, beğenin ve yorum yapın. Trend olan konuları takip edin.
@@ -46,8 +46,8 @@ full_description: |
 
   Hemen ücretsiz kaydolun ve Türkiye'nin en güvenilir profesyonel ağına katılın!
 
-  Sorularınız için: destek@meslektas.com
-  Web: https://meslektas.com
+  Sorularınız için: destek@dengin.com
+  Web: https://dengin.com
 
 # Category
 category: Social
@@ -59,31 +59,31 @@ application_type: Application
 content_rating: Everyone 10+
 
 # Privacy Policy URL
-privacy_policy_url: https://meslektas.com/gizlilik
+privacy_policy_url: https://dengin.com/gizlilik
 
 # Developer Info
 developer:
-  name: Meslektaş Teknoloji A.Ş.
-  email: developer@meslektas.com
-  website: https://meslektas.com
+  name: Dengin Teknoloji A.Ş.
+  email: developer@dengin.com
+  website: https://dengin.com
   address: |
     İstanbul, Türkiye
 
 # Contact Info
 contact:
-  email: destek@meslektas.com
+  email: destek@dengin.com
   phone: +90 212 XXX XX XX
-  website: https://meslektas.com/destek
+  website: https://dengin.com/destek
 
 # Video (YouTube URL)
 video_url: null
 
 # Recent Changes (500 characters max per version)
 changelogs:
-  - version: "1.0.0"
+  - version: '1.0.0'
     text: |
-      Meslektaş'a hoş geldiniz! Bu sürümde:
-      
+      Dengin'a hoş geldiniz! Bu sürümde:
+
       • Yeni: Kimlik doğrulama sistemi
       • Yeni: Gerçek zamanlı mesajlaşma
       • Yeni: Sosyal akış ve etkileşimler

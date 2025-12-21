@@ -8,15 +8,18 @@ import {
   TouchableOpacity,
   ViewToken,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeInDown, FadeInUp, SlideInRight, FadeIn } from 'react-native-reanimated';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Feather';
+import { SCREEN_ANIMATIONS } from '@constants/animationPresets';
 
 import { useColors } from '@contexts/ThemeContext';
+import { typography } from '@theme';
+import { useSemanticHaptic } from '@shared/hooks';
 import { asyncStorage } from '@core/storage/asyncStorage';
 import { STORAGE_KEYS } from '@core/storage/keys';
-import type { AuthStackNavigationProp } from '@shared/types';
+import type { AuthStackNavigationProp, AuthStackParamList } from '@shared/types';
 
 const { width } = Dimensions.get('window');
 
@@ -70,11 +73,11 @@ const SlideItem: React.FC<SlideProps> = ({ slide, index }) => {
 
   return (
     <Animated.View
-      entering={FadeIn.delay(index * 100).duration(600)}
+      entering={SCREEN_ANIMATIONS.listItemEnter(index)}
       style={[styles.slide, { width }]}>
       {/* Icon Container */}
       <Animated.View
-        entering={SlideInRight.delay(200 + index * 100).springify()}
+        entering={SCREEN_ANIMATIONS.heroEnter}
         style={[
           styles.iconContainer,
           {
@@ -86,9 +89,7 @@ const SlideItem: React.FC<SlideProps> = ({ slide, index }) => {
       </Animated.View>
 
       {/* Text Content */}
-      <Animated.View
-        entering={FadeInDown.delay(300 + index * 100).duration(500)}
-        style={styles.textContainer}>
+      <Animated.View entering={SCREEN_ANIMATIONS.contentEnter} style={styles.textContainer}>
         <Text style={[styles.slideTitle, { color: colors.text.primary }]}>{slide.title}</Text>
         <Text style={[styles.slideDescription, { color: colors.text.secondary }]}>
           {slide.description}
@@ -128,8 +129,11 @@ const PaginationDot: React.FC<DotProps> = ({ active }) => {
 export const OnboardingScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation<AuthStackNavigationProp>();
+  const route = useRoute<RouteProp<AuthStackParamList, 'Onboarding'>>();
+  const { triggerNavigation } = useSemanticHaptic();
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const initialSlide = route.params?.initialSlide ?? 0;
+  const [currentIndex, setCurrentIndex] = useState(initialSlide);
   const flatListRef = useRef<FlatList>(null);
 
   /**
@@ -138,6 +142,7 @@ export const OnboardingScreen: React.FC = () => {
   const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
     if (viewableItems.length > 0 && viewableItems[0].index !== null) {
       setCurrentIndex(viewableItems[0].index);
+      triggerNavigation('screenOpen');
     }
   }).current;
 
@@ -146,9 +151,27 @@ export const OnboardingScreen: React.FC = () => {
   }).current;
 
   /**
+   * Scroll to initial slide on mount
+   */
+  React.useEffect(() => {
+    if (initialSlide > 0 && flatListRef.current) {
+      // Delay scroll to ensure FlatList is ready
+      const timer = setTimeout(() => {
+        flatListRef.current?.scrollToIndex({
+          index: initialSlide,
+          animated: false,
+        });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [initialSlide]);
+
+  /**
    * Handle Next
    */
   const handleNext = () => {
+    triggerNavigation('navigate');
     if (currentIndex < slides.length - 1) {
       flatListRef.current?.scrollToIndex({
         index: currentIndex + 1,
@@ -190,6 +213,7 @@ export const OnboardingScreen: React.FC = () => {
           <View style={styles.finalButtons}>
             <TouchableOpacity
               onPress={() => {
+                triggerNavigation('navigate');
                 asyncStorage.set(STORAGE_KEYS.ONBOARDING_COMPLETED, true);
                 navigation.replace('Login');
               }}
@@ -199,6 +223,7 @@ export const OnboardingScreen: React.FC = () => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
+                triggerNavigation('navigate');
                 asyncStorage.set(STORAGE_KEYS.ONBOARDING_COMPLETED, true);
                 navigation.replace('Register');
               }}
@@ -234,23 +259,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 16,
   },
-  ctaButtonText: {
-    fontSize: 17,
-    fontWeight: '600',
-    marginRight: 8,
-  },
   ctaButtonOutline: {
     alignItems: 'center',
     borderRadius: 28,
     borderWidth: 2,
     flexDirection: 'row',
     justifyContent: 'center',
-    paddingVertical: 14,
     marginTop: 12,
+    paddingVertical: 14,
   },
   ctaButtonOutlineText: {
-    fontSize: 17,
-    fontWeight: '600',
+    ...typography.button,
+  },
+  ctaButtonText: {
+    ...typography.button,
+    marginRight: 8,
   },
   ctaIcon: {
     marginLeft: 4,
@@ -288,8 +311,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   skipText: {
-    fontSize: 15,
-    fontWeight: '500',
+    ...typography.button,
   },
   slide: {
     alignItems: 'center',
@@ -297,14 +319,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   slideDescription: {
-    fontSize: 15,
-    fontWeight: '400',
+    ...typography.body1,
     lineHeight: 22,
     textAlign: 'center',
   },
   slideTitle: {
-    fontSize: 26,
-    fontWeight: '700',
+    ...typography.h4,
     letterSpacing: -0.5,
     marginBottom: 16,
     textAlign: 'center',

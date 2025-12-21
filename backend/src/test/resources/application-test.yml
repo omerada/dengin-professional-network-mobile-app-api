@@ -1,9 +1,9 @@
 # Test Profile Configuration
-# Meslektaş Backend - Integration Tests
+# Dengin Backend - Integration Tests
 
 spring:
   application:
-    name: meslektas-backend-test
+    name: dengin-backend-test
 
   # Main configuration disabled
   main:
@@ -117,7 +117,7 @@ sentry:
 logging:
   level:
     root: WARN
-    com.meslektas: INFO
+    com.dengin: INFO
     org.springframework.web: WARN
     org.springframework.security: WARN
     org.hibernate.SQL: WARN

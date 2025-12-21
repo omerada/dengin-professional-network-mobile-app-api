@@ -12,10 +12,10 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.meslektas</groupId>
-    <artifactId>meslektas-backend</artifactId>
+    <groupId>com.dengin</groupId>
+    <artifactId>dengin-backend</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <name>Meslektaş Backend</name>
+    <name>Dengin Backend</name>
     <description>Professional Social Network Backend - Strategic DDD Implementation</description>
 
     <properties>
@@ -284,6 +284,30 @@
             <plugin>
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
+            </plugin>
+
+            <!-- Otomatik IP Tespit ve Güncelleme -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>update-local-ip</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>node</executable>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                            <arguments>
+                                <argument>scripts/get-local-ip.js</argument>
+                            </arguments>
+                            <skip>${skipIpUpdate}</skip>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -1,9 +1,9 @@
-# Meslektaş - App Store Metadata (Turkish)
+# Dengin - App Store Metadata (Turkish)
 # Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
 
 ---
 # App Name (30 characters max)
-name: Meslektaş
+name: Dengin
 
 # Subtitle (30 characters max)
 subtitle: Profesyonel Network
@@ -14,7 +14,7 @@ promotional_text: |
 
 # Description (4000 characters max)
 description: |
-  Meslektaş, Türkiye'deki profesyoneller için tasarlanmış yeni nesil sosyal ağ platformudur. Kimlik doğrulama sistemi sayesinde gerçek profesyonellerle güvenli bir ortamda tanışın.
+  Dengin, Türkiye'deki profesyoneller için tasarlanmış yeni nesil sosyal ağ platformudur. Kimlik doğrulama sistemi sayesinde gerçek profesyonellerle güvenli bir ortamda tanışın.
 
   🔐 KİMLİK DOĞRULAMA
   Her kullanıcı kimlik belgesi ve yüz tanıma ile doğrulanır. Spam hesaplar ve sahte profiller yok!
@@ -23,7 +23,7 @@ description: |
   Aynı sektörden veya farklı alanlardan profesyonellerle tanışın. Kariyerinizi geliştirmek için doğru kişilerle bağlantı kurun.
 
   💬 GERÇEK ZAMANLI MESAJLAŞMA
-  Meslektaşlarınızla anında mesajlaşın. End-to-end şifreleme ile güvenli iletişim.
+  Denginlarınızla anında mesajlaşın. End-to-end şifreleme ile güvenli iletişim.
 
   📱 SOSYAL AKIŞ
   Sektörünüzle ilgili güncellemeleri paylaşın, beğenin ve yorum yapın. Trend olan konuları takip edin.
@@ -50,20 +50,20 @@ description: |
 
   Hemen ücretsiz kaydolun ve Türkiye'nin en güvenilir profesyonel ağına katılın!
 
-  Sorularınız için: destek@meslektas.com
-  Web: https://meslektas.com
+  Sorularınız için: destek@dengin.com
+  Web: https://dengin.com
 
 # Keywords (100 characters max, comma-separated)
 keywords: networking, profesyonel, kariyer, iş, bağlantı, sosyal, meslek, topluluk, LinkedIn alternatif
 
 # Support URL
-support_url: https://meslektas.com/destek
+support_url: https://dengin.com/destek
 
 # Marketing URL
-marketing_url: https://meslektas.com
+marketing_url: https://dengin.com
 
 # Privacy Policy URL
-privacy_url: https://meslektas.com/gizlilik
+privacy_url: https://dengin.com/gizlilik
 
 # Categories
 primary_category: Social Networking
@@ -88,19 +88,19 @@ age_rating:
 
 # App Review Information
 review_info:
-  demo_user: demo@meslektas.com
+  demo_user: demo@dengin.com
   demo_password: Demo123!
   notes: |
     Demo hesabı önceden doğrulanmış olarak ayarlanmıştır.
     Tüm özellikleri test etmek için kullanabilirsiniz.
 
 # Copyright
-copyright: "2024 Meslektaş Teknoloji A.Ş."
+copyright: '2024 Dengin Teknoloji A.Ş.'
 
 # Version-specific information
 version_release_notes: |
-  Meslektaş'a hoş geldiniz! Bu sürümde:
-  
+  Dengin'a hoş geldiniz! Bu sürümde:
+
   • Yeni: Kimlik doğrulama sistemi
   • Yeni: Gerçek zamanlı mesajlaşma
   • Yeni: Sosyal akış ve etkileşimler

@@ -1,9 +1,9 @@
 // src/shared/components/SearchBar/SearchBar.styles.ts
-// Meslektaş Design System - SearchBar Styles
+// Dengin Design System - SearchBar Styles
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import { StyleSheet } from 'react-native';
-import { spacing } from '@theme';
+import { spacing, borderRadius } from '@theme';
 
 export const styles = StyleSheet.create({
   cancelButton: {
@@ -32,7 +32,7 @@ export const styles = StyleSheet.create({
   },
   inputContainer: {
     alignItems: 'center',
-    borderRadius: 12,
+    borderRadius: borderRadius.lg,
     flex: 1,
     flexDirection: 'row',
   },

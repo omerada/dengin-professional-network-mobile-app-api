@@ -1,16 +1,24 @@
 // src/features/profile/components/ProfileActions/index.tsx
-// Meslektaş Design System - Modern ProfileActions Component
+// Dengin Design System - Modern ProfileActions Component
 // Oku: mobile-development-guide/ui-ux-modernization/09-PROFILE-REDESIGN.md
 
-import React, { memo, useCallback } from 'react';
-import { Alert, View } from 'react-native';
+import React, { memo, useCallback, useState } from 'react';
+import { View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-import { Button } from '@shared/components';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { Button, ActionSheet } from '@shared/components';
+import { useSemanticHaptic, useHaptic } from '@shared/hooks';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
+import {
+  showSuccess,
+  showFollowError,
+  showUnfollowError,
+  showBlockError,
+  showUnblockError,
+} from '@shared/utils';
 import { useFollow, useUnfollow, useBlock, useUnblock } from '@features/social/hooks/useFollow';
 
 import { styles } from './ProfileActions.styles';
@@ -48,7 +56,13 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
   }) => {
     const navigation = useNavigation();
     const { trigger } = useHaptic();
+    const { triggerSocial, triggerSystem, triggerNavigation } = useSemanticHaptic();
+    const toast = useToast();
     const colors = useColors();
+
+    // State for ActionSheets
+    const [showOptionsSheet, setShowOptionsSheet] = useState(false);
+    const [showBlockConfirmSheet, setShowBlockConfirmSheet] = useState(false);
 
     // Mutations
     const followMutation = useFollow();
@@ -60,105 +74,93 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
 
     // Handle follow/unfollow
     const handleFollowPress = useCallback(() => {
-      trigger(isFollowing ? 'light' : 'medium');
+      triggerSocial(isFollowing ? 'unfollow' : 'follow');
 
       if (isFollowing) {
         unfollowMutation.mutate(userId, {
           onSuccess: () => {
-            trigger('success');
+            showSuccess(toast, { trigger }, 'Takipten çıkıldı');
             onFollowChange?.(false);
           },
           onError: () => {
-            trigger('error');
-            Alert.alert('Hata', 'Takipten çıkılamadı. Lütfen tekrar deneyin.');
+            showUnfollowError(toast, { trigger }, () => unfollowMutation.mutate(userId));
           },
         });
       } else {
         followMutation.mutate(userId, {
           onSuccess: () => {
-            trigger('success');
+            showSuccess(toast, { trigger }, 'Takip edildi');
             onFollowChange?.(true);
           },
           onError: () => {
-            trigger('error');
-            Alert.alert('Hata', 'Takip edilemedi. Lütfen tekrar deneyin.');
+            showFollowError(toast, { trigger }, () => followMutation.mutate(userId));
           },
         });
       }
-    }, [userId, isFollowing, followMutation, unfollowMutation, onFollowChange, trigger]);
+    }, [
+      userId,
+      isFollowing,
+      followMutation,
+      unfollowMutation,
+      onFollowChange,
+      triggerSystem,
+      triggerSocial,
+    ]);
 
     // Handle message button
     const handleMessagePress = useCallback(() => {
-      trigger('light');
+      triggerNavigation('navigate'); // Navigating to conversation
       // @ts-expect-error - navigation types not fully typed
       navigation.navigate('Conversation', {
         userId,
         isNew: true,
       });
-    }, [navigation, userId, trigger]);
+    }, [navigation, userId, triggerNavigation]);
+
+    // Handle block/unblock confirmation
+    const handleBlockAction = useCallback(() => {
+      if (isBlocked) {
+        unblockMutation.mutate(userId, {
+          onSuccess: () => {
+            showSuccess(toast, { trigger }, 'Engel kaldırıldı');
+            onBlockChange?.(false);
+            setShowBlockConfirmSheet(false);
+          },
+          onError: () => {
+            showUnblockError(toast, { trigger });
+            setShowBlockConfirmSheet(false);
+          },
+        });
+      } else {
+        blockMutation.mutate(userId, {
+          onSuccess: () => {
+            showSuccess(toast, { trigger }, 'Kullanıcı engellendi');
+            onBlockChange?.(true);
+            setShowBlockConfirmSheet(false);
+          },
+          onError: () => {
+            showBlockError(toast, { trigger });
+            setShowBlockConfirmSheet(false);
+          },
+        });
+      }
+    }, [isBlocked, userId, blockMutation, unblockMutation, onBlockChange, triggerSystem, toast]);
+
+    // Handle report navigation
+    const handleReport = useCallback(() => {
+      setShowOptionsSheet(false);
+      // @ts-expect-error - navigation types not fully typed
+      navigation.navigate('Report', {
+        type: 'USER',
+        targetId: userId,
+      });
+    }, [navigation, userId]);
 
     // Handle more options
     const handleMorePress = useCallback(() => {
-      trigger('light');
-
-      Alert.alert('Seçenekler', '', [
-        {
-          text: isBlocked ? 'Engeli Kaldır' : 'Engelle',
-          style: isBlocked ? 'default' : 'destructive',
-          onPress: () => {
-            Alert.alert(
-              isBlocked ? 'Engeli Kaldır' : 'Kullanıcıyı Engelle',
-              isBlocked
-                ? 'Bu kullanıcının engelini kaldırmak istediğinize emin misiniz?'
-                : 'Bu kullanıcıyı engellemek istediğinize emin misiniz?',
-              [
-                { text: 'İptal', style: 'cancel' },
-                {
-                  text: isBlocked ? 'Engeli Kaldır' : 'Engelle',
-                  style: isBlocked ? 'default' : 'destructive',
-                  onPress: () => {
-                    if (isBlocked) {
-                      unblockMutation.mutate(userId, {
-                        onSuccess: () => {
-                          trigger('success');
-                          onBlockChange?.(false);
-                        },
-                        onError: () => {
-                          trigger('error');
-                          Alert.alert('Hata', 'Engel kaldırılamadı.');
-                        },
-                      });
-                    } else {
-                      blockMutation.mutate(userId, {
-                        onSuccess: () => {
-                          trigger('warning');
-                          onBlockChange?.(true);
-                        },
-                        onError: () => {
-                          trigger('error');
-                          Alert.alert('Hata', 'Engellenemedi.');
-                        },
-                      });
-                    }
-                  },
-                },
-              ],
-            );
-          },
-        },
-        {
-          text: 'Şikayet Et',
-          onPress: () => {
-            // @ts-expect-error - navigation types not fully typed
-            navigation.navigate('Report', {
-              type: 'USER',
-              targetId: userId,
-            });
-          },
-        },
-        { text: 'İptal', style: 'cancel' },
-      ]);
-    }, [isBlocked, navigation, userId, blockMutation, unblockMutation, onBlockChange, trigger]);
+      triggerSystem('confirm'); // Opening options menu
+      setShowOptionsSheet(true);
+    }, [triggerSystem]);
 
     return (
       <Animated.View
@@ -197,6 +199,56 @@ export const ProfileActions: React.FC<ProfileActionsProps> = memo(
           size="md"
           leftIcon={<Icon name="ellipsis-horizontal" size={20} color={colors.text.secondary} />}
           style={styles.moreButton}
+        />
+
+        {/* Options ActionSheet */}
+        <ActionSheet
+          visible={showOptionsSheet}
+          onClose={() => setShowOptionsSheet(false)}
+          title="Seçenekler"
+          options={[
+            {
+              id: 'block',
+              label: isBlocked ? 'Engeli Kaldır' : 'Engelle',
+              icon: isBlocked ? 'checkmark-circle-outline' : 'ban-outline',
+              destructive: !isBlocked,
+              onPress: () => {
+                setShowOptionsSheet(false);
+                setShowBlockConfirmSheet(true);
+              },
+            },
+            {
+              id: 'report',
+              label: 'Şikayet Et',
+              icon: 'flag-outline',
+              onPress: handleReport,
+            },
+          ]}
+          cancelLabel="İptal"
+          testID="profile-options-sheet"
+        />
+
+        {/* Block Confirmation ActionSheet */}
+        <ActionSheet
+          visible={showBlockConfirmSheet}
+          onClose={() => setShowBlockConfirmSheet(false)}
+          title={isBlocked ? 'Engeli Kaldır' : 'Kullanıcıyı Engelle'}
+          message={
+            isBlocked
+              ? 'Bu kullanıcının engelini kaldırmak istediğinize emin misiniz?'
+              : 'Bu kullanıcıyı engellemek istediğinize emin misiniz?'
+          }
+          options={[
+            {
+              id: 'confirm',
+              label: isBlocked ? 'Engeli Kaldır' : 'Engelle',
+              icon: isBlocked ? 'checkmark-circle-outline' : 'ban-outline',
+              destructive: !isBlocked,
+              onPress: handleBlockAction,
+            },
+          ]}
+          cancelLabel="İptal"
+          testID="block-confirm-sheet"
         />
       </Animated.View>
     );

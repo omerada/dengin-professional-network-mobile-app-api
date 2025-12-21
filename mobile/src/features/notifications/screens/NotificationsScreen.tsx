@@ -4,14 +4,22 @@
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 import React, { useCallback, useEffect, useState, memo } from 'react';
-import { View, Text, StyleSheet, Pressable, Alert, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, InteractionManager } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeIn } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
+
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SCREEN_ANIMATIONS } from '@constants';
+import { navigateToChat, navigateToPostDetail, navigateToUserProfile } from '@core/navigation';
+import { spacing } from '@theme';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useToast } from '@contexts/ToastContext';
+import { useSemanticHaptic } from '@shared/hooks';
+import { UnifiedScreenHeader, ActionSheet } from '@shared/components';
+import { showOperationError } from '@shared/utils';
+
 import { NotificationList } from '../components/NotificationList';
 import { PermissionPrompt } from '../components/PermissionPrompt';
 import { useMarkAllAsRead, useNotificationPermission, useUnreadCount } from '../hooks';
@@ -40,12 +48,14 @@ type NavigationProp = NativeStackNavigationProp<FeedStackParamList>;
 export const NotificationsScreen: React.FC = memo(() => {
   const colors = useColors();
   const navigation = useNavigation<NavigationProp>();
-  const { trigger } = useHaptic();
+  const toast = useToast();
+  const { triggerNavigation, triggerSystem } = useSemanticHaptic();
   const { markAllAsRead, isPending: isMarkingAllAsRead } = useMarkAllAsRead();
   const { isPermissionGranted, requestPermission } = useNotificationPermission();
   const { unreadCount } = useUnreadCount();
 
   const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
+  const [showMarkAllReadConfirm, setShowMarkAllReadConfirm] = useState(false);
 
   // Check permission on mount - Disabled in development (Expo Go)
   // Expo Go'da FCM çalışmadığı için izin popup'ı gösterilmiyor
@@ -65,71 +75,78 @@ export const NotificationsScreen: React.FC = memo(() => {
   /**
    * Handle notification press - smart navigation based on type
    * Backend NotificationType enum ile uyumlu
+   * Uses InteractionManager for smooth 300ms fade animations
    */
   const handleNotificationPress = useCallback(
     (notification: NotificationResponse) => {
-      trigger('light');
+      triggerNavigation('navigate');
       const type = notification.type as NotificationType;
       const metadata = notification.metadata;
 
-      try {
-        switch (type) {
-          case 'NEW_MESSAGE':
-            if (metadata?.conversationId) {
-              // @ts-expect-error - MessagingStack navigation
-              navigation.navigate('MessagingTab', {
-                screen: 'Chat',
-                params: { conversationId: metadata.conversationId },
+      // Use InteractionManager to ensure smooth animations
+      // Defers navigation until current interactions complete
+      InteractionManager.runAfterInteractions(() => {
+        try {
+          switch (type) {
+            case 'NEW_MESSAGE':
+              if (metadata?.conversationId) {
+                navigateToChat(navigation as any, {
+                  conversationId: Number(metadata.conversationId),
+                });
+              }
+              break;
+
+            case 'POST_LIKED':
+            case 'POST_COMMENTED':
+            case 'MENTION':
+              if (metadata?.postId) {
+                navigateToPostDetail(navigation, {
+                  postId: Number(metadata.postId),
+                });
+              }
+              break;
+
+            case 'NEW_FOLLOWER':
+              if (metadata?.actorId) {
+                navigateToUserProfile(navigation, {
+                  userId: Number(metadata.actorId),
+                });
+              }
+              break;
+
+            case 'VERIFICATION_APPROVED':
+            case 'VERIFICATION_REJECTED':
+            case 'VERIFICATION_PENDING_REVIEW':
+              navigation.navigate('VerificationStatus');
+              break;
+
+            case 'POST_FLAGGED':
+            case 'CONTENT_REMOVED':
+            case 'WARNING_ISSUED':
+              toast.show({
+                message: notification.body || 'Detaylar için bildirime tıklayın.',
+                type: 'info',
+                duration: 5000,
               });
-            }
-            break;
+              break;
 
-          case 'POST_LIKED':
-          case 'POST_COMMENTED':
-          case 'MENTION':
-            if (metadata?.postId) {
-              navigation.navigate('PostDetail', {
-                postId: Number(metadata.postId),
-              });
-            }
-            break;
-
-          case 'NEW_FOLLOWER':
-            if (metadata?.actorId) {
-              navigation.navigate('UserProfile', {
-                userId: Number(metadata.actorId),
-              });
-            }
-            break;
-
-          case 'VERIFICATION_APPROVED':
-          case 'VERIFICATION_REJECTED':
-          case 'VERIFICATION_PENDING_REVIEW':
-            navigation.navigate('VerificationStatus');
-            break;
-
-          case 'POST_FLAGGED':
-          case 'CONTENT_REMOVED':
-          case 'WARNING_ISSUED':
-            Alert.alert(
-              notification.title || 'Bildirim',
-              notification.body || 'Detaylar için bildirime tıklayın.',
-              [{ text: 'Tamam' }],
-            );
-            break;
-
-          default:
-            if (notification.body) {
-              Alert.alert(notification.title || 'Bildirim', notification.body, [{ text: 'Tamam' }]);
-            }
-            break;
+            default:
+              if (notification.body) {
+                toast.info(notification.body);
+              }
+              break;
+          }
+        } catch (error) {
+          console.error('[NotificationsScreen] Navigation error:', error);
+          showOperationError(
+            toast,
+            { trigger: triggerNavigation },
+            'Bildirim açılırken bir hata oluştu.',
+          );
         }
-      } catch (error) {
-        console.error('[NotificationsScreen] Navigation error:', error);
-        Alert.alert('Hata', 'Bildirim açılırken bir hata oluştu.');
-      }
+      });
     },
-    [navigation, trigger],
+    [navigation, triggerNavigation],
   );
 
   /**
@@ -138,39 +155,35 @@ export const NotificationsScreen: React.FC = memo(() => {
   const handleMarkAllAsRead = useCallback(() => {
     if (unreadCount === 0) return;
 
-    trigger('medium');
-    Alert.alert(
-      'Tümünü Okundu İşaretle',
-      `${unreadCount} okunmamış bildirim okundu olarak işaretlenecek.`,
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Okundu İşaretle',
-          style: 'default',
-          onPress: () => {
-            markAllAsRead();
-            trigger('success');
-          },
-        },
-      ],
-    );
-  }, [unreadCount, markAllAsRead, trigger]);
+    triggerSystem('alert');
+    setShowMarkAllReadConfirm(true);
+  }, [unreadCount, triggerSystem]);
+
+  /**
+   * Confirm mark all as read
+   */
+  const handleConfirmMarkAllRead = useCallback(() => {
+    markAllAsRead();
+    triggerSystem('success');
+    setShowMarkAllReadConfirm(false);
+    toast.success('Tüm bildirimler okundu işaretlendi');
+  }, [markAllAsRead, triggerSystem, toast]);
 
   /**
    * Navigate to notification settings
    */
   const handleSettingsPress = useCallback(() => {
-    trigger('light');
+    triggerNavigation('navigate');
     navigation.navigate('NotificationSettings');
-  }, [navigation, trigger]);
+  }, [navigation, triggerNavigation]);
 
   /**
    * Go back to previous screen
    */
   const handleBack = useCallback(() => {
-    trigger('light');
+    triggerNavigation('back');
     navigation.goBack();
-  }, [navigation, trigger]);
+  }, [navigation, triggerNavigation]);
 
   /**
    * Handle permission request
@@ -181,123 +194,106 @@ export const NotificationsScreen: React.FC = memo(() => {
   }, [requestPermission]);
 
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background.primary }]}
-      edges={['top']}>
-      {/* Modern Header with Back Button */}
-      <Animated.View
-        entering={FadeIn.duration(300)}
-        style={[styles.header, { borderBottomColor: colors.border.subtle }]}>
-        <View style={styles.headerLeft}>
-          <Pressable
-            onPress={handleBack}
-            style={({ pressed }) => [styles.backButton, pressed && { opacity: 0.7 }]}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Icon name="arrow-back" size={24} color={colors.text.primary} />
-          </Pressable>
-          <View>
-            <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Bildirimler</Text>
-            {unreadCount > 0 && (
-              <Text style={[styles.headerSubtitle, { color: colors.text.tertiary }]}>
-                {unreadCount} okunmamış
-              </Text>
-            )}
-          </View>
-        </View>
-
-        <View style={styles.headerActions}>
-          {/* Mark All Read Button */}
-          {unreadCount > 0 && (
-            <Pressable
-              onPress={handleMarkAllAsRead}
-              disabled={isMarkingAllAsRead}
-              style={({ pressed }) => [
-                styles.headerButton,
-                { backgroundColor: colors.interactive.default + '15' },
-                pressed && styles.headerButtonPressed,
-              ]}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-              {isMarkingAllAsRead ? (
-                <ActivityIndicator size="small" color={colors.interactive.default} />
-              ) : (
-                <Icon name="checkmark-done" size={20} color={colors.interactive.default} />
+    <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={styles.wrapper}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background.primary }]}
+        edges={['top']}>
+        {/* Unified Header */}
+        <UnifiedScreenHeader
+          variant="default"
+          title="Bildirimler"
+          subtitle={unreadCount > 0 ? `${unreadCount} okunmamış` : undefined}
+          showBackButton={true}
+          onBackPress={handleBack}
+          rightElement={
+            <View style={styles.headerActions}>
+              {/* Mark All Read Button */}
+              {unreadCount > 0 && (
+                <View
+                  style={[
+                    styles.iconButton,
+                    { backgroundColor: colors.interactive.default + '15' },
+                  ]}>
+                  {isMarkingAllAsRead ? (
+                    <ActivityIndicator size="small" color={colors.interactive.default} />
+                  ) : (
+                    <Icon
+                      name="checkmark-done"
+                      size={20}
+                      color={colors.interactive.default}
+                      onPress={handleMarkAllAsRead}
+                    />
+                  )}
+                </View>
               )}
-            </Pressable>
-          )}
 
-          {/* Settings Button */}
-          <Pressable
-            onPress={handleSettingsPress}
-            style={({ pressed }) => [styles.headerButton, pressed && styles.headerButtonPressed]}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Icon name="settings-outline" size={22} color={colors.text.primary} />
-          </Pressable>
-        </View>
-      </Animated.View>
+              {/* Settings Button */}
+              <View style={styles.iconButton}>
+                <Icon
+                  name="settings-outline"
+                  size={22}
+                  color={colors.text.primary}
+                  onPress={handleSettingsPress}
+                />
+              </View>
+            </View>
+          }
+        />
 
-      {/* Notification List */}
-      <NotificationList onNotificationPress={handleNotificationPress} />
+        {/* Notification List */}
+        <NotificationList onNotificationPress={handleNotificationPress} />
 
-      {/* Permission Prompt Modal */}
-      <PermissionPrompt
-        visible={showPermissionPrompt}
-        onRequestPermission={handleRequestPermission}
-        onDismiss={() => setShowPermissionPrompt(false)}
-        permissionDenied={!isPermissionGranted}
-      />
-    </SafeAreaView>
+        {/* Permission Prompt Modal */}
+        <PermissionPrompt
+          visible={showPermissionPrompt}
+          onRequestPermission={handleRequestPermission}
+          onDismiss={() => setShowPermissionPrompt(false)}
+          permissionDenied={!isPermissionGranted}
+        />
+
+        {/* Mark All Read Confirmation ActionSheet */}
+        <ActionSheet
+          visible={showMarkAllReadConfirm}
+          onClose={() => setShowMarkAllReadConfirm(false)}
+          title="Tümünü Okundu İşaretle"
+          message={`${unreadCount} okunmamış bildirim okundu olarak işaretlenecek.`}
+          options={[
+            {
+              id: 'mark-read',
+              label: 'Okundu İşaretle',
+              onPress: handleConfirmMarkAllRead,
+            },
+            {
+              id: 'cancel',
+              label: 'İptal',
+              onPress: () => setShowMarkAllReadConfirm(false),
+            },
+          ]}
+        />
+      </SafeAreaView>
+    </Animated.View>
   );
 });
 
 NotificationsScreen.displayName = 'NotificationsScreen';
 
 const styles = StyleSheet.create({
-  backButton: {
-    alignItems: 'center',
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
+  wrapper: {
+    flex: 1,
   },
   container: {
     flex: 1,
   },
-  header: {
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
   headerActions: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: 8,
+    gap: spacing.sm,
   },
-  headerButton: {
+  iconButton: {
     alignItems: 'center',
     borderRadius: 20,
     height: 40,
     justifyContent: 'center',
     width: 40,
-  },
-  headerButtonPressed: {
-    opacity: 0.6,
-  },
-  headerLeft: {
-    alignItems: 'center',
-    flex: 1,
-    flexDirection: 'row',
-    gap: 12,
-  },
-  headerSubtitle: {
-    fontSize: 12,
-    fontWeight: '500',
-    marginTop: 2,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    letterSpacing: 0.2,
   },
 });

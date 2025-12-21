@@ -1,5 +1,5 @@
 // src/shared/components/Pressable/PressableScale.tsx
-// Meslektaş Design System - PressableScale Component
+// Dengin Design System - PressableScale Component
 // Oku: mobile-development-guide/ui-ux-modernization/14-SPRINT-IMPLEMENTATION-PLAN.md
 
 /* eslint-disable react-hooks/exhaustive-deps */
@@ -19,7 +19,7 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useHaptic } from '@shared/hooks';
 import { spring } from '@theme/animations';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -28,7 +28,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
  * PressableScale Props
  */
 export interface PressableScaleProps extends Omit<PressableProps, 'style'> {
-  /** Scale when pressed (default: 0.95) */
+  /** Scale when pressed (default: 0.96) */
   activeScale?: number;
   /** Spring damping (default: 15) */
   damping?: number;
@@ -58,7 +58,7 @@ export interface PressableScaleProps extends Omit<PressableProps, 'style'> {
  * </PressableScale>
  */
 export const PressableScale = memo<PressableScaleProps>(function PressableScale({
-  activeScale = 0.95,
+  activeScale = 0.96,
   damping = 15,
   stiffness = 150,
   haptic: enableHaptic = false,

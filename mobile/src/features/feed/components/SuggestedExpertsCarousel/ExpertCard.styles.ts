@@ -5,28 +5,36 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
+  avatar: {
+    alignItems: 'center',
+    borderRadius: 30,
+    height: 60,
+    justifyContent: 'center',
+    marginBottom: 8,
+    width: 60,
+  },
+
   card: {
-    width: 120,
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
     height: 140,
     marginRight: 12,
-    borderRadius: 12,
     padding: 12,
-    alignItems: 'center',
-    borderWidth: 1,
+    width: 120,
   },
 
-  avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginBottom: 8,
+  followButton: {
+    alignItems: 'center',
+    borderRadius: 8,
+    height: 32,
     justifyContent: 'center',
-    alignItems: 'center',
+    width: '100%',
   },
 
-  nameContainer: {
-    width: '100%',
-    marginBottom: 4,
+  followButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
 
   name: {
@@ -35,32 +43,24 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  nameWithBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+  nameContainer: {
+    marginBottom: 4,
+    width: '100%',
   },
 
-  verifiedBadge: {
-    marginLeft: 3,
+  nameWithBadge: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
 
   profession: {
     fontSize: 12,
-    textAlign: 'center',
     marginBottom: 8,
+    textAlign: 'center',
   },
 
-  followButton: {
-    width: '100%',
-    height: 32,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  followButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
+  verifiedBadge: {
+    marginLeft: 3,
   },
 });

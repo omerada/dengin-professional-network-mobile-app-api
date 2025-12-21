@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { biometricService, authApi, tokenService } from '../services';
 import { useAuthStore } from '../stores';
 import { getErrorMessage } from '@core/utils/errorUtils';
-import { resetNavigation } from '@core/navigation/AppNavigator';
+// import { resetNavigation } from '@core/navigation/AppNavigator'; // Not used
 
 /**
  * Biometric login hook
@@ -69,10 +69,13 @@ export const useBiometricLogin = () => {
       await tokenService.saveTokens(tokens);
 
       // Update auth store
+      // This will automatically trigger navigation through AppNavigator's isAuthenticated check
       setUser(user);
 
-      // Navigate to main app using helper function
-      resetNavigation(0, [{ name: 'Main' }]);
+      // No need to manually navigate - AppNavigator will re-render with isAuthenticated=true
+      if (__DEV__) {
+        console.log('[useBiometricLogin] Biometric login successful, auth state updated');
+      }
     },
 
     onError: (error: Error) => {

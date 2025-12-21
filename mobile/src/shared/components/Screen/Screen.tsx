@@ -212,10 +212,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollView: {
+  keyboardAvoiding: {
     flex: 1,
   },
-  keyboardAvoiding: {
+  scrollView: {
     flex: 1,
   },
 });

@@ -1,9 +1,10 @@
-package com.meslektas.verification.api;
+package com.dengin.verification.api;
 
+import com.dengin.verification.api.VerificationController;
+import com.dengin.verification.application.dto.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.meslektas.verification.application.dto.*;
-import com.meslektas.verification.application.service.VerificationService;
-import com.meslektas.verification.domain.model.VerificationStatus;
+import com.dengin.verification.application.service.VerificationService;
+import com.dengin.verification.domain.model.VerificationStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

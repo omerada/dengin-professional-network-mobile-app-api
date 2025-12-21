@@ -1,5 +1,5 @@
 // src/shared/components/Avatar/index.ts
-// Meslektaş Design System - Avatar Component Exports
+// Dengin Design System - Avatar Component Exports
 
 export { Avatar } from './Avatar';
 export type {

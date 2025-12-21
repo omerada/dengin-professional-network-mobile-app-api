@@ -1,5 +1,5 @@
 // src/shared/components/Avatar/Avatar.styles.ts
-// Meslektaş Design System - Avatar Styles
+// Dengin Design System - Avatar Styles
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import { StyleSheet } from 'react-native';
@@ -48,5 +48,21 @@ export const styles = StyleSheet.create({
 
   selected: {
     borderWidth: 3,
+  },
+
+  // P3: Skeleton loading overlay
+  skeleton: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
+  },
+
+  verificationBadge: {
+    alignItems: 'center',
+    bottom: -2,
+    justifyContent: 'center',
+    position: 'absolute',
+    right: -2,
   },
 });

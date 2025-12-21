@@ -1,8 +1,7 @@
-package com.meslektas.verification.domain.service;
+package com.dengin.verification.domain.service;
 
-import com.meslektas.verification.domain.model.VerificationStatus;
-import com.meslektas.verification.domain.repository.VerificationRequestRepository;
-import org.junit.jupiter.api.BeforeEach;
+import com.dengin.verification.domain.repository.VerificationRequestRepository;
+import com.dengin.verification.domain.service.VerificationAttemptPolicy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,8 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;

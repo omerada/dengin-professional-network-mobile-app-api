@@ -4,15 +4,7 @@
 // Oku: mobile-development-guide/ui-ux-modernization/07-SCREEN-REDESIGNS.md
 
 import React, { useCallback } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Feather';
@@ -21,12 +13,13 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useColors } from '@contexts/ThemeContext';
 import { useLocale } from '@contexts/LocaleContext';
-import { Button, Input } from '@shared/components';
+import { Button, Input, UnifiedScreenHeader, KeyboardAwareScreen } from '@shared/components';
+import { useSemanticHaptic } from '@shared/hooks';
+import { SCREEN_ANIMATIONS } from '@constants';
 import { useForgotPassword } from '../hooks';
 import { forgotPasswordSchema, ForgotPasswordSchemaType } from '../validation';
 import { AuthStackNavigationProp } from '@shared/types';
 import { spacing } from '@theme';
-import { getErrorMessage } from '@core/utils/errorUtils';
 
 /**
  * Modern Forgot Password Screen
@@ -40,6 +33,7 @@ export const ForgotPasswordScreen: React.FC = () => {
   const colors = useColors();
   const { t } = useLocale();
   const navigation = useNavigation<AuthStackNavigationProp>();
+  const { triggerNavigation } = useSemanticHaptic();
   const { requestReset, isLoading, error, isError, isEmailSent, reset } = useForgotPassword();
 
   const {
@@ -63,12 +57,14 @@ export const ForgotPasswordScreen: React.FC = () => {
   );
 
   const handleBack = useCallback(() => {
+    triggerNavigation('back');
     navigation.goBack();
-  }, [navigation]);
+  }, [navigation, triggerNavigation]);
 
   const handleBackToLogin = useCallback(() => {
+    triggerNavigation('navigate');
     navigation.navigate('Login');
-  }, [navigation]);
+  }, [navigation, triggerNavigation]);
 
   // Success state
   if (isEmailSent) {
@@ -118,101 +114,110 @@ export const ForgotPasswordScreen: React.FC = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top', 'bottom', 'left', 'right']}>
-      <KeyboardAvoidingView
-        style={styles.keyboardAvoid}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
-          showsVerticalScrollIndicator={false}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity
-              onPress={handleBack}
-              style={styles.backButton}
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-              <Icon name="arrow-left" size={24} color={colors.text.primary} />
-            </TouchableOpacity>
-            <Text style={[styles.headerTitle, { color: colors.text.primary }]}>
-              Şifremi Unuttum
+      <UnifiedScreenHeader
+        variant="default"
+        title="Şifremi Unuttum"
+        showBackButton
+        onBackPress={handleBack}
+      />
+      <KeyboardAwareScreen contentContainerStyle={styles.scrollContent}>
+        {/* Subtitle */}
+        <Animated.View
+          entering={SCREEN_ANIMATIONS.listItemEnter(0)}
+          style={styles.subtitleContainer}>
+          <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
+            E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.
+          </Text>
+        </Animated.View>
+
+        {/* Error Message */}
+        {isError && error && (
+          <Animated.View
+            entering={SCREEN_ANIMATIONS.listItemEnter(1)}
+            style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
+            <Icon name="alert-circle" size={18} color={colors.status.error} />
+            <Text style={[styles.errorText, { color: colors.status.error }]}>
+              {error.message?.includes('not found') || error.message?.includes('bulunamadı')
+                ? 'Bu e-posta adresi kayıtlı değil.'
+                : 'Bir hata oluştu. Lütfen tekrar deneyin.'}
             </Text>
-            <View style={styles.headerSpacer} />
-          </View>
+          </Animated.View>
+        )}
 
-          {/* Subtitle */}
-          <View style={styles.subtitleContainer}>
-            <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
-              E-posta adresinizi girin, size şifre sıfırlama bağlantısı gönderelim.
-            </Text>
-          </View>
+        {/* Form */}
+        <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(2)} style={styles.form}>
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label={t('auth.email')}
+                placeholder="ornek@email.com"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                autoCorrect={false}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={errors.email?.message}
+                required
+              />
+            )}
+          />
+        </Animated.View>
 
-          {/* Error Message */}
-          {isError && error && (
-            <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
-              <Icon name="alert-circle" size={18} color={colors.status.error} />
-              <Text style={[styles.errorText, { color: colors.status.error }]}>
-                {error.message?.includes('not found') || error.message?.includes('bulunamadı')
-                  ? 'Bu e-posta adresi kayıtlı değil.'
-                  : 'Bir hata oluştu. Lütfen tekrar deneyin.'}
-              </Text>
-            </View>
-          )}
+        {/* Submit Button */}
+        <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(3)} style={styles.actions}>
+          <Button
+            title="Sıfırlama Bağlantısı Gönder"
+            onPress={handleSubmit(onSubmit)}
+            loading={isLoading}
+            disabled={isLoading}
+            size="lg"
+            fullWidth
+          />
+        </Animated.View>
 
-          {/* Form */}
-          <View style={styles.form}>
-            <Controller
-              control={control}
-              name="email"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label={t('auth.email')}
-                  placeholder="ornek@email.com"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                  autoCorrect={false}
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.email?.message}
-                  required
-                />
-              )}
-            />
-          </View>
-
-          {/* Submit Button */}
-          <View style={styles.actions}>
-            <Button
-              title="Sıfırlama Bağlantısı Gönder"
-              onPress={handleSubmit(onSubmit)}
-              loading={isLoading}
-              disabled={isLoading}
-              size="lg"
-              fullWidth
-            />
-          </View>
-
-          {/* Back to Login */}
-          <TouchableOpacity
-            onPress={handleBackToLogin}
-            accessible={true}
-            accessibilityRole="link"
-            accessibilityLabel="Giriş sayfasına dön"
-            style={styles.backToLogin}>
-            <Text style={{ color: colors.interactive.default }}>← Giriş sayfasına dön</Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        {/* Back to Login */}
+        <TouchableOpacity
+          onPress={handleBackToLogin}
+          accessible={true}
+          accessibilityRole="link"
+          accessibilityLabel="Giriş sayfasına dön"
+          style={styles.backToLogin}>
+          <Text style={{ color: colors.interactive.default }}>← Giriş sayfasına dön</Text>
+        </TouchableOpacity>
+      </KeyboardAwareScreen>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  actions: {
+    marginBottom: spacing.xl,
+  },
+  backToLogin: {
+    alignItems: 'center',
+    padding: spacing.md,
+  },
   container: {
     flex: 1,
+  },
+  errorContainer: {
+    alignItems: 'center',
+    borderRadius: 12,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
+    padding: spacing.md,
+  },
+  errorText: {
+    flex: 1,
+    fontSize: 14,
+  },
+  form: {
+    marginBottom: spacing.lg,
   },
   keyboardAvoid: {
     flex: 1,
@@ -222,77 +227,38 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xl,
     paddingTop: spacing.md,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.lg,
-    paddingHorizontal: spacing.xs,
-  },
-  backButton: {
-    padding: spacing.sm,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-  },
-  headerSpacer: {
-    width: 40,
-  },
-  subtitleContainer: {
-    marginBottom: spacing.xl,
-  },
   subtitle: {
     fontSize: 15,
     lineHeight: 22,
   },
-  errorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    padding: spacing.md,
-    borderRadius: 12,
-    marginBottom: spacing.lg,
-  },
-  errorText: {
-    flex: 1,
-    fontSize: 14,
-  },
-  form: {
-    marginBottom: spacing.lg,
-  },
-  actions: {
+  subtitleContainer: {
     marginBottom: spacing.xl,
   },
-  backToLogin: {
-    alignItems: 'center',
-    padding: spacing.md,
-  },
   successContent: {
+    alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
     paddingHorizontal: spacing.xl,
   },
   successIcon: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: spacing.xl,
+    borderRadius: 60,
     borderWidth: 3,
+    height: 120,
+    justifyContent: 'center',
+    marginBottom: spacing.xl,
+    width: 120,
+  },
+  successText: {
+    fontSize: 16,
+    lineHeight: 24,
+    paddingHorizontal: spacing.md,
+    textAlign: 'center',
   },
   successTitle: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: spacing.md,
     textAlign: 'center',
-  },
-  successText: {
-    fontSize: 16,
-    textAlign: 'center',
-    lineHeight: 24,
-    paddingHorizontal: spacing.md,
   },
 });

@@ -6,7 +6,7 @@ import React, { memo } from 'react';
 import { StyleSheet, View, Text, Dimensions } from 'react-native';
 import Svg, { Circle, Rect, Defs, Mask, G, Path } from 'react-native-svg';
 import { useColors } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, typography, borderRadius } from '@theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -69,7 +69,7 @@ export const SelfieGuide: React.FC<SelfieGuideProps> = memo(
           <Rect
             width={SCREEN_WIDTH}
             height={SCREEN_HEIGHT}
-            fill="rgba(0,0,0,0.6)"
+            fill={colors.background.overlay}
             mask="url(#selfie-mask)"
           />
 
@@ -146,52 +146,52 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   hintContainer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
     alignItems: 'center',
+    left: 0,
     paddingHorizontal: spacing.lg,
+    position: 'absolute',
+    right: 0,
   },
   hintText: {
     ...typography.body,
     textAlign: 'center',
-    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
-  statusContainer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  statusIndicator: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  statusText: {
-    ...typography.bodySmall,
-    fontWeight: '600',
-    textShadowColor: 'rgba(0,0,0,0.5)',
+  instructionText: {
+    ...typography.caption,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
   instructionsContainer: {
-    position: 'absolute',
-    bottom: 160,
-    left: 0,
-    right: 0,
     alignItems: 'center',
-    paddingHorizontal: spacing.lg,
+    bottom: 160,
     gap: spacing.xs,
+    left: 0,
+    paddingHorizontal: spacing.lg,
+    position: 'absolute',
+    right: 0,
   },
-  instructionText: {
-    ...typography.caption,
-    textShadowColor: 'rgba(0,0,0,0.5)',
+  statusContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing.sm,
+    justifyContent: 'center',
+    left: 0,
+    position: 'absolute',
+    right: 0,
+  },
+  statusIndicator: {
+    borderRadius: borderRadius.sm,
+    height: 12,
+    width: 12,
+  },
+  statusText: {
+    ...typography.bodySmall,
+    fontWeight: '600',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },

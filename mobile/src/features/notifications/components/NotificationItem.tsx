@@ -4,14 +4,17 @@
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 import React, { memo, useCallback } from 'react';
-import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { ProgressiveImage, PressableScale } from '@shared/components';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
+import { useSemanticHaptic } from '@shared/hooks';
+import { spacing } from '@theme';
 import type { NotificationResponse, NotificationType } from '../types';
 
 export interface NotificationItemProps {
   notification: NotificationResponse;
-  onPress: (notification: NotificationResponse) => void;
+  onPress?: (notification: NotificationResponse) => void;
   onLongPress?: (notification: NotificationResponse) => void;
 }
 
@@ -96,17 +99,24 @@ const formatRelativeTime = (dateString: string): string => {
 export const NotificationItem: React.FC<NotificationItemProps> = memo(
   ({ notification, onPress, onLongPress }) => {
     const colors = useColors();
-
-    const handlePress = useCallback(() => {
-      onPress(notification);
-    }, [notification, onPress]);
-
-    const handleLongPress = useCallback(() => {
-      onLongPress?.(notification);
-    }, [notification, onLongPress]);
+    const { triggerNavigation, triggerSystem } = useSemanticHaptic();
 
     // Backend: read field (boolean)
     const isUnread = !notification.read;
+
+    const handlePress = useCallback(() => {
+      if (onPress) {
+        triggerNavigation('navigate');
+        onPress(notification);
+      }
+    }, [onPress, notification, triggerNavigation]);
+
+    const handleLongPress = useCallback(() => {
+      if (onLongPress) {
+        triggerSystem('alert');
+        onLongPress(notification);
+      }
+    }, [onLongPress, notification, triggerSystem]);
 
     // Backend icon field (derived) veya type'dan hesapla
     const iconConfig = notification.icon
@@ -119,31 +129,29 @@ export const NotificationItem: React.FC<NotificationItemProps> = memo(
     // Backend relativeTime field veya hesaplanan
     const displayTime = notification.relativeTime || formatRelativeTime(notification.createdAt);
 
-    return (
-      <Pressable
-        onPress={handlePress}
-        onLongPress={handleLongPress}
-        style={({ pressed }) => [
+    const content = (
+      <View
+        style={[
           styles.container,
           {
-            backgroundColor: isUnread
-              ? colors.interactive.subtle
-              : pressed
-                ? colors.background.secondary
-                : colors.background.primary,
+            backgroundColor: isUnread ? colors.interactive.subtle : colors.background.primary,
           },
         ]}>
         {/* Icon or Image */}
         <View style={styles.iconContainer}>
           {imageUrl ? (
-            <Image source={{ uri: imageUrl }} style={styles.image} />
+            <ProgressiveImage
+              source={{ uri: imageUrl }}
+              style={styles.image}
+              showLoadingIndicator
+            />
           ) : (
             <View style={[styles.iconCircle, { backgroundColor: `${iconConfig.color}20` }]}>
               <Icon name={iconConfig.name} size={20} color={iconConfig.color} />
             </View>
           )}
         </View>
-        /* Content */
+        {/* Content */}
         <View style={styles.content}>
           <Text
             style={[styles.title, { color: colors.text.primary }, isUnread && styles.titleUnread]}
@@ -159,39 +167,62 @@ export const NotificationItem: React.FC<NotificationItemProps> = memo(
         {isUnread && (
           <View style={[styles.unreadDot, { backgroundColor: colors.interactive.default }]} />
         )}
-      </Pressable>
+      </View>
     );
+
+    if (onPress || onLongPress) {
+      return (
+        <PressableScale
+          onPress={handlePress}
+          onLongPress={handleLongPress}
+          activeScale={0.98}
+          haptic={false} // Manual haptic in handlers
+        >
+          {content}
+        </PressableScale>
+      );
+    }
+
+    return content;
   },
 );
 
 NotificationItem.displayName = 'NotificationItem';
 
 const styles = StyleSheet.create({
+  body: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: spacing.xs, // 4
+  },
   container: {
-    flexDirection: 'row',
     alignItems: 'flex-start',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 12,
-  },
-  iconContainer: {
-    width: 44,
-    height: 44,
-  },
-  iconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  image: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    flexDirection: 'row',
+    gap: spacing.sm + spacing.xs, // 12
+    paddingHorizontal: spacing.md, // 16
+    paddingVertical: spacing.sm + spacing.xs, // 12
   },
   content: {
     flex: 1,
+  },
+  iconCircle: {
+    alignItems: 'center',
+    borderRadius: 22,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
+  },
+  iconContainer: {
+    height: 44,
+    width: 44,
+  },
+  image: {
+    borderRadius: 22,
+    height: 44,
+    width: 44,
+  },
+  time: {
+    fontSize: 12,
   },
   title: {
     fontSize: 15,
@@ -200,19 +231,11 @@ const styles = StyleSheet.create({
   titleUnread: {
     fontWeight: '600',
   },
-  body: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 4,
-  },
-  time: {
-    fontSize: 12,
-  },
   unreadDot: {
-    width: 8,
-    height: 8,
     borderRadius: 4,
+    height: 8,
     marginTop: 4,
+    width: 8,
   },
 });
 

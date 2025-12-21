@@ -15,7 +15,7 @@ describe('Login Flow E2E', () => {
 
   it('hoş geldiniz ekranını göstermeli', async () => {
     await expect(element(by.id('welcome-screen'))).toBeVisible();
-    await expect(element(by.text('Meslektaş'))).toBeVisible();
+    await expect(element(by.text('Dengin'))).toBeVisible();
   });
 
   it('giriş ekranına yönlendirmeli', async () => {

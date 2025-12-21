@@ -1,4 +1,4 @@
-# 🤖 Meslektaş Backend - AI Agent Development Guide
+# 🤖 Dengin Backend - AI Agent Development Guide
 
 **Version:** 1.0.0  
 **Last Updated:** 2025-12-09  
@@ -22,7 +22,7 @@
 ### Strategic DDD Architecture
 
 ```
-Meslektaş Backend
+Dengin Backend
 ├── Identity Context        → Users, Auth, Professions
 ├── Verification Context    → AI-powered profession verification
 ├── Social Context          → Posts, Comments, Likes
@@ -49,7 +49,7 @@ Monitoring: Sentry
 ### Package Structure
 
 ```
-com.meslektas/
+com.dengin/
 ├── common/                 # Shared utilities, exceptions
 ├── config/                 # Spring configuration
 ├── {context}/              # Each bounded context:
@@ -429,7 +429,7 @@ public Page<PostResponse> getPosts(
    ← S3: 200 OK
 
 3. Client: PUT /api/users/me/avatar/confirm { key }
-   ← Server: { avatarUrl: "https://cdn.meslektas.com/..." }
+   ← Server: { avatarUrl: "https://cdn.dengin.com/..." }
 ```
 
 ---
@@ -616,7 +616,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 # application.yml
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/meslektas
+    url: jdbc:postgresql://localhost:5432/dengin
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
@@ -795,5 +795,5 @@ mvn spring-boot:run
 ---
 
 **Last Updated:** 2025-12-09  
-**Maintained by:** Meslektaş Development Team  
+**Maintained by:** Dengin Development Team  
 **For AI Agents:** This guide is optimized for code generation. Follow patterns strictly for consistency.

@@ -1,14 +1,14 @@
-package com.meslektas.identity.application.service;
+package com.dengin.identity.application.service;
 
-import com.meslektas.common.exception.BusinessException;
-import com.meslektas.common.exception.ResourceNotFoundException;
-import com.meslektas.identity.application.dto.request.PasswordResetConfirmRequest;
-import com.meslektas.identity.application.dto.request.PasswordResetRequest;
-import com.meslektas.identity.domain.model.User;
-import com.meslektas.identity.domain.model.UserStatus;
-import com.meslektas.identity.domain.model.OAuthProvider;
-import com.meslektas.identity.domain.repository.UserRepository;
-import com.meslektas.notification.domain.service.EmailService;
+import com.dengin.common.exception.BusinessException;
+import com.dengin.common.exception.ResourceNotFoundException;
+import com.dengin.identity.application.dto.request.PasswordResetConfirmRequest;
+import com.dengin.identity.application.dto.request.PasswordResetRequest;
+import com.dengin.identity.application.service.PasswordResetService;
+import com.dengin.identity.domain.model.User;
+import com.dengin.identity.domain.model.UserStatus;
+import com.dengin.identity.domain.repository.UserRepository;
+import com.dengin.notification.domain.service.EmailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

@@ -3,13 +3,15 @@
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import React, { memo, useCallback } from 'react';
-import { StyleSheet, View, Text, ScrollView, Alert } from 'react-native';
+import { StyleSheet, View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
-import { Button } from '@shared/components';
+import { useToast } from '@contexts/ToastContext';
+import { useSemanticHaptic } from '@shared/hooks';
+import { spacing, typography, fontSize, borderRadius } from '@theme';
+import { Button, SuccessCelebration } from '@shared/components';
 import { useVerificationStore } from '../stores';
 import { StepIndicator, ImagePreview } from '../components';
 import type { VerificationStackParamList } from '@shared/types/navigation.types';
@@ -22,9 +24,13 @@ type NavigationProp = NativeStackNavigationProp<VerificationStackParamList, 'Ver
 export const VerificationReviewScreen: React.FC = memo(() => {
   const navigation = useNavigation<NavigationProp>();
   const colors = useColors();
+  const toast = useToast();
+  const { triggerSystem } = useSemanticHaptic();
 
   const { data, currentStep, setStep, setDocumentFront, setDocumentBack, setSelfie } =
     useVerificationStore();
+
+  const [showSuccess, setShowSuccess] = React.useState(false);
 
   /**
    * Belge ön yüzünü tekrar çek
@@ -59,33 +65,25 @@ export const VerificationReviewScreen: React.FC = memo(() => {
   const handleSubmit = useCallback(() => {
     // Tüm görüntülerin mevcut olduğunu kontrol et
     if (!data.documentFront || !data.documentBack || !data.selfie) {
-      Alert.alert('Eksik Belge', 'Lütfen tüm belgeleri çekin.', [{ text: 'Tamam' }]);
+      triggerSystem('error');
+      toast.error('Lütfen tüm belgeleri çekin');
       return;
     }
 
     setStep('uploading');
-    navigation.navigate('VerificationStatus');
-  }, [data, navigation, setStep]);
+    setShowSuccess(true);
+  }, [data, setStep, toast, triggerSystem]);
 
   /**
-   * İptal et
+   * İptal et - UNIFIED_FEEDBACK pattern
    */
   const handleCancel = useCallback(() => {
-    Alert.alert(
-      'İptal Et',
-      'Doğrulama işlemini iptal etmek istediğinizden emin misiniz? Çekilen fotoğraflar silinecek.',
-      [
-        { text: 'Hayır', style: 'cancel' },
-        {
-          text: 'Evet, İptal Et',
-          style: 'destructive',
-          onPress: () => {
-            navigation.popToTop();
-          },
-        },
-      ],
-    );
-  }, [navigation]);
+    triggerSystem('cancel');
+    toast.error('Doğrulama iptal edildi. Çekilen fotoğraflar silindi.', { duration: 4000 });
+    setTimeout(() => {
+      navigation.popToTop();
+    }, 300);
+  }, [navigation, toast, triggerSystem]);
 
   const isComplete = data.documentFront && data.documentBack && data.selfie;
 
@@ -194,6 +192,16 @@ export const VerificationReviewScreen: React.FC = memo(() => {
           accessibilityLabel="Doğrulama belgelerini gönder"
         />
       </View>
+
+      {/* Success Celebration */}
+      <SuccessCelebration
+        visible={showSuccess}
+        type="checkmark"
+        onComplete={() => {
+          setShowSuccess(false);
+          navigation.navigate('VerificationStatus');
+        }}
+      />
     </SafeAreaView>
   );
 });
@@ -201,65 +209,77 @@ export const VerificationReviewScreen: React.FC = memo(() => {
 VerificationReviewScreen.displayName = 'VerificationReviewScreen';
 
 const styles = StyleSheet.create({
-  container: {
+  cancelButton: {
     flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xl,
-  },
-  stepIndicator: {
-    marginTop: spacing.md,
-    marginBottom: spacing.lg,
-  },
-  header: {
-    marginBottom: spacing.xl,
-  },
-  title: {
-    ...typography.h2,
-    marginBottom: spacing.sm,
-  },
-  subtitle: {
-    ...typography.body,
-  },
-  previewSection: {
-    marginBottom: spacing.xl,
-    gap: spacing.lg,
-  },
-  previewItem: {
-    alignItems: 'center',
-  },
-  checklistContainer: {
-    padding: spacing.md,
-    borderRadius: 12,
-    marginBottom: spacing.lg,
-  },
-  checklistTitle: {
-    ...typography.body,
-    fontWeight: '600',
-    marginBottom: spacing.md,
-  },
-  checklistItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.sm,
   },
   checkIcon: {
-    fontSize: 16,
+    fontSize: fontSize.base,
     marginRight: spacing.sm,
   },
   checkText: {
     ...typography.bodySmall,
     flex: 1,
   },
+  checklistContainer: {
+    borderRadius: borderRadius.lg,
+    marginBottom: spacing.lg,
+    padding: spacing.md,
+  },
+  checklistItem: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginBottom: spacing.sm,
+  },
+  checklistTitle: {
+    ...typography.body,
+    fontWeight: '600',
+    marginBottom: spacing.md,
+  },
+  container: {
+    flex: 1,
+  },
+  footer: {
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    gap: spacing.md,
+    padding: spacing.lg,
+  },
+  header: {
+    marginBottom: spacing.xl,
+  },
+  previewItem: {
+    alignItems: 'center',
+  },
+  previewSection: {
+    gap: spacing.lg,
+    marginBottom: spacing.xl,
+  },
+  scrollContent: {
+    paddingBottom: spacing.xl,
+    paddingHorizontal: spacing.lg,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  stepIndicator: {
+    marginBottom: spacing.lg,
+    marginTop: spacing.md,
+  },
+  submitButton: {
+    flex: 2,
+  },
+  subtitle: {
+    ...typography.body,
+  },
+  title: {
+    ...typography.h2,
+    marginBottom: spacing.sm,
+  },
   warningContainer: {
+    alignItems: 'flex-start',
+    borderRadius: borderRadius.lg,
     flexDirection: 'row',
     padding: spacing.md,
-    borderRadius: 12,
-    alignItems: 'flex-start',
   },
   warningIcon: {
     fontSize: 16,
@@ -269,18 +289,15 @@ const styles = StyleSheet.create({
     ...typography.bodySmall,
     flex: 1,
   },
-  footer: {
-    flexDirection: 'row',
-    padding: spacing.lg,
-    borderTopWidth: 1,
-    gap: spacing.md,
-  },
-  cancelButton: {
-    flex: 1,
-  },
-  submitButton: {
-    flex: 2,
-  },
 });
 
-export default VerificationReviewScreen;
+// Wrap with Error Boundary for production safety
+import { ErrorBoundary } from '@core/components';
+
+export default function VerificationReviewScreenWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <VerificationReviewScreen />
+    </ErrorBoundary>
+  );
+}

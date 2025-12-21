@@ -163,8 +163,8 @@ StepIndicator.displayName = 'StepIndicator';
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     alignItems: 'flex-start',
+    flexDirection: 'row',
     justifyContent: 'center',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
@@ -174,15 +174,11 @@ const styles = StyleSheet.create({
     width: 60,
   },
   stepDot: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
     alignItems: 'center',
+    borderRadius: 16,
+    height: 32,
     justifyContent: 'center',
-  },
-  stepNumber: {
-    ...typography.bodySmall,
-    fontWeight: '700',
+    width: 32,
   },
   stepLabel: {
     ...typography.caption,
@@ -190,11 +186,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   stepLine: {
+    borderRadius: 1.5,
     flex: 1,
     height: 3,
-    marginTop: 14,
     marginHorizontal: 4,
-    borderRadius: 1.5,
+    marginTop: 14,
+  },
+  stepNumber: {
+    ...typography.bodySmall,
+    fontWeight: '700',
   },
 });
 

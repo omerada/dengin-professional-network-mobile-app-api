@@ -14,6 +14,8 @@ import { useColors, useTheme, ThemeProvider } from '@contexts/ThemeContext';
 import { ToastProvider } from '@contexts/ToastContext';
 import { useAuthStore } from '@features/auth/stores/authStore';
 import { notificationHandler } from '@features/notifications/services/notificationHandler.production';
+import { ErrorBoundary, OfflineBanner } from '@shared/components';
+import { useNetworkStatus } from '@shared/hooks';
 
 // Disable warnings in production but keep errors visible in development
 LogBox.ignoreAllLogs(!__DEV__);
@@ -74,12 +76,15 @@ const AppContent: React.FC = () => {
     };
   }, [isAuthenticated]);
 
+  const { isOffline } = useNetworkStatus();
+
   return (
     <>
       <StatusBar
         barStyle={isDark ? 'light-content' : 'dark-content'}
         backgroundColor={colors.background.primary}
       />
+      {isOffline && <OfflineBanner />}
       <AppNavigator />
     </>
   );
@@ -91,19 +96,21 @@ const AppContent: React.FC = () => {
  */
 const App: React.FC = () => {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider>
-            <ToastProvider>
-              <LocaleProvider>
-                <AppContent />
-              </LocaleProvider>
-            </ToastProvider>
-          </ThemeProvider>
-        </QueryClientProvider>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <ErrorBoundary enableReporting={!__DEV__}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <QueryClientProvider client={queryClient}>
+            <ThemeProvider>
+              <ToastProvider>
+                <LocaleProvider>
+                  <AppContent />
+                </LocaleProvider>
+              </ToastProvider>
+            </ThemeProvider>
+          </QueryClientProvider>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 };
 

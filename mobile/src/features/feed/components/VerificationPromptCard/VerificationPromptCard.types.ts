@@ -13,6 +13,11 @@ export interface VerificationPromptCardProps {
   onPress: () => void;
 
   /**
+   * Callback when dismiss button pressed
+   */
+  onDismiss?: () => void;
+
+  /**
    * Test ID for testing
    */
   testID?: string;

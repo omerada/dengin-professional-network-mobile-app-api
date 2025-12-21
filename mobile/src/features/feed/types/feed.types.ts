@@ -6,7 +6,7 @@ import type { PagedResponse } from '@shared/types';
 
 /**
  * Post yazarı - Backend FeedPostResponse.AuthorDto ile %100 uyumlu
- * Backend: com.meslektas.social.application.dto.FeedPostResponse.AuthorDto
+ * Backend: com.dengin.social.application.dto.FeedPostResponse.AuthorDto
  */
 export interface PostAuthor {
   /** Backend: userId (Long) */
@@ -26,7 +26,7 @@ export interface PostAuthor {
   verified: boolean;
   /** Backward compatibility alias */
   isVerified?: boolean;
-  /** @deprecated Use professionName instead */
+  /** Legacy field - backward compatibility */
   profession?: string;
 }
 
@@ -61,7 +61,7 @@ export interface UserInteraction {
 
 /**
  * Post - Backend FeedPostResponse ile %100 uyumlu
- * Backend: com.meslektas.social.application.dto.FeedPostResponse
+ * Backend: com.dengin.social.application.dto.FeedPostResponse
  *
  * NOT: Backend hem Long id hem UUID postId döndürüyor.
  * - API çağrılarında Long id kullanılmalı (PostController Long.parseLong kullanıyor)
@@ -84,17 +84,16 @@ export interface Post {
   /** Feed algorithm relevance score (optional) */
   relevanceScore?: number;
   createdAt: string;
-  /** @deprecated Backend FeedPostResponse'da yok, opsiyonel */
+  /** Legacy field - backward compatibility */
   updatedAt?: string;
-  /** @deprecated Use flat likeCount, commentCount instead */
+  /** Legacy field - backward compatibility */
   stats?: PostStats;
-  /** @deprecated Use liked instead */
+  /** Legacy field - backward compatibility */
   userInteraction?: UserInteraction;
 }
 
 /**
- * Post özeti (liste için)
- * @deprecated Yeni API ile Post tipini doğrudan kullanın
+ * Post özeti (liste için) - legacy type
  */
 export interface PostSummary {
   /** Primary ID (Long) */
@@ -250,7 +249,8 @@ export interface LegacyCreatePostRequest {
 export interface CreatePostDto {
   content: string;
   images: LocalImage[];
-  professionId?: number;
+  /** Meslek ID'si - Backend zorunlu olarak bekliyor */
+  professionId: number;
 }
 
 /**
@@ -306,6 +306,10 @@ export interface FeedStoreState {
   addDraftImage: (image: LocalImage) => void;
   removeDraftImage: (index: number) => void;
   clearDraft: () => void;
+
+  // Verification prompt (session-based)
+  verificationPromptShown: boolean;
+  setVerificationPromptShown: (shown: boolean) => void;
 }
 
 /**

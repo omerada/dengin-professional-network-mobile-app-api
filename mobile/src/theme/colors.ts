@@ -1,5 +1,5 @@
 // src/theme/colors.ts
-// Meslektaş Design System v3.0 - Professional Color Tokens
+// Dengin Design System v3.0 - Professional Color Tokens
 // Redesigned with Warm Copper (#D9C5AC) as Primary Brand Color
 
 import type { ColorPalette, ThemeColors } from './types';
@@ -399,7 +399,7 @@ export const lightTheme: ThemeColors = {
     pressed: palette.terracotta[800], // Çok koyu terracotta - pressed
     disabled: palette.slate[300], // Açık slate - disabled
     focus: palette.terracotta[500], // Parlak terracotta - focus ring
-    subtle: palette.terracotta[100], // Çok açık terracotta - subtle interaction
+    subtle: palette.terracotta[50], // Çok çok açık terracotta - subtle interaction (tab background)
   },
 
   // Borders - İnce ve zarif
