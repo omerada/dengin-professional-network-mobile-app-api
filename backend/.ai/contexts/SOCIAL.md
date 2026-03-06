@@ -122,8 +122,8 @@ Authorization: Bearer {token}
 {
   "content": "Bugün harika bir ameliyat gerçekleştirdik...",
   "imageUrls": [
-    "https://cdn.meslektas.com/posts/1.jpg",
-    "https://cdn.meslektas.com/posts/2.jpg"
+    "https://cdn.dengin.com/posts/1.jpg",
+    "https://cdn.dengin.com/posts/2.jpg"
   ]
 }
 

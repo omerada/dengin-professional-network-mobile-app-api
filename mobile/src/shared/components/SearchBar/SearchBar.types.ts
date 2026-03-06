@@ -1,5 +1,5 @@
 // src/shared/components/SearchBar/SearchBar.types.ts
-// Meslektaş Design System - SearchBar Types
+// Dengin Design System - SearchBar Types
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import { ViewStyle, TextInputProps } from 'react-native';
@@ -14,7 +14,7 @@ export type SearchBarSize = 'sm' | 'md' | 'lg';
  */
 export interface SearchBarProps extends Omit<TextInputProps, 'style'> {
   /** Current search value */
-  value: string;
+  value?: string;
   /** Value change handler */
   onChangeText: (text: string) => void;
   /** Placeholder text */
@@ -35,6 +35,10 @@ export interface SearchBarProps extends Omit<TextInputProps, 'style'> {
   loading?: boolean;
   /** Auto focus on mount */
   autoFocus?: boolean;
+  /** Show filter button */
+  showFilter?: boolean;
+  /** Filter button press handler */
+  onFilterPress?: () => void;
   /** Container style */
   style?: ViewStyle;
   /** Test ID for testing */

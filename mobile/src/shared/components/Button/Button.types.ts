@@ -1,5 +1,5 @@
 // src/shared/components/Button/Button.types.ts
-// Meslektaş Design System - Button Type Definitions
+// Dengin Design System - Button Type Definitions
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import { ViewStyle, TextStyle, AccessibilityProps } from 'react-native';
@@ -82,9 +82,6 @@ export interface ButtonProps extends AccessibilityProps {
 
   /** Test ID for testing */
   testID?: string;
-
-  /** Animated scale when pressed (0-1, default 0.97) */
-  pressScale?: number;
 
   /** Loading indicator color override */
   loadingColor?: string;

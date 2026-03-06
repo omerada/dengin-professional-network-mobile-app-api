@@ -1,5 +1,5 @@
 # GitHub Actions CI/CD Workflow
-# Meslektaş Mobile App
+# Dengin Mobile App
 # Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
 
 name: Mobile CI/CD
@@ -151,8 +151,8 @@ jobs:
         if: github.event.inputs.release != 'true'
         working-directory: mobile
         run: |
-          xcodebuild -workspace ios/MeslektasApp.xcworkspace \
-            -scheme MeslektasApp \
+          xcodebuild -workspace ios/DenginApp.xcworkspace \
+            -scheme DenginApp \
             -configuration Debug \
             -destination 'platform=iOS Simulator,name=iPhone 15' \
             build

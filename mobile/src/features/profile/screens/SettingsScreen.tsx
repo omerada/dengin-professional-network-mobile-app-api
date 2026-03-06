@@ -3,13 +3,30 @@
 // Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
 
 import React, { useMemo, useCallback, useState } from 'react';
-import { StyleSheet, ScrollView, Alert } from 'react-native';
+import { StyleSheet, ScrollView, useColorScheme } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme, useColors } from '@contexts/ThemeContext';
+import { SCREEN_ANIMATIONS } from '@constants';
+import {
+  navigateToEditProfile,
+  navigateToChangePassword,
+  navigateToBiometricSettings,
+  navigateToNotificationSettings,
+  navigateToPrivacySettings,
+  navigateToBlockedUsers,
+  navigateToAccountDeletion,
+} from '@core/navigation';
+import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
+import { useSemanticHaptic } from '@shared/hooks';
 import { spacing } from '@theme';
+import { asyncStorage, STORAGE_KEYS } from '@core/storage';
 import { SettingsSection } from '../components';
+import { CustomRefreshControl, UnifiedScreenHeader } from '@shared/components';
+import { useLogout } from '@features/auth/hooks';
 import type { SettingsSectionType } from '../types';
+import type { ThemeMode } from '@theme/types';
 
 /**
  * SettingsScreen
@@ -22,51 +39,111 @@ import type { SettingsSectionType } from '../types';
  * - Danger Zone (delete account)
  */
 export const SettingsScreen: React.FC = () => {
-  const { toggleTheme, isDark } = useTheme();
   const colors = useColors();
+  const { triggerNavigation, triggerSystem } = useSemanticHaptic();
+  const toast = useToast();
   const navigation = useNavigation();
+  const { logout, isLoading: isLoggingOut } = useLogout();
+  const systemColorScheme = useColorScheme();
+
+  // Theme state
+  const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
+  const isDark = themeMode === 'system' ? systemColorScheme === 'dark' : themeMode === 'dark';
+  // Load theme preference on mount
+  React.useEffect(() => {
+    const loadTheme = async () => {
+      try {
+        const saved = await asyncStorage.get<ThemeMode>(STORAGE_KEYS.THEME);
+        if (saved) setThemeModeState(saved);
+      } catch (error) {
+        console.warn('Failed to load theme:', error);
+      }
+    };
+    loadTheme();
+  }, []);
+
+  // Save theme preference
+  const setThemeMode = useCallback(async (mode: ThemeMode) => {
+    setThemeModeState(mode);
+    try {
+      await asyncStorage.set(STORAGE_KEYS.THEME, mode);
+    } catch (error) {
+      console.warn('Failed to save theme:', error);
+    }
+  }, []);
 
   // Loading states
   const [loadingStates, _setLoadingStates] = useState<Record<string, boolean>>({});
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Handlers
+  // Handlers - UNIFIED: Using navigation helpers instead of direct navigate
   const handleEditProfile = useCallback(() => {
-    navigation.navigate('EditProfile' as never);
+    navigateToEditProfile(navigation as any);
   }, [navigation]);
 
   const handleChangePassword = useCallback(() => {
-    navigation.navigate('ChangePassword' as never);
+    navigateToChangePassword(navigation as any);
   }, [navigation]);
 
   const handleBiometric = useCallback(() => {
-    navigation.navigate('BiometricSettings' as never);
+    navigateToBiometricSettings(navigation as any);
   }, [navigation]);
 
   const handleNotificationSettings = useCallback(() => {
-    navigation.navigate('NotificationSettings' as never);
+    navigateToNotificationSettings(navigation as any);
   }, [navigation]);
 
   const handlePrivacySettings = useCallback(() => {
-    navigation.navigate('PrivacySettings' as never);
+    navigateToPrivacySettings(navigation as any);
   }, [navigation]);
 
   const handleBlockedUsers = useCallback(() => {
-    navigation.navigate('BlockedUsers' as never);
+    navigateToBlockedUsers(navigation as any);
   }, [navigation]);
 
   const handleHelp = useCallback(() => {
+    triggerNavigation('navigate');
     // Open help center or FAQ
-    Alert.alert('Yardım', 'Yardım merkezi yakında eklenecek.');
-  }, []);
+    toast.info('Yardım merkezi yakında eklenecek.');
+  }, [triggerNavigation, toast]);
 
   const handleContact = useCallback(() => {
+    triggerNavigation('navigate');
     // Open contact support
-    Alert.alert('İletişim', 'destek@meslektas.app');
-  }, []);
+    toast.info('İletişim: destek@dengin.app');
+  }, [triggerNavigation, toast]);
 
   const handleDeleteAccount = useCallback(() => {
-    navigation.navigate('AccountDeletion' as never);
-  }, [navigation]);
+    triggerSystem('alert');
+    navigateToAccountDeletion(navigation as any);
+  }, [navigation, triggerSystem]);
+
+  const handleLogout = useCallback(() => {
+    triggerSystem('alert');
+    logout();
+  }, [logout, triggerSystem]);
+
+  // Cycle through theme modes: system → light → dark → system
+  const handleThemeCycle = useCallback(() => {
+    triggerSystem('success');
+    const modes = ['system', 'light', 'dark'] as const;
+    const currentIndex = modes.indexOf(themeMode);
+    const nextMode = modes[(currentIndex + 1) % modes.length];
+    setThemeMode(nextMode);
+
+    // User feedback with toast
+    const labels = { system: 'Sistem', light: 'Açık', dark: 'Koyu' };
+    toast.success(`Tema: ${labels[nextMode]}`);
+  }, [themeMode, setThemeMode, triggerSystem, toast]);
+
+  const handleRefresh = useCallback(() => {
+    triggerNavigation('navigate');
+    setIsRefreshing(true);
+    // Simulate settings refresh (in real app, refetch user preferences)
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 800);
+  }, [triggerNavigation]);
 
   // Settings sections
   const sections: SettingsSectionType[] = useMemo(
@@ -136,12 +213,17 @@ export const SettingsScreen: React.FC = () => {
         title: 'Görünüm',
         items: [
           {
-            id: 'darkMode',
-            title: 'Karanlık Mod',
-            icon: 'moon-outline',
-            type: 'toggle',
-            value: isDark,
-            onToggle: toggleTheme,
+            id: 'themeMode',
+            title: 'Tema',
+            subtitle: `${themeMode === 'system' ? 'Sistem' : themeMode === 'light' ? 'Açık' : 'Koyu'}${themeMode === 'system' ? ` (${isDark ? 'Koyu' : 'Açık'})` : ''}`,
+            icon:
+              themeMode === 'system'
+                ? 'phone-portrait-outline'
+                : isDark
+                  ? 'moon-outline'
+                  : 'sunny-outline',
+            type: 'navigation',
+            onPress: handleThemeCycle,
           },
         ],
       },
@@ -165,6 +247,20 @@ export const SettingsScreen: React.FC = () => {
         ],
       },
       {
+        title: 'Hesap İşlemleri',
+        items: [
+          {
+            id: 'logout',
+            title: 'Çıkış Yap',
+            subtitle: 'Hesabınızdan güvenli çıkış yapın',
+            icon: 'log-out-outline',
+            type: 'navigation',
+            onPress: handleLogout,
+            loading: isLoggingOut,
+          },
+        ],
+      },
+      {
         title: 'Tehlikeli Bölge',
         items: [
           {
@@ -179,8 +275,10 @@ export const SettingsScreen: React.FC = () => {
       },
     ],
     [
+      themeMode,
       isDark,
-      toggleTheme,
+      isLoggingOut,
+      handleThemeCycle,
       handleEditProfile,
       handleChangePassword,
       handleBiometric,
@@ -189,24 +287,36 @@ export const SettingsScreen: React.FC = () => {
       handleBlockedUsers,
       handleHelp,
       handleContact,
+      handleLogout,
       handleDeleteAccount,
     ],
+  );
+
+  const refreshControl = useMemo(
+    () => <CustomRefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />,
+    [isRefreshing, handleRefresh],
   );
 
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.secondary }]}
-      edges={['bottom']}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {sections.map(section => (
-          <SettingsSection
-            key={section.title}
-            title={section.title}
-            items={section.items}
-            loadingStates={loadingStates}
-          />
-        ))}
-      </ScrollView>
+      edges={['top', 'bottom']}>
+      <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={{ flex: 1 }}>
+        <UnifiedScreenHeader variant="default" title="Ayarlar" showBackButton showBorder />
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={refreshControl}>
+          {sections.map(section => (
+            <SettingsSection
+              key={section.title}
+              title={section.title}
+              items={section.items}
+              loadingStates={loadingStates}
+            />
+          ))}
+        </ScrollView>
+      </Animated.View>
     </SafeAreaView>
   );
 };

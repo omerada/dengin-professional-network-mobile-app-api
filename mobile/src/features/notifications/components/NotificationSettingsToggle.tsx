@@ -85,24 +85,29 @@ NotificationSettingsToggle.displayName = 'NotificationSettingsToggle';
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    flexDirection: 'row',
     paddingHorizontal: 16,
+    paddingVertical: 12,
   },
-  pressed: {
-    opacity: 0.7,
+  description: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 2,
   },
   disabled: {
     opacity: 0.5,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 20,
+    height: 40,
+    justifyContent: 'center',
     marginRight: 12,
+    width: 40,
+  },
+  pressed: {
+    opacity: 0.7,
   },
   textContainer: {
     flex: 1,
@@ -111,11 +116,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '500',
-  },
-  description: {
-    fontSize: 13,
-    marginTop: 2,
-    lineHeight: 18,
   },
 });
 

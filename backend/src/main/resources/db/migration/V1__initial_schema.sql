@@ -1,4 +1,4 @@
--- Initial schema for Meslektaş platform
+-- Initial schema for Dengin platform
 -- Strategic DDD Implementation
 
 -- =====================================================
@@ -167,4 +167,4 @@ CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
 
 -- System user for automated actions
 INSERT INTO users (id, email, name, surname, status, is_email_verified) 
-VALUES (0, 'system@meslektas.com', 'System', 'User', 'ACTIVE', TRUE);
+VALUES (0, 'system@dengin.com', 'System', 'User', 'ACTIVE', TRUE);

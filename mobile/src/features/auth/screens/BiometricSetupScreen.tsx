@@ -9,8 +9,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { Button, Loading } from '@shared/components';
+import { Button, UnifiedLoadingState } from '@shared/components';
 import { spacing, typography } from '@theme';
+import { showOperationError, showSuccess, showInfo } from '@shared/utils';
+import { useSemanticHaptic, useHaptic } from '@shared/hooks';
 import { secureStorage, SECURE_KEYS } from '@core/storage';
 import { biometricService } from '../services/biometricService';
 import { useAuthStore } from '../stores';
@@ -41,6 +43,8 @@ export const BiometricSetupScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation();
   const toast = useToast();
+  const { trigger } = useHaptic();
+  const { triggerSystem } = useSemanticHaptic();
 
   // Auth store
   const { user } = useAuthStore();
@@ -84,14 +88,22 @@ export const BiometricSetupScreen: React.FC = () => {
   // Handle enable biometric
   const handleEnableBiometric = useCallback(async () => {
     if (!user?.email) {
-      Alert.alert('Hata', 'Biyometrik kimlik doğrulama için giriş yapmalısınız.');
+      showOperationError(
+        toast,
+        { trigger },
+        'Biyometrik kimlik doğrulama için giriş yapmalısınız.',
+      );
       return;
     }
 
     // Get refresh token from secure storage
     const refreshTokenValue = await secureStorage.get(SECURE_KEYS.REFRESH_TOKEN);
     if (!refreshTokenValue) {
-      Alert.alert('Hata', 'Biyometrik kimlik doğrulama için giriş yapmalısınız.');
+      showOperationError(
+        toast,
+        { trigger },
+        'Biyometrik kimlik doğrulama için giriş yapmalısınız.',
+      );
       return;
     }
 
@@ -104,7 +116,7 @@ export const BiometricSetupScreen: React.FC = () => {
       );
 
       if (!success) {
-        Alert.alert('Doğrulama Başarısız', error || 'Biyometrik doğrulama başarısız oldu.');
+        showOperationError(toast, { trigger }, error || 'Biyometrik doğrulama başarısız oldu.');
         return;
       }
 
@@ -113,17 +125,17 @@ export const BiometricSetupScreen: React.FC = () => {
 
       if (enabled) {
         setIsEnabled(true);
-        toast.success(`${biometricName} ile giriş etkinleştirildi`, 'Başarılı');
+        showSuccess(toast, { trigger }, `${biometricName} ile giriş etkinleştirildi`);
       } else {
-        Alert.alert('Hata', 'Biyometrik giriş etkinleştirilemedi.');
+        showOperationError(toast, { trigger }, 'Biyometrik giriş etkinleştirilemedi.');
       }
     } catch (error) {
       console.error('[BiometricSetupScreen] Enable error:', error);
-      Alert.alert('Hata', 'Bir hata oluştu. Lütfen tekrar deneyin.');
+      showOperationError(toast, { trigger }, 'Bir hata oluştu. Lütfen tekrar deneyin.');
     } finally {
       setIsProcessing(false);
     }
-  }, [user, biometricName, toast]);
+  }, [user, biometricName, toast, triggerSystem]);
 
   // Handle disable biometric
   const handleDisableBiometric = useCallback(async () => {
@@ -143,13 +155,13 @@ export const BiometricSetupScreen: React.FC = () => {
 
               if (disabled) {
                 setIsEnabled(false);
-                toast.info(`${biometricName} ile giriş devre dışı bırakıldı`, 'Devre Dışı');
+                showInfo(toast, { trigger }, `${biometricName} ile giriş devre dışı bırakıldı`);
               } else {
-                Alert.alert('Hata', 'Biyometrik giriş devre dışı bırakılamadı.');
+                showOperationError(toast, { trigger }, 'Biyometrik giriş devre dışı bırakılamadı.');
               }
             } catch (error) {
               console.error('[BiometricSetupScreen] Disable error:', error);
-              Alert.alert('Hata', 'Bir hata oluştu.');
+              showOperationError(toast, { trigger }, 'Bir hata oluştu.');
             } finally {
               setIsProcessing(false);
             }
@@ -172,7 +184,7 @@ export const BiometricSetupScreen: React.FC = () => {
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.background.primary }]}
         edges={['bottom']}>
-        <Loading size="large" message="Kontrol ediliyor..." />
+        <UnifiedLoadingState strategy="spinner" message="Kontrol ediliyor..." variant="screen" />
       </SafeAreaView>
     );
   }
@@ -312,103 +324,103 @@ export const BiometricSetupScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    padding: spacing.xl,
-    alignItems: 'center',
-  },
-  iconContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-  },
-  icon: {
-    fontSize: 60,
-  },
-  title: {
-    ...typography.h2,
-    textAlign: 'center',
-    marginBottom: spacing.sm,
-  },
-  description: {
-    ...typography.body1,
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-    lineHeight: 24,
-  },
-  statusBadge: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: spacing.xl,
-    marginBottom: spacing.xl,
-  },
-  statusText: {
-    ...typography.subtitle2,
-  },
-  benefitsCard: {
-    width: '100%',
-    padding: spacing.lg,
-    borderRadius: spacing.md,
-    marginBottom: spacing.xl,
-  },
-  benefitsTitle: {
-    ...typography.subtitle1,
-    marginBottom: spacing.md,
-  },
-  benefitItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: spacing.sm,
-  },
-  benefitIcon: {
-    fontSize: 18,
-    marginRight: spacing.sm,
-  },
-  benefitText: {
-    ...typography.body2,
-    flex: 1,
-    lineHeight: 22,
-  },
-  buttonContainer: {
-    width: '100%',
-    marginBottom: spacing.xl,
-  },
   actionButton: {
     width: '100%',
   },
   backButton: {
     marginTop: spacing.lg,
   },
-  noteCard: {
-    padding: spacing.md,
-    borderRadius: spacing.sm,
-    borderWidth: 1,
+  benefitIcon: {
+    fontSize: 18,
+    marginRight: spacing.sm,
   },
-  noteText: {
-    ...typography.caption,
+  benefitItem: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    marginBottom: spacing.sm,
+  },
+  benefitText: {
+    ...typography.body2,
+    flex: 1,
+    lineHeight: 22,
+  },
+  benefitsCard: {
+    borderRadius: spacing.md,
+    marginBottom: spacing.xl,
+    padding: spacing.lg,
+    width: '100%',
+  },
+  benefitsTitle: {
+    ...typography.subtitle1,
+    marginBottom: spacing.md,
+  },
+  buttonContainer: {
+    marginBottom: spacing.xl,
+    width: '100%',
+  },
+  container: {
+    flex: 1,
+  },
+  content: {
+    alignItems: 'center',
+    flex: 1,
+    padding: spacing.xl,
+  },
+  description: {
+    ...typography.body1,
+    lineHeight: 24,
+    marginBottom: spacing.lg,
     textAlign: 'center',
-    lineHeight: 18,
+  },
+  icon: {
+    fontSize: 60,
+  },
+  iconContainer: {
+    alignItems: 'center',
+    borderRadius: 60,
+    height: 120,
+    justifyContent: 'center',
+    marginBottom: spacing.xl,
+    width: 120,
   },
   infoCard: {
-    width: '100%',
-    padding: spacing.lg,
     borderRadius: spacing.md,
-    marginTop: spacing.xl,
     marginBottom: spacing.xl,
+    marginTop: spacing.xl,
+    padding: spacing.lg,
+    width: '100%',
+  },
+  infoText: {
+    ...typography.body2,
+    lineHeight: 22,
   },
   infoTitle: {
     ...typography.subtitle1,
     marginBottom: spacing.sm,
   },
-  infoText: {
-    ...typography.body2,
-    lineHeight: 22,
+  noteCard: {
+    borderRadius: spacing.sm,
+    borderWidth: 1,
+    padding: spacing.md,
+  },
+  noteText: {
+    ...typography.caption,
+    lineHeight: 18,
+    textAlign: 'center',
+  },
+  statusBadge: {
+    borderRadius: spacing.xl,
+    marginBottom: spacing.xl,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+  },
+  statusText: {
+    ...typography.subtitle2,
+  },
+  title: {
+    ...typography.h2,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
   },
 });
 

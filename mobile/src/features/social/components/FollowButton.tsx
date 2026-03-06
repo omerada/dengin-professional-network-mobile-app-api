@@ -6,9 +6,11 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { StyleSheet, Text, ActivityIndicator, Pressable } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
 import { spacing, fontSize } from '@theme';
 import { spring } from '@theme/animations';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic, useHaptic } from '@shared/hooks';
+import { showFollowError, showUnfollowError, showSuccess } from '@shared/utils';
 import { useFollow, useUnfollow } from '../hooks';
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -51,7 +53,9 @@ export interface FollowButtonProps {
 export const FollowButton: React.FC<FollowButtonProps> = memo(
   ({ userId, isFollowing, onFollowChange, size = 'md' }) => {
     const colors = useColors();
-    const haptic = useHaptic();
+    const { trigger } = useHaptic();
+    const { triggerSocial, triggerSystem } = useSemanticHaptic();
+    const toast = useToast();
     const follow = useFollow();
     const unfollow = useUnfollow();
 
@@ -65,21 +69,35 @@ export const FollowButton: React.FC<FollowButtonProps> = memo(
     }));
 
     const handlePress = useCallback(async () => {
-      haptic.medium();
+      triggerSocial(isFollowing ? 'unfollow' : 'follow');
       try {
         if (isFollowing) {
           await unfollow.mutateAsync(userId);
+          showSuccess(toast, { trigger }, 'Takipten çıkıldı');
           onFollowChange?.(userId, false);
         } else {
           await follow.mutateAsync(userId);
+          showSuccess(toast, { trigger }, 'Takip edildi');
           onFollowChange?.(userId, true);
-          haptic.success();
         }
       } catch (error) {
-        haptic.error();
         console.error('Follow/Unfollow error:', error);
+        if (isFollowing) {
+          showUnfollowError(toast, { trigger }, () => handlePress());
+        } else {
+          showFollowError(toast, { trigger }, () => handlePress());
+        }
       }
-    }, [userId, isFollowing, follow, unfollow, onFollowChange, haptic]);
+    }, [
+      userId,
+      isFollowing,
+      follow,
+      unfollow,
+      onFollowChange,
+      triggerSystem,
+      toast,
+      triggerSocial,
+    ]);
 
     const buttonStyle = useMemo(
       () => [
@@ -100,7 +118,7 @@ export const FollowButton: React.FC<FollowButtonProps> = memo(
       () => [
         styles.text,
         size === 'sm' ? styles.textSm : styles.textMd,
-        { color: isFollowing ? colors.text.primary : '#FFFFFF' },
+        { color: isFollowing ? colors.text.primary : colors.text.inverse },
       ],
       [size, isFollowing, colors],
     );
@@ -110,7 +128,7 @@ export const FollowButton: React.FC<FollowButtonProps> = memo(
         style={[buttonStyle, animatedStyle]}
         onPress={handlePress}
         onPressIn={() => {
-          scale.value = withSpring(0.95, spring.press);
+          scale.value = withSpring(0.96, spring.press);
         }}
         onPressOut={() => {
           scale.value = withSpring(1, spring.press);
@@ -120,7 +138,10 @@ export const FollowButton: React.FC<FollowButtonProps> = memo(
         accessibilityLabel={isFollowing ? 'Takipten çık' : 'Takip et'}
         accessibilityState={{ disabled: isLoading }}>
         {isLoading ? (
-          <ActivityIndicator size="small" color={isFollowing ? colors.text.primary : '#FFFFFF'} />
+          <ActivityIndicator
+            size="small"
+            color={isFollowing ? colors.text.primary : colors.text.inverse}
+          />
         ) : (
           <Text style={textStyle}>{isFollowing ? 'Takipten Çık' : 'Takip Et'}</Text>
         )}
@@ -131,28 +152,28 @@ export const FollowButton: React.FC<FollowButtonProps> = memo(
 
 const styles = StyleSheet.create({
   button: {
-    justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
-  },
-  buttonSm: {
-    paddingVertical: spacing['1'],
-    paddingHorizontal: spacing['4'],
-    minWidth: 90,
+    justifyContent: 'center', // md token
   },
   buttonMd: {
-    paddingVertical: spacing['2'],
-    paddingHorizontal: spacing['6'],
     minWidth: 110,
+    paddingHorizontal: spacing['6'],
+    paddingVertical: spacing['2'],
+  },
+  buttonSm: {
+    minWidth: 90,
+    paddingHorizontal: spacing['4'],
+    paddingVertical: spacing['1'],
   },
   text: {
     fontWeight: '600',
   },
-  textSm: {
-    fontSize: fontSize.sm,
-  },
   textMd: {
     fontSize: fontSize.base,
+  },
+  textSm: {
+    fontSize: fontSize.sm,
   },
 });
 

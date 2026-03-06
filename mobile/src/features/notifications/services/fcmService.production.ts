@@ -14,7 +14,7 @@ import type {
   DevicePlatform,
 } from '../types';
 
-const FCM_TOKEN_KEY = '@meslektas/fcm_token';
+const FCM_TOKEN_KEY = '@dengin/fcm_token';
 const isExpoGo = Constants.appOwnership === 'expo';
 
 // Firebase types

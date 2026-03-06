@@ -9,7 +9,7 @@ import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { useAITrends } from '../../hooks/useAITrends';
 
 import { styles } from './AITrendInsightCard.styles';
@@ -51,7 +51,7 @@ import type { AITrendInsightCardProps } from './AITrendInsightCard.types';
 export const AITrendInsightCard: React.FC<AITrendInsightCardProps> = memo(
   ({ professionCategory, onTrendPress, onMorePress, testID = 'ai-trend-insight-card' }) => {
     const colors = useColors();
-    const { trigger } = useHaptic();
+    const { triggerContent } = useSemanticHaptic();
 
     // Fetch AI trends from backend
     const { data: trends, isLoading, isError } = useAITrends(professionCategory);
@@ -85,17 +85,17 @@ export const AITrendInsightCard: React.FC<AITrendInsightCardProps> = memo(
     // Handle trend item press
     const handleTrendPress = useCallback(
       (trendId: string) => {
-        trigger('light');
+        triggerContent('refresh');
         onTrendPress?.(trendId);
       },
-      [onTrendPress, trigger],
+      [onTrendPress, triggerContent],
     );
 
     // Handle "Daha Fazla Gör" press
     const handleMorePress = useCallback(() => {
-      trigger('light');
+      triggerContent('refresh');
       onMorePress?.();
-    }, [onMorePress, trigger]);
+    }, [onMorePress, triggerContent]);
 
     // Loading state
     if (isLoading) {

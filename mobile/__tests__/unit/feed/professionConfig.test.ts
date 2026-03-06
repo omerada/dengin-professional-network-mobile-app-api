@@ -1,5 +1,5 @@
 // __tests__/unit/feed/professionConfig.test.ts
-// Meslektaş Design System - Profession Config Tests
+// Dengin Design System - Profession Config Tests
 // Oku: mobile-development-guide/sprints/30-SPRINT-HOME-SCREEN-COMPLETION.md Lines 692-780
 
 import {

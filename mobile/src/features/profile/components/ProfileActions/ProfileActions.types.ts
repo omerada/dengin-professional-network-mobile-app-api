@@ -1,5 +1,5 @@
 // src/features/profile/components/ProfileActions/ProfileActions.types.ts
-// Meslektaş Design System - ProfileActions Type Definitions
+// Dengin Design System - ProfileActions Type Definitions
 // Oku: mobile-development-guide/ui-ux-modernization/09-PROFILE-REDESIGN.md
 
 /**
@@ -25,8 +25,8 @@ export interface ProfileActionsProps {
 /**
  * Get follow button text based on state
  */
-export const getFollowButtonText = (isFollowing: boolean, isFollowedBy: boolean): string => {
+export const getFollowButtonText = (isFollowing?: boolean, isFollowedBy?: boolean): string => {
   if (isFollowing) return 'Takipten Çık';
-  if (isFollowedBy) return 'Seni Takip Ediyor • Takip Et';
+  if (isFollowedBy) return 'Takip Et Geri';
   return 'Takip Et';
 };

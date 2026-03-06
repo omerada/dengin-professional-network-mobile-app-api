@@ -59,24 +59,24 @@ export const SocialLoginButtons: React.FC<SocialLoginButtonsProps> = memo(
 );
 
 const styles = StyleSheet.create({
+  buttons: {
+    gap: spacing.md,
+  },
   container: {
     marginVertical: spacing.xl,
-  },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.xl,
   },
   divider: {
     flex: 1,
     height: 1,
   },
-  dividerText: {
-    marginHorizontal: spacing.md,
-    fontSize: fontSize.sm,
+  dividerContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginBottom: spacing.xl,
   },
-  buttons: {
-    gap: spacing.md,
+  dividerText: {
+    fontSize: fontSize.sm,
+    marginHorizontal: spacing.md,
   },
 });
 

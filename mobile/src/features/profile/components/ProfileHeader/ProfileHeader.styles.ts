@@ -1,25 +1,23 @@
 // src/features/profile/components/ProfileHeader/ProfileHeader.styles.ts
-// Meslektaş Design System - ProfileHeader Styles
+// Dengin Design System - ProfileHeader Styles
 // Oku: mobile-development-guide/ui-ux-modernization/09-PROFILE-REDESIGN.md
 
 import { StyleSheet } from 'react-native';
 
-// Color constants
-const WHITE = '#FFFFFF';
-
 /**
  * ProfileHeader styles - Alphabetically sorted
+ * Note: Color values should be passed via theme colors, not hard-coded
  */
 export const styles = StyleSheet.create({
   avatar: {
-    borderRadius: 50,
-    borderWidth: 3,
-    height: 100,
-    width: 100,
+    borderRadius: 40,
+    borderWidth: 2,
+    height: 80,
+    width: 80,
   },
 
   avatarContainer: {
-    marginBottom: 16, // spacing['4']
+    marginRight: 20,
     position: 'relative',
   },
 
@@ -29,9 +27,7 @@ export const styles = StyleSheet.create({
   },
 
   container: {
-    alignItems: 'center',
-    paddingHorizontal: 24, // spacing['6']
-    paddingVertical: 32, // spacing['8']
+    alignItems: 'flex-start',
   },
 
   editButton: {
@@ -54,42 +50,37 @@ export const styles = StyleSheet.create({
   },
 
   infoContainer: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    flex: 1,
+    justifyContent: 'center',
   },
 
   initials: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '700',
   },
 
   name: {
-    fontSize: 22,
-    fontWeight: '700',
-  },
-
-  nameRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 8, // spacing['2']
+    fontSize: 16,
+    fontWeight: '600',
   },
 
   profession: {
-    fontSize: 14,
+    fontSize: 13,
   },
 
   professionIcon: {
-    marginRight: 4, // spacing['1']
+    marginRight: 4,
   },
 
   professionRow: {
     alignItems: 'center',
     flexDirection: 'row',
-    marginTop: 4, // spacing['1']
+    marginTop: 2,
   },
 
   verifiedBadge: {
     alignItems: 'center',
-    borderColor: WHITE,
     borderRadius: 12,
     borderWidth: 2,
     height: 24,

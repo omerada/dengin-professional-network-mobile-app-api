@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Meslektaş",
-    "slug": "meslektas",
+    "name": "Dengin",
+    "slug": "dengin",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
@@ -11,13 +11,13 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.adalabs.meslektas",
+      "bundleIdentifier": "com.adalabs.dengin",
       "infoPlist": {
         "UIBackgroundModes": ["remote-notification", "fetch"]
       }
     },
     "android": {
-      "package": "com.adalabs.meslektas",
+      "package": "com.adalabs.dengin",
       "usesCleartextTraffic": true,
       "permissions": [
         "INTERNET",
@@ -36,10 +36,7 @@
     "extra": {
       "eas": {
         "projectId": "your-expo-project-id"
-      },
-      "_comment": "API configuration - using local network IP for both emulator and real device",
-      "API_BASE_URL": "http://192.168.1.101:8080",
-      "WS_URL": "ws://192.168.1.101:8080/ws"
+      }
     }
   }
 }

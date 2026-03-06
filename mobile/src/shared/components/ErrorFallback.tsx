@@ -1,5 +1,5 @@
 // src/shared/components/ErrorFallback.tsx
-// Meslektaş Design System - Modern Error Fallback Component
+// Dengin Design System - Modern Error Fallback Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback } from 'react';
@@ -15,7 +15,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useHaptic } from '@shared/hooks';
 import { spring } from '@theme/animations';
 import type { ErrorFallbackProps } from '@shared/utils/errorHandling';
 
@@ -46,7 +46,7 @@ export const ErrorFallback: React.FC<ErrorFallbackProps> = memo(({ error, resetE
 
   const handleRetry = useCallback(() => {
     trigger('medium');
-    buttonScale.value = withSequence(withSpring(0.95, spring.press), withSpring(1, spring.snappy));
+    buttonScale.value = withSequence(withSpring(0.96, spring.press), withSpring(1, spring.snappy));
     setTimeout(() => resetError(), 150);
   }, [resetError, trigger, buttonScale]);
 

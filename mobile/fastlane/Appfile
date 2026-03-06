@@ -1,20 +1,20 @@
 # Fastlane Configuration
-# Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
+# For setup instructions, see mobile/README.md
 
 # iOS Configuration
 # -----------------
 
 # App Store Connect credentials
-app_identifier "com.meslektas.app"
-apple_id "developer@meslektas.com"
-team_id "XXXXXXXXXX" # Apple Developer Team ID
+app_identifier "com.dengin.app"
+apple_id "your-apple-developer-email@example.com"
+team_id "YOUR_TEAM_ID" # Apple Developer Team ID
 
 # Paths
-xcodeproj "./ios/MeslektasApp.xcodeproj"
-scheme "MeslektasApp"
+xcodeproj "./ios/DenginApp.xcodeproj"
+scheme "DenginApp"
 
 # Android Configuration
 # ---------------------
 
 json_key_file "./android/play-store-key.json"
-package_name "com.meslektas.app"
+package_name "com.dengin.app"

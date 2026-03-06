@@ -1,5 +1,5 @@
 // src/shared/components/Pressable/index.ts
-// Meslektaş Design System - Pressable Components Exports
+// Dengin Design System - Pressable Components Exports
 
 export {
   PressableScale,

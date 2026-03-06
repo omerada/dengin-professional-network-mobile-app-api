@@ -27,9 +27,10 @@ import { scheduleOnRN } from 'react-native-worklets';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
-import { spacing, fontSize } from '@theme';
+import { spacing, fontSize, borderRadius } from '@theme';
 import { spring as springPresets } from '@theme/animations';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
+import { UNIFIED_TIMING } from '@constants/unifiedTiming';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -96,7 +97,7 @@ export const Modal: React.FC<ModalProps> = memo(
     testID,
   }) => {
     const colors = useColors();
-    const haptic = useHaptic();
+    const { triggerNavigation } = useSemanticHaptic();
 
     // Close button animation
     const closeButtonScale = useSharedValue(1);
@@ -106,9 +107,9 @@ export const Modal: React.FC<ModalProps> = memo(
     }));
 
     const handleClosePress = useCallback(() => {
-      haptic.light();
+      triggerNavigation('back');
       onClose();
-    }, [haptic, onClose]);
+    }, [triggerNavigation, onClose]);
 
     return (
       <RNModal
@@ -120,8 +121,8 @@ export const Modal: React.FC<ModalProps> = memo(
         testID={testID}
         accessibilityViewIsModal>
         <Animated.View
-          entering={FadeIn.duration(200)}
-          exiting={FadeOut.duration(150)}
+          entering={FadeIn.duration(UNIFIED_TIMING.componentEnter)}
+          exiting={FadeOut.duration(UNIFIED_TIMING.componentExit)}
           style={styles.overlay}>
           <TouchableWithoutFeedback
             onPress={closeOnBackdrop ? handleClosePress : undefined}
@@ -130,8 +131,11 @@ export const Modal: React.FC<ModalProps> = memo(
           </TouchableWithoutFeedback>
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
             <Animated.View
-              entering={FadeIn.duration(250).springify().damping(20).stiffness(300)}
-              exiting={FadeOut.duration(150)}
+              entering={FadeIn.duration(UNIFIED_TIMING.componentEnter)
+                .springify()
+                .damping(20)
+                .stiffness(300)}
+              exiting={FadeOut.duration(UNIFIED_TIMING.componentExit)}
               style={[styles.content, { backgroundColor: colors.background.primary }]}>
               {(title || showCloseButton) && (
                 <View style={[styles.header, { borderBottomColor: colors.border.default }]}>
@@ -227,7 +231,7 @@ export interface BottomSheetProps {
 export const BottomSheet: React.FC<BottomSheetProps> = memo(
   ({ visible, onClose, title, children, height = 'auto', swipeToDismiss = true, testID }) => {
     const colors = useColors();
-    const haptic = useHaptic();
+    const { triggerNavigation } = useSemanticHaptic();
     const translateY = useSharedValue(0);
     const isClosing = useSharedValue(false);
 
@@ -240,9 +244,9 @@ export const BottomSheet: React.FC<BottomSheetProps> = memo(
     }, [visible, translateY, isClosing]);
 
     const handleClose = useCallback(() => {
-      haptic.light();
+      triggerNavigation('back');
       onClose();
-    }, [haptic, onClose]);
+    }, [triggerNavigation, onClose]);
 
     // Pan gesture for swipe to dismiss
     const panGesture = Gesture.Pan()
@@ -282,8 +286,8 @@ export const BottomSheet: React.FC<BottomSheetProps> = memo(
         testID={testID}
         accessibilityViewIsModal>
         <Animated.View
-          entering={FadeIn.duration(200)}
-          exiting={FadeOut.duration(150)}
+          entering={FadeIn.duration(UNIFIED_TIMING.componentEnter)}
+          exiting={FadeOut.duration(UNIFIED_TIMING.componentExit)}
           style={styles.overlay}>
           <TouchableWithoutFeedback onPress={handleClose} accessible={false}>
             <View style={StyleSheet.absoluteFill} />
@@ -292,7 +296,7 @@ export const BottomSheet: React.FC<BottomSheetProps> = memo(
           <GestureDetector gesture={panGesture}>
             <Animated.View
               entering={SlideInDown.springify().damping(20).stiffness(200)}
-              exiting={SlideOutDown.duration(200)}
+              exiting={SlideOutDown.duration(UNIFIED_TIMING.componentExit)}
               style={[
                 styles.bottomSheetContent,
                 {
@@ -328,29 +332,29 @@ export const BottomSheet: React.FC<BottomSheetProps> = memo(
 
 const styles = StyleSheet.create({
   overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    flex: 1,
+    justifyContent: 'center',
   },
   content: {
-    width: SCREEN_WIDTH - 48,
+    borderRadius: borderRadius.xl,
     maxHeight: SCREEN_HEIGHT * 0.8,
-    borderRadius: 16,
     overflow: 'hidden',
+    width: SCREEN_WIDTH - 48,
   },
   header: {
+    alignItems: 'center',
+    borderBottomWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     paddingHorizontal: spacing['6'],
     paddingVertical: spacing['4'],
-    borderBottomWidth: 1,
   },
   title: {
+    flex: 1,
     fontSize: fontSize.lg,
     fontWeight: '600',
-    flex: 1,
   },
   closeButton: {
     padding: spacing['1'],
@@ -360,25 +364,25 @@ const styles = StyleSheet.create({
   },
   // BottomSheet styles
   bottomSheetContent: {
-    position: 'absolute',
+    borderTopLeftRadius: borderRadius['2xl'],
+    borderTopRightRadius: borderRadius['2xl'],
     bottom: 0,
     left: 0,
+    position: 'absolute',
     right: 0,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
   },
   handle: {
-    width: 40,
-    height: 4,
-    borderRadius: 2,
     alignSelf: 'center',
+    borderRadius: borderRadius.xs,
+    height: 4,
     marginTop: spacing['2'],
+    width: 40,
   },
   bottomSheetHeader: {
+    alignItems: 'center',
+    borderBottomWidth: 1,
     paddingHorizontal: spacing['6'],
     paddingVertical: spacing['4'],
-    borderBottomWidth: 1,
-    alignItems: 'center',
   },
   bottomSheetBody: {
     padding: spacing['6'],

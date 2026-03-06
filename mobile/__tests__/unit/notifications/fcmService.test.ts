@@ -283,7 +283,7 @@ describe('FCMService', () => {
       await fcmService.clearToken();
 
       expect(mockMessagingInstance.deleteToken).toHaveBeenCalled();
-      expect(AsyncStorage.removeItem).toHaveBeenCalledWith('@meslektas/fcm_token');
+      expect(AsyncStorage.removeItem).toHaveBeenCalledWith('@dengin/fcm_token');
     });
   });
 

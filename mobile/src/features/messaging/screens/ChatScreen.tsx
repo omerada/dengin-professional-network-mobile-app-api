@@ -3,20 +3,25 @@
 // Backend: ConversationController, MessageWebSocketController
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Alert, StyleSheet } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import { StyleSheet } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
+import { SAFE_AREA_EDGES, SCREEN_ANIMATIONS, NETWORK_CONFIG } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks';
+import { useToast } from '@contexts/ToastContext';
+import { useSemanticHaptic, useLoadingTimeout, useHaptic } from '@shared/hooks';
+import { showMessageDeleteError, showSuccess } from '@shared/utils';
 import { useAuthStore } from '@features/auth/stores';
+import { UnifiedScreenHeader, KeyboardAwareScreen, ActionSheet } from '@shared/components';
 import {
-  ChatHeader,
   MessageList,
   MessageInput,
   MessageOptionsSheet,
+  ChatSkeleton,
   type MessageOptionsSheetRef,
 } from '../components';
 import { useMessages, useSendMessage, useTyping } from '../hooks';
@@ -32,7 +37,9 @@ export const ChatScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<ChatRouteProp>();
-  const { trigger: triggerHaptic } = useHaptic();
+  const { trigger } = useHaptic();
+  const { triggerMedia, triggerSystem, triggerContent } = useSemanticHaptic();
+  const toast = useToast();
 
   // Route params - Backend Conversation yapısıyla uyumlu
   const routeParams = route.params as {
@@ -68,15 +75,18 @@ export const ChatScreen: React.FC = () => {
   useEffect(() => {
     if (!conversationId) {
       console.error('[ChatScreen] Missing conversationId, navigating back');
-      Alert.alert('Hata', 'Konuşma ID bulunamadı', [
-        { text: 'Tamam', onPress: () => navigation.goBack() },
-      ]);
+      toast.error('Konuşma ID bulunamadı');
+      navigation.goBack();
     }
-  }, [conversationId, navigation]);
+  }, [conversationId, navigation, toast]);
 
   // State
   const [messageText, setMessageText] = useState('');
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showReportConfirm, setShowReportConfirm] = useState(false);
+  const [messageToDelete, setMessageToDelete] = useState<Message | null>(null);
+  const [messageToReport, setMessageToReport] = useState<Message | null>(null);
 
   // Refs
   const messageOptionsRef = useRef<MessageOptionsSheetRef>(null);
@@ -98,6 +108,17 @@ export const ChatScreen: React.FC = () => {
     fetchNextPage,
     markAsRead,
   } = useMessages(conversationId, currentUserId);
+
+  // Loading timeout protection
+  useLoadingTimeout(isLoading && messages.length === 0, {
+    timeout: NETWORK_CONFIG.TIMEOUT_DURATION,
+    onTimeout: () => {
+      toast.error('Mesajlar yüklenirken zaman aşımı oluştu. Lütfen tekrar deneyin.');
+    },
+    onRetry: async () => {
+      await refetch();
+    },
+  });
 
   const {
     sendMessage,
@@ -165,14 +186,14 @@ export const ChatScreen: React.FC = () => {
   }, [navigation, participant]);
 
   const handleOptionsPress = useCallback(() => {
-    Alert.alert('Konuşma Seçenekleri', 'Bu özellik yakında eklenecek');
-  }, []);
+    toast.info('Bu özellik yakında eklenecek');
+  }, [toast]);
 
   const handleSend = useCallback(() => {
     const trimmedText = messageText.trim();
     if (!trimmedText || !recipientId) return;
 
-    triggerHaptic('light');
+    triggerSystem('success'); // Send message
 
     sendMessage({
       content: trimmedText,
@@ -181,7 +202,7 @@ export const ChatScreen: React.FC = () => {
 
     setMessageText('');
     clearDraft(conversationId);
-  }, [conversationId, messageText, recipientId, sendMessage, clearDraft, triggerHaptic]);
+  }, [conversationId, messageText, recipientId, sendMessage, clearDraft, triggerSystem]);
 
   const handleTextChange = useCallback(
     (text: string) => {
@@ -195,47 +216,65 @@ export const ChatScreen: React.FC = () => {
     [startTyping, stopTyping],
   );
 
+  // P2: Media attachment handlers
+  const handleImagePick = useCallback(() => {
+    triggerMedia('select');
+    toast.info('Bu özellik yakında eklenecek');
+  }, [triggerMedia, toast]);
+
+  const handleCameraOpen = useCallback(() => {
+    triggerMedia('capture');
+    toast.info('Bu özellik yakında eklenecek');
+  }, [triggerMedia, toast]);
+
+  const handleVoiceRecord = useCallback(() => {
+    triggerMedia('capture');
+    toast.info('Bu özellik yakında eklenecek');
+  }, [triggerMedia, toast]);
+
   const handleMessageLongPress = useCallback(
     (message: Message | ClientMessage) => {
-      triggerHaptic('medium');
+      triggerContent('edit');
       setSelectedMessage(message as Message);
       messageOptionsRef.current?.open();
     },
-    [triggerHaptic],
+    [triggerContent],
   );
 
-  const handleDeleteMessage = useCallback(
-    async (message: Message) => {
-      Alert.alert('Mesajı Sil', 'Bu mesajı silmek istediğinize emin misiniz?', [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Sil',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await messagingService.deleteMessage(conversationId, message.messageId);
-              refetch();
-            } catch (error) {
-              Alert.alert('Hata', 'Mesaj silinemedi');
-            }
-          },
-        },
-      ]);
-    },
-    [conversationId, refetch],
-  );
-
-  const handleReportMessage = useCallback((_message: Message) => {
-    Alert.alert('Mesajı Bildir', 'Bu mesajı bildirmek istediğinize emin misiniz?', [
-      { text: 'İptal', style: 'cancel' },
-      {
-        text: 'Bildir',
-        onPress: () => {
-          Alert.alert('Bilgi', 'Mesaj bildirildi');
-        },
-      },
-    ]);
+  const handleDeleteMessage = useCallback((message: Message) => {
+    setMessageToDelete(message);
+    setShowDeleteConfirm(true);
   }, []);
+
+  const executeDeleteMessage = useCallback(async () => {
+    if (!messageToDelete) return;
+
+    try {
+      await messagingService.deleteMessage(conversationId, messageToDelete.messageId);
+      showSuccess(toast, { trigger }, 'Mesaj silindi');
+      refetch();
+    } catch (error) {
+      showMessageDeleteError(toast, { trigger });
+    } finally {
+      setShowDeleteConfirm(false);
+      setMessageToDelete(null);
+    }
+  }, [messageToDelete, conversationId, refetch, triggerSystem, toast]);
+
+  const handleReportMessage = useCallback((message: Message) => {
+    setMessageToReport(message);
+    setShowReportConfirm(true);
+  }, []);
+
+  const executeReportMessage = useCallback(() => {
+    if (!messageToReport) return;
+
+    // TODO: Implement actual report API call
+    triggerSystem('success');
+    toast.success('Mesaj bildirildi');
+    setShowReportConfirm(false);
+    setMessageToReport(null);
+  }, [messageToReport, triggerSystem, toast]);
 
   const handleLoadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -243,46 +282,52 @@ export const ChatScreen: React.FC = () => {
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  // Display data
-  const displayParticipant: Participant = participant || {
-    userId: 0,
-    fullName: 'Konuşma',
-    profession: '',
-    profileImageUrl: null,
-    verified: false,
-    online: false,
-    lastSeenAt: null,
-  };
-
-  // Create a conversation object for ChatHeader
-  const displayConversation: Conversation = {
-    conversationId,
-    participant: displayParticipant,
-    lastMessage: null,
-    unreadCount: 0,
-    updatedAt: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
-  };
-
   // Get typing users for this conversation
   const { typingUsers } = useMessagingStore();
   const conversationTypingUsers = typingUsers[conversationId] || [];
 
+  // Show loading skeleton while initial load
+  if (isLoading && messages.length === 0) {
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background.primary }]}
+        edges={SAFE_AREA_EDGES.standard}>
+        <UnifiedScreenHeader
+          variant="chat"
+          onBackPress={handleBackPress}
+          chatProps={{
+            avatar: participant?.profileImageUrl || undefined,
+            name: participant?.fullName || 'Yükleniyor...',
+            subtitle: undefined,
+            isOnline: false,
+            onProfilePress: handleProfilePress,
+            onOptionsPress: handleOptionsPress,
+          }}
+        />
+        <ChatSkeleton count={8} />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
-      edges={['top', 'bottom']}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
-        <Animated.View entering={FadeIn.duration(300)} style={styles.content}>
-          {/* Header */}
-          <ChatHeader
-            conversation={displayConversation}
+      edges={SAFE_AREA_EDGES.standard}>
+      <KeyboardAwareScreen mode="padding">
+        <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={styles.content}>
+          {/* Unified Header */}
+          <UnifiedScreenHeader
+            variant="chat"
             onBackPress={handleBackPress}
-            onProfilePress={handleProfilePress}
-            onOptionsPress={handleOptionsPress}
+            chatProps={{
+              avatar: participant?.profileImageUrl || undefined,
+              name: participant?.fullName || 'Kullanıcı',
+              subtitle: participant?.online ? 'çevrimiçi' : undefined,
+              isOnline: participant?.online || false,
+              isTyping: conversationTypingUsers.length > 0,
+              onProfilePress: handleProfilePress,
+              onOptionsPress: handleOptionsPress,
+            }}
           />
 
           {/* Messages */}
@@ -299,12 +344,15 @@ export const ChatScreen: React.FC = () => {
             onMessageLongPress={handleMessageLongPress}
           />
 
-          {/* Input */}
+          {/* Input - P2: With media attachment support */}
           <MessageInput
             value={messageText}
             onChangeText={handleTextChange}
             onSend={handleSend}
             disabled={isSending}
+            onImagePick={handleImagePick}
+            onCameraOpen={handleCameraOpen}
+            onVoiceRecord={handleVoiceRecord}
           />
 
           {/* Message options sheet */}
@@ -316,7 +364,51 @@ export const ChatScreen: React.FC = () => {
             onReport={handleReportMessage}
           />
         </Animated.View>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScreen>
+
+      {/* Delete Message Confirmation */}
+      <ActionSheet
+        visible={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setMessageToDelete(null);
+        }}
+        title="Mesajı Sil"
+        message="Bu mesajı silmek istediğinize emin misiniz?"
+        options={[
+          {
+            id: 'delete',
+            label: 'Sil',
+            icon: 'trash-outline',
+            destructive: true,
+            onPress: executeDeleteMessage,
+          },
+        ]}
+        cancelLabel="İptal"
+        testID="delete-message-sheet"
+      />
+
+      {/* Report Message Confirmation */}
+      <ActionSheet
+        visible={showReportConfirm}
+        onClose={() => {
+          setShowReportConfirm(false);
+          setMessageToReport(null);
+        }}
+        title="Mesajı Bildir"
+        message="Bu mesajı bildirmek istediğinize emin misiniz?"
+        options={[
+          {
+            id: 'report',
+            label: 'Bildir',
+            icon: 'flag-outline',
+            destructive: true,
+            onPress: executeReportMessage,
+          },
+        ]}
+        cancelLabel="İptal"
+        testID="report-message-sheet"
+      />
     </SafeAreaView>
   );
 };
@@ -330,4 +422,13 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChatScreen;
+// Wrap with Error Boundary for production safety
+import { ErrorBoundary } from '@core/components';
+
+export default function ChatScreenWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <ChatScreen />
+    </ErrorBoundary>
+  );
+}

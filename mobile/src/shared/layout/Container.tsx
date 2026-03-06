@@ -225,10 +225,10 @@ export const Spacer = React.memo<SpacerProps>(({ size = spacing.md, horizontal =
 Spacer.displayName = 'Spacer';
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-  },
   column: {
     flexDirection: 'column',
+  },
+  row: {
+    flexDirection: 'row',
   },
 });

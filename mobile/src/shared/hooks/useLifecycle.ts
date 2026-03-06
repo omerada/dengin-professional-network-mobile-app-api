@@ -1,5 +1,5 @@
 // src/shared/hooks/useLifecycle.ts
-// Meslektaş Design System - Lifecycle Hooks
+// Dengin Design System - Lifecycle Hooks
 // Oku: mobile-development-guide/ui-ux-modernization/14-SPRINT-IMPLEMENTATION-PLAN.md
 
 import { useEffect, useRef, useCallback } from 'react';

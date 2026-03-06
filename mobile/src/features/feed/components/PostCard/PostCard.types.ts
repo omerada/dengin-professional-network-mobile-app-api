@@ -1,5 +1,5 @@
 // src/features/feed/components/PostCard/PostCard.types.ts
-// Meslektaş Design System - PostCard Type Definitions
+// Dengin Design System - PostCard Type Definitions
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import type { ViewStyle } from 'react-native';

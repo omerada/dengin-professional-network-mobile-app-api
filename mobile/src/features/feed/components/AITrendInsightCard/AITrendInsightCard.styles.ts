@@ -6,16 +6,16 @@ import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 16,
-    marginVertical: 8,
     borderRadius: 16,
     borderWidth: 1,
+    marginHorizontal: 16,
+    marginVertical: 8,
     padding: 20,
   },
 
   header: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     marginBottom: 16,
   },
 
@@ -79,10 +79,10 @@ export const styles = StyleSheet.create({
   },
   // Loading state
   loadingContainer: {
-    paddingVertical: 32,
     alignItems: 'center',
-    justifyContent: 'center',
     gap: 12,
+    justifyContent: 'center',
+    paddingVertical: 32,
   },
   loadingText: {
     fontSize: 14,

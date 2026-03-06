@@ -1,5 +1,5 @@
 // src/features/profile/components/ProfileStats/ProfileStats.styles.ts
-// Meslektaş Design System - ProfileStats Styles
+// Dengin Design System - ProfileStats Styles
 // Oku: mobile-development-guide/ui-ux-modernization/09-PROFILE-REDESIGN.md
 
 import { StyleSheet } from 'react-native';
@@ -10,22 +10,19 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderTopWidth: 1,
+    flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginHorizontal: 24, // spacing['6']
-    paddingVertical: 16, // spacing['4']
+    paddingRight: 8,
   },
 
   divider: {
-    height: 32,
-    width: 1,
+    display: 'none',
   },
 
   statItem: {
     alignItems: 'center',
-    paddingHorizontal: 24, // spacing['6']
+    paddingHorizontal: 8,
   },
 
   statLabel: {
@@ -34,7 +31,7 @@ export const styles = StyleSheet.create({
   },
 
   statValue: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
   },
 });

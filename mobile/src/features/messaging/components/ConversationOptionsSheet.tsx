@@ -1,15 +1,11 @@
 // src/features/messaging/components/ConversationOptionsSheet.tsx
-// Konuşma seçenekleri alt sayfası
+// Konuşma seçenekleri alt sayfası - Clean Modal Solution
 // Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
 
-import React, { memo, useCallback, forwardRef, useImperativeHandle, useRef } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import React, { memo, useCallback, forwardRef, useImperativeHandle, useState } from 'react';
+import { View, Text, StyleSheet, Pressable, Modal } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetView,
-  type BottomSheetBackdropProps,
-} from '@gorhom/bottom-sheet';
+import Animated, { SlideInDown } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
 import type { ConversationSummary } from '../types';
 
@@ -59,19 +55,19 @@ export const ConversationOptionsSheet = forwardRef<
   ConversationOptionsSheetProps
 >(({ conversation, onPin, onMute, onDelete, onBlock }, ref) => {
   const colors = useColors();
-  const bottomSheetRef = useRef<any>(null);
+  const [visible, setVisible] = useState(false);
 
   useImperativeHandle(ref, () => ({
     open: () => {
-      bottomSheetRef.current?.expand();
+      setVisible(true);
     },
     close: () => {
-      bottomSheetRef.current?.close();
+      setVisible(false);
     },
   }));
 
   const handleClose = useCallback(() => {
-    bottomSheetRef.current?.close();
+    setVisible(false);
   }, []);
 
   const handlePin = useCallback(() => {
@@ -102,99 +98,105 @@ export const ConversationOptionsSheet = forwardRef<
     }
   }, [conversation, onBlock, handleClose]);
 
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />
-    ),
-    [],
-  );
-
   return (
-    <BottomSheet
-      ref={bottomSheetRef}
-      index={-1}
-      snapPoints={['35%']}
-      enablePanDownToClose
-      backdropComponent={renderBackdrop}
-      backgroundStyle={{ backgroundColor: colors.background.primary }}
-      handleIndicatorStyle={{ backgroundColor: colors.text.secondary }}>
-      <BottomSheetView style={styles.content}>
-        {/* Header */}
-        {conversation && (
-          <View style={[styles.header, { borderBottomColor: colors.border.default }]}>
-            <Text style={[styles.headerTitle, { color: colors.text.primary }]} numberOfLines={1}>
-              {conversation.name}
-            </Text>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
+      <Pressable style={styles.modalOverlay} onPress={handleClose}>
+        <Animated.View
+          entering={SlideInDown.duration(300).springify()}
+          style={[styles.modalContent, { backgroundColor: colors.background.primary }]}>
+          {/* Handle indicator */}
+          <View style={[styles.handleIndicator, { backgroundColor: colors.text.tertiary }]} />
+
+          <View style={styles.content}>
+            {/* Header */}
+            {conversation && (
+              <View style={[styles.header, { borderBottomColor: colors.border.default }]}>
+                <Text
+                  style={[styles.headerTitle, { color: colors.text.primary }]}
+                  numberOfLines={1}>
+                  {conversation.name}
+                </Text>
+              </View>
+            )}
+
+            {/* Options */}
+            <View style={styles.options}>
+              <OptionItem
+                icon={conversation?.isPinned ? 'pin-outline' : 'pin'}
+                label={conversation?.isPinned ? 'Sabitlemeyi Kaldır' : 'Sabitle'}
+                onPress={handlePin}
+              />
+
+              <OptionItem
+                icon={conversation?.isMuted ? 'volume-high' : 'volume-mute'}
+                label={conversation?.isMuted ? 'Sesi Aç' : 'Sessize Al'}
+                onPress={handleMute}
+              />
+
+              <OptionItem
+                icon="trash-outline"
+                label="Konuşmayı Sil"
+                onPress={handleDelete}
+                destructive
+              />
+
+              <OptionItem icon="ban" label="Engelle" onPress={handleBlock} destructive />
+            </View>
           </View>
-        )}
-
-        {/* Options */}
-        <View style={styles.options}>
-          <OptionItem
-            icon={conversation?.isPinned ? 'pin-outline' : 'pin'}
-            label={conversation?.isPinned ? 'Sabitlemeyi Kaldır' : 'Sabitle'}
-            onPress={handlePin}
-          />
-
-          <OptionItem
-            icon={conversation?.isMuted ? 'volume-high' : 'volume-mute'}
-            label={conversation?.isMuted ? 'Sesi Aç' : 'Sessize Al'}
-            onPress={handleMute}
-          />
-
-          <OptionItem
-            icon="trash-outline"
-            label="Konuşmayı Sil"
-            onPress={handleDelete}
-            destructive
-          />
-
-          <OptionItem icon="ban" label="Engelle" onPress={handleBlock} destructive />
-        </View>
-      </BottomSheetView>
-    </BottomSheet>
+        </Animated.View>
+      </Pressable>
+    </Modal>
   );
 });
 
 ConversationOptionsSheet.displayName = 'ConversationOptionsSheet';
 
+const MODAL_OVERLAY_BG = 'rgba(0, 0, 0, 0.5)';
+
 const styles = StyleSheet.create({
   content: {
-    flex: 1,
+    paddingBottom: 16,
+  },
+  handleIndicator: {
+    alignSelf: 'center',
+    borderRadius: 2,
+    height: 4,
+    marginBottom: 16,
+    marginTop: 8,
+    width: 40,
   },
   header: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   headerTitle: {
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
   },
-  options: {
-    paddingTop: 8,
+  modalContent: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 32,
+  },
+  modalOverlay: {
+    backgroundColor: MODAL_OVERLAY_BG,
+    flex: 1,
+    justifyContent: 'flex-end',
   },
   optionItem: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
+    gap: 16,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    gap: 16,
   },
   optionLabel: {
     fontSize: 16,
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    paddingTop: 16,
-    paddingBottom: 32,
+  options: {
+    paddingTop: 8,
   },
 });
 

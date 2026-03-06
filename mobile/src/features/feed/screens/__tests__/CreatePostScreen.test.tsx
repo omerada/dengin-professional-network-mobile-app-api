@@ -24,8 +24,8 @@ jest.mock('@react-navigation/native', () => ({
 jest.mock('@contexts/ThemeContext', () => ({
   useColors: jest.fn(() => ({
     interactive: {
-      default: '#0066FF',
-      subtle: '#E6F0FF',
+      default: '#F59E42',
+      subtle: '#FFF8F0',
     },
     text: {
       primary: '#000000',

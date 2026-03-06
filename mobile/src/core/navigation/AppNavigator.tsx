@@ -3,56 +3,20 @@
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import React from 'react';
-import { View, StyleSheet, ActivityIndicator, Text } from 'react-native';
-import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
+import { View, StyleSheet, ActivityIndicator, Text, Image } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { RootStackParamList } from '@shared/types';
+import { RootStackParamList } from './types';
 import { useAuthStore } from '@features/auth/stores/authStore';
 import { useColors } from '@contexts/ThemeContext';
 import { linking } from './linking';
 import { AuthNavigator } from './AuthNavigator';
 import { MainNavigator } from './MainNavigator';
 import { VerificationNavigator } from './VerificationNavigator';
+import { UNIFIED_NAVIGATION } from '@constants/unifiedNavigation';
+import { navigationRef } from './navigationRef';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
-/**
- * Navigation container ref for navigation outside of React components
- */
-export const navigationRef = createNavigationContainerRef<RootStackParamList>();
-
-/**
- * Navigate function for use outside of React components
- */
-export const navigate = <T extends keyof RootStackParamList>(
-  name: T,
-  params?: RootStackParamList[T],
-) => {
-  if (navigationRef.isReady()) {
-    (navigationRef as any).navigate(name, params);
-  }
-};
-
-/**
- * Go back function for use outside of React components
- */
-export const goBack = () => {
-  if (navigationRef.isReady() && navigationRef.canGoBack()) {
-    navigationRef.goBack();
-  }
-};
-
-/**
- * Reset navigation state
- */
-export const resetNavigation = (
-  index: number,
-  routes: Array<{ name: keyof RootStackParamList; params?: any }>,
-) => {
-  if (navigationRef.isReady()) {
-    navigationRef.reset({ index, routes });
-  }
-};
 
 /**
  * App Navigator - Root navigation container
@@ -67,7 +31,12 @@ export const AppNavigator: React.FC = () => {
   if (isLoading) {
     return (
       <View style={[styles.splashContainer, { backgroundColor: colors.background.primary }]}>
-        <Text style={[styles.splashLogo, { color: colors.interactive.default }]}>Meslektaş</Text>
+        <Image
+          source={require('../../../assets/dengin-icon.png')}
+          style={styles.splashIcon}
+          resizeMode="contain"
+        />
+        <Text style={[styles.splashLogo, { color: colors.text.primary }]}>Dengin</Text>
         <ActivityIndicator
           size="large"
           color={colors.interactive.default}
@@ -79,24 +48,14 @@ export const AppNavigator: React.FC = () => {
 
   return (
     <NavigationContainer ref={navigationRef} linking={linking}>
-      <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-          animation: 'fade',
-          gestureEnabled: true,
-          fullScreenGestureEnabled: true,
-        }}>
+      <Stack.Navigator screenOptions={UNIFIED_NAVIGATION.SCREEN}>
         {isAuthenticated ? (
           <>
             <Stack.Screen name="Main" component={MainNavigator} />
             <Stack.Screen
               name="Verification"
               component={VerificationNavigator}
-              options={{
-                presentation: 'modal',
-                animation: 'slide_from_bottom',
-                gestureEnabled: false,
-              }}
+              options={UNIFIED_NAVIGATION.FULLSCREEN}
             />
           </>
         ) : (
@@ -109,16 +68,21 @@ export const AppNavigator: React.FC = () => {
 
 const styles = StyleSheet.create({
   splashContainer: {
+    alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
   },
-  splashLogo: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginBottom: 24,
+  splashIcon: {
+    height: 80,
+    marginBottom: 16,
+    width: 80,
   },
   splashLoader: {
-    marginTop: 16,
+    marginTop: 24,
+  },
+  splashLogo: {
+    fontSize: 28,
+    fontWeight: '600',
+    letterSpacing: 1,
   },
 });

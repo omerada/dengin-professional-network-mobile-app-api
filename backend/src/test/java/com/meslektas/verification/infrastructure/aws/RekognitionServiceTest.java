@@ -1,6 +1,7 @@
-package com.meslektas.verification.infrastructure.aws;
+package com.dengin.verification.infrastructure.aws;
 
-import com.meslektas.verification.domain.model.AIVerificationResult;
+import com.dengin.verification.domain.model.AIVerificationResult;
+import com.dengin.verification.infrastructure.aws.RekognitionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -45,7 +46,7 @@ class RekognitionServiceTest {
 
     private static final String DOCUMENT_S3_KEY = "documents/user1/doc.jpg";
     private static final String SELFIE_S3_KEY = "selfies/user1/selfie.jpg";
-    private static final String BUCKET_NAME = "meslektas-verifications";
+    private static final String BUCKET_NAME = "dengin-verifications";
 
     @BeforeEach
     void setUp() {

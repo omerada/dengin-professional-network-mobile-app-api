@@ -1,5 +1,5 @@
 // src/features/profile/components/ProfileBio/ProfileBio.styles.ts
-// Meslektaş Design System - ProfileBio Styles
+// Dengin Design System - ProfileBio Styles
 // Oku: mobile-development-guide/ui-ux-modernization/09-PROFILE-REDESIGN.md
 
 import { StyleSheet } from 'react-native';
@@ -9,18 +9,18 @@ import { StyleSheet } from 'react-native';
  */
 export const styles = StyleSheet.create({
   bio: {
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: 14,
+    lineHeight: 20,
   },
 
   container: {
-    paddingHorizontal: 24, // spacing['6']
-    paddingVertical: 16, // spacing['4']
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
 
   showMore: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
-    marginTop: 4, // spacing['1']
+    marginTop: 4,
   },
 });

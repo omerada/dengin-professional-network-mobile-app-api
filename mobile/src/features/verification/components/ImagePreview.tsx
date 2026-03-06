@@ -3,18 +3,11 @@
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import React, { memo } from 'react';
-import {
-  StyleSheet,
-  View,
-  Image,
-  TouchableOpacity,
-  Text,
-  Dimensions,
-  ViewStyle,
-} from 'react-native';
+import { StyleSheet, View, Image, Text, Dimensions, ViewStyle } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useColors } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, typography, borderRadius } from '@theme';
+import { PressableScale } from '@shared/components';
 import type { CapturedImage } from '../types';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -61,7 +54,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = memo(
             },
             style,
           ]}>
-          <Text style={[styles.placeholderIcon]}>📷</Text>
+          <Text style={styles.placeholderIcon}>📷</Text>
           <Text style={[styles.placeholderText, { color: colors.text.secondary }]}>{label}</Text>
         </View>
       );
@@ -90,7 +83,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = memo(
 
           {/* Yükleniyor overlay */}
           {loading && (
-            <View style={[styles.loadingOverlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+            <View style={[styles.loadingOverlay, { backgroundColor: colors.background.overlay }]}>
               <Text style={styles.loadingText}>Yükleniyor...</Text>
             </View>
           )}
@@ -103,15 +96,17 @@ export const ImagePreview: React.FC<ImagePreviewProps> = memo(
 
         {/* Tekrar çek butonu */}
         {onRetake && !loading && (
-          <TouchableOpacity
-            style={[styles.retakeButton, { backgroundColor: colors.background.secondary }]}
+          <PressableScale
             onPress={onRetake}
+            hapticType="light"
             accessibilityRole="button"
             accessibilityLabel={`${label} tekrar çek`}>
-            <Text style={[styles.retakeText, { color: colors.interactive.default }]}>
-              Tekrar Çek
-            </Text>
-          </TouchableOpacity>
+            <View style={[styles.retakeButton, { backgroundColor: colors.background.secondary }]}>
+              <Text style={[styles.retakeText, { color: colors.interactive.default }]}>
+                Tekrar Çek
+              </Text>
+            </View>
+          </PressableScale>
         )}
       </Animated.View>
     );
@@ -124,14 +119,27 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
   },
-  imageContainer: {
-    borderRadius: 12,
-    overflow: 'hidden',
-    borderWidth: 2,
-  },
   image: {
-    width: '100%',
     height: '100%',
+    width: '100%',
+  },
+  imageContainer: {
+    borderRadius: borderRadius.lg,
+    borderWidth: 2,
+    overflow: 'hidden',
+  },
+  label: {
+    ...typography.caption,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  labelContainer: {
+    bottom: 0,
+    left: 0,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    position: 'absolute',
+    right: 0,
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -143,24 +151,11 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: '600',
   },
-  labelContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-  },
-  label: {
-    ...typography.caption,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
   placeholder: {
-    borderRadius: 12,
-    borderWidth: 2,
-    borderStyle: 'dashed',
     alignItems: 'center',
+    borderRadius: borderRadius.lg,
+    borderStyle: 'dashed',
+    borderWidth: 2,
     justifyContent: 'center',
   },
   placeholderIcon: {
@@ -171,10 +166,10 @@ const styles = StyleSheet.create({
     ...typography.bodySmall,
   },
   retakeButton: {
+    borderRadius: borderRadius.xl,
     marginTop: spacing.sm,
-    paddingVertical: spacing.xs,
     paddingHorizontal: spacing.md,
-    borderRadius: 16,
+    paddingVertical: spacing.xs,
   },
   retakeText: {
     ...typography.bodySmall,

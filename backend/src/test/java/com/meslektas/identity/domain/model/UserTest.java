@@ -1,12 +1,11 @@
-package com.meslektas.identity.domain.model;
+package com.dengin.identity.domain.model;
 
-import com.meslektas.common.exception.BusinessException;
-import com.meslektas.identity.domain.model.ProfessionCategory;
-import com.meslektas.identity.domain.event.PasswordChangedEvent;
-import com.meslektas.identity.domain.event.ProfileUpdatedEvent;
-import com.meslektas.identity.domain.event.UserProfessionVerifiedEvent;
-import com.meslektas.identity.domain.event.UserRegisteredEvent;
-import com.meslektas.identity.domain.event.UserStatusChangedEvent;
+import com.dengin.common.exception.BusinessException;
+import com.dengin.identity.domain.model.*;
+import com.dengin.identity.domain.event.ProfileUpdatedEvent;
+import com.dengin.identity.domain.event.UserProfessionVerifiedEvent;
+import com.dengin.identity.domain.event.UserRegisteredEvent;
+import com.dengin.identity.domain.event.UserStatusChangedEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

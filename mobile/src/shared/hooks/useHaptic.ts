@@ -1,5 +1,5 @@
 // src/shared/hooks/useHaptic.ts
-// Meslektaş Design System - Haptic Feedback Hook
+// Dengin Design System - Haptic Feedback Hook
 // Oku: mobile-development-guide/ui-ux-modernization/16-HAPTIC-FEEDBACK.md
 
 import { useCallback, useMemo } from 'react';
@@ -64,6 +64,14 @@ export const useHaptic = (): HapticFeedback => {
     hapticService.like();
   }, []);
 
+  // Additional haptic shortcuts for common interactions
+  const checkbox = useCallback(() => trigger('impactLight'), [trigger]);
+  const radio = useCallback(() => trigger('impactLight'), [trigger]);
+  const toggle = useCallback(() => trigger('selection'), [trigger]);
+  const slider = useCallback(() => trigger('selection'), [trigger]);
+  const longPressHaptic = useCallback(() => trigger('impactMedium'), [trigger]);
+  const contextMenu = useCallback(() => trigger('impactLight'), [trigger]);
+
   return useMemo<HapticFeedback>(
     () => ({
       trigger,
@@ -76,8 +84,32 @@ export const useHaptic = (): HapticFeedback => {
       selection,
       buttonPress,
       like,
+      // New shortcuts for complete UX coverage
+      checkbox,
+      radio,
+      toggle,
+      slider,
+      longPress: longPressHaptic,
+      contextMenu,
     }),
-    [trigger, light, medium, heavy, success, warning, error, selection, buttonPress, like],
+    [
+      trigger,
+      light,
+      medium,
+      heavy,
+      success,
+      warning,
+      error,
+      selection,
+      buttonPress,
+      like,
+      checkbox,
+      radio,
+      toggle,
+      slider,
+      longPressHaptic,
+      contextMenu,
+    ],
   );
 };
 

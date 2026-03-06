@@ -1,5 +1,6 @@
-package com.meslektas.social.domain.model;
+package com.dengin.social.domain.model;
 
+import com.dengin.social.domain.model.PostImage;
 import org.junit.jupiter.api.*;
 
 import static org.assertj.core.api.Assertions.*;
@@ -18,7 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 class PostImageTest {
 
     private static final String VALID_S3_KEY = "posts/123/image.jpg";
-    private static final String VALID_URL = "https://cdn.meslektas.com/posts/123/image.jpg";
+    private static final String VALID_URL = "https://cdn.dengin.com/posts/123/image.jpg";
 
     // ============================================
     // FACTORY METHOD TESTS

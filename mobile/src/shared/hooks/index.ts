@@ -2,9 +2,6 @@
 // Shared hooks exports
 // Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
 
-// Existing hooks
-export { useDebounce } from '../../hooks/useDebounce';
-
 // Sector hooks (Sprint 1)
 export {
   useSectors,
@@ -62,6 +59,8 @@ export {
 
 // UI/UX Modernization hooks
 export { useHaptic, useHapticPress, useHapticLike } from './useHaptic';
+export { useSemanticHaptic } from './useSemanticHaptic';
+export type { HapticTrigger } from './useSemanticHaptic';
 export {
   useDebounce as useDebounceValue,
   useDebouncedCallback,
@@ -80,6 +79,33 @@ export {
   useSharedTransition,
   useEnterAnimation,
 } from './useAnimatedValue';
+
+// Phase 2: Press & Focus animations
+export { usePressAnimation, usePressAnimationWithHaptic } from './usePressAnimation';
+export type { UsePressAnimationConfig } from './usePressAnimation';
+
+export { useInputFocusAnimation, useInputFocusAnimationWithHaptic } from './useInputFocusAnimation';
+export type { UseInputFocusAnimationConfig } from './useInputFocusAnimation';
+
+// Phase 2: Success Celebration
+export { useSuccessCelebration, getSuccessCelebrationPattern } from './useSuccessCelebration';
+export type {
+  UseSuccessCelebrationReturn,
+  SuccessCelebrationOptions,
+  SuccessCelebrationAnimation,
+  SuccessCelebrationPattern,
+} from './useSuccessCelebration';
+
+// Phase 3: Gesture & Scroll Enhancements
+export { useSwipeBackGesture, useSwipeBackGestureWithShadow } from './useSwipeBackGesture';
+export type { UseSwipeBackGestureConfig, UseSwipeBackGestureReturn } from './useSwipeBackGesture';
+
+export { useParallaxScroll, useHeaderCollapse, useListItemReveal } from './useParallaxScroll';
+export type {
+  UseParallaxScrollConfig,
+  UseParallaxScrollReturn,
+  ParallaxStyleConfig,
+} from './useParallaxScroll';
 
 // Lifecycle hooks
 export {
@@ -103,3 +129,22 @@ export {
   getResponsiveSpacing,
 } from './useDimensions';
 export type { WindowDimensions, ScreenDimensions } from './useDimensions';
+
+// Loading state hook
+export { useLoadingState } from './useLoadingState';
+export type { UseLoadingStateOptions, LoadingStateResult } from './useLoadingState';
+
+// Unified feedback hook - Production UX
+export { useFeedback } from './useFeedback';
+export type { FeedbackLevel, FeedbackOptions } from './useFeedback';
+
+// Loading timeout hook - Prevent infinite loading
+export { useLoadingTimeout } from './useLoadingTimeout';
+export type { UseLoadingTimeoutConfig, UseLoadingTimeoutReturn } from './useLoadingTimeout';
+
+// Loading transition hook - Smooth crossfade
+export { useLoadingTransition } from './useLoadingTransition';
+export type {
+  UseLoadingTransitionOptions,
+  UseLoadingTransitionResult,
+} from './useLoadingTransition';

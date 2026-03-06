@@ -1,9 +1,9 @@
-# Meslektaş Backend - Spring Boot Configuration
+# Dengin Backend - Spring Boot Configuration
 # Strategic DDD Implementation
 
 spring:
   application:
-    name: meslektas-backend
+    name: dengin-backend
 
   profiles:
     active: dev
@@ -65,7 +65,7 @@ management:
 logging:
   level:
     root: INFO
-    com.meslektas: DEBUG
+    com.dengin: DEBUG
     org.springframework.web: DEBUG
     org.springframework.security: DEBUG
     org.hibernate.SQL: DEBUG
@@ -86,7 +86,7 @@ springdoc:
 
 # Application Specific
 app:
-  name: ${APP_NAME:Meslektaş}
+  name: ${APP_NAME:Dengin}
   version: ${APP_VERSION:1.0.0}
 
   # JWT Configuration
@@ -107,15 +107,15 @@ app:
 mailgun:
   api-key: ${MAILGUN_API_KEY:not-configured}
   domain: ${MAILGUN_DOMAIN:not-configured}
-  sender-email: ${MAILGUN_SENDER_EMAIL:noreply@meslektas.com}
-  sender-name: ${MAILGUN_SENDER_NAME:Meslektaş}
+  sender-email: ${MAILGUN_SENDER_EMAIL:noreply@dengin.com}
+  sender-name: ${MAILGUN_SENDER_NAME:Dengin}
   enabled: ${MAILGUN_ENABLED:true}
   base-url: ${MAILGUN_BASE_URL:https://api.eu.mailgun.net/v3}
 
 # Firebase (Push Notifications)
 firebase:
   enabled: ${FIREBASE_ENABLED:true}
-  project-id: ${FIREBASE_PROJECT_ID:meslektas-dev}
+  project-id: ${FIREBASE_PROJECT_ID:dengin-dev}
   credentials-json: ${FIREBASE_CREDENTIALS_JSON:not-configured}
 
 # OpenRouter AI Configuration
@@ -138,7 +138,7 @@ spring:
 
   # PostgreSQL
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5433/meslektas_dev}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5433/dengin_dev}
     username: ${DATABASE_USERNAME:postgres}
     password: ${DATABASE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
@@ -190,7 +190,7 @@ aws:
   region: ${AWS_REGION:eu-central-1}
   endpoint: ${AWS_ENDPOINT:http://localhost:4566}
   s3:
-    bucket: ${AWS_S3_BUCKET:meslektas-dev}
+    bucket: ${AWS_S3_BUCKET:dengin-dev}
     profile-images:
       folder: users # S3 folder for profile images: users/{userId}/avatar-{uuid}.jpg
     presigned-url:
@@ -201,7 +201,7 @@ aws:
     domain: ${AWS_CLOUDFRONT_DOMAIN:} # Leave empty for dev (uses S3 direct URLs)
   rekognition:
     endpoint: ${AWS_ENDPOINT:http://localhost:4566}
-    bucket-name: ${AWS_REKOGNITION_BUCKET:meslektas-verifications}
+    bucket-name: ${AWS_REKOGNITION_BUCKET:dengin-verifications}
     face-match-threshold: ${AWS_REKOGNITION_FACE_MATCH_THRESHOLD:80.0}
     min-confidence: ${AWS_REKOGNITION_MIN_CONFIDENCE:70.0}
 
@@ -220,7 +220,7 @@ spring:
 
   # PostgreSQL
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/meslektas_prod}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/dengin_prod}
     username: ${DATABASE_USERNAME:postgres}
     password: ${DATABASE_PASSWORD}
     hikari:
@@ -260,7 +260,7 @@ aws:
   secret-key: ${AWS_SECRET_ACCESS_KEY}
   region: ${AWS_REGION:eu-central-1}
   s3:
-    bucket: ${AWS_S3_BUCKET:meslektas-prod}
+    bucket: ${AWS_S3_BUCKET:dengin-prod}
     profile-images:
       folder: users # S3 folder for profile images: users/{userId}/avatar-{uuid}.jpg
     presigned-url:
@@ -268,7 +268,7 @@ aws:
   cloudfront:
     domain: ${AWS_CLOUDFRONT_DOMAIN:daw1sj0p0yrom.cloudfront.net} # CloudFront distribution domain
   rekognition:
-    bucket-name: ${AWS_REKOGNITION_BUCKET:meslektas-verifications}
+    bucket-name: ${AWS_REKOGNITION_BUCKET:dengin-verifications}
 
 # File Storage
 storage:
@@ -278,12 +278,12 @@ storage:
 logging:
   level:
     root: INFO
-    com.meslektas: INFO
+    com.dengin: INFO
     org.springframework.web: INFO
     org.springframework.security: INFO
     org.hibernate.SQL: INFO
   file:
-    name: /var/log/meslektas/application.log
+    name: /var/log/dengin/application.log
     max-size: 10MB
     max-history: 30
     total-size-cap: 1GB

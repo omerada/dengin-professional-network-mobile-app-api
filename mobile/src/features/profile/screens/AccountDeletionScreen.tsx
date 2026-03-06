@@ -3,25 +3,18 @@
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-COMPLETION.md
 
 import React, { useState, useCallback } from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
-  Pressable,
-} from 'react-native';
+import { StyleSheet, View, Text, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
-import { Button, Input } from '@shared/components';
+import { Button, Input, ActionSheet, KeyboardAwareScreen } from '@shared/components';
 import { spacing, typography } from '@theme';
 import { useDeleteAccount } from '../hooks';
 import { getErrorMessage } from '@core/utils/errorUtils';
+import { showAccountDeletionError } from '@shared/utils';
+import { useHaptic } from '@shared/hooks';
 import type { DeleteAccountRequest } from '../types';
 
 /**
@@ -56,6 +49,7 @@ export const AccountDeletionScreen: React.FC = () => {
   const colors = useColors();
   const navigation = useNavigation();
   const toast = useToast();
+  const { trigger } = useHaptic();
   const deleteAccount = useDeleteAccount();
 
   // Form state
@@ -64,6 +58,7 @@ export const AccountDeletionScreen: React.FC = () => {
   const [customReason, setCustomReason] = useState('');
   const [confirmText, setConfirmText] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showFinalConfirmation, setShowFinalConfirmation] = useState(false);
 
   // Error state
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -99,44 +94,36 @@ export const AccountDeletionScreen: React.FC = () => {
     return reason?.label;
   }, [selectedReason, customReason]);
 
-  // Handle account deletion
-  const handleDeleteAccount = useCallback(async () => {
+  // Execute account deletion
+  const executeAccountDeletion = useCallback(async () => {
+    const request: DeleteAccountRequest = {
+      password,
+      reason: getFinalReason(),
+    };
+
+    try {
+      await deleteAccount.mutateAsync(request);
+      // User will be logged out automatically by the hook
+      setShowFinalConfirmation(false);
+    } catch (error: any) {
+      const errorMessage = getErrorMessage(error);
+      setShowFinalConfirmation(false);
+
+      if (errorMessage.toLowerCase().includes('password')) {
+        setErrors(prev => ({ ...prev, password: 'Şifre yanlış' }));
+      } else {
+        showAccountDeletionError(toast, { trigger });
+      }
+    }
+  }, [password, getFinalReason, deleteAccount, toast]);
+
+  // Handle account deletion - show final confirmation
+  const handleDeleteAccount = useCallback(() => {
     if (!validateForm()) {
       return;
     }
-
-    // Final confirmation
-    Alert.alert(
-      '⚠️ Son Onay',
-      'Bu işlem geri alınamaz. Hesabınız ve tüm verileriniz kalıcı olarak silinecektir. Devam etmek istediğinize emin misiniz?',
-      [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Evet, Hesabımı Sil',
-          style: 'destructive',
-          onPress: async () => {
-            const request: DeleteAccountRequest = {
-              password,
-              reason: getFinalReason(),
-            };
-
-            try {
-              await deleteAccount.mutateAsync(request);
-              // User will be logged out automatically by the hook
-            } catch (error: any) {
-              const errorMessage = getErrorMessage(error);
-
-              if (errorMessage.toLowerCase().includes('password')) {
-                setErrors(prev => ({ ...prev, password: 'Şifre yanlış' }));
-              } else {
-                toast.error(errorMessage, 'Hesap Silinemedi');
-              }
-            }
-          },
-        },
-      ],
-    );
-  }, [validateForm, password, getFinalReason, deleteAccount]);
+    setShowFinalConfirmation(true);
+  }, [validateForm]);
 
   // Reason button component
   const ReasonButton: React.FC<{ id: string; label: string }> = ({ id, label }) => {
@@ -156,241 +143,250 @@ export const AccountDeletionScreen: React.FC = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['bottom']}>
-      <KeyboardAvoidingView
-        style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 88 : 0}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}>
-          {/* Warning Card */}
-          <View style={[styles.warningCard, { backgroundColor: colors.status.errorBg }]}>
-            <Text style={styles.warningIcon}>⚠️</Text>
-            <Text style={[styles.warningTitle, { color: colors.status.error }]}>
-              Dikkat! Bu işlem geri alınamaz
-            </Text>
-            <Text style={[styles.warningText, { color: colors.status.error }]}>
-              Hesabınızı sildiğinizde:
-            </Text>
-            <View style={styles.warningList}>
-              {[
-                'Tüm paylaşımlarınız silinecek',
-                'Takipçileriniz ve takip ettikleriniz kaldırılacak',
-                'Mesajlarınız erişilemez olacak',
-                'Doğrulanmış meslek bilginiz geçersiz olacak',
-                'Bu e-posta ile 30 gün boyunca yeni hesap açılamayacak',
-              ].map((item, index) => (
-                <View key={index} style={styles.warningItem}>
-                  <Text style={[styles.warningBullet, { color: colors.status.error }]}>•</Text>
-                  <Text style={[styles.warningItemText, { color: colors.status.error }]}>
-                    {item}
-                  </Text>
-                </View>
-              ))}
-            </View>
+      <KeyboardAwareScreen
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
+        {/* Warning Card */}
+        <View style={[styles.warningCard, { backgroundColor: colors.status.errorBg }]}>
+          <Text style={styles.warningIcon}>⚠️</Text>
+          <Text style={[styles.warningTitle, { color: colors.status.error }]}>
+            Dikkat! Bu işlem geri alınamaz
+          </Text>
+          <Text style={[styles.warningText, { color: colors.status.error }]}>
+            Hesabınızı sildiğinizde:
+          </Text>
+          <View style={styles.warningList}>
+            {[
+              'Tüm paylaşımlarınız silinecek',
+              'Takipçileriniz ve takip ettikleriniz kaldırılacak',
+              'Mesajlarınız erişilemez olacak',
+              'Doğrulanmış meslek bilginiz geçersiz olacak',
+              'Bu e-posta ile 30 gün boyunca yeni hesap açılamayacak',
+            ].map((item, index) => (
+              <View key={index} style={styles.warningItem}>
+                <Text style={[styles.warningBullet, { color: colors.status.error }]}>•</Text>
+                <Text style={[styles.warningItemText, { color: colors.status.error }]}>{item}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* Reason Selection */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>
+            Neden ayrılıyorsunuz? (Opsiyonel)
+          </Text>
+          <Text style={[styles.sectionSubtitle, { color: colors.text.secondary }]}>
+            Geri bildiriminiz uygulamamızı geliştirmemize yardımcı olur
+          </Text>
+          <View style={styles.reasonsContainer}>
+            {DELETION_REASONS.map(reason => (
+              <ReasonButton key={reason.id} {...reason} />
+            ))}
           </View>
 
-          {/* Reason Selection */}
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>
-              Neden ayrılıyorsunuz? (Opsiyonel)
-            </Text>
-            <Text style={[styles.sectionSubtitle, { color: colors.text.secondary }]}>
-              Geri bildiriminiz uygulamamızı geliştirmemize yardımcı olur
-            </Text>
-            <View style={styles.reasonsContainer}>
-              {DELETION_REASONS.map(reason => (
-                <ReasonButton key={reason.id} {...reason} />
-              ))}
-            </View>
-
-            {/* Custom Reason Input */}
-            {selectedReason === 'other' && (
-              <Input
-                value={customReason}
-                onChangeText={setCustomReason}
-                placeholder="Nedeninizi yazın..."
-                multiline
-                numberOfLines={3}
-                containerStyle={styles.customReasonInput}
-              />
-            )}
-          </View>
-
-          {/* Password Verification */}
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>
-              Şifrenizi Girin
-            </Text>
-            <Text style={[styles.sectionSubtitle, { color: colors.text.secondary }]}>
-              Kimliğinizi doğrulamak için şifrenizi girin
-            </Text>
+          {/* Custom Reason Input */}
+          {selectedReason === 'other' && (
             <Input
-              value={password}
-              onChangeText={text => {
-                setPassword(text);
-                setErrors(prev => ({ ...prev, password: '' }));
-              }}
-              placeholder="Şifreniz"
-              secureTextEntry={!showPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-              error={errors.password}
-              rightIcon={
-                <Pressable onPress={() => setShowPassword(!showPassword)}>
-                  <Icon
-                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                    size={20}
-                    color={colors.text.secondary}
-                  />
-                </Pressable>
-              }
+              value={customReason}
+              onChangeText={setCustomReason}
+              placeholder="Nedeninizi yazın..."
+              multiline
+              numberOfLines={3}
+              containerStyle={styles.customReasonInput}
             />
-          </View>
+          )}
+        </View>
 
-          {/* Confirmation Text */}
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Onay Metni</Text>
-            <Text style={[styles.sectionSubtitle, { color: colors.text.secondary }]}>
-              Devam etmek için aşağıya{' '}
-              <Text style={[styles.confirmTextHighlight, { color: colors.status.error }]}>
-                {CONFIRM_TEXT}
-              </Text>{' '}
-              yazın
-            </Text>
-            <Input
-              value={confirmText}
-              onChangeText={text => {
-                setConfirmText(text.toUpperCase());
-                setErrors(prev => ({ ...prev, confirmText: '' }));
-              }}
-              placeholder={CONFIRM_TEXT}
-              autoCapitalize="characters"
-              autoCorrect={false}
-              error={errors.confirmText}
-            />
-          </View>
+        {/* Password Verification */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Şifrenizi Girin</Text>
+          <Text style={[styles.sectionSubtitle, { color: colors.text.secondary }]}>
+            Kimliğinizi doğrulamak için şifrenizi girin
+          </Text>
+          <Input
+            value={password}
+            onChangeText={text => {
+              setPassword(text);
+              setErrors(prev => ({ ...prev, password: '' }));
+            }}
+            placeholder="Şifreniz"
+            secureTextEntry={!showPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            error={errors.password}
+            rightIcon={
+              <Pressable onPress={() => setShowPassword(!showPassword)}>
+                <Icon
+                  name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                  size={20}
+                  color={colors.text.secondary}
+                />
+              </Pressable>
+            }
+          />
+        </View>
 
-          {/* Action Buttons */}
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Hesabımı Kalıcı Olarak Sil"
-              variant="danger"
-              onPress={handleDeleteAccount}
-              loading={deleteAccount.isPending}
-              disabled={!password || confirmText !== CONFIRM_TEXT}
-              style={styles.deleteButton}
-            />
-            <Button
-              title="Vazgeç"
-              variant="ghost"
-              onPress={() => navigation.goBack()}
-              style={styles.cancelButton}
-            />
-          </View>
+        {/* Confirmation Text */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>Onay Metni</Text>
+          <Text style={[styles.sectionSubtitle, { color: colors.text.secondary }]}>
+            Devam etmek için aşağıya{' '}
+            <Text style={[styles.confirmTextHighlight, { color: colors.status.error }]}>
+              {CONFIRM_TEXT}
+            </Text>{' '}
+            yazın
+          </Text>
+          <Input
+            value={confirmText}
+            onChangeText={text => {
+              setConfirmText(text.toUpperCase());
+              setErrors(prev => ({ ...prev, confirmText: '' }));
+            }}
+            placeholder={CONFIRM_TEXT}
+            autoCapitalize="characters"
+            autoCorrect={false}
+            error={errors.confirmText}
+          />
+        </View>
 
-          {/* Info Note */}
-          <View style={[styles.infoCard, { backgroundColor: colors.background.secondary }]}>
-            <Text style={[styles.infoText, { color: colors.text.secondary }]}>
-              ℹ️ Hesabınız 30 gün boyunca geri alınabilir durumda kalacaktır. Bu süre içinde tekrar
-              giriş yaparsanız hesabınız yeniden aktifleştirilir.
-            </Text>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        {/* Action Buttons */}
+        <View style={styles.buttonContainer}>
+          <Button
+            title="Hesabımı Kalıcı Olarak Sil"
+            variant="danger"
+            onPress={handleDeleteAccount}
+            loading={deleteAccount.isPending}
+            disabled={!password || confirmText !== CONFIRM_TEXT}
+            style={styles.deleteButton}
+          />
+          <Button
+            title="Vazgeç"
+            variant="ghost"
+            onPress={() => navigation.goBack()}
+            style={styles.cancelButton}
+          />
+        </View>
+
+        {/* Info Note */}
+        <View style={[styles.infoCard, { backgroundColor: colors.background.secondary }]}>
+          <Text style={[styles.infoText, { color: colors.text.secondary }]}>
+            ℹ️ Hesabınız 30 gün boyunca geri alınabilir durumda kalacaktır. Bu süre içinde tekrar
+            giriş yaparsanız hesabınız yeniden aktifleştirilir.
+          </Text>
+        </View>
+      </KeyboardAwareScreen>
+
+      {/* Final Confirmation ActionSheet */}
+      <ActionSheet
+        visible={showFinalConfirmation}
+        onClose={() => setShowFinalConfirmation(false)}
+        title="⚠️ Son Onay"
+        message="Bu işlem geri alınamaz. Hesabınız ve tüm verileriniz kalıcı olarak silinecektir. Devam etmek istediğinize emin misiniz?"
+        options={[
+          {
+            id: 'delete',
+            label: 'Evet, Hesabımı Sil',
+            icon: 'trash-outline',
+            destructive: true,
+            onPress: executeAccountDeletion,
+          },
+        ]}
+        cancelLabel="İptal"
+        testID="final-delete-confirmation"
+      />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  buttonContainer: {
+    gap: spacing.md,
+    marginBottom: spacing.xl,
+  },
+  cancelButton: {
+    // Styled via variant="ghost"
+  },
+  confirmTextHighlight: {
+    fontWeight: 'bold',
+  },
   container: {
     flex: 1,
+  },
+  customReasonInput: {
+    marginTop: spacing.md,
+  },
+  deleteButton: {
+    // Styled via variant="danger"
+  },
+  infoCard: {
+    borderRadius: spacing.sm,
+    padding: spacing.md,
+  },
+  infoText: {
+    ...typography.caption,
+    lineHeight: 20,
   },
   keyboardView: {
     flex: 1,
   },
-  scrollContent: {
-    padding: spacing.lg,
-  },
-  warningCard: {
-    padding: spacing.lg,
-    borderRadius: spacing.md,
-    marginBottom: spacing.xl,
-  },
-  warningIcon: {
-    fontSize: 40,
-    textAlign: 'center',
-    marginBottom: spacing.sm,
-  },
-  warningTitle: {
-    ...typography.h3,
-    textAlign: 'center',
-    marginBottom: spacing.sm,
-  },
-  warningText: {
-    ...typography.body2,
-    marginBottom: spacing.sm,
-  },
-  warningList: {
-    marginTop: spacing.sm,
-  },
-  warningItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+  reasonButton: {
     marginBottom: spacing.xs,
-  },
-  warningBullet: {
-    ...typography.body2,
-    marginRight: spacing.xs,
-    fontWeight: 'bold',
-  },
-  warningItemText: {
-    ...typography.body2,
-    flex: 1,
-  },
-  section: {
-    marginBottom: spacing.xl,
-  },
-  sectionTitle: {
-    ...typography.subtitle1,
-    marginBottom: spacing.xs,
-  },
-  sectionSubtitle: {
-    ...typography.body2,
-    marginBottom: spacing.md,
-  },
-  confirmTextHighlight: {
-    fontWeight: 'bold',
   },
   reasonsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
   },
-  reasonButton: {
-    marginBottom: spacing.xs,
+  scrollContent: {
+    padding: spacing.lg,
   },
-  customReasonInput: {
-    marginTop: spacing.md,
-  },
-  buttonContainer: {
-    gap: spacing.md,
+  section: {
     marginBottom: spacing.xl,
   },
-  deleteButton: {
-    // Styled via variant="danger"
+  sectionSubtitle: {
+    ...typography.body2,
+    marginBottom: spacing.md,
   },
-  cancelButton: {
-    // Styled via variant="ghost"
+  sectionTitle: {
+    ...typography.subtitle1,
+    marginBottom: spacing.xs,
   },
-  infoCard: {
-    padding: spacing.md,
-    borderRadius: spacing.sm,
+  warningBullet: {
+    ...typography.body2,
+    fontWeight: 'bold',
+    marginRight: spacing.xs,
   },
-  infoText: {
-    ...typography.caption,
-    lineHeight: 20,
+  warningCard: {
+    borderRadius: spacing.md,
+    marginBottom: spacing.xl,
+    padding: spacing.lg,
+  },
+  warningIcon: {
+    fontSize: 40,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  warningItem: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    marginBottom: spacing.xs,
+  },
+  warningItemText: {
+    ...typography.body2,
+    flex: 1,
+  },
+  warningList: {
+    marginTop: spacing.sm,
+  },
+  warningText: {
+    ...typography.body2,
+    marginBottom: spacing.sm,
+  },
+  warningTitle: {
+    ...typography.h3,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
   },
 });
 

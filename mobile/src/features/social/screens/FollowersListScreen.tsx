@@ -1,16 +1,26 @@
 // src/features/social/screens/FollowersListScreen.tsx
-// Followers list screen
+// Followers list screen with search
 // Oku: mobile-development-guide/sprints/29-SPRINT-13-14-PART5.md
 
-import React, { useCallback, useMemo } from 'react';
-import { View, StyleSheet, RefreshControl, ActivityIndicator } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { FlatList } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute } from '@react-navigation/native';
+import { SCREEN_ANIMATIONS } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
-import { EmptyState, Loading } from '@shared/components';
+import { useToast } from '@contexts/ToastContext';
+import { useLoadingTimeout } from '@shared/hooks';
+import {
+  UnifiedEmptyState,
+  AnimatedListItem,
+  CustomRefreshControl,
+  UnifiedScreenHeader,
+} from '@shared/components';
+import { ErrorBoundary } from '@core/components';
 import { spacing } from '@theme';
-import { UserListItem } from '../components';
+import { UserListItem, UserSkeleton } from '../components';
 import { useFollowers } from '../hooks';
 import type { FollowUser } from '../types';
 import type { StyleProp, ViewStyle } from 'react-native';
@@ -25,8 +35,10 @@ type ContentStyle = StyleProp<ViewStyle>;
  */
 export const FollowersListScreen: React.FC = () => {
   const colors = useColors();
+  const toast = useToast();
   const route = useRoute();
   const { userId } = route.params as { userId: number };
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, refetch, isRefetching } =
     useFollowers(userId);
@@ -35,6 +47,33 @@ export const FollowersListScreen: React.FC = () => {
     return data?.pages.flatMap(page => page.content) || [];
   }, [data]);
 
+  // Loading timeout protection
+  useLoadingTimeout(isLoading && users.length === 0, {
+    timeout: 30000,
+    onTimeout: () => {
+      toast.error('Takipçiler yüklenirken zaman aşımı. Lütfen tekrar deneyin.');
+    },
+    onRetry: async () => {
+      await refetch();
+    },
+  });
+
+  // Filter users by search query
+  const filteredUsers = useMemo(() => {
+    if (!searchQuery.trim()) return users;
+    const query = searchQuery.toLowerCase();
+    return users.filter(user => {
+      const nameMatch = user.fullName.toLowerCase().includes(query);
+      const professionMatch =
+        user.profession && typeof user.profession === 'string'
+          ? (user.profession as string).toLowerCase().includes(query)
+          : user.profession && typeof user.profession === 'object'
+            ? (user.profession as any).name?.toLowerCase().includes(query)
+            : false;
+      return nameMatch || professionMatch;
+    });
+  }, [users, searchQuery]);
+
   const handleEndReached = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
@@ -42,7 +81,13 @@ export const FollowersListScreen: React.FC = () => {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const renderItem = useCallback(
-    ({ item }: { item: FollowUser }) => <UserListItem user={item} showFollowButton />,
+    ({ item, index }: { item: FollowUser; index: number }) => (
+      <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(index)}>
+        <AnimatedListItem>
+          <UserListItem user={item} showFollowButton />
+        </AnimatedListItem>
+      </Animated.View>
+    ),
     [],
   );
 
@@ -59,14 +104,25 @@ export const FollowersListScreen: React.FC = () => {
 
   const ListEmptyComponent = useMemo(() => {
     if (isLoading) return null;
+
+    if (searchQuery.trim() && filteredUsers.length === 0) {
+      return (
+        <UnifiedEmptyState
+          icon="search-outline"
+          title="Sonuç Bulunamadı"
+          description={`"${searchQuery}" için takipçi bulunamadı`}
+        />
+      );
+    }
+
     return (
-      <EmptyState
+      <UnifiedEmptyState
         icon="people-outline"
-        title="Henüz takipçi yok"
-        message="Bu kullanıcının henüz takipçisi bulunmuyor"
+        title="Henüz Takipçi Yok"
+        description="Bu kullanıcının henüz takipçisi bulunmuyor"
       />
     );
-  }, [isLoading]);
+  }, [isLoading, searchQuery, filteredUsers]);
 
   const ItemSeparatorComponent = useCallback(
     () => <View style={[styles.separator, { backgroundColor: colors.border.default }]} />,
@@ -76,7 +132,8 @@ export const FollowersListScreen: React.FC = () => {
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background.primary }]}>
-        <Loading message="Yükleniyor..." />
+        <UnifiedScreenHeader variant="default" title="Takipçiler" showBackButton />
+        <UserSkeleton count={12} showFollowButton />
       </SafeAreaView>
     );
   }
@@ -85,43 +142,54 @@ export const FollowersListScreen: React.FC = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['bottom']}>
-      <FlatList
-        data={users}
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-        onEndReached={handleEndReached}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={ListFooterComponent}
-        ListEmptyComponent={ListEmptyComponent}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={refetch}
-            tintColor={colors.interactive.default}
-          />
-        }
-        ItemSeparatorComponent={ItemSeparatorComponent}
-        contentContainerStyle={
-          users.length === 0 ? ({ flexGrow: 1 } as unknown as ContentStyle) : undefined
-        }
-      />
+      <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={{ flex: 1 }}>
+        <UnifiedScreenHeader
+          variant="search"
+          title="Takipçiler"
+          showBackButton
+          searchProps={{
+            placeholder: 'Takipçilerde ara...',
+            value: searchQuery,
+            onChangeText: setSearchQuery,
+          }}
+        />
+        <FlatList
+          data={filteredUsers}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={ListFooterComponent}
+          ListEmptyComponent={ListEmptyComponent}
+          refreshControl={<CustomRefreshControl refreshing={isRefetching} onRefresh={refetch} />}
+          ItemSeparatorComponent={ItemSeparatorComponent}
+          contentContainerStyle={
+            users.length === 0 ? ({ flexGrow: 1 } as unknown as ContentStyle) : undefined
+          }
+        />
+      </Animated.View>
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  footer: {
+    alignItems: 'center',
+    padding: spacing.lg,
   },
   separator: {
     height: 1,
     marginLeft: 76,
   },
-  footer: {
-    padding: spacing.lg,
-    alignItems: 'center',
-  },
-  emptyContent: {
-    flex: 1,
-  },
 });
+
+// Wrap with Error Boundary for production safety
+export default function FollowersListScreenWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <FollowersListScreen />
+    </ErrorBoundary>
+  );
+}

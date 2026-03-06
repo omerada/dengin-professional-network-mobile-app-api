@@ -1,26 +1,55 @@
 // src/features/feed/screens/FeedScreen.tsx
-// Meslektaş Feed Ekranı - Production Ready Implementation
+// Dengin Feed Ekranı - Production Ready Implementation
 // Oku: MOBILE-APP-HOME-SCREEN.md, mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
-import React, { useCallback, useMemo, useState, memo } from 'react';
-import { RefreshControl, ActivityIndicator, Alert, StyleSheet } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import React, { useCallback, useMemo, useState, memo, useEffect } from 'react';
+import { ActivityIndicator, StyleSheet } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import { SCREEN_ANIMATIONS, NETWORK_CONFIG, UNIFIED_FEEDBACK } from '@constants';
+import {
+  navigateToComments,
+  navigateToReportContent,
+  navigateToNotifications,
+  navigateToVerificationIntro,
+  navigateToNewConversation,
+  navigateToUserProfile,
+} from '@core/navigation';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useToast } from '@contexts/ToastContext';
+import { useSemanticHaptic, useLoadingTimeout, useHaptic } from '@shared/hooks';
 import { useFeedPosts, useLikePost, useBookmarkPost, useDeletePost } from '../hooks';
-import { PostCard, FeedHeader, FilterBar, EmptyFeed, FeedSkeleton } from '../components';
+import { useFeedStore } from '../stores/feedStore';
+import { PostCard } from '../components';
 import { VerificationPromptCard } from '../components/VerificationPromptCard';
 import { AITrendInsightCard } from '../components/AITrendInsightCard';
 import { SuggestedExpertsCarousel } from '../components/SuggestedExpertsCarousel';
-import { ActionSheet, type ActionSheetOption } from '@shared/components';
-import { sharePost, showShareError } from '@shared/utils/share';
+import {
+  ActionSheet,
+  type ActionSheetOption,
+  UnifiedEmptyState,
+  CustomRefreshControl,
+  UnifiedScreenHeader,
+  SkeletonList,
+  SkeletonPostCard,
+} from '@shared/components';
+import {
+  sharePost,
+  showSuccess,
+  showLikeError,
+  showBookmarkError,
+  showFollowError,
+  showUnfollowError,
+  showOperationError,
+} from '@shared/utils';
 import { useAuthStore } from '@features/auth/stores';
 import { useFollow, useUnfollow } from '@features/social/hooks';
 import { useUnreadCount } from '@features/notifications/hooks';
+import { asyncStorage } from '@core/storage/asyncStorage';
+import { STORAGE_KEYS } from '@core/storage/keys';
 import type { Post } from '../types';
 
 /**
@@ -45,7 +74,9 @@ import type { Post } from '../types';
 export const FeedScreen: React.FC = memo(() => {
   const colors = useColors();
   const navigation = useNavigation();
-  const { medium } = useHaptic();
+  const { trigger } = useHaptic();
+  const { triggerContent, triggerSystem, triggerNavigation } = useSemanticHaptic();
+  const toast = useToast();
   const currentUserId = useAuthStore(state => state.user?.id);
   const user = useAuthStore(state => state.user);
   const { unreadCount } = useUnreadCount();
@@ -53,6 +84,13 @@ export const FeedScreen: React.FC = memo(() => {
   // Action sheet state
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [actionSheetVisible, setActionSheetVisible] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<Post | null>(null);
+
+  // Verification prompt state (optimized)
+  const [showVerificationPrompt, setShowVerificationPrompt] = useState(false);
+  const verificationPromptShown = useFeedStore(state => state.verificationPromptShown);
+  const setVerificationPromptShown = useFeedStore(state => state.setVerificationPromptShown);
 
   // Follow/Unfollow mutations
   const followMutation = useFollow();
@@ -69,23 +107,148 @@ export const FeedScreen: React.FC = memo(() => {
     isRefetching,
   } = useFeedPosts();
 
+  // Loading timeout protection
+  const { hasTimedOut, retry } = useLoadingTimeout(isLoading && posts.length === 0, {
+    timeout: NETWORK_CONFIG.TIMEOUT_DURATION,
+    onTimeout: () => {
+      triggerSystem('error');
+      toast.error('Gönderiler yüklenirken zaman aşımı oluştu', {
+        duration: UNIFIED_FEEDBACK.ERROR_RECOVERABLE.duration,
+        action: {
+          label: 'Tekrar Dene',
+          onPress: retry,
+        },
+      });
+    },
+    onRetry: async () => {
+      await refetch();
+    },
+  });
+
   // Mutations with optimistic updates
   const likePost = useLikePost();
   const bookmarkPost = useBookmarkPost();
   const deletePost = useDeletePost();
 
   // ============================================================================
+  // P2 Addition: Engagement Card Frequency Logic
+  // ============================================================================
+
+  /**
+   * PRODUCTION OPTIMIZED: Smart verification prompt system
+   *
+   * Performance improvements:
+   * - Runs only once when posts.length >= 10 (not on every render)
+   * - Session tracking prevents re-showing in same app session
+   * - AsyncStorage I/O minimized (only on first check and dismiss)
+   * - Memoized check with useMemo to prevent re-computation
+   *
+   * UX improvements:
+   * - Show max 2 times total (less intrusive)
+   * - Wait 7 days between dismissals
+   * - Show after 10th post (let user explore first)
+   * - Contextual placement (after 10th post, not at top)
+   */
+  useEffect(() => {
+    let mounted = true;
+
+    const checkVerificationPrompt = async () => {
+      // Already verified
+      if (user?.verificationStatus === 'APPROVED') {
+        return;
+      }
+
+      // Wait for posts to load (min 10 posts)
+      if (posts.length < 10) {
+        return;
+      }
+
+      // Already shown in this session
+      if (verificationPromptShown) {
+        return;
+      }
+
+      // Get show count (max 2 times)
+      const shownCount =
+        (await asyncStorage.get<number>(STORAGE_KEYS.VERIFICATION_PROMPT_SHOWN_COUNT)) ?? 0;
+
+      if (shownCount >= 2) {
+        return;
+      }
+
+      // Check cooldown period (7 days)
+      const dismissedAt = await asyncStorage.get<string>(
+        STORAGE_KEYS.VERIFICATION_PROMPT_DISMISSED_AT,
+      );
+
+      if (dismissedAt) {
+        const daysPassed = (Date.now() - parseInt(dismissedAt, 10)) / (1000 * 60 * 60 * 24);
+        if (daysPassed < 7) {
+          return;
+        }
+      }
+
+      // All checks passed - show prompt
+      if (mounted) {
+        setShowVerificationPrompt(true);
+        setVerificationPromptShown(true); // Mark as shown in session
+
+        // Increment show count
+        await asyncStorage.set(STORAGE_KEYS.VERIFICATION_PROMPT_SHOWN_COUNT, shownCount + 1);
+      }
+    };
+
+    // PRODUCTION FIX: Only run once when minimum post count is reached
+    if (posts.length >= 10 && !verificationPromptShown) {
+      checkVerificationPrompt();
+    }
+
+    return () => {
+      mounted = false;
+    };
+    // CRITICAL: Empty dependency array - run only once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /**
+   * Handle verification prompt dismissal
+   */
+  const handleDismissVerificationPrompt = useCallback(async () => {
+    setShowVerificationPrompt(false);
+    await asyncStorage.set(STORAGE_KEYS.VERIFICATION_PROMPT_DISMISSED_AT, Date.now().toString());
+  }, []);
+
+  /**
+   * Handle verification start
+   */
+  const handleStartVerification = useCallback(() => {
+    triggerNavigation('navigate');
+    setShowVerificationPrompt(false);
+    navigateToVerificationIntro(navigation as any);
+  }, [navigation, triggerNavigation]);
+
+  // ============================================================================
   // Handlers
   // ============================================================================
 
   /**
-   * Handle like post with optimistic update
+   * Handle like with optimistic update + feedback
    */
   const handleLike = useCallback(
     (postId: number, isLiked: boolean) => {
-      likePost.mutate({ postId, isLiked });
+      likePost.mutate(
+        { postId, isLiked },
+        {
+          onSuccess: () => {
+            showSuccess(toast, { trigger }, isLiked ? 'Beğeni geri alındı' : 'Gönderi beğenildi');
+          },
+          onError: () => {
+            showLikeError(toast, { trigger }, () => handleLike(postId, isLiked));
+          },
+        },
+      );
     },
-    [likePost],
+    [likePost, triggerSystem, toast, trigger],
   );
 
   /**
@@ -93,8 +256,7 @@ export const FeedScreen: React.FC = memo(() => {
    */
   const handleComment = useCallback(
     (postId: number) => {
-      // @ts-expect-error - Comments route not yet defined in types
-      navigation.navigate('Comments', { postId });
+      navigateToComments(navigation as any, { postId });
     },
     [navigation],
   );
@@ -112,7 +274,7 @@ export const FeedScreen: React.FC = memo(() => {
           author: post.author,
         });
         if (!result.success && result.error !== 'dismissed') {
-          showShareError();
+          showOperationError(toast, { trigger }, 'Paylaşım');
         }
       }
     },
@@ -120,13 +282,27 @@ export const FeedScreen: React.FC = memo(() => {
   );
 
   /**
-   * Handle bookmark with optimistic update
+   * Handle bookmark with optimistic update + feedback
    */
   const handleBookmark = useCallback(
     (postId: number, isSaved: boolean) => {
-      bookmarkPost.mutate({ postId, isSaved });
+      bookmarkPost.mutate(
+        { postId, isSaved },
+        {
+          onSuccess: () => {
+            showSuccess(
+              toast,
+              { trigger },
+              isSaved ? 'Kayıtlardan kaldırıldı' : 'Gönderi kaydedildi',
+            );
+          },
+          onError: () => {
+            showBookmarkError(toast, { trigger }, () => handleBookmark(postId, isSaved));
+          },
+        },
+      );
     },
-    [bookmarkPost],
+    [bookmarkPost, triggerSystem, toast, trigger],
   );
 
   /**
@@ -147,9 +323,9 @@ export const FeedScreen: React.FC = memo(() => {
    * Handle pull-to-refresh with haptic feedback
    */
   const handleRefresh = useCallback(() => {
-    medium();
+    triggerContent('refresh');
     refetch();
-  }, [medium, refetch]);
+  }, [triggerContent, refetch]);
 
   /**
    * Handle infinite scroll - load more posts
@@ -169,23 +345,28 @@ export const FeedScreen: React.FC = memo(() => {
   }, []);
 
   /**
-   * Delete post with confirmation
+   * Delete post with confirmation - show confirmation action sheet
    */
   const handleDeletePost = useCallback(() => {
     if (selectedPost) {
-      Alert.alert('Gönderiyi Sil', 'Bu gönderiyi silmek istediğinize emin misiniz?', [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Sil',
-          style: 'destructive',
-          onPress: () => {
-            deletePost.mutate(selectedPost.id);
-            handleCloseActionSheet();
-          },
-        },
-      ]);
+      triggerSystem('alert'); // Critical action feedback
+      setShowDeleteConfirm(true);
+      setPostToDelete(selectedPost);
+      handleCloseActionSheet();
     }
-  }, [selectedPost, deletePost, handleCloseActionSheet]);
+  }, [selectedPost, handleCloseActionSheet, triggerSystem]);
+
+  /**
+   * Confirm delete action
+   */
+  const handleConfirmDelete = useCallback(() => {
+    if (postToDelete) {
+      triggerSystem('confirm'); // Confirm deletion feedback
+      deletePost.mutate(postToDelete.id);
+      setShowDeleteConfirm(false);
+      setPostToDelete(null);
+    }
+  }, [postToDelete, deletePost, triggerSystem]);
 
   /**
    * Report post
@@ -193,10 +374,9 @@ export const FeedScreen: React.FC = memo(() => {
   const handleReportPost = useCallback(() => {
     if (selectedPost) {
       handleCloseActionSheet();
-      // @ts-expect-error - ReportContent route not yet defined in types
-      navigation.navigate('ReportContent', {
+      navigateToReportContent(navigation as any, {
         contentId: selectedPost.id,
-        contentType: 'POST',
+        contentType: 'post',
       });
     }
   }, [selectedPost, navigation, handleCloseActionSheet]);
@@ -247,39 +427,80 @@ export const FeedScreen: React.FC = memo(() => {
   // ============================================================================
 
   /**
-   * Render single post item with suggested experts carousel every 5th post
+   * Render single post item with engagement cards
+   * P2 Optimized: Strategic placement based on index
+   * - AI Trend: After 5th post
+   * - Suggested Experts: After 10th post
    * Memoized for FlashList performance
+   * Uses UNIFIED_TIMING for consistent list animations (40ms delay)
    */
   const renderPost = useCallback(
-    ({ item, index }: ListRenderItemInfo<Post>) => (
-      <>
-        {/* Show suggested experts carousel every 5th post (after 1st, 6th, 11th...) */}
-        {index > 0 && index % 5 === 0 && (
-          <SuggestedExpertsCarousel
-            onExpertPress={expertId => {
-              // @ts-expect-error - UserProfile route not yet defined in types
-              navigation.navigate('UserProfile', { userId: expertId });
-            }}
-            onFollowToggle={(expertId, isFollowing) => {
-              if (isFollowing) {
-                unfollowMutation.mutate(expertId);
-              } else {
-                followMutation.mutate(expertId);
-              }
-            }}
+    ({ item, index }: ListRenderItemInfo<Post>) => {
+      return (
+        <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(index)} style={{ flex: 1 }}>
+          {/* P2: AI Trend Insight - After 5th post */}
+          {index === 5 && (
+            <AITrendInsightCard
+              professionCategory={user?.sector?.code}
+              onTrendPress={trend => console.log('Trend pressed:', trend)}
+              onMorePress={() => console.log('More trends pressed')}
+            />
+          )}
+
+          {/* P2: Suggested Experts - After 10th post */}
+          {index === 10 && (
+            <SuggestedExpertsCarousel
+              onExpertPress={expertId => {
+                navigateToUserProfile(navigation as any, { userId: expertId });
+              }}
+              onFollowToggle={(expertId, isFollowing) => {
+                if (isFollowing) {
+                  unfollowMutation.mutate(expertId, {
+                    onSuccess: () => {
+                      showSuccess(toast, { trigger }, 'Takipten çıkıldı');
+                    },
+                    onError: () => {
+                      showUnfollowError(toast, { trigger }, () =>
+                        unfollowMutation.mutate(expertId),
+                      );
+                    },
+                  });
+                } else {
+                  followMutation.mutate(expertId, {
+                    onSuccess: () => {
+                      showSuccess(toast, { trigger }, 'Takip edildi');
+                    },
+                    onError: () => {
+                      showFollowError(toast, { trigger }, () => followMutation.mutate(expertId));
+                    },
+                  });
+                }
+              }}
+            />
+          )}
+
+          <PostCard
+            post={item}
+            onLike={handleLike}
+            onComment={handleComment}
+            onShare={handleShare}
+            onBookmark={handleBookmark}
+            onMenuPress={handleMenuPress}
           />
-        )}
-        <PostCard
-          post={item}
-          onLike={handleLike}
-          onComment={handleComment}
-          onShare={handleShare}
-          onBookmark={handleBookmark}
-          onMenuPress={handleMenuPress}
-        />
-      </>
-    ),
-    [handleLike, handleComment, handleShare, handleBookmark, handleMenuPress, navigation],
+        </Animated.View>
+      );
+    },
+    [
+      handleLike,
+      handleComment,
+      user?.sector?.code,
+      handleShare,
+      handleBookmark,
+      handleMenuPress,
+      navigation,
+      unfollowMutation,
+      followMutation,
+    ],
   );
 
   /**
@@ -293,56 +514,69 @@ export const FeedScreen: React.FC = memo(() => {
   const ListHeaderComponent = useMemo(() => {
     return (
       <>
-        <FeedHeader
-          sector={
-            user?.sector
+        <UnifiedScreenHeader
+          variant="feed"
+          showBackButton={false}
+          feedProps={{
+            sector: user?.sector
               ? {
                   name: user.sector.name,
                   code: user.sector.code,
                 }
-              : undefined
-          }
-          unreadNotifications={unreadCount || 0}
-          onSectorPress={() => console.log('Sector detail pressed')}
-          onNotificationPress={() => {
-            // @ts-expect-error - Notifications route navigation
-            navigation.navigate('Notifications');
+              : undefined,
+            unreadCount: unreadCount || 0,
+            onSectorPress: () => console.log('Sector detail pressed'),
+            onSearchPress: () => {
+              navigateToNewConversation(navigation as any);
+            },
+            onNotificationPress: () => {
+              navigateToNotifications(navigation as any);
+            },
           }}
         />
-        {/* Filter Bar - Separate from header per design spec */}
-        <FilterBar />
-        {/* Show verification prompt for unverified users */}
-        {user?.verificationStatus !== 'APPROVED' && (
+        {/* OPTIMIZED: Smart verification prompt (session-based, contextual) */}
+        {showVerificationPrompt && (
           <VerificationPromptCard
-            onPress={() => navigation.navigate('VerificationIntro' as never)}
+            onPress={handleStartVerification}
+            onDismiss={handleDismissVerificationPrompt}
           />
         )}
-        {/* Always show AI trend insights */}
-        <AITrendInsightCard
-          professionCategory={user?.sector?.code}
-          onTrendPress={trend => console.log('Trend pressed:', trend)}
-          onMorePress={() => console.log('More trends pressed')}
-        />
       </>
     );
-  }, [user, navigation]);
+  }, [user, navigation, showVerificationPrompt, handleDismissVerificationPrompt]);
 
   /**
-   * Empty state component
+   * Empty state component with smooth crossfade transition
    */
   const ListEmptyComponent = useMemo(() => {
+    // If timed out, show error state with retry
+    if (hasTimedOut) {
+      return (
+        <UnifiedEmptyState
+          icon="alert-circle-outline"
+          title="Yükleme Zaman Aşımı"
+          description="Gönderiler yüklenirken bir sorun oluştu. Lütfen tekrar deneyin."
+          primaryAction={{
+            label: 'Tekrar Dene',
+            onPress: retry,
+          }}
+        />
+      );
+    }
+
+    // Content-aware skeleton loading
     if (isLoading && posts.length === 0) {
-      return <FeedSkeleton count={3} showImages />;
+      return <SkeletonList count={5} ItemSkeleton={SkeletonPostCard} />;
     }
 
     return (
-      <EmptyFeed
-        title="Henüz gönderi yok"
-        message="Takip ettiğin kişilerin gönderilerini burada göreceksin."
+      <UnifiedEmptyState
         icon="newspaper-outline"
+        title="Henüz gönderi yok"
+        description="Takip ettiğin kişilerin gönderilerini burada göreceksin."
       />
     );
-  }, [isLoading, posts.length]);
+  }, [isLoading, posts.length, hasTimedOut, retry]);
 
   /**
    * Footer component - loading more indicator
@@ -351,7 +585,7 @@ export const FeedScreen: React.FC = memo(() => {
     if (!isFetchingNextPage) return null;
 
     return (
-      <Animated.View entering={FadeIn.duration(200)} style={styles.footer}>
+      <Animated.View entering={SCREEN_ANIMATIONS.quickFadeIn} style={styles.footer}>
         <ActivityIndicator size="small" color={colors.interactive.default} />
       </Animated.View>
     );
@@ -361,16 +595,8 @@ export const FeedScreen: React.FC = memo(() => {
    * Refresh control component
    */
   const refreshControl = useMemo(
-    () => (
-      <RefreshControl
-        refreshing={isRefetching}
-        onRefresh={handleRefresh}
-        tintColor={colors.interactive.default}
-        colors={[colors.interactive.default]}
-        progressBackgroundColor={colors.background.primary}
-      />
-    ),
-    [isRefetching, handleRefresh, colors],
+    () => <CustomRefreshControl refreshing={isRefetching} onRefresh={handleRefresh} />,
+    [isRefetching, handleRefresh],
   );
 
   // ============================================================================
@@ -381,7 +607,7 @@ export const FeedScreen: React.FC = memo(() => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top']}>
-      <Animated.View entering={FadeIn.duration(300)} style={styles.container}>
+      <Animated.View entering={SCREEN_ANIMATIONS.screenEnter} style={styles.container}>
         {/* FlashList for optimized performance */}
         <FlashList
           data={posts}
@@ -411,6 +637,33 @@ export const FeedScreen: React.FC = memo(() => {
           onClose={handleCloseActionSheet}
           options={actionSheetOptions}
         />
+
+        {/* Delete Confirmation Action Sheet */}
+        <ActionSheet
+          visible={showDeleteConfirm}
+          onClose={() => {
+            setShowDeleteConfirm(false);
+            setPostToDelete(null);
+          }}
+          title="Gönderiyi Sil"
+          message="Bu gönderiyi silmek istediğinize emin misiniz?"
+          options={[
+            {
+              id: 'delete',
+              label: 'Sil',
+              destructive: true,
+              onPress: handleConfirmDelete,
+            },
+            {
+              id: 'cancel',
+              label: 'İptal',
+              onPress: () => {
+                setShowDeleteConfirm(false);
+                setPostToDelete(null);
+              },
+            },
+          ]}
+        />
       </Animated.View>
     </SafeAreaView>
   );
@@ -430,12 +683,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 20,
   },
-  skeletonContainer: {
-    flex: 1,
-  },
-  skeletonItem: {
-    marginBottom: 16,
-  },
 });
 
-export default FeedScreen;
+// Wrap with Error Boundary for production safety
+import { ErrorBoundary } from '@core/components';
+
+export default function FeedScreenWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <FeedScreen />
+    </ErrorBoundary>
+  );
+}

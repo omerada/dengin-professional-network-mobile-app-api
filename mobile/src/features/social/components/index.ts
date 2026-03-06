@@ -2,3 +2,4 @@
 
 export { FollowButton } from './FollowButton';
 export { UserListItem } from './UserListItem';
+export { UserSkeleton } from './UserSkeleton';

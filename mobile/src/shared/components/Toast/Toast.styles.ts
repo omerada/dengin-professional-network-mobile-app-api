@@ -1,8 +1,9 @@
 // src/shared/components/Toast/Toast.styles.ts
-// Meslektaş Design System - Toast Styles
+// Dengin Design System - Toast Styles
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import { StyleSheet } from 'react-native';
+import { borderRadius } from '@theme';
 
 /**
  * Static toast styles
@@ -23,7 +24,7 @@ export const styles = StyleSheet.create({
 
   container: {
     alignItems: 'center',
-    borderRadius: 12,
+    borderRadius: borderRadius.lg,
     flexDirection: 'row',
     marginHorizontal: 16,
     overflow: 'hidden',

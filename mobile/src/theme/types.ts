@@ -1,5 +1,5 @@
 // src/theme/types.ts
-// Meslektaş Design System - TypeScript Type Definitions
+// Dengin Design System - TypeScript Type Definitions
 // Oku: mobile-development-guide/ui-ux-modernization/03-DESIGN-SYSTEM-OVERHAUL.md
 
 import { TextStyle, ViewStyle } from 'react-native';
@@ -30,15 +30,38 @@ export interface GrayColorScale extends ColorScale {
 }
 
 /**
- * Base Color Palette
+ * Slate Color Scale (0-950 dahil)
+ */
+export interface SlateColorScale extends ColorScale {
+  0: string;
+  950: string;
+}
+
+/**
+ * Base Color Palette - Anatolian Professional System
  */
 export interface ColorPalette {
-  blue: ColorScale;
-  green: ColorScale;
-  orange: ColorScale;
-  red: ColorScale;
-  gold: ColorScale;
-  gray: GrayColorScale;
+  // Main colors (Anatolian Professional)
+  terracotta: ColorScale; // Primary - Terracotta #DC582A (özgün)
+  slate: SlateColorScale; // Neutral - Slate (modern profesyonel)
+  emerald: ColorScale; // Success - Emerald (güven)
+  orange: ColorScale; // Warning - Orange
+  red: ColorScale; // Error - Red
+  violet: ColorScale; // Premium - Violet
+  sky: ColorScale; // Accent - Sky Blue (service)
+  rose: ColorScale; // Creative - Rose
+  amber: ColorScale; // Education - Amber
+  indigo: ColorScale; // Secondary - Sage Green (kept for compatibility)
+  // Legacy support (backward compatibility)
+  blue: ColorScale; // Old primary - maps to terracotta
+  green: ColorScale; // Old success - maps to emerald
+  purple: ColorScale; // Old premium - maps to violet
+  copper: ColorScale; // Old copper - maps to terracotta
+  ruby: ColorScale; // Old error - maps to red
+  gold: ColorScale; // Old premium - maps to violet
+  gray: SlateColorScale; // Old neutral - maps to slate
+  warmGray: SlateColorScale; // Old warm gray - maps to slate
+  teal: ColorScale; // Info/legacy - kept for compatibility
 }
 
 /**
@@ -50,6 +73,7 @@ export interface BackgroundColors {
   tertiary: string;
   elevated: string;
   overlay: string;
+  accent: string;
 }
 
 /**
@@ -62,6 +86,7 @@ export interface TextColors {
   disabled: string;
   inverse: string;
   link: string;
+  accent: string;
   error: string;
   success: string;
 }
@@ -96,15 +121,19 @@ export interface StatusColors {
   success: string;
   successBg: string;
   successBackground: string; // Alias for successBg
+  successBorder: string;
   warning: string;
   warningBg: string;
   warningBackground: string; // Alias for warningBg
+  warningBorder: string;
   error: string;
   errorBg: string;
   errorBackground: string; // Alias for errorBg
+  errorBorder: string;
   info: string;
   infoBg: string;
   infoBackground: string; // Alias for infoBg
+  infoBorder: string;
 }
 
 /**
@@ -115,15 +144,30 @@ export interface SpecialColors {
   premium: string;
   online: string;
   offline: string;
+  badge: string;
+}
+
+/**
+ * Surface Level Colors
+ */
+export interface SurfaceColors {
+  level0: string;
+  level1: string;
+  level2: string;
+  level3: string;
 }
 
 /**
  * Gradient Definitions
  */
 export interface GradientColors {
-  primary: readonly [string, string];
-  premium: readonly [string, string];
-  hero: readonly [string, string];
+  primary: readonly [string, string, string?];
+  secondary: readonly [string, string];
+  premium: readonly [string, string, string?];
+  hero: readonly [string, string, string?];
+  success: readonly [string, string];
+  surface: readonly [string, string];
+  overlay: readonly [string, string];
   dark: readonly [string, string];
   light: readonly [string, string];
 }
@@ -138,6 +182,7 @@ export interface ThemeColors {
   border: BorderColors;
   status: StatusColors;
   special: SpecialColors;
+  surface: SurfaceColors;
   gradient: GradientColors;
 }
 
@@ -381,6 +426,7 @@ export type HapticType =
  * Haptic Feedback Interface
  */
 export interface HapticFeedback {
+  // Core triggers
   trigger: (type: HapticType) => void;
   light: () => void;
   medium: () => void;
@@ -391,4 +437,11 @@ export interface HapticFeedback {
   selection: () => void;
   buttonPress: () => void;
   like: () => void;
+  // New shortcuts for complete UX coverage
+  checkbox: () => void; // For checkbox interactions
+  radio: () => void; // For radio button interactions
+  toggle: () => void; // For switch/toggle interactions
+  slider: () => void; // For slider interactions
+  longPress: () => void; // For long press gestures
+  contextMenu: () => void; // For context menu interactions
 }

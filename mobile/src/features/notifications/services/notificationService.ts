@@ -1,6 +1,6 @@
 // src/features/notifications/services/notificationService.ts
 // Notification API service - Backend API'sine %100 uyumlu
-// Backend: com.meslektas.notification.api.NotificationController
+// Backend: com.dengin.notification.api.NotificationController
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 import { apiClient } from '@core/api/client';

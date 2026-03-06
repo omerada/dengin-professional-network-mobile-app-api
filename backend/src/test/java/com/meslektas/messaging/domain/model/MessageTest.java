@@ -1,6 +1,6 @@
-package com.meslektas.messaging.domain.model;
+package com.dengin.messaging.domain.model;
 
-import org.junit.jupiter.api.BeforeEach;
+import com.dengin.messaging.domain.model.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

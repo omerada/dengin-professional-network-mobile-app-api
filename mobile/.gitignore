@@ -30,6 +30,12 @@ yarn-error.*
 # Local env files
 .env*.local
 .env
+.env.test
+.env.production
+
+# Firebase credentials (sensitive)
+android/app/google-services.json
+ios/GoogleService-Info.plist
 
 # TypeScript
 *.tsbuildinfo

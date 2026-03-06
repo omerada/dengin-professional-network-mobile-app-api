@@ -1,5 +1,6 @@
-package com.meslektas.shared.infrastructure.web;
+package com.dengin.shared.infrastructure.web;
 
+import com.dengin.shared.infrastructure.web.ApiResponseHeadersFilter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -38,7 +39,7 @@ class ApiResponseHeadersFilterTest {
     void setUp() {
         filter = new ApiResponseHeadersFilter();
         ReflectionTestUtils.setField(filter, "apiVersion", "v1");
-        ReflectionTestUtils.setField(filter, "applicationName", "meslektas");
+        ReflectionTestUtils.setField(filter, "applicationName", "dengin");
     }
 
     @Nested

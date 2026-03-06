@@ -1,5 +1,5 @@
 // src/shared/services/HapticService.ts
-// Meslektaş Design System - Haptic Feedback Service
+// Dengin Design System - Haptic Feedback Service
 // Oku: mobile-development-guide/ui-ux-modernization/16-HAPTIC-FEEDBACK.md
 
 import { Platform } from 'react-native';

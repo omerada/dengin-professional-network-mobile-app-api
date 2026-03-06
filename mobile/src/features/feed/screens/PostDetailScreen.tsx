@@ -2,19 +2,16 @@
 // Post detay ekranı - Backend API uyumlu
 // Oku: mobile-development-guide/sprints/25-SPRINT-5-6.md
 
-import React, { useCallback, useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator,
-  RefreshControl,
-  Alert,
-} from 'react-native';
+import React, { useCallback, useState, useMemo } from 'react';
+import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { SAFE_AREA_EDGES } from '@constants';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
+import { useSemanticHaptic, useHaptic } from '@shared/hooks';
+import { spacing } from '@theme';
 import { useAuthStore } from '@features/auth/stores';
 import {
   usePost,
@@ -25,16 +22,21 @@ import {
   useLikeComment,
   useDeletePost,
 } from '../hooks';
-import { ActionSheet, ActionSheetOption } from '@shared/components';
-import { sharePost } from '@shared/utils/share';
+import {
+  ActionSheet,
+  ActionSheetOption,
+  UnifiedLoadingState,
+  UnifiedEmptyState,
+} from '@shared/components';
+import { sharePost, showSuccess, showError, showInfo } from '@shared/utils';
 import {
   PostHeader,
   PostContent,
   PostImages,
   PostActions,
   CommentCard,
+  CommentListSkeleton,
   AddCommentForm,
-  EmptyFeed,
 } from '../components';
 import type { FeedStackParamList } from '@shared/types';
 import type { Comment } from '../types';
@@ -44,6 +46,9 @@ type PostDetailNavigationProp = NativeStackNavigationProp<FeedStackParamList, 'P
 
 export const PostDetailScreen: React.FC = () => {
   const colors = useColors();
+  const toast = useToast();
+  const { trigger } = useHaptic();
+  const { triggerContent, triggerSystem } = useSemanticHaptic();
   const navigation = useNavigation<PostDetailNavigationProp>();
   const route = useRoute<PostDetailRouteProp>();
   const { postId } = route.params; // postId: number
@@ -97,6 +102,11 @@ export const PostDetailScreen: React.FC = () => {
     }
   }, [bookmarkPost, post]);
 
+  const handleRefresh = useCallback(() => {
+    triggerContent('refresh');
+    refetch();
+  }, [refetch, triggerContent]);
+
   const handleMenuPress = useCallback(() => {
     setShowActionSheet(true);
   }, []);
@@ -141,6 +151,24 @@ export const PostDetailScreen: React.FC = () => {
     [addComment, postId],
   );
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Delete confirmation handler
+  const handleDeleteConfirm = useCallback(() => {
+    if (!post) return;
+    triggerSystem('confirm');
+    deletePost.mutate(post.id, {
+      onSuccess: () => {
+        showSuccess(toast, { trigger }, 'Gönderi silindi');
+        navigation.goBack();
+      },
+      onError: () => {
+        showError(toast, { trigger }, 'Gönderi silinemedi');
+      },
+    });
+    setShowDeleteConfirm(false);
+  }, [post, deletePost, triggerSystem, toast, navigation]);
+
   // Action Sheet Options
   const getActionSheetOptions = useCallback((): ActionSheetOption[] => {
     if (!post) return [];
@@ -155,14 +183,9 @@ export const PostDetailScreen: React.FC = () => {
         icon: 'trash-outline',
         destructive: true,
         onPress: () => {
-          Alert.alert('Gönderiyi Sil', 'Bu gönderiyi silmek istediğinize emin misiniz?', [
-            { text: 'İptal', style: 'cancel' },
-            {
-              text: 'Sil',
-              style: 'destructive',
-              onPress: () => deletePost.mutate(post.id),
-            },
-          ]);
+          triggerSystem('alert');
+          setShowDeleteConfirm(true);
+          setShowActionSheet(false);
         },
       });
     } else {
@@ -172,8 +195,8 @@ export const PostDetailScreen: React.FC = () => {
           label: 'Gönderiyi Şikayet Et',
           icon: 'flag-outline',
           onPress: () => {
-            // Report screen not in FeedStackParamList - show alert instead
-            Alert.alert('Şikayet', 'Gönderi şikayet edildi.');
+            showSuccess(toast, { trigger }, 'Gönderi şikayet edildi');
+            setShowActionSheet(false);
           },
         },
         {
@@ -181,21 +204,35 @@ export const PostDetailScreen: React.FC = () => {
           label: 'Bu Gönderiyi Gizle',
           icon: 'eye-off-outline',
           onPress: () => {
-            Alert.alert('Bilgi', 'Bu gönderi artık akışınızda görünmeyecek.');
+            showInfo(toast, { trigger }, 'Bu gönderi artık akışınızda görünmeyecek');
+            setShowActionSheet(false);
           },
         },
       );
     }
 
     return options;
-  }, [post, currentUserId, deletePost]);
+  }, [post, currentUserId, triggerSystem, toast]);
+
+  const refreshControl = useMemo(
+    () => (
+      <RefreshControl
+        refreshing={isRefetching}
+        onRefresh={handleRefresh}
+        tintColor={colors.interactive.default}
+        colors={[colors.interactive.default]}
+        progressBackgroundColor={colors.background.primary}
+      />
+    ),
+    [isRefetching, handleRefresh, colors],
+  );
 
   if (isLoading || !post) {
     return (
       <SafeAreaView
-        style={[styles.loadingContainer, { backgroundColor: colors.background.primary }]}
+        style={[styles.container, { backgroundColor: colors.background.primary }]}
         edges={['bottom']}>
-        <ActivityIndicator size="large" color={colors.interactive.default} />
+        <UnifiedLoadingState strategy="spinner" message="Yükleniyor..." variant="screen" />
       </SafeAreaView>
     );
   }
@@ -203,16 +240,10 @@ export const PostDetailScreen: React.FC = () => {
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
-      edges={['bottom']}>
+      edges={SAFE_AREA_EDGES.standard}>
       <ScrollView
         style={styles.scrollView}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefetching}
-            onRefresh={refetch}
-            tintColor={colors.interactive.default}
-          />
-        }
+        refreshControl={refreshControl}
         showsVerticalScrollIndicator={false}>
         {/* Post */}
         <View style={styles.postContainer}>
@@ -248,17 +279,15 @@ export const PostDetailScreen: React.FC = () => {
         {/* Divider */}
         <View style={[styles.divider, { backgroundColor: colors.border.default }]} />
 
-        {/* Comments */}
+        {/* Comments - P3: Skeleton loader for consistent UX */}
         <View style={styles.commentsContainer}>
           {commentsLoading ? (
-            <View style={styles.commentsLoading}>
-              <ActivityIndicator size="small" color={colors.interactive.default} />
-            </View>
+            <CommentListSkeleton count={3} />
           ) : comments.length === 0 ? (
-            <EmptyFeed
-              title="Henüz yorum yok"
-              message="İlk yorumu siz yapın!"
+            <UnifiedEmptyState
               icon="chatbubble-outline"
+              title="Henüz yorum yok"
+              description="İlk yorumu siz yapın!"
             />
           ) : (
             comments.map((comment: Comment) => (
@@ -290,34 +319,46 @@ export const PostDetailScreen: React.FC = () => {
         options={getActionSheetOptions()}
         title="Gönderi Seçenekleri"
       />
+
+      {/* Delete Confirmation ActionSheet */}
+      <ActionSheet
+        visible={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        title="Gönderiyi Sil"
+        message="Bu gönderiyi silmek istediğinize emin misiniz?"
+        options={[
+          {
+            id: 'delete',
+            label: 'Sil',
+            destructive: true,
+            onPress: handleDeleteConfirm,
+          },
+          {
+            id: 'cancel',
+            label: 'İptal',
+            onPress: () => setShowDeleteConfirm(false),
+          },
+        ]}
+      />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  commentsContainer: {
+    paddingBottom: 16,
+  },
   container: {
     flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  postContainer: {
-    paddingTop: 12,
   },
   divider: {
     height: 8,
     marginVertical: 8,
   },
-  commentsContainer: {
-    paddingBottom: 16,
+  postContainer: {
+    paddingTop: spacing.md, // 12
   },
-  commentsLoading: {
-    padding: 24,
-    alignItems: 'center',
+  scrollView: {
+    flex: 1,
   },
 });

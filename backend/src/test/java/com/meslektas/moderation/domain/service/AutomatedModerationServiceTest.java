@@ -1,7 +1,8 @@
-package com.meslektas.moderation.domain.service;
+package com.dengin.moderation.domain.service;
 
-import com.meslektas.moderation.domain.model.ModerationScore;
-import com.meslektas.moderation.domain.model.RiskLevel;
+import com.dengin.moderation.domain.model.ModerationScore;
+import com.dengin.moderation.domain.model.RiskLevel;
+import com.dengin.moderation.domain.service.AutomatedModerationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

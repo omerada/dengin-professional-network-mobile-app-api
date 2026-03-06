@@ -10,16 +10,11 @@ export const styles = StyleSheet.create({
   },
 
   header: {
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
     marginBottom: 12,
-  },
-
-  title: {
-    fontSize: 16,
-    fontWeight: '700',
+    paddingHorizontal: 16,
   },
 
   scrollView: {
@@ -28,5 +23,10 @@ export const styles = StyleSheet.create({
 
   scrollViewContent: {
     paddingRight: 16,
+  },
+
+  title: {
+    fontSize: 16,
+    fontWeight: '700',
   },
 });

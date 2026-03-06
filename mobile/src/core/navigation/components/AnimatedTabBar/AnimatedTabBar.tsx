@@ -1,5 +1,5 @@
 // src/core/navigation/components/AnimatedTabBar/AnimatedTabBar.tsx
-// Meslektaş Design System - Modern AnimatedTabBar Component
+// Dengin Design System - Modern AnimatedTabBar Component
 // Oku: mobile-development-guide/ui-ux-modernization/06-MICRO-INTERACTIONS.md
 
 import React, { memo, useCallback, useEffect } from 'react';
@@ -16,8 +16,8 @@ import Animated, {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
 import { spring } from '@theme/animations';
+import { PRESS_ANIMATION_CONFIG } from '@constants/unifiedGestures';
 import { styles, TAB_ICON_SIZE, CENTER_FAB_ICON_SIZE } from './AnimatedTabBar.styles';
 import type { AnimatedTabBarProps, TabButtonProps } from './AnimatedTabBar.types';
 
@@ -29,7 +29,6 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const TabButton: React.FC<TabButtonProps> = memo(({ item, focused, onPress, onLongPress }) => {
   const colors = useColors();
-  const { trigger } = useHaptic();
 
   // Determine if this is the center FAB
   const isCenterFab = item.isCenterFab ?? false;
@@ -42,27 +41,28 @@ const TabButton: React.FC<TabButtonProps> = memo(({ item, focused, onPress, onLo
   useEffect(() => {
     focusProgress.value = withSpring(focused ? 1 : 0, spring.snappy);
 
-    if (focused && !isCenterFab) {
-      // Very subtle bounce when focused - reduced animation (normal tabs only)
-      scale.value = withSequence(
-        withSpring(1.05, { damping: 10, stiffness: 300 }),
-        withSpring(1, { damping: 15, stiffness: 250 }),
-      );
+    if (focused) {
+      // Subtle scale animation - consistent for all tabs
+      scale.value = withSpring(1.02, spring.gentle);
+    } else {
+      scale.value = withSpring(1, spring.gentle);
     }
-  }, [focused, focusProgress, scale, isCenterFab]);
+  }, [focused, focusProgress, scale]);
 
-  // Handle press
+  // Handle press - PRODUCTION STANDARD: Unified press animation
   const handlePress = useCallback(() => {
-    trigger('selection');
-    scale.value = withSequence(withSpring(0.92, spring.press), withSpring(1, spring.snappy));
+    const config = PRESS_ANIMATION_CONFIG.STANDARD;
+    scale.value = withSequence(
+      withSpring(config.scale, config.spring),
+      withSpring(1, spring.snappy),
+    );
     onPress();
-  }, [onPress, trigger, scale]);
+  }, [onPress, scale]);
 
   // Handle long press
   const handleLongPress = useCallback(() => {
-    trigger('heavy');
     onLongPress();
-  }, [onLongPress, trigger]);
+  }, [onLongPress]);
 
   // Animated styles
   const containerStyle = useAnimatedStyle(() => ({
@@ -73,7 +73,7 @@ const TabButton: React.FC<TabButtonProps> = memo(({ item, focused, onPress, onLo
     backgroundColor: interpolateColor(
       focusProgress.value,
       [0, 1],
-      ['transparent', colors.interactive.focus],
+      ['transparent', colors.interactive.subtle],
     ),
   }));
 
@@ -81,19 +81,20 @@ const TabButton: React.FC<TabButtonProps> = memo(({ item, focused, onPress, onLo
     color: interpolateColor(
       focusProgress.value,
       [0, 1],
-      [colors.text.tertiary, colors.interactive.default],
+      [colors.text.secondary, colors.interactive.default],
     ),
-    opacity: 0.7 + focusProgress.value * 0.3,
+    opacity: 0.8 + focusProgress.value * 0.2,
   }));
 
-  const iconColor = focused ? colors.interactive.default : colors.text.tertiary;
+  // FAB container style - always define hooks at top level
+  const fabContainerStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const iconColor = focused ? colors.interactive.default : colors.text.secondary;
 
   // Center FAB rendering (elevated button)
   if (isCenterFab) {
-    const fabContainerStyle = useAnimatedStyle(() => ({
-      transform: [{ scale: scale.value }],
-    }));
-
     return (
       <View style={styles.centerFabContainer}>
         <AnimatedPressable

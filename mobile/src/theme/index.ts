@@ -1,5 +1,5 @@
 // src/theme/index.ts
-// Meslektaş Design System - Unified Exports
+// Dengin Design System - Unified Exports
 // Oku: mobile-development-guide/ui-ux-modernization/03-DESIGN-SYSTEM-OVERHAUL.md
 
 // Types
@@ -107,6 +107,8 @@ export const dark: Theme = {
   isDark: true,
 };
 
+import { duration, spring, easing } from './animations';
+
 /**
  * Default export for convenience
  */
@@ -117,8 +119,8 @@ export default {
   spacing,
   shadows,
   animations: {
-    duration: require('./animations').duration,
-    spring: require('./animations').spring,
-    easing: require('./animations').easing,
+    duration,
+    spring,
+    easing,
   },
 };

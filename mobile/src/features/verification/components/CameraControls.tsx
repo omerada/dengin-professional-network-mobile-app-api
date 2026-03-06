@@ -3,9 +3,10 @@
 // Oku: mobile-development-guide/sprints/24-SPRINT-3-4.md
 
 import React, { memo, useCallback } from 'react';
-import { StyleSheet, View, TouchableOpacity, Text, ViewStyle } from 'react-native';
+import { StyleSheet, View, Text, ViewStyle } from 'react-native';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing } from '@theme';
+import { PressableScale } from '@shared/components';
 import type { CameraSettings } from '../types';
 
 /**
@@ -77,13 +78,16 @@ export const CameraControls: React.FC<CameraControlsProps> = memo(
         {/* Sol kontroller */}
         <View style={styles.leftControls}>
           {showGallery && (
-            <TouchableOpacity
-              style={[styles.controlButton, { backgroundColor: colors.background.secondary }]}
+            <PressableScale
               onPress={onSelectFromGallery}
+              hapticType="light"
               accessibilityRole="button"
               accessibilityLabel="Galeriden seç">
-              <Text style={styles.controlIcon}>🖼️</Text>
-            </TouchableOpacity>
+              <View
+                style={[styles.controlButton, { backgroundColor: colors.background.secondary }]}>
+                <Text style={styles.controlIcon}>🖼️</Text>
+              </View>
+            </PressableScale>
           )}
         </View>
 
@@ -93,33 +97,39 @@ export const CameraControls: React.FC<CameraControlsProps> = memo(
         {/* Sağ kontroller */}
         <View style={styles.rightControls}>
           {/* Flaş butonu */}
-          <TouchableOpacity
-            style={[
-              styles.controlButton,
-              {
-                backgroundColor:
-                  settings.flash === 'on'
-                    ? colors.interactive.default
-                    : colors.background.secondary,
-              },
-            ]}
+          <PressableScale
             onPress={handleFlashToggle}
+            hapticType="light"
             accessibilityRole="button"
             accessibilityLabel={`Flaş: ${FLASH_LABELS[settings.flash]}`}>
-            <Text style={[styles.controlIcon, settings.flash === 'off' && styles.flashOff]}>
-              {FLASH_ICONS[settings.flash]}
-            </Text>
-          </TouchableOpacity>
+            <View
+              style={[
+                styles.controlButton,
+                {
+                  backgroundColor:
+                    settings.flash === 'on'
+                      ? colors.interactive.default
+                      : colors.background.secondary,
+                },
+              ]}>
+              <Text style={[styles.controlIcon, settings.flash === 'off' && styles.flashOff]}>
+                {FLASH_ICONS[settings.flash]}
+              </Text>
+            </View>
+          </PressableScale>
 
           {/* Kamera çevirme butonu */}
           {showFlip && onFlipCamera && (
-            <TouchableOpacity
-              style={[styles.controlButton, { backgroundColor: colors.background.secondary }]}
+            <PressableScale
               onPress={onFlipCamera}
+              hapticType="light"
               accessibilityRole="button"
               accessibilityLabel="Kamerayı çevir">
-              <Text style={styles.controlIcon}>🔄</Text>
-            </TouchableOpacity>
+              <View
+                style={[styles.controlButton, { backgroundColor: colors.background.secondary }]}>
+                <Text style={styles.controlIcon}>🔄</Text>
+              </View>
+            </PressableScale>
           )}
         </View>
       </View>
@@ -130,40 +140,40 @@ export const CameraControls: React.FC<CameraControlsProps> = memo(
 CameraControls.displayName = 'CameraControls';
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-  },
-  leftControls: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    gap: spacing.md,
-  },
   centerSpace: {
     flex: 1,
   },
-  rightControls: {
-    flex: 1,
+  container: {
+    alignItems: 'center',
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: spacing.md,
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
   },
   controlButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
     alignItems: 'center',
+    borderRadius: 24,
+    height: 48,
     justifyContent: 'center',
+    width: 48,
   },
   controlIcon: {
     fontSize: 20,
   },
   flashOff: {
     opacity: 0.5,
+  },
+  leftControls: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: spacing.md,
+    justifyContent: 'flex-start',
+  },
+  rightControls: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: spacing.md,
+    justifyContent: 'flex-end',
   },
 });
 

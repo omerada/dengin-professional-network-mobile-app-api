@@ -22,8 +22,8 @@ jest.mock('@contexts/ThemeContext', () => ({
     colors: {
       background: { primary: '#FFFFFF' },
       text: { primary: '#000000', secondary: '#666666' },
-      interactive: { default: '#0066FF' },
-      status: { error: '#FF3B30' },
+      interactive: { default: '#F59E42' },
+      status: { error: '#EF4444' },
     },
   }),
 }));

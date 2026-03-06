@@ -3,19 +3,19 @@
 // Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
 
 import React, { memo, useCallback, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
 import { useColors } from '@contexts/ThemeContext';
+import { useToast } from '@contexts/ToastContext';
+import { ActionSheet } from '@shared/components';
 import { spacing, fontSize } from '@theme';
+import { useSemanticHaptic, useHaptic } from '@shared/hooks';
+import {
+  showCameraPermissionError,
+  showGalleryPermissionError,
+  showOperationError,
+} from '@shared/utils';
 
 interface AvatarPickerProps {
   /**
@@ -58,6 +58,11 @@ interface AvatarPickerProps {
 export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
   ({ currentAvatarUrl, fullName, onImageSelected, onRemove, isLoading = false, size = 120 }) => {
     const colors = useColors();
+    const toast = useToast();
+    const { trigger } = useHaptic();
+    const { triggerMedia, triggerSystem } = useSemanticHaptic();
+    const [showActionSheet, setShowActionSheet] = useState(false);
+    const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
     const [previewUri, setPreviewUri] = useState<string | null>(null);
 
     // Generate initials from full name
@@ -76,12 +81,9 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
       try {
         // Request camera permission
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
-        
+
         if (status !== 'granted') {
-          Alert.alert(
-            'İzin Gerekli',
-            'Fotoğraf çekmek için kamera iznine ihtiyacımız var.'
-          );
+          showCameraPermissionError(toast, { trigger });
           return;
         }
 
@@ -95,24 +97,22 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
           const uri = result.assets[0].uri;
           setPreviewUri(uri);
           onImageSelected(uri);
+          triggerMedia('capture');
         }
       } catch (error) {
         console.error('[AvatarPicker] Camera error:', error);
-        Alert.alert('Hata', 'Kamera açılırken bir hata oluştu.');
+        showOperationError(toast, { trigger }, 'Kamera açılırken bir hata oluştu.');
       }
-    }, [onImageSelected]);
+    }, [onImageSelected, triggerMedia, trigger]);
 
     // Open gallery
     const handleChooseFromGallery = useCallback(async () => {
       try {
         // Request media library permission
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        
+
         if (status !== 'granted') {
-          Alert.alert(
-            'İzin Gerekli',
-            'Galeriden fotoğraf seçmek için medya kütüphanesi iznine ihtiyacımız var.'
-          );
+          showGalleryPermissionError(toast, { trigger });
           return;
         }
 
@@ -126,51 +126,32 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
           const uri = result.assets[0].uri;
           setPreviewUri(uri);
           onImageSelected(uri);
+          triggerMedia('capture');
         }
       } catch (error) {
         console.error('[AvatarPicker] Gallery error:', error);
-        Alert.alert('Hata', 'Galeri açılırken bir hata oluştu.');
+        showOperationError(toast, { trigger }, 'Galeri açılırken bir hata oluştu.');
       }
-    }, [onImageSelected]);
+    }, [onImageSelected, triggerMedia, triggerSystem]);
 
     // Remove avatar
     const handleRemove = useCallback(() => {
-      Alert.alert('Fotoğrafı Kaldır', 'Profil fotoğrafınızı kaldırmak istediğinize emin misiniz?', [
-        { text: 'İptal', style: 'cancel' },
-        {
-          text: 'Kaldır',
-          style: 'destructive',
-          onPress: () => {
-            setPreviewUri(null);
-            onRemove?.();
-          },
-        },
-      ]);
-    }, [onRemove]);
+      triggerSystem('alert');
+      setShowRemoveConfirm(true);
+    }, [triggerSystem]);
+
+    const confirmRemove = useCallback(() => {
+      setPreviewUri(null);
+      onRemove?.();
+      triggerSystem('success');
+      setShowRemoveConfirm(false);
+    }, [onRemove, triggerSystem]);
 
     // Show options
     const handlePress = useCallback(() => {
-      const options: {
-        text: string;
-        onPress?: () => void;
-        style?: 'cancel' | 'destructive' | 'default';
-      }[] = [
-        { text: 'Fotoğraf Çek', onPress: handleTakePhoto },
-        { text: 'Galeriden Seç', onPress: handleChooseFromGallery },
-      ];
-
-      if (displayUri && onRemove) {
-        options.push({
-          text: 'Fotoğrafı Kaldır',
-          style: 'destructive',
-          onPress: handleRemove,
-        });
-      }
-
-      options.push({ text: 'İptal', style: 'cancel' });
-
-      Alert.alert('Profil Fotoğrafı', 'Bir seçenek seçin', options);
-    }, [displayUri, handleTakePhoto, handleChooseFromGallery, handleRemove, onRemove]);
+      triggerMedia('select');
+      setShowActionSheet(true);
+    }, [triggerMedia]);
 
     return (
       <View style={styles.container}>
@@ -224,11 +205,11 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
               },
             ]}>
             {isLoading ? (
-              <ActivityIndicator color="#FFFFFF" size="large" />
+              <ActivityIndicator color={colors.text.inverse} size="large" />
             ) : (
               <>
-                <Icon name="camera" size={24} color="#FFFFFF" />
-                <Text style={styles.overlayText}>Değiştir</Text>
+                <Icon name="camera" size={24} color={colors.text.inverse} />
+                <Text style={[styles.overlayText, { color: colors.text.inverse }]}>Değiştir</Text>
               </>
             )}
           </View>
@@ -237,6 +218,65 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
         <Text style={[styles.hint, { color: colors.text.secondary }]}>
           Profil fotoğrafı eklemek için dokunun
         </Text>
+
+        {/* Avatar options ActionSheet */}
+        <ActionSheet
+          visible={showActionSheet}
+          onClose={() => setShowActionSheet(false)}
+          title="Profil Fotoğrafı"
+          message="Bir seçenek seçin"
+          options={[
+            {
+              id: 'take-photo',
+              label: 'Fotoğraf Çek',
+              icon: 'camera',
+              onPress: () => {
+                setShowActionSheet(false);
+                handleTakePhoto();
+              },
+            },
+            {
+              id: 'choose-gallery',
+              label: 'Galeriden Seç',
+              icon: 'images',
+              onPress: () => {
+                setShowActionSheet(false);
+                handleChooseFromGallery();
+              },
+            },
+            ...(displayUri && onRemove
+              ? [
+                  {
+                    id: 'remove-photo',
+                    label: 'Fotoğrafı Kaldır',
+                    icon: 'trash',
+                    destructive: true,
+                    onPress: () => {
+                      setShowActionSheet(false);
+                      handleRemove();
+                    },
+                  },
+                ]
+              : []),
+          ]}
+        />
+
+        {/* Remove confirmation ActionSheet */}
+        <ActionSheet
+          visible={showRemoveConfirm}
+          onClose={() => setShowRemoveConfirm(false)}
+          title="Fotoğrafı Kaldır"
+          message="Profil fotoğrafınızı kaldırmak istediğinize emin misiniz?"
+          options={[
+            {
+              id: 'confirm-remove',
+              label: 'Kaldır',
+              destructive: true,
+              onPress: confirmRemove,
+            },
+          ]}
+          cancelLabel="İptal"
+        />
       </View>
     );
   },
@@ -245,37 +285,36 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = memo(
 AvatarPicker.displayName = 'AvatarPicker';
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    paddingVertical: spacing.lg,
+  avatar: {
+    borderWidth: 3,
   },
   avatarContainer: {
     position: 'relative',
   },
-  avatar: {
-    borderWidth: 3,
-  },
   avatarPlaceholder: {
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  container: {
+    alignItems: 'center',
+    paddingVertical: spacing.lg,
+  },
+  hint: {
+    fontSize: fontSize.sm,
+    marginTop: spacing.sm,
   },
   initials: {
     fontWeight: '700',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
     opacity: 0.7,
   },
   overlayText: {
-    color: '#FFFFFF',
     fontSize: fontSize.xs,
     fontWeight: '600',
     marginTop: 2,
-  },
-  hint: {
-    fontSize: fontSize.sm,
-    marginTop: spacing.sm,
   },
 });

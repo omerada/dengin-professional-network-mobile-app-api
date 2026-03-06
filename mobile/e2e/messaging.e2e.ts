@@ -8,10 +8,10 @@ describe('Messaging Module', () => {
   beforeAll(async () => {
     await device.launchApp({ newInstance: true });
     // Login as test user
-    await element(by.id('email-input')).typeText('test@meslektas.com');
+    await element(by.id('email-input')).typeText('test@dengin.com');
     await element(by.id('password-input')).typeText('Test123!');
     await element(by.id('login-button')).tap();
-    
+
     // Wait for main screen
     await waitFor(element(by.id('main-tab-bar')))
       .toBeVisible()
@@ -250,7 +250,7 @@ describe('Messaging Module', () => {
 
     it('should show online status', async () => {
       await element(by.id('conversation-item-0')).tap();
-      
+
       // If user is online, should show indicator
       // await expect(element(by.id('online-indicator'))).toBeVisible();
     });
@@ -269,7 +269,7 @@ describe('Messaging Module', () => {
 
     it('should queue messages when offline', async () => {
       await element(by.id('conversation-item-0')).tap();
-      
+
       // Disable network
       await device.setURLBlacklist(['.*']);
 
@@ -298,10 +298,10 @@ describe('Messaging Module', () => {
     it('should support keyboard navigation', async () => {
       // Focus on search input
       await element(by.id('conversation-search')).tap();
-      
+
       // Type and submit
       await element(by.id('conversation-search')).typeText('Test');
-      
+
       // Should filter results
       await waitFor(element(by.text('Test')))
         .toBeVisible()

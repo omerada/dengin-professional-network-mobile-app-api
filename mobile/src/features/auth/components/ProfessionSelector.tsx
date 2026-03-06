@@ -306,155 +306,15 @@ export const ProfessionSelector: React.FC<ProfessionSelectorProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: spacing.md,
-  },
-  labelContainer: {
-    marginBottom: spacing.xs,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  selector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    borderRadius: 12,
-    borderWidth: 1,
-    minHeight: 56,
-  },
-  selectedIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: spacing.sm,
-  },
-  selectorText: {
-    flex: 1,
-    fontSize: 16,
-  },
-  errorText: {
-    fontSize: 12,
-    marginTop: spacing.xs,
-  },
-  hint: {
-    fontSize: 12,
-    marginTop: spacing.xs,
-  },
-  infoBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing.sm,
-    borderRadius: 8,
-    marginTop: spacing.sm,
-  },
-  infoText: {
-    fontSize: 13,
-    marginLeft: spacing.xs,
-    flex: 1,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: MODAL_OVERLAY_COLOR,
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingBottom: spacing.xl,
-    maxHeight: '80%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.md,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    marginLeft: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-  listContent: {
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.md,
-  },
-  professionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing.md,
-    borderRadius: 12,
-    marginBottom: spacing.sm,
-    borderWidth: 1,
-  },
-  professionContent: {
-    flex: 1,
-  },
-  professionName: {
-    fontSize: 16,
-    marginBottom: spacing.xs,
-  },
-  professionDescription: {
-    fontSize: 13,
-    marginTop: spacing.xs,
-  },
-  verificationBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginTop: spacing.xs,
-  },
   badgeText: {
     fontSize: 11,
     fontWeight: '600',
     marginLeft: 4,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: spacing['2xl'],
+  container: {
+    marginBottom: spacing.md,
   },
-  loadingText: {
-    fontSize: 14,
-    marginTop: spacing.md,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: spacing['2xl'],
-  },
-  errorTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: spacing.md,
-  },
-  errorMessage: {
+  emptyMessage: {
     fontSize: 14,
     marginTop: spacing.xs,
   },
@@ -467,8 +327,148 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: spacing.md,
   },
-  emptyMessage: {
+  errorContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    paddingVertical: spacing['2xl'],
+  },
+  errorMessage: {
     fontSize: 14,
     marginTop: spacing.xs,
+  },
+  errorText: {
+    fontSize: 12,
+    marginTop: spacing.xs,
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: spacing.md,
+  },
+  hint: {
+    fontSize: 12,
+    marginTop: spacing.xs,
+  },
+  infoBox: {
+    alignItems: 'center',
+    borderRadius: 8,
+    flexDirection: 'row',
+    marginTop: spacing.sm,
+    padding: spacing.sm,
+  },
+  infoText: {
+    flex: 1,
+    fontSize: 13,
+    marginLeft: spacing.xs,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  labelContainer: {
+    marginBottom: spacing.xs,
+  },
+  listContent: {
+    paddingBottom: spacing.md,
+    paddingHorizontal: spacing.lg,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    paddingVertical: spacing['2xl'],
+  },
+  loadingText: {
+    fontSize: 14,
+    marginTop: spacing.md,
+  },
+  modalContent: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '80%',
+    paddingBottom: spacing.xl,
+  },
+  modalHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingBottom: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+  },
+  modalOverlay: {
+    backgroundColor: MODAL_OVERLAY_COLOR,
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  professionContent: {
+    flex: 1,
+  },
+  professionDescription: {
+    fontSize: 13,
+    marginTop: spacing.xs,
+  },
+  professionItem: {
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: 'row',
+    marginBottom: spacing.sm,
+    padding: spacing.md,
+  },
+  professionName: {
+    fontSize: 16,
+    marginBottom: spacing.xs,
+  },
+  searchContainer: {
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: 'row',
+    marginBottom: spacing.md,
+    marginHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    marginLeft: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  selectedIconContainer: {
+    alignItems: 'center',
+    borderRadius: 20,
+    height: 40,
+    justifyContent: 'center',
+    marginRight: spacing.sm,
+    width: 40,
+  },
+  selector: {
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: 'row',
+    minHeight: 56,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+  },
+  selectorText: {
+    flex: 1,
+    fontSize: 16,
+  },
+  verificationBadge: {
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    borderRadius: 12,
+    flexDirection: 'row',
+    marginTop: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
   },
 });

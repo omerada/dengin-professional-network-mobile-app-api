@@ -1,9 +1,13 @@
 // src/features/profile/services/profileApi.ts
 // Backend UserController, UserProfileController ile %100 uyumlu
-// Oku: backend/src/main/java/com/meslektas/identity/api/UserController.java
-// Oku: backend/src/main/java/com/meslektas/identity/api/UserProfileController.java
+// Oku: backend/src/main/java/com/dengin/identity/api/UserController.java
+// Oku: backend/src/main/java/com/dengin/identity/api/UserProfileController.java
 
 import { apiClient, API_ENDPOINTS } from '@core/api';
+import {
+  imageOptimizationService,
+  IMAGE_OPTIMIZATION_PRESETS,
+} from '@shared/services/imageOptimizationService';
 import type {
   MyProfileResponse,
   ProfileResponse,
@@ -79,13 +83,15 @@ export const profileApi = {
 
   /**
    * POST /api/users/me/avatar (DEPRECATED - multipart upload)
-   * 
+   *
    * @deprecated Use uploadAvatarWithPresignedUrl() instead (presigned URL pattern)
    * This method will be removed in future versions.
    */
   uploadAvatar: async (imageUri: string): Promise<AvatarUploadResponse> => {
-    console.warn('DEPRECATED: uploadAvatar with multipart. Use uploadAvatarWithPresignedUrl instead.');
-    
+    console.warn(
+      'DEPRECATED: uploadAvatar with multipart. Use uploadAvatarWithPresignedUrl instead.',
+    );
+
     const formData = new FormData();
 
     // React Native'de dosya ekleme
@@ -113,23 +119,25 @@ export const profileApi = {
 
   /**
    * Upload avatar using presigned URL pattern (Production-Ready)
-   * 
+   *
    * Flow:
-   * 1. Request presigned URL from backend
-   * 2. Upload image directly to S3 using presigned URL
-   * 3. Confirm upload with backend (validates S3 upload)
-   * 4. Backend returns updated user profile with CloudFront URL
-   * 
+   * 1. Optimize image (reduce file size, improve upload speed)
+   * 2. Request presigned URL from backend
+   * 3. Upload optimized image directly to S3 using presigned URL
+   * 4. Confirm upload with backend (validates S3 upload)
+   * 5. Backend returns updated user profile with CloudFront URL
+   *
    * Benefits:
+   * - Image optimization (30-70% size reduction)
    * - No file passing through backend (bandwidth optimization)
    * - Direct S3 upload (faster)
    * - CloudFront CDN for image serving
    * - Production-ready security (IAM roles, presigned URLs)
-   * 
+   *
    * Backend: ProfileImageController
    * - POST /api/users/me/avatar/presigned-url
    * - POST /api/users/me/avatar/confirm
-   * 
+   *
    * @param imageUri Local image URI from camera/gallery
    * @param onProgress Progress callback (0-100)
    * @returns Updated user profile with CloudFront avatar URL
@@ -139,15 +147,30 @@ export const profileApi = {
     onProgress?: (progress: number) => void,
   ): Promise<MyProfileResponse> => {
     try {
-      // Step 1: Determine content type
-      const filename = imageUri.split('/').pop() || 'avatar.jpg';
-      const match = /\.(\w+)$/.exec(filename);
-      const extension = match ? match[1].toLowerCase() : 'jpg';
-      const contentType = `image/${extension === 'jpg' ? 'jpeg' : extension}`;
+      // Step 1: Optimize image (reduce file size, improve upload speed)
+      console.log('[profileApi] Optimizing avatar image...');
+      onProgress?.(5);
 
-      onProgress?.(10);
+      const optimizationResult = await imageOptimizationService.optimizeImage(
+        imageUri,
+        IMAGE_OPTIMIZATION_PRESETS.AVATAR,
+      );
 
-      // Step 2: Request presigned URL from backend
+      console.log('[profileApi] Image optimized:', {
+        reduction: `${optimizationResult.reductionPercentage}%`,
+        originalSize: imageOptimizationService.formatBytes(optimizationResult.originalSize),
+        optimizedSize: imageOptimizationService.formatBytes(optimizationResult.optimizedSize),
+      });
+
+      // Use optimized image URI
+      const optimizedUri = optimizationResult.uri;
+
+      // Step 2: Determine content type (always JPEG after optimization)
+      const contentType = 'image/jpeg';
+
+      onProgress?.(15);
+
+      // Step 3: Request presigned URL from backend
       const presignedResponse = await apiClient.post<
         ApiResponse<{
           url: string;
@@ -160,43 +183,94 @@ export const profileApi = {
 
       const { url: presignedUrl, key: s3Key } = presignedResponse.data.data;
 
-      onProgress?.(30);
+      onProgress?.(35);
 
-      // Step 3: Read image file as blob
-      const response = await fetch(imageUri);
+      // Step 4: Read optimized image file as blob
+      const response = await fetch(optimizedUri);
       const blob = await response.blob();
 
-      onProgress?.(50);
+      onProgress?.(55);
 
-      // Step 4: Upload directly to S3 via presigned URL (PUT request)
-      console.log('[profileApi] Uploading to S3:', {
+      // Step 5: Upload directly to S3 via presigned URL (PUT request)
+      console.log('[profileApi] Uploading optimized image to S3:', {
         url: presignedUrl,
         contentType,
         blobSize: blob.size,
       });
 
-      const uploadResponse = await fetch(presignedUrl, {
-        method: 'PUT',
-        body: blob,
-        headers: {
-          'Content-Type': contentType,
-        },
-      });
+      // Upload with retry mechanism (network failures are common)
+      let uploadResponse: Response | null = null;
+      let lastError: Error | null = null;
+      const maxRetries = 3;
 
-      console.log('[profileApi] S3 Upload response:', {
-        status: uploadResponse.status,
-        statusText: uploadResponse.statusText,
-      });
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          console.log(`[profileApi] Upload attempt ${attempt}/${maxRetries}`);
 
-      if (!uploadResponse.ok) {
-        const errorText = await uploadResponse.text();
-        console.error('[profileApi] S3 Upload failed:', errorText);
-        throw new Error(`S3 upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
+          // Create abort controller for timeout
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+          uploadResponse = await fetch(presignedUrl, {
+            method: 'PUT',
+            body: blob,
+            headers: {
+              'Content-Type': contentType,
+              'Content-Length': blob.size.toString(),
+            },
+            signal: controller.signal,
+          });
+
+          clearTimeout(timeoutId);
+
+          console.log('[profileApi] S3 Upload response:', {
+            attempt,
+            status: uploadResponse.status,
+            statusText: uploadResponse.statusText,
+          });
+
+          if (uploadResponse.ok) {
+            break; // Success
+          }
+
+          // If not successful and not last attempt, retry
+          if (attempt < maxRetries) {
+            const errorText = await uploadResponse.text();
+            console.warn(
+              `[profileApi] Upload attempt ${attempt} failed (${uploadResponse.status}): ${errorText}`,
+            );
+            await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Exponential backoff
+            continue;
+          }
+
+          // Last attempt failed
+          const errorText = await uploadResponse.text();
+          console.error('[profileApi] S3 Upload failed after all retries:', errorText);
+          throw new Error(
+            `S3 upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`,
+          );
+        } catch (error: unknown) {
+          lastError = error as Error;
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.warn(`[profileApi] Upload attempt ${attempt} error:`, errorMessage);
+
+          if (attempt === maxRetries) {
+            // All retries exhausted
+            throw lastError;
+          }
+
+          // Network error, retry with exponential backoff
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        }
+      }
+
+      if (!uploadResponse || !uploadResponse.ok) {
+        throw lastError || new Error('Upload failed after all retries');
       }
 
       onProgress?.(80);
 
-      // Step 5: Confirm upload with backend (validates S3 upload)
+      // Step 6: Confirm upload with backend (validates S3 upload)
       const confirmResponse = await apiClient.post<ApiResponse<MyProfileResponse>>(
         '/api/users/me/avatar/confirm',
         { key: s3Key },
@@ -204,11 +278,26 @@ export const profileApi = {
 
       onProgress?.(100);
 
+      console.log('[profileApi] Avatar upload completed successfully');
       return confirmResponse.data.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as Error & { name?: string; response?: { data?: { message?: string } } };
       console.error('[profileApi.uploadAvatarWithPresignedUrl] Error:', error);
+
+      // Provide more specific error messages
+      if (err.name === 'AbortError') {
+        throw new Error('Yükleme zaman aşımına uğradı. Lütfen internet bağlantınızı kontrol edin.');
+      }
+
+      const errorMessage = err.message || '';
+      if (errorMessage.includes('Network request failed')) {
+        throw new Error('Ağ bağlantısı hatası. LocalStack erişilebilir olduğundan emin olun.');
+      }
+
       throw new Error(
-        error.response?.data?.message || 'Avatar yükleme başarısız. Lütfen tekrar deneyin.',
+        err.response?.data?.message ||
+          errorMessage ||
+          'Avatar yükleme başarısız. Lütfen tekrar deneyin.',
       );
     }
   },

@@ -1,5 +1,5 @@
 // src/features/profile/components/ParallaxProfileHeader/ParallaxProfileHeader.styles.ts
-// Meslektaş Design System - ParallaxProfileHeader Styles
+// Dengin Design System - ParallaxProfileHeader Styles
 // Oku: mobile-development-guide/ui-ux-modernization/10-PROFILE-EXPERIENCE.md
 
 import { StyleSheet } from 'react-native';
@@ -12,15 +12,15 @@ export const styles = StyleSheet.create({
 
   // Cover image
   coverContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
     height: HEADER_CONSTANTS.MAX_HEIGHT * 0.6,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 0,
   },
   coverImage: {
-    width: '100%',
     height: '100%',
+    width: '100%',
   },
   coverOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -36,75 +36,75 @@ export const styles = StyleSheet.create({
 
   // Top bar
   topBar: {
+    alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
     paddingBottom: 8,
+    paddingHorizontal: 16,
     zIndex: 10,
   },
   stickyName: {
+    flex: 1,
     fontSize: 18,
     fontWeight: '600',
-    flex: 1,
     textAlign: 'center',
   },
   topBarButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 20,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
   },
 
   // Avatar section
   avatarContainer: {
-    position: 'absolute',
     bottom: 80,
     left: 16,
+    position: 'absolute',
     zIndex: 5,
   },
   avatarBorder: {
-    borderWidth: 4,
     borderRadius: (HEADER_CONSTANTS.AVATAR_SIZE + 8) / 2,
+    borderWidth: 4,
   },
   avatar: {
-    width: HEADER_CONSTANTS.AVATAR_SIZE,
-    height: HEADER_CONSTANTS.AVATAR_SIZE,
     borderRadius: HEADER_CONSTANTS.AVATAR_SIZE / 2,
+    height: HEADER_CONSTANTS.AVATAR_SIZE,
+    width: HEADER_CONSTANTS.AVATAR_SIZE,
   },
   avatarPlaceholder: {
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   initials: {
     fontSize: 36,
     fontWeight: '700',
   },
   verificationBadge: {
-    position: 'absolute',
+    alignItems: 'center',
+    borderRadius: 14,
+    borderWidth: 2,
     bottom: 0,
+    height: 28,
+    justifyContent: 'center',
+    position: 'absolute',
     right: 0,
     width: 28,
-    height: 28,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
   },
 
   // Profile info
   profileInfo: {
-    position: 'absolute',
     bottom: 0,
     left: 0,
-    right: 0,
-    paddingHorizontal: 16,
     paddingBottom: 16,
+    paddingHorizontal: 16,
+    position: 'absolute',
+    right: 0,
   },
   nameRow: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     marginBottom: 4,
     marginLeft: HEADER_CONSTANTS.AVATAR_SIZE + 24,
   },
@@ -115,14 +115,14 @@ export const styles = StyleSheet.create({
   },
   username: {
     fontSize: 14,
-    marginLeft: HEADER_CONSTANTS.AVATAR_SIZE + 24,
     marginBottom: 4,
+    marginLeft: HEADER_CONSTANTS.AVATAR_SIZE + 24,
   },
   profession: {
     fontSize: 14,
     fontWeight: '500',
-    marginLeft: HEADER_CONSTANTS.AVATAR_SIZE + 24,
     marginBottom: 12,
+    marginLeft: HEADER_CONSTANTS.AVATAR_SIZE + 24,
   },
 
   // Action buttons
@@ -134,12 +134,12 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
   smallActionButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 22,
     borderWidth: 1,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
   },
 
   // Spacer for top bar

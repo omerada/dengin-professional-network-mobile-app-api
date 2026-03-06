@@ -1,15 +1,16 @@
-package com.meslektas.social.application.service;
+package com.dengin.social.application.service;
 
-import com.meslektas.common.infrastructure.DomainEventPublisher;
-import com.meslektas.identity.application.service.ProfessionService;
-import com.meslektas.identity.domain.model.Profession;
-import com.meslektas.identity.domain.model.User;
-import com.meslektas.identity.domain.repository.UserRepository;
-import com.meslektas.social.application.dto.*;
-import com.meslektas.social.domain.model.*;
-import com.meslektas.social.domain.repository.CommentRepository;
-import com.meslektas.social.domain.repository.FollowRepository;
-import com.meslektas.social.domain.repository.PostRepository;
+import com.dengin.common.infrastructure.DomainEventPublisher;
+import com.dengin.identity.application.service.ProfessionService;
+import com.dengin.identity.domain.model.Profession;
+import com.dengin.identity.domain.model.User;
+import com.dengin.identity.domain.repository.UserRepository;
+import com.dengin.social.application.dto.*;
+import com.dengin.social.application.service.PostService;
+import com.dengin.social.domain.model.*;
+import com.dengin.social.domain.repository.CommentRepository;
+import com.dengin.social.domain.repository.FollowRepository;
+import com.dengin.social.domain.repository.PostRepository;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,10 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;

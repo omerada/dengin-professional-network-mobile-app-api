@@ -1,5 +1,6 @@
-package com.meslektas.common.exception;
+package com.dengin.common.exception;
 
+import com.dengin.common.exception.RateLimitExceededException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

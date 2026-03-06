@@ -34,21 +34,6 @@ export {
 } from './errorHandling';
 export type { ErrorFallbackProps } from './errorHandling';
 
-// Haptic feedback utilities
-export {
-  haptic,
-  hapticLight,
-  hapticMedium,
-  hapticHeavy,
-  hapticSelection,
-  hapticSuccess,
-  hapticWarning,
-  hapticError,
-  withHaptic,
-  useHaptics,
-} from './haptics';
-export type { HapticType } from './haptics';
-
 // Date utilities
 export {
   formatRelativeTime,
@@ -131,3 +116,16 @@ export {
   combineValidators,
 } from './validationUtils';
 export type { ValidationResult, ValidationRule, PasswordStrength } from './validationUtils';
+
+// Unified feedback utilities
+export {
+  showSuccess,
+  showInfo,
+  showWarning,
+  showError,
+  useUnifiedFeedback,
+  UnifiedFeedbackUtils,
+} from './unifiedFeedback';
+
+// Error message utilities
+export * from './errorMessages';

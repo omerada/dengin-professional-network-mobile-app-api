@@ -6,7 +6,7 @@
  */
 export const APP_CONFIG = {
   // App info
-  APP_NAME: 'Meslektaş',
+  APP_NAME: 'Dengin',
   APP_VERSION: '1.0.0',
   BUILD_NUMBER: '1',
 
@@ -52,8 +52,8 @@ export const APP_CONFIG = {
 
   // Deep linking
   DEEP_LINK: {
-    SCHEME: 'meslektas',
-    PREFIX: 'meslektas://',
+    SCHEME: 'dengin',
+    PREFIX: 'dengin://',
   },
 } as const;
 

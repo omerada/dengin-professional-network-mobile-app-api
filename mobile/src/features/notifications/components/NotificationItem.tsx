@@ -4,65 +4,73 @@
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 import React, { memo, useCallback } from 'react';
-import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { ProgressiveImage, PressableScale } from '@shared/components';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
+import { useSemanticHaptic } from '@shared/hooks';
+import { spacing } from '@theme';
 import type { NotificationResponse, NotificationType } from '../types';
 
 export interface NotificationItemProps {
   notification: NotificationResponse;
-  onPress: (notification: NotificationResponse) => void;
+  onPress?: (notification: NotificationResponse) => void;
   onLongPress?: (notification: NotificationResponse) => void;
 }
 
 /**
  * Bildirim türüne göre ikon - Backend NotificationType enum ile uyumlu
  * @see NotificationType.java
+ * @param type - Notification type
+ * @param colors - Theme colors from context
  */
-const getNotificationIcon = (type: NotificationType): { name: string; color: string } => {
+const getNotificationIcon = (
+  type: NotificationType,
+  colors: ReturnType<typeof useColors>,
+): { name: string; color: string } => {
   switch (type) {
     // Social notifications
     case 'NEW_FOLLOWER':
-      return { name: 'person-add', color: '#5856D6' };
+      return { name: 'person-add', color: colors.special.verified };
     case 'POST_LIKED':
-      return { name: 'heart', color: '#FF2D55' };
+      return { name: 'heart', color: colors.status.error };
     case 'POST_COMMENTED':
-      return { name: 'chatbubble-ellipses', color: '#FF9500' };
+      return { name: 'chatbubble-ellipses', color: colors.status.warning };
     case 'MENTION':
-      return { name: 'at', color: '#007AFF' };
+      return { name: 'at', color: colors.interactive.default };
 
     // Messaging
     case 'NEW_MESSAGE':
-      return { name: 'chatbubble', color: '#007AFF' };
+      return { name: 'chatbubble', color: colors.interactive.default };
 
     // Verification
     case 'VERIFICATION_APPROVED':
-      return { name: 'shield-checkmark', color: '#34C759' };
+      return { name: 'shield-checkmark', color: colors.status.success };
     case 'VERIFICATION_REJECTED':
-      return { name: 'shield-half', color: '#FF3B30' };
+      return { name: 'shield-half', color: colors.status.error };
     case 'VERIFICATION_PENDING_REVIEW':
-      return { name: 'time', color: '#FF9500' };
+      return { name: 'time', color: colors.status.warning };
 
     // Moderation
     case 'POST_FLAGGED':
-      return { name: 'flag', color: '#FF9500' };
+      return { name: 'flag', color: colors.status.warning };
     case 'CONTENT_REMOVED':
-      return { name: 'trash', color: '#FF3B30' };
+      return { name: 'trash', color: colors.status.error };
     case 'WARNING_ISSUED':
-      return { name: 'warning', color: '#FF9500' };
+      return { name: 'warning', color: colors.status.warning };
 
     // System
     case 'WELCOME':
-      return { name: 'happy', color: '#34C759' };
+      return { name: 'happy', color: colors.status.success };
     case 'PASSWORD_RESET':
-      return { name: 'key', color: '#8E8E93' };
+      return { name: 'key', color: colors.text.tertiary };
     case 'ACCOUNT_SUSPENDED':
-      return { name: 'ban', color: '#FF3B30' };
+      return { name: 'ban', color: colors.status.error };
     case 'ACCOUNT_REACTIVATED':
-      return { name: 'checkmark-circle', color: '#34C759' };
+      return { name: 'checkmark-circle', color: colors.status.success };
 
     default:
-      return { name: 'notifications', color: '#8E8E93' };
+      return { name: 'notifications', color: colors.text.tertiary };
   }
 };
 
@@ -91,22 +99,29 @@ const formatRelativeTime = (dateString: string): string => {
 export const NotificationItem: React.FC<NotificationItemProps> = memo(
   ({ notification, onPress, onLongPress }) => {
     const colors = useColors();
-
-    const handlePress = useCallback(() => {
-      onPress(notification);
-    }, [notification, onPress]);
-
-    const handleLongPress = useCallback(() => {
-      onLongPress?.(notification);
-    }, [notification, onLongPress]);
+    const { triggerNavigation, triggerSystem } = useSemanticHaptic();
 
     // Backend: read field (boolean)
     const isUnread = !notification.read;
 
+    const handlePress = useCallback(() => {
+      if (onPress) {
+        triggerNavigation('navigate');
+        onPress(notification);
+      }
+    }, [onPress, notification, triggerNavigation]);
+
+    const handleLongPress = useCallback(() => {
+      if (onLongPress) {
+        triggerSystem('alert');
+        onLongPress(notification);
+      }
+    }, [onLongPress, notification, triggerSystem]);
+
     // Backend icon field (derived) veya type'dan hesapla
     const iconConfig = notification.icon
-      ? { name: notification.icon, color: notification.color || '#8E8E93' }
-      : getNotificationIcon(notification.type);
+      ? { name: notification.icon, color: notification.color || colors.text.tertiary }
+      : getNotificationIcon(notification.type, colors);
 
     // Metadata'dan resim URL'i
     const imageUrl = notification.metadata?.imageUrl || notification.metadata?.actorAvatarUrl;
@@ -114,31 +129,29 @@ export const NotificationItem: React.FC<NotificationItemProps> = memo(
     // Backend relativeTime field veya hesaplanan
     const displayTime = notification.relativeTime || formatRelativeTime(notification.createdAt);
 
-    return (
-      <Pressable
-        onPress={handlePress}
-        onLongPress={handleLongPress}
-        style={({ pressed }) => [
+    const content = (
+      <View
+        style={[
           styles.container,
           {
-            backgroundColor: isUnread
-              ? colors.interactive.subtle
-              : pressed
-                ? colors.background.secondary
-                : colors.background.primary,
+            backgroundColor: isUnread ? colors.interactive.subtle : colors.background.primary,
           },
         ]}>
         {/* Icon or Image */}
         <View style={styles.iconContainer}>
           {imageUrl ? (
-            <Image source={{ uri: imageUrl }} style={styles.image} />
+            <ProgressiveImage
+              source={{ uri: imageUrl }}
+              style={styles.image}
+              showLoadingIndicator
+            />
           ) : (
             <View style={[styles.iconCircle, { backgroundColor: `${iconConfig.color}20` }]}>
               <Icon name={iconConfig.name} size={20} color={iconConfig.color} />
             </View>
           )}
         </View>
-        /* Content */
+        {/* Content */}
         <View style={styles.content}>
           <Text
             style={[styles.title, { color: colors.text.primary }, isUnread && styles.titleUnread]}
@@ -154,39 +167,62 @@ export const NotificationItem: React.FC<NotificationItemProps> = memo(
         {isUnread && (
           <View style={[styles.unreadDot, { backgroundColor: colors.interactive.default }]} />
         )}
-      </Pressable>
+      </View>
     );
+
+    if (onPress || onLongPress) {
+      return (
+        <PressableScale
+          onPress={handlePress}
+          onLongPress={handleLongPress}
+          activeScale={0.98}
+          haptic={false} // Manual haptic in handlers
+        >
+          {content}
+        </PressableScale>
+      );
+    }
+
+    return content;
   },
 );
 
 NotificationItem.displayName = 'NotificationItem';
 
 const styles = StyleSheet.create({
+  body: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: spacing.xs, // 4
+  },
   container: {
-    flexDirection: 'row',
     alignItems: 'flex-start',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 12,
-  },
-  iconContainer: {
-    width: 44,
-    height: 44,
-  },
-  iconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  image: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    flexDirection: 'row',
+    gap: spacing.sm + spacing.xs, // 12
+    paddingHorizontal: spacing.md, // 16
+    paddingVertical: spacing.sm + spacing.xs, // 12
   },
   content: {
     flex: 1,
+  },
+  iconCircle: {
+    alignItems: 'center',
+    borderRadius: 22,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
+  },
+  iconContainer: {
+    height: 44,
+    width: 44,
+  },
+  image: {
+    borderRadius: 22,
+    height: 44,
+    width: 44,
+  },
+  time: {
+    fontSize: 12,
   },
   title: {
     fontSize: 15,
@@ -195,19 +231,11 @@ const styles = StyleSheet.create({
   titleUnread: {
     fontWeight: '600',
   },
-  body: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 4,
-  },
-  time: {
-    fontSize: 12,
-  },
   unreadDot: {
-    width: 8,
-    height: 8,
     borderRadius: 4,
+    height: 8,
     marginTop: 4,
+    width: 8,
   },
 });
 

@@ -1,5 +1,5 @@
 // src/shared/components/ImageViewer/ImageViewer.tsx
-// Meslektaş Design System - Full Screen Image Viewer
+// Dengin Design System - Full Screen Image Viewer
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback, useState } from 'react';
@@ -20,7 +20,7 @@ import Animated, {
   withSpring,
   withTiming,
   interpolate,
-  Extrapolate,
+  Extrapolation,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -28,7 +28,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useHaptic } from '@shared/hooks';
 import { spring } from '@theme/animations';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -89,7 +89,7 @@ export const ImageViewer = memo<ImageViewerProps>(function ImageViewer({
   showShare = false,
   onShare,
 }) {
-  useColors(); // Keep hook for future theming
+  const colors = useColors();
   const insets = useSafeAreaInsets();
   const { trigger: triggerHaptic } = useHaptic();
   const [loading, setLoading] = useState(true);
@@ -164,7 +164,7 @@ export const ImageViewer = memo<ImageViewerProps>(function ImageViewer({
           Math.abs(event.translationY),
           [0, 200],
           [1, 0.3],
-          Extrapolate.CLAMP,
+          Extrapolation.CLAMP,
         );
       }
     })
@@ -266,7 +266,7 @@ export const ImageViewer = memo<ImageViewerProps>(function ImageViewer({
             hitSlop={16}
             accessibilityLabel="Close"
             accessibilityRole="button">
-            <Icon name="close" size={28} color="#FFFFFF" />
+            <Icon name="close" size={28} color={colors.text.inverse} />
           </Pressable>
 
           <View style={styles.headerActions}>
@@ -277,7 +277,7 @@ export const ImageViewer = memo<ImageViewerProps>(function ImageViewer({
                 hitSlop={16}
                 accessibilityLabel="Share"
                 accessibilityRole="button">
-                <Icon name="share-outline" size={24} color="#FFFFFF" />
+                <Icon name="share-outline" size={24} color={colors.text.inverse} />
               </Pressable>
             )}
             {showDownload && onDownload && (
@@ -287,7 +287,7 @@ export const ImageViewer = memo<ImageViewerProps>(function ImageViewer({
                 hitSlop={16}
                 accessibilityLabel="Download"
                 accessibilityRole="button">
-                <Icon name="download-outline" size={24} color="#FFFFFF" />
+                <Icon name="download-outline" size={24} color={colors.text.inverse} />
               </Pressable>
             )}
           </View>
@@ -298,14 +298,16 @@ export const ImageViewer = memo<ImageViewerProps>(function ImageViewer({
           <Animated.View style={[styles.imageContainer, imageAnimatedStyle]}>
             {loading && (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#FFFFFF" />
+                <ActivityIndicator size="large" color={colors.text.inverse} />
               </View>
             )}
 
             {error ? (
               <View style={styles.errorContainer}>
-                <Icon name="image-outline" size={48} color="#FFFFFF" />
-                <Text style={styles.errorText}>Resim yüklenemedi</Text>
+                <Icon name="image-outline" size={48} color={colors.text.inverse} />
+                <Text style={[styles.errorText, { color: colors.text.inverse }]}>
+                  Resim yüklenemedi
+                </Text>
               </View>
             ) : (
               <Image
@@ -335,7 +337,6 @@ export const ImageViewer = memo<ImageViewerProps>(function ImageViewer({
 // Color constants for ImageViewer (dark overlay theme)
 const OVERLAY_BG = '#000000';
 const OVERLAY_BG_TRANSLUCENT = 'rgba(0, 0, 0, 0.5)';
-const OVERLAY_TEXT = '#FFFFFF';
 
 const styles = StyleSheet.create({
   background: {
@@ -350,7 +351,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   errorText: {
-    color: OVERLAY_TEXT,
     fontSize: 16,
     marginTop: 12,
   },

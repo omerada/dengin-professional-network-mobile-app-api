@@ -1,5 +1,5 @@
 // src/shared/hooks/useDimensions.ts
-// Meslektaş Design System - Dimensions Hook
+// Dengin Design System - Dimensions Hook
 // Oku: mobile-development-guide/ui-ux-modernization/14-SPRINT-IMPLEMENTATION-PLAN.md
 
 import { useState, useEffect } from 'react';

@@ -8,7 +8,7 @@ import { authApi, tokenService } from '../services';
 import { useAuthStore } from '../stores';
 import type { LoginFormData } from '../types';
 import { getErrorMessage } from '@core/utils/errorUtils';
-import { resetNavigation } from '@core/navigation/AppNavigator';
+// import { resetNavigation } from '@core/navigation/AppNavigator'; // Not used
 
 /**
  * Login hook with React Query mutation
@@ -45,6 +45,7 @@ export const useLogin = () => {
         }
 
         // Update auth store with user data
+        // This will automatically trigger navigation through AppNavigator's isAuthenticated check
         setUser(data.user);
 
         // Remember last login email
@@ -52,8 +53,11 @@ export const useLogin = () => {
           setLastLoginEmail(variables.email);
         }
 
-        // Navigate to main app using helper function
-        resetNavigation(0, [{ name: 'Main' }]);
+        // No need to manually navigate - AppNavigator will re-render with isAuthenticated=true
+        // and automatically show Main screen
+        if (__DEV__) {
+          console.log('[useLogin] Login successful, auth state updated');
+        }
       } catch (error) {
         // Log critical errors only
         if (__DEV__) {

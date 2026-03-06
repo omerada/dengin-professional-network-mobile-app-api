@@ -1,5 +1,5 @@
 // src/shared/hooks/useAnimatedValue.ts
-// Meslektaş Design System - Animated Value Hooks
+// Dengin Design System - Animated Value Hooks
 // Oku: mobile-development-guide/ui-ux-modernization/05-ANIMATION-MOTION.md
 
 import { useCallback } from 'react';
@@ -76,7 +76,7 @@ export function useAnimatedValue(initialValue: number = 0) {
  * </Animated.View>
  */
 export function useScaleAnimation(config?: { pressedScale?: number; springPreset?: SpringPreset }) {
-  const { pressedScale = 0.97, springPreset = 'press' } = config || {};
+  const { pressedScale = 0.96, springPreset = 'press' } = config || {};
   const scale = useSharedValue(1);
 
   const onPressIn = useCallback(() => {

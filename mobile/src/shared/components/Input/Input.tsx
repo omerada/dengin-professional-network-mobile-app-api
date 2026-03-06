@@ -1,5 +1,5 @@
 // src/shared/components/Input/Input.tsx
-// Meslektaş Design System - Modern Input Component
+// Dengin Design System - Modern Input Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, {
@@ -14,6 +14,7 @@ import React, {
 } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import Animated, {
+  FadeInDown,
   interpolateColor,
   useAnimatedStyle,
   useSharedValue,
@@ -24,7 +25,8 @@ import Animated, {
 import Icon from 'react-native-vector-icons/Feather';
 
 import { useColors } from '@contexts/ThemeContext';
-import { spring, duration } from '@theme/animations';
+import { spring } from '@theme/animations';
+import { UNIFIED_TIMING } from '@constants';
 
 import { styles, getVariantStyles } from './Input.styles';
 import { INPUT_SIZE_CONFIG, type InputProps, type InputRef } from './Input.types';
@@ -183,7 +185,7 @@ export const Input = memo(
 
         const borderWidth = withTiming(
           focusProgress.value > 0 ? variantStyles.focusedBorderWidth : variantStyles.borderWidth,
-          { duration: duration.fast },
+          { duration: UNIFIED_TIMING.inputFocus },
         );
 
         return {
@@ -376,6 +378,17 @@ export const Input = memo(
               </Pressable>
             )}
 
+            {/* Success Icon */}
+            {success && !error && !secureTextEntry && !clearable && !rightIcon && (
+              <View style={[styles.rightIcon, { width: sizeConfig.iconSize }]}>
+                <Icon
+                  name="check-circle"
+                  size={sizeConfig.iconSize}
+                  color={colors.status.success}
+                />
+              </View>
+            )}
+
             {/* Right Icon */}
             {rightIcon && !secureTextEntry && !clearable && (
               <View style={[styles.rightIcon, { width: sizeConfig.iconSize }]}>{rightIcon}</View>
@@ -386,9 +399,11 @@ export const Input = memo(
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             {/* Error/Hint Text */}
             {(error || hint) && (
-              <Text style={[styles.helperText, { color: helperTextColor, flex: 1 }]}>
+              <AnimatedText
+                entering={FadeInDown.duration(200)}
+                style={[styles.helperText, { color: helperTextColor, flex: 1 }]}>
                 {error ?? hint}
-              </Text>
+              </AnimatedText>
             )}
 
             {/* Character Count */}

@@ -1,32 +1,31 @@
 // src/features/messaging/components/EmptyChat.tsx
-// Boş sohbet komponenti
+// Boş sohbet komponenti - Migrated to UnifiedEmptyState
 // Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
 
 import React, { memo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import { useColors } from '@contexts/ThemeContext';
+import { View, StyleSheet } from 'react-native';
+import { UnifiedEmptyState } from '@shared/components';
 
 interface EmptyChatProps {
   userName?: string;
 }
 
+/**
+ * EmptyChat Component
+ * Migrated to UnifiedEmptyState for consistency
+ */
 export const EmptyChat: React.FC<EmptyChatProps> = memo(({ userName }) => {
-  const colors = useColors();
-
   return (
     <View style={styles.container}>
-      <View style={[styles.iconContainer, { backgroundColor: colors.interactive.subtle }]}>
-        <Icon name="chatbubble-ellipses-outline" size={40} color={colors.interactive.default} />
-      </View>
-
-      <Text style={[styles.title, { color: colors.text.primary }]}>Sohbete Başlayın</Text>
-
-      <Text style={[styles.description, { color: colors.text.secondary }]}>
-        {userName
-          ? `${userName} ile ilk mesajınızı gönderin`
-          : 'İlk mesajınızı göndererek sohbete başlayın'}
-      </Text>
+      <UnifiedEmptyState
+        icon="chatbubble-ellipses-outline"
+        title="Sohbete Başlayın"
+        description={
+          userName
+            ? `${userName} ile ilk mesajınızı gönderin`
+            : 'İlk mesajınızı göndererek sohbete başlayın'
+        }
+      />
     </View>
   );
 });
@@ -36,30 +35,8 @@ EmptyChat.displayName = 'EmptyChat';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
     // Inverted FlatList için dönüştürme
     transform: [{ scaleY: -1 }],
-  },
-  iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  description: {
-    fontSize: 14,
-    textAlign: 'center',
-    lineHeight: 20,
   },
 });
 

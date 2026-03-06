@@ -1,0 +1,507 @@
+package com.dengin.identity.application.service;
+
+import com.dengin.common.api.PagedResponse;
+import com.dengin.common.exception.BusinessException;
+import com.dengin.common.exception.ResourceNotFoundException;
+import com.dengin.common.storage.ImageProcessor;
+import com.dengin.common.storage.StorageService;
+import com.dengin.identity.application.dto.request.UpdateProfileRequest;
+import com.dengin.identity.application.dto.response.UserProfileResponse;
+import com.dengin.identity.application.dto.request.ChangeProfessionRequest;
+import com.dengin.identity.application.dto.request.UpdateUserRequest;
+import com.dengin.identity.application.dto.response.UserResponse;
+import com.dengin.identity.application.mapper.UserMapper;
+import com.dengin.identity.domain.model.Profession;
+import com.dengin.identity.domain.model.Sector;
+import com.dengin.identity.domain.model.User;
+import com.dengin.identity.domain.repository.ProfessionRepository;
+import com.dengin.identity.domain.repository.SectorRepository;
+import com.dengin.identity.domain.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+/**
+ * User Management Application Service
+ * 
+ * DDD Pattern: Application Service (orchestrates domain operations)
+ * 
+ * Responsibilities:
+ * - User profile operations
+ * - Avatar upload
+ * - Profession management
+ * - Publish domain events
+ */
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class UserService {
+
+    private final UserRepository userRepository;
+    private final ProfessionRepository professionRepository;
+    private final SectorRepository sectorRepository;
+    private final UserMapper userMapper;
+    private final ApplicationEventPublisher eventPublisher;
+    private final StorageService storageService;
+    private final ImageProcessor imageProcessor;
+
+    /**
+     * Get current user profile
+     */
+    @Transactional(readOnly = true)
+    public UserResponse getCurrentUser(Long userId) {
+        log.info("Fetching user profile: {}", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        return userMapper.toResponse(user);
+    }
+
+    /**
+     * Get user profile by ID (Long)
+     * 
+     * Returns full profile if requesting user is viewing their own profile,
+     * otherwise returns limited profile based on privacy settings.
+     * 
+     * @param userId           User ID to fetch
+     * @param requestingUserId ID of the user making the request (null for public
+     *                         access)
+     * @return UserProfileResponse
+     */
+    @Transactional(readOnly = true)
+    public UserProfileResponse getUserProfile(Long userId, Long requestingUserId) {
+        log.info("Fetching user profile: userId={}, requestingUserId={}", userId, requestingUserId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        // Check if user is active
+        if (!user.isActive()) {
+            throw new BusinessException(
+                    "Bu kullanıcının hesabı aktif değil",
+                    "USER_NOT_ACTIVE");
+        }
+
+        // Map to full profile response
+        UserProfileResponse profile = userMapper.toProfileResponse(user);
+
+        // If requesting user is viewing another user's profile, apply privacy rules
+        if (requestingUserId != null && !userId.equals(requestingUserId)) {
+            // Return limited profile (hide sensitive fields)
+            profile = UserProfileResponse.createLimitedProfile(profile);
+            log.debug("Returning limited profile for user: {}", userId);
+        }
+
+        return profile;
+    }
+
+    /**
+     * Update user profile with new DTO
+     * 
+     * Business Rules:
+     * - Users can only update their own profile
+     * - Profile completeness is recalculated
+     * - ProfileUpdatedEvent is published
+     * 
+     * @param userId  User ID
+     * @param request Update profile request
+     * @return Updated user profile
+     */
+    @Transactional
+    public UserProfileResponse updateUserProfile(Long userId, UpdateProfileRequest request) {
+        log.info("Updating user profile: userId={}", userId);
+
+        // Validate age if date of birth provided
+        if (request.getDateOfBirth() != null && !request.isValidAge()) {
+            throw new BusinessException(
+                    "Kullanıcı en az 13 yaşında olmalıdır",
+                    "INVALID_AGE");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        // Update profile using domain behavior
+        user.updateProfile(
+                request.getName(),
+                request.getSurname(),
+                request.getBio(),
+                request.getDateOfBirth());
+
+        // Update gender if provided
+        if (request.getGender() != null) {
+            user.setGender(request.getGender());
+        }
+
+        // Save
+        User updatedUser = userRepository.save(user);
+
+        // Publish domain events
+        updatedUser.getEvents().forEach(eventPublisher::publishEvent);
+        updatedUser.clearEvents();
+
+        log.info("User profile updated successfully: userId={}", userId);
+
+        return userMapper.toProfileResponse(updatedUser);
+    }
+
+    /**
+     * Update user avatar
+     * 
+     * Business Rules:
+     * - Old avatar is deleted from storage
+     * - ProfileUpdatedEvent is published
+     * - Profile completeness is recalculated
+     * 
+     * @param userId    User ID
+     * @param avatarUrl New avatar URL from storage
+     * @return Updated user profile
+     */
+    @Transactional
+    public UserProfileResponse updateUserAvatar(Long userId, String avatarUrl) {
+        log.info("Updating user avatar: userId={}, avatarUrl={}", userId, avatarUrl);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        // Delete old avatar if exists
+        if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
+            try {
+                storageService.delete(user.getAvatarUrl());
+                log.info("Old avatar deleted: {}", user.getAvatarUrl());
+            } catch (Exception e) {
+                log.warn("Failed to delete old avatar: {}", e.getMessage());
+                // Continue even if deletion fails
+            }
+        }
+
+        // Update avatar using domain behavior
+        user.updateAvatar(avatarUrl);
+
+        // Save
+        User updatedUser = userRepository.save(user);
+
+        // Publish domain events
+        updatedUser.getEvents().forEach(eventPublisher::publishEvent);
+        updatedUser.clearEvents();
+
+        log.info("User avatar updated successfully: userId={}", userId);
+
+        return userMapper.toProfileResponse(updatedUser);
+    }
+
+    /**
+     * Get user by ID (public profile)
+     */
+    @Transactional(readOnly = true)
+    public UserResponse getUserById(Long userId) {
+        log.info("Fetching public user profile: {}", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        // Check if user is active
+        if (!user.isActive()) {
+            throw new BusinessException(
+                    "Bu kullanıcının hesabı aktif değil",
+                    "USER_NOT_ACTIVE");
+        }
+
+        return userMapper.toResponse(user);
+    }
+
+    /**
+     * Update user profile
+     * 
+     * Business Rule: Users can update their basic information
+     */
+    @Transactional
+    public UserResponse updateProfile(Long userId, UpdateUserRequest request) {
+        log.info("Updating user profile: {}", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        // Update basic info
+        if (request.name() != null || request.surname() != null ||
+                request.bio() != null || request.dateOfBirth() != null) {
+            user.updateProfile(
+                    request.name() != null ? request.name() : user.getName(),
+                    request.surname() != null ? request.surname() : user.getSurname(),
+                    request.bio(),
+                    request.dateOfBirth());
+        }
+
+        // Update gender if provided
+        if (request.gender() != null) {
+            user.setGender(request.gender());
+        }
+
+        // Update profession if provided
+        if (request.professionId() != null) {
+            Profession profession = professionRepository.findById(request.professionId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Profession", request.professionId()));
+
+            user.selectProfession(profession);
+        }
+
+        // Save
+        User updatedUser = userRepository.save(user);
+
+        // Publish events
+        updatedUser.getEvents().forEach(eventPublisher::publishEvent);
+        updatedUser.clearEvents();
+
+        log.info("User profile updated successfully: {}", userId);
+
+        return userMapper.toResponse(updatedUser);
+    }
+
+    /**
+     * Change user profession
+     * 
+     * Business Rule (BR-003):
+     * - Verified profession cannot be changed (except general category)
+     * - Unverified users can change freely
+     */
+    @Transactional
+    public UserResponse changeProfession(Long userId, ChangeProfessionRequest request) {
+        log.info("Changing profession for user {}: new profession {}", userId, request.professionId());
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        Profession newProfession = professionRepository.findById(request.professionId())
+                .orElseThrow(() -> new ResourceNotFoundException("Profession", request.professionId()));
+
+        // Auto-update sector from profession category (fetch from DB to avoid transient issue)
+        Sector sector = null;
+        if (newProfession.getCategory() != null) {
+            String sectorCode = newProfession.getCategory().name();
+            sector = sectorRepository.findByCode(sectorCode)
+                    .orElseGet(() -> {
+                        // If sector doesn't exist, create it
+                        log.warn("Sector not found for code: {}. Creating new sector.", sectorCode);
+                        Sector newSector = Sector.builder()
+                                .code(sectorCode)
+                                .name(newProfession.getCategory().getDisplayName())
+                                .isActive(true)
+                                .build();
+                        return sectorRepository.save(newSector);
+                    });
+        }
+
+        // Use domain method to set profession and sector
+        user.selectProfession(newProfession, sector);
+
+        // Save
+        User updatedUser = userRepository.save(user);
+
+        // Publish events
+        updatedUser.getEvents().forEach(eventPublisher::publishEvent);
+        updatedUser.clearEvents();
+
+        log.info("Profession changed successfully for user: {}", userId);
+
+        return userMapper.toResponse(updatedUser);
+    }
+
+    /**
+     * Upload user avatar (DEPRECATED - kept for backward compatibility)
+     * 
+     * @deprecated Use ProfileImageController with presigned URLs instead.
+     * This method will be removed in future versions.
+     */
+    @Deprecated
+    @Transactional
+    public UserResponse uploadAvatar(Long userId, MultipartFile file) {
+        log.warn("DEPRECATED: uploadAvatar with MultipartFile. Use presigned URL pattern instead.");
+        log.info("Uploading avatar for user: {}", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        // Validate and process image
+        imageProcessor.validateImage(file);
+
+        // Delete old avatar if exists
+        if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
+            try {
+                storageService.delete(user.getAvatarUrl());
+                log.info("Old avatar deleted: {}", user.getAvatarUrl());
+            } catch (Exception e) {
+                log.warn("Failed to delete old avatar: {}", e.getMessage());
+            }
+        }
+
+        // Upload to storage
+        String avatarUrl = storageService.upload(file, "avatars");
+        log.info("Avatar uploaded to storage: {}", avatarUrl);
+
+        // Update user
+        user.updateAvatar(avatarUrl);
+        User updatedUser = userRepository.save(user);
+
+        log.info("Avatar uploaded successfully for user: {}", userId);
+
+        return userMapper.toResponse(updatedUser);
+    }
+
+    /**
+     * Update avatar URL (used by presigned URL flow)
+     * 
+     * This method is called after mobile uploads image directly to S3.
+     * Backend validates the upload and updates user profile with CloudFront URL.
+     * 
+     * @param userId      User ID
+     * @param avatarUrl   CloudFront URL from ProfileImageS3Service
+     * @return Updated user profile
+     */
+    @Transactional
+    public UserResponse updateAvatarUrl(Long userId, String avatarUrl) {
+        log.info("Updating avatar URL for user: {} with URL: {}", userId, avatarUrl);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        // Delete old avatar if exists (cleanup from S3)
+        if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
+            try {
+                // Extract S3 key and delete via ProfileImageS3Service
+                storageService.delete(user.getAvatarUrl());
+                log.info("Old avatar deleted: {}", user.getAvatarUrl());
+            } catch (Exception e) {
+                log.warn("Failed to delete old avatar: {}", e.getMessage());
+                // Continue even if deletion fails
+            }
+        }
+
+        // Update user avatar with new CloudFront URL
+        user.updateAvatar(avatarUrl);
+        User updatedUser = userRepository.save(user);
+
+        log.info("Avatar URL updated successfully for user: {}", userId);
+
+        return userMapper.toResponse(updatedUser);
+    }
+
+    /**
+     * Delete user account (soft delete)
+     * 
+     * Business Rule: Users can delete their own accounts
+     */
+    @Transactional
+    public void deleteAccount(Long userId) {
+        log.info("Deleting account: {}", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        // Delete avatar from storage
+        if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
+            try {
+                storageService.delete(user.getAvatarUrl());
+                log.info("Avatar deleted from storage: {}", user.getAvatarUrl());
+            } catch (Exception e) {
+                log.warn("Failed to delete avatar: {}", e.getMessage());
+            }
+        }
+
+        // Soft delete (domain behavior)
+        user.delete();
+
+        // Save
+        userRepository.save(user);
+
+        // Publish events
+        user.getEvents().forEach(eventPublisher::publishEvent);
+        user.clearEvents();
+
+        log.info("Account deleted successfully: {}", userId);
+    }
+
+    /**
+     * Delete user avatar
+     * 
+     * Business Rule: Users can remove their avatar
+     */
+    @Transactional
+    public UserResponse deleteAvatar(Long userId) {
+        log.info("Deleting avatar for user: {}", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        // Delete avatar from storage if exists
+        if (user.getAvatarUrl() != null && !user.getAvatarUrl().isEmpty()) {
+            try {
+                storageService.delete(user.getAvatarUrl());
+                log.info("Avatar deleted from storage: {}", user.getAvatarUrl());
+            } catch (Exception e) {
+                log.warn("Failed to delete avatar from storage: {}", e.getMessage());
+            }
+        }
+
+        // Clear avatar in domain
+        user.updateAvatar(null);
+        User updatedUser = userRepository.save(user);
+
+        // Publish events
+        updatedUser.getEvents().forEach(eventPublisher::publishEvent);
+        updatedUser.clearEvents();
+
+        log.info("Avatar deleted successfully for user: {}", userId);
+
+        return userMapper.toResponse(updatedUser);
+    }
+    
+    /**
+     * Search users by name
+     * 
+     * Searches for users by name, surname, or full name (case-insensitive).
+     * Only returns active users.
+     * 
+     * @param query Search query (min 2 characters)
+     * @param page Page number (0-indexed)
+     * @param size Page size (max 50)
+     * @return PagedResponse of matching users
+     */
+    @Transactional(readOnly = true)
+    public PagedResponse<UserResponse> searchUsers(String query, int page, int size) {
+        log.info("Searching users: query={}, page={}, size={}", query, page, size);
+        
+        // Validate query
+        if (query == null || query.trim().length() < 2) {
+            throw new BusinessException(
+                "Arama sorgusu en az 2 karakter olmalıdır",
+                "SEARCH_QUERY_TOO_SHORT"
+            );
+        }
+        
+        // Limit page size
+        int limitedSize = Math.min(size, 50);
+        Pageable pageable = PageRequest.of(page, limitedSize);
+        
+        // Search users
+        Page<User> userPage = userRepository.searchByNameContaining(query.trim(), pageable);
+        
+        // Map to response
+        Page<UserResponse> responsePage = userPage.map(userMapper::toResponse);
+        
+        log.info("User search completed: query={}, results={}", query, userPage.getTotalElements());
+        
+        return PagedResponse.of(
+            responsePage.getContent(),
+            responsePage.getNumber(),
+            responsePage.getSize(),
+            responsePage.getTotalElements()
+        );
+    }
+}

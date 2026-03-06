@@ -6,7 +6,7 @@ import React, { memo } from 'react';
 import { StyleSheet, View, Text, Dimensions } from 'react-native';
 import Svg, { Rect, Defs, Mask, G, Line } from 'react-native-svg';
 import { useColors } from '@contexts/ThemeContext';
-import { spacing, typography } from '@theme';
+import { spacing, typography, borderRadius } from '@theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -36,7 +36,7 @@ export const DocumentGuide: React.FC<DocumentGuideProps> = memo(
     const GUIDE_X = (SCREEN_WIDTH - GUIDE_WIDTH) / 2;
     const GUIDE_Y = (SCREEN_HEIGHT - GUIDE_HEIGHT) / 2 - 50;
     const CORNER_SIZE = 24;
-    const BORDER_RADIUS = 12;
+    const BORDER_RADIUS = borderRadius.lg;
 
     const defaultHint =
       type === 'front'
@@ -65,7 +65,7 @@ export const DocumentGuide: React.FC<DocumentGuideProps> = memo(
           <Rect
             width={SCREEN_WIDTH}
             height={SCREEN_HEIGHT}
-            fill="rgba(0,0,0,0.6)"
+            fill={colors.background.overlay}
             mask="url(#guide-mask)"
           />
 
@@ -161,30 +161,30 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   hintContainer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
     alignItems: 'center',
+    left: 0,
     paddingHorizontal: spacing.lg,
+    position: 'absolute',
+    right: 0,
   },
   hintText: {
     ...typography.body,
     textAlign: 'center',
-    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
   typeIndicator: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
     alignItems: 'center',
+    left: 0,
+    position: 'absolute',
+    right: 0,
   },
   typeText: {
     ...typography.h3,
     fontWeight: '700',
     letterSpacing: 2,
-    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
   },

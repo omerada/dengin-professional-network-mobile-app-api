@@ -1,4 +1,4 @@
-# 🚀 Meslektaş FCM Durum Raporu ve Kullanım Kılavuzu
+# 🚀 Dengin FCM Durum Raporu ve Kullanım Kılavuzu
 
 **Tarih:** 10 Aralık 2025
 
@@ -45,7 +45,7 @@
 
 ```bash
 FIREBASE_ENABLED=true
-FIREBASE_PROJECT_ID=meslektas
+FIREBASE_PROJECT_ID=dengin
 FIREBASE_CREDENTIALS_JSON={"type":"service_account",...}
 ```
 
@@ -120,7 +120,7 @@ eas login
 
 Firebase Console'dan indir:
 
-- https://console.firebase.google.com/project/meslektas/settings/general
+- https://console.firebase.google.com/project/YOUR_PROJECT_ID/settings/general
 
 3. **EAS JSON Oluştur:**
 
@@ -174,7 +174,7 @@ cd android
 # iOS (Mac gerekli)
 cd ios
 pod install
-open meslektas.xcworkspace
+open dengin.xcworkspace
 ```
 
 **Avantajları:**
@@ -299,7 +299,7 @@ npm start
 
 ```bash
 # Firebase Console'a git
-# https://console.firebase.google.com/project/meslektas/settings/general
+# https://console.firebase.google.com/project/YOUR_PROJECT_ID/settings/general
 
 # Android app bölümünden:
 # google-services.json indir → mobile/android/app/ klasörüne koy
@@ -378,11 +378,11 @@ npx expo start --dev-client
 ### Android: google-services.json
 
 1. **Firebase Console'a Git:**
-   https://console.firebase.google.com/project/meslektas/settings/general
+   https://console.firebase.google.com/project/YOUR_PROJECT_ID/settings/general
 
 2. **Android App Bölümünü Bul:**
    - "Your apps" altında Android ikonu
-   - Package name: `com.meslektas.app`
+   - Package name: `com.dengin.app`
 
 3. **google-services.json İndir:**
    - "Download google-services.json" butonuna tıkla
@@ -392,7 +392,7 @@ npx expo start --dev-client
 
 1. **Firebase Console'da iOS App Bölümü:**
    - "Your apps" altında iOS ikonu
-   - Bundle ID: `com.meslektas.app`
+   - Bundle ID: `com.dengin.app`
 
 2. **GoogleService-Info.plist İndir:**
    - "Download GoogleService-Info.plist" butonuna tıkla

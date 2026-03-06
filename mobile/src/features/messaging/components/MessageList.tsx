@@ -7,12 +7,13 @@ import {
   FlatList,
   StyleSheet,
   View,
-  ActivityIndicator,
-  RefreshControl,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  ActivityIndicator,
 } from 'react-native';
 import { useColors } from '@contexts/ThemeContext';
+import { useSemanticHaptic } from '@shared/hooks';
+import { CustomRefreshControl, UnifiedLoadingState } from '@shared/components';
 import { MessageBubble } from './MessageBubble';
 import { TypingIndicator } from './TypingIndicator';
 import { EmptyChat } from './EmptyChat';
@@ -48,33 +49,66 @@ export const MessageList: React.FC<MessageListProps> = memo(
     onLoadMore,
     onRefresh,
     onMessageLongPress,
-    onReplyPress,
     onScrollToBottom,
   }) => {
     const colors = useColors();
+    const { triggerSystem } = useSemanticHaptic();
     const flatListRef = useRef<FlatList<Message>>(null);
     const scrollOffsetRef = useRef(0);
 
+    // UX IMPROVEMENT: Pull-to-refresh with haptic feedback
+    const handleRefresh = useCallback(() => {
+      triggerSystem('refresh');
+      onRefresh?.();
+    }, [onRefresh, triggerSystem]);
+
+    /**
+     * P3: Refined message grouping logic
+     * - Avatar: Same sender within 2 minutes
+     * - Timestamp separator: 1 hour gap
+     */
     const renderMessage = useCallback(
       ({ item, index }: { item: Message; index: number }) => {
         // senderId is number, currentUserId is string, convert for comparison
         const isOwn = item.senderId === Number(currentUserId);
 
-        // Önceki mesajla aynı gönderici mi kontrol et
         const previousMessage = messages[index + 1]; // inverted list
-        const showAvatar = !previousMessage || previousMessage.senderId !== item.senderId;
+        const nextMessage = messages[index - 1];
+
+        // Show avatar if different sender OR more than 2 minutes gap
+        let showAvatar = true;
+        if (previousMessage && previousMessage.senderId === item.senderId) {
+          const timeDiff =
+            new Date(item.sentAt).getTime() - new Date(previousMessage.sentAt).getTime();
+          showAvatar = timeDiff > 2 * 60 * 1000; // 2 minutes
+        }
+
+        // Show timestamp separator if more than 1 hour gap from next message
+        let showTimestamp = false;
+        if (nextMessage) {
+          const timeDiff = new Date(nextMessage.sentAt).getTime() - new Date(item.sentAt).getTime();
+          showTimestamp = timeDiff > 60 * 60 * 1000; // 1 hour
+        } else {
+          // Always show timestamp for last (oldest) message
+          showTimestamp = true;
+        }
+
+        // P2: Only animate the first message (most recent, since list is inverted)
+        const isNew = index === 0;
 
         return (
           <MessageBubble
             message={item}
             isOwn={isOwn}
             showAvatar={showAvatar}
+            showTimestamp={showTimestamp}
+            senderAvatar={isOwn ? null : item.senderName}
             onLongPress={onMessageLongPress}
-            onReply={onReplyPress}
+            isNew={isNew}
           />
         );
       },
-      [currentUserId, messages, onMessageLongPress, onReplyPress],
+      [currentUserId, messages, onMessageLongPress],
     );
 
     const keyExtractor = useCallback((item: Message) => item.messageId, []);
@@ -103,10 +137,10 @@ export const MessageList: React.FC<MessageListProps> = memo(
 
       return (
         <View style={styles.typingContainer}>
-          <TypingIndicator users={typingUsers} />
+          <TypingIndicator visible={true} userName={userName} />
         </View>
       );
-    }, [typingUsers]);
+    }, [typingUsers, userName]);
 
     const ListFooterComponent = useCallback(() => {
       if (!isFetchingMore) return null;
@@ -122,13 +156,13 @@ export const MessageList: React.FC<MessageListProps> = memo(
       if (isLoading) {
         return (
           <View style={styles.centerContainer}>
-            <ActivityIndicator size="large" color={colors.interactive.default} />
+            <UnifiedLoadingState strategy="spinner" variant="screen" />
           </View>
         );
       }
 
       return <EmptyChat userName={userName} />;
-    }, [isLoading, userName, colors.interactive.default]);
+    }, [isLoading, userName]);
 
     const getItemLayout = useCallback(
       (_data: ArrayLike<Message> | null | undefined, index: number) => ({
@@ -160,12 +194,7 @@ export const MessageList: React.FC<MessageListProps> = memo(
         scrollEventThrottle={16}
         refreshControl={
           onRefresh ? (
-            <RefreshControl
-              refreshing={false}
-              onRefresh={onRefresh}
-              colors={[colors.interactive.default]}
-              tintColor={colors.interactive.default}
-            />
+            <CustomRefreshControl refreshing={false} onRefresh={handleRefresh} />
           ) : undefined
         }
         showsVerticalScrollIndicator={false}
@@ -184,8 +213,12 @@ export const MessageList: React.FC<MessageListProps> = memo(
 MessageList.displayName = 'MessageList';
 
 const styles = StyleSheet.create({
-  list: {
+  centerContainer: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    // Inverted list için dönüştürme
+    transform: [{ scaleY: -1 }],
   },
   contentContainer: {
     paddingVertical: 8,
@@ -193,9 +226,8 @@ const styles = StyleSheet.create({
   emptyContainer: {
     flexGrow: 1,
   },
-  typingContainer: {
-    // Inverted list için dönüştürme
-    transform: [{ scaleY: -1 }],
+  list: {
+    flex: 1,
   },
   loadingContainer: {
     paddingVertical: 16,
@@ -203,10 +235,7 @@ const styles = StyleSheet.create({
     // Inverted list için dönüştürme
     transform: [{ scaleY: -1 }],
   },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  typingContainer: {
     // Inverted list için dönüştürme
     transform: [{ scaleY: -1 }],
   },

@@ -1,5 +1,5 @@
 // __tests__/unit/feed/ProfessionIcon.test.tsx
-// Meslektaş Design System - ProfessionIcon Component Tests
+// Dengin Design System - ProfessionIcon Component Tests
 // Oku: mobile-development-guide/sprints/30-SPRINT-HOME-SCREEN-COMPLETION.md Lines 692-780
 
 import React from 'react';

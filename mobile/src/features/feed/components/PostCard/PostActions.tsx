@@ -1,5 +1,5 @@
 // src/features/feed/components/PostCard/PostActions.tsx
-// Meslektaş Design System - Modern PostActions Component
+// Dengin Design System - Modern PostActions Component
 // Oku: mobile-development-guide/ui-ux-modernization/08-FEED-EXPERIENCE.md
 
 import React, { memo, useCallback } from 'react';
@@ -13,7 +13,7 @@ import Animated, {
 import Icon from 'react-native-vector-icons/Ionicons';
 
 import { useColors } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useSemanticHaptic } from '@shared/hooks';
 import { spring } from '@theme/animations';
 
 import { styles } from './PostCard.styles';
@@ -46,7 +46,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 export const PostActions: React.FC<PostActionsProps> = memo(
   ({ stats, userInteraction, onLike, onComment, onShare, onBookmark, testID }) => {
     const colors = useColors();
-    const { trigger } = useHaptic();
+    const { triggerSocial, triggerNavigation } = useSemanticHaptic();
 
     // Animation values
     const likeScale = useSharedValue(1);
@@ -73,40 +73,40 @@ export const PostActions: React.FC<PostActionsProps> = memo(
 
     // Like handler with bounce animation
     const handleLike = useCallback(() => {
-      trigger(userInteraction.isLiked ? 'light' : 'medium');
+      triggerSocial(userInteraction.isLiked ? 'unlike' : 'like');
       likeScale.value = withSequence(
         withSpring(1.3, { damping: 8, stiffness: 400 }),
         withSpring(1, { damping: 12, stiffness: 200 }),
       );
       onLike();
-    }, [onLike, trigger, userInteraction.isLiked, likeScale]);
+    }, [onLike, triggerSocial, userInteraction.isLiked, likeScale]);
 
     // Comment handler
     const handleComment = useCallback(() => {
-      trigger('light');
+      triggerNavigation('navigate');
       commentScale.value = withSequence(
         withSpring(1.15, spring.press),
         withSpring(1, spring.snappy),
       );
       onComment();
-    }, [onComment, trigger, commentScale]);
+    }, [onComment, triggerNavigation, commentScale]);
 
     // Share handler
     const handleShare = useCallback(() => {
-      trigger('light');
+      triggerSocial('share');
       shareScale.value = withSequence(withSpring(1.15, spring.press), withSpring(1, spring.snappy));
       onShare();
-    }, [onShare, trigger, shareScale]);
+    }, [onShare, triggerSocial, shareScale]);
 
     // Bookmark handler with animation
     const handleBookmark = useCallback(() => {
-      trigger(userInteraction.isSaved ? 'light' : 'medium');
+      triggerSocial(userInteraction.isSaved ? 'unlike' : 'like');
       bookmarkScale.value = withSequence(
         withSpring(1.2, { damping: 10, stiffness: 400 }),
         withSpring(1, { damping: 15, stiffness: 200 }),
       );
       onBookmark();
-    }, [onBookmark, trigger, userInteraction.isSaved, bookmarkScale]);
+    }, [onBookmark, triggerSocial, userInteraction.isSaved, bookmarkScale]);
 
     return (
       <View style={styles.actions} testID={testID}>

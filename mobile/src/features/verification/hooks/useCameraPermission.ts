@@ -9,10 +9,12 @@ import { cameraService, CameraPermissionStatus } from '../services/cameraService
 /**
  * Kamera izni hook sonucu
  */
-interface CameraPermissionResult {
+export interface CameraPermissionResult {
   hasPermission: boolean;
   status: CameraPermissionStatus;
   isLoading: boolean;
+  isChecking: boolean;
+  isDenied: boolean;
   requestPermission: () => Promise<boolean>;
   openSettings: () => void;
 }
@@ -71,7 +73,7 @@ export function useCameraPermission(): CameraPermissionResult {
           [
             { text: 'Hayır', style: 'cancel' },
             { text: 'Ayarları Aç', onPress: () => Linking.openSettings() },
-          ]
+          ],
         );
         return false;
       }
@@ -96,6 +98,8 @@ export function useCameraPermission(): CameraPermissionResult {
     hasPermission: status === 'granted',
     status,
     isLoading,
+    isChecking: isLoading,
+    isDenied: status === 'denied' || status === 'restricted',
     requestPermission,
     openSettings,
   };

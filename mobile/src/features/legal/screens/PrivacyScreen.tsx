@@ -2,12 +2,14 @@
 // Gizlilik Politikası Ekranı
 
 import React from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
+import { PressableScale } from '@shared/components';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing } from '@theme';
+import { UNIFIED_HEADER } from '@constants';
 
 /**
  * Privacy Policy Screen
@@ -22,22 +24,22 @@ export const PrivacyScreen: React.FC = () => {
       edges={['top', 'bottom', 'left', 'right']}>
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: colors.border.default }]}>
-        <TouchableOpacity
+        <PressableScale
           onPress={() => navigation.goBack()}
-          style={styles.backButton}
-          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+          hapticType="light"
+          style={styles.backButton}>
           <View
             style={{
-              width: 56,
-              height: 56,
-              borderRadius: 28,
+              width: UNIFIED_HEADER.HEIGHT,
+              height: UNIFIED_HEADER.HEIGHT,
+              borderRadius: UNIFIED_HEADER.HEIGHT / 2,
               backgroundColor: colors.background.secondary,
               justifyContent: 'center',
               alignItems: 'center',
             }}>
             <Icon name="chevron-left" size={32} color={colors.text.primary} />
           </View>
-        </TouchableOpacity>
+        </PressableScale>
         <Text style={[styles.headerTitle, { color: colors.text.primary }]}>
           Gizlilik Politikası
         </Text>
@@ -54,7 +56,7 @@ export const PrivacyScreen: React.FC = () => {
         </Text>
 
         <Text style={[styles.intro, { color: colors.text.secondary }]}>
-          Meslektaş olarak gizliliğinizi ciddiye alıyoruz. Bu politika, kişisel verilerinizin nasıl
+          Dengin olarak gizliliğinizi ciddiye alıyoruz. Bu politika, kişisel verilerinizin nasıl
           toplandığını, kullanıldığını ve korunduğunu açıklar.
         </Text>
 
@@ -138,8 +140,8 @@ export const PrivacyScreen: React.FC = () => {
         <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>9. İletişim</Text>
         <Text style={[styles.paragraph, { color: colors.text.secondary }]}>
           Gizlilik politikası ve kişisel verileriniz hakkında sorularınız için:
-          {'\n\n'}E-posta: privacy@meslektas.com
-          {'\n'}Veri Sorumlusu: Meslektaş Teknoloji A.Ş.
+          {'\n\n'}E-posta: privacy@dengin.com
+          {'\n'}Veri Sorumlusu: Dengin Teknoloji A.Ş.
         </Text>
 
         <View style={{ height: spacing.xl }} />
@@ -150,8 +152,8 @@ export const PrivacyScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   backButton: {
-    justifyContent: 'center',
     alignItems: 'flex-start',
+    justifyContent: 'center',
   },
   backButtonText: {
     fontSize: 32,
@@ -173,8 +175,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
     paddingLeft: spacing.sm,
     paddingRight: spacing.md,
-    paddingVertical: spacing.md,
     paddingTop: spacing.lg,
+    paddingVertical: spacing.md,
   },
   headerTitle: {
     fontSize: 18,

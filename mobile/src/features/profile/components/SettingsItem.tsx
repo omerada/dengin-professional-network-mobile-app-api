@@ -3,10 +3,12 @@
 // Oku: mobile-development-guide/features/08-PROFILE-MODULE.md
 
 import React, { memo, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Switch, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Switch, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useColors } from '@contexts/ThemeContext';
-import { spacing, fontSize } from '@theme';
+import { useSemanticHaptic } from '@shared/hooks';
+import { PressableScale } from '@shared/components';
+import { spacing, fontSize, borderRadius } from '@theme';
 import type { SettingsItemType } from '../types';
 
 interface SettingsItemProps extends SettingsItemType {
@@ -28,12 +30,19 @@ interface SettingsItemProps extends SettingsItemType {
 export const SettingsItem: React.FC<SettingsItemProps> = memo(
   ({ id: _id, title, subtitle, icon, type, value, onPress, onToggle, isLoading = false }) => {
     const colors = useColors();
+    const { triggerNavigation, triggerSystem } = useSemanticHaptic();
 
     const handlePress = useCallback(() => {
       if (!isLoading && onPress) {
+        // Haptic feedback based on type
+        if (type === 'danger') {
+          triggerSystem('alert');
+        } else {
+          triggerNavigation('navigate');
+        }
         onPress();
       }
-    }, [isLoading, onPress]);
+    }, [isLoading, onPress, type, triggerNavigation, triggerSystem]);
 
     const handleToggle = useCallback(
       (newValue: boolean) => {
@@ -77,7 +86,7 @@ export const SettingsItem: React.FC<SettingsItemProps> = memo(
                 false: colors.border.default,
                 true: colors.interactive.default,
               }}
-              thumbColor="#FFFFFF"
+              thumbColor={colors.background.primary}
             />
           )}
 
@@ -88,15 +97,20 @@ export const SettingsItem: React.FC<SettingsItemProps> = memo(
       </View>
     );
 
-    // Toggle items don't need to be wrapped in TouchableOpacity
+    // Toggle items don't need to be wrapped in PressableScale
     if (type === 'toggle') {
       return content;
     }
 
     return (
-      <TouchableOpacity onPress={handlePress} disabled={isLoading} activeOpacity={0.7}>
+      <PressableScale
+        onPress={handlePress}
+        disabled={isLoading}
+        activeScale={0.98}
+        haptic
+        hapticType={type === 'danger' ? 'heavy' : 'light'}>
         {content}
-      </TouchableOpacity>
+      </PressableScale>
     );
   },
 );
@@ -105,18 +119,26 @@ SettingsItem.displayName = 'SettingsItem';
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: spacing.md,
+    flexDirection: 'row',
     paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
   },
   iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: borderRadius.md,
+    height: 36,
+    justifyContent: 'center',
     marginRight: spacing.md,
+    width: 36,
+  },
+  rightContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  subtitle: {
+    fontSize: fontSize.sm,
+    marginTop: 2,
   },
   textContainer: {
     flex: 1,
@@ -125,13 +147,5 @@ const styles = StyleSheet.create({
   title: {
     fontSize: fontSize.base,
     fontWeight: '500',
-  },
-  subtitle: {
-    fontSize: fontSize.sm,
-    marginTop: 2,
-  },
-  rightContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
   },
 });

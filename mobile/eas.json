@@ -15,10 +15,7 @@
         "buildConfiguration": "Debug",
         "simulator": false
       },
-      "env": {
-        "API_BASE_URL": "http://192.168.1.101:8080",
-        "WS_URL": "ws://192.168.1.101:8080/ws"
-      }
+      "_comment": "Development environment variables are loaded from .env file automatically"
     },
     "preview": {
       "distribution": "internal",
@@ -37,8 +34,8 @@
         "simulator": false
       },
       "env": {
-        "API_BASE_URL": "https://api.meslektas.com",
-        "WS_URL": "wss://api.meslektas.com/ws"
+        "API_BASE_URL": "https://api.your-domain.com",
+        "WS_URL": "wss://api.your-domain.com/ws"
       }
     }
   },

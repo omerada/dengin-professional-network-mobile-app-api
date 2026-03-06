@@ -1,5 +1,5 @@
 // src/shared/components/Button/Button.tsx
-// Meslektaş Design System - Modern Button Component
+// Dengin Design System - Modern Button Component
 // Oku: mobile-development-guide/ui-ux-modernization/04-COMPONENT-LIBRARY.md
 
 import React, { memo, useCallback, useMemo } from 'react';
@@ -12,8 +12,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
-import { spring } from '@theme/animations';
+import { useSemanticHaptic } from '@shared/hooks';
+import { PRESS_ANIMATION_CONFIG } from '@constants/unifiedGestures';
+
 import { styles, getVariantStyles } from './Button.styles';
 import { ButtonProps, BUTTON_SIZE_CONFIG } from './Button.types';
 
@@ -54,7 +55,6 @@ export const Button = memo<ButtonProps>(
     onPress,
     onLongPress,
     hapticType = 'light',
-    pressScale = 0.97,
     style,
     textStyle,
     loadingColor,
@@ -65,7 +65,7 @@ export const Button = memo<ButtonProps>(
   }) => {
     // Hooks
     const { colors } = useTheme();
-    const { trigger } = useHaptic();
+    const { triggerSystem } = useSemanticHaptic();
 
     // Animation value
     const pressed = useSharedValue(0);
@@ -83,32 +83,43 @@ export const Button = memo<ButtonProps>(
       return '#FFFFFF';
     }, [loadingColor, variant, colors]);
 
-    // Animation handlers
+    // Animation handlers - PRODUCTION STANDARD: Unified press animation
     const handlePressIn = useCallback(() => {
-      pressed.value = withSpring(1, spring.press);
-    }, [pressed]);
+      const config =
+        variant === 'danger' ? PRESS_ANIMATION_CONFIG.DESTRUCTIVE : PRESS_ANIMATION_CONFIG.STANDARD;
+      pressed.value = withSpring(config.scale, config.spring);
+    }, [pressed, variant]);
 
     const handlePressOut = useCallback(() => {
-      pressed.value = withSpring(0, spring.press);
+      const config = PRESS_ANIMATION_CONFIG.STANDARD;
+      pressed.value = withSpring(1, config.spring);
     }, [pressed]);
 
     const handlePress = useCallback(() => {
       if (disabled || loading) return;
-      trigger(hapticType);
+      // Semantic mapping based on variant
+      if (variant === 'danger') {
+        triggerSystem('alert');
+      } else if (variant === 'success') {
+        triggerSystem('success');
+      } else {
+        triggerSystem('confirm');
+      }
       onPress?.();
-    }, [disabled, loading, trigger, hapticType, onPress]);
+    }, [disabled, loading, triggerSystem, variant, onPress]);
 
     const handleLongPress = useCallback(() => {
       if (disabled || loading || !onLongPress) return;
-      trigger('medium');
+      triggerSystem('confirm');
       onLongPress();
-    }, [disabled, loading, trigger, onLongPress]);
+    }, [disabled, loading, triggerSystem, onLongPress]);
 
-    // Animated styles
+    // Animated styles - PRODUCTION STANDARD: Dynamic scale based on variant
     const animatedContainerStyle = useAnimatedStyle(() => {
-      const scaleValue = interpolate(pressed.value, [0, 1], [1, pressScale]);
+      // pressed.value: 0 = not pressed, 1 = pressed
+      // When pressed, use scale from config; when not pressed, use 1
       return {
-        transform: [{ scale: scaleValue }],
+        transform: [{ scale: pressed.value }],
       };
     });
 

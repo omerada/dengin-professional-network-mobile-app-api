@@ -4,30 +4,32 @@
 // Oku: mobile-development-guide/ui-ux-modernization/07-SCREEN-REDESIGNS.md
 
 import React, { useCallback, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, Platform, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated from 'react-native-reanimated';
 import Icon from 'react-native-vector-icons/Feather';
+import FAIcon from 'react-native-vector-icons/FontAwesome';
 
 import { useNavigation } from '@react-navigation/native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useColors } from '@contexts/ThemeContext';
 import { useLocale } from '@contexts/LocaleContext';
-import { Button, Input } from '@shared/components';
+import { useSemanticHaptic } from '@shared/hooks';
+import {
+  Button,
+  Input,
+  ShakeAnimation,
+  UnifiedScreenHeader,
+  KeyboardAwareScreen,
+} from '@shared/components';
+import { SAFE_AREA_EDGES, SCREEN_ANIMATIONS } from '@constants';
 import { useLogin, useBiometricLogin } from '../hooks';
 import { useAuthStore } from '../stores';
 import { loginSchema, LoginSchemaType } from '../validation';
 import { AuthStackNavigationProp } from '@shared/types';
 import { spacing } from '@theme';
-import { getErrorMessage } from '@core/utils/errorUtils';
+import { styles } from './LoginScreen.styles';
 
 /**
  * Modern Login Screen
@@ -42,6 +44,7 @@ export const LoginScreen: React.FC = () => {
   const colors = useColors();
   const { t } = useLocale();
   const navigation = useNavigation<AuthStackNavigationProp>();
+  const { triggerSystem, triggerNavigation } = useSemanticHaptic();
 
   const lastLoginEmail = useAuthStore(state => state.lastLoginEmail);
   const { login, isLoading, error, isError, reset } = useLogin();
@@ -76,173 +79,194 @@ export const LoginScreen: React.FC = () => {
 
   const onSubmit = useCallback(
     (data: LoginSchemaType) => {
+      triggerSystem('confirm');
       reset();
       login(data);
     },
-    [login, reset],
+    [login, reset, triggerSystem],
   );
 
   const handleForgotPassword = useCallback(() => {
+    triggerNavigation('navigate');
     navigation.navigate('ForgotPassword');
-  }, [navigation]);
-
-  const handleBack = useCallback(() => {
-    navigation.goBack();
-  }, [navigation]);
+  }, [navigation, triggerNavigation]);
 
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background.primary }]}
-      edges={['top', 'bottom', 'left', 'right']}>
-      <KeyboardAvoidingView
-        style={styles.keyboardAvoid}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}>
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
-          showsVerticalScrollIndicator={false}>
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity
-              onPress={handleBack}
-              accessible={true}
-              accessibilityRole="button"
-              accessibilityLabel="Geri dön"
-              style={styles.backButton}
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
-              <View
-                style={[
-                  styles.backButtonCircle,
-                  { backgroundColor: colors.background.secondary, marginLeft: -8 },
-                ]}>
-                <Icon name="chevron-left" size={28} color={colors.text.primary} />
-              </View>
-            </TouchableOpacity>
+      edges={SAFE_AREA_EDGES.full}>
+      <UnifiedScreenHeader
+        variant="default"
+        title="Giriş Yap"
+        showBackButton={false}
+        showBorder={false}
+      />
+      <KeyboardAwareScreen mode="padding">
+        {/* Hero Section - DENGIN Branding */}
+        <Animated.View entering={SCREEN_ANIMATIONS.heroEnter} style={styles.heroSection}>
+          <View style={styles.logoContainer}>
+            <Text style={[styles.logoText, { color: colors.interactive.default }]}>DENGIN</Text>
           </View>
 
-          {/* Hero Section */}
-          <View style={styles.heroSection}>
-            <View style={styles.logoContainer}>
-              <View
+          {/* Slogan */}
+          <Text style={[styles.slogan, { color: colors.text.secondary }]}>
+            Profesyoneller için güvenli sosyal ağ
+          </Text>
+        </Animated.View>
+
+        {/* Social Login - Priority (Üstte) */}
+        <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(0)} style={styles.socialSection}>
+          <Text style={[styles.socialTitle, { color: colors.text.primary }]}>Hızlı Giriş</Text>
+          <View style={styles.socialButtonsColumn}>
+            {Platform.OS === 'ios' && (
+              <TouchableOpacity
                 style={[
-                  styles.logoPlaceholder,
+                  styles.socialButtonLarge,
                   {
-                    backgroundColor: colors.interactive.default,
+                    backgroundColor: colors.background.secondary,
+                    borderColor: colors.border.default,
                   },
-                ]}>
-                <Text style={[styles.logoText, { color: '#FFFFFF' }]}>M</Text>
-              </View>
-            </View>
-            <View style={styles.titleContainer}>
-              <Text style={[styles.title, { color: colors.text.primary }]}>
-                {t('auth.welcomeBack')}
-              </Text>
-              <Text style={[styles.subtitle, { color: colors.text.secondary }]}>
-                Profesyonel ağınıza giriş yapın
-              </Text>
-            </View>
-          </View>
+                ]}
+                disabled={true}>
+                <FAIcon name="apple" size={20} color={colors.text.primary} />
+                <Text style={[styles.socialButtonLargeText, { color: colors.text.primary }]}>
+                  Apple ile Giriş Yap
+                </Text>
+              </TouchableOpacity>
+            )}
 
-          {/* Error Message */}
-          {isError && error && (
-            <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
-              <Text style={[styles.errorText, { color: colors.status.error }]}>
-                {getErrorMessage(error)}
-              </Text>
-            </View>
-          )}
-
-          {/* Form */}
-          <View style={styles.form}>
-            <Controller
-              control={control}
-              name="email"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label={t('auth.email')}
-                  placeholder="ornek@email.com"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoComplete="email"
-                  autoCorrect={false}
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.email?.message}
-                  required
-                />
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="password"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label={t('auth.password')}
-                  placeholder="••••••••"
-                  secureTextEntry
-                  autoCapitalize="none"
-                  autoComplete="password"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  error={errors.password?.message}
-                  required
-                />
-              )}
-            />
-
-            {/* Forgot Password */}
             <TouchableOpacity
-              onPress={handleForgotPassword}
-              accessible={true}
-              accessibilityRole="link"
-              accessibilityLabel="Şifremi unuttum"
-              style={styles.forgotPassword}>
-              <Text style={{ color: colors.interactive.default, fontSize: 14 }}>
-                {t('auth.forgotPassword')}
+              style={[
+                styles.socialButtonLarge,
+                {
+                  backgroundColor: colors.background.secondary,
+                  borderColor: colors.border.default,
+                },
+              ]}
+              disabled={true}>
+              <FAIcon name="google" size={20} color={colors.text.primary} />
+              <Text style={[styles.socialButtonLargeText, { color: colors.text.primary }]}>
+                Google ile Giriş Yap
               </Text>
             </TouchableOpacity>
           </View>
+        </Animated.View>
 
-          {/* Login Button */}
-          <View style={styles.actions}>
-            <Button
-              title={t('auth.login')}
-              onPress={handleSubmit(onSubmit)}
-              loading={isLoading}
-              disabled={isLoading || isBiometricLoading}
-              size="lg"
-              fullWidth
-            />
+        {/* Divider */}
+        <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(1)} style={styles.divider}>
+          <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
+          <Text style={[styles.dividerText, { color: colors.text.tertiary }]}>veya email ile</Text>
+          <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
+        </Animated.View>
 
-            {/* Biometric Login */}
-            {isBiometricAvailable && (
-              <>
-                <View style={styles.divider}>
-                  <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
-                  <Text style={[styles.dividerText, { color: colors.text.secondary }]}>veya</Text>
-                  <View style={[styles.dividerLine, { backgroundColor: colors.border.default }]} />
-                </View>
+        {/* Error Message - Professional */}
+        {isError && error && (
+          <ShakeAnimation trigger={isError}>
+            <View style={[styles.errorContainer, { backgroundColor: colors.status.errorBg }]}>
+              <Icon name="alert-circle" size={18} color={colors.status.error} />
+              <View style={styles.errorContent}>
+                <Text style={[styles.errorText, { color: colors.status.error }]}>
+                  {error.message?.includes('credentials') || error.message?.includes('password')
+                    ? 'E-posta veya şifre hatalı. Lütfen tekrar deneyin.'
+                    : error.message?.includes('network') || error.message?.includes('connection')
+                      ? 'Bağlantı sorunu. İnternet bağlantınızı kontrol edin.'
+                      : 'Bir hata oluştu. Lütfen tekrar deneyin.'}
+                </Text>
+                <TouchableOpacity onPress={handleForgotPassword}>
+                  <Text style={[styles.errorAction, { color: colors.interactive.default }]}>
+                    Şifremi Unuttum
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ShakeAnimation>
+        )}
 
-                <Button
-                  title={`${biometricName} ile Giriş`}
-                  onPress={loginWithBiometric}
-                  loading={isBiometricLoading}
-                  disabled={isLoading || isBiometricLoading}
-                  variant="outline"
-                  size="lg"
-                  fullWidth
-                />
-              </>
+        {/* Form */}
+        <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(2)} style={styles.form}>
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label={t('auth.email')}
+                placeholder="ornek@email.com"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                autoCorrect={false}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={errors.email?.message}
+                required
+              />
             )}
-          </View>
+          />
 
-          {/* Register Link */}
-          <View style={styles.registerContainer}>
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label={t('auth.password')}
+                placeholder="••••••••"
+                secureTextEntry
+                autoCapitalize="none"
+                autoComplete="password"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={errors.password?.message}
+                required
+              />
+            )}
+          />
+
+          {/* Forgot Password */}
+          <TouchableOpacity
+            onPress={handleForgotPassword}
+            accessible={true}
+            accessibilityRole="link"
+            accessibilityLabel="Şifremi unuttum"
+            style={styles.forgotPassword}>
+            <Text style={{ color: colors.interactive.default, fontSize: 14 }}>
+              {t('auth.forgotPassword')}
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/* Login Button */}
+        <Animated.View entering={SCREEN_ANIMATIONS.listItemEnter(1)} style={styles.actions}>
+          <Button
+            title={isLoading ? 'Giriş yapılıyor...' : t('auth.login')}
+            onPress={handleSubmit(onSubmit)}
+            loading={isLoading}
+            disabled={isLoading || isBiometricLoading}
+            size="lg"
+            fullWidth
+          />
+
+          {/* Biometric Login */}
+          {isBiometricAvailable && (
+            <Button
+              title={`${biometricName} ile Giriş`}
+              onPress={loginWithBiometric}
+              loading={isBiometricLoading}
+              disabled={isLoading || isBiometricLoading}
+              variant="ghost"
+              size="md"
+              fullWidth
+              style={{ marginTop: spacing.md }}
+            />
+          )}
+        </Animated.View>
+
+        {/* Footer: Register CTA */}
+        <View style={styles.footer}>
+          <Animated.View
+            entering={SCREEN_ANIMATIONS.listItemEnter(4)}
+            style={styles.registerContainer}>
             <Text style={{ color: colors.text.secondary }}>Hesabınız yok mu? </Text>
             <TouchableOpacity
               onPress={() => navigation.navigate('Register')}
@@ -253,113 +277,9 @@ export const LoginScreen: React.FC = () => {
                 {t('auth.register')}
               </Text>
             </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+          </Animated.View>
+        </View>
+      </KeyboardAwareScreen>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  keyboardAvoid: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: spacing.xl,
-  },
-  header: {
-    height: 56,
-    justifyContent: 'center',
-    marginBottom: spacing.lg,
-    marginTop: spacing.sm,
-    marginLeft: spacing.xs,
-  },
-  backButton: {
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  backButtonCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  heroSection: {
-    alignItems: 'center',
-    marginBottom: spacing['2xl'],
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: spacing.lg,
-  },
-  logoPlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  logoText: {
-    fontSize: 48,
-    fontWeight: 'bold',
-  },
-  titleContainer: {
-    marginBottom: spacing.md,
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: spacing.sm,
-  },
-  subtitle: {
-    fontSize: 16,
-  },
-  errorContainer: {
-    padding: spacing.md,
-    borderRadius: 8,
-    marginBottom: spacing.xl + spacing.md,
-  },
-  errorText: {
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  form: {
-    marginBottom: spacing.lg,
-  },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginTop: -spacing.sm,
-  },
-  actions: {
-    marginBottom: spacing.xl,
-  },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: spacing.lg,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-  },
-  dividerText: {
-    marginHorizontal: spacing.md,
-    fontSize: 14,
-  },
-  registerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: spacing.xl,
-  },
-});

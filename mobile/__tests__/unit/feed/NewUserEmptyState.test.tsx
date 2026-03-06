@@ -70,7 +70,7 @@ describe('NewUserEmptyState', () => {
       expect(getByText(/Hoş Geldin, Ahmet!/i)).toBeTruthy();
 
       // Subtitle
-      expect(getByText(/Meslektaş topluluğuna katılmak için birkaç adım kaldı/i)).toBeTruthy();
+      expect(getByText(/Dengin topluluğuna katılmak için birkaç adım kaldı/i)).toBeTruthy();
 
       // Checklist items
       expect(getByText('Profil fotoğrafı ekle')).toBeTruthy();

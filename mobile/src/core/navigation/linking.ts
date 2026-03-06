@@ -9,7 +9,7 @@ import { APP_CONFIG } from '@config/app';
  * Deep linking configuration
  */
 export const linking: LinkingOptions<RootStackParamList> = {
-  prefixes: [APP_CONFIG.DEEP_LINK.PREFIX, 'https://meslektas.com', 'https://app.meslektas.com'],
+  prefixes: [APP_CONFIG.DEEP_LINK.PREFIX, 'https://dengin.com', 'https://app.dengin.com'],
 
   config: {
     screens: {

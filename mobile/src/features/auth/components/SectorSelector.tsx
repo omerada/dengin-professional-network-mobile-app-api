@@ -131,7 +131,7 @@ export const SectorSelector: React.FC<SectorSelectorProps> = ({
           <Icon
             name={getSectorIcon(item.code)}
             size={20}
-            color={isSelected ? '#FFFFFF' : colors.text.secondary}
+            color={isSelected ? colors.text.inverse : colors.text.secondary}
           />
         </View>
 
@@ -329,163 +329,15 @@ export const SectorSelector: React.FC<SectorSelectorProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginBottom: spacing.lg,
-  },
-  labelContainer: {
-    flexDirection: 'row',
-    marginBottom: spacing.xs,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  selector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: 56,
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingHorizontal: spacing.md,
-    gap: spacing.sm,
-  },
-  selectedIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  selectorText: {
-    flex: 1,
-    fontSize: 16,
-  },
-  errorText: {
-    fontSize: 12,
-    marginTop: spacing.xs,
-  },
-  hint: {
-    fontSize: 12,
-    marginTop: spacing.xs,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: MODAL_OVERLAY_COLOR,
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    maxHeight: '80%',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingBottom: spacing.xl,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.md,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.md,
-    paddingHorizontal: spacing.md,
-    height: 48,
-    borderRadius: 12,
-    borderWidth: 1,
-    gap: spacing.sm,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-  },
-  listContent: {
-    paddingHorizontal: spacing.lg,
-    gap: spacing.sm,
-  },
-  sectorItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing.md,
-    borderRadius: 12,
-    borderWidth: 1,
-    gap: spacing.md,
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sectorContent: {
-    flex: 1,
-    gap: spacing.xs,
-  },
-  sectorHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  sectorName: {
-    fontSize: 16,
-    flex: 1,
-  },
-  verificationBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.xs,
-    paddingVertical: 4,
-    borderRadius: 6,
-    gap: 4,
-  },
   badgeText: {
     fontSize: 10,
     fontWeight: '600',
   },
-  sectorDescription: {
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  userCount: {
-    fontSize: 12,
-  },
   checkIcon: {
     marginLeft: spacing.sm,
   },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.xl * 2,
-  },
-  loadingText: {
-    marginTop: spacing.md,
-    fontSize: 14,
-  },
-  errorContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.xl * 2,
-    paddingHorizontal: spacing.xl,
-  },
-  errorTitle: {
-    marginTop: spacing.md,
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  errorDescription: {
-    marginTop: spacing.sm,
-    fontSize: 14,
-    textAlign: 'center',
+  container: {
+    marginBottom: spacing.lg,
   },
   emptyContainer: {
     alignItems: 'center',
@@ -493,7 +345,155 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xl * 2,
   },
   emptyText: {
-    marginTop: spacing.md,
     fontSize: 14,
+    marginTop: spacing.md,
+  },
+  errorContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.xl * 2,
+  },
+  errorDescription: {
+    fontSize: 14,
+    marginTop: spacing.sm,
+    textAlign: 'center',
+  },
+  errorText: {
+    fontSize: 12,
+    marginTop: spacing.xs,
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: spacing.md,
+  },
+  hint: {
+    fontSize: 12,
+    marginTop: spacing.xs,
+  },
+  iconContainer: {
+    alignItems: 'center',
+    borderRadius: 10,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  labelContainer: {
+    flexDirection: 'row',
+    marginBottom: spacing.xs,
+  },
+  listContent: {
+    gap: spacing.sm,
+    paddingHorizontal: spacing.lg,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    paddingVertical: spacing.xl * 2,
+  },
+  loadingText: {
+    fontSize: 14,
+    marginTop: spacing.md,
+  },
+  modalContent: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '80%',
+    paddingBottom: spacing.xl,
+  },
+  modalHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingBottom: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+  },
+  modalOverlay: {
+    backgroundColor: MODAL_OVERLAY_COLOR,
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  searchContainer: {
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    height: 48,
+    marginBottom: spacing.md,
+    marginHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+  },
+  sectorContent: {
+    flex: 1,
+    gap: spacing.xs,
+  },
+  sectorDescription: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  sectorHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  sectorItem: {
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: spacing.md,
+    padding: spacing.md,
+  },
+  sectorName: {
+    flex: 1,
+    fontSize: 16,
+  },
+  selectedIconContainer: {
+    alignItems: 'center',
+    borderRadius: 8,
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
+  },
+  selector: {
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    height: 56,
+    paddingHorizontal: spacing.md,
+  },
+  selectorText: {
+    flex: 1,
+    fontSize: 16,
+  },
+  userCount: {
+    fontSize: 12,
+  },
+  verificationBadge: {
+    alignItems: 'center',
+    borderRadius: 6,
+    flexDirection: 'row',
+    gap: 4,
+    paddingHorizontal: spacing.xs,
+    paddingVertical: 4,
   },
 });

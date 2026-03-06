@@ -1,10 +1,10 @@
-# 📱 Meslektaş Mobile - AI Agent Development Guide
+# 📱 Dengin Mobile - AI Agent Development Guide
 
 > **AI-Optimized Documentation** - Kısa, öz, net. Sıfır şişirme, maksimum verimlilik.
 
 ## 🎯 Hızlı Başlangıç
 
-Bu dokümantasyon AI agent'ların Meslektaş mobile app'ini hatasız geliştirmesi için tasarlandı.
+Bu dokümantasyon AI agent'ların Dengin mobile app'ini hatasız geliştirmesi için tasarlandı.
 
 ```bash
 # Proje dizini
@@ -283,4 +283,4 @@ graph LR
 
 **Son Güncelleme:** 2024-12-09  
 **Version:** 2.0 (AI-Optimized)  
-**Maintainer:** Meslektaş Mobile Team
+**Maintainer:** Dengin Mobile Team

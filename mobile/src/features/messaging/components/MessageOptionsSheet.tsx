@@ -1,17 +1,14 @@
 // src/features/messaging/components/MessageOptionsSheet.tsx
-// Mesaj seçenekleri alt sayfası
+// Mesaj seçenekleri alt sayfası - Modern BottomSheet Implementation
 // Oku: mobile-development-guide/sprints/26-SPRINT-7-8.md
 
-import React, { memo, useCallback, forwardRef, useImperativeHandle, useRef } from 'react';
+import React, { memo, useCallback, forwardRef, useImperativeHandle, useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import * as Clipboard from 'expo-clipboard';
-import BottomSheet, {
-  BottomSheetBackdrop,
-  BottomSheetView,
-  type BottomSheetBackdropProps,
-} from '@gorhom/bottom-sheet';
 import { useColors } from '@contexts/ThemeContext';
+import { BottomSheet } from '@shared/components';
+import { spacing } from '@theme';
 import type { Message } from '../types';
 
 interface MessageOptionsSheetProps {
@@ -59,19 +56,19 @@ OptionItem.displayName = 'OptionItem';
 export const MessageOptionsSheet = forwardRef<MessageOptionsSheetRef, MessageOptionsSheetProps>(
   ({ message, isOwn, onReply, onCopy, onDelete, onReport }, ref) => {
     const colors = useColors();
-    const bottomSheetRef = useRef<any>(null);
+    const [visible, setVisible] = useState(false);
 
     useImperativeHandle(ref, () => ({
       open: () => {
-        bottomSheetRef.current?.expand();
+        setVisible(true);
       },
       close: () => {
-        bottomSheetRef.current?.close();
+        setVisible(false);
       },
     }));
 
     const handleClose = useCallback(() => {
-      bottomSheetRef.current?.close();
+      setVisible(false);
     }, []);
 
     const handleReply = useCallback(() => {
@@ -103,23 +100,9 @@ export const MessageOptionsSheet = forwardRef<MessageOptionsSheetRef, MessageOpt
       }
     }, [message, onReport, handleClose]);
 
-    const renderBackdrop = useCallback(
-      (props: BottomSheetBackdropProps) => (
-        <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />
-      ),
-      [],
-    );
-
     return (
-      <BottomSheet
-        ref={bottomSheetRef}
-        index={-1}
-        snapPoints={['30%']}
-        enablePanDownToClose
-        backdropComponent={renderBackdrop}
-        backgroundStyle={{ backgroundColor: colors.background.primary }}
-        handleIndicatorStyle={{ backgroundColor: colors.text.secondary }}>
-        <BottomSheetView style={styles.content}>
+      <BottomSheet visible={visible} onClose={handleClose} height="auto" swipeToDismiss={true}>
+        <View style={styles.content}>
           {/* Message preview */}
           {message && (
             <View style={[styles.preview, { backgroundColor: colors.background.secondary }]}>
@@ -143,7 +126,7 @@ export const MessageOptionsSheet = forwardRef<MessageOptionsSheetRef, MessageOpt
               <OptionItem icon="flag-outline" label="Bildir" onPress={handleReport} destructive />
             )}
           </View>
-        </BottomSheetView>
+        </View>
       </BottomSheet>
     );
   },
@@ -153,41 +136,30 @@ MessageOptionsSheet.displayName = 'MessageOptionsSheet';
 
 const styles = StyleSheet.create({
   content: {
-    flex: 1,
-  },
-  preview: {
-    marginHorizontal: 16,
-    marginVertical: 8,
-    padding: 12,
-    borderRadius: 8,
-  },
-  previewText: {
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  options: {
-    paddingTop: 8,
+    paddingBottom: spacing['4'],
   },
   optionItem: {
-    flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    gap: 16,
+    flexDirection: 'row',
+    gap: spacing['4'],
+    paddingHorizontal: spacing['4'],
+    paddingVertical: spacing['3.5'],
   },
   optionLabel: {
     fontSize: 16,
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+  options: {
+    paddingTop: spacing['2'],
   },
-  modalContent: {
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    paddingTop: 16,
-    paddingBottom: 32,
+  preview: {
+    borderRadius: spacing['2'],
+    marginHorizontal: spacing['4'],
+    marginVertical: spacing['2'],
+    padding: spacing['3'],
+  },
+  previewText: {
+    fontSize: 14,
+    lineHeight: 20,
   },
 });
 

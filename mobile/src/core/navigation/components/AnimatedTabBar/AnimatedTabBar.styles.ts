@@ -1,9 +1,9 @@
 // src/core/navigation/components/AnimatedTabBar/AnimatedTabBar.styles.ts
-// Meslektaş Design System - AnimatedTabBar Styles
+// Dengin Design System - AnimatedTabBar Styles
 // Oku: mobile-development-guide/ui-ux-modernization/06-MICRO-INTERACTIONS.md
 
 import { StyleSheet, Platform } from 'react-native';
-import { spacing } from '@theme';
+import { spacing, shadows } from '@theme';
 
 export const TAB_BAR_HEIGHT = Platform.select({ ios: 84, android: 68 }) ?? 68;
 export const TAB_ICON_SIZE = 26;
@@ -19,14 +19,34 @@ export const styles = StyleSheet.create({
     height: TAB_BADGE_SIZE,
     justifyContent: 'center',
     minWidth: TAB_BADGE_SIZE,
-    paddingHorizontal: 4,
+    paddingHorizontal: spacing['1'],
     position: 'absolute',
-    right: 6,
-    top: -4,
+    right: spacing['1.5'],
+    top: -spacing['1'],
   },
   badgeText: {
     fontSize: 10,
     fontWeight: '700',
+  },
+  centerFabButton: {
+    alignItems: 'center',
+    borderRadius: CENTER_FAB_SIZE / 2,
+    height: CENTER_FAB_SIZE,
+    justifyContent: 'center',
+    width: CENTER_FAB_SIZE,
+    ...shadows.md,
+  },
+  centerFabContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    marginTop: -16,
+  },
+  centerFabLabel: {
+    fontSize: 9,
+    fontWeight: '600',
+    marginTop: spacing['1'],
+    textAlign: 'center',
   },
   container: {
     alignItems: 'flex-start',
@@ -62,29 +82,5 @@ export const styles = StyleSheet.create({
     flex: 1,
     gap: 4,
     justifyContent: 'center',
-  },
-  centerFabContainer: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-    marginTop: -16,
-  },
-  centerFabButton: {
-    alignItems: 'center',
-    borderRadius: CENTER_FAB_SIZE / 2,
-    elevation: 6,
-    height: CENTER_FAB_SIZE,
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    width: CENTER_FAB_SIZE,
-  },
-  centerFabLabel: {
-    fontSize: 9,
-    fontWeight: '600',
-    marginTop: 4,
-    textAlign: 'center',
   },
 });

@@ -1,9 +1,9 @@
-package com.meslektas.social.api;
+package com.dengin.social.api;
 
-import com.meslektas.common.api.GlobalExceptionHandler;
-import com.meslektas.social.application.dto.FeedPostResponse;
-import com.meslektas.social.application.dto.PostImageDto;
-import com.meslektas.social.application.service.FeedService;
+import com.dengin.common.api.GlobalExceptionHandler;
+import com.dengin.social.api.FeedController;
+import com.dengin.social.application.dto.FeedPostResponse;
+import com.dengin.social.application.service.FeedService;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -1,11 +1,16 @@
-package com.meslektas.social.api;
+package com.dengin.social.api;
 
+import com.dengin.common.exception.BusinessException;
+import com.dengin.common.exception.ResourceNotFoundException;
+import com.dengin.social.api.PostController;
+import com.dengin.social.application.dto.CreatePostRequest;
+import com.dengin.social.application.dto.LikeResponse;
+import com.dengin.social.application.dto.PostImageDto;
+import com.dengin.social.application.dto.PostResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.meslektas.common.api.ApiResponse;
-import com.meslektas.common.api.GlobalExceptionHandler;
-import com.meslektas.social.application.dto.*;
-import com.meslektas.social.application.service.PostService;
-import com.meslektas.social.domain.model.PostStatus;
+import com.dengin.common.api.GlobalExceptionHandler;
+import com.dengin.social.application.service.PostService;
+import com.dengin.social.domain.model.PostStatus;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -189,7 +194,7 @@ class PostControllerTest {
             // Given
             String postId = "999";
             when(postService.getPost(eq(999L), eq(1L)))
-                    .thenThrow(new com.meslektas.common.exception.ResourceNotFoundException("Post", 999L));
+                    .thenThrow(new ResourceNotFoundException("Post", 999L));
 
             // When & Then
             mockMvc.perform(get("/api/posts/{postId}", postId))
@@ -224,7 +229,7 @@ class PostControllerTest {
         void shouldReturn404_WhenPostNotFound() throws Exception {
             // Given
             String postId = "999";
-            doThrow(new com.meslektas.common.exception.ResourceNotFoundException("Post", 999L))
+            doThrow(new ResourceNotFoundException("Post", 999L))
                     .when(postService).deletePost(eq(999L), eq(1L));
 
             // When & Then
@@ -237,7 +242,7 @@ class PostControllerTest {
         void shouldReturn400_WhenNonAuthorDeletes() throws Exception {
             // Given
             String postId = "1";
-            doThrow(new com.meslektas.common.exception.BusinessException("Only post author can delete the post",
+            doThrow(new BusinessException("Only post author can delete the post",
                     "POST_UNAUTHORIZED_DELETE"))
                     .when(postService).deletePost(eq(1L), eq(1L));
 
@@ -282,7 +287,7 @@ class PostControllerTest {
             // Given
             String postId = "1";
             when(postService.likePost(eq(1L), eq(1L)))
-                    .thenThrow(new com.meslektas.common.exception.BusinessException("Cannot like your own post",
+                    .thenThrow(new BusinessException("Cannot like your own post",
                             "SELF_LIKE_NOT_ALLOWED"));
 
             // When & Then

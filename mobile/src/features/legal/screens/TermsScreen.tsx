@@ -2,12 +2,14 @@
 // Kullanım Koşulları Ekranı
 
 import React from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
+import { PressableScale } from '@shared/components';
 import { useColors } from '@contexts/ThemeContext';
 import { spacing } from '@theme';
+import { UNIFIED_HEADER } from '@constants';
 
 /**
  * Terms of Service Screen
@@ -22,22 +24,22 @@ export const TermsScreen: React.FC = () => {
       edges={['top', 'bottom', 'left', 'right']}>
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: colors.border.default }]}>
-        <TouchableOpacity
+        <PressableScale
           onPress={() => navigation.goBack()}
-          style={styles.backButton}
-          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+          hapticType="light"
+          style={styles.backButton}>
           <View
             style={{
-              width: 56,
-              height: 56,
-              borderRadius: 28,
+              width: UNIFIED_HEADER.HEIGHT,
+              height: UNIFIED_HEADER.HEIGHT,
+              borderRadius: UNIFIED_HEADER.HEIGHT / 2,
               backgroundColor: colors.background.secondary,
               justifyContent: 'center',
               alignItems: 'center',
             }}>
             <Icon name="chevron-left" size={32} color={colors.text.primary} />
           </View>
-        </TouchableOpacity>
+        </PressableScale>
         <Text style={[styles.headerTitle, { color: colors.text.primary }]}>Kullanım Koşulları</Text>
         <View style={styles.placeholder} />
       </View>
@@ -53,7 +55,7 @@ export const TermsScreen: React.FC = () => {
 
         <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>1. Kabul</Text>
         <Text style={[styles.paragraph, { color: colors.text.secondary }]}>
-          Meslektaş platformunu kullanarak, işbu Kullanım Koşullarını kabul etmiş sayılırsınız. Bu
+          Dengin platformunu kullanarak, işbu Kullanım Koşullarını kabul etmiş sayılırsınız. Bu
           koşulları kabul etmiyorsanız, lütfen platformu kullanmayın.
         </Text>
 
@@ -61,8 +63,8 @@ export const TermsScreen: React.FC = () => {
           2. Hesap Oluşturma
         </Text>
         <Text style={[styles.paragraph, { color: colors.text.secondary }]}>
-          Meslektaş&apos;ta hesap oluşturmak için 18 yaşında veya daha büyük olmalısınız.
-          Hesabınızın güvenliğinden siz sorumlusunuz ve şifrenizi gizli tutmalısınız.
+          Dengin&apos;ta hesap oluşturmak için 18 yaşında veya daha büyük olmalısınız. Hesabınızın
+          güvenliğinden siz sorumlusunuz ve şifrenizi gizli tutmalısınız.
         </Text>
 
         <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>
@@ -92,8 +94,8 @@ export const TermsScreen: React.FC = () => {
 
         <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>6. Fikri Mülkiyet</Text>
         <Text style={[styles.paragraph, { color: colors.text.secondary }]}>
-          Platform üzerindeki tüm içerik, tasarım, logo ve markalar Meslektaş&apos;ın
-          mülkiyetindedir. İzinsiz kullanım yasaktır.
+          Platform üzerindeki tüm içerik, tasarım, logo ve markalar Dengin&apos;ın mülkiyetindedir.
+          İzinsiz kullanım yasaktır.
         </Text>
 
         <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>7. Hesap İptali</Text>
@@ -106,13 +108,13 @@ export const TermsScreen: React.FC = () => {
           8. Sorumluluk Reddi
         </Text>
         <Text style={[styles.paragraph, { color: colors.text.secondary }]}>
-          Meslektaş, platformun kesintisiz ve hatasız çalışacağını garanti etmez. Kullanıcılar arası
+          Dengin, platformun kesintisiz ve hatasız çalışacağını garanti etmez. Kullanıcılar arası
           etkileşimlerden doğan zararlardan sorumlu tutulamaz.
         </Text>
 
         <Text style={[styles.sectionTitle, { color: colors.text.primary }]}>9. İletişim</Text>
         <Text style={[styles.paragraph, { color: colors.text.secondary }]}>
-          Kullanım koşulları hakkında sorularınız için: info@meslektas.com
+          Kullanım koşulları hakkında sorularınız için: info@dengin.com
         </Text>
 
         <View style={{ height: spacing.xl }} />
@@ -123,8 +125,8 @@ export const TermsScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   backButton: {
-    justifyContent: 'center',
     alignItems: 'flex-start',
+    justifyContent: 'center',
   },
   backButtonText: {
     fontSize: 32,
@@ -146,8 +148,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
     paddingLeft: spacing.sm,
     paddingRight: spacing.md,
-    paddingVertical: spacing.md,
     paddingTop: spacing.lg,
+    paddingVertical: spacing.md,
   },
   headerTitle: {
     fontSize: 18,

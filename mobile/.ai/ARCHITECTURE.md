@@ -1,6 +1,6 @@
 # 🏗️ Architecture Blueprint
 
-> **Meslektaş Mobile App - Architectural Overview**
+> **Dengin Mobile App - Architectural Overview**
 
 ## 📐 Mimari Prensipler
 

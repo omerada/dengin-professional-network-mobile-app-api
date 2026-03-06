@@ -1,5 +1,5 @@
 // src/core/navigation/components/AnimatedTabBar/AnimatedTabBar.types.ts
-// Meslektaş Design System - AnimatedTabBar Types
+// Dengin Design System - AnimatedTabBar Types
 // Oku: mobile-development-guide/ui-ux-modernization/06-MICRO-INTERACTIONS.md
 
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';

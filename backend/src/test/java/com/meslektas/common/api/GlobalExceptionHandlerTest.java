@@ -1,6 +1,8 @@
-package com.meslektas.common.api;
+package com.dengin.common.api;
 
-import com.meslektas.common.exception.*;
+import com.dengin.common.api.ErrorResponse;
+import com.dengin.common.api.GlobalExceptionHandler;
+import com.dengin.common.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

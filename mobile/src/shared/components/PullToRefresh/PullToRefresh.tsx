@@ -1,5 +1,5 @@
 // src/shared/components/PullToRefresh/PullToRefresh.tsx
-// Meslektaş Design System - Modern Pull To Refresh Component
+// Dengin Design System - Modern Pull To Refresh Component
 // Oku: mobile-development-guide/ui-ux-modernization/06-MICRO-INTERACTIONS.md
 
 import React, { memo, useCallback, useMemo } from 'react';
@@ -12,7 +12,7 @@ import Animated, {
   Extrapolation,
 } from 'react-native-reanimated';
 import { useTheme } from '@contexts/ThemeContext';
-import { useHaptic } from '@shared/hooks/useHaptic';
+import { useHaptic } from '@shared/hooks';
 import { Spinner } from '../Loading';
 
 // ============================================================================
@@ -236,20 +236,20 @@ PullToRefresh.displayName = 'PullToRefresh';
 
 const styles = StyleSheet.create({
   indicator: {
-    width: 32,
+    alignItems: 'center',
     height: 32,
     justifyContent: 'center',
-    alignItems: 'center',
-  },
-  indicatorInner: {
-    width: 24,
-    height: 24,
+    width: 32,
   },
   indicatorArc: {
-    width: 24,
-    height: 24,
     borderRadius: 12,
     borderWidth: 2.5,
+    height: 24,
+    width: 24,
+  },
+  indicatorInner: {
+    height: 24,
+    width: 24,
   },
 });
 

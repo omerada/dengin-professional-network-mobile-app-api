@@ -1,5 +1,5 @@
 // src/core/navigation/MainNavigator.tsx
-// Meslektaş Design System - Modern Main Navigator
+// Dengin Design System - Modern Main Navigator
 // Oku: mobile-development-guide/core/09-NAVIGATION.md
 // Oku: mobile-development-guide/ui-ux-modernization/06-MICRO-INTERACTIONS.md
 
@@ -13,6 +13,8 @@ import {
   ProfileStackParamList,
 } from '@shared/types';
 import { AnimatedTabBar, TabItem } from './components/AnimatedTabBar';
+import { TabScreenWrapper } from './components/TabScreenWrapper';
+import { UNIFIED_NAVIGATION } from '@constants/unifiedNavigation';
 
 // Screens
 import { FeedScreen } from '@features/feed/screens/FeedScreen';
@@ -81,43 +83,44 @@ const Tab = createBottomTabNavigator<MainTabParamList>();
 // Feed Stack
 const FeedStack = createNativeStackNavigator<FeedStackParamList>();
 const FeedStackNavigator: React.FC = () => (
-  <FeedStack.Navigator
-    screenOptions={{
-      headerShown: false,
-      gestureEnabled: true,
-      fullScreenGestureEnabled: true,
-      animation: 'slide_from_right',
-    }}>
+  <FeedStack.Navigator screenOptions={UNIFIED_NAVIGATION.SCREEN}>
     <FeedStack.Screen name="Feed" component={FeedScreen} />
-    <FeedStack.Screen name="PostDetail" component={PostDetailScreen} />
+    <FeedStack.Screen
+      name="PostDetail"
+      component={PostDetailScreen}
+      options={UNIFIED_NAVIGATION.SCREEN}
+    />
     <FeedStack.Screen
       name="CreatePost"
       component={CreatePostScreen}
-      options={{ presentation: 'modal', gestureEnabled: true }}
+      options={UNIFIED_NAVIGATION.MODAL}
     />
-    <FeedStack.Screen name="Comments" component={CommentsScreen} />
+    <FeedStack.Screen
+      name="Comments"
+      component={CommentsScreen}
+      options={UNIFIED_NAVIGATION.MODAL}
+    />
     <FeedStack.Screen name="Notifications" component={NotificationsScreen} />
     <FeedStack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
     <FeedStack.Screen name="VerificationStatus" component={VerificationStatusScreen} />
+    <FeedStack.Screen
+      name="NewConversation"
+      component={require('@features/messaging/screens/NewConversationScreen').NewConversationScreen}
+      options={UNIFIED_NAVIGATION.MODAL}
+    />
   </FeedStack.Navigator>
 );
 
 // Messaging Stack
 const MessagingStack = createNativeStackNavigator<MessagingStackParamList>();
 const MessagingStackNavigator: React.FC = () => (
-  <MessagingStack.Navigator
-    screenOptions={{
-      headerShown: false,
-      gestureEnabled: true,
-      fullScreenGestureEnabled: true,
-      animation: 'slide_from_right',
-    }}>
+  <MessagingStack.Navigator screenOptions={UNIFIED_NAVIGATION.SCREEN}>
     <MessagingStack.Screen name="ConversationList" component={ConversationListScreen} />
     <MessagingStack.Screen name="Chat" component={ChatScreen} />
     <MessagingStack.Screen
       name="NewConversation"
       component={require('@features/messaging/screens/NewConversationScreen').NewConversationScreen}
-      options={{ presentation: 'modal', gestureEnabled: true }}
+      options={UNIFIED_NAVIGATION.MODAL}
     />
   </MessagingStack.Navigator>
 );
@@ -125,15 +128,13 @@ const MessagingStackNavigator: React.FC = () => (
 // Profile Stack
 const ProfileStack = createNativeStackNavigator<ProfileStackParamList>();
 const ProfileStackNavigator: React.FC = () => (
-  <ProfileStack.Navigator
-    screenOptions={{
-      headerShown: false,
-      gestureEnabled: true,
-      fullScreenGestureEnabled: true,
-      animation: 'slide_from_right',
-    }}>
+  <ProfileStack.Navigator screenOptions={UNIFIED_NAVIGATION.SCREEN}>
     <ProfileStack.Screen name="Profile" component={ProfileScreen} />
-    <ProfileStack.Screen name="EditProfile" component={EditProfileScreen} />
+    <ProfileStack.Screen
+      name="EditProfile"
+      component={EditProfileScreen}
+      options={UNIFIED_NAVIGATION.MODAL}
+    />
     <ProfileStack.Screen name="Settings" component={SettingsScreen} />
   </ProfileStack.Navigator>
 );
@@ -164,8 +165,20 @@ export const MainNavigator: React.FC = () => {
       screenOptions={{
         headerShown: false,
       }}>
-      <Tab.Screen name="FeedTab" component={FeedStackNavigator} />
-      <Tab.Screen name="MessagingTab" component={MessagingStackNavigator} />
+      <Tab.Screen name="FeedTab">
+        {() => (
+          <TabScreenWrapper>
+            <FeedStackNavigator />
+          </TabScreenWrapper>
+        )}
+      </Tab.Screen>
+      <Tab.Screen name="MessagingTab">
+        {() => (
+          <TabScreenWrapper>
+            <MessagingStackNavigator />
+          </TabScreenWrapper>
+        )}
+      </Tab.Screen>
       <Tab.Screen
         name="CreatePostTab"
         component={FeedStackNavigator}
@@ -178,8 +191,20 @@ export const MainNavigator: React.FC = () => {
           },
         })}
       />
-      <Tab.Screen name="ActivityTab" component={ActivityScreen} />
-      <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} />
+      <Tab.Screen name="ActivityTab">
+        {() => (
+          <TabScreenWrapper>
+            <ActivityScreen />
+          </TabScreenWrapper>
+        )}
+      </Tab.Screen>
+      <Tab.Screen name="ProfileTab">
+        {() => (
+          <TabScreenWrapper>
+            <ProfileStackNavigator />
+          </TabScreenWrapper>
+        )}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 };

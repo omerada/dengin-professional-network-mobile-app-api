@@ -3,7 +3,8 @@
 // Instagram kalitesinde medya görüntüleme
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { View, Text, Pressable, Image, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { ProgressiveImage } from '@shared/components';
 import Animated, {
   FadeIn,
   useAnimatedStyle,
@@ -42,7 +43,7 @@ export const MessageAttachment: React.FC<MessageAttachmentProps> = memo(
     const isImage = contentType?.startsWith('image/');
 
     const handlePressIn = useCallback(() => {
-      scale.value = withSpring(0.97, { damping: 15 });
+      scale.value = withSpring(0.96, { damping: 15 });
     }, [scale]);
 
     const handlePressOut = useCallback(() => {
@@ -67,7 +68,7 @@ export const MessageAttachment: React.FC<MessageAttachmentProps> = memo(
             backgroundColor: isOwn ? 'rgba(255,255,255,0.1)' : colors.background.tertiary,
           },
           fileName: {
-            color: isOwn ? '#FFFFFF' : colors.text.primary,
+            color: isOwn ? colors.text.inverse : colors.text.primary,
           },
           fileSize: {
             color: isOwn ? 'rgba(255,255,255,0.7)' : colors.text.tertiary,
@@ -79,7 +80,7 @@ export const MessageAttachment: React.FC<MessageAttachmentProps> = memo(
       [isOwn, colors],
     );
 
-    const iconColor = isOwn ? '#FFFFFF' : colors.text.secondary;
+    const iconColor = isOwn ? colors.text.inverse : colors.text.secondary;
     const downloadIconColor = isOwn ? 'rgba(255,255,255,0.7)' : colors.text.secondary;
 
     // Resim
@@ -91,7 +92,12 @@ export const MessageAttachment: React.FC<MessageAttachmentProps> = memo(
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
             style={styles.imageContainer}>
-            <Image source={{ uri: url }} style={styles.image} resizeMode="cover" />
+            <ProgressiveImage
+              source={{ uri: url }}
+              style={styles.image}
+              resizeMode="cover"
+              showLoadingIndicator
+            />
           </Pressable>
         </Animated.View>
       );

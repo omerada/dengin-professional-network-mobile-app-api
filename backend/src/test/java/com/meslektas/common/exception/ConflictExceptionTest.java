@@ -1,5 +1,7 @@
-package com.meslektas.common.exception;
+package com.dengin.common.exception;
 
+import com.dengin.common.exception.BusinessException;
+import com.dengin.common.exception.ConflictException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

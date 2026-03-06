@@ -2,6 +2,8 @@
 // Backend API ile %100 uyumlu tipler
 // Backend: UserResponse, UserProfileResponse, UpdateProfileRequest
 
+import type { Sector } from '@shared/types/api.types';
+
 /**
  * Profession bilgisi
  * Backend: ProfessionResponse
@@ -10,7 +12,9 @@ export interface Profession {
   id: number;
   name: string;
   category: string;
+  categoryDisplayName?: string;
   description?: string;
+  requiresVerification: boolean;
   requiredDocuments?: string[];
 }
 
@@ -101,8 +105,9 @@ export interface MyProfileResponse {
   dateOfBirth: string | null;
   gender: Gender | null;
 
-  // Profession
+  // Profession & Sector
   profession: Profession | null;
+  sector: Sector | null;
   isProfessionVerified: boolean;
   professionVerifiedAt: string | null;
 

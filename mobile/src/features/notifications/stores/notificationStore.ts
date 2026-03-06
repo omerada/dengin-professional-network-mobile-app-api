@@ -1,6 +1,6 @@
 // src/features/notifications/stores/notificationStore.ts
 // Notification Zustand store - Backend NotificationController ile uyumlu
-// Backend: com.meslektas.notification.api.NotificationController
+// Backend: com.dengin.notification.api.NotificationController
 // Oku: mobile-development-guide/sprints/27-SPRINT-9-10.md
 
 import { create } from 'zustand';

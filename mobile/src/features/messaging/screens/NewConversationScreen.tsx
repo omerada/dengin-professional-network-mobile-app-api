@@ -19,6 +19,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useColors } from '@contexts/ThemeContext';
 import { useToast } from '@contexts/ToastContext';
+import { spacing } from '@theme';
 import { useDebounce } from '@shared/hooks/useDebounce';
 import { useUserSearch } from '@features/social/hooks';
 import { useStartConversation } from '../hooks';
@@ -78,7 +79,8 @@ export const NewConversationScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
 
-  const debouncedSearch = useDebounce(searchQuery, 300);
+  // P3: Optimized debounce 300ms → 200ms for snappier UX
+  const debouncedSearch = useDebounce(searchQuery, 200);
 
   // Hooks
   const { startConversation } = useStartConversation();
@@ -103,7 +105,7 @@ export const NewConversationScreen: React.FC = () => {
       } catch (error) {
         // Show backend error message with modern toast
         const errorMessage = getErrorMessage(error);
-        toast.error(errorMessage, 'Konuşma Başlatılamadı');
+        toast.error(errorMessage);
       } finally {
         setLoadingUserId(null);
       }
@@ -150,7 +152,14 @@ export const NewConversationScreen: React.FC = () => {
       style={[styles.container, { backgroundColor: colors.background.primary }]}
       edges={['top', 'bottom']}>
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: colors.background.primary }]}>
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: colors.background.primary,
+            borderBottomColor: colors.border.default,
+          },
+        ]}>
         <Pressable
           onPress={handleBackPress}
           style={styles.backButton}
@@ -210,20 +219,68 @@ export const NewConversationScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  avatar: {
+    borderRadius: 22,
+    height: 44,
+    width: 44,
+  },
+  avatarPlaceholder: {
+    alignItems: 'center',
+    borderRadius: 22,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
+  },
+  backButton: {
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
   container: {
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
+  emptyContainer: {
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(0,0,0,0.1)',
-  },
-  backButton: {
+    gap: 16,
     justifyContent: 'center',
-    alignItems: 'flex-start',
+    paddingVertical: 48,
+  },
+  emptyListContent: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  header: {
+    alignItems: 'center',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    flexDirection: 'row',
+    paddingBottom: 12,
+    paddingHorizontal: 16,
+  },
+  headerSpacer: {
+    width: 40,
+  },
+  listContent: {
+    flexGrow: 1,
+  },
+  searchContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    paddingVertical: 0,
+  },
+  searchInputContainer: {
+    alignItems: 'center',
+    borderRadius: 10,
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
   title: {
     flex: 1,
@@ -231,65 +288,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
-  headerSpacer: {
-    width: 40,
-  },
-  searchContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  searchInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    gap: 8,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 15,
-    paddingVertical: 0,
-  },
-  listContent: {
-    flexGrow: 1,
-  },
-  emptyListContent: {
-    flex: 1,
-    justifyContent: 'center',
-  },
   userItem: {
+    alignItems: 'center',
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 12,
-  },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-  },
-  avatarPlaceholder: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
+    gap: spacing.sm + spacing.xs, // 12
+    paddingHorizontal: spacing.md, // 16
+    paddingVertical: spacing.sm + spacing.xs, // 12
   },
   userName: {
     flex: 1,
     fontSize: 16,
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 48,
-    gap: 16,
-  },
-  emptyText: {
-    fontSize: 14,
-    textAlign: 'center',
   },
 });
 

@@ -1,8 +1,9 @@
-package com.meslektas.notification.domain.model;
+package com.dengin.notification.domain.model;
 
-import com.meslektas.notification.domain.event.NotificationCreatedEvent;
-import com.meslektas.notification.domain.event.NotificationDeliveredEvent;
-import com.meslektas.notification.domain.event.NotificationReadEvent;
+import com.dengin.notification.domain.event.NotificationCreatedEvent;
+import com.dengin.notification.domain.event.NotificationDeliveredEvent;
+import com.dengin.notification.domain.event.NotificationReadEvent;
+import com.dengin.notification.domain.model.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

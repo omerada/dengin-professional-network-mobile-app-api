@@ -81,12 +81,9 @@ export interface User {
   avatarUrl?: string;
   verificationStatus: BackendVerificationStatus;
 
-  // Legacy profession fields (deprecated, use sector instead)
-  /** @deprecated Use sectorId instead */
+  // Legacy profession fields - backward compatibility
   professionId?: number;
-  /** @deprecated Use sectorName instead */
   professionName?: string;
-  /** @deprecated Use sector object instead */
   profession?: Profession;
 
   // New sector fields (Sprint 1)
@@ -119,8 +116,7 @@ export interface UserStats {
 }
 
 /**
- * Profession entity
- * @deprecated Use Sector and ProfessionGroup instead (Sprint 1)
+ * Legacy profession type - backward compatibility
  */
 export interface Profession {
   id: number;
@@ -132,9 +128,7 @@ export interface Profession {
 }
 
 /**
- * Profession category enum - Backend ProfessionCategory.java ile %100 uyumlu
- * @see backend/src/main/java/com/meslektas/identity/domain/model/ProfessionCategory.java
- * @deprecated Use Sector codes instead (Sprint 1)
+ * Legacy profession category - backward compatibility
  */
 export type ProfessionCategory =
   | 'MEDICAL' // Sağlık
@@ -195,7 +189,7 @@ export interface Sector {
   /** Number of users in this sector */
   memberCount: number;
 
-  /** @deprecated Use memberCount instead */
+  /** Legacy field - backward compatibility */
   userCount?: number;
 }
 
@@ -417,31 +411,13 @@ export interface LegacySubmitVerificationRequest {
 }
 
 /**
- * Post entity
- */
-export interface Post {
-  id: number;
-  content: string;
-  imageUrls: string[];
-  author: User;
-  likeCount: number;
-  commentCount: number;
-  shareCount: number;
-  isLiked: boolean;
-  isBookmarked: boolean;
-  visibility: PostVisibility;
-  createdAt: string;
-  updatedAt: string;
-}
-
-/**
  * Post visibility enum
  */
 export type PostVisibility = 'PUBLIC' | 'VERIFIED_ONLY' | 'FOLLOWERS_ONLY';
 
 /**
  * Post image DTO - Backend PostImageDto.java ile %100 uyumlu
- * @see backend/src/main/java/com/meslektas/social/application/dto/PostImageDto.java
+ * @see backend/src/main/java/com/dengin/social/application/dto/PostImageDto.java
  */
 export interface PostImageDto {
   /** S3 key - ZORUNLU! Backend @NotBlank validation */
