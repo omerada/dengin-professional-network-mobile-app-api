@@ -64,13 +64,24 @@ desktop.ini
 # ========================================
 .env
 .env.local
+.env.test
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
 *.pem
 *.key
 *.crt
 secrets/
+
+# Firebase credentials (sensitive - download from Firebase Console)
+mobile/android/app/google-services.json
+mobile/ios/GoogleService-Info.plist
+
+# Play Store / App Store signing keys
+*.keystore
+*.jks
+play-store-key.json
 
 # ========================================
 # LOGS

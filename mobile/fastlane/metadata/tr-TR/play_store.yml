@@ -46,7 +46,7 @@ full_description: |
 
   Hemen ücretsiz kaydolun ve Türkiye'nin en güvenilir profesyonel ağına katılın!
 
-  Sorularınız için: destek@dengin.com
+  Sorularınız için: support@dengin.com
   Web: https://dengin.com
 
 # Category
@@ -63,16 +63,16 @@ privacy_policy_url: https://dengin.com/gizlilik
 
 # Developer Info
 developer:
-  name: Dengin Teknoloji A.Ş.
-  email: developer@dengin.com
+  name: Dengin
+  email: developer@example.com
   website: https://dengin.com
   address: |
     İstanbul, Türkiye
 
 # Contact Info
 contact:
-  email: destek@dengin.com
-  phone: +90 212 XXX XX XX
+  email: support@example.com
+  phone: +90 XXX XXX XX XX
   website: https://dengin.com/destek
 
 # Video (YouTube URL)

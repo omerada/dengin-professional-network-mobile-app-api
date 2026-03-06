@@ -134,8 +134,8 @@ src/main/java/com/dengin/
 
 pgAdmin'e erişim:
 
-- URL: http://localhost:5050
-- Email: admin@dengin.com
+- URL: http://localhost:5051
+- Email: admin@example.com
 - Password: admin
 
 PostgreSQL bağlantı bilgileri:

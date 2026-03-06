@@ -120,7 +120,7 @@ eas login
 
 Firebase Console'dan indir:
 
-- https://console.firebase.google.com/project/dengin/settings/general
+- https://console.firebase.google.com/project/YOUR_PROJECT_ID/settings/general
 
 3. **EAS JSON Oluştur:**
 
@@ -299,7 +299,7 @@ npm start
 
 ```bash
 # Firebase Console'a git
-# https://console.firebase.google.com/project/dengin/settings/general
+# https://console.firebase.google.com/project/YOUR_PROJECT_ID/settings/general
 
 # Android app bölümünden:
 # google-services.json indir → mobile/android/app/ klasörüne koy
@@ -378,7 +378,7 @@ npx expo start --dev-client
 ### Android: google-services.json
 
 1. **Firebase Console'a Git:**
-   https://console.firebase.google.com/project/dengin/settings/general
+   https://console.firebase.google.com/project/YOUR_PROJECT_ID/settings/general
 
 2. **Android App Bölümünü Bul:**
    - "Your apps" altında Android ikonu

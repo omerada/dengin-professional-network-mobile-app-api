@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "748858155102",
-    "project_id": "dengin",
-    "storage_bucket": "dengin.firebasestorage.app"
+    "project_number": "YOUR_PROJECT_NUMBER",
+    "project_id": "your-firebase-project-id",
+    "storage_bucket": "your-firebase-project-id.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:748858155102:android:a4c57b0127903d357d94cf",
+        "mobilesdk_app_id": "1:YOUR_PROJECT_NUMBER:android:YOUR_APP_HASH",
         "android_client_info": {
           "package_name": "com.adalabs.dengin"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDokz5NdhZXUbPlDG38Pa0RW5OtGsIHFlU"
+          "current_key": "YOUR_FIREBASE_API_KEY"
         }
       ],
       "services": {

@@ -1,13 +1,13 @@
 # Fastlane Configuration
-# Oku: mobile-development-guide/sprints/28-SPRINT-11-12.md
+# For setup instructions, see mobile/README.md
 
 # iOS Configuration
 # -----------------
 
 # App Store Connect credentials
 app_identifier "com.dengin.app"
-apple_id "developer@dengin.com"
-team_id "XXXXXXXXXX" # Apple Developer Team ID
+apple_id "your-apple-developer-email@example.com"
+team_id "YOUR_TEAM_ID" # Apple Developer Team ID
 
 # Paths
 xcodeproj "./ios/DenginApp.xcodeproj"
