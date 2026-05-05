@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="dengin.png" alt="Dengin Logo" width="120" height="120" />
+  <img src="dengin.png" alt="Dengin Logo" width="433" height="144" />
 </p>
 
 <h1 align="center">Dengin</h1>
