@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo-placeholder.png" alt="Dengin Logo" width="120" height="120" />
+  <img src="dengin.png" alt="Dengin Logo" width="120" height="120" />
 </p>
 
 <h1 align="center">Dengin</h1>
@@ -36,37 +36,37 @@ Spam hesaplar ve sahte profiller yerine; AI tabanlı kimlik doğrulama, meslek b
 
 ## Özellikler
 
-### 🔐 Kimlik Doğrulama Sistemi
+### Kimlik Doğrulama Sistemi
 
 - **AI Tabanlı Yüz Tanıma** — AWS Rekognition ile kimlik belgesi ve canlılık tespiti
 - **Meslek Doğrulama** — Yapay zeka ile profesyonel yetkinlik seviyesi belirleme
 - **Doğrulama Rozetleri** — Bronz, Gümüş, Altın seviye mesleki rozetler
 
-### 📱 Sosyal Akış
+### Sosyal Akış
 
 - Mesleğe özel içerik akışı ve keşif
 - Gönderi paylaşma, beğenme, yorum yapma
 - AI tabanlı içerik kalite filtresi
 
-### 💬 Gerçek Zamanlı Mesajlaşma
+### Gerçek Zamanlı Mesajlaşma
 
 - WebSocket (STOMP) üzerinden anlık mesajlaşma
 - Dosya ve medya paylaşımı
 - Okundu bilgisi ve yazıyor göstergesi
 
-### 🔔 Akıllı Bildirimler
+### Akıllı Bildirimler
 
 - Firebase Cloud Messaging ile push bildirimler
 - Bildirim tercihleri özelleştirme
 - Arka plan bildirimleri desteği
 
-### 👤 Profesyonel Profil
+### Profesyonel Profil
 
 - Detaylı meslek bazlı profil
 - Sektöre özel topluluklar
 - Takipçi/takip edilen sistemi
 
-### 🛡️ Güvenlik & Gizlilik
+### Güvenlik & Gizlilik
 
 - KVKK uyumlu veri işleme
 - Biyometrik kimlik doğrulama
